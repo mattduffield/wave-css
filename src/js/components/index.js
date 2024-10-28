@@ -1,3 +1,4 @@
+import './helper-function.js';
 import './wc-base-component.js';
 import './wc-accordion.js';
 import './wc-background-image.js';
