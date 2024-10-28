@@ -8,6 +8,7 @@ import './wc-flip-box.js';
 import './wc-image.js';
 import './wc-menu.js';
 import './wc-sidebar.js';
+import './wc-sidenav.js';
 import './wc-slideshow-image.js';
 import './wc-slideshow.js';
 import './wc-tab-item.js';
