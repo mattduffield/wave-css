@@ -1,0 +1,15 @@
+import './wc-base-component.js';
+import './wc-accordion.js';
+import './wc-background-image.js';
+import './wc-div.js';
+import './wc-dropdown.js';
+import './wc-flip-box.js';
+import './wc-image.js';
+import './wc-menu.js';
+import './wc-sidebar.js';
+import './wc-slideshow-image.js';
+import './wc-slideshow.js';
+import './wc-tab-item.js';
+import './wc-tab.js';
+import './wc-timeline.js';
+import './wc-top-nav.js';
