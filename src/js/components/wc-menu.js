@@ -19,7 +19,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcMenu extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class'];
+    return ['id', 'class', 'path', 'wrap'];
   }
 
   constructor() {
@@ -55,6 +55,8 @@ class WcMenu extends WcBaseComponent {
         this._items = JSON.parse(newValue);
       }
       this.removeAttribute('items');
+    } else if (attrName === 'wrap') {
+      // Do nothing...
     } else {
       super._handleAttributeChange(attrName, newValue);  
     }
@@ -89,6 +91,9 @@ class WcMenu extends WcBaseComponent {
 
     const menuDiv = document.createElement('div');
     menuDiv.classList.add('menu-items');
+    if (this.hasAttribute('wrap')) {
+      menuDiv.classList.add('flex-wrap');
+    }
     this._items.forEach(item => {
       const link = this._createAnchor(item.name, item.label, item.selected);
       menuDiv.appendChild(link);
@@ -128,6 +133,7 @@ class WcMenu extends WcBaseComponent {
   }
 
   _createAnchor(viewName, viewLabel, selected) {
+    const path = this.getAttribute('path') || '/static/views/';
     const el = document.createElement('a');
     el.classList.add('menu-link');
     if (selected) {
@@ -135,12 +141,12 @@ class WcMenu extends WcBaseComponent {
     }
     el.dataset.name = viewName;
     el.textContent = viewLabel;
-    el.setAttribute('href', `/static/views/${viewName}.html`);
-    el.setAttribute('hx-get', `/static/views/${viewName}.html`);
+    el.setAttribute('href', `${path}${viewName}.html`);
+    el.setAttribute('hx-get', `${path}${viewName}.html`);
     el.setAttribute('hx-trigger', 'click');
     el.setAttribute('hx-target', '#viewport');
     el.setAttribute('hx-swap', 'innerHTML transition:true');
-    el.setAttribute('hx-push-url', `/static/views/${viewName}.html`);
+    el.setAttribute('hx-push-url', `${path}${viewName}.html`);
     el.setAttribute('hx-select', '#page-contents');
     el.addEventListener('click', this._handleClick.bind(this));
     return el;

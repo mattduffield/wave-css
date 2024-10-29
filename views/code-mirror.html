@@ -1,0 +1,37 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+<wc-code-mirror
+  name="code"
+  line-numbers
+  line-wrapper
+  fold-gutter
+  mode="javascript"
+  theme="monokai"
+  value="class Customer { }"
+  tab-size="2"
+  indent-unit="2"></wc-code-mirror>
+
+
+<wc-code-mirror
+  name="python"
+  line-numbers
+  line-wrapper
+  fold-gutter
+  mode="python"
+  theme="monokai"
+  tab-size="4"
+  indent-unit="4">def to_number_format(value, *args, **kwargs):
+    if not value:
+        return value
+    return format(int(value), ',')
+
+
+def to_float_format(value, expr=',.2f', *args, **kwargs):
+    if not value:
+        return value
+    if isinstance(value, object):
+        value = str(value)
+    result = format(float(value), expr)
+    return result</wc-code-mirror>
+
+</div>

@@ -19,6 +19,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-slideshow
 - wc-tab-item
 - wc-tab
+- wc-theme-selector
 - wc-timeline
 - wc-top-nav
 
@@ -26,4 +27,11 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 
 ```bash
 npm run build
+```
+
+## Viewing Components
+Execute the following to view the components locally.
+
+```bash
+python3 -m http.server 3015
 ```

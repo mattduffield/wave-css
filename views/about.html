@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Base</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link href="/static/css/base.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+</head>
+
+<body class="col-1 gap-4 h-full text-sm">
+  <top-nav id="top-nav"></top-nav>
+
+  <div class="my-2 px-4">
+    <theme-selector theme="theme-ocean-blue" mode="light"></theme-selector>
+  </div> 
+  <div id="viewport" class="slide-it relative h-screen col-1 p-4 overflow-auto">
+
+
+    <div id="page-contents">
+      <style>
+        .card {
+          /* Add shadows to create the "card" effect */
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+          transition: 0.3s;
+          border-radius: 5px;
+          max-width: 200px;
+        }
+
+        /* On mouse-over, add a deeper shadow */
+        .card:hover {
+          box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+
+        /* Add some padding inside the card container */
+        .container {
+          padding: 2px 16px;
+        }
+        img {
+          border-radius: 5px 5px 0 0;    
+        }
+      </style>
+      <div class="card">
+        <img src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar" style="width:100%">
+        <div class="container">
+          <h4><b>John Doe</b></h4>
+          <p>Architect & Engineer</p>
+        </div>
+      </div>
+    </div>
+
+    
+  </div>
+  <bottom-nav id="footer">
+  </bottom-nav>
+  <div id="loading-indicator" class="htmx-indicator">
+    <svg class="animate-spin h-5 w-5"
+      xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
+  <script type="module" src="/static/views/index.js"></script>
+</body>
+</html>

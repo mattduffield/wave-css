@@ -1,5 +1,7 @@
 /**
  * 
+ *  DEPRECATED!!
+ * 
  *  Name: wc-top-nav
  *  Usage:
  *    <wc-top-nav id="top-nav"
