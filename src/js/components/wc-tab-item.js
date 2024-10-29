@@ -81,8 +81,8 @@ class WcTabItem extends WcBaseComponent {
 
   _createInnerElement() {
     const parts = this.querySelectorAll('wc-tab-item > *:not(.wc-tab-item)');
-    parts.forEach(p => {
-      this.componentElement.appendChild(p);
+    parts.forEach(part => {
+      this.componentElement.appendChild(part);
     });
   }
 

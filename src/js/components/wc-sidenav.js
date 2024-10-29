@@ -50,12 +50,14 @@ class WcSidenav extends WcBaseComponent {
       }
       this.appendChild(this.componentElement);      
     }
+    console.log('ctor:wc-sidenav');
   }
 
   async connectedCallback() {
     super.connectedCallback();
-    console.log('connectedCallback', this);
+
     this._applyStyle();
+    console.log('conntectCallback:wc-sidenav');
   }
 
   disconnectedCallback() {
@@ -105,6 +107,7 @@ class WcSidenav extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+    console.log('_render:wc-sidenav');
   }
 
   _createInnerElement() {

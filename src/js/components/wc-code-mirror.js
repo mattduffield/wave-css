@@ -29,6 +29,8 @@ class WcCodeMirror extends WcBaseComponent {
 
   constructor() {
     super();
+    this.childComponentName = 'editor';
+    // this.childComponentSelector = '.CodeMirror';
     this._isResizing = false;
     this._internals = this.attachInternals();
     this.firstContent = '';
@@ -60,30 +62,30 @@ class WcCodeMirror extends WcBaseComponent {
   }
 
   async _handleAttributeChange(attrName, newValue) {
-    if (name === 'theme') {
+    if (attrName === 'theme') {
       await this.loadTheme(newValue);
-    } else if (name === 'mode') {
+    } else if (attrName === 'mode') {
       await this.loadMode(newValue);
-    } else if (name === 'line-numbers') {
+    } else if (attrName === 'line-numbers') {
       // Need to suport intial render as well as changes.
       this.editor.setOption('lineNumbers', ((newValue == '' && this.hasAttribute('line-numbers')) || (newValue == true || newValue == 'true')));
       const gutters = await this.getGutters();
       this.editor.setOption('gutters', gutters);
-    } else if (name === 'line-wrapping') {
+    } else if (attrName === 'line-wrapping') {
       // Need to suport intial render as well as changes.
       this.editor.setOption('lineWrapping', ((newValue == '' && this.hasAttribute('line-wrapping')) || (newValue == true || newValue == 'true')));
-    } else if (name === 'fold-gutter') {
+    } else if (attrName === 'fold-gutter') {
       // Need to suport intial render as well as changes.
       this.editor.setOption('foldGutter', ((newValue == '' && this.hasAttribute('fold-gutter')) || (newValue == true || newValue == 'true')));
       const gutters = await this.getGutters();
       this.editor.setOption('gutters', gutters);
-    } else if (name === 'tab-size') {
+    } else if (attrName === 'tab-size') {
       this.editor.setOption('tabSize', parseInt(newValue, 10));
-    } else if (name === 'indent-unit') {
+    } else if (attrName === 'indent-unit') {
       this.editor.setOption('indentUnit', parseInt(newValue, 10));
-    } else if (name === 'value') {
+    } else if (attrName === 'value') {
       this.editor.setValue(newValue);
-    } else if (name === 'disabled') {
+    } else if (attrName === 'disabled') {
       if (this.hasAttribute('disabled')) {
         this.editor.setOption('readOnly', 'nocursor');
       } else {
@@ -98,7 +100,8 @@ class WcCodeMirror extends WcBaseComponent {
     super._render();
     const innerEl = this.querySelector('.wc-code-mirror > *');
     if (innerEl) {
-      // Do nothing...
+      const settingsIcon = this.querySelector('.settings-icon');
+      settingsIcon.addEventListener('click', this._handleSettingsIconClick.bind(this));
     } else {
       this.componentElement.innerHTML = '';
 
@@ -130,6 +133,7 @@ class WcCodeMirror extends WcBaseComponent {
     `.trim();
     settingsIcon.className = 'settings-icon';
     settingsIcon.setAttribute('popovertarget', this.popoverId);
+    settingsIcon.addEventListener('click', this._handleSettingsIconClick.bind(this));
     this.componentElement.appendChild(settingsIcon);
 
     // Create the popover for settings using the Popover API
@@ -137,9 +141,7 @@ class WcCodeMirror extends WcBaseComponent {
     settingsPopover.classList.add('settings-popover');
     settingsPopover.id = this.popoverId;
     settingsPopover.setAttribute('popover', 'manual');
-    this._buildSettingsPopover(settingsPopover);
     this.componentElement.appendChild(settingsPopover);
-
 
     // Set the initial value from the attribute if provided
     const initialValue = this.getAttribute('value') || this.firstContent || '';
@@ -154,6 +156,11 @@ class WcCodeMirror extends WcBaseComponent {
 
     // Set the initial form value to the value from the attribute
     this._internals.setFormValue(initialValue);
+  }
+
+  _handleSettingsIconClick(event) {
+    const settingsPopover = this.querySelector('.settings-popover');
+    this._buildSettingsPopover(settingsPopover);
   }
 
   _buildSettingsPopover(settingsPopover) {
@@ -201,14 +208,14 @@ class WcCodeMirror extends WcBaseComponent {
         </button>
         <div class="row gap-2">
           <div class="col-1">
-            <combo-box name="theme-select" lbl-label="Theme">
+            <wc-combo-box class="col-1" name="theme-select" lbl-label="Theme" autofocus>
               ${themes.map(theme => `<option value="${theme}" ${theme == this.getAttribute('theme') ? 'selected' : ''}>${theme}</option>`).join('')}
-            </combo-box>
+            </wc-combo-box>
           </div>
           <div class="col-1">
-            <combo-box name="mode-select" lbl-label="Mode">
+            <wc-combo-box class="col-1" name="mode-select" lbl-label="Mode">
               ${modes.map(mode => `<option value="${mode}" ${mode == this.getAttribute('mode') ? 'selected' : ''}>${mode}</option>`).join('')}
-            </combo-box>
+            </wc-combo-box>
           </div>
         </div>
         <div class="row gap-2">
@@ -231,61 +238,52 @@ class WcCodeMirror extends WcBaseComponent {
           </div>
         </div>
         <div class="row gap-2 justify-end gap-x-4">
-          <button class="" id="apply-settings" type="submit"
-          >Apply</button>
-          <button class="btn-clear" type="button"
-            popovertarget="${this.popoverId}" popovertargetaction="hide"
-          >Cancel
+          <button class="" id="apply-settings" type="submit">
+            Apply
+          </button>
+          <button class="btn-clear" id="cancel-settings" type="button">
+            Cancel
           </button>
         </div>
       </form>
     `;
 
-    settingsPopover.addEventListener('keydown', (event) => {
-      if (event.key === 'Tab') {
-        const focusableElements = settingsPopover.querySelectorAll('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
-        const focusable = Array.from(focusableElements);
-        const currentIndex = focusable.indexOf(document.activeElement);
-
-        // Determine next or previous focusable element based on whether Shift is held down
-        let nextIndex;
-        if (event.shiftKey) {
-          nextIndex = currentIndex - 1 < 0 ? focusable.length - 1 : currentIndex - 1;
-        } else {
-          nextIndex = currentIndex + 1 >= focusable.length ? 0 : currentIndex + 1;
-        }
-
-        // Move focus to the next/previous element and prevent the default behavior
-        focusable[nextIndex].focus();
-        event.preventDefault();
-      }
-    });
-
     // Add functionality to apply settings
-    settingsPopover.querySelector('#apply-settings').addEventListener('click', (e) => {
-      e.preventDefault();  // Prevent form submission
+    settingsPopover.querySelector('#closeButton').addEventListener('click', this._handleSettingsClose.bind(this), { once: true });
+    settingsPopover.querySelector('#apply-settings').addEventListener('click', this._handleSettingsApply.bind(this), { once: true });
+    settingsPopover.querySelector('#cancel-settings').addEventListener('click', this._handleSettingsClose.bind(this), { once: true });
+  }
 
-      const close = settingsPopover.querySelector('#closeButton');
-      const theme = settingsPopover.querySelector('#theme-select').value;
-      const mode = settingsPopover.querySelector('#mode-select').value;
-      const lineNumbers = settingsPopover.querySelector('#line-numbers').checked;
-      const lineWrapper = settingsPopover.querySelector('#line-wrapper').checked;
-      const foldGutter = settingsPopover.querySelector('#fold-gutter').checked;
-      const tabSize = settingsPopover.querySelector('#tab-size').value;
-      const indentUnit = settingsPopover.querySelector('#indent-unit').value;
+  _handleSettingsApply(event) {
+    // event.preventDefault();  // Prevent form submission
+    const settingsPopover = this.querySelector('.settings-popover');
+    const close = settingsPopover.querySelector('#closeButton');
+    const theme = settingsPopover.querySelector('#theme-select').value;
+    const mode = settingsPopover.querySelector('#mode-select').value;
+    // const lineNumbers = settingsPopover.querySelector('#line-numbers').checked;
+    // const lineWrapper = settingsPopover.querySelector('#line-wrapper').checked;
+    // const foldGutter = settingsPopover.querySelector('#fold-gutter').checked;
+    // const tabSize = settingsPopover.querySelector('#tab-size').value;
+    // const indentUnit = settingsPopover.querySelector('#indent-unit').value;
 
-      // Update CodeMirror editor with new settings
-      this.setAttribute('theme', theme);
-      this.setAttribute('mode', mode);
-      this.setAttribute('line-numbers', lineNumbers);
-      this.setAttribute('line-wrapper', lineWrapper);
-      this.setAttribute('fold-gutter', foldGutter);
-      this.setAttribute('tab-size', tabSize);
-      this.setAttribute('indent-unit', indentUnit);
-      if (close) {
-        close.click();
-      }
-    });
+    // Update CodeMirror editor with new settings
+    this.setAttribute('theme', theme);
+    this.setAttribute('mode', mode);
+    // this.setAttribute('line-numbers', lineNumbers);
+    // this.setAttribute('line-wrapper', lineWrapper);
+    // this.setAttribute('fold-gutter', foldGutter);
+    // this.setAttribute('tab-size', tabSize);
+    // this.setAttribute('indent-unit', indentUnit);
+    this._handleSettingsClose(event);
+  }
+  _handleSettingsClose(event) {
+    event.preventDefault();  // Prevent form submission
+    const settingsPopover = this.querySelector('.settings-popover');
+    settingsPopover.togglePopover();
+    // settingsPopover.querySelector('#apply-settings').removeEventListener('click', this._handleSettingsClose.bind(this));
+    while (settingsPopover.firstChild) {
+      settingsPopover.removeChild(settingsPopover.firstChild);
+    }
   }
 
   get value() {
@@ -396,8 +394,9 @@ class WcCodeMirror extends WcBaseComponent {
         border: none;
         background: none;
         position: absolute;
-        right: 0.25rem;
+        right: 0.5rem;
         top: 0.5rem;
+        padding: 0;
         cursor: pointer;
       }
 
@@ -442,7 +441,6 @@ class WcCodeMirror extends WcBaseComponent {
       const gutters = await this.getGutters();
       this.editor.setOption('gutters', gutters);
     });
-
   }
   
   // This is required to inform the form that the component can be form-associated
@@ -577,6 +575,13 @@ class WcCodeMirror extends WcBaseComponent {
     }
     this.editor.setOption('mode', mode);
   }
+
+  _unWireEvents() {
+    super._unWireEvents();
+    const settingsIcon = this.querySelector('.settings-icon');
+    settingsIcon.removeEventListener('click', this._handleSettingsIconClick.bind(this));
+  }
+
 }
 
 customElements.define('wc-code-mirror', WcCodeMirror);

@@ -39,12 +39,14 @@ class WcSidebar extends WcBaseComponent {
       this.componentElement.classList.add('wc-sidebar');
       this.appendChild(this.componentElement);      
     }
+    console.log('ctor:wc-sidebar');
   }
 
   async connectedCallback() {
     super.connectedCallback();
-    console.log('connectedCallback', this);
+
     this._applyStyle();
+    console.log('conntectCallback:wc-sidebar');
   }
 
   disconnectedCallback() {
@@ -94,6 +96,7 @@ class WcSidebar extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+    console.log('_render:wc-sidebar');
   }
 
   _createInnerElement() {

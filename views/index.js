@@ -1,4 +1,5 @@
-import '/dist/components.min.js';
+// import '/dist/components.min.js';
+import '/src/js/components/index.js';
 
 export class Index {
   

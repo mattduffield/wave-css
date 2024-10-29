@@ -33,16 +33,22 @@ class WcTimeline extends WcBaseComponent {
   constructor() {
     super();
     this._items = [];
-    this.componentElement = document.createElement('div');
-    this.componentElement.classList.add('wc-timeline');
-    this.appendChild(this.componentElement);
+    const compEl = this.querySelector('.wc-timeline');
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement('div');
+      this.componentElement.classList.add('wc-timeline');
+      this.appendChild(this.componentElement);
+    }
+    console.log('ctor:wc-timeline');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    this._render();
+    console.log('conntectCallback:wc-timeline');
   }
 
   disconnectedCallback() {
@@ -63,17 +69,23 @@ class WcTimeline extends WcBaseComponent {
 
   _render() {
     super._render();
-    this._moveDeclarativeOptions();
-    this.componentElement.innerHTML = '';
+    const innerEl = this.querySelector('.wc-timeline > *');
+    if (innerEl) {
+      // Do nothing...
+    } else {
+      this._moveDeclarativeOptions();
+      this.componentElement.innerHTML = '';
 
-    this._items.forEach((item, idx) => {
-      const el = this._createElement(item.label, item.content, idx);
-      this.componentElement.appendChild(el);
-    });
+      this._items.forEach((item, idx) => {
+        const el = this._createElement(item.label, item.content, idx);
+        this.componentElement.appendChild(el);
+      });      
+    }
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+    console.log('_render:wc-timeline');
   }
 
   _createElement(itemLabel, itemContent, idx) {

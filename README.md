@@ -23,6 +23,12 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-timeline
 - wc-top-nav
 
+## Form Web Components
+
+- wc-combo-box
+
+
+
 ## Build
 
 ```bash

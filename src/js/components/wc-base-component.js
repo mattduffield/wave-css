@@ -9,30 +9,40 @@ export class WcBaseComponent extends HTMLElement {
     this.loadScript = loadScript.bind(this);
     this.loadLibrary = loadLibrary.bind(this);
     this.loadStyle = loadStyle.bind(this);
+    this.childComponent = null;
     this.childComponentSelector = '';
     this._pendingAttributes = {};
     this._isConnected = false;
     this.componentWrapper = null; // This is any wrapper over the component.
     this.componentElement = null; // This will be the input, select, etc. (set by child components)
+    this.formElement = null;
   }
 
   connectedCallback() {
     // The following is used to ensure any child web components render prior to allowing
     // this component to render.
     if (this.childComponentSelector) {
+      console.log('connectedCallback:waiting for ', this.childComponentSelector, ' to be loaded...');
       this._waitForChildren(this.childComponentSelector).then(() => {
         this._connectedCallback();
-      })
+      });
     } else {
       this._connectedCallback();
     }
   }
 
   _connectedCallback() {
-    this._isConnected = true;
-    this._applyPendingAttributes();
-    window.addEventListener('popstate', this._handlePopState.bind(this));
-    this._render();          
+    // window.addEventListener('popstate', this._handlePopState.bind(this));
+    this._render();
+    if (this.childComponentName) {
+      this._waitForChild(() => this[this.childComponentName]).then(() => {
+        this._isConnected = true;
+        this._applyPendingAttributes();
+      });
+    } else {
+      this._isConnected = true;
+      this._applyPendingAttributes();      
+    }
   }
 
   disconnectedCallback() {
@@ -77,22 +87,31 @@ export class WcBaseComponent extends HTMLElement {
   }
 
   _handleNameToIdLinkage(nameValue) {
-    if (!this.formElement.hasAttribute('id')) {
+    if (this.formElement && !this.formElement.hasAttribute('id')) {
       this.formElement.setAttribute('id', nameValue);
     }
   }
 
-  _handlePopState(event) {
-    // Handle back navigation logic, we call the _render function.
-    // It is important that the _render logic is idempotent.
-    // this._render();
-  }
+  // _handlePopState(event) {
+  //   // Handle back navigation logic, we call the _render function.
+  //   // It is important that the _render logic is idempotent.
+  //   // this._render();
+  // }
 
   _render() {
-    this.className = 'contents';
-    // this.classList.add('contents');
+    this.classList.add('contents');
   }
 
+  async _waitForChild(childRef) {
+    return new Promise((resolve) => {
+      const checkIfReady = setInterval(() => {
+        if (childRef()) {
+          clearInterval(checkIfReady);
+          resolve();
+        }
+      }, 50); // Check every 50ms, adjust interval as needed
+    });
+  }
   async _waitForChildren(selector) {
     const children = Array.from(this.querySelectorAll(selector));
 
@@ -115,6 +134,10 @@ export class WcBaseComponent extends HTMLElement {
         });
       })
     );
+  }
+
+  _applyStyle() {
+    // Handle any base styles.
   }
 
   _wireEvents() {

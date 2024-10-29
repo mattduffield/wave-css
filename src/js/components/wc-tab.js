@@ -106,7 +106,6 @@ class WcTab extends WcBaseComponent {
     super._render();
     const innerEl = this.querySelector('.wc-tab > *');
     if (innerEl) {
-      // Do nothing...
       const btns = this.querySelectorAll('.tab-link');
       btns.forEach(btn => btn.addEventListener('click', this._handleClick.bind(this)));      
     } else {
@@ -152,7 +151,6 @@ class WcTab extends WcBaseComponent {
     parts.forEach(p => p.classList.remove('active'));
     target.classList.add('active');
     const label = target.textContent;
-    console.log('_handleClick: label', label);
     const contents = this.querySelector(`.wc-tab-item[label='${label}']`);
     contents.classList.add('active');
   }

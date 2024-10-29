@@ -29,9 +29,6 @@ class WcSlideshowImage extends WcBaseComponent {
 
   constructor() {
     super();
-    //
-    // TODO: NEED TO DOCUMENT WHAT IS HAPPENING HERE AND SEE IF WE CAN MAKE THIS A STANDARD.
-    //
     const compEl = this.querySelector('.wc-slideshow-image');
     if (compEl) {
       this.componentElement = compEl;

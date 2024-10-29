@@ -33,10 +33,7 @@ class WcSlideshow extends WcBaseComponent {
     this.slideshowInterval = null;
     this.isPaused = false;
     this.slideIndex = 1;
-    this.childComponentSelector = 'wc-slideshow-image';
-    //
-    // TODO: NEED TO DOCUMENT WHAT IS HAPPENING HERE AND SEE IF WE CAN MAKE THIS A STANDARD.
-    //
+    this.childComponentSelector = 'wc-slideshow-image'; // We wait until the child component renders...
     const compEl = this.querySelector('.wc-slideshow');
     if (compEl) {
       this.componentElement = compEl;

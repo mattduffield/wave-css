@@ -43,6 +43,7 @@ class WcThemeSelector extends WcBaseComponent {
       this.componentElement.classList.add('wc-theme-selector');
       this.appendChild(this.componentElement);      
     }
+    console.log('ctor:wc-theme-selector');
   }
 
   async connectedCallback() {
@@ -58,10 +59,11 @@ class WcThemeSelector extends WcBaseComponent {
 
   _handleAttributeChange(attrName, newValue) {    
     if (attrName === 'theme') {
-      document.body.dataset.theme = newValue;
+      const themeButton = this.componentElement.querySelector(`button[data-theme="${newValue}"]`);
+      themeButton?.click();
     } else if (attrName === 'mode') {
-      document.body.dataset.themeMode = newValue;
-      // Do nothing...
+      const themeModeButton = this.componentElement.querySelector(`button[data-theme-mode="${newValue}"]`);
+      themeModeButton?.click();    
     } else {
       super._handleAttributeChange(attrName, newValue);  
     }
@@ -84,6 +86,7 @@ class WcThemeSelector extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+    console.log('_render:wc-theme-selector');
   }
 
   _createInnerElement() {
@@ -160,6 +163,7 @@ class WcThemeSelector extends WcBaseComponent {
     const {target} = event;
     const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     const selectedTheme = target.getAttribute('data-theme');
+    this.setAttribute('theme', selectedTheme);
     // Remove "selected" class from all buttons
     themeBtns.forEach(btn => btn.classList.remove('selected'));        
     // Add "selected" class to the clicked button
@@ -178,6 +182,7 @@ class WcThemeSelector extends WcBaseComponent {
     const {target} = event;
     const themeModeBtns = this.componentElement.querySelectorAll('button[data-theme-mode]');
     const selectedMode = target.getAttribute('data-theme-mode');
+    this.setAttribute('mode', selectedMode);
     // Remove "selected" class from all buttons
     themeModeBtns.forEach(btn => btn.classList.remove('selected'));        
     // Add "selected" class to the clicked button
@@ -198,52 +203,6 @@ class WcThemeSelector extends WcBaseComponent {
     themeModeBtns.forEach(btn => btn.addEventListener('click', this._handleThemeModeClick.bind(this)));
     const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     themeBtns.forEach(btn => btn.addEventListener('click', this._handleThemeClick.bind(this)));
-
-    // const themeModeButtons = this.componentElement.querySelectorAll('button[data-theme-mode]');
-    // themeModeButtons.forEach(button => {
-    //   button.addEventListener('click', this._handleThemeModeClick.bind(this));
-    //   // button.addEventListener('click', () => {
-    //   //   const selectedMode = button.getAttribute('data-theme-mode');
-    //   //   // Remove "selected" class from all buttons
-    //   //   themeModeButtons.forEach(btn => btn.classList.remove('selected'));        
-    //   //   // Add "selected" class to the clicked button
-    //   //   button.classList.add('selected');        
-    //   //   // Remove any current theme classes
-    //   //   const oldMode = document.body.dataset.themeMode || selectedMode;
-    //   //   if (oldMode) {
-    //   //     document.body.classList.remove(oldMode);
-    //   //   }
-    //   //   document.body.dataset.themeMode = selectedMode;
-    //   //   // Add the selected theme class to the body
-    //   //   document.body.classList.add(selectedMode);
-    //   // });
-    // });
-    // const themeButtons = this.componentElement.querySelectorAll('button[data-theme]');
-    // themeButtons.forEach(button => {
-    //   button.addEventListener('click', this._handleThemeClick.bind(this));
-    //   // button.addEventListener('click', () => {
-    //   //   const selectedTheme = button.getAttribute('data-theme');
-    //   //   // Remove "selected" class from all buttons
-    //   //   themeButtons.forEach(btn => btn.classList.remove('selected'));        
-    //   //   // Add "selected" class to the clicked button
-    //   //   button.classList.add('selected');        
-    //   //   // Remove any current theme classes
-    //   //   const oldTheme = document.body.dataset.theme || selectedTheme;
-    //   //   if (oldTheme) {
-    //   //     document.body.classList.remove(oldTheme);
-    //   //   }
-    //   //   document.body.dataset.theme = selectedTheme;
-    //   //   // Add the selected theme class to the body
-    //   //   document.body.classList.add(selectedTheme);
-    //   // });
-    // });
-
-    const currentTheme = document.body.dataset.theme;
-    const currentThemeMode = document.body.dataset.themeMode;
-    const themeButton = this.componentElement.querySelector(`button[data-theme="${currentTheme}"]`);
-    const themeModeButton = this.componentElement.querySelector(`button[data-theme-mode="${currentThemeMode}"]`);
-    themeButton.click();
-    themeModeButton.click();    
   }
 
   _unWireEvents() {

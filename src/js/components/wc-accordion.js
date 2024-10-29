@@ -35,12 +35,14 @@ class WcAccordion extends WcBaseComponent {
       this.componentElement.classList.add('wc-accordion');
       this.appendChild(this.componentElement);      
     }
+    console.log('ctor:wc-accordion');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
+    console.log('conntectCallback:wc-accordion');
   }
 
   disconnectedCallback() {
@@ -84,6 +86,7 @@ class WcAccordion extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+    console.log('_render:wc-accordion');
   }
 
   _createHeader(label, selected) {
