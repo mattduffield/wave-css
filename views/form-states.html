@@ -1,0 +1,195 @@
+<div id="page-contents">
+  <wc-form class="col p-6 gap-3">
+    <div class="row gap-4">
+      <wc-select name="favorite_color"
+        class="col-1"
+        lbl-label="Fav. Color"
+        value="green">
+        <option value="red">Red</option>
+        <option value="green" selected>Green</option>
+        <option value="blue">Blue</option>
+      </wc-select>
+      <wc-select name="favorite_color2"
+        class="col-1"
+        lbl-label="Fav. Color 2"
+        value="green"
+        disabled>
+        <option value="red">Red</option>
+        <option value="green" selected>Green</option>
+        <option value="blue">Blue</option>
+      </wc-select>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="first_name"
+        class="col-1"
+        value="John"
+        lbl-label="First Name"
+        autocomplete="first_name"
+        minlength="2"
+        maxlength="5"
+        required>
+      </wc-input>
+      <wc-input name="middle_name"
+        class="col-1"
+        value="H"
+        lbl-label="Middle Name"
+        autocomplete="middle_name"
+        readonly>
+      </wc-input>
+      <wc-input name="last_name"
+        class="col-1"
+        value="Doe"
+        lbl-label="Last Name"
+        autocomplete="last_name"
+        disabled>
+      </wc-input>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="budget"
+        class="col"
+        lbl-label="Budget"
+        type="number"
+        min="1"
+        max="1000">
+      </wc-input>
+      <wc-input name="credit_score"
+        class="col"
+        value="500"
+        lbl-label="Credit Score"
+        type="number"
+        min="1"
+        max="1000"
+        required
+        disabled>
+      </wc-input>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="appointment_date"
+        class="col"
+        value=""
+        lbl-label="Appointment"
+        type="date"
+        min="2023-01-01"
+        max="2024-12-31"
+        required>
+      </wc-input>
+      <wc-input name="appointment_time"
+        class="col"
+        value=""
+        lbl-label="Appointment Time"
+        type="time"
+        min="09:00"
+        max="18:00"
+        required>
+      </wc-input>
+      <wc-input name="appointment_week"
+        class="col"
+        value=""
+        lbl-label="Appointment Week"
+        type="week"
+        min="2024-W01"
+        max="2024-W22"
+        required>
+      </wc-input>
+      <wc-input name="appointment_month"
+        class="col"
+        value=""
+        lbl-label="Appointment Month"
+        type="month"
+        min="2024-01"
+        max="2024-06"
+        required>
+      </wc-input>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="season1"
+        class="col"
+        value="50"
+        lbl-label="Season 1"
+        type="range"
+        min="1"
+        max="100"
+        step="1"
+        required>
+      </wc-input>
+      <wc-input name="season2"
+        class="col"
+        value="25"
+        lbl-label="Season 2"
+        type="range"
+        min="1"
+        max="100"
+        step="1"
+        disabled>
+      </wc-input>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="is_active1"
+        class="col"
+        lbl-label="Is Active 1?"
+        type="checkbox"
+        checked>
+      </wc-input>
+      <wc-input name="is_active2"
+        class="col"
+        lbl-label="Is Active 2?"
+        type="checkbox"
+        checked
+        disabled>
+      </wc-input>
+      <wc-input name="is_eligible1"
+        class="col"
+        lbl-label="Is Eligible 1?"
+        type="checkbox"
+        toggle-switch>
+      </wc-input>
+      <wc-input name="is_eligible2"
+        class="col"
+        lbl-label="Is Eligible 2?"
+        type="checkbox"
+        toggle-switch
+        disabled>
+      </wc-input>
+    </div>
+
+    <div class="row gap-4">
+      <wc-textarea class="col-1"
+        lbl-label="Comments"
+        rows="5"
+        name="comments"
+        value="10/10/2024 - First comment..."
+        placeholder="Enter comments here..."
+        required></wc-textarea>
+      <wc-textarea class="col-1"
+        lbl-label="Notes"
+        rows="5"
+        name="notes"
+        value="test note"
+        placeholder="Enter comments here..."
+        readonly>
+10/30/2024 - Had a call with the client. They want to move forward.
+10/28/2024 - Had initial call with the client. They want to think about it.
+      </wc-textarea>
+      <wc-textarea class="col-1"
+        lbl-label="Remarks"
+        rows="5"
+        name="remarks"
+        placeholder="Enter comments here..."
+        disabled>
+10/30/2024 - Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+10/28/2024 - Lorem culpa qui officia deserunt mollit anim id est laborum.
+      </wc-textarea>
+    </div>
+    <div class="row gap-4">
+      <button type="submit">Submit</button>
+      <button type="button" disabled>Validate</button>
+      <wc-input type="button" value="Click 1"></wc-input>
+      <wc-input type="button" value="Click 2" disabled></wc-input>
+    </div>
+  </wc-form>
+  <div class="col p-6 gap-4">
+    <wc-theme-selector theme="theme-slate-storm" mode="dark">
+    </wc-theme-selector>
+  </div>
+
+</div>

@@ -1,5 +1,6 @@
 export * from './helper-function.js';
 import './wc-base-component.js';
+import './wc-base-form-component.js';
 import './wc-accordion.js';
 import './wc-background-image.js';
 import './wc-code-mirror.js';
@@ -18,4 +19,7 @@ import './wc-theme-selector.js';
 import './wc-timeline.js';
 // import './wc-top-nav.js';
 // Form Controls
-import './wc-combo-box.js';
+import './wc-form.js';
+import './wc-input.js';
+import './wc-select.js';
+import './wc-textarea.js';

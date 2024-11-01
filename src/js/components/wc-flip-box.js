@@ -140,14 +140,14 @@ class WcFlipBox extends WcBaseComponent {
 
       /* Style the front side */
       .wc-flip-box .flip-box-front {
-        background-color: var(--background-color);
-        color: var(--text-color);
+        background-color: var(--bg-color);
+        color: var(--color);
       }
 
       /* Style the back side */
       .wc-flip-box .flip-box-back {
-        background-color: var(--background-color);
-        color: var(--text-color);
+        background-color: var(--bg-color);
+        color: var(--color);
         transform: rotateY(180deg);
       }`.trim();
     this.loadStyle('wc-flip-box-style', style);

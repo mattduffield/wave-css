@@ -152,8 +152,8 @@ class WcDropdown extends WcBaseComponent {
     const style = `
       /* Dropdown Button */
       .wc-dropdown .dropbtn {
-        background-color: var(--primary-color);
-        color: var(--primary-text-color);
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
         padding: 16px;
         font-size: 16px;
         border: none;
@@ -170,7 +170,7 @@ class WcDropdown extends WcBaseComponent {
       .wc-dropdown .dropdown-content {
         display: none;
         position: absolute;
-        background-color: var(--component-background-color);
+        background-color: var(--component-bg-color);
         min-width: 160px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
@@ -189,13 +189,13 @@ class WcDropdown extends WcBaseComponent {
         transform: translateY(-50%);
         width: 20px;
         height: 20px;
-        stroke: var(--component-text-color);
+        stroke: var(--component-color);
         pointer-events: none;
       }
 
       /* Links inside the dropdown */
       .wc-dropdown .dropdown-content a {
-        color: var(--component-text-color);
+        color: var(--component-color);
         padding: 12px 16px;
         text-decoration: none;
         display: block;
@@ -216,10 +216,10 @@ class WcDropdown extends WcBaseComponent {
 
       /* Change the background color of the dropdown button when the dropdown content is shown */
       .wc-dropdown.dropdown:hover:not(.click):not(.search) .dropbtn {
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
       }
       .wc-dropdown.dropdown.show .dropbtn {
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
       }
     `.trim();
     this.loadStyle('wc-dropdown-style', style);

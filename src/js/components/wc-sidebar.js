@@ -138,7 +138,7 @@ class WcSidebar extends WcBaseComponent {
         position: fixed;
         z-index: 1;
         top: 0;
-        background-color: var(--background-color);
+        background-color: var(--bg-color);
         overflow-x: hidden;
         padding-top: 20px;
         padding-bottom: 20px;
@@ -154,12 +154,12 @@ class WcSidebar extends WcBaseComponent {
         padding: 6px 8px 6px 16px;
         text-decoration: none;
         font-size: 25px;
-        color: var(--component-text-color);
+        color: var(--component-color);
         display: block;
       }
 
       wc-sidebar .wc-sidebar a:hover {
-        color: var(--accent-color);
+        color: var(--accent-bg-color);
       }
     `;
     this.loadStyle('wc-sidebar-style', style);

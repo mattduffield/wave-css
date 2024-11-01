@@ -1,21 +1,20 @@
-import { generateUniqueId, loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
 
 
 export class WcBaseComponent extends HTMLElement {
+
   constructor() {
     super();
-    this.generateUniqueId = generateUniqueId.bind(this);
     this.loadCSS = loadCSS.bind(this);
     this.loadScript = loadScript.bind(this);
     this.loadLibrary = loadLibrary.bind(this);
     this.loadStyle = loadStyle.bind(this);
-    this.childComponent = null;
-    this.childComponentSelector = '';
+    this.childComponent = null; // This is used to detect when a third-party object is created, e.g. Code Mirror editor object.
+    this.childComponentSelector = ''; // This is used to detect when child web components are loaded.
     this._pendingAttributes = {};
     this._isConnected = false;
-    this.componentWrapper = null; // This is any wrapper over the component.
-    this.componentElement = null; // This will be the input, select, etc. (set by child components)
-    this.formElement = null;
+    this.componentElement = null; // This is the standard component or wrapper for form elements.
+    this.formElement = null; // This is any form element: input, select, etc.
   }
 
   connectedCallback() {
@@ -32,7 +31,6 @@ export class WcBaseComponent extends HTMLElement {
   }
 
   _connectedCallback() {
-    // window.addEventListener('popstate', this._handlePopState.bind(this));
     this._render();
     if (this.childComponentName) {
       this._waitForChild(() => this[this.childComponentName]).then(() => {
@@ -68,17 +66,18 @@ export class WcBaseComponent extends HTMLElement {
   _handleAttributeChange(attrName, newValue) {
     if (attrName === 'name') {
       this._handleNameToIdLinkage(newValue);
-    } else if (attrName === 'wpr-class') {
-      const wpr = this.querySelector('.wrapper');
-      if (wpr) {
-        wpr.setAttribute('class', newValue);
+    } else if (attrName === 'elt-class') {
+      const fe = this.querySelector('[form-element]');
+      if (fe) {
+        fe.setAttribute('class', newValue);
       }
     } else if (attrName === 'class') {
-      const parts = newValue.split(' ');
-      parts.forEach(p => {
-        const cls = p.replace('contents', '');
-        if (cls) {
-          this.componentElement.classList.add(cls);
+      const cls = newValue.replace('contents', '');
+      const parts = cls.split(' ');
+      parts.forEach(part => {
+        if (part) {
+          this.componentElement.classList.add(part);
+          this.classList.remove(part);
         }
       })
     } else {
@@ -91,12 +90,6 @@ export class WcBaseComponent extends HTMLElement {
       this.formElement.setAttribute('id', nameValue);
     }
   }
-
-  // _handlePopState(event) {
-  //   // Handle back navigation logic, we call the _render function.
-  //   // It is important that the _render logic is idempotent.
-  //   // this._render();
-  // }
 
   _render() {
     this.classList.add('contents');
@@ -115,10 +108,10 @@ export class WcBaseComponent extends HTMLElement {
   async _waitForChildren(selector) {
     const children = Array.from(this.querySelectorAll(selector));
 
-    // // Wait until all wc-slideshow-image components are defined and upgraded
+    // // Wait until all components are defined and upgraded
     // await Promise.all(
     //   children.map((child) =>
-    //     customElements.whenDefined('wc-slideshow-image')
+    //     customElements.whenDefined(selector)
     //   )
     // );
 

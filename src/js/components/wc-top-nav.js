@@ -121,29 +121,29 @@ class WcTopNav extends WcBaseComponent {
   _applyStyle() {
     const style = `.wc-top-nav {
       position: relative;
-      background-color: var(--secondary-color);
+      background-color: var(--secondary-bg-color);
       opacity: 0.75;
     }
 
     .wc-top-nav a {
-      color: var(--secondary-text-color);
+      color: var(--secondary-color);
       text-align: center;
       padding: 14px 16px;
       text-decoration: none;
       font-size: 17px;
     }
     .wc-top-nav a svg {
-      color: var(--secondary-text-color);
+      color: var(--secondary-color);
     }
 
     .wc-top-nav a:hover {
-      background-color: var(--primary-color);
-      color: var(--primary-text-color);
+      background-color: var(--primary-bg-color);
+      color: var(--primary-color);
     }
 
     .wc-top-nav a.active {
-      background-color: var(--primary-color);
-      color: var(--primary-text-color);
+      background-color: var(--primary-bg-color);
+      color: var(--primary-color);
       opacity: 1;
     }
 

@@ -30,7 +30,6 @@ class WcCodeMirror extends WcBaseComponent {
   constructor() {
     super();
     this.childComponentName = 'editor';
-    // this.childComponentSelector = '.CodeMirror';
     this._isResizing = false;
     this._internals = this.attachInternals();
     this.firstContent = '';
@@ -67,16 +66,25 @@ class WcCodeMirror extends WcBaseComponent {
     } else if (attrName === 'mode') {
       await this.loadMode(newValue);
     } else if (attrName === 'line-numbers') {
-      // Need to suport intial render as well as changes.
-      this.editor.setOption('lineNumbers', ((newValue == '' && this.hasAttribute('line-numbers')) || (newValue == true || newValue == 'true')));
+      if (newValue || newValue == '') {
+        this.editor.setOption('lineNumbers', true);
+      } else {
+        this.editor.setOption('lineNumbers', false);
+      }
       const gutters = await this.getGutters();
       this.editor.setOption('gutters', gutters);
     } else if (attrName === 'line-wrapping') {
-      // Need to suport intial render as well as changes.
-      this.editor.setOption('lineWrapping', ((newValue == '' && this.hasAttribute('line-wrapping')) || (newValue == true || newValue == 'true')));
+      if (newValue || newValue == '') {
+        this.editor.setOption('lineWrapping', true);
+      } else {
+        this.editor.setOption('lineWrapping', false);
+      }      
     } else if (attrName === 'fold-gutter') {
-      // Need to suport intial render as well as changes.
-      this.editor.setOption('foldGutter', ((newValue == '' && this.hasAttribute('fold-gutter')) || (newValue == true || newValue == 'true')));
+      if (newValue || newValue == '') {
+        this.editor.setOption('foldGutter', true);
+      } else {
+        this.editor.setOption('foldGutter', false);
+      }      
       const gutters = await this.getGutters();
       this.editor.setOption('gutters', gutters);
     } else if (attrName === 'tab-size') {
@@ -199,7 +207,7 @@ class WcCodeMirror extends WcBaseComponent {
     ];
     // HTML for the popover (to change theme, mode, line numbers)
     settingsPopover.innerHTML = `
-      <form id="popover-form" class="popover-form col gap-3" method="dialog">
+      <div id="popover-form" class="popover-form col gap-3">
         <button id="closeButton" class="close-btn" type="button"
           popovertarget="${this.popoverId}" popovertargetaction="hide"
           >
@@ -207,35 +215,21 @@ class WcCodeMirror extends WcBaseComponent {
           <span class="sr-only">Close</span>
         </button>
         <div class="row gap-2">
-          <div class="col-1">
-            <wc-combo-box class="col-1" name="theme-select" lbl-label="Theme" autofocus>
-              ${themes.map(theme => `<option value="${theme}" ${theme == this.getAttribute('theme') ? 'selected' : ''}>${theme}</option>`).join('')}
-            </wc-combo-box>
-          </div>
-          <div class="col-1">
-            <wc-combo-box class="col-1" name="mode-select" lbl-label="Mode">
-              ${modes.map(mode => `<option value="${mode}" ${mode == this.getAttribute('mode') ? 'selected' : ''}>${mode}</option>`).join('')}
-            </wc-combo-box>
-          </div>
+          <wc-select class="col-1" name="theme-select" lbl-label="Theme" autofocus elt-class="w-full">
+            ${themes.map(theme => `<option value="${theme}" ${theme == this.getAttribute('theme') ? 'selected' : ''}>${theme}</option>`).join('')}
+          </wc-select>
+          <wc-select class="col-1" name="mode-select" lbl-label="Mode" elt-class="w-full">
+            ${modes.map(mode => `<option value="${mode}" ${mode == this.getAttribute('mode') ? 'selected' : ''}>${mode}</option>`).join('')}
+          </wc-select>
         </div>
         <div class="row gap-2">
-          <div class="col">
-            <text-box name="line-numbers" lbl-label="Line Numbers" ${hasLineNumbers ? 'checked ' : '' }type="checkbox"></text-box>
-          </div>
-          <div class="col">
-            <text-box name="line-wrapper" lbl-label="Line Wrapper" ${hasLineWrapper ? 'checked ' : ''}type="checkbox"></text-box>
-          </div>
-          <div class="col">
-            <text-box name="fold-gutter" lbl-label="Fold Gutter" ${hasFoldGutter ? 'checked ' : '' }type="checkbox"></text-box>
-          </div>
+          <wc-input class="col-1" name="line-numbers" lbl-label="Line Numbers" ${hasLineNumbers ? 'checked ' : '' }type="checkbox"></wc-input>
+          <wc-input class="col-1" name="line-wrapper" lbl-label="Line Wrapper" ${hasLineWrapper ? 'checked ' : ''}type="checkbox"></wc-input>
+          <wc-input class="col-1" name="fold-gutter" lbl-label="Fold Gutter" ${hasFoldGutter ? 'checked ' : '' }type="checkbox"></wc-input>
         </div>
         <div class="row gap-2">
-          <div class="col-1">
-            <text-box name="tab-size" lbl-label="Tab Size" value="${this.getAttribute('tab-size')}" type="number"></text-box>
-          </div>
-          <div class="col-1">
-            <text-box name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute('indent-unit')}" type="number"></text-box>
-          </div>
+          <wc-input class="col-1" name="tab-size" lbl-label="Tab Size" value="${this.getAttribute('tab-size')}" type="number"></wc-input>
+          <wc-input class="col-1" name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute('indent-unit')}" type="number"></wc-input>
         </div>
         <div class="row gap-2 justify-end gap-x-4">
           <button class="" id="apply-settings" type="submit">
@@ -245,7 +239,7 @@ class WcCodeMirror extends WcBaseComponent {
             Cancel
           </button>
         </div>
-      </form>
+      </div>
     `;
 
     // Add functionality to apply settings
@@ -255,32 +249,42 @@ class WcCodeMirror extends WcBaseComponent {
   }
 
   _handleSettingsApply(event) {
-    // event.preventDefault();  // Prevent form submission
     const settingsPopover = this.querySelector('.settings-popover');
     const close = settingsPopover.querySelector('#closeButton');
     const theme = settingsPopover.querySelector('#theme-select').value;
     const mode = settingsPopover.querySelector('#mode-select').value;
-    // const lineNumbers = settingsPopover.querySelector('#line-numbers').checked;
-    // const lineWrapper = settingsPopover.querySelector('#line-wrapper').checked;
-    // const foldGutter = settingsPopover.querySelector('#fold-gutter').checked;
-    // const tabSize = settingsPopover.querySelector('#tab-size').value;
-    // const indentUnit = settingsPopover.querySelector('#indent-unit').value;
+    const lineNumbers = settingsPopover.querySelector('#line-numbers').checked;
+    const lineWrapper = settingsPopover.querySelector('#line-wrapper').checked;
+    const foldGutter = settingsPopover.querySelector('#fold-gutter').checked;
+    const tabSize = settingsPopover.querySelector('#tab-size').value;
+    const indentUnit = settingsPopover.querySelector('#indent-unit').value;
 
     // Update CodeMirror editor with new settings
     this.setAttribute('theme', theme);
     this.setAttribute('mode', mode);
-    // this.setAttribute('line-numbers', lineNumbers);
-    // this.setAttribute('line-wrapper', lineWrapper);
-    // this.setAttribute('fold-gutter', foldGutter);
-    // this.setAttribute('tab-size', tabSize);
-    // this.setAttribute('indent-unit', indentUnit);
+    if (lineNumbers) {
+      this.setAttribute('line-numbers', '');
+    } else {
+      this.removeAttribute('line-numbers');
+    }
+    if (lineWrapper) {
+      this.setAttribute('line-wrapper', '');
+    } else {
+      this.removeAttribute('line-wrapper');
+    }
+    if (foldGutter) {
+      this.setAttribute('fold-gutter', '');
+    } else {
+      this.removeAttribute('fold-gutter');
+    }    
+    this.setAttribute('tab-size', tabSize);
+    this.setAttribute('indent-unit', indentUnit);
     this._handleSettingsClose(event);
   }
   _handleSettingsClose(event) {
     event.preventDefault();  // Prevent form submission
     const settingsPopover = this.querySelector('.settings-popover');
     settingsPopover.togglePopover();
-    // settingsPopover.querySelector('#apply-settings').removeEventListener('click', this._handleSettingsClose.bind(this));
     while (settingsPopover.firstChild) {
       settingsPopover.removeChild(settingsPopover.firstChild);
     }
@@ -298,7 +302,6 @@ class WcCodeMirror extends WcBaseComponent {
   }
   
   _applyStyle() {
-      // Inject custom CSS directly into the component
     const style = `
       /* Container using flex or grid layout */
       .editor-container-flex {
@@ -336,7 +339,7 @@ class WcCodeMirror extends WcBaseComponent {
         height: 10em;        
       }
       .wc-code-mirror:focus-within {
-        border: 2px solid var(--primary-color);
+        border: 2px solid var(--primary-bg-color);
       }
 
       .CodeMirror {

@@ -231,7 +231,7 @@ class WcImage extends WcBaseComponent {
         top: 100%;
         left: 0;
         right: 0;
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
         overflow: hidden;
         width: 100%;
         height:0;
@@ -246,7 +246,7 @@ class WcImage extends WcBaseComponent {
         bottom: 100%;
         left: 0;
         right: 0;
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
         overflow: hidden;
         width: 100%;
         height:0;
@@ -261,7 +261,7 @@ class WcImage extends WcBaseComponent {
         bottom: 0;
         left: 100%;
         right: 0;
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
         overflow: hidden;
         width: 0;
         height: 100%;
@@ -276,7 +276,7 @@ class WcImage extends WcBaseComponent {
         bottom: 0;
         left: 0;
         right: 100%;
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
         overflow: hidden;
         width: 0;
         height: 100%;

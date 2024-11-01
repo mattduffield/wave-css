@@ -129,7 +129,7 @@ class WcThemeSelector extends WcBaseComponent {
       template.innerHTML = `
       <div class="row flex-wrap">
         ${themes.map(theme => `
-          <button class="flat h-10 w-10 rounded-t-md ${theme}" data-theme="${theme}" title="${theme}">
+          <button class="flat h-10 w-10 rounded-t-md ${theme}" type="button" data-theme="${theme}" title="${theme}">
             <svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
               <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
             </svg>
@@ -138,7 +138,7 @@ class WcThemeSelector extends WcBaseComponent {
       </div>
       <div class="row">
         ${themeModes.map(item => `
-          <button class="flat h-10 w-10 ${item.theme}" data-theme-mode="${item.mode}">
+          <button class="flat h-10 w-10 ${item.theme}" type="button" data-theme-mode="${item.mode}">
             <svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
               <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
             </svg>
@@ -155,6 +155,10 @@ class WcThemeSelector extends WcBaseComponent {
       wc-theme-selector .wc-theme-selector {
 
       }
+
+      wc-theme-selector .wc-theme-selector .selectmark {
+        pointer-events: none;
+      }
     `;
     this.loadStyle('wc-theme-selector-style', style);
   }
@@ -169,10 +173,15 @@ class WcThemeSelector extends WcBaseComponent {
     // Add "selected" class to the clicked button
     target.classList.add('selected');        
     // Remove any current theme classes
-    const oldTheme = document.body.dataset.theme || selectedTheme;
-    if (oldTheme) {
-      document.body.classList.remove(oldTheme);
-    }
+    document.body.classList.forEach(cls => {
+      if (cls.startsWith('theme-')) {
+        document.body.classList.remove(cls);
+      }
+    });
+    // const oldTheme = document.body.dataset.theme || selectedTheme;
+    // if (oldTheme) {
+    //   document.body.classList.remove(oldTheme);
+    // }
     document.body.dataset.theme = selectedTheme;
     // Add the selected theme class to the body
     document.body.classList.add(selectedTheme);

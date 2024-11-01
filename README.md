@@ -25,11 +25,24 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 
 ## Form Web Components
 
-- wc-combo-box
+- wc-base-form-component
+- wc-code-mirror
+- wc-input
+- wc-select
+- wc-textarea
+
+
+## Component Lifecycle
+
+- ctor
+- `_render`
+- connectedCallback
+- `_handleAttributeChange`
 
 
 
 ## Build
+Execute the following command to build the bundler for both `css` and `javascript`.
 
 ```bash
 npm run build
@@ -41,3 +54,4 @@ Execute the following to view the components locally.
 ```bash
 python3 -m http.server 3015
 ```
+

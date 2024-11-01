@@ -97,7 +97,7 @@ class WcMenu extends WcBaseComponent {
     this._items.forEach(item => {
       const link = this._createAnchor(item.name, item.label, item.selected);
       menuDiv.appendChild(link);
-    })
+    });
     const hamburgerDiv = document.createElement('div');
     hamburgerDiv.classList.add('menu-toggle');
     const menuIcon = document.createElement('a');
@@ -205,7 +205,7 @@ class WcMenu extends WcBaseComponent {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        background-color: var(--secondary-color);
+        background-color: var(--secondary-bg-color);
         overflow: hidden;
       }
       wc-menu .wc-menu .menu-items {
@@ -213,7 +213,7 @@ class WcMenu extends WcBaseComponent {
         flex-direction: row;
       }
       wc-menu .wc-menu a {
-        color: var(--secondary-text-color);
+        color: var(--secondary-color);
         text-align: center;
         padding: 14px 16px;
         text-decoration: none;
@@ -222,13 +222,13 @@ class WcMenu extends WcBaseComponent {
         user-select: none;
       }
       wc-menu .wc-menu a:hover {
-        background-color: var(--primary-color);
-        color: var(--primary-text-color);
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
         opacity: 1;
       }
       wc-menu .wc-menu a.active {
-        background-color: var(--primary-color);
-        color: var(--primary-text-color);
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
         opacity: 1;
       }
       wc-menu .wc-menu a.icon {
@@ -251,13 +251,13 @@ class WcMenu extends WcBaseComponent {
           flex: 1 1 0%;
         }
         wc-menu .wc-menu.open a:active {
-          background-color: var(--primary-color);
-          color: var(--primary-text-color);
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
           opacity: 1;
         }
         wc-menu .wc-menu.open .icon {
-          background-color: var(--primary-color);
-          color: var(--primary-text-color);
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
           opacity: 1;
           position: absolute;
           right: 0;

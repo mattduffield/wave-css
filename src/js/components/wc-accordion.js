@@ -182,8 +182,8 @@ class WcAccordion extends WcBaseComponent {
   _applyStyle() {
     const style = `
       .wc-accordion .accordion-header {
-        background-color: var(--secondary-color);
-        color: var(--secondary-text-color);
+        background-color: var(--secondary-bg-color);
+        color: var(--secondary-color);
         cursor: pointer;
         padding: 18px;
         width: 100%;
@@ -197,12 +197,12 @@ class WcAccordion extends WcBaseComponent {
 
       .wc-accordion .active,
       .wc-accordion .accordion-header:hover {
-        background-color: var(--primary-color);
+        background-color: var(--primary-bg-color);
       }
 
       .wc-accordion .accordion-header:after {
         content: '+';
-        color: var(--secondary-text-color);
+        color: var(--secondary-color);
         font-weight: bold;
         float: right;
         margin-left: 5px;
@@ -215,14 +215,14 @@ class WcAccordion extends WcBaseComponent {
 
       .wc-accordion .active:after {
         content: '-';
-        color: var(--primary-text-color);
+        color: var(--primary-color);
         font-size: 20px;
       }
 
       .wc-accordion .accordion-panel {
         padding: 0 18px;
-        background-color: var(--component-background-color);
-        color: var(--component-text-color);
+        background-color: var(--component-bg-color);
+        color: var(--component-color);
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.2s ease-out;

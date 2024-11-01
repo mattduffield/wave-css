@@ -125,7 +125,7 @@ class WcTimeline extends WcBaseComponent {
         content: '';
         position: absolute;
         width: 6px;
-        background-color: var(--primary-color);
+        background-color: var(--primary-bg-color);
         top: 0;
         bottom: 0;
         left: 50%;
@@ -147,8 +147,8 @@ class WcTimeline extends WcBaseComponent {
         width: 25px;
         height: 25px;
         right: -17px;
-        background-color: var(--component-text-color);
-        border: 4px solid var(--accent-color);
+        background-color: var(--component-color);
+        border: 4px solid var(--accent-bg-color);
         top: 15px;
         border-radius: 50%;
         z-index: 1;
@@ -175,7 +175,7 @@ class WcTimeline extends WcBaseComponent {
         right: 30px;
         border: medium solid white;
         border-width: 10px 0 10px 10px;
-        border-color: transparent transparent transparent var(--component-background-color);
+        border-color: transparent transparent transparent var(--component-bg-color);
       }
 
       /* Add arrows to the right container (pointing left) */
@@ -189,7 +189,7 @@ class WcTimeline extends WcBaseComponent {
         left: 30px;
         border: medium solid white;
         border-width: 10px 10px 10px 0;
-        border-color: transparent var(--component-background-color); transparent transparent;
+        border-color: transparent var(--component-bg-color); transparent transparent;
       }
 
       /* Fix the circle for containers on the right side */
@@ -200,8 +200,8 @@ class WcTimeline extends WcBaseComponent {
       /* The actual content */
       .wc-timeline .card {
         padding: 20px 30px;
-        background-color: var(--component-background-color);
-        color: var(--input-text-color);
+        background-color: var(--component-bg-color);
+        color: var(--input-color);
         position: relative;
         border-radius: 6px;
       }
