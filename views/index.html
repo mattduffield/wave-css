@@ -43,7 +43,7 @@
 
     <div id="page-contents" class="p-6">
       <div 
-        hx-get="/views/home.html"
+        hx-get="./home.html"
         hx-trigger="load"
         hx-target="#page-contents"
         hx-swap="outerHTML transition:true"
@@ -67,6 +67,6 @@
   <wc-event-hub></wc-event-hub>
 
   <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
-  <script type="module" src="/views/index.js"></script>
+  <script type="module" src="./index.js"></script>
 </body>
 </html>
