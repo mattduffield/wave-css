@@ -180,16 +180,45 @@
 10/28/2024 - Lorem culpa qui officia deserunt mollit anim id est laborum.
       </wc-textarea>
     </div>
-    <div class="row gap-4">
+    <div class="row gap-3">
       <button type="submit">Submit</button>
       <button type="button" disabled>Validate</button>
       <wc-input type="button" value="Click 1"></wc-input>
       <wc-input type="button" value="Click 2" disabled></wc-input>
-    </div>
+      <wc-input type="button" value="Accept" class="theme-forest-green"></wc-input>
+      <wc-input type="button" value="Accept" class="theme-forest-green" disabled></wc-input>
+      <wc-input type="button" value="Reject" class="theme-coral-sunset"></wc-input>
+      <wc-input type="button" value="Reject" class="theme-coral-sunset" disabled></wc-input>
+      <wc-input type="button" value="Cancel" class="theme-day"></wc-input>
+      <wc-input type="button" value="Cancel" class="theme-day" disabled></wc-input>
+      <wc-input type="button" value="Confirm" class="theme-royal-blue"></wc-input>
+      <wc-input type="button" value="Confirm" class="theme-royal-blue" disabled></wc-input>    </div>
   </wc-form>
   <div class="col p-6 gap-4">
     <wc-theme-selector theme="theme-slate-storm" mode="dark">
     </wc-theme-selector>
   </div>
+  <div class="test-container p-6">
+    <wc-event-handler 
+      event-name="custom-event"
+      action-target=".test-container"></wc-event-handler>
+    TEST EVENT HANDLER
+  </div>
 
+<!--
+  <div class="p-6">
+    <wc-behavior 
+      xhx-trigger="click, keyup[ctrlKey&&shiftKey&&key=='X'] from:body"
+      xhx-post=""
+      xhx-confirm="Are you sure you want to do this?"></wc-behavior>
+    THIS IS MY CONTENT
+  </div>
+  <div class="p-6">
+    <wc-behavior 
+      hx-trigger="custom-event from:body"
+      hx-post=""
+      hx-confirm="Are you sure you perform the custom event?"></wc-behavior>
+    Other content
+  </div>
+-->
 </div>

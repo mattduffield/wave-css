@@ -99,6 +99,8 @@ class WcSidenav extends WcBaseComponent {
       closeBtn.addEventListener('click', this._closeNav.bind(this));
       const openBtn = this.querySelector('.openbtn');
       openBtn.addEventListener('click', this._openNav.bind(this));
+      document.body.addEventListener('open-nav', this._handleOpen.bind(this));
+      document.body.addEventListener('close-nav', this._handleClose.bind(this));
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
@@ -152,6 +154,29 @@ class WcSidenav extends WcBaseComponent {
         if (pushTarget) {
           pushTarget.style.setProperty('transition', 'margin-left 0.5s ease, margin-right 0.5s ease');
         }
+    }
+    document.body.addEventListener('open-nav', this._handleOpen.bind(this));
+    document.body.addEventListener('close-nav', this._handleClose.bind(this));
+  }
+
+
+  _handleOpen(event) {
+    const {detail} = event;
+    const {selector} = detail;
+    const tgt = document.querySelector(selector);
+    if (tgt === this) {
+      const btn = tgt?.querySelector('.openbtn');
+      btn?.click();
+    }
+  }
+
+  _handleClose(event) {
+    const {detail} = event;
+    const {selector} = detail;
+    const tgt = document.querySelector(selector);
+    if (tgt === this) {
+      const btn = tgt?.querySelector('.closebtn');
+      btn?.click();
     }
   }
 
@@ -322,6 +347,8 @@ class WcSidenav extends WcBaseComponent {
     closeBtn.removeEventListener('click', this._closeNav.bind(this));
     const openBtn = this.querySelector('.openbtn');
     openBtn.removeEventListener('click', this._openNav.bind(this));
+    document.body.removeEventListener('open-nav', this._handleOpen.bind(this));
+    document.body.removeEventListener('close-nav', this._handleClose.bind(this));
   }
 
 }
