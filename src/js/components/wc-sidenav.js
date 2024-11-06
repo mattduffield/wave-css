@@ -57,6 +57,7 @@ class WcSidenav extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-sidenav');
   }
 
@@ -99,8 +100,8 @@ class WcSidenav extends WcBaseComponent {
       closeBtn.addEventListener('click', this._closeNav.bind(this));
       const openBtn = this.querySelector('.openbtn');
       openBtn.addEventListener('click', this._openNav.bind(this));
-      document.body.addEventListener('open-nav', this._handleOpen.bind(this));
-      document.body.addEventListener('close-nav', this._handleClose.bind(this));
+      // document.body.addEventListener('open-nav', this._handleOpen.bind(this));
+      // document.body.addEventListener('close-nav', this._handleClose.bind(this));
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
@@ -155,29 +156,33 @@ class WcSidenav extends WcBaseComponent {
           pushTarget.style.setProperty('transition', 'margin-left 0.5s ease, margin-right 0.5s ease');
         }
     }
-    document.body.addEventListener('open-nav', this._handleOpen.bind(this));
-    document.body.addEventListener('close-nav', this._handleClose.bind(this));
+    // document.body.addEventListener('open-nav', this._handleOpen.bind(this));
+    // document.body.addEventListener('close-nav', this._handleClose.bind(this));
   }
 
 
   _handleOpen(event) {
     const {detail} = event;
     const {selector} = detail;
-    const tgt = document.querySelector(selector);
-    if (tgt === this) {
-      const btn = tgt?.querySelector('.openbtn');
-      btn?.click();
-    }
+    const tgts = document.querySelectorAll(selector);
+    tgts.forEach(tgt => {
+      if (tgt === this) {
+        const btn = tgt?.querySelector('.openbtn');
+        btn?.click();
+      }      
+    });
   }
 
   _handleClose(event) {
     const {detail} = event;
     const {selector} = detail;
-    const tgt = document.querySelector(selector);
-    if (tgt === this) {
-      const btn = tgt?.querySelector('.closebtn');
-      btn?.click();
-    }
+    const tgts = document.querySelectorAll(selector);
+    tgts.forEach(tgt => {
+      if (tgt === this) {
+        const btn = tgt?.querySelector('.closebtn');
+        btn?.click();
+      }      
+    });
   }
 
   _openNav(event) {
@@ -340,6 +345,12 @@ class WcSidenav extends WcBaseComponent {
     this.loadStyle('wc-sidenav-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    document.body.addEventListener('wc-sidenav-open', this._handleOpen.bind(this));
+    document.body.addEventListener('wc-sidenav-close', this._handleClose.bind(this));    
+  }
 
   _unWireEvents() {
     super._unWireEvents();
@@ -347,8 +358,8 @@ class WcSidenav extends WcBaseComponent {
     closeBtn.removeEventListener('click', this._closeNav.bind(this));
     const openBtn = this.querySelector('.openbtn');
     openBtn.removeEventListener('click', this._openNav.bind(this));
-    document.body.removeEventListener('open-nav', this._handleOpen.bind(this));
-    document.body.removeEventListener('close-nav', this._handleClose.bind(this));
+    document.body.removeEventListener('wc-sidenav-open', this._handleOpen.bind(this));
+    document.body.removeEventListener('wc-sidenav-close', this._handleClose.bind(this));
   }
 
 }
