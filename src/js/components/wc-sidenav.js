@@ -100,8 +100,6 @@ class WcSidenav extends WcBaseComponent {
       closeBtn.addEventListener('click', this._closeNav.bind(this));
       const openBtn = this.querySelector('.openbtn');
       openBtn.addEventListener('click', this._openNav.bind(this));
-      // document.body.addEventListener('open-nav', this._handleOpen.bind(this));
-      // document.body.addEventListener('close-nav', this._handleClose.bind(this));
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
@@ -156,33 +154,32 @@ class WcSidenav extends WcBaseComponent {
           pushTarget.style.setProperty('transition', 'margin-left 0.5s ease, margin-right 0.5s ease');
         }
     }
-    // document.body.addEventListener('open-nav', this._handleOpen.bind(this));
-    // document.body.addEventListener('close-nav', this._handleClose.bind(this));
   }
 
-
-  _handleOpen(event) {
+  _handleHelper(event, btnSelector) {
     const {detail} = event;
     const {selector} = detail;
-    const tgts = document.querySelectorAll(selector);
-    tgts.forEach(tgt => {
-      if (tgt === this) {
-        const btn = tgt?.querySelector('.openbtn');
-        btn?.click();
-      }      
-    });
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          const btn = tgt?.querySelector(btnSelector);
+          btn?.click();
+        }
+      });      
+    } else {
+      const btn = selector?.querySelector(btnSelector);
+      btn?.click();
+    }    
+  }
+
+  _handleOpen(event) {
+    this._handleHelper(event, '.openbtn');
   }
 
   _handleClose(event) {
-    const {detail} = event;
-    const {selector} = detail;
-    const tgts = document.querySelectorAll(selector);
-    tgts.forEach(tgt => {
-      if (tgt === this) {
-        const btn = tgt?.querySelector('.closebtn');
-        btn?.click();
-      }      
-    });
+    this._handleHelper(event, '.closebtn');
   }
 
   _openNav(event) {
