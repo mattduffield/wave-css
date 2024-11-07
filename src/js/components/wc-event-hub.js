@@ -21,8 +21,9 @@ class WcEventHub extends HTMLElement {
   disconnectedCallback() {
   }
 
-  broadcast(eventName, selector) {
-    const custom = new CustomEvent(eventName, { detail: { selector: selector }});
+  broadcast(eventName, selector, subSelector) {
+    const payload = { detail: { selector, subSelector }};
+    const custom = new CustomEvent(eventName, payload);
     document.body.dispatchEvent(custom);
   }
 

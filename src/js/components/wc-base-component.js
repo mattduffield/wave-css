@@ -1,10 +1,11 @@
-import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { generateUniqueId, loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
 
 
 export class WcBaseComponent extends HTMLElement {
 
   constructor() {
     super();
+    this._wcId = generateUniqueId();
     this.loadCSS = loadCSS.bind(this);
     this.loadScript = loadScript.bind(this);
     this.loadLibrary = loadLibrary.bind(this);
@@ -15,6 +16,10 @@ export class WcBaseComponent extends HTMLElement {
     this._isConnected = false;
     this.componentElement = null; // This is the standard component or wrapper for form elements.
     this.formElement = null; // This is any form element: input, select, etc.
+  }
+
+  get wcId() {
+    return this._wcId;
   }
 
   connectedCallback() {
@@ -32,6 +37,7 @@ export class WcBaseComponent extends HTMLElement {
 
   _connectedCallback() {
     this._render();
+    this.dataset.wcId = this.wcId;
     if (this.childComponentName) {
       this._waitForChild(() => this[this.childComponentName]).then(() => {
         this._isConnected = true;

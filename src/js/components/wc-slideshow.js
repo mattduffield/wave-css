@@ -17,6 +17,11 @@
  *        caption="Caption 4"></wc-slideshow-image>
  *    </wc-slideshow>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-slideshow:next', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-slideshow:prev', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-slideshow:start', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-slideshow:stop', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -49,6 +54,7 @@ class WcSlideshow extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-slideshow');
   }
 
@@ -113,6 +119,65 @@ class WcSlideshow extends WcBaseComponent {
     this.componentElement.appendChild(next);
   }
 
+  _handleHelper(event, mode='next') {
+    const {detail} = event;
+    const {selector} = detail;
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          if (mode === 'next') {
+            this._nextSlide({target: this});
+          } else if (mode === 'prev') {
+            this._prevSlide({target: this});
+          } else if (mode === 'start') {
+            this.setAttribute('autoplay', '');
+            this.isPaused = false;
+            this._startSlideshow();
+          } else if (mode === 'stop') {
+            this.removeAttribute('autoplay');
+            this.isPaused = true;
+            clearInterval(this.slideshowInterval);
+          }
+        }
+      });
+    } else {
+      if (selector === this) {
+        if (mode === 'next') {
+          this._nextSlide({target: this});
+        } else if (mode === 'prev') {
+          this._prevSlide({target: this});
+        } else if (mode === 'start') {
+          this.setAttribute('autoplay', '');
+          this.isPaused = false;
+          this._startSlideshow();
+        } else if (mode === 'stop') {
+          this.removeAttribute('autoplay');
+          this.isPaused = true;
+          clearInterval(this.slideshowInterval);          
+        }
+      }
+    }
+  }
+
+  _handleNext(event) {
+    this._handleHelper(event, 'next');
+  }
+
+  _handlePrev(event) {
+    this._handleHelper(event, 'prev');
+  }
+
+  _handleStart(event) {
+    this._handleHelper(event, 'start');
+  }
+
+  _handleStop(event) {
+    this._handleHelper(event, 'stop');
+  }
+
+
   _prevSlide(event) {
     if (event?.target) {
       this.isPaused = true;
@@ -125,7 +190,7 @@ class WcSlideshow extends WcBaseComponent {
   _nextSlide(event) {
     if (event?.target) {
       this.isPaused = true;
-      clearInterval(this.slideshowInterval);      
+      clearInterval(this.slideshowInterval);
     }
     this.slideIndex += 1;
     this._showSlide();
@@ -229,8 +294,21 @@ class WcSlideshow extends WcBaseComponent {
     this.loadStyle('wc-slideshow-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    document.body.addEventListener('wc-slideshow:next', this._handleNext.bind(this));
+    document.body.addEventListener('wc-slideshow:prev', this._handlePrev.bind(this));
+    document.body.addEventListener('wc-slideshow:start', this._handleStart.bind(this));
+    document.body.addEventListener('wc-slideshow:stop', this._handleStop.bind(this));
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+    document.body.removeEventListener('wc-slideshow:next', this._handleNext.bind(this));
+    document.body.removeEventListener('wc-slideshow:prev', this._handlePrev.bind(this));
+    document.body.removeEventListener('wc-slideshow:start', this._handleStart.bind(this));
+    document.body.removeEventListener('wc-slideshow:stop', this._handleStop.bind(this));
     const prev = this.querySelector('.prev');
     const next = this.querySelector('.next');
     prev.removeEventListener('click', this._prevSlide.bind(this));

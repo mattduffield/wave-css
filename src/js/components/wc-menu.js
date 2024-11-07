@@ -12,6 +12,10 @@
  *    <option value="menu">Menu</option>
  *  </wc-menu>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="theme"]')
+ *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="accordion"]')
+ *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="form-states"]')
  */
 
 
@@ -41,6 +45,7 @@ class WcMenu extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-menu');
   }
 
@@ -184,6 +189,35 @@ class WcMenu extends WcBaseComponent {
     return pageWithoutExtension;
   }
 
+  _handleHelper(event, mode='click') {
+    const {detail} = event;
+    const {selector, subSelector} = detail;
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          if (mode === 'click') {
+            const menu = this.querySelector(subSelector);
+            menu?.click();
+          }
+        }
+      });
+    } else {
+      if (selector === this) {
+        if (mode === 'click') {
+          const menu = this.querySelector(subSelector);
+          menu?.click();
+        }
+      }
+    }
+  }
+
+  _handleOnClick(event) {
+    this._handleHelper(event, 'click');
+  }
+
+
   _handleClick(event) {
     const {target} = event;
     const anchors = this.querySelectorAll('.wc-menu a:not(.icon)');
@@ -273,8 +307,15 @@ class WcMenu extends WcBaseComponent {
     this.loadStyle('wc-menu-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    document.body.addEventListener('wc-menu:click', this._handleOnClick.bind(this));
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+    document.body.removeEventListener('wc-menu:click', this._handleOnClick.bind(this));
     const links = this.querySelectorAll('.menu-link');
     links.forEach(link => link.removeEventListener('click', this._handleClick.bind(this)));
     const menuIcon = this.querySelector('.menu-toggle');

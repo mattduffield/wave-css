@@ -23,6 +23,10 @@
  *      <a href="#">Contact</a>
  *    </wc-sidenav>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-sidenav:open', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-sidenav:close', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-sidenav:toggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -164,6 +168,14 @@ class WcSidenav extends WcBaseComponent {
       const tgts = document.querySelectorAll(selector);
       tgts.forEach(tgt => {
         if (tgt === this) {
+          if (btnSelector === 'toggle') {
+            const side = this.querySelector('.wc-sidenav');
+            if (side.classList.contains('open')) {
+              btnSelector = '.closebtn';
+            } else {
+              btnSelector = '.openbtn';
+            }
+          }
           const btn = tgt?.querySelector(btnSelector);
           btn?.click();
         }
@@ -180,6 +192,10 @@ class WcSidenav extends WcBaseComponent {
 
   _handleClose(event) {
     this._handleHelper(event, '.closebtn');
+  }
+
+  _handleToggle(event) {
+    this._handleHelper(event, 'toggle');
   }
 
   _openNav(event) {
@@ -345,8 +361,9 @@ class WcSidenav extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
 
-    document.body.addEventListener('wc-sidenav-open', this._handleOpen.bind(this));
-    document.body.addEventListener('wc-sidenav-close', this._handleClose.bind(this));    
+    document.body.addEventListener('wc-sidenav:open', this._handleOpen.bind(this));
+    document.body.addEventListener('wc-sidenav:close', this._handleClose.bind(this));    
+    document.body.addEventListener('wc-sidenav:toggle', this._handleToggle.bind(this));    
   }
 
   _unWireEvents() {
@@ -357,6 +374,7 @@ class WcSidenav extends WcBaseComponent {
     openBtn.removeEventListener('click', this._openNav.bind(this));
     document.body.removeEventListener('wc-sidenav-open', this._handleOpen.bind(this));
     document.body.removeEventListener('wc-sidenav-close', this._handleClose.bind(this));
+    document.body.removeEventListener('wc-sidenav:toggle', this._handleToggle.bind(this));
   }
 
 }

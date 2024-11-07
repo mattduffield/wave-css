@@ -14,6 +14,10 @@
  *      <a href="#">Link 3</a>
  *    </wc-dropdown>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-dropdown:open', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-dropdown:close', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-dropdown:toggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -43,6 +47,7 @@ class WcDropdown extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-dropdown');
   }
 
@@ -120,6 +125,49 @@ class WcDropdown extends WcBaseComponent {
       btn.addEventListener('click', this._handleClick.bind(this));
       window.addEventListener('click', this._handleWindowClick.bind(this));
     }
+  }
+
+  _handleHelper(event, mode='open') {
+    const {detail} = event;
+    const {selector} = detail;
+    const triggerSelector = '.wc-dropdown';
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          const elt = tgt?.querySelector(triggerSelector);
+          if (mode === 'open') {
+            elt?.classList.add('show');
+          } else if (mode === 'close') {
+            elt?.classList.remove('show');
+          } else if (mode === 'toggle') {
+            elt?.classList.toggle('show');
+          }
+        }
+      });
+    } else {
+      const elt = selector?.querySelector(triggerSelector);
+      if (mode === 'open') {
+        elt?.classList.add('show');
+      } else if (mode === 'close') {
+        elt?.classList.remove('show');
+      } else if (mode === 'toggle') {
+        elt?.classList.toggle('show');
+      }
+    }
+  }
+
+  _handleOpen(event) {
+    this._handleHelper(event, 'open');
+  }
+
+  _handleClose(event) {
+    this._handleHelper(event, 'close');
+  }
+
+  _handleToggle(event) {
+    this._handleHelper(event, 'toggle');
   }
 
   _handleClick(event) {
@@ -225,9 +273,24 @@ class WcDropdown extends WcBaseComponent {
     this.loadStyle('wc-dropdown-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    if (this.clickModes.includes(this.mode)) {
+      document.body.addEventListener('wc-dropdown:open', this._handleOpen.bind(this));
+      document.body.addEventListener('wc-dropdown:close', this._handleClose.bind(this));
+      document.body.addEventListener('wc-dropdown:toggle', this._handleToggle.bind(this));
+    }
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+
     if (this.clickModes.includes(this.mode)) {
+      document.body.removeEventListener('wc-dropdown:open', this._handleOpen.bind(this));
+      document.body.removeEventListener('wc-dropdown:close', this._handleClose.bind(this));
+      document.body.removeEventListener('wc-dropdown:toggle', this._handleToggle.bind(this));
+
       const btn = this.querySelector('.dropbtn');
       btn.removeEventListener('click', this._handleClick.bind(this));
       window.removeEventListener('click', this._handleWindowClick.bind(this));

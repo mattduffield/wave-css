@@ -14,6 +14,10 @@
  *      </option>
  *    </wc-accordion>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-accordion:open', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
+ *    wc.EventHub.broadcast('wc-accordion:close', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
+ *    wc.EventHub.broadcast('wc-accordion:toggle', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(2)'])
  */
 
 
@@ -42,6 +46,7 @@ class WcAccordion extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-accordion');
   }
 
@@ -139,17 +144,17 @@ class WcAccordion extends WcBaseComponent {
     return el;
   }
 
-  _handleClick(e) {
-    const {target} = e;
-    const anchors = this.querySelectorAll('.wc-accordion .accordion-header');
-    target.classList.toggle('active');
-    const panel = target.nextElementSibling;
-    if (panel.style.maxHeight) {
-      panel.style.maxHeight = null;
-    } else {
-      panel.style.maxHeight = panel.scrollHeight + "px";
-    }
-  }
+  // _handleClick(e) {
+  //   const {target} = e;
+  //   const anchors = this.querySelectorAll('.wc-accordion .accordion-header');
+  //   target.classList.toggle('active');
+  //   const panel = target.nextElementSibling;
+  //   if (panel.style.maxHeight) {
+  //     panel.style.maxHeight = null;
+  //   } else {
+  //     panel.style.maxHeight = panel.scrollHeight + "px";
+  //   }
+  // }
 
   _moveDeclarativeOptions() {
     const options = this.querySelectorAll('option');
@@ -231,8 +236,64 @@ class WcAccordion extends WcBaseComponent {
     this.loadStyle('wc-accordion-style', style);
   }
 
+  _handleHelper(event, mode='open') {
+    const {detail} = event;
+    const {selector, subSelector} = detail;
+    const headerSelector = subSelector || '.accordion-header';
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          const btn = tgt?.querySelector(headerSelector);
+          if (mode === 'open') {
+            if (btn?.classList.contains('active')) {
+              // Do nothing...
+            } else {
+              btn?.click();
+            }
+          } else if (mode === 'close') {
+            if (!btn?.classList.contains('active')) {
+              // Do nothing...
+            } else {
+              btn?.click();
+            }
+          } else if (mode === 'toggle') {
+            btn?.click();
+          }
+        }
+      });
+    } else {
+      const btn = selector?.querySelector(headerSelector);
+      btn?.click();
+    }
+  }
+
+  _handleOpen(event) {
+    this._handleHelper(event, 'open');
+  }
+
+  _handleClose(event) {
+    this._handleHelper(event, 'close');
+  }
+
+  _handleToggle(event) {
+    this._handleHelper(event, 'toggle');
+  }
+
+  _wireEvents() {
+    super._wireEvents();
+
+    document.body.addEventListener('wc-accordion:open', this._handleOpen.bind(this));
+    document.body.addEventListener('wc-accordion:close', this._handleClose.bind(this));
+    document.body.addEventListener('wc-accordion:toggle', this._handleToggle.bind(this));
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+    document.body.removeEventListener('wc-accordion:open', this._handleOpen.bind(this));
+    document.body.removeEventListener('wc-accordion:close', this._handleClose.bind(this));
+    document.body.removeEventListener('wc-accordion:toggle', this._handleToggle.bind(this));
   }
 
 }

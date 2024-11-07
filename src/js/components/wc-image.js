@@ -23,6 +23,9 @@
  *    </div>
  *  </wc-image>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-image:show', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wc-image:hide', ['[data-wc-id="0982-a544-98da-b3da"]'])
  * 
  */
 
@@ -51,6 +54,7 @@ class WcImage extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-image');
   }
 
@@ -134,6 +138,40 @@ class WcImage extends WcBaseComponent {
       imgEl.addEventListener('click', this._showModal.bind(this));
       closeBtn.addEventListener('click', this._hideModal.bind(this));      
     }
+  }
+
+  _handleHelper(event, mode='show') {
+    const {detail} = event;
+    const {selector} = detail;
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          if (mode === 'show') {
+            this._showModal({target: this});
+          } else if (mode === 'hide') {
+            this._hideModal({target: this});
+          }
+        }
+      });
+    } else {
+      if (selector === this) {
+        if (mode === 'show') {
+          this._showModal({target: this});
+        } else if (mode === 'hide') {
+          this._hideModal({target: this});
+        }
+      }
+    }
+  }
+
+  _handleShow(event) {
+    this._handleHelper(event, 'show');
+  }
+
+  _handleHide(event) {
+    this._handleHelper(event, 'hide');
   }
 
   _showModal(event) {
@@ -295,9 +333,20 @@ class WcImage extends WcBaseComponent {
     this.loadStyle('wc-image-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    if (this.hasAttribute('modal')) {
+      document.body.addEventListener('wc-image:show', this._handleShow.bind(this));
+      document.body.addEventListener('wc-image:hide', this._handleHide.bind(this));
+    }
+  }
+
   _unWireEvents() {
     super._unWireEvents();
     if (this.hasAttribute('modal')) {
+      document.body.removeEventListener('wc-image:show', this._handleShow.bind(this));
+      document.body.removeEventListener('wc-image:hide', this._handleHide.bind(this));
       const imgEl = this.querySelector('.img');
       imgEl.removeEventListener('click', this._showModal.bind(this));
       const closeBtn = this.querySelector('.overlay .closebtn');
