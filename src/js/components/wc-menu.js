@@ -217,7 +217,6 @@ class WcMenu extends WcBaseComponent {
     this._handleHelper(event, 'click');
   }
 
-
   _handleClick(event) {
     const {target} = event;
     const anchors = this.querySelectorAll('.wc-menu a:not(.icon)');

@@ -56,6 +56,10 @@
  *    </wc-tab-item>
  *  </wc-tab>
  * 
+ *  API:
+ *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(2)')
+ *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(3)')
+ *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(1)')
  */
 
 
@@ -84,6 +88,7 @@ class WcTab extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     console.log('conntectCallback:wc-tab');
   }
 
@@ -143,6 +148,34 @@ class WcTab extends WcBaseComponent {
     });
     this.componentElement.appendChild(tabNav);
     this.componentElement.appendChild(tabBody);
+  }
+
+  _handleHelper(event, mode='click') {
+    const {detail} = event;
+    const {selector, subSelector} = detail;
+    const isArray = Array.isArray(selector);
+    if (typeof selector === 'string' || isArray) {
+      const tgts = document.querySelectorAll(selector);
+      tgts.forEach(tgt => {
+        if (tgt === this) {
+          if (mode === 'click') {
+            const elt = this.querySelector(subSelector);
+            elt?.click();
+          }
+        }
+      });
+    } else {
+      if (selector === this) {
+        if (mode === 'click') {
+          const elt = this.querySelector(subSelector);
+          elt?.click();
+        }
+      }
+    }
+  }
+
+  _handleOnClick(event) {
+    this._handleHelper(event, 'click');
   }
 
   _handleClick(event) {
@@ -222,8 +255,15 @@ class WcTab extends WcBaseComponent {
     this.loadStyle('wc-tab-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+
+    document.body.addEventListener('wc-tab:click', this._handleOnClick.bind(this));
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+    document.body.removeEventListener('wc-tab:click', this._handleOnClick.bind(this));
     const btns = this.querySelectorAll('.tab-link');
     btns.forEach(btn => btn.removeEventListener('click', this._handleClick.bind(this)));
   }
