@@ -86,7 +86,15 @@ class WcInput extends WcBaseFormComponent {
       this.formElement?.setAttribute(attrName, newValue);
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {
-      this.formElement?.setAttribute(attrName, '');
+      const type = this.getAttribute('type') || 'text';
+      if (type === 'radio') {
+        const radios = this.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => {
+          radio.setAttribute(attrName, '');
+        });
+      } else {
+        this.formElement?.setAttribute(attrName, '');
+      }
     }
     if (this.ignoreAttributes.includes(attrName)) {
       // Do nothing...
@@ -97,7 +105,13 @@ class WcInput extends WcBaseFormComponent {
       lbl?.classList.add(newValue);
     } else if (attrName === 'radio-group-class') {
       const elt = this.querySelector('.radio-group');
-      elt?.classList.add(newValue);
+      const parts = newValue.split(' ');
+      parts.forEach(p => {
+        if (p) {
+          elt?.classList.add(p.trim());
+        }
+      })
+      // elt?.classList.add(newValue);
     } else if (attrName === 'type') {
       this.formElement?.setAttribute('type', newValue);
       if (newValue === 'checkbox') {
@@ -265,21 +279,59 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: flex;
+      }
+      wc-input .radio-group:not(.modern) {
         gap: 0.5rem;
       }
       wc-input .radio-group .radio-option {
         display: inline-flex;
         align-items: center;
-        cursor: pointer;
         position: relative;
-        padding-left: 12px;
         outline: none;
+      }
+      wc-input .radio-group:not(.modern) .radio-option {
+        padding-left: 12px;
+      }
+      wc-input .radio-group.modern {
+        border: 1px solid var(--accent-bg-color);
+        border-radius: 5px;
+      }
+      wc-input .radio-group.modern .radio-option {
+        padding: 0 0.5rem;
+        background-color: var(--secondary-bg-color);
+        color: var(--secondary-color);
+        border-right: 1px solid var(--accent-bg-color);
+      }
+      wc-input .radio-group.modern .radio-option:first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+      wc-input .radio-group.modern .radio-option:last-child {
+        border-right: none;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
       }
       wc-input .radio-group .radio-option input[type="radio"] {
         opacity: 0;
         margin: 0;
       }
-      wc-input .radio-group .radio-option::before {
+      wc-input .radio-group.modern .radio-option input[type="radio"] {
+        position: absolute;
+      }
+      wc-input .radio-group.modern .radio-option:hover {
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
+      }
+      wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
+      }
+      wc-input .radio-group.modern:has(:focus-within) {
+        outline: var(--primary-bg-color) solid 2px;
+        outline-offset: 0px;
+        border: 1px solid transparent;
+      }
+      wc-input .radio-group:not(.modern) .radio-option::before {
         content: "";
         display: inline-block;
         width: 16px;
@@ -291,7 +343,7 @@ class WcInput extends WcBaseFormComponent {
         position: absolute;
         left: 0;
       }
-      wc-input .radio-group .radio-option:has(:checked)::after {
+      wc-input .radio-group:not(.modern) .radio-option:has(:checked)::after {
         content: "";
         display: inline-block;
         width: 10px; /* Slightly smaller than outer circle */
@@ -306,7 +358,7 @@ class WcInput extends WcBaseFormComponent {
       wc-input .radio-option:hover::before {
         border-color: var(--secondary-bg-color);
       }
-      wc-input .radio-group .radio-option:focus-within::after {
+      wc-input .radio-group:not(.modern) .radio-option:focus-within::after {
         outline: var(--primary-bg-color) solid 2px;
         outline-offset: 0px;
       }

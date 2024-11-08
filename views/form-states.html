@@ -153,8 +153,8 @@
     </div>
 
     <div class="row gap-4">
-      <wc-input name="gender"
-        lbl-label="Gender"
+      <wc-input name="gender1"
+        lbl-label="Gender 1"
         type="radio"
         radio-group-class="row"
         value="male"
@@ -163,6 +163,57 @@
           {"key": "Male", "value": "male"},
           {"key": "Other", "value": "other"}
         ]'>
+      </wc-input>
+      <wc-input name="gender2"
+        lbl-label="Gender 2"
+        type="radio"
+        radio-group-class="row"
+        value="male"
+        options='[
+          {"key": "Female", "value": "female"}, 
+          {"key": "Male", "value": "male"},
+          {"key": "Other", "value": "other"}
+        ]'
+        disabled>
+      </wc-input>
+      <wc-input name="gender3"
+        lbl-label="Gender 3"
+        type="radio"
+        radio-group-class="row modern"
+        value="male"
+        options='[
+          {"key": "Female", "value": "female"}, 
+          {"key": "Male", "value": "male"},
+          {"key": "Other", "value": "other"}
+        ]'>
+      </wc-input>
+    </div>
+
+    <div class="row gap-4">
+      <wc-input name="marital_status1"
+        lbl-label="Marital Status 1"
+        type="radio"
+        radio-group-class="col"
+        value="married"
+        options='[
+          {"key": "Single", "value": "single"}, 
+          {"key": "Married", "value": "married"},
+          {"key": "Divorced", "value": "divorced"},
+          {"key": "Widowed", "value": "widowed"}
+        ]'>
+      </wc-input>
+      <wc-input name="marital_status2"
+        lbl-label="Marital Status 2"
+        type="radio"
+        radio-group-class="col"
+        value="married"
+        options='[
+          {"key": "Single", "value": "single"}, 
+          {"key": "Married", "value": "married"},
+          {"key": "Divorced", "value": "divorced"},
+          {"key": "Widowed", "value": "widowed"}
+        ]'
+        disabled>
       </wc-input>
     </div>
 
