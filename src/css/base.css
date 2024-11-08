@@ -1048,6 +1048,9 @@ div[class^="wc-"] :disabled:not(.toggle-checkbox) {
   font-style: italic;
 }
 
+div[class^="wc-"] label:has(:disabled) {
+  cursor: not-allowed;
+}
 div[class^="wc-"]:has(:disabled) label {
   opacity: 0.7;
   font-style: italic;

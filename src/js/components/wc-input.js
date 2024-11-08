@@ -318,7 +318,7 @@ class WcInput extends WcBaseFormComponent {
       wc-input .radio-group.modern .radio-option input[type="radio"] {
         position: absolute;
       }
-      wc-input .radio-group.modern .radio-option:hover {
+      wc-input .radio-group.modern .radio-option:hover:not(:has(input[type="radio"]:disabled)) {
         background-color: var(--primary-bg-color);
         color: var(--primary-color);
       }
