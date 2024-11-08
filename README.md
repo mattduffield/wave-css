@@ -30,7 +30,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-base-form-component
 - wc-form
 - wc-code-mirror
-- wc-input
+- wc-input (text, number, range, date, time, week, month, checkbox, radio)
 - wc-select
 - wc-textarea
 

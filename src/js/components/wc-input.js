@@ -45,6 +45,42 @@ class WcInput extends WcBaseFormComponent {
       'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich'
     ];
   }
+  static get icons() {
+    return [
+      {
+        name: 'email-stroke',
+        icon: `
+          <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="0.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"></path>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'email-fill',
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="CurrentColor">
+            <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'tel-stroke',
+        icon: `
+          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"></path>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'tel-fill',
+        icon: `
+          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+            <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>
+          </svg>
+        `.trim()
+      },
+    ];
+  }
 
   constructor() {
     super();
@@ -200,6 +236,24 @@ class WcInput extends WcBaseFormComponent {
       toggleSwitch.classList.add('toggle-switch');
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
+    } else if (type === 'email') {
+      const icon = document.createElement('span');
+      icon.classList.add('icon');
+      const iconItem = WcInput.icons.find(f => f.name === 'email-fill');
+      icon.innerHTML = iconItem.icon;
+      this.componentElement.appendChild(this.formElement);
+      this.componentElement.appendChild(icon);
+    } else if (type === 'tel') {
+      const icon = document.createElement('span');
+      icon.classList.add('icon');
+      const iconItem = WcInput.icons.find(f => f.name === 'tel-fill');
+      icon.innerHTML = iconItem.icon;
+      this.formElement.setAttribute('_', `on load or input
+          call wc.MaskHub.phoneMask(event)
+          me.setCustomValidity('')
+        end`);
+      this.componentElement.appendChild(this.formElement);
+      this.componentElement.appendChild(icon);
     } else {
       this.componentElement.appendChild(this.formElement);
     }
@@ -365,26 +419,25 @@ class WcInput extends WcBaseFormComponent {
 
 
 
-      /*
-      wc-input .radio-group .radio-option::before {
-        content: "";
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 2px solid var(--component-border-color);
-        margin-right: 8px;
-        background-color: var(--white-color);
-        transition: border-color 0.3s;
+
+      wc-input input[type="email"] {
+        padding-left: 25px;
       }
-      wc-input .radio-option:hover::before {
-        border-color: var(--secondary-bg-color);
+      wc-input input[type="email"] + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
       }
-      wc-input .radio-group .radio-option:has(:checked)::before {
-        background-color: var(--accent-bg-color);
-        border-color: var(--accent-bg-color);
+
+
+      wc-input input[type="tel"] {
+        padding-left: 25px;
       }
-      */
+      wc-input input[type="tel"] + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
 
 
     `.trim();

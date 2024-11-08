@@ -23,6 +23,7 @@ import './wc-behavior.js';
 import './wc-visibility-change.js';
 import './wc-event-handler.js';
 import './wc-event-hub.js';
+import './wc-mask-hub.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';
