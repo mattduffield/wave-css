@@ -153,6 +153,20 @@
     </div>
 
     <div class="row gap-4">
+      <wc-input name="gender"
+        lbl-label="Gender"
+        type="radio"
+        radio-group-class="row"
+        value="male"
+        options='[
+          {"key": "Female", "value": "female"}, 
+          {"key": "Male", "value": "male"},
+          {"key": "Other", "value": "other"}
+        ]'>
+      </wc-input>
+    </div>
+
+    <div class="row gap-4">
       <wc-textarea class="col-1"
         lbl-label="Comments"
         rows="5"

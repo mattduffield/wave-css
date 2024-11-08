@@ -1,3 +1,14 @@
+/**
+ * 
+ *  Name: wc-behavior
+ *  Usage:
+ *    <wc-behavior
+ *      hx-trigger="custom-event from:body"
+ *      hx-post=""
+ *      hx-confirm="Are you sure you perform the custom event?"></wc-behavior>
+ * 
+ */
+
 class WcBehavior extends HTMLElement {
   static get observedAttributes() {
     // Define all HTMX-supported attributes here for observation

@@ -3,6 +3,7 @@ This library provides a set of classes and CSS variables for building web applic
 
 This library has been built with HTMX and Hyperscript in mind so that you still have the power of web components but does not use Shadow DOM. You still get excellent code reuse and encapsulation without the complexity of trying to have third-party libraries penetrate the Shadow Root.
 
+
 ## Current Web Components
 
 - wc-base-component
@@ -23,13 +24,23 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-timeline
 - wc-top-nav
 
+
 ## Form Web Components
 
 - wc-base-form-component
+- wc-form
 - wc-code-mirror
 - wc-input
 - wc-select
 - wc-textarea
+
+
+## Non-UI Components
+
+- wc-behavior
+- wc-event-handler
+- wc-event-hub
+- wc-visibility-change
 
 
 ## Component Lifecycle

@@ -38,7 +38,8 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
 class WcInput extends WcBaseFormComponent {
   static get observedAttributes() {
     return [
-      'name', 'id', 'class', 'type', 'value', 'placeholder', 'lbl-label', 
+      'name', 'id', 'class', 'type', 'value', 'placeholder',
+      'lbl-label', 'lbl-class', 'radio-group-class',
       'checked', 'disabled', 'readonly', 'required', 'autocomplete', 
       'autofocus', 'min', 'max', 'minlength', 'maxlength', 'pattern',
       'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich'
@@ -83,10 +84,20 @@ class WcInput extends WcBaseFormComponent {
   _handleAttributeChange(attrName, newValue) {
     if (this.passThruAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, newValue);
-    } if (this.passThruEmptyAttributes.includes(attrName)) {
+    }
+    if (this.passThruEmptyAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, '');
-    } if (this.ignoreAttributes.includes(attrName)) {
+    }
+    if (this.ignoreAttributes.includes(attrName)) {
       // Do nothing...
+    }
+    if (attrName === 'lbl-class') {
+      const name = this.getAttribute('name');
+      const lbl = this.querySelector(`label[for="${name}"]`);
+      lbl?.classList.add(newValue);
+    } else if (attrName === 'radio-group-class') {
+      const elt = this.querySelector('.radio-group');
+      elt?.classList.add(newValue);
     } else if (attrName === 'type') {
       this.formElement?.setAttribute('type', newValue);
       if (newValue === 'checkbox') {
@@ -125,6 +136,8 @@ class WcInput extends WcBaseFormComponent {
     const name = this.getAttribute('name');
     const type = this.getAttribute('type') || 'text';
     const isToggle = this.hasAttribute('toggle-switch');
+    const options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];
+
     if (labelText) {
       const lblEl = document.createElement('label');
       const value = this.getAttribute('value') || '';
@@ -136,10 +149,33 @@ class WcInput extends WcBaseFormComponent {
       lblEl.setAttribute('for', name);
       this.componentElement.appendChild(lblEl);
     }
+
     this.formElement = document.createElement('input');
     this.formElement.setAttribute('form-element', '');
     this.formElement.setAttribute('type', type);
-    if (type === 'checkbox' && isToggle) {
+    
+    if (type === 'radio' && options.length) {
+      const radioContainer = document.createElement('div');
+      radioContainer.classList.add('radio-group');
+
+      options.forEach(option => {
+        const radioLabel = document.createElement('label');
+        radioLabel.classList.add('radio-option');
+        radioLabel.textContent = option.key;
+
+        const radioInput = document.createElement('input');
+        radioInput.setAttribute('type', 'radio');
+        radioInput.setAttribute('name', name);
+        radioInput.setAttribute('value', option.value);
+        if (option.value === this.getAttribute('value')) {
+            radioInput.setAttribute('checked', '');
+        }
+
+        radioLabel.prepend(radioInput);
+        radioContainer.appendChild(radioLabel);
+      });
+      this.componentElement.appendChild(radioContainer);
+    } else if (type === 'checkbox' && isToggle) {
       this.formElement.classList.add('toggle-checkbox');
 
       const toggleWrapper = document.createElement('div');
@@ -223,6 +259,82 @@ class WcInput extends WcBaseFormComponent {
       wc-input .toggle-checkbox:disabled + .toggle-switch {
         opacity: 0.7;
       }
+
+
+
+
+      wc-input .radio-group {
+        display: flex;
+        gap: 0.5rem;
+      }
+      wc-input .radio-group .radio-option {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+        padding-left: 12px;
+        outline: none;
+      }
+      wc-input .radio-group .radio-option input[type="radio"] {
+        opacity: 0;
+        margin: 0;
+      }
+      wc-input .radio-group .radio-option::before {
+        content: "";
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid var(--component-border-color);
+        background-color: var(--white-color);
+        transition: border-color 0.3s;
+        position: absolute;
+        left: 0;
+      }
+      wc-input .radio-group .radio-option:has(:checked)::after {
+        content: "";
+        display: inline-block;
+        width: 10px; /* Slightly smaller than outer circle */
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--accent-bg-color);
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        transition: background-color 0.3s;
+      }
+      wc-input .radio-option:hover::before {
+        border-color: var(--secondary-bg-color);
+      }
+      wc-input .radio-group .radio-option:focus-within::after {
+        outline: var(--primary-bg-color) solid 2px;
+        outline-offset: 0px;
+      }
+
+
+
+      /*
+      wc-input .radio-group .radio-option::before {
+        content: "";
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid var(--component-border-color);
+        margin-right: 8px;
+        background-color: var(--white-color);
+        transition: border-color 0.3s;
+      }
+      wc-input .radio-option:hover::before {
+        border-color: var(--secondary-bg-color);
+      }
+      wc-input .radio-group .radio-option:has(:checked)::before {
+        background-color: var(--accent-bg-color);
+        border-color: var(--accent-bg-color);
+      }
+      */
+
+
     `.trim();
     this.loadStyle('wc-input-style', style);
   }
