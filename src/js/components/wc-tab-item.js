@@ -46,7 +46,7 @@ class WcTabItem extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-tab-item');
+    console.log('connectedCallback:wc-tab-item');
   }
 
   disconnectedCallback() {

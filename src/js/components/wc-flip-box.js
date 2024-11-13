@@ -41,7 +41,7 @@ class WcFlipBox extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-flip-box');
+    console.log('connectedCallback:wc-flip-box');
   }
 
   disconnectedCallback() {

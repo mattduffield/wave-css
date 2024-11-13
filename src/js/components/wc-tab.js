@@ -89,7 +89,7 @@ class WcTab extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-tab');
+    console.log('connectedCallback:wc-tab');
   }
 
   disconnectedCallback() {

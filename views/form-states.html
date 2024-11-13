@@ -1,15 +1,15 @@
 <div id="page-contents">
   <wc-form class="col p-6 gap-3">
     <div class="row gap-4">
-      <wc-select name="favorite_color"
+      <wc-select-box name="favorite_color"
         class="col-1"
         lbl-label="Fav. Color"
         value="green">
         <option value="red">Red</option>
         <option value="green" selected>Green</option>
         <option value="blue">Blue</option>
-      </wc-select>
-      <wc-select name="favorite_color2"
+      </wc-select-box>
+      <wc-select-box name="favorite_color2"
         class="col-1"
         lbl-label="Fav. Color 2"
         value="green"
@@ -17,8 +17,81 @@
         <option value="red">Red</option>
         <option value="green" selected>Green</option>
         <option value="blue">Blue</option>
-      </wc-select>
+      </wc-select-box>
     </div>
+    <div class="row gap-4">
+      <wc-select-box name="gender1" 
+        class="col-1"
+        lbl-label="Gender 1"
+        value="male"
+        display-member="label"
+        items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'
+        required>
+      </wc-select-box>
+      <wc-select-box name="gender2" 
+        class="col-1"
+        lbl-label="Gender 2"
+        value="male"
+        display-member="label"
+        items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'
+        disabled>
+      </wc-select-box>
+    </div>
+    <div class="row gap-4">
+      <wc-select-box name="favorite_fruit1"
+        mode="chip"
+        class="col-1"
+        lbl-label="Fav. Fruit 1"
+        value="banana"
+        required>
+        <option value="apple">Apple</option>
+        <option value="banana" selected>Banana</option>
+        <option value="cherry">Cherry</option>
+        <option value="date" selected>Date</option>
+        <option value="elderberry">Elderberry</option>        
+        <option value="huckleberry">Huckleberry</option>        
+        <option value="raspberry">Raspberry</option>        
+        <option value="strawberry">Strawberry</option>        
+      </wc-select-box>
+      <wc-select-box name="favorite_fruit2"
+        mode="chip"
+        class="col-1"
+        lbl-label="Fav. Fruit 2"
+        value="banana"
+        disabled>
+        <option value="apple">Apple</option>
+        <option value="banana">Banana</option>
+        <option value="cherry">Cherry</option>
+        <option value="date">Date</option>
+        <option value="elderberry">Elderberry</option>        
+      </wc-select-box>
+    </div>
+    <div class="row gap-4">
+      <wc-select-box name="favorite_fruit3"
+        mode="multiple"
+        class="col-1"
+        lbl-label="Fav. Fruit 3"
+        multiple>
+        <option value="apple" selected>Apple</option>
+        <option value="banana">Banana</option>
+        <option value="cherry" selected>Cherry</option>
+        <option value="date">Date</option>
+        <option value="elderberry">Elderberry</option>        
+      </wc-select-box>
+      <wc-select-box name="favorite_fruit4"
+        mode="multiple"
+        class="col-1"
+        lbl-label="Fav. Fruit 4"
+        disabled
+        multiple>
+        <option value="apple" selected>Apple</option>
+        <option value="banana">Banana</option>
+        <option value="cherry" selected>Cherry</option>
+        <option value="date">Date</option>
+        <option value="elderberry">Elderberry</option>        
+      </wc-select-box>
+    </div>
+
     <div class="row gap-4">
       <wc-input name="first_name"
         class="col-1"
@@ -60,6 +133,37 @@
         min="1"
         max="1000"
         required
+        disabled>
+      </wc-input>
+    </div>
+    <div class="row gap-4">
+      <wc-input name="budget1"
+        class="col"
+        value="1500.00"
+        lbl-label="Budget 1"
+        type="currency"
+        step="0.01"
+        min="1"
+        max="10000">
+      </wc-input>
+      <wc-input name="budget2"
+        class="col"
+        value="1500.00"
+        lbl-label="Budget 2"
+        type="currency"
+        step="0.01"
+        min="1"
+        max="10000"
+        readonly>
+      </wc-input>
+      <wc-input name="budget3"
+        class="col"
+        value="1500.00"
+        lbl-label="Budget 3"
+        type="currency"
+        step="0.01"
+        min="1"
+        max="10000"
         disabled>
       </wc-input>
     </div>
@@ -326,6 +430,7 @@
     TEST EVENT HANDLER
   </div>
 
+
 <!--
   <div class="p-6">
     <wc-behavior 
@@ -342,4 +447,6 @@
     Other content
   </div>
 -->
+
+<a href="https://google.com">Google</a>
 </div>

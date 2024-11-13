@@ -46,7 +46,7 @@ class WcMenu extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-menu');
+    console.log('connectedCallback:wc-menu');
   }
 
   disconnectedCallback() {

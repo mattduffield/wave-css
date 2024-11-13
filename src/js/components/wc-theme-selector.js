@@ -49,7 +49,7 @@ class WcThemeSelector extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log('conntectCallback:wc-theme-selector');
+    console.log('connectedCallback:wc-theme-selector');
   }
 
   disconnectedCallback() {

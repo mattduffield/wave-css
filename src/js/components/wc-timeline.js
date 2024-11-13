@@ -48,7 +48,7 @@ class WcTimeline extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-timeline');
+    console.log('connectedCallback:wc-timeline');
   }
 
   disconnectedCallback() {

@@ -37,7 +37,7 @@ class WcBackgroundImage extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-background-image');
+    console.log('connectedCallback:wc-background-image');
   }
 
   disconnectedCallback() {

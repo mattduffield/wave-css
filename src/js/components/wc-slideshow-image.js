@@ -44,7 +44,7 @@ class WcSlideshowImage extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-slideshow-image');
+    console.log('connectedCallback:wc-slideshow-image');
   }
 
   disconnectedCallback() {

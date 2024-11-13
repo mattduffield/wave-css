@@ -55,7 +55,7 @@ class WcImage extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-image');
+    console.log('connectedCallback:wc-image');
   }
 
   disconnectedCallback() {

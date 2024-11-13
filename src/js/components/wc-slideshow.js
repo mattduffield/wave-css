@@ -55,7 +55,7 @@ class WcSlideshow extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-slideshow');
+    console.log('connectedCallback:wc-slideshow');
   }
 
   disconnectedCallback() {

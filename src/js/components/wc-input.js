@@ -66,7 +66,7 @@ class WcInput extends WcBaseFormComponent {
       {
         name: 'tel-stroke',
         icon: `
-          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.75" stroke="currentColor">
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="0.75" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"></path>
           </svg>
         `.trim()
@@ -74,11 +74,27 @@ class WcInput extends WcBaseFormComponent {
       {
         name: 'tel-fill',
         icon: `
-          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
             <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>
           </svg>
         `.trim()
       },
+      {
+        name: 'currency-circle',
+        icon: `
+          <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="0.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'currency-symbol',
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor">
+            <path d="M160 0c17.7 0 32 14.3 32 32l0 35.7c1.6 .2 3.1 .4 4.7 .7c.4 .1 .7 .1 1.1 .2l48 8.8c17.4 3.2 28.9 19.9 25.7 37.2s-19.9 28.9-37.2 25.7l-47.5-8.7c-31.3-4.6-58.9-1.5-78.3 6.2s-27.2 18.3-29 28.1c-2 10.7-.5 16.7 1.2 20.4c1.8 3.9 5.5 8.3 12.8 13.2c16.3 10.7 41.3 17.7 73.7 26.3l2.9 .8c28.6 7.6 63.6 16.8 89.6 33.8c14.2 9.3 27.6 21.9 35.9 39.5c8.5 17.9 10.3 37.9 6.4 59.2c-6.9 38-33.1 63.4-65.6 76.7c-13.7 5.6-28.6 9.2-44.4 11l0 33.4c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-34.9c-.4-.1-.9-.1-1.3-.2l-.2 0s0 0 0 0c-24.4-3.8-64.5-14.3-91.5-26.3c-16.1-7.2-23.4-26.1-16.2-42.2s26.1-23.4 42.2-16.2c20.9 9.3 55.3 18.5 75.2 21.6c31.9 4.7 58.2 2 76-5.3c16.9-6.9 24.6-16.9 26.8-28.9c1.9-10.6 .4-16.7-1.3-20.4c-1.9-4-5.6-8.4-13-13.3c-16.4-10.7-41.5-17.7-74-26.3l-2.8-.7s0 0 0 0C119.4 279.3 84.4 270 58.4 253c-14.2-9.3-27.5-22-35.8-39.6c-8.4-17.9-10.1-37.9-6.1-59.2C23.7 116 52.3 91.2 84.8 78.3c13.3-5.3 27.9-8.9 43.2-11L128 32c0-17.7 14.3-32 32-32z"/>
+          </svg>
+        `.trim()
+      }
     ];
   }
 
@@ -109,7 +125,7 @@ class WcInput extends WcBaseFormComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-input');
+    console.log('connectedCallback:wc-input');
   }
 
   disconnectedCallback() {
@@ -158,6 +174,8 @@ class WcInput extends WcBaseFormComponent {
           this.formElement?.removeAttribute('checked');
           this.setAttribute('value', 'bool:False');
         }
+      } else if (newValue === 'currency') {
+        this.formElement?.setAttribute('type', 'number');
       }
     } else {
       super._handleAttributeChange(attrName, newValue);  
@@ -236,6 +254,14 @@ class WcInput extends WcBaseFormComponent {
       toggleSwitch.classList.add('toggle-switch');
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
+    } else if (type === 'currency') {
+      this.formElement.setAttribute('type', 'number');
+      const icon = document.createElement('span');
+      icon.classList.add('icon');
+      const iconItem = WcInput.icons.find(f => f.name === 'currency-symbol');
+      icon.innerHTML = iconItem.icon;
+      this.componentElement.appendChild(this.formElement);
+      this.componentElement.appendChild(icon);
     } else if (type === 'email') {
       const icon = document.createElement('span');
       icon.classList.add('icon');
@@ -434,6 +460,15 @@ class WcInput extends WcBaseFormComponent {
         padding-left: 25px;
       }
       wc-input input[type="tel"] + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+
+      wc-input[type="currency"] input[type="number"] {
+        padding-left: 25px;
+      }
+      wc-input[type="currency"] input[type="number"] + .icon {
         position: absolute;
         top: 25px;
         left: 5px;

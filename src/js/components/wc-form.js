@@ -37,7 +37,7 @@ class WcForm extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-form');
+    console.log('connectedCallback:wc-form');
   }
 
   disconnectedCallback() {

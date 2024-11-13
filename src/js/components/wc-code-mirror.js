@@ -52,7 +52,7 @@ class WcCodeMirror extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-code-mirror');
+    console.log('conntectedCallback:wc-code-mirror');
   }
 
   disconnectedCallback() {

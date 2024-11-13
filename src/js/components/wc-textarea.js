@@ -51,7 +51,7 @@ class WcTextarea extends WcBaseFormComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-textarea');
+    console.log('connectedCallback:wc-textarea');
   }
 
   disconnectedCallback() {

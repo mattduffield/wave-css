@@ -68,6 +68,8 @@ class WcSelect extends WcBaseFormComponent {
       this.formElement?.setAttribute('disabled', '');
     } else if (attrName === 'required') {
       this.formElement?.setAttribute('required', '');
+    } else if (attrName === 'multiple') {
+      this.formElement?.setAttribute('multiple', '');
     } else if (attrName === 'lbl-label') {
       // Do nothing...
     } else if (attrName === 'value-member') {
@@ -87,7 +89,7 @@ class WcSelect extends WcBaseFormComponent {
     } else {
       this.componentElement.innerHTML = '';
 
-      this._createInnerElement();
+      this._createInnerElement(this.hasAttribute('multiple'));
     }
 
     if (typeof htmx !== 'undefined') {
@@ -96,7 +98,7 @@ class WcSelect extends WcBaseFormComponent {
     console.log('_render:wc-select');
   }
 
-  _createInnerElement() {
+  _createInnerElement(hasMultiple) {
     const labelText = this.getAttribute('lbl-label') || '';
     const name = this.getAttribute('name');
     if (labelText) {
@@ -105,12 +107,40 @@ class WcSelect extends WcBaseFormComponent {
       lblEl.setAttribute('for', name);
       this.componentElement.appendChild(lblEl);
     }
+
     this.formElement = document.createElement('select');
     this.formElement.setAttribute('form-element', '');
     const options = this.querySelectorAll('option');
     options.forEach(opt => this.formElement.appendChild(opt));
     this.componentElement.appendChild(this.formElement);
+
+    if (hasMultiple) {
+      this._renderChipUI();
+    }
   }
+
+  _renderChipUI() {
+    const chipContainer = document.createElement('div');
+    chipContainer.classList.add('chip-container');
+
+    const options = this.querySelectorAll('option');
+    options.forEach(opt => {
+      const optionText = opt.textContent || opt.value;
+      const chip = document.createElement('span');
+      chip.classList.add('chip');
+      chip.textContent = optionText;
+
+      const closeBtn = document.createElement('span');
+      closeBtn.classList.add('close-btn');
+      closeBtn.textContent = '×';
+      closeBtn.addEventListener('click', () => this._removeOption(opt.value));
+
+      chip.appendChild(closeBtn);
+      chipContainer.appendChild(chip);
+    });
+
+    this.componentElement.appendChild(chipContainer);
+  }  
 
   _generateOptionsFromItems() {
     const displayMember = this.getAttribute('display-member') || 'key';
@@ -131,6 +161,34 @@ class WcSelect extends WcBaseFormComponent {
         opt.selected = true;
       }
       this.formElement.appendChild(opt);
+    });
+  }
+
+  _removeOption(value) {
+    const select = this.formElement;
+    const index = Array.from(select.options).findIndex(option => option.value === value);
+    if (index >= 0) {
+      select.options.remove(index);
+    }
+  }
+
+  _handleRemove(event) {
+    const {target} = event;
+    if (target.classList.contains('close-btn')) {
+      const parentChip = target.parentElement;
+      const value = parentChip.innerText.replace(/[^a-zA-Z0-9 ]/g, '');
+      this._removeOption(value);
+    }    
+  }
+
+  _wireEvents() {
+    super._wireEvents();
+    this.componentElement.addEventListener('click', e => {
+      if (e.target.classList.contains('close-btn')) {
+        const parentChip = e.target.parentElement;
+        const value = parentChip.innerText.replace(/[^a-zA-Z0-9 ]/g, '');
+        this._removeOption(value);
+      }
     });
   }
 

@@ -46,7 +46,7 @@ class WcSidebar extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('conntectCallback:wc-sidebar');
+    console.log('connectedCallback:wc-sidebar');
   }
 
   disconnectedCallback() {

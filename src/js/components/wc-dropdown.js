@@ -48,7 +48,7 @@ class WcDropdown extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-dropdown');
+    console.log('connectedCallback:wc-dropdown');
   }
 
   disconnectedCallback() {

@@ -99,6 +99,7 @@ export class WcBaseFormComponent extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
     this.formElement = this.querySelector('input, select, textarea'); // Define form element
+    console.log('wc-base-form-component:connectedCallback - formElement', this.formElement);
     this._wireEvents();
   }
 
@@ -112,9 +113,11 @@ export class WcBaseFormComponent extends WcBaseComponent {
       if (this._isCheckbox()) {
         this.checked = newValue !== null && newValue !== 'false' && newValue !== 'bool:False';
       } else {
-        this.formElement?.setAttribute('value', newValue);
-        if ('value' in this.formElement) {
-          this.formElement.value = newValue;
+        if (this.formElement) {
+          this.formElement?.setAttribute('value', newValue);
+          if ('value' in this.formElement) {
+            this.formElement.value = newValue;
+          }
         }
         this.value = newValue;
       }

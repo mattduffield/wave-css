@@ -45,12 +45,12 @@ export class WcBaseComponent extends HTMLElement {
       });
     } else {
       this._isConnected = true;
-      this._applyPendingAttributes();      
+      this._applyPendingAttributes();
     }
   }
 
   disconnectedCallback() {
-    window.removeEventListener('popstate', this._handlePopState);
+    
   }
 
   attributeChangedCallback(attrName, oldValue, newValue) {

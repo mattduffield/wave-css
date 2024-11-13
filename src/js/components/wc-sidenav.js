@@ -62,7 +62,7 @@ class WcSidenav extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-sidenav');
+    console.log('connectedCallback:wc-sidenav');
   }
 
   disconnectedCallback() {

@@ -47,7 +47,7 @@ class WcAccordion extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('conntectCallback:wc-accordion');
+    console.log('connectedCallback:wc-accordion');
   }
 
   disconnectedCallback() {
