@@ -27,6 +27,5 @@ import './wc-mask-hub.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';
-// import './wc-select.js';
-import './wc-select-box.js';
+import './wc-select.js';
 import './wc-textarea.js';

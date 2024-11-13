@@ -1,15 +1,15 @@
 <div id="page-contents">
   <wc-form class="col p-6 gap-3">
     <div class="row gap-4">
-      <wc-select-box name="favorite_color"
+      <wc-select name="favorite_color"
         class="col-1"
         lbl-label="Fav. Color"
         value="green">
         <option value="red">Red</option>
         <option value="green" selected>Green</option>
         <option value="blue">Blue</option>
-      </wc-select-box>
-      <wc-select-box name="favorite_color2"
+      </wc-select>
+      <wc-select name="favorite_color2"
         class="col-1"
         lbl-label="Fav. Color 2"
         value="green"
@@ -17,57 +17,65 @@
         <option value="red">Red</option>
         <option value="green" selected>Green</option>
         <option value="blue">Blue</option>
-      </wc-select-box>
+      </wc-select>
     </div>
     <div class="row gap-4">
-      <wc-select-box name="gender1" 
+      <wc-select name="gender1" 
         class="col-1"
         lbl-label="Gender 1"
         value="male"
-        display-member="label"
-        items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'
+        items='[{"key": "Female", "value": "female"}, {"key": "Male", "value": "male"}]'
         required>
-      </wc-select-box>
-      <wc-select-box name="gender2" 
+      </wc-select>
+      <wc-select name="gender2" 
         class="col-1"
         lbl-label="Gender 2"
         value="male"
         display-member="label"
         items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'
         disabled>
-      </wc-select-box>
+      </wc-select>
     </div>
     <div class="row gap-4">
-      <wc-select-box name="favorite_fruit1"
+      <wc-select name="favorite_fruit1"
         mode="chip"
         class="col-1"
         lbl-label="Fav. Fruit 1"
-        value="banana"
+        multiple
         required>
-        <option value="apple">Apple</option>
-        <option value="banana" selected>Banana</option>
+        <option value="apple" selected>Apple</option>
+        <option value="banana">Banana</option>
         <option value="cherry">Cherry</option>
         <option value="date" selected>Date</option>
         <option value="elderberry">Elderberry</option>        
         <option value="huckleberry">Huckleberry</option>        
         <option value="raspberry">Raspberry</option>        
         <option value="strawberry">Strawberry</option>        
-      </wc-select-box>
-      <wc-select-box name="favorite_fruit2"
+      </wc-select>
+      <wc-select name="favorite_fruit2"
         mode="chip"
         class="col-1"
         lbl-label="Fav. Fruit 2"
-        value="banana"
+        multiple
         disabled>
         <option value="apple">Apple</option>
-        <option value="banana">Banana</option>
+        <option value="banana" selected>Banana</option>
         <option value="cherry">Cherry</option>
         <option value="date">Date</option>
         <option value="elderberry">Elderberry</option>        
-      </wc-select-box>
+      </wc-select>
+      <wc-select name="favorite_fruit3" 
+        mode="chip"
+        class="col-1"
+        lbl-label="Fav. Fruit 3"
+        value="male"
+        display-member="label"
+        items='[{"label": "Apple", "value": "apple"}, {"label": "Banana", "value": "banana", "selected": true}, {"label": "Cherry", "value": "cherry"}]'
+        multiple>
+      </wc-select>
     </div>
     <div class="row gap-4">
-      <wc-select-box name="favorite_fruit3"
+      <wc-select name="favorite_fruit3"
         mode="multiple"
         class="col-1"
         lbl-label="Fav. Fruit 3"
@@ -77,8 +85,8 @@
         <option value="cherry" selected>Cherry</option>
         <option value="date">Date</option>
         <option value="elderberry">Elderberry</option>        
-      </wc-select-box>
-      <wc-select-box name="favorite_fruit4"
+      </wc-select>
+      <wc-select name="favorite_fruit4"
         mode="multiple"
         class="col-1"
         lbl-label="Fav. Fruit 4"
@@ -89,7 +97,7 @@
         <option value="cherry" selected>Cherry</option>
         <option value="date">Date</option>
         <option value="elderberry">Elderberry</option>        
-      </wc-select-box>
+      </wc-select>
     </div>
 
     <div class="row gap-4">

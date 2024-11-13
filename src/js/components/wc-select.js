@@ -1,7 +1,31 @@
+/**
+ * 
+ *  Name: wc-select
+ *  Usage:
+ *    <wc-select name="gender" lbl-label="Gender" value="male"
+ *      items='[{"key": "Female", "value": "female"}, {"key": "Male", "value": "male"}]'>
+ *    </wc-select>
+ *    <wc-select name="marital_status" lbl-label="Marital Status" value="married">
+ *      <option value="single">Single</option>
+ *      <option value="married" selected>Married</option>
+ *      <option value="divorced">Divorced</option>
+ *      <option value="widowed">Widowed</option>
+ *    </wc-select>
+ *    <wc-select name="gender"
+ *      class="col-1"
+ *      lbl-label="Gender"
+ *      value="male"
+ *      display-member="label"
+ *      value-member="value"
+ *      items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'>
+ *    </wc-select>
+ * 
+ */
+
 
 import { WcBaseFormComponent } from './wc-base-form-component.js';
 
-class WcSelectBox extends WcBaseFormComponent {
+class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
     return ['name', 'id', 'class', 'multiple', 'value', 'items', 'display-member', 'value-member', 'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class'];
     // return ['mode']; // Allows switching between "multiple" and "chip" modes
@@ -12,22 +36,22 @@ class WcSelectBox extends WcBaseFormComponent {
     this.selectedOptions = [];
     this.mode = this.getAttribute('mode') || 'chip'; // Default to 'chip' mode if not specified
     this.highlightedIndex = -1;
-    const compEl = this.querySelector('.wc-select-box');
+    const compEl = this.querySelector('.wc-select');
     if (compEl) {
       this.componentElement = compEl;
     } else {
       this.componentElement = document.createElement('div');
-      this.componentElement.classList.add('wc-select-box', 'relative');
+      this.componentElement.classList.add('wc-select', 'relative');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-select-box');
+    console.log('ctor:wc-select');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-select-box');
+    console.log('connectedCallback:wc-select');
   }
 
   disconnectedCallback() {
@@ -43,6 +67,13 @@ class WcSelectBox extends WcBaseFormComponent {
       if (typeof newValue === 'string') {
         this._items = JSON.parse(newValue);
         this._generateOptionsFromItems();
+        this._items.forEach(item => {
+          if (item.selected) {
+            const displayMember = this.getAttribute('display-member') || 'key';
+            const valueMember = this.getAttribute('value-member') || 'value';
+            this.addChip(item[valueMember], item[displayMember]);
+          }
+        });
       }
       this.removeAttribute('items');      
     } else if (attrName === 'disabled') {
@@ -64,19 +95,24 @@ class WcSelectBox extends WcBaseFormComponent {
 
   _render() {
     super._render();
-    const innerEl = this.querySelector('.wc-select-box > *');
+    const innerEl = this.querySelector('.wc-select > *');
     if (innerEl) {
       // Do nothing...
     } else {
       this.componentElement.innerHTML = '';
 
       this._createInnerElement();
+
+      const options = this.querySelectorAll('option[selected]');
+      options.forEach(opt => {
+        this.addChip(opt.value, opt.textContent);
+      });
     }
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-select-box');
+    console.log('_render:wc-select');
   }
   _createInnerElement() {
     const labelText = this.getAttribute('lbl-label') || '';
@@ -96,7 +132,13 @@ class WcSelectBox extends WcBaseFormComponent {
     const select = document.createElement('select');
     select.id = name;
     select.name = name;
-    options.forEach(opt => select.appendChild(opt));
+    if (this.getAttribute('multiple')) {
+      select.multiple = true;
+      select.setAttribute('multiple', '');
+    }
+    options.forEach(opt => {
+      select.appendChild(opt)
+    });
     this.formElement = select;
 
     if (this.getAttribute('mode') === 'chip') {
@@ -159,21 +201,28 @@ class WcSelectBox extends WcBaseFormComponent {
       }
       this.formElement.appendChild(opt);
     });
+    const optionsContainer = this.querySelector('.options-container');
+    if (optionsContainer) {
+      const options = this.formElement.querySelectorAll('option');
+      optionsContainer.innerHTML = Array.from(options)
+        .map(option => `<div class="option" data-value="${option.value}">${option.textContent}</div>`)
+        .join('');      
+    }
   }
 
   _applyStyle() {
     const style = `
-      wc-select-box .chip-container { 
+      wc-select .chip-container { 
         display: none;
         flex-wrap: wrap; 
         gap: 5px; 
         margin-bottom: 5px; 
       }
-      wc-select-box[mode="chip"] .chip-container { 
+      wc-select[mode="chip"] .chip-container { 
         display: flex; 
       }
 
-      wc-select-box .chip { 
+      wc-select .chip { 
         display: flex; 
         align-items: center; 
         padding: 5px; 
@@ -182,31 +231,38 @@ class WcSelectBox extends WcBaseFormComponent {
         font-size: 0.75rem; /* 12px */
         line-height: 1rem; /* 16px */
       }
-      wc-select-box .chip-close { 
+      wc-select .chip-close { 
         margin-left: 5px; 
         cursor: pointer; 
         font-weight: bold; 
       }
-      wc-select-box .dropdown { 
+      wc-select:has(:disabled) .chip {
+        opacity: 0.7;
+        font-style: italic;
+      }
+      wc-select:has(:disabled) .chip .chip-close {
+        display: none;
+      }
+      wc-select .dropdown { 
         display: flex; 
         flex-direction: row;
         flex: 1 1 0%;
         position: relative; 
       }
-      wc-select-box .dropdown-input { 
+      wc-select .dropdown-input { 
         display: none;
         width: 100%;
         min-width: 85px;
         height: 15.5px;
         padding: 0.375rem;
       }
-      wc-select-box .chip-container:has(.chip) + .dropdown .dropdown-input {
+      wc-select .chip-container:has(.chip) + .dropdown .dropdown-input {
         margin-left: 0.5rem;
       }
-      wc-select-box[mode="chip"] .dropdown-input { 
+      wc-select[mode="chip"] .dropdown-input { 
         display: block; 
       }
-      wc-select-box .options-container { 
+      wc-select .options-container { 
         display: none;
         position: absolute; 
         top: 29.5px; 
@@ -221,50 +277,50 @@ class WcSelectBox extends WcBaseFormComponent {
         z-index: 10; 
       }
 
-      wc-select-box[mode="chip"] .options-container { 
+      wc-select[mode="chip"] .options-container { 
         display: block;
       }
-      wc-select-box .chip-container:has(.chip) + .dropdown .options-container {
+      wc-select .chip-container:has(.chip) + .dropdown .options-container {
         margin-left: 0.5rem;
       }
-      wc-select-box .option { 
+      wc-select .option { 
         padding: 5px; 
         cursor: pointer; 
       }
-      wc-select-box .option.highlighted { 
+      wc-select .option.highlighted { 
         background-color: var(--primary-bg-color);
         color: var(--primary-color);
       }
-      wc-select-box .option:hover { 
+      wc-select .option:hover { 
         background-color: var(--primary-bg-color);
         color: var(--primary-color);
       }
-      wc-select-box select { 
+      wc-select select { 
         display: block; 
         width: 100%; 
         padding: 5px; 
       }
-      wc-select-box[mode="multiple"] select { 
+      wc-select[mode="multiple"] select { 
         display: block;
       }
-      wc-select-box[mode="chip"] select { 
+      wc-select[mode="chip"] select { 
         display: none;
       }
-      wc-select-box select:disabled { 
+      wc-select select:disabled { 
         cursor: not-allowed;
         opacity: 0.7;
         font-style: italic;
       }
-      wc-select-box select:disabled option {
+      wc-select select:disabled option {
         color: var(--component-color);
       }
-      wc-select-box .dropdown-input:disabled {
+      wc-select .dropdown-input:disabled {
         cursor: not-allowed;
         opacity: 0.7;
         font-style: italic;
       }
     `.trim();
-    this.loadStyle('wc-select-box-style', style);
+    this.loadStyle('wc-select-style', style);
   }
 
   attachEventListeners() {
@@ -359,13 +415,15 @@ class WcSelectBox extends WcBaseFormComponent {
   addChip(value, label) {
     if (this.selectedOptions.includes(value)) return;
 
-    this.selectedOptions.push(value);
-    this.updateSelect();
-    this.updateChips();
-    this.updateDropdownOptions();
+    setTimeout(() => {
+      this.selectedOptions.push(value);
+      this.updateSelect();
+      this.updateChips();
+      this.updateDropdownOptions();
 
-    const event = new Event('change');
-    this.dispatchEvent(event);
+      const event = new Event('change');
+      this.dispatchEvent(event);
+    }, 10);
   }
 
   removeChip(value) {
@@ -380,12 +438,14 @@ class WcSelectBox extends WcBaseFormComponent {
 
   updateChips() {
     const chipContainer = this.querySelector('#chipContainer');
-    if (this.mode === 'chip') {
-      chipContainer.innerHTML = this.selectedOptions.map(value => {
-        const option = Array.from(this.querySelectorAll('option')).find(opt => opt.value === value);
-        const label = option ? option.textContent : value;
-        return `<div class="chip" data-value="${value}">${label}<span class="chip-close">&times;</span></div>`;
-      }).join('');
+    if (chipContainer) {
+      if (this.mode === 'chip') {
+        chipContainer.innerHTML = this.selectedOptions.map(value => {
+          const option = Array.from(this.querySelectorAll('option')).find(opt => opt.value === value);
+          const label = option ? option.textContent : value;
+          return `<div class="chip" data-value="${value}">${label}<span class="chip-close">&times;</span></div>`;
+        }).join('');
+      }      
     }
   }
 
@@ -398,10 +458,12 @@ class WcSelectBox extends WcBaseFormComponent {
 
   updateDropdownOptions() {
     const optionsContainer = this.querySelector('#optionsContainer');
-    Array.from(optionsContainer.querySelectorAll('.option')).forEach(option => {
-      option.style.display = this.selectedOptions.includes(option.getAttribute('data-value')) ? 'none' : 'block';
-    });
+    if (optionsContainer) {
+      Array.from(optionsContainer.querySelectorAll('.option')).forEach(option => {
+        option.style.display = this.selectedOptions.includes(option.getAttribute('data-value')) ? 'none' : 'block';
+      });      
+    }
   }
 }
 
-customElements.define('wc-select-box', WcSelectBox);
+customElements.define('wc-select', WcSelect);
