@@ -13,6 +13,14 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-dropdown
 - wc-flip-box
 - wc-image
+- wc-loader
+	- Properties
+    - Size
+    - Speed
+	- API
+    - show
+    - hide
+    - toggle
 - wc-menu
 - wc-sidebar
 - wc-sidenav
@@ -31,7 +39,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - wc-form
 - wc-code-mirror
 - wc-input (text, number, range, date, time, week, month, checkbox, radio)
-- wc-select
+- wc-select (standard and multiple with mode=chip and mode=multiple)
 - wc-textarea
 
 

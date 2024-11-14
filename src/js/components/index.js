@@ -17,6 +17,7 @@ import './wc-tab-item.js';
 import './wc-tab.js';
 import './wc-theme-selector.js';
 import './wc-timeline.js';
+import './wc-loader.js';
 // import './wc-top-nav.js';
 // Non-UI
 import './wc-behavior.js';
