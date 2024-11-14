@@ -2,9 +2,9 @@
  * 
  *  Name: wc-loader
  *  Usage:
- *    <wc-loader size="20px" speed="0.5s"></wc-loader>
- *    <wc-loader size="45px" speed="0.75s"></wc-loader>
- *    <wc-loader size="90px" speed="1s"></wc-loader>
+ *    <wc-loader size="20px" speed="0.5s" thickness="4px"></wc-loader>
+ *    <wc-loader size="45px" speed="0.75s" thickness="8px"></wc-loader>
+ *    <wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>
  *    <wc-loader></wc-loader>
  * 
  *  API:
@@ -18,7 +18,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcLoader extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'size', 'speed'];
+    return ['id', 'class', 'size', 'speed', 'thickness'];
   }
 
   constructor() {
@@ -52,6 +52,8 @@ class WcLoader extends WcBaseComponent {
       this.componentElement.style.width = newValue;
     } else if (attrName === 'speed') {
       this.componentElement.style.animationDuration = newValue;
+    } else if (attrName === 'thickness') {
+      this.componentElement.style.borderWidth = newValue;
     } else {
       super._handleAttributeChange(attrName, newValue);  
     }
@@ -64,9 +66,7 @@ class WcLoader extends WcBaseComponent {
       this.componentElement.innerHTML = '';
       innerParts.forEach(p => this.componentElement.appendChild(p));
     } else {
-      // this.componentElement.innerHTML = '';
-      // const el = this._createElement();
-      // this.componentElement.appendChild(el);
+      // Do nothing...
     }
 
     if (typeof htmx !== 'undefined') {
@@ -77,8 +77,14 @@ class WcLoader extends WcBaseComponent {
   _applyStyle() {
     const style = `
       wc-loader .wc-loader {
+        border-width: 16px;
+        border-style: solid;
+        border-color: var(--color);
+        border-top-color: var(--primary-bg-color);
+        /*
         border: 16px solid var(--color);
         border-top: 16px solid var(--primary-bg-color);
+        */
         border-radius: 50%;
         width: 120px;
         height: 120px;

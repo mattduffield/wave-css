@@ -17,6 +17,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 	- Properties
     - Size
     - Speed
+    - Thickness
 	- API
     - show
     - hide
