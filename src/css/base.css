@@ -2155,6 +2155,11 @@ div[class^="wc-"] :user-invalid[data-error]:hover::after {
   display: none;
 }
 
+/* Anchor */
+a {
+  color: var(--color);
+}
+
 
 /* Button */
 
