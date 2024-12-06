@@ -17,7 +17,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcForm extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class'];
+    return ['id', 'class', 'mode', 'action'];
   }
 
   constructor() {
