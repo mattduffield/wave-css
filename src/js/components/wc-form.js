@@ -22,6 +22,11 @@ class WcForm extends WcBaseComponent {
 
   constructor() {
     super();
+    this.passThruAttributes = [
+      'mode', 'action'
+    ];
+    this.passThruEmptyAttributes = [];
+    this.ignoreAttributes = [];
     const compEl = this.querySelector('.wc-form');
     if (compEl) {
       this.componentElement = compEl;
@@ -45,7 +50,17 @@ class WcForm extends WcBaseComponent {
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {    
+  _handleAttributeChange(attrName, newValue) {  
+    if (this.passThruAttributes.includes(attrName)) {
+      this.componentElement?.setAttribute(attrName, newValue);
+    }
+    if (this.passThruEmptyAttributes.includes(attrName)) {
+      this.componentElement?.setAttribute(attrName, '');
+    }
+    if (this.ignoreAttributes.includes(attrName)) {
+      // Do nothing...
+    }
+
     if (attrName === 'test') {
       // Do nothing...
     } else {
