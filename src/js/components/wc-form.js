@@ -17,13 +17,13 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcForm extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'mode', 'action'];
+    return ['class'];
   }
 
   constructor() {
     super();
     this.passThruAttributes = [
-      'mode', 'action'
+      'id', 'name', 'mode', 'action'
     ];
     this.passThruEmptyAttributes = [];
     this.ignoreAttributes = [];
@@ -51,16 +51,6 @@ class WcForm extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue) {  
-    if (this.passThruAttributes.includes(attrName)) {
-      this.componentElement?.setAttribute(attrName, newValue);
-    }
-    if (this.passThruEmptyAttributes.includes(attrName)) {
-      this.componentElement?.setAttribute(attrName, '');
-    }
-    if (this.ignoreAttributes.includes(attrName)) {
-      // Do nothing...
-    }
-
     if (attrName === 'test') {
       // Do nothing...
     } else {
@@ -75,6 +65,15 @@ class WcForm extends WcBaseComponent {
       // Do nothing...
     } else {
       this.componentElement.innerHTML = '';
+      this.passThruAttributes.forEach(p => {
+        if (this.hasAttribute(p)) {
+          const v = this.getAttribute(p);
+          this.componentElement?.setAttribute(p, v);
+        }
+      });
+      this.passThruAttributes.forEach(p => {
+        this.removeAttribute(p);
+      });
 
       this._moveDeclarativeInner();
       this._wireEvents();
