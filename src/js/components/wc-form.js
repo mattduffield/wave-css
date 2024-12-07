@@ -23,7 +23,7 @@ class WcForm extends WcBaseComponent {
   constructor() {
     super();
     this.passThruAttributes = [
-      'id', 'name', 'mode', 'action'
+      'id', 'name', 'method', 'action'
     ];
     this.passThruEmptyAttributes = [];
     this.ignoreAttributes = [];
