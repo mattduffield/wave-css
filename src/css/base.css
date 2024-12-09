@@ -1034,8 +1034,11 @@ textarea {
 
 
 input:-webkit-autofill {
-  background-color: var(--component-bg-color) !important;
-  color: var(--component-color) !important;
+  background-color: var(--component-bg-color);
+  color: var(--component-color);
+  box-shadow: 0 0 0px 1000px var(--component-bg-color) inset;
+  -webkit-text-fill-color: var(--component-color);
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 
