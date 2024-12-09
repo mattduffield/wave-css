@@ -1023,6 +1023,7 @@ button:hover:not(:disabled) {
 
 
 input,
+input:-internal-autofill-selected,
 select,
 textarea {
   background-color: var(--component-bg-color);
