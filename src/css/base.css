@@ -15,6 +15,45 @@
   --white-color: #fff;
 }
 
+@layer colors {
+  .background-color {
+    background-color: var(--bg-color);
+  }
+  .color {
+    color: var(--color);
+  }
+  .primary-bg-color {
+    background-color: var(--primary-bg-color);
+  }
+  .primary-color {
+    color: var(--primary-color);
+  }
+  .secondary-bg-color {
+    background-color: var(--secondary-bg-color);
+  }
+  .secondary-color {
+    color: var(--secondary-color);
+  }
+  .accent-bg-color {
+    background-color: var(--accent-bg-color);
+  }
+  .accent-color {
+    color: var(--accent-color);
+  }
+  .component-bg-color {
+    background-color: var(--component-bg-color);
+  }
+  .component-color {
+    color: var(--component-color);
+  }
+  .component-border-color {
+    border-color: var(--component-border-color);
+  }
+  .invalid-color {
+    color: var(--invalid-color);
+  }
+}
+
 @layer themes {
   /* Themes light/dark */
   .theme-coral-sunset {
