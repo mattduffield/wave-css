@@ -1023,7 +1023,6 @@ button:hover:not(:disabled) {
 
 
 input,
-input:-internal-autofill-selected,
 select,
 textarea {
   background-color: var(--component-bg-color);
@@ -1032,6 +1031,21 @@ textarea {
   color: var(--component-color);
   padding: 0.375rem;
 }
+
+
+@keyframes autofill-fix {
+  0% {
+    background-color: var(--component-bg-color);
+    color: var(--component-color);
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: autofill-fix;
+  animation-fill-mode: both;
+  animation-duration: 0.001s;
+}
+
 
 input:focus-visible,
 select:focus-visible,
