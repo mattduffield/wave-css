@@ -24,7 +24,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcCodeMirror extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'theme', 'mode', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled'];
+    return ['id', 'class', 'height', 'theme', 'mode', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled'];
   }
 
   constructor() {
@@ -65,6 +65,10 @@ class WcCodeMirror extends WcBaseComponent {
       await this.loadTheme(newValue);
     } else if (attrName === 'mode') {
       await this.loadMode(newValue);
+    } else if (attrName === 'height') {
+      if (newValue) {
+        this.editor.setSize(null, newValue)
+      }
     } else if (attrName === 'line-numbers') {
       if (newValue || newValue == '') {
         this.editor.setOption('lineNumbers', true);
@@ -336,7 +340,7 @@ class WcCodeMirror extends WcBaseComponent {
         overflow: hidden;
         resize: vertical;
   
-        height: 10em;        
+        min-height: 10em;        
       }
       .wc-code-mirror:focus-within {
         border: 2px solid var(--primary-bg-color);
