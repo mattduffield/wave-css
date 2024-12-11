@@ -187,6 +187,9 @@ class WcTab extends WcBaseComponent {
     const label = target.textContent;
     const contents = this.querySelector(`.wc-tab-item[label='${label}']`);
     contents.classList.add('active');
+    const payload = { detail: { label }};
+    const custom = new CustomEvent('tabchange', payload);
+    contents.dispatchEvent(custom);
   }
 
   _applyStyle() {

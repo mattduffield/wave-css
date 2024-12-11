@@ -1,5 +1,5 @@
 <div id="page-contents">
-  <wc-tab class="p-4 mb-4" animate>
+  <wc-tab id="cities" class="p-4 mb-4" animate>
     <wc-tab-item class="active" label="London">
       <div class="col-1 gap-2 pt-2 pb-10 px-10">
         <h3>London</h3>
@@ -19,9 +19,20 @@
     <wc-tab-item label="Miami">
       <div class="col-1 gap-2 pt-2 pb-10 px-10">
         <h3>Miami</h3>
-        <p>
-          Lorem ipsum dolor sit amet, illum definitiones no quo, maluisset concludaturque et eum, altera fabulas ut quo. Atqui causae gloriatur ius te, id agam omnis evertitur eum. Affert laboramus repudiandae nec et. Inciderint efficiantur his ad. Eum no molestiae voluptatibus.
-        </p>
+        <wc-code-mirror
+          _="on tabchange from me.closest('.wc-tab-item')
+            call me.editor.refresh()
+          end"
+          name="content"
+          label="Content"
+          line-numbers
+          line-wrapper
+          fold-gutter
+          mode="javascript"
+          theme="monokai"
+          value="class Customer { }"
+          tab-size="2"
+          indent-unit="2"></wc-code-mirror>
       </div>
     </wc-tab-item>
   </wc-tab>
