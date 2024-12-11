@@ -231,6 +231,10 @@ class WcTab extends WcBaseComponent {
       }
 
       wc-tab .wc-tab .tab-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0%;
+        
         border: 1px solid var(--accent-bg-color);
         border-top: none;
       }
@@ -244,9 +248,7 @@ class WcTab extends WcBaseComponent {
         animation: tab-fade 1s;
       }
       wc-tab .wc-tab .tab-body wc-tab-item .wc-tab-item.active {
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 0%;
+        display: block;
       }
 
       @keyframes tab-fade {
