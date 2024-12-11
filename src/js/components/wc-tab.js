@@ -134,6 +134,7 @@ class WcTab extends WcBaseComponent {
     parts.forEach((p, idx) => {
       const tabItem = p.querySelector('.wc-tab-item');
       const btn = document.createElement('button');
+      btn.type = "button";
       btn.classList.add('tab-link');
       btn.addEventListener('click', this._handleClick.bind(this));
       const hasActive = tabItem.classList.contains('active');
