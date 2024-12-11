@@ -244,7 +244,9 @@ class WcTab extends WcBaseComponent {
         animation: tab-fade 1s;
       }
       wc-tab .wc-tab .tab-body wc-tab-item .wc-tab-item.active {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0%;
       }
 
       @keyframes tab-fade {
