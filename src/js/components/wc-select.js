@@ -277,7 +277,7 @@ class WcSelect extends WcBaseFormComponent {
       }
 
       wc-select[mode="chip"] .options-container { 
-        display: block;
+        display: none;
       }
       wc-select .chip-container:has(.chip) + .dropdown .options-container {
         margin-left: 0.5rem;
