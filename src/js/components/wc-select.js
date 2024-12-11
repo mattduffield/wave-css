@@ -253,7 +253,6 @@ class WcSelect extends WcBaseFormComponent {
         display: none;
         width: 100%;
         min-width: 85px;
-        height: 15.5px;
         padding: 0.375rem;
       }
       wc-select .chip-container:has(.chip) + .dropdown .dropdown-input {
