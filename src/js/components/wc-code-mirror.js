@@ -160,8 +160,7 @@ class WcCodeMirror extends WcBaseComponent {
 
     await Promise.all([
       this.loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css'),
-      this.loadLibrary('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js', 'CodeMirror'),
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js')
+      this.loadLibrary('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js', 'CodeMirror')
     ]);
 
     // Render the editor and pass the initial value
@@ -422,6 +421,12 @@ class WcCodeMirror extends WcBaseComponent {
   }
   
   async renderEditor(initialValue) {
+    await Promise.all([
+      // this.loadScript('https://storage.googleapis.com/datamasters/codemirror-grammar-mode.js'),
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js'),
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js')
+    ]);
+
     const gutters = await this.getGutters();
 
     // Initialize CodeMirror editor
@@ -432,12 +437,12 @@ class WcCodeMirror extends WcBaseComponent {
       lineWrapper: this.hasAttribute('line-wrapper'),
       foldGutter: this.hasAttribute('fold-gutter'),
       gutters: gutters,
-      keyMap: "sublime",
       extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
       value: initialValue,
       tabSize: parseInt(this.getAttribute('tab-size'), 10) || 4,
       indentUnit: parseInt(this.getAttribute('indent-unit'), 10) || 2,
       matchBrackets: true,
+      keyMap: "sublime",
       showInvisibles: true
     });
 
