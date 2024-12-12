@@ -131,7 +131,6 @@ class WcSelect extends WcBaseFormComponent {
 
     const select = document.createElement('select');
     select.id = name;
-    select.name = name;
     if (this.getAttribute('multiple')) {
       select.multiple = true;
       select.setAttribute('multiple', '');
@@ -142,6 +141,7 @@ class WcSelect extends WcBaseFormComponent {
     this.formElement = select;
 
     if (this.getAttribute('mode') === 'chip') {
+      select.name = name;
       const hostContainer = document.createElement('div');
       hostContainer.classList.add('row');
 
