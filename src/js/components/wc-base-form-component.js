@@ -129,6 +129,11 @@ export class WcBaseFormComponent extends WcBaseComponent {
   _handleInputChange(event) {
     const {target} = event;
     if (this._isCheckbox()) {
+      if (target.checked) {
+        this.formElement.value = "bool:True";
+      } else {
+        this.formElement.value = "bool:False";
+      }
       this.checked = target.checked;
     } else {
       this.value = target.value;
