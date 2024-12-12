@@ -169,10 +169,10 @@ class WcInput extends WcBaseFormComponent {
       if (newValue === 'checkbox') {
         if (this.hasAttribute('checked')) {
           this.formElement?.setAttribute('checked', '');
-          this.setAttribute('value', 'bool:True');
+          this.formElement?.setAttribute('value', 'bool:True');
         } else {
           this.formElement?.removeAttribute('checked');
-          this.setAttribute('value', 'bool:False');
+          this.formElement?.setAttribute('value', 'bool:False');
         }
       } else if (newValue === 'currency') {
         this.formElement?.setAttribute('type', 'number');
