@@ -131,7 +131,7 @@ class WcSelect extends WcBaseFormComponent {
 
     const select = document.createElement('select');
     select.id = name;
-    // select.name = name;
+    select.name = name;
     if (this.getAttribute('multiple')) {
       select.multiple = true;
       select.setAttribute('multiple', '');
