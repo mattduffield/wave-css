@@ -204,7 +204,7 @@ class WcInput extends WcBaseFormComponent {
     const name = this.getAttribute('name');
     const type = this.getAttribute('type') || 'text';
     const isToggle = this.hasAttribute('toggle-switch');
-    const options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];
+    // const options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];
 
     if (labelText) {
       const lblEl = document.createElement('label');
@@ -222,7 +222,19 @@ class WcInput extends WcBaseFormComponent {
     this.formElement.setAttribute('form-element', '');
     this.formElement.setAttribute('type', type);
     
-    if (type === 'radio' && options.length) {
+    // if (type === 'radio' && options.length) {
+    if (type === 'radio') {
+      let options = [];
+      let optionList = this.querySelectorAll('option');
+      optionList.forEach(f => {
+        const key = f.textContent.trim();
+        const value = f.value.trim();
+        options.push({"key": key, "value": value});
+      });
+      optionList.forEach(f => f.remove());
+      if (options.length == 0) {
+        options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];    
+      }
       const radioContainer = document.createElement('div');
       radioContainer.classList.add('radio-group');
 
