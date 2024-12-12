@@ -371,6 +371,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: flex;
+        height: 29.5px;
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.5rem;
