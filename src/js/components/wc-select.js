@@ -131,6 +131,7 @@ class WcSelect extends WcBaseFormComponent {
 
     const select = document.createElement('select');
     select.id = name;
+    select.name = name;
     if (this.getAttribute('multiple')) {
       select.multiple = true;
       select.setAttribute('multiple', '');
@@ -177,6 +178,8 @@ class WcSelect extends WcBaseFormComponent {
     } else {
       this.componentElement.appendChild(select);
     }
+
+    this.removeAttribute('name');
 
     this.attachEventListeners();
   }
