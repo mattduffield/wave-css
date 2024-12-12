@@ -422,7 +422,6 @@ class WcCodeMirror extends WcBaseComponent {
   
   async renderEditor(initialValue) {
     await Promise.all([
-      // this.loadScript('https://storage.googleapis.com/datamasters/codemirror-grammar-mode.js'),
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js'),
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js')
     ]);
