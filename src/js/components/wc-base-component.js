@@ -92,8 +92,12 @@ export class WcBaseComponent extends HTMLElement {
   }
 
   _handleNameToIdLinkage(nameValue) {
-    if (this.formElement && !this.formElement.hasAttribute('id')) {
-      this.formElement.setAttribute('id', nameValue);
+    if (nameValue) {
+      if (this.formElement && !this.formElement.hasAttribute('id')) {
+        this.formElement.setAttribute('id', nameValue);
+        this.formElement.setAttribute('name', nameValue);
+        this.removeAttribute('name');
+      }      
     }
   }
 
