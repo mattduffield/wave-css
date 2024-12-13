@@ -266,6 +266,10 @@ class WcInput extends WcBaseFormComponent {
       toggleSwitch.classList.add('toggle-switch');
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
+      const hiddenCheckbox = document.createElement('input');
+      hiddenCheckbox.type = 'hidden';
+      hiddenCheckbox.value = 'bool:False';
+      this.componentElement.appendChild(hiddenCheckbox);
     } else if (type === 'currency') {
       this.formElement.setAttribute('type', 'number');
       const icon = document.createElement('span');
