@@ -267,6 +267,7 @@ class WcInput extends WcBaseFormComponent {
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
       const hiddenCheckbox = document.createElement('input');
+      hiddenCheckbox.name = name;
       hiddenCheckbox.type = 'hidden';
       hiddenCheckbox.checked = true;
       hiddenCheckbox.value = 'bool:False';
