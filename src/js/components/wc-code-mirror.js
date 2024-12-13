@@ -437,7 +437,17 @@ class WcCodeMirror extends WcBaseComponent {
       lineWrapper: this.hasAttribute('line-wrapper'),
       foldGutter: this.hasAttribute('fold-gutter'),
       gutters: gutters,
-      extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+      extraKeys: {
+        "Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
+        "Tab": (cm) => {
+          if (cm.somethingSelected()) {
+            cm.indentSelection("add");
+          } else {
+            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+            cm.replaceSelection(spaces);
+          }
+        }        
+      },
       value: initialValue,
       tabSize: parseInt(this.getAttribute('tab-size'), 10) || 4,
       indentUnit: parseInt(this.getAttribute('indent-unit'), 10) || 2,
