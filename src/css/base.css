@@ -1092,6 +1092,8 @@ input[type="button"]:hover:not(:disabled) {
   background-color: var(--primary-hover-color);
 }
 
+
+/*
 div[class^="wc-"] :disabled:not(.toggle-checkbox) {
   cursor: not-allowed;
   opacity: 0.7;
@@ -1113,8 +1115,53 @@ div[class^="wc-"]:has(:required) label {
 div[class^="wc-"]:has(:required) label::after {
   content: ' *';
   font-weight: bold;
-  /* color: red; */
 }
+*/
+
+
+div.wc-input :disabled:not(.toggle-checkbox),
+div.wc-textarea :disabled,
+div.wc-select :disabled,
+div.wc-code-mirror :disabled 
+{
+  cursor: not-allowed;
+  opacity: 0.7;
+  font-style: italic;  
+}
+div.wc-input label:has(:disabled),
+div.wc-textarea label:has(:disabled),
+div.wc-select label:has(:disabled),
+div.wc-code-mirror label:has(:disabled)
+{
+  cursor: not-allowed;
+}
+div.wc-input:has(:disabled) label,
+div.wc-textarea:has(:disabled) label,
+div.wc-select:has(:disabled) label,
+div.wc-code-mirror:has(:disabled) label
+{
+  opacity: 0.7;
+  font-style: italic;
+}
+div.wc-input:has(:required) label,
+div.wc-textarea:has(:required) label,
+div.wc-select:has(:required) label,
+div.wc-code-mirror:has(:required) label
+{
+  font-weight: bold;
+}
+div.wc-input:has(:required) label::after,
+div.wc-textarea:has(:required) label::after,
+div.wc-select:has(:required) label::after,
+div.wc-code-mirror:has(:required) label::after
+{
+  content: ' *';
+  font-weight: bold;
+}
+
+
+
+
 
 
 /* Custom error message as span */
