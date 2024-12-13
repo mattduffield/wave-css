@@ -423,7 +423,8 @@ class WcCodeMirror extends WcBaseComponent {
   async renderEditor(initialValue) {
     await Promise.all([
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js'),
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js')
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js'),
+      this.loadScript('https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js')
     ]);
 
     const gutters = await this.getGutters();
