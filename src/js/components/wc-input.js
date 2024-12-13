@@ -268,6 +268,7 @@ class WcInput extends WcBaseFormComponent {
       this.componentElement.appendChild(toggleWrapper);
       const hiddenCheckbox = document.createElement('input');
       hiddenCheckbox.type = 'hidden';
+      hiddenCheckbox.checked = true;
       hiddenCheckbox.value = 'bool:False';
       this.componentElement.appendChild(hiddenCheckbox);
     } else if (type === 'currency') {
