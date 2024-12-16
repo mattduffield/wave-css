@@ -1146,14 +1146,16 @@ div.wc-code-mirror:has(:disabled) label
 div.wc-input:has(:required) label,
 div.wc-textarea:has(:required) label,
 div.wc-select:has(:required) label,
-div.wc-code-mirror:has(:required) label
+/*div.wc-code-mirror:has(:required) label*/
+div.wc-code-mirror[required] label
 {
   font-weight: bold;
 }
 div.wc-input:has(:required) label::after,
 div.wc-textarea:has(:required) label::after,
 div.wc-select:has(:required) label::after,
-div.wc-code-mirror:has(:required) label::after
+/*div.wc-code-mirror:has(:required) label::after*/
+div.wc-code-mirror[required] label::after
 {
   content: ' *';
   font-weight: bold;

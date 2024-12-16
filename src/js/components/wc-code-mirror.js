@@ -24,7 +24,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcCodeMirror extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'height', 'theme', 'mode', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled'];
+    return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required'];
   }
 
   constructor() {
@@ -61,7 +61,11 @@ class WcCodeMirror extends WcBaseComponent {
   }
 
   async _handleAttributeChange(attrName, newValue) {
-    if (attrName === 'theme') {
+    if (attrName === 'lbl-class') {
+      const name = this.getAttribute('name');
+      const lbl = this.querySelector(`label[for="${name}"]`);
+      lbl?.classList.add(newValue);
+    } else if (attrName === 'theme') {
       await this.loadTheme(newValue);
     } else if (attrName === 'mode') {
       await this.loadMode(newValue);
@@ -127,10 +131,18 @@ class WcCodeMirror extends WcBaseComponent {
   }
 
   async _createInnerElement() {
+    const labelText = this.getAttribute('lbl-label') || '';
     const name = this.getAttribute('name') || '';
     if (!name) {
       throw new Error("Name attribute must be provided.");
     }
+    if (labelText) {
+      const lblEl = document.createElement('label');
+      const value = this.getAttribute('value') || '';
+      lblEl.textContent = labelText;
+      lblEl.setAttribute('for', name);
+      this.componentElement.appendChild(lblEl);
+    }    
     this.editor = null;
     this.popoverId = `settings-popover-${this.getAttribute('name') || 'wc-code-mirror'}`;
     // Create a settings icon
@@ -335,6 +347,7 @@ class WcCodeMirror extends WcBaseComponent {
         position: relative;
         width: 100%;
         display: flex;
+        flex-direction: column;
         border: 2px solid transparent;
 
         overflow: hidden;
