@@ -599,7 +599,7 @@ class WcCodeMirror extends WcBaseComponent {
 
       const customModes = ['litespec']; // List of custom simple modes you might add
       if (customModes.includes(mode)) {
-        const modeUrl = '/static/js/dsl/highlighters/litespec.mode.cm.js';
+        const modeUrl = 'https://mattduffield.github.io/wave-css/dist/highlighters/litespec.mode.cm.js';
         await this.loadScript(modeUrl);
         // Once the custom mode is loaded, set it for the editor
         this.editor.setOption('mode', mode);
