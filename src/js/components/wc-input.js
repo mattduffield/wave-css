@@ -467,6 +467,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input input[type="email"] {
         padding-left: 25px;
+        min-width: 130px;
       }
       wc-input input[type="email"] + .icon {
         position: absolute;
@@ -477,6 +478,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input input[type="tel"] {
         padding-left: 25px;
+        min-width: 130px;
       }
       wc-input input[type="tel"] + .icon {
         position: absolute;

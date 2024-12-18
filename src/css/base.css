@@ -1093,32 +1093,6 @@ input[type="button"]:hover:not(:disabled) {
 }
 
 
-/*
-div[class^="wc-"] :disabled:not(.toggle-checkbox) {
-  cursor: not-allowed;
-  opacity: 0.7;
-  font-style: italic;
-}
-
-div[class^="wc-"] label:has(:disabled) {
-  cursor: not-allowed;
-}
-div[class^="wc-"]:has(:disabled) label {
-  opacity: 0.7;
-  font-style: italic;
-}
-
-div[class^="wc-"]:has(:required) label {
-  font-weight: bold;
-}
-
-div[class^="wc-"]:has(:required) label::after {
-  content: ' *';
-  font-weight: bold;
-}
-*/
-
-
 div.wc-input :disabled:not(.toggle-checkbox),
 div.wc-textarea :disabled,
 div.wc-select :disabled,
