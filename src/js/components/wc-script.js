@@ -27,12 +27,6 @@ if (!customElements.get('wc-script')) {
 
         // Check if the script is already appended
         if (!document.getElementById(scriptId)) {
-          const script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.textContent = scriptContent; // Set the script content
-          script.id = scriptId; // Add an ID to the script to prevent duplication
-          document.head.appendChild(script); // Append the script to the document head
-
           if (!window.wc) {
             window.wc = {};
           }
@@ -40,11 +34,18 @@ if (!customElements.get('wc-script')) {
           window.wc.loadScript = loadScript;
           window.wc.loadLibrary = loadLibrary;
           window.wc.loadStyle = loadStyle;
+
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.textContent = scriptContent; // Set the script content
+          script.id = scriptId; // Add an ID to the script to prevent duplication
+          document.head.appendChild(script); // Append the script to the document head
+
         } else {
           console.log('Script already exists, skipping append:', scriptId);
         }
       }
-      
+
       // Optionally clear the content to hide the script in the DOM
       this.textContent = '';  
     }
