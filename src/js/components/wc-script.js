@@ -6,6 +6,7 @@
  * Description:
  *   The purpose of this component is to dynamically add a <script> tag to the document head
  *   if it doesn't already exist. The `src` attribute specifies the script source.
+ *   It also dispatches a custom event when the script is loaded or fails to load.
  */
 
 if (!customElements.get('wc-script')) {
@@ -26,6 +27,26 @@ if (!customElements.get('wc-script')) {
           script.type = 'text/javascript';
           script.src = src;
           script.id = scriptId; // Set a unique ID to prevent duplication
+
+          // Listen for the load and error events
+          script.onload = () => {
+            console.log(`Script loaded: ${src}`);
+            this.dispatchEvent(new CustomEvent('script-loaded', {
+              detail: { src },
+              bubbles: true,
+              composed: true
+            }));
+          };
+
+          script.onerror = () => {
+            console.error(`Failed to load script: ${src}`);
+            this.dispatchEvent(new CustomEvent('script-error', {
+              detail: { src },
+              bubbles: true,
+              composed: true
+            }));
+          };
+
           document.head.appendChild(script); // Append the script to the document head
           console.log(`Added script: ${src}`);
         } else {
