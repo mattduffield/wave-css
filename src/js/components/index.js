@@ -28,6 +28,7 @@ import './wc-mask-hub.js';
 import './wc-hotkey.js';
 import './wc-link.js';
 import './wc-script.js';
+import './wc-javascript.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';
