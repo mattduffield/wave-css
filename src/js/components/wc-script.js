@@ -19,7 +19,7 @@ if (!customElements.get('wc-script')) {
       const src = this.getAttribute('src'); // Get the script source from the attribute
 
       if (src) {
-        const scriptId = `wc-script-${btoa(src).replace(/=/g, '')}`; // Create a unique ID based on the src
+        const scriptId = `wc-script-${this.id || this.dataset.id || crypto.randomUUID()}`;
 
         // Check if the script is already appended
         if (!document.getElementById(scriptId)) {
