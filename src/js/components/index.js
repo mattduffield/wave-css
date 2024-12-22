@@ -26,6 +26,7 @@ import './wc-event-handler.js';
 import './wc-event-hub.js';
 import './wc-mask-hub.js';
 import './wc-hotkey.js';
+import './wc-link.js';
 import './wc-script.js';
 // Form Controls
 import './wc-form.js';
