@@ -51,6 +51,11 @@ if (!customElements.get('wc-script')) {
           console.log(`Added script: ${src}`);
         } else {
           console.log(`Script already exists, skipping append: ${src}`);
+          this.dispatchEvent(new CustomEvent('script-loaded', {
+            detail: { src },
+            bubbles: true,
+            composed: true
+          }));
         }
       } else {
         console.warn('No src provided for wc-script component.');
