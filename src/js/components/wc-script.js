@@ -30,6 +30,9 @@ if (!customElements.get('wc-script')) {
           if (!window.wc) {
             window.wc = {};
           }
+          if (!window.wc.scripts) {
+            window.wc.scripts = {};
+          }
           window.wc.loadCSS = loadCSS;
           window.wc.loadScript = loadScript;
           window.wc.loadLibrary = loadLibrary;
@@ -43,6 +46,7 @@ if (!customElements.get('wc-script')) {
 
         } else {
           console.log('Script already exists, skipping append:', scriptId);
+          window.wc.scripts[scriptId]?.run();
         }
       }
 
