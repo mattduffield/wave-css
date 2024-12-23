@@ -48,6 +48,7 @@ if (!customElements.get('wc-javascript')) {
           console.log('Script already exists, skipping append:', scriptId);
           const fn = window.wc.scripts[scriptId];
           if (fn) {
+            console.log("Calling script function...");
             fn();
           }
         }
