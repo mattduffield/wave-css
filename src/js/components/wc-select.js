@@ -20,6 +20,8 @@
  *      items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'>
  *    </wc-select>
  * 
+ *  Note: A SELECT with the multiple attribute will always send the first 
+ *        option in a Form post regardless if it is selected or not.
  */
 
 
@@ -330,11 +332,6 @@ class WcSelect extends WcBaseFormComponent {
     const optionsContainer = this.querySelector('#optionsContainer');
     const chipContainer = this.querySelector('#chipContainer');
 
-    const form = this.closest('form');
-    if (form) {
-      form.addEventListener('submit', () => this.syncSelectOptions());
-    }
-
     if (this.mode === 'chip') {
       if (dropdownInput) {
         dropdownInput?.addEventListener('focus', () => optionsContainer.style.display = 'block');
@@ -365,26 +362,6 @@ class WcSelect extends WcBaseFormComponent {
         });
       }
     }
-  }
-
-  syncSelectOptions(e) {
-    const select = this.querySelector('select');
-    if (this.selectedOptions.length > 0) {
-      select.setAttribute('name', select.id);
-    } else {
-      select.removeAttribute('name');
-      for (const option of Array.from(select.options)) {
-        option.selected = false;
-      }
-      select.value = '';
-      this.value = '';
-    }
-    // if (this.selectedOptions.length === 0) {
-    //   const select = this.querySelector('select');
-    //   for (const option of Array.from(select.options)) {
-    //     option.selected = false;
-    //   }
-    // }
   }
 
   handleKeyboardNavigation(e) {
