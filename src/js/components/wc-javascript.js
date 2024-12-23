@@ -48,10 +48,8 @@ if (!customElements.get('wc-javascript')) {
           console.log('Script already exists, skipping append:', scriptId);
           const fn = window.wc.scripts[scriptId];
           if (fn) {
-            setTimeout(() => {
-              console.log("Calling script function...");
-              fn();  
-            }, 100);
+            console.log("Calling script function...");
+            fn();
           }
         }
       }
