@@ -5394,7 +5394,12 @@ var WcSelect = class extends WcBaseFormComponent {
     if (this.selectedOptions.length > 0) {
       select.setAttribute("name", select.id);
     } else {
-      select.removeAttribute("name");
+      select2.removeAttribute("name");
+      const select2 = this.querySelector("select");
+      for (const option of Array.from(select2.options)) {
+        option.selected = false;
+      }
+      select2.value = "";
     }
   }
   handleKeyboardNavigation(e) {
