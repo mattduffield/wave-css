@@ -1,5 +1,6 @@
 const esbuild = require('esbuild');
 
+// JavasScript bundling and minification
 esbuild.build({
   entryPoints: ['src/js/components/index.js'],
   bundle: true,
@@ -9,13 +10,22 @@ esbuild.build({
   // watch: process.argv.includes('--watch'),  // Optional: Watch mode
 }).catch(() => process.exit(1));
 
+// JavasScript bundling
 esbuild.build({
   entryPoints: ['src/js/components/index.js'],
   bundle: true,
   minify: false,
-  outfile: 'dist/wc-css.js',  // Output bundled file
+  outfile: 'dist/wave-css.js',  // Output bundled file
   format: 'esm',  // Use ESM for modern imports
   // watch: process.argv.includes('--watch'),  // Optional: Watch mode
+}).catch(() => process.exit(1));
+
+// CSS bundling
+esbuild.build({
+  entryPoints: ['src/css/base.css'],
+  bundle: true,
+  minify: false,
+  outfile: 'dist/wave-css.css'
 }).catch(() => process.exit(1));
 
 // CSS bundling and minification
@@ -23,5 +33,5 @@ esbuild.build({
   entryPoints: ['src/css/base.css'],
   bundle: true,
   minify: true,
-  outfile: 'dist/styles.min.css'
+  outfile: 'dist/wave-css.min.css'
 }).catch(() => process.exit(1));
