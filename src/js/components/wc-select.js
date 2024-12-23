@@ -330,6 +330,11 @@ class WcSelect extends WcBaseFormComponent {
     const optionsContainer = this.querySelector('#optionsContainer');
     const chipContainer = this.querySelector('#chipContainer');
 
+    const form = this.closest('form');
+    if (form) {
+      form.addEventListener('submit', () => this.syncSelectOptions());
+    }
+
     if (this.mode === 'chip') {
       if (dropdownInput) {
         dropdownInput?.addEventListener('focus', () => optionsContainer.style.display = 'block');
@@ -358,6 +363,14 @@ class WcSelect extends WcBaseFormComponent {
             this.removeChip(value);
           }
         });
+      }
+    }
+  }
+
+  syncSelectOptions(e) {
+    if (this.selectedOptions.length === 0) {
+      for (const option of this.selectElement.options) {
+        option.selected = false;
       }
     }
   }
