@@ -5391,7 +5391,8 @@ var WcSelect = class extends WcBaseFormComponent {
   }
   syncSelectOptions(e) {
     if (this.selectedOptions.length === 0) {
-      for (const option of this.selectElement.options) {
+      const select = this.querySelector("select");
+      for (const option of select.options) {
         option.selected = false;
       }
     }
