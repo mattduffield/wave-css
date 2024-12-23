@@ -368,12 +368,18 @@ class WcSelect extends WcBaseFormComponent {
   }
 
   syncSelectOptions(e) {
-    if (this.selectedOptions.length === 0) {
-      const select = this.querySelector('select');
-      for (const option of Array.from(select.options)) {
-        option.selected = false;
-      }
+    const select = this.querySelector('select');
+    if (this.selectedOptions.length > 0) {
+      select.setAttribute('name', select.id);
+    } else {
+      select.removeAttribute('name');
     }
+    // if (this.selectedOptions.length === 0) {
+    //   const select = this.querySelector('select');
+    //   for (const option of Array.from(select.options)) {
+    //     option.selected = false;
+    //   }
+    // }
   }
 
   handleKeyboardNavigation(e) {
