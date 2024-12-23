@@ -370,7 +370,7 @@ class WcSelect extends WcBaseFormComponent {
   syncSelectOptions(e) {
     if (this.selectedOptions.length === 0) {
       const select = this.querySelector('select');
-      for (const option of select.options) {
+      for (const option of Array.from(select.options)) {
         option.selected = false;
       }
     }
