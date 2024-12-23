@@ -373,7 +373,6 @@ class WcSelect extends WcBaseFormComponent {
       select.setAttribute('name', select.id);
     } else {
       select.removeAttribute('name');
-      const select = this.querySelector('select');
       for (const option of Array.from(select.options)) {
         option.selected = false;
       }
