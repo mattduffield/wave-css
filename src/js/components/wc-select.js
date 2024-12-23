@@ -378,6 +378,7 @@ class WcSelect extends WcBaseFormComponent {
         option.selected = false;
       }
       select.value = '';
+      this.value = '';
     }
     // if (this.selectedOptions.length === 0) {
     //   const select = this.querySelector('select');

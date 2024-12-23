@@ -5400,6 +5400,7 @@ var WcSelect = class extends WcBaseFormComponent {
         option.selected = false;
       }
       select2.value = "";
+      this.value = "";
     }
   }
   handleKeyboardNavigation(e) {
