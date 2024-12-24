@@ -63,7 +63,7 @@ if (!customElements.get('wc-save-button')) {
         <button type="button" class="btn"
           hx-post="${saveUrl}"
           data-url="${saveUrl}">Save</button>
-        <input type="hidden" name="redirect-url">
+        <input type="hidden" name="__redirect-url">
         <div class="dropdown">
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"
@@ -86,14 +86,7 @@ if (!customElements.get('wc-save-button')) {
     }
 
     _handleAttributeChange(attrName, newValue) {    
-      if (attrName === 'items') {
-        // if (typeof newValue === 'string') {
-        //   this._items = JSON.parse(newValue);
-        // }
-        // this.removeAttribute('items');
-      } else {
-        super._handleAttributeChange(attrName, newValue);  
-      }
+      super._handleAttributeChange(attrName, newValue);  
     }
 
     _applyStyle() {
@@ -152,15 +145,22 @@ if (!customElements.get('wc-save-button')) {
       super._wireEvents();
       this.componentElement.addEventListener('click', (e) => {
         const url = e.target.dataset.url;
-        const ipt = this.componentElement.querySelector('input[name="redirect-url"]');
-        ipt.value = url;
-        console.log('wc-save-button:click', e, e.target.dataset.url);
-        const form = this.componentElement.closest('form');
-        if (form) {
-          console.log('wc-save-button:click - form', form);
-          htmx.trigger(form, 'click');
-        }
+        console.log('wc-save-button:click', e, url);
+        document.body.addEventListener('htmx:configRequest', (e) => {
+          e.detail.headers['X-Save-Redirect'] = url;
+        });
       });
+      // this.componentElement.addEventListener('click', (e) => {
+      //   const url = e.target.dataset.url;
+      //   const ipt = this.componentElement.querySelector('input[name="__redirect-url"]');
+      //   ipt.value = url;
+      //   console.log('wc-save-button:click', e, e.target.dataset.url);
+      //   const form = this.componentElement.closest('form');
+      //   if (form) {
+      //     console.log('wc-save-button:click - form', form);
+      //     htmx.trigger(form, 'click');
+      //   }
+      // });
     }
 
     _unWireEvents() {
