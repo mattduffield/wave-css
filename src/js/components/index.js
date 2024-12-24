@@ -9,6 +9,7 @@ import './wc-dropdown.js';
 import './wc-flip-box.js';
 import './wc-image.js';
 import './wc-menu.js';
+import './wc-save-button.js';
 import './wc-sidebar.js';
 import './wc-sidenav.js';
 import './wc-slideshow-image.js';
