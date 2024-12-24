@@ -60,15 +60,20 @@ if (!customElements.get('wc-save-button')) {
       const saveReturnUrl = this.getAttribute('save-return-url') || '';
       
       const markup = `
-        <button class="btn"
-          hx-get="${saveUrl}">Save</button>
+        <button type="button" class="btn"
+          data-url="${saveUrl}">Save</button>
+        <input type="hidden" name="redirect-url">
         <div class="dropdown">
-          <button class="btn" style="border-left:1px solid var(--component-border-color);">
-          >
+          <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
+            <svg class="h-3 w-3 pointer-events-none"
+              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
+              stroke="currentColor" fill="currentColor">
+              <path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
+            </svg>
           </button>
           <div class="dropdown-content">
-            <a href="${saveNewUrl}">Save and Add New</a>
-            <a href="${saveReturnUrl}">Save and Return</a>
+            <button type="button" class="btn w-full" data-url="${saveNewUrl}">Save and Add New</button>
+            <button type="button" class="btn w-full" data-url="${saveReturnUrl}">Save and Return</button>
           </div>
         </div>
       `.trim();
@@ -85,8 +90,6 @@ if (!customElements.get('wc-save-button')) {
         super._handleAttributeChange(attrName, newValue);  
       }
     }
-
-
 
     _applyStyle() {
       const style = `
@@ -115,7 +118,7 @@ if (!customElements.get('wc-save-button')) {
         }
 
         /* Links inside the dropdown */
-        .wc-save-button .dropdown-content a {
+        .wc-save-button .dropdown-content button {
           color: var(--primary-color);
           padding: 12px 16px;
           text-decoration: none;
@@ -142,6 +145,12 @@ if (!customElements.get('wc-save-button')) {
 
     _wireEvents() {
       super._wireEvents();
+      this.componentElement.addEventListener('click', (e) => {
+        const url = e.target.dataset.url;
+        const ipt = this.componentElement.querySelector('input[name="redirect-url"]');
+        ipt.value = url;
+        console.log('wc-save-button:click', e, e.target.dataset.url);
+      });
     }
 
     _unWireEvents() {

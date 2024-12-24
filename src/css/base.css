@@ -1209,6 +1209,14 @@ div[class^="wc-"] :user-invalid[data-error]:hover::after {
 }
 
 
+
+.pointer-events-none {
+  pointer-events: none;
+}
+.pointer-events-auto {
+  pointer-events: auto;
+}
+
 .popover-form {
   background-color: var(--bg-color);
   color: var(--color);
