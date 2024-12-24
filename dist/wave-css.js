@@ -2514,6 +2514,7 @@ if (!customElements.get("wc-save-button")) {
       const saveReturnUrl = this.getAttribute("save-return-url") || "";
       const markup = `
         <button type="button" class="btn"
+          hx-post="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <input type="hidden" name="redirect-url">
         <div class="dropdown">

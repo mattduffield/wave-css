@@ -61,6 +61,7 @@ if (!customElements.get('wc-save-button')) {
       
       const markup = `
         <button type="button" class="btn"
+          hx-post="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <input type="hidden" name="redirect-url">
         <div class="dropdown">
