@@ -150,6 +150,11 @@ if (!customElements.get('wc-save-button')) {
         const ipt = this.componentElement.querySelector('input[name="redirect-url"]');
         ipt.value = url;
         console.log('wc-save-button:click', e, e.target.dataset.url);
+        const form = this.componentElement.closest('form');
+        if (form) {
+          console.log('wc-save-button:click - form', form);
+          htmx.trigger(form, 'click');
+        }
       });
     }
 
