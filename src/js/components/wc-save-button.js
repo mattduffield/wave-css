@@ -147,7 +147,7 @@ if (!customElements.get('wc-save-button')) {
         const url = e.target.dataset.url;
         console.log('wc-save-button:click', e, url);
         document.body.addEventListener('htmx:configRequest', (e) => {
-          e.detail.headers['X-Save-Redirect'] = url;
+          e.detail.headers['Wc-Save-Redirect'] = url;
         });
       });
       // this.componentElement.addEventListener('click', (e) => {

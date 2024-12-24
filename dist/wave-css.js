@@ -2597,7 +2597,7 @@ if (!customElements.get("wc-save-button")) {
         const url = e.target.dataset.url;
         console.log("wc-save-button:click", e, url);
         document.body.addEventListener("htmx:configRequest", (e2) => {
-          e2.detail.headers["X-Save-Redirect"] = url;
+          e2.detail.headers["Wc-Save-Redirect"] = url;
         });
       });
     }
