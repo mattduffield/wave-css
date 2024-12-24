@@ -74,10 +74,10 @@ if (!customElements.get('wc-save-button')) {
           </button>
           <div class="dropdown-content">
             <button type="button" class="btn w-full"
-              hx-post="${saveNewUrl}"
+              hx-post="${saveUrl}"
               data-url="${saveNewUrl}">Save and Add New</button>
             <button type="button" class="btn w-full"
-              hx-post="${saveReturnUrl}"
+              hx-post="${saveUrl}"
               data-url="${saveReturnUrl}">Save and Return</button>
           </div>
         </div>
