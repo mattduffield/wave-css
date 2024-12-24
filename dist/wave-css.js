@@ -2526,8 +2526,12 @@ if (!customElements.get("wc-save-button")) {
             </svg>
           </button>
           <div class="dropdown-content">
-            <button type="button" class="btn w-full" data-url="${saveNewUrl}">Save and Add New</button>
-            <button type="button" class="btn w-full" data-url="${saveReturnUrl}">Save and Return</button>
+            <button type="button" class="btn w-full"
+              hx-post="${saveNewUrl}"
+              data-url="${saveNewUrl}">Save and Add New</button>
+            <button type="button" class="btn w-full"
+              hx-post="${saveReturnUrl}"
+              data-url="${saveReturnUrl}">Save and Return</button>
           </div>
         </div>
       `.trim();
