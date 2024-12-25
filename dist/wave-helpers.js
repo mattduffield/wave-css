@@ -20,6 +20,7 @@ var WaveHelpers = (() => {
   // src/js/components/helper-function.js
   var helper_function_exports = {};
   __export(helper_function_exports, {
+    checkResources: () => checkResources,
     generateUniqueId: () => generateUniqueId,
     isCustomElement: () => isCustomElement,
     loadCSS: () => loadCSS,
@@ -167,6 +168,11 @@ var WaveHelpers = (() => {
       };
       checkVisibility();
     });
+  }
+  function checkResources(link, script) {
+    let result = false;
+    result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
+    return result;
   }
   return __toCommonJS(helper_function_exports);
 })();

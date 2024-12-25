@@ -137,6 +137,11 @@ function waitForSelectorPolling(selector, timeout = 5e3, interval = 100) {
     checkVisibility();
   });
 }
+function checkResources(link, script) {
+  let result = false;
+  result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
+  return result;
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -5756,6 +5761,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 };
 customElements.define("wc-textarea", WcTextarea);
 export {
+  checkResources,
   generateUniqueId,
   isCustomElement,
   loadCSS,

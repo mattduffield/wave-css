@@ -164,3 +164,9 @@ export function waitForSelectorPolling(selector, timeout = 5000, interval = 100)
     checkVisibility();
   });
 }
+
+export function checkResources(link, script) {
+  let result = false;
+  result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
+  return result;
+}
