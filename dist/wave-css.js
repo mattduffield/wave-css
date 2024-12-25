@@ -4596,7 +4596,7 @@ if (!customElements.get("wc-script")) {
           script.onload = () => {
             console.log(`Script loaded: ${src}`);
             window.wc.scriptsLoaded[src] = true;
-            this.dispatchEvent(new CustomEvent("script-loaded", {
+            document.body.dispatchEvent(new CustomEvent("script-loaded", {
               detail: { src },
               bubbles: true,
               composed: true
@@ -4604,7 +4604,7 @@ if (!customElements.get("wc-script")) {
           };
           script.onerror = () => {
             console.error(`Failed to load script: ${src}`);
-            this.dispatchEvent(new CustomEvent("script-error", {
+            document.body.dispatchEvent(new CustomEvent("script-error", {
               detail: { src },
               bubbles: true,
               composed: true
