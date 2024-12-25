@@ -121,6 +121,22 @@ function locatorAll(root, selector) {
   }
   return elements;
 }
+function waitForSelectorPolling(selector, timeout = 5e3, interval = 100) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkVisibility = () => {
+      const element = document.querySelector(selector);
+      if (element && element.offsetParent !== null) {
+        resolve(element);
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: Selector "${selector}" not found or not visible after ${timeout}ms`));
+      } else {
+        setTimeout(checkVisibility, interval);
+      }
+    };
+    checkVisibility();
+  });
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -5747,5 +5763,6 @@ export {
   loadScript,
   loadStyle,
   locator,
-  locatorAll
+  locatorAll,
+  waitForSelectorPolling
 };

@@ -147,3 +147,20 @@ export function locatorAll(root, selector) {
   }
   return elements;
 }
+
+export function waitForSelectorPolling(selector, timeout = 5000, interval = 100) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkVisibility = () => {
+        const element = document.querySelector(selector);
+        if (element && element.offsetParent !== null) {
+          resolve(element);
+        } else if (Date.now() - startTime > timeout) {
+          reject(new Error(`Timeout: Selector "${selector}" not found or not visible after ${timeout}ms`));
+        } else {
+          setTimeout(checkVisibility, interval);
+        }
+    };
+    checkVisibility();
+  });
+}
