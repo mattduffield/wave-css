@@ -60,7 +60,7 @@ if (!customElements.get('wc-save-button')) {
       const saveReturnUrl = this.getAttribute('save-return-url') || '';
       
       const markup = `
-        <button type="button" class="btn"
+        <button id="saveBtn" type="button" class="btn"
           hx-post="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
@@ -72,10 +72,10 @@ if (!customElements.get('wc-save-button')) {
             </svg>
           </button>
           <div class="dropdown-content">
-            <button type="button" class="btn w-full"
+            <button id="saveNewBtn" type="button" class="btn w-full"
               hx-post="${saveUrl}"
               data-url="${saveNewUrl}">Save and Add New</button>
-            <button type="button" class="btn w-full"
+            <button id="saveReturnBtn" type="button" class="btn w-full"
               hx-post="${saveUrl}"
               data-url="${saveReturnUrl}">Save and Return</button>
           </div>
@@ -86,6 +86,15 @@ if (!customElements.get('wc-save-button')) {
 
     _handleAttributeChange(attrName, newValue) {    
       super._handleAttributeChange(attrName, newValue);  
+    }
+
+    _handleClick(event) {
+      const url = event.target.dataset.url;
+      console.log('wc-save-button:click', event, url);
+      document.body.addEventListener('htmx:configRequest', (e) => {
+        console.log('wc-save-button:htmx:configRequest', e, url);
+        e.detail.headers['Wc-Save-Redirect'] = url;
+      }, {once: true});
     }
 
     _applyStyle() {
@@ -142,14 +151,20 @@ if (!customElements.get('wc-save-button')) {
 
     _wireEvents() {
       super._wireEvents();
-      this.componentElement.addEventListener('click', (event) => {
-        const url = event.target.dataset.url;
-        console.log('wc-save-button:click', event, url);
-        document.body.addEventListener('htmx:configRequest', (e) => {
-          console.log('wc-save-button:htmx:configRequest', e, url);
-          e.detail.headers['Wc-Save-Redirect'] = url;
-        }, {once: true});
-      });
+      const saveBtn = this.querySelector('button#saveBtn');
+      saveBtn.addEventListener('click', this._handleClick.bind(this));
+      const saveNewBtn = this.querySelector('button#saveNewBtn');
+      saveNewBtn.addEventListener('click', this._handleClick.bind(this));
+      const saveReturnBtn = this.querySelector('button#saveReturnBtn');
+      saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
+      // this.componentElement.addEventListener('click', (event) => {
+      //   const url = event.target.dataset.url;
+      //   console.log('wc-save-button:click', event, url);
+      //   document.body.addEventListener('htmx:configRequest', (e) => {
+      //     console.log('wc-save-button:htmx:configRequest', e, url);
+      //     e.detail.headers['Wc-Save-Redirect'] = url;
+      //   }, {once: true});
+      // });
     }
 
     _unWireEvents() {
