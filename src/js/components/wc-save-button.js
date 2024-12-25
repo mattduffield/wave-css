@@ -157,14 +157,6 @@ if (!customElements.get('wc-save-button')) {
       saveNewBtn.addEventListener('click', this._handleClick.bind(this));
       const saveReturnBtn = this.querySelector('button#saveReturnBtn');
       saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
-      // this.componentElement.addEventListener('click', (event) => {
-      //   const url = event.target.dataset.url;
-      //   console.log('wc-save-button:click', event, url);
-      //   document.body.addEventListener('htmx:configRequest', (e) => {
-      //     console.log('wc-save-button:htmx:configRequest', e, url);
-      //     e.detail.headers['Wc-Save-Redirect'] = url;
-      //   }, {once: true});
-      // });
     }
 
     _unWireEvents() {

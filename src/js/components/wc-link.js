@@ -18,7 +18,14 @@ if (!customElements.get('wc-link')) {
       const url = this.getAttribute('url'); // Get the URL from the attribute
 
       if (url) {
-        const linkId = `wc-link-${btoa(url).replace(/=/g, '')}`; // Create a unique ID based on the URL
+        const linkId = `wc-link-${this.id || this.dataset.id || crypto.randomUUID()}`;
+        if (!window.wc) {
+          window.wc = {};
+        }
+        if (!window.wc.scriptsLoaded) {
+          window.wc["linksLoaded"] = {};
+        }
+  
 
         // Check if the link is already appended
         if (!document.getElementById(linkId)) {
@@ -26,6 +33,27 @@ if (!customElements.get('wc-link')) {
           link.rel = 'stylesheet';
           link.href = url;
           link.id = linkId; // Set a unique ID to prevent duplication
+
+          // Listen for the load and error events
+          link.onload = () => {
+            console.log(`Link loaded: ${url}`);
+            window.wc.scriptsLoaded[src] = true;
+            this.dispatchEvent(new CustomEvent('link-loaded', {
+              detail: { url },
+              bubbles: true,
+              composed: true
+            }));
+          };
+
+          link.onerror = () => {
+            console.error(`Failed to load link: ${url}`);
+            this.dispatchEvent(new CustomEvent('link-error', {
+              detail: { url },
+              bubbles: true,
+              composed: true
+            }));
+          };
+
           document.head.appendChild(link); // Append the link to the document head
           console.log(`Added link: ${url}`);
         } else {

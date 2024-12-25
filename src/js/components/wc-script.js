@@ -17,6 +17,12 @@ if (!customElements.get('wc-script')) {
 
     connectedCallback() {
       const src = this.getAttribute('src'); // Get the script source from the attribute
+      if (!window.wc) {
+        window.wc = {};
+      }
+      if (!window.wc.scriptsLoaded) {
+        window.wc["scriptsLoaded"] = {};
+      }
 
       if (src) {
         const scriptId = `wc-script-${this.id || this.dataset.id || crypto.randomUUID()}`;
@@ -31,6 +37,7 @@ if (!customElements.get('wc-script')) {
           // Listen for the load and error events
           script.onload = () => {
             console.log(`Script loaded: ${src}`);
+            window.wc.scriptsLoaded[src] = true;
             this.dispatchEvent(new CustomEvent('script-loaded', {
               detail: { src },
               bubbles: true,
