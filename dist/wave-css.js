@@ -4544,7 +4544,7 @@ if (!customElements.get("wc-link")) {
           link.onload = () => {
             console.log(`Link loaded: ${url}`);
             window.wc.linksLoaded[url] = true;
-            this.dispatchEvent(new CustomEvent("link-loaded", {
+            document.body.dispatchEvent(new CustomEvent("link-loaded", {
               detail: { url },
               bubbles: true,
               composed: true
@@ -4552,7 +4552,7 @@ if (!customElements.get("wc-link")) {
           };
           link.onerror = () => {
             console.error(`Failed to load link: ${url}`);
-            this.dispatchEvent(new CustomEvent("link-error", {
+            document.body.dispatchEvent(new CustomEvent("link-error", {
               detail: { url },
               bubbles: true,
               composed: true
@@ -4562,6 +4562,11 @@ if (!customElements.get("wc-link")) {
           console.log(`Added link: ${url}`);
         } else {
           console.log(`Link already exists, skipping append: ${url}`);
+          document.body.dispatchEvent(new CustomEvent("link-loaded", {
+            detail: { url },
+            bubbles: true,
+            composed: true
+          }));
         }
       } else {
         console.warn("No URL provided for wc-link component.");
@@ -4614,7 +4619,7 @@ if (!customElements.get("wc-script")) {
           console.log(`Added script: ${src}`);
         } else {
           console.log(`Script already exists, skipping append: ${src}`);
-          this.dispatchEvent(new CustomEvent("script-loaded", {
+          document.body.dispatchEvent(new CustomEvent("script-loaded", {
             detail: { src },
             bubbles: true,
             composed: true
