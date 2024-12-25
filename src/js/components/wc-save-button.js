@@ -142,13 +142,13 @@ if (!customElements.get('wc-save-button')) {
 
     _wireEvents() {
       super._wireEvents();
-      this.componentElement.addEventListener('click', (e) => {
-        const url = e.target.dataset.url;
-        console.log('wc-save-button:click', e, url);
-        this.addEventListener('htmx:configRequest', (e) => {
+      this.componentElement.addEventListener('click', (event) => {
+        const url = event.target.dataset.url;
+        console.log('wc-save-button:click', event, url);
+        document.body.addEventListener('htmx:configRequest', (e) => {
           console.log('wc-save-button:htmx:configRequest', e, url);
           e.detail.headers['Wc-Save-Redirect'] = url;
-        });
+        }, {once: true});
       });
     }
 
