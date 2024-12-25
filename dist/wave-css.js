@@ -4543,7 +4543,7 @@ if (!customElements.get("wc-link")) {
           link.id = linkId;
           link.onload = () => {
             console.log(`Link loaded: ${url}`);
-            window.wc.scriptsLoaded[src] = true;
+            window.wc.linksLoaded[url] = true;
             this.dispatchEvent(new CustomEvent("link-loaded", {
               detail: { url },
               bubbles: true,
@@ -4579,43 +4579,43 @@ if (!customElements.get("wc-script")) {
       super();
     }
     connectedCallback() {
-      const src2 = this.getAttribute("src");
+      const src = this.getAttribute("src");
       if (!window.wc) {
         window.wc = {};
       }
       if (!window.wc.scriptsLoaded) {
         window.wc["scriptsLoaded"] = {};
       }
-      if (src2) {
+      if (src) {
         const scriptId = `wc-script-${this.id || this.dataset.id || crypto.randomUUID()}`;
         if (!document.getElementById(scriptId)) {
           const script = document.createElement("script");
           script.type = "text/javascript";
-          script.src = src2;
+          script.src = src;
           script.id = scriptId;
           script.onload = () => {
-            console.log(`Script loaded: ${src2}`);
-            window.wc.scriptsLoaded[src2] = true;
+            console.log(`Script loaded: ${src}`);
+            window.wc.scriptsLoaded[src] = true;
             this.dispatchEvent(new CustomEvent("script-loaded", {
-              detail: { src: src2 },
+              detail: { src },
               bubbles: true,
               composed: true
             }));
           };
           script.onerror = () => {
-            console.error(`Failed to load script: ${src2}`);
+            console.error(`Failed to load script: ${src}`);
             this.dispatchEvent(new CustomEvent("script-error", {
-              detail: { src: src2 },
+              detail: { src },
               bubbles: true,
               composed: true
             }));
           };
           document.head.appendChild(script);
-          console.log(`Added script: ${src2}`);
+          console.log(`Added script: ${src}`);
         } else {
-          console.log(`Script already exists, skipping append: ${src2}`);
+          console.log(`Script already exists, skipping append: ${src}`);
           this.dispatchEvent(new CustomEvent("script-loaded", {
-            detail: { src: src2 },
+            detail: { src },
             bubbles: true,
             composed: true
           }));

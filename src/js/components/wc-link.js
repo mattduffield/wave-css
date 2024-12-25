@@ -37,7 +37,7 @@ if (!customElements.get('wc-link')) {
           // Listen for the load and error events
           link.onload = () => {
             console.log(`Link loaded: ${url}`);
-            window.wc.scriptsLoaded[src] = true;
+            window.wc.linksLoaded[url] = true;
             this.dispatchEvent(new CustomEvent('link-loaded', {
               detail: { url },
               bubbles: true,
