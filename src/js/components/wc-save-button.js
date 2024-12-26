@@ -55,9 +55,12 @@ if (!customElements.get('wc-save-button')) {
     }
 
     _createElement() {
+      const id = this.getAttribute('id') || '';
       const saveUrl = this.getAttribute('save-url') || '';
       const saveNewUrl = this.getAttribute('save-new-url') || '';
       const saveReturnUrl = this.getAttribute('save-return-url') || '';
+      const positionArea = this.getAttribute('position-area') || 'bottom span-left';
+      const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';
       
       const markup = `
         <button id="saveBtn" type="button" class="btn"
@@ -82,6 +85,12 @@ if (!customElements.get('wc-save-button')) {
         </div>
       `.trim();
       this.componentElement.innerHTML = markup;
+      const saveBtn = this.querySelector('.wc-save-button');
+      saveBtn.style.anchorName = `--${id}-anchor`;
+      const drpContent = this.querySelector('.dropdown-content');
+      drpContent.style.positionAnchor = `--${id}-anchor`;
+      drpContent.style.positionArea = positionArea;
+      drpContent.style.positionTryFallbacks = positionTryFallbacks;
     }
 
     _handleAttributeChange(attrName, newValue) {    
@@ -99,6 +108,11 @@ if (!customElements.get('wc-save-button')) {
 
     _applyStyle() {
       const style = `
+        .wc-save-button {
+          /* anchor-name: --save-anchor; */
+          display: flex;
+          flex-direction: row;
+        }
         /* Dropdown Button */
         .wc-save-button .btn {
           background-color: var(--primary-bg-color);
@@ -110,17 +124,41 @@ if (!customElements.get('wc-save-button')) {
 
         /* The container <div> - needed to position the dropdown content */
         .wc-save-button .dropdown {
-          position: absolute;
-          display: inline-block;
+          /* display: inline-block; */
         }
 
         /* Dropdown Content (Hidden by Default) */
         .wc-save-button .dropdown-content {
           display: none;
-          position: absolute;
           background-color: var(--primary-bg-color);
           min-width: 160px;
           z-index: 1;
+
+          position: absolute;
+          position-try-fallbacks: --bottom-right, --bottom-left, --top-right, --top-left, --right, --left;
+          /*
+          position-anchor: --save-anchor;
+          position-area: bottom span-left;
+          */
+        }
+
+        @position-try --bottom-left {
+          position-area: bottom span-left;
+        }
+        @position-try --bottom-right {
+          position-area: bottom span-right;
+        }
+        @position-try --top-left {
+          position-area: top span-left;
+        }
+        @position-try --top-right {
+          position-area: top span-right;
+        }
+        @position-try --right {
+          position-area: right;
+        }
+        @position-try --left {
+          position-area: left;
         }
 
         /* Links inside the dropdown */
@@ -137,7 +175,7 @@ if (!customElements.get('wc-save-button')) {
         }
 
         /* Show the dropdown menu on hover */
-        .wc-save-button .dropdown:hover .dropdown-content {
+        .wc-save-button .dropdown:hover > .dropdown-content {
           display: block;
         }
 

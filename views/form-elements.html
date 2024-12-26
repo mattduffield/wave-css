@@ -54,8 +54,13 @@
         autocomplete="confirm-new-password">
       </wc-input>
     </div>
-    <div class="row gap-4">
-      <wc-save-button
+    <div class="row gap-4 justify-between">
+      <wc-save-button id="left-save"
+        position-area="bottom span-right"
+        save-url="/screen/contact/123"
+        save-new-url="/screen/contact/create"
+        save-return-url="/screen/contact_list/list"></wc-save-button>
+      <wc-save-button id="right-save"
         save-url="/screen/contact/123"
         save-new-url="/screen/contact/create"
         save-return-url="/screen/contact_list/list"></wc-save-button>

@@ -165,6 +165,16 @@ export function waitForSelectorPolling(selector, timeout = 5000, interval = 100)
   });
 }
 
+/*
+  Name: checkResources
+  Desc:
+  Usage:
+      const link = "https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css";
+      const script = "https://cdn.jsdelivr.net/npm/simple-datatables@latest";
+      if (WaveHelpers.checkResources(link, script)) {
+        ...
+      }
+*/
 export function checkResources(link, script) {
   let result = false;
   result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
