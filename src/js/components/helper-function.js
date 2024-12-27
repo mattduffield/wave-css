@@ -200,8 +200,8 @@ export function waitForResourcePolling(scriptDependencies = [], linkDependencies
 
     // Check if all dependencies are available
     const checkAvailability = () => {
-      const scriptsAvailable = scriptList.length === 0 || scriptList.every(dep => window.wc?.scripts?.[dep] === true);
-      const linksAvailable = linkList.length === 0 || linkList.every(dep => window.wc?.links?.[dep] === true);
+      const scriptsAvailable = scriptList.length === 0 || scriptList.every(dep => window.wc?.scriptsLoaded?.[dep] === true);
+      const linksAvailable = linkList.length === 0 || linkList.every(dep => window.wc?.linksLoaded?.[dep] === true);
 
       if (scriptsAvailable && linksAvailable) {
         resolve();
