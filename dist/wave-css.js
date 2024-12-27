@@ -2598,6 +2598,7 @@ if (!customElements.get("wc-save-split-button")) {
     }
     _createElement() {
       const id = this.getAttribute("id") || "";
+      const method = this.getAttribute("method") || "post";
       const saveUrl = this.getAttribute("save-url") || "";
       const saveNewUrl = this.getAttribute("save-new-url") || "";
       const saveReturnUrl = this.getAttribute("save-return-url") || "";
@@ -2605,7 +2606,7 @@ if (!customElements.get("wc-save-split-button")) {
       const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
       const markup = `
         <button type="button" class="save-btn btn"
-          hx-post="${saveUrl}"
+          hx-${method}="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
@@ -2617,10 +2618,10 @@ if (!customElements.get("wc-save-split-button")) {
           </button>
           <div class="dropdown-content">
             <button type="button" class="save-new-btn btn w-full"
-              hx-post="${saveUrl}"
+              hx-${method}="${saveUrl}"
               data-url="${saveNewUrl}">Save and Add New</button>
             <button type="button" class="save-return-btn btn w-full"
-              hx-post="${saveUrl}"
+              hx-${method}="${saveUrl}"
               data-url="${saveReturnUrl}">Save and Return</button>
           </div>
         </div>
