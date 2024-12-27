@@ -55,15 +55,21 @@
       </wc-input>
     </div>
     <div class="row gap-4 justify-between">
-      <wc-save-button id="left-save"
+      <wc-save-split-button id="left-save"
         position-area="bottom span-right"
         save-url="/screen/contact/123"
         save-new-url="/screen/contact/create"
-        save-return-url="/screen/contact_list/list"></wc-save-button>
+        save-return-url="/screen/contact_list/list"></wc-save-split-button>
+
       <wc-save-button id="right-save"
         save-url="/screen/contact/123"
         save-new-url="/screen/contact/create"
         save-return-url="/screen/contact_list/list"></wc-save-button>
+
+      <wc-save-split-button id="right-save"
+        save-url="/screen/contact/123"
+        save-new-url="/screen/contact/create"
+        save-return-url="/screen/contact_list/list"></wc-save-split-button>
     </div>
     <div class="row gap-4">
       <wc-textarea class="col-1"
