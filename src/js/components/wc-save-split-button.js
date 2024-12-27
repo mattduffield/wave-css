@@ -63,7 +63,7 @@ if (!customElements.get('wc-save-split-button')) {
       const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';
       
       const markup = `
-        <button type="button" class="saveBtn btn"
+        <button type="button" class="save-btn btn"
           hx-post="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
@@ -75,10 +75,10 @@ if (!customElements.get('wc-save-split-button')) {
             </svg>
           </button>
           <div class="dropdown-content">
-            <button type="button" class="saveNewBtn btn w-full"
+            <button type="button" class="save-new-btn btn w-full"
               hx-post="${saveUrl}"
               data-url="${saveNewUrl}">Save and Add New</button>
-            <button type="button" class="saveReturnBtn btn w-full"
+            <button type="button" class="save-return-btn btn w-full"
               hx-post="${saveUrl}"
               data-url="${saveReturnUrl}">Save and Return</button>
           </div>
@@ -189,11 +189,11 @@ if (!customElements.get('wc-save-split-button')) {
 
     _wireEvents() {
       super._wireEvents();
-      const saveBtn = this.querySelector('button.saveBtn');
+      const saveBtn = this.querySelector('button.save-btn');
       saveBtn.addEventListener('click', this._handleClick.bind(this));
-      const saveNewBtn = this.querySelector('button.saveNewBtn');
+      const saveNewBtn = this.querySelector('button.save-new-btn');
       saveNewBtn.addEventListener('click', this._handleClick.bind(this));
-      const saveReturnBtn = this.querySelector('button.saveReturnBtn');
+      const saveReturnBtn = this.querySelector('button.save-return-btn');
       saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
     }
 
