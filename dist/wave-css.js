@@ -172,6 +172,10 @@ function show(selector) {
   const el = document.querySelector(selector);
   el.classList.remove("hidden");
 }
+function hideAndShow(hideSelector, showSelector) {
+  hide(hideSelector);
+  show(showSelector);
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -6008,6 +6012,7 @@ export {
   checkResources,
   generateUniqueId,
   hide,
+  hideAndShow,
   isCustomElement,
   loadCSS,
   loadLibrary,

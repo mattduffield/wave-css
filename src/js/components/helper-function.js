@@ -237,3 +237,8 @@ export function show(selector) {
   const el = document.querySelector(selector);
   el.classList.remove('hidden');
 }
+
+export function hideAndShow(hideSelector, showSelector) {
+  hide(hideSelector);
+  show(showSelector);
+}

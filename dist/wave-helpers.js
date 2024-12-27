@@ -23,6 +23,7 @@ var WaveHelpers = (() => {
     checkResources: () => checkResources,
     generateUniqueId: () => generateUniqueId,
     hide: () => hide,
+    hideAndShow: () => hideAndShow,
     isCustomElement: () => isCustomElement,
     loadCSS: () => loadCSS,
     loadLibrary: () => loadLibrary,
@@ -207,6 +208,10 @@ var WaveHelpers = (() => {
   function show(selector) {
     const el = document.querySelector(selector);
     el.classList.remove("hidden");
+  }
+  function hideAndShow(hideSelector, showSelector) {
+    hide(hideSelector);
+    show(showSelector);
   }
   return __toCommonJS(helper_function_exports);
 })();
