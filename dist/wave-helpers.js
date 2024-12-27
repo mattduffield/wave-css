@@ -22,6 +22,7 @@ var WaveHelpers = (() => {
   __export(helper_function_exports, {
     checkResources: () => checkResources,
     generateUniqueId: () => generateUniqueId,
+    hide: () => hide,
     isCustomElement: () => isCustomElement,
     loadCSS: () => loadCSS,
     loadLibrary: () => loadLibrary,
@@ -29,6 +30,7 @@ var WaveHelpers = (() => {
     loadStyle: () => loadStyle,
     locator: () => locator,
     locatorAll: () => locatorAll,
+    show: () => show,
     sleep: () => sleep,
     waitForResourcePolling: () => waitForResourcePolling,
     waitForSelectorPolling: () => waitForSelectorPolling
@@ -197,6 +199,14 @@ var WaveHelpers = (() => {
   }
   async function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  function hide(selector) {
+    const el = document.querySelector(selector);
+    el.classList.add("hidden");
+  }
+  function show(selector) {
+    const el = document.querySelector(selector);
+    el.classList.remove("hidden");
   }
   return __toCommonJS(helper_function_exports);
 })();

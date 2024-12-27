@@ -227,3 +227,13 @@ export function waitForResourcePolling(scriptDependencies = [], linkDependencies
 export async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function hide(selector) {
+  const el = document.querySelector(selector);
+  el.classList.add('hidden');
+}
+
+export function show(selector) {
+  const el = document.querySelector(selector);
+  el.classList.remove('hidden');
+}

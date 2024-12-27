@@ -164,6 +164,14 @@ function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+function hide(selector) {
+  const el = document.querySelector(selector);
+  el.classList.add("hidden");
+}
+function show(selector) {
+  const el = document.querySelector(selector);
+  el.classList.remove("hidden");
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -5999,6 +6007,7 @@ customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
   generateUniqueId,
+  hide,
   isCustomElement,
   loadCSS,
   loadLibrary,
@@ -6006,6 +6015,7 @@ export {
   loadStyle,
   locator,
   locatorAll,
+  show,
   sleep,
   waitForResourcePolling,
   waitForSelectorPolling
