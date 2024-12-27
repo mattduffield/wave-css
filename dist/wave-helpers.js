@@ -29,6 +29,7 @@ var WaveHelpers = (() => {
     loadStyle: () => loadStyle,
     locator: () => locator,
     locatorAll: () => locatorAll,
+    sleep: () => sleep,
     waitForResourcePolling: () => waitForResourcePolling,
     waitForSelectorPolling: () => waitForSelectorPolling
   });
@@ -193,6 +194,9 @@ var WaveHelpers = (() => {
       };
       checkAvailability();
     });
+  }
+  async function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
   return __toCommonJS(helper_function_exports);
 })();

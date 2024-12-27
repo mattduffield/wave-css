@@ -224,6 +224,6 @@ export function waitForResourcePolling(scriptDependencies = [], linkDependencies
     await sleep(100); // Wait for 100 milliseconds
     ...
 */
-async function sleep(ms) {
+export async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

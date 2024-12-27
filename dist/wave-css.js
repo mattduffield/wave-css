@@ -161,6 +161,9 @@ function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], 
     checkAvailability();
   });
 }
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -5895,6 +5898,7 @@ export {
   loadStyle,
   locator,
   locatorAll,
+  sleep,
   waitForResourcePolling,
   waitForSelectorPolling
 };
