@@ -142,6 +142,25 @@ function checkResources(link, script) {
   result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
   return result;
 }
+function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], timeout = 5e3, interval = 100) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const scriptList = Array.isArray(scriptDependencies) ? scriptDependencies : [scriptDependencies];
+    const linkList = Array.isArray(linkDependencies) ? linkDependencies : [linkDependencies];
+    const checkAvailability = () => {
+      const scriptsAvailable = scriptList.length === 0 || scriptList.every((dep) => window.wc?.scripts?.[dep] === true);
+      const linksAvailable = linkList.length === 0 || linkList.every((dep) => window.wc?.links?.[dep] === true);
+      if (scriptsAvailable && linksAvailable) {
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: Dependencies not available after ${timeout}ms. Scripts: ${JSON.stringify(scriptList)}, Links: ${JSON.stringify(linkList)}`));
+      } else {
+        setTimeout(checkAvailability, interval);
+      }
+    };
+    checkAvailability();
+  });
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -5876,5 +5895,6 @@ export {
   loadStyle,
   locator,
   locatorAll,
+  waitForResourcePolling,
   waitForSelectorPolling
 };
