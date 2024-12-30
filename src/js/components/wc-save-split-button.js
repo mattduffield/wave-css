@@ -101,6 +101,11 @@ if (!customElements.get('wc-save-split-button')) {
     _handleClick(event) {
       const method = this.getAttribute('method') || 'post';
       let url = event.target.dataset.url;
+      //
+      // The following is necessary to distinguish between a create and
+      // return back to the new created record. Otherwise, it would
+      // always go to a new create screen upon save.
+      //
       if (method == 'post' && event.target.classList.contains('save-btn')) {
         url = url.replace('create', '__id__')
       }
