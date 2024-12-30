@@ -99,7 +99,11 @@ if (!customElements.get('wc-save-split-button')) {
     }
 
     _handleClick(event) {
-      const url = event.target.dataset.url;
+      const method = this.getAttribute('method') || 'post';
+      let url = event.target.dataset.url;
+      if (method == 'post' && event.target.classList.contains('save-btn')) {
+        url = url.replace('create', '__id__')
+      }
       console.log('wc-save-split-button:click', event, url);
       document.body.addEventListener('htmx:configRequest', (e) => {
         console.log('wc-save-split-button:htmx:configRequest', e, url);
