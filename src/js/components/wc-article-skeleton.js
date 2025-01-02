@@ -93,23 +93,6 @@ if (!customElements.get('wc-article-skeleton')) {
   max-width: 360px;
 }
 
-/* Background Colors */
-.bg-gray-300 {
-  background-color: #d1d5db;
-}
-.bg-gray-200 {
-  background-color: #e5e7eb;
-}
-.dark\:bg-gray-700 {
-  background-color: #374151;
-}
-.dark\:text-gray-600 {
-  color: #4b5563;
-}
-.text-gray-200 {
-  color: #e5e7eb;
-}
-
 .mb-2\.5 {
   margin-bottom: 0.625rem;
 }

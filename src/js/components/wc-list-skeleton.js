@@ -41,42 +41,42 @@ if (!customElements.get('wc-list-skeleton')) {
     _createElement() {
       this.componentElement.id = 'list-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'm-4 p-4 space-y-4 border border-solid border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700';
+      this.componentElement.className = 'm-4 p-4 space-y-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="w-5/6">
-            <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+            <div class="h-2.5 component-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 component-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+          <div class="w-1/6 h-2.5 component-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+            <div class="h-2.5 component-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 component-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+          <div class="w-1/6 h-2.5 component-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+            <div class="h-2.5 component-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 component-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+          <div class="w-1/6 h-2.5 component-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+            <div class="h-2.5 component-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 component-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+          <div class="w-1/6 h-2.5 component-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+            <div class="h-2.5 component-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 component-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 bg-gray-300 rounded-full dark:bg-gray-700"></div>
+          <div class="w-1/6 h-2.5 component-bg-color rounded-full"></div>
         </div>
         <span class="sr-only">Loading...</span>
       `.trim();
@@ -101,37 +101,6 @@ if (!customElements.get('wc-list-skeleton')) {
 }
 .h-2\.5 {
   height: 0.625rem;
-}
-
-/* Background Colors */
-.bg-gray-300 {
-  background-color: #d1d5db;
-}
-.bg-gray-200 {
-  background-color: #e5e7eb;
-}
-.dark\:bg-gray-600 {
-  background-color: #4b5563;
-}
-.dark\:bg-gray-700 {
-  background-color: #374151;
-}
-
-/* Borders */
-.border-gray-200 {
-  border-color: #e5e7eb;
-}
-.dark\:border-gray-700 {
-  border-color: #374151;
-}
-.divide-y > * + * {
-  border-top-width: 1px;
-}
-.divide-gray-200 {
-  border-color: #e5e7eb;
-}
-.dark\:divide-gray-700 > * + * {
-  border-color: #374151;
 }
 
 /* Shadows */

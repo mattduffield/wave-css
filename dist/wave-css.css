@@ -2031,6 +2031,9 @@ div[class^=wc-] :user-invalid[data-error]:hover::after {
 .max-h-64 {
   max-height: 16rem;
 }
+.max-h-full {
+  max-height: 100%;
+}
 .w-0 {
   width: 0;
 }
@@ -2480,6 +2483,9 @@ div[class^=wc-] :user-invalid[data-error]:hover::after {
 }
 .max-w-64 {
   max-width: 16rem;
+}
+.max-w-full {
+  max-width: 100%;
 }
 .p-0 {
   padding: 0;
