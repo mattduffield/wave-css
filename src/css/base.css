@@ -47,13 +47,28 @@
     color: var(--component-color);
   }
   .primary-border-color {
+    border-color: var(--primary-color);
+  }
+  .primary-bg-border-color {
     border-color: var(--primary-bg-color);
   }
   .secondary-border-color {
+    border-color: var(--secondary-color);
+  }
+  .secondary-bg-border-color {
     border-color: var(--secondary-bg-color);
   }
   .accent-border-color {
+    border-color: var(--accent-color);
+  }
+  .accent-bg-border-color {
     border-color: var(--accent-bg-color);
+  }
+  .component-bg-border-color {
+    border-color: var(--component-bg-color);
+  }
+  .component-color-border-color {
+    border-color: var(--component-color);
   }
   .component-border-color {
     border-color: var(--component-border-color);
