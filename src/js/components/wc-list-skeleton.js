@@ -41,7 +41,7 @@ if (!customElements.get('wc-list-skeleton')) {
     _createElement() {
       this.componentElement.id = 'list-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'm-4 p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700';
+      this.componentElement.className = 'm-4 p-4 space-y-4 border border-solid border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="w-5/6">
@@ -118,10 +118,6 @@ if (!customElements.get('wc-list-skeleton')) {
 }
 
 /* Borders */
-.border {
-  border-width: 1px;
-  border-style: solid;
-}
 .border-gray-200 {
   border-color: #e5e7eb;
 }

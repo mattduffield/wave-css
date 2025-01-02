@@ -41,7 +41,7 @@ if (!customElements.get('wc-table-skeleton')) {
     _createElement() {
       this.componentElement.id = 'table-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'max-w-full p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700';
+      this.componentElement.className = 'max-w-full m-4 p-4 space-y-4 border border-solid border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700';
       this.componentElement.innerHTML = `
         <!-- Table Header Skeleton -->
         <div class="flex items-center justify-between">

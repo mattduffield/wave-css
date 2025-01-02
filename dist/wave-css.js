@@ -4295,7 +4295,7 @@ if (!customElements.get("wc-article-skeleton")) {
     _createElement() {
       this.componentElement.id = "article-skeleton";
       this.componentElement.setAttribute("role", "status");
-      this.componentElement.className = "p-4 space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center";
+      this.componentElement.className = "max-w-full m-4 border border-solid border-gray-200 p-4 space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center dark:border-gray-700";
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center w-full h-48 bg-gray-300 rounded-md sm:w-96 dark:bg-gray-700">
           <svg class="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
@@ -4411,7 +4411,7 @@ if (!customElements.get("wc-card-skeleton")) {
     _createElement() {
       this.componentElement.id = "card-skeleton";
       this.componentElement.setAttribute("role", "status");
-      this.componentElement.className = "max-w-sm p-4 border border-gray-200 rounded-md shadow animate-pulse md:p-6 dark:border-gray-700";
+      this.componentElement.className = "max-w-sm p-4 border border-solid border-gray-200 rounded-md shadow animate-pulse md:p-6 dark:border-gray-700";
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center h-48 mb-4 bg-gray-300 rounded-md dark:bg-gray-700">
           <svg class="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
@@ -4513,7 +4513,7 @@ if (!customElements.get("wc-list-skeleton")) {
     _createElement() {
       this.componentElement.id = "list-skeleton";
       this.componentElement.setAttribute("role", "status");
-      this.componentElement.className = "m-4 p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700";
+      this.componentElement.className = "m-4 p-4 space-y-4 border border-solid border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700";
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="w-5/6">
@@ -4589,10 +4589,6 @@ if (!customElements.get("wc-list-skeleton")) {
 }
 
 /* Borders */
-.border {
-  border-width: 1px;
-  border-style: solid;
-}
 .border-gray-200 {
   border-color: #e5e7eb;
 }
@@ -4658,7 +4654,7 @@ if (!customElements.get("wc-table-skeleton")) {
     _createElement() {
       this.componentElement.id = "table-skeleton";
       this.componentElement.setAttribute("role", "status");
-      this.componentElement.className = "max-w-full p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700";
+      this.componentElement.className = "max-w-full m-4 p-4 space-y-4 border border-solid border-gray-200 divide-y divide-gray-200 rounded-md shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700";
       this.componentElement.innerHTML = `
         <!-- Table Header Skeleton -->
         <div class="flex items-center justify-between">

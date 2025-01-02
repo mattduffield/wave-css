@@ -41,7 +41,7 @@ if (!customElements.get('wc-card-skeleton')) {
     _createElement() {
       this.componentElement.id = 'card-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'max-w-sm p-4 border border-gray-200 rounded-md shadow animate-pulse md:p-6 dark:border-gray-700';
+      this.componentElement.className = 'max-w-sm p-4 border border-solid border-gray-200 rounded-md shadow animate-pulse md:p-6 dark:border-gray-700';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center h-48 mb-4 bg-gray-300 rounded-md dark:bg-gray-700">
           <svg class="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
