@@ -8,6 +8,7 @@ import './wc-div.js';
 import './wc-dropdown.js';
 import './wc-flip-box.js';
 import './wc-image.js';
+import './wc-list-skeleton.js';
 import './wc-menu.js';
 import './wc-save-button.js';
 import './wc-save-split-button.js';

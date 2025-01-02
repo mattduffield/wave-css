@@ -82,24 +82,6 @@ if (!customElements.get('wc-list-skeleton')) {
       `.trim();
     }
 
-    // _render() {
-    //   super._render();
-    //   const innerParts = this.querySelectorAll('.wc-div > *');
-    //   if (innerParts.length > 0) {
-    //     this.componentElement.innerHTML = '';
-    //     innerParts.forEach(p => this.componentElement.appendChild(p));
-    //   } else {
-    //     this.componentElement.innerHTML = '';
-    //     this._moveDeclarativeInner();
-    //     // const el = this._createElement();
-    //     // this.componentElement.appendChild(el);
-    //   }
-
-    //   if (typeof htmx !== 'undefined') {
-    //     htmx.process(this);
-    //   }
-    // }
-
     _applyStyle() {
       const style = `
         .wc-div {
