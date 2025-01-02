@@ -46,6 +46,15 @@
   .component-color {
     color: var(--component-color);
   }
+  .primary-border-color {
+    border-color: var(--primary-bg-color);
+  }
+  .secondary-border-color {
+    border-color: var(--secondary-bg-color);
+  }
+  .accent-border-color {
+    border-color: var(--accent-bg-color);
+  }
   .component-border-color {
     border-color: var(--component-border-color);
   }
