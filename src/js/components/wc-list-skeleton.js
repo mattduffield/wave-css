@@ -91,16 +91,10 @@ if (!customElements.get('wc-list-skeleton')) {
 .space-y-4 > * + * {
   margin-top: 1rem;
 }
-.mb-2\.5 {
-  margin-bottom: 0.625rem;
-}
 
 /* Width and Height */
 .max-w-md {
   max-width: 28rem;
-}
-.h-2\.5 {
-  height: 0.625rem;
 }
 
 /* Shadows */

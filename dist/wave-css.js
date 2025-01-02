@@ -4345,10 +4345,6 @@ if (!customElements.get("wc-article-skeleton")) {
 .max-w-[360px] {
   max-width: 360px;
 }
-
-.mb-2.5 {
-  margin-bottom: 0.625rem;
-}
       `.trim();
       this.loadStyle("wc-article-skeleton", style);
     }
@@ -4420,17 +4416,7 @@ if (!customElements.get("wc-card-skeleton")) {
     }
     _applyStyle() {
       const style = `
-.h-2.5 {
-  height: 0.625rem;
-}
-.mb-2.5 {
-  margin-bottom: 0.625rem;
-}
-.me-3 {
-  margin-inline-end: 0.75rem;
-}
       `.trim();
-      this.loadStyle("wc-card-skeleton", style);
     }
     _unWireEvents() {
       super._unWireEvents();
@@ -4523,16 +4509,10 @@ if (!customElements.get("wc-list-skeleton")) {
 .space-y-4 > * + * {
   margin-top: 1rem;
 }
-.mb-2.5 {
-  margin-bottom: 0.625rem;
-}
 
 /* Width and Height */
 .max-w-md {
   max-width: 28rem;
-}
-.h-2.5 {
-  height: 0.625rem;
 }
 
 /* Shadows */

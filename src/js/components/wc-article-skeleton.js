@@ -92,10 +92,6 @@ if (!customElements.get('wc-article-skeleton')) {
 .max-w-\[360px\] {
   max-width: 360px;
 }
-
-.mb-2\.5 {
-  margin-bottom: 0.625rem;
-}
       `.trim();
       this.loadStyle('wc-article-skeleton', style);
     }

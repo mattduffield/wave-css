@@ -2470,6 +2470,17 @@ div[class^="wc-"] :user-invalid[data-error]:hover::after {
 .my-auto { margin-top: auto; margin-bottom: auto; }
 
 
+/* Placeholder styles */
+.h-2\.5 {
+    height: 0.625rem; /* 10px */
+}
+.mb-2\.5 {
+    margin-bottom: 0.625rem; /* 10px */
+}
+.me-3 {
+  margin-inline-end: 0.75rem;
+}
+
 
 .text-align-right {
   text-align: right;

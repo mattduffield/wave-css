@@ -68,17 +68,8 @@ if (!customElements.get('wc-card-skeleton')) {
 
     _applyStyle() {
       const style = `
-.h-2\.5 {
-  height: 0.625rem;
-}
-.mb-2\.5 {
-  margin-bottom: 0.625rem;
-}
-.me-3 {
-  margin-inline-end: 0.75rem;
-}
       `.trim();
-      this.loadStyle('wc-card-skeleton', style);
+      // this.loadStyle('wc-card-skeleton', style);
     }
 
     _unWireEvents() {

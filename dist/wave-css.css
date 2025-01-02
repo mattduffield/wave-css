@@ -4212,6 +4212,15 @@ div[class^=wc-] :user-invalid[data-error]:hover::after {
   margin-top: auto;
   margin-bottom: auto;
 }
+.h-2\.5 {
+  height: 0.625rem;
+}
+.mb-2\.5 {
+  margin-bottom: 0.625rem;
+}
+.me-3 {
+  margin-inline-end: 0.75rem;
+}
 .text-align-right {
   text-align: right;
 }
