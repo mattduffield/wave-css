@@ -148,9 +148,18 @@ export function locatorAll(root, selector) {
   return elements;
 }
 
-export function waitForSelectorPolling(selector, timeout = 5000, interval = 100) {
+/*
+  Name: waitForSelectorPolling
+  Desc:
+  Usage:
+    const selector = "#table-main";
+    await WaveHelpers.waitForSelectorPolling(selectors, 1000);
+    ... now you can proceed...
+*/
+export function waitForSelectorPolling(selector, timeout = 3000, interval = 100) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
+
     const checkVisibility = () => {
         const element = document.querySelector(selector);
         if (element && element.offsetParent !== null) {
@@ -215,6 +224,39 @@ export function waitForResourcePolling(scriptDependencies = [], linkDependencies
     checkAvailability();
   });
 }
+
+/*
+  Name: waitForSelectorsPolling
+  Desc:
+  Usage:
+    const selectors = ["#table-main", ".page-content"];
+    await WaveHelpers.waitForSelectorsPolling(selectors, 1000);
+    ... now you can proceed...
+*/
+export function waitForSelectorsPolling(selectors = [], timeout = 1000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+
+    // Ensure selectors is an array
+    const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+
+    // Function to check if all selectors are present in the DOM
+    const checkAvailability = () => {
+      const allAvailable = selectorList.every(selector => document.querySelector(selector) !== null);
+
+      if (allAvailable) {
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: Not all selectors available after ${timeout}ms. Missing selectors: ${JSON.stringify(selectorList)}`));
+      } else {
+        requestAnimationFrame(checkAvailability);
+      }
+    };
+
+    checkAvailability();
+  });
+}
+
 
 /*
   Name: sleep

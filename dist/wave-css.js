@@ -121,7 +121,7 @@ function locatorAll(root, selector) {
   }
   return elements;
 }
-function waitForSelectorPolling(selector, timeout = 5e3, interval = 100) {
+function waitForSelectorPolling(selector, timeout = 3e3, interval = 100) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const checkVisibility = () => {
@@ -156,6 +156,23 @@ function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], 
         reject(new Error(`Timeout: Dependencies not available after ${timeout}ms. Scripts: ${JSON.stringify(scriptList)}, Links: ${JSON.stringify(linkList)}`));
       } else {
         setTimeout(checkAvailability, interval);
+      }
+    };
+    checkAvailability();
+  });
+}
+function waitForSelectorsPolling(selectors = [], timeout = 1e3) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+    const checkAvailability = () => {
+      const allAvailable = selectorList.every((selector) => document.querySelector(selector) !== null);
+      if (allAvailable) {
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: Not all selectors available after ${timeout}ms. Missing selectors: ${JSON.stringify(selectorList)}`));
+      } else {
+        requestAnimationFrame(checkAvailability);
       }
     };
     checkAvailability();
@@ -6289,5 +6306,6 @@ export {
   show,
   sleep,
   waitForResourcePolling,
-  waitForSelectorPolling
+  waitForSelectorPolling,
+  waitForSelectorsPolling
 };
