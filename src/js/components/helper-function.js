@@ -285,7 +285,7 @@ export function hideAndShow(hideSelector, showSelector) {
   show(showSelector);
 }
 
-export async function waitForThenHideAndShow(hideSelector, showSelector, timeout=3000, delay=1000) {
+export async function waitForThenHideAndShow(hideSelector, showSelector, timeout=3000, delay=500) {
   await waitForSelectorsPolling([hideSelector, showSelector], timeout);
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);

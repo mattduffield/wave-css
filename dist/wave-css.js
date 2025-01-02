@@ -193,7 +193,7 @@ function hideAndShow(hideSelector, showSelector) {
   hide(hideSelector);
   show(showSelector);
 }
-async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3, delay = 1e3) {
+async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3, delay = 500) {
   await waitForSelectorsPolling([hideSelector, showSelector], timeout);
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);
