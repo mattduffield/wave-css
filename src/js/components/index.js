@@ -1,16 +1,13 @@
 export * from './helper-function.js';
-import './wc-article-skeleton.js';
 import './wc-base-component.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
 import './wc-background-image.js';
-import './wc-card-skeleton.js';
 import './wc-code-mirror.js';
 import './wc-div.js';
 import './wc-dropdown.js';
 import './wc-flip-box.js';
 import './wc-image.js';
-import './wc-list-skeleton.js';
 import './wc-menu.js';
 import './wc-save-button.js';
 import './wc-save-split-button.js';
@@ -20,11 +17,15 @@ import './wc-slideshow-image.js';
 import './wc-slideshow.js';
 import './wc-tab-item.js';
 import './wc-tab.js';
-import './wc-table-skeleton.js';
 import './wc-theme-selector.js';
 import './wc-timeline.js';
-import './wc-loader.js';
 // import './wc-top-nav.js';
+// Loaders
+import './wc-article-skeleton.js';
+import './wc-card-skeleton.js';
+import './wc-list-skeleton.js';
+import './wc-table-skeleton.js';
+import './wc-loader.js';
 // Non-UI
 import './wc-behavior.js';
 import './wc-visibility-change.js';

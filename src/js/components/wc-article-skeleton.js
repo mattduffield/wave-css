@@ -41,7 +41,7 @@ if (!customElements.get('wc-article-skeleton')) {
     _createElement() {
       this.componentElement.id = 'article-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center';
+      this.componentElement.className = 'p-4 space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center w-full h-48 bg-gray-300 rounded-md sm:w-96 dark:bg-gray-700">
           <svg class="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
