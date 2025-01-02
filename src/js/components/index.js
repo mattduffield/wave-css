@@ -1,4 +1,5 @@
 export * from './helper-function.js';
+import './wc-article-skeleton.js';
 import './wc-base-component.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
