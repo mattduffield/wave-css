@@ -161,7 +161,7 @@ function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], 
     checkAvailability();
   });
 }
-function waitForSelectorsPolling(selectors = [], timeout = 1e3) {
+function waitForSelectorsPolling(selectors = [], timeout = 3e3) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const selectorList = Array.isArray(selectors) ? selectors : [selectors];
@@ -192,6 +192,11 @@ function show(selector) {
 function hideAndShow(hideSelector, showSelector) {
   hide(hideSelector);
   show(showSelector);
+}
+async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3, delay = 1e3) {
+  await waitForSelectorsPolling([hideSelector, showSelector], timeout);
+  await sleep(delay);
+  hideAndShow(hideSelector, showSelector);
 }
 
 // src/js/components/wc-base-component.js
@@ -6307,5 +6312,6 @@ export {
   sleep,
   waitForResourcePolling,
   waitForSelectorPolling,
-  waitForSelectorsPolling
+  waitForSelectorsPolling,
+  waitForThenHideAndShow
 };

@@ -35,7 +35,8 @@ var WaveHelpers = (() => {
     sleep: () => sleep,
     waitForResourcePolling: () => waitForResourcePolling,
     waitForSelectorPolling: () => waitForSelectorPolling,
-    waitForSelectorsPolling: () => waitForSelectorsPolling
+    waitForSelectorsPolling: () => waitForSelectorsPolling,
+    waitForThenHideAndShow: () => waitForThenHideAndShow
   });
   function isCustomElement(element) {
     return element.tagName.includes("-");
@@ -199,7 +200,7 @@ var WaveHelpers = (() => {
       checkAvailability();
     });
   }
-  function waitForSelectorsPolling(selectors = [], timeout = 1e3) {
+  function waitForSelectorsPolling(selectors = [], timeout = 3e3) {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
       const selectorList = Array.isArray(selectors) ? selectors : [selectors];
@@ -230,6 +231,11 @@ var WaveHelpers = (() => {
   function hideAndShow(hideSelector, showSelector) {
     hide(hideSelector);
     show(showSelector);
+  }
+  async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3, delay = 1e3) {
+    await waitForSelectorsPolling([hideSelector, showSelector], timeout);
+    await sleep(delay);
+    hideAndShow(hideSelector, showSelector);
   }
   return __toCommonJS(helper_function_exports);
 })();

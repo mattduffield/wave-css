@@ -230,10 +230,10 @@ export function waitForResourcePolling(scriptDependencies = [], linkDependencies
   Desc:
   Usage:
     const selectors = ["#table-main", ".page-content"];
-    await WaveHelpers.waitForSelectorsPolling(selectors, 1000);
+    await WaveHelpers.waitForSelectorsPolling(selectors, 3000);
     ... now you can proceed...
 */
-export function waitForSelectorsPolling(selectors = [], timeout = 1000) {
+export function waitForSelectorsPolling(selectors = [], timeout = 3000) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
 
@@ -283,4 +283,10 @@ export function show(selector) {
 export function hideAndShow(hideSelector, showSelector) {
   hide(hideSelector);
   show(showSelector);
+}
+
+export async function waitForThenHideAndShow(hideSelector, showSelector, timeout=3000, delay=1000) {
+  await waitForSelectorsPolling([hideSelector, showSelector], timeout);
+  await sleep(delay);
+  hideAndShow(hideSelector, showSelector);
 }
