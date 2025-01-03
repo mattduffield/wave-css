@@ -123,9 +123,11 @@ class WcTab extends WcBaseComponent {
       htmx.process(this);
     }
 
-    const hash = location.hash.slice(1);
-    const btn = this.querySelector(`button[data-label="${hash}"]`);
-    btn?.click();
+    setTimeout(() => {
+      const hash = location.hash.slice(1);
+      const btn = this.querySelector(`button[data-label="${hash}"]`);
+      btn?.click();
+    }, 100);
 
     console.log('_render:wc-tab');
   }

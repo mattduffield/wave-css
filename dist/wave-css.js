@@ -3729,7 +3729,7 @@ var WcTab = class extends WcBaseComponent {
     const innerEl = this.querySelector(".wc-tab > *");
     if (innerEl) {
       const btns = this.querySelectorAll(".tab-link");
-      btns.forEach((btn2) => btn2.addEventListener("click", this._handleClick.bind(this)));
+      btns.forEach((btn) => btn.addEventListener("click", this._handleClick.bind(this)));
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
@@ -3737,9 +3737,11 @@ var WcTab = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    const hash = location.hash.slice(1);
-    const btn = this.querySelector(`button[data-label="${hash}"]`);
-    btn?.click();
+    setTimeout(() => {
+      const hash = location.hash.slice(1);
+      const btn = this.querySelector(`button[data-label="${hash}"]`);
+      btn?.click();
+    }, 100);
     console.log("_render:wc-tab");
   }
   _createInnerElement() {
