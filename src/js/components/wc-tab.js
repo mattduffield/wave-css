@@ -199,15 +199,17 @@ class WcTab extends WcBaseComponent {
   }
 
   _handleClick(event) {
-    event.stopPropagation();
-    event.preventDefault();
     const {target} = event;
-    // const parts = this.componentElement.querySelectorAll('.tab-nav .active, .tab-body .active');
-    const parts = document.querySelectorAll(`wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-nav > .active, wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-body > wc-tab-item > .active`)
-  
+    let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`)
     parts.forEach(p => {
       p.classList.remove('active')
     });
+    
+    parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-body > wc-tab-item > .active`)
+    parts.forEach(p => {
+      p.classList.remove('active')
+    });
+
     target.classList.add('active');
     const label = target.textContent;
     const contents = this.querySelector(`.wc-tab-item[label='${label}']`);

@@ -3824,10 +3824,12 @@ var WcTab = class extends WcBaseComponent {
     this._handleHelper(event, "click");
   }
   _handleClick(event) {
-    event.stopPropagation();
-    event.preventDefault();
     const { target } = event;
-    const parts = document.querySelectorAll(`wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-nav > .active, wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-body > wc-tab-item > .active`);
+    let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`);
+    parts.forEach((p) => {
+      p.classList.remove("active");
+    });
+    parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-body > wc-tab-item > .active`);
     parts.forEach((p) => {
       p.classList.remove("active");
     });
