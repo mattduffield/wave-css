@@ -257,6 +257,35 @@ export function waitForSelectorsPolling(selectors = [], timeout = 3000) {
   });
 }
 
+/*
+  Name: waitForPropertyPolling
+  Desc:
+  Usage:
+    const el = document.querySelector("wc-tab");
+    await WaveHelpers.waitForPropertyPolling(el, "editor", 3000);
+    ... now you can proceed...
+*/
+export function waitForPropertyPolling(el, propertyName, timeout = 3000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+
+    // Function to check if property is present on the element
+    const checkAvailability = () => {
+      const isAvailable = el[propertyName];
+
+      if (allAvailable) {
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: ${timeout}ms. Propery: ${propertyName} not available on element.`));
+      } else {
+        requestAnimationFrame(checkAvailability);
+      }
+    };
+
+    checkAvailability();
+  });
+}
+
 
 /*
   Name: sleep

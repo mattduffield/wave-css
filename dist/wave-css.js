@@ -166,11 +166,27 @@ function waitForSelectorsPolling(selectors = [], timeout = 3e3) {
     const startTime = Date.now();
     const selectorList = Array.isArray(selectors) ? selectors : [selectors];
     const checkAvailability = () => {
-      const allAvailable = selectorList.every((selector) => document.querySelector(selector) !== null);
-      if (allAvailable) {
+      const allAvailable2 = selectorList.every((selector) => document.querySelector(selector) !== null);
+      if (allAvailable2) {
         resolve();
       } else if (Date.now() - startTime > timeout) {
         reject(new Error(`Timeout: Not all selectors available after ${timeout}ms. Missing selectors: ${JSON.stringify(selectorList)}`));
+      } else {
+        requestAnimationFrame(checkAvailability);
+      }
+    };
+    checkAvailability();
+  });
+}
+function waitForPropertyPolling(el, propertyName, timeout = 3e3) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkAvailability = () => {
+      const isAvailable = el[propertyName];
+      if (allAvailable) {
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout: ${timeout}ms. Propery: ${propertyName} not available on element.`));
       } else {
         requestAnimationFrame(checkAvailability);
       }
@@ -6312,6 +6328,7 @@ export {
   locatorAll,
   show,
   sleep,
+  waitForPropertyPolling,
   waitForResourcePolling,
   waitForSelectorPolling,
   waitForSelectorsPolling,
