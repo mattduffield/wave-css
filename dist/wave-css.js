@@ -3763,9 +3763,11 @@ var WcTab = class extends WcBaseComponent {
       htmx.process(this);
     }
     setTimeout(() => {
-      const hash = location.hash.slice(1);
-      const btn = this.querySelector(`button[data-label="${hash}"]`);
-      btn?.click();
+      const hashParts = location.hash.slice(1).split("+");
+      hashParts.forEach((part) => {
+        const btn = this.querySelector(`button[data-label="${part}"]`);
+        btn?.click();
+      });
     }, 100);
     console.log("_render:wc-tab");
   }
