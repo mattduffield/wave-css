@@ -236,17 +236,17 @@ class WcTab extends WcBaseComponent {
     function traverseTabs(tab) {
         let result = [];
 
-        const tabNav = tab.querySelector('.tab-nav');
+        const tabNav = tab.querySelector(':scope > .wc-tab > .tab-nav');
         if (tabNav) {
             // Find all buttons with the 'active' class in this tab
-            const activeButtons = Array.from(tabNav.querySelectorAll('button.active'));
+            const activeButtons = Array.from(tabNav.querySelectorAll(':scope > button.active'));
             for (const button of activeButtons) {
                 result.push(button.textContent.trim());
             }
         }
 
         // Find all nested wc-tab components directly inside this tab
-        const nestedTabs = Array.from(tab.querySelectorAll(':scope > .wc-tab > .tab-body > wc-tab-item > .wc-tab-item > wc-tab'));
+        const nestedTabs = Array.from(tab.querySelectorAll(':scope > .wc-tab > .tab-body > wc-tab-item > .wc-tab-item.active > wc-tab'));
         for (const nestedTab of nestedTabs) {
             result = result.concat(traverseTabs(nestedTab));
         }
