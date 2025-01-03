@@ -506,8 +506,8 @@ class WcCodeMirror extends WcBaseComponent {
   }
 
   refresh() {
-    this.editor.focus();
     this.editor.refresh();
+    this.editor.focus();
   }
 
   async getGutters() {
