@@ -273,7 +273,7 @@ export function waitForPropertyPolling(el, propertyName, timeout = 3000) {
     const checkAvailability = () => {
       const isAvailable = el[propertyName];
 
-      if (allAvailable) {
+      if (isAvailable) {
         resolve();
       } else if (Date.now() - startTime > timeout) {
         reject(new Error(`Timeout: ${timeout}ms. Propery: ${propertyName} not available on element.`));

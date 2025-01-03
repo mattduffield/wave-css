@@ -166,8 +166,8 @@ function waitForSelectorsPolling(selectors = [], timeout = 3e3) {
     const startTime = Date.now();
     const selectorList = Array.isArray(selectors) ? selectors : [selectors];
     const checkAvailability = () => {
-      const allAvailable2 = selectorList.every((selector) => document.querySelector(selector) !== null);
-      if (allAvailable2) {
+      const allAvailable = selectorList.every((selector) => document.querySelector(selector) !== null);
+      if (allAvailable) {
         resolve();
       } else if (Date.now() - startTime > timeout) {
         reject(new Error(`Timeout: Not all selectors available after ${timeout}ms. Missing selectors: ${JSON.stringify(selectorList)}`));
@@ -183,7 +183,7 @@ function waitForPropertyPolling(el, propertyName, timeout = 3e3) {
     const startTime = Date.now();
     const checkAvailability = () => {
       const isAvailable = el[propertyName];
-      if (allAvailable) {
+      if (isAvailable) {
         resolve();
       } else if (Date.now() - startTime > timeout) {
         reject(new Error(`Timeout: ${timeout}ms. Propery: ${propertyName} not available on element.`));
