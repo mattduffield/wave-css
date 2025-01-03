@@ -3821,7 +3821,8 @@ var WcTab = class extends WcBaseComponent {
     event.stopPropagation();
     event.preventDefault();
     const { target } = event;
-    let parts = this.componentElement.querySelectorAll(".active");
+    const ce = target.closest(".wc-tab");
+    let parts = ce.querySelectorAll(".active");
     parts.forEach((p) => {
       const parent = p.closest("wc-tab");
       if (parent == this) {
