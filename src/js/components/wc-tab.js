@@ -211,91 +211,58 @@ class WcTab extends WcBaseComponent {
     const payload = { detail: { label }};
     const custom = new CustomEvent('tabchange', payload);
     contents.dispatchEvent(custom);
-    // location.hash = target.dataset.label;    
-    // location.hash = this._buildTabPathFromInnermost(target);
-    const wcTab = this._findRootMostTab(target);
-    location.hash = this._buildActiveTabString(wcTab);
+    location.hash = this._buildActiveTabStringFromRoot(target);
   }
 
-  _buildActiveTabString(container) {
-    function traverseTabs(element) {
+  _buildActiveTabStringFromRoot(startElement) {
+    // Helper function to find the root-most wc-tab
+    function findRootMostTab(element) {
+        let current = element.closest('wc-tab');
+        let root = current;
+
+        while (current) {
+            const parentTab = current.parentElement?.closest('wc-tab');
+            if (!parentTab) {
+                root = current;
+                break;
+            }
+            current = parentTab;
+        }
+
+        return root;
+    }
+
+    // Recursive function to traverse wc-tab components and collect active buttons
+    function traverseTabs(tab) {
         let result = [];
 
-        // Find all wc-tab components within the current container
-        const tabs = Array.from(element.querySelectorAll('wc-tab'));
-
-        for (const tab of tabs) {
-            const tabNav = tab.querySelector('.tab-nav');
-            if (tabNav) {
-                // Find all buttons with the 'active' class
-                const activeButtons = Array.from(tabNav.querySelectorAll('button.active'));
-                for (const button of activeButtons) {
-                    result.push(button.textContent.trim());
-                }
+        const tabNav = tab.querySelector('.tab-nav');
+        if (tabNav) {
+            // Find all buttons with the 'active' class in this tab
+            const activeButtons = Array.from(tabNav.querySelectorAll('button.active'));
+            for (const button of activeButtons) {
+                result.push(button.textContent.trim());
             }
-            
-            // Recursively process nested wc-tab components
-            const nestedTabs = traverseTabs(tab);
-            result = result.concat(nestedTabs);
+        }
+
+        // Find all nested wc-tab components directly inside this tab
+        const nestedTabs = Array.from(tab.querySelectorAll(':scope > .wc-tab > .tab-body > wc-tab-item > .wc-tab-item > wc-tab'));
+        for (const nestedTab of nestedTabs) {
+            result = result.concat(traverseTabs(nestedTab));
         }
 
         return result;
     }
 
-    // Start traversal from the outermost container
-    const activeTabString = traverseTabs(container).join('+');
+    // Start by finding the root-most wc-tab
+    const rootTab = findRootMostTab(startElement);
+    if (!rootTab) {
+        return ''; // Return an empty string if no wc-tab is found
+    }
+
+    // Traverse from the root-most tab and join the results with '+'
+    const activeTabString = traverseTabs(rootTab).join('+');
     return activeTabString;
-  }
-
-  _findRootMostTab(element) {
-    let current = element.closest('wc-tab'); // Start with the closest wc-tab to the given element
-    let root = current;
-
-    while (current) {
-        // Check if the current wc-tab has a parent wc-tab
-        const parentTab = current.parentElement?.closest('wc-tab');
-        if (!parentTab) {
-            // If no parent wc-tab is found, we are at the root
-            root = current;
-            break;
-        }
-        current = parentTab; // Move up to the parent wc-tab
-    }
-
-    return root; // Return the root-most wc-tab
-  }
-
-  /**
-   * Recursively builds a '+' separated string of active tabs starting from the innermost clicked tab.
-   *
-   * @param {Element} element - The innermost clicked tab element (e.g., the button inside .tab-nav).
-   * @returns {string} - A '+' separated string of active tab names up to the outermost.
-   */
-  _buildTabPathFromInnermost(element) {
-    function traverseToOuter(tabElement) {
-        if (!tabElement || !tabElement.closest('wc-tab')) {
-            return '';
-        }
-
-        const currentTab = tabElement.closest('wc-tab');
-        const tabNav = currentTab.querySelector('.tab-nav');
-
-        let tabName = '';
-
-        if (tabNav) {
-            const activeButton = tabNav.querySelector('button.active');
-
-            if (activeButton) {
-                tabName = activeButton.textContent.trim();
-            }
-        }
-
-        const outerPath = traverseToOuter(currentTab.parentElement.closest('wc-tab'));
-
-        return outerPath ? `${outerPath}+${tabName}` : tabName;
-    }
-
-    return traverseToOuter(element);
   }
 
   _applyStyle() {
