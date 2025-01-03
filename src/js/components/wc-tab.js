@@ -199,6 +199,7 @@ class WcTab extends WcBaseComponent {
   }
 
   _handleClick(event) {
+    console.log('event', event);
     event.stopPropagation();
     event.preventDefault();
     const {target} = event;
