@@ -1449,7 +1449,8 @@ var WcCodeMirror = class extends WcBaseComponent {
       this.editor.setOption("readOnly", isDisabled);
     }
   }
-  refresh() {
+  async refresh(timeout = 500) {
+    await sleep(timeout);
     this.editor.refresh();
     this.editor.focus();
   }

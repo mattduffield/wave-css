@@ -20,6 +20,7 @@
  * 
  */
 
+import { sleep } from './helper-function.js';
 import { WcBaseComponent } from './wc-base-component.js';
 
 class WcCodeMirror extends WcBaseComponent {
@@ -505,7 +506,8 @@ class WcCodeMirror extends WcBaseComponent {
     }
   }
 
-  refresh() {
+  async refresh(timeout=500) {
+    await sleep(timeout);
     this.editor.refresh();
     this.editor.focus();
   }
