@@ -3828,6 +3828,7 @@ var WcTab = class extends WcBaseComponent {
     const payload = { detail: { label } };
     const custom = new CustomEvent("tabchange", payload);
     contents.dispatchEvent(custom);
+    location.hash = target.dataset.label;
   }
   _applyStyle() {
     const style = `
