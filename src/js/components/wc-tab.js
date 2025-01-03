@@ -212,7 +212,57 @@ class WcTab extends WcBaseComponent {
     const custom = new CustomEvent('tabchange', payload);
     contents.dispatchEvent(custom);
     // location.hash = target.dataset.label;    
-    location.hash = this._buildTabPathFromInnermost(target);
+    // location.hash = this._buildTabPathFromInnermost(target);
+    const wcTab = this._findRootMostTab(target);
+    location.hash = this._buildActiveTabString(wcTab);
+  }
+
+  _buildActiveTabString(container) {
+    function traverseTabs(element) {
+        let result = [];
+
+        // Find all wc-tab components within the current container
+        const tabs = Array.from(element.querySelectorAll('wc-tab'));
+
+        for (const tab of tabs) {
+            const tabNav = tab.querySelector('.tab-nav');
+            if (tabNav) {
+                // Find all buttons with the 'active' class
+                const activeButtons = Array.from(tabNav.querySelectorAll('button.active'));
+                for (const button of activeButtons) {
+                    result.push(button.textContent.trim());
+                }
+            }
+            
+            // Recursively process nested wc-tab components
+            const nestedTabs = traverseTabs(tab);
+            result = result.concat(nestedTabs);
+        }
+
+        return result;
+    }
+
+    // Start traversal from the outermost container
+    const activeTabString = traverseTabs(container).join('+');
+    return activeTabString;
+  }
+
+  _findRootMostTab(element) {
+    let current = element.closest('wc-tab'); // Start with the closest wc-tab to the given element
+    let root = current;
+
+    while (current) {
+        // Check if the current wc-tab has a parent wc-tab
+        const parentTab = current.parentElement?.closest('wc-tab');
+        if (!parentTab) {
+            // If no parent wc-tab is found, we are at the root
+            root = current;
+            break;
+        }
+        current = parentTab; // Move up to the parent wc-tab
+    }
+
+    return root; // Return the root-most wc-tab
   }
 
   /**

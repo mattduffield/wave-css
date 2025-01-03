@@ -3843,7 +3843,41 @@ var WcTab = class extends WcBaseComponent {
     const payload = { detail: { label } };
     const custom = new CustomEvent("tabchange", payload);
     contents.dispatchEvent(custom);
-    location.hash = this._buildTabPathFromInnermost(target);
+    const wcTab = this._findRootMostTab(target);
+    location.hash = this._buildActiveTabString(wcTab);
+  }
+  _buildActiveTabString(container) {
+    function traverseTabs(element) {
+      let result = [];
+      const tabs = Array.from(element.querySelectorAll("wc-tab"));
+      for (const tab of tabs) {
+        const tabNav = tab.querySelector(".tab-nav");
+        if (tabNav) {
+          const activeButtons = Array.from(tabNav.querySelectorAll("button.active"));
+          for (const button of activeButtons) {
+            result.push(button.textContent.trim());
+          }
+        }
+        const nestedTabs = traverseTabs(tab);
+        result = result.concat(nestedTabs);
+      }
+      return result;
+    }
+    const activeTabString = traverseTabs(container).join("+");
+    return activeTabString;
+  }
+  _findRootMostTab(element) {
+    let current = element.closest("wc-tab");
+    let root = current;
+    while (current) {
+      const parentTab = current.parentElement?.closest("wc-tab");
+      if (!parentTab) {
+        root = current;
+        break;
+      }
+      current = parentTab;
+    }
+    return root;
   }
   /**
    * Recursively builds a '+' separated string of active tabs starting from the innermost clicked tab.
