@@ -505,6 +505,11 @@ class WcCodeMirror extends WcBaseComponent {
     }
   }
 
+  refresh() {
+    this.editor.focus();
+    this.editor.refresh();
+  }
+
   async getGutters() {
     if (this.hasAttribute('fold-gutter')) {
       // Need to load these serially...
