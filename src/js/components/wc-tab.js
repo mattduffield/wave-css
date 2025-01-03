@@ -199,6 +199,8 @@ class WcTab extends WcBaseComponent {
   }
 
   _handleClick(event) {
+    event.stopPropagation();
+    event.preventDefault();
     const {target} = event;
     let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`)
     parts.forEach(p => {

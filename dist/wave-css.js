@@ -3824,6 +3824,8 @@ var WcTab = class extends WcBaseComponent {
     this._handleHelper(event, "click");
   }
   _handleClick(event) {
+    event.stopPropagation();
+    event.preventDefault();
     const { target } = event;
     let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`);
     parts.forEach((p) => {
