@@ -3787,6 +3787,11 @@ var WcTab = class extends WcBaseComponent {
     parts.forEach((p) => {
       tabBody.appendChild(p);
     });
+    const hashParts = location.hash.slice(1).split("+");
+    hashParts.forEach((part) => {
+      const btn = this.querySelector(`button[data-label="${part}"]`);
+      btn?.click();
+    });
     this.componentElement.appendChild(tabNav);
     this.componentElement.appendChild(tabBody);
   }

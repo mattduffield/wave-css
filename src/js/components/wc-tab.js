@@ -146,7 +146,6 @@ class WcTab extends WcBaseComponent {
     tabNav.classList.add('tab-nav');
     const tabBody = document.createElement('div');
     tabBody.classList.add('tab-body');
-    // const parts = this.querySelectorAll('wc-tab > *:not(.wc-tab)');
     const parts = Array.from(this.children).filter(p => !p.matches('wc-tab') && !p.matches('.wc-tab')); // Exclude nested wc-tab elements
 
     parts.forEach((p, idx) => {
@@ -166,6 +165,13 @@ class WcTab extends WcBaseComponent {
     parts.forEach(p => {
       tabBody.appendChild(p);
     });
+    
+    const hashParts = location.hash.slice(1).split('+');
+    hashParts.forEach(part => {
+      const btn = this.querySelector(`button[data-label="${part}"]`);
+      btn?.click();  
+    });
+
     this.componentElement.appendChild(tabNav);
     this.componentElement.appendChild(tabBody);
   }
@@ -211,16 +217,6 @@ class WcTab extends WcBaseComponent {
         p.classList.remove('active')
       }
     });
-
-    // let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`)
-    // parts.forEach(p => {
-    //   p.classList.remove('active')
-    // });
-    
-    // parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-body > wc-tab-item > .active`)
-    // parts.forEach(p => {
-    //   p.classList.remove('active')
-    // });
 
     target.classList.add('active');
     const label = target.textContent;
