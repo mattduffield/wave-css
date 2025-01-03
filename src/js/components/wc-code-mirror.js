@@ -380,6 +380,10 @@ class WcCodeMirror extends WcBaseComponent {
         font-size: 1.5em;
         z-index: 1;
       }
+      
+      .wc-code-mirror > label ~ .settings-icon {
+        top: 22px;
+      }
 
       .settings-popover {
         background: transparent;
