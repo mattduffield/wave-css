@@ -13,7 +13,6 @@ if (!customElements.get('wc-table-skeleton')) {
         this.componentElement = compEl;
       } else {
         this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-table-skeleton');
         this._createElement();
         this.appendChild(this.componentElement);      
       }
@@ -41,7 +40,7 @@ if (!customElements.get('wc-table-skeleton')) {
     _createElement() {
       this.componentElement.id = 'table-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'max-w-full m-4 p-4 space-y-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
+      this.componentElement.className = 'wc-table-skeleton max-w-full m-4 p-4 space-y-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <!-- Table Header Skeleton -->
         <div class="flex items-center justify-between">

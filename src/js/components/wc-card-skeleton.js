@@ -13,7 +13,6 @@ if (!customElements.get('wc-card-skeleton')) {
         this.componentElement = compEl;
       } else {
         this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-card-skeleton');
         this._createElement();
         this.appendChild(this.componentElement);      
       }
@@ -41,7 +40,7 @@ if (!customElements.get('wc-card-skeleton')) {
     _createElement() {
       this.componentElement.id = 'card-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'max-w-full m-4 p-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
+      this.componentElement.className = 'wc-card-skeleton max-w-full m-4 p-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center h-48 mb-4 component-bg-color rounded-md">
           <svg class="w-10 h-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">

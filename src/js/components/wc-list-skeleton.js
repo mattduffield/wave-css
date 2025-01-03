@@ -13,7 +13,6 @@ if (!customElements.get('wc-list-skeleton')) {
         this.componentElement = compEl;
       } else {
         this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-list-skeleton');
         this._createElement();
         this.appendChild(this.componentElement);      
       }
@@ -41,7 +40,7 @@ if (!customElements.get('wc-list-skeleton')) {
     _createElement() {
       this.componentElement.id = 'list-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'm-4 p-4 space-y-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
+      this.componentElement.className = 'wc-list-skeleton m-4 p-4 space-y-4 border border-solid component-bg-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="w-5/6">

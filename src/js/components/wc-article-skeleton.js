@@ -13,7 +13,6 @@ if (!customElements.get('wc-article-skeleton')) {
         this.componentElement = compEl;
       } else {
         this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-article-skeleton');
         this._createElement();
         this.appendChild(this.componentElement);      
       }
@@ -41,7 +40,7 @@ if (!customElements.get('wc-article-skeleton')) {
     _createElement() {
       this.componentElement.id = 'article-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'max-w-full m-4 border border-solid component-bg-border-color p-4 space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center';
+      this.componentElement.className = 'wc-article-skeleton max-w-full m-4 border border-solid component-bg-border-color p-4 space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-center w-full h-48 component-bg-color rounded-md sm:w-96">
           <svg class="w-10 h-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
