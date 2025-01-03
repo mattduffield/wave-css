@@ -126,13 +126,13 @@ class WcTab extends WcBaseComponent {
       // nestedTabs.forEach(tab => htmx.process(tab));
     }
 
-    setTimeout(() => {
-      const hashParts = location.hash.slice(1).split('+');
-      hashParts.forEach(part => {
-        const btn = this.querySelector(`button[data-label="${part}"]`);
-        btn?.click();  
-      });
-    }, 100);
+    // setTimeout(() => {
+    //   const hashParts = location.hash.slice(1).split('+');
+    //   hashParts.forEach(part => {
+    //     const btn = this.querySelector(`button[data-label="${part}"]`);
+    //     btn?.click();  
+    //   });
+    // }, 100);
 
     // // Render nested tabs
     // const nestedTabs = this.querySelectorAll('wc-tab');
