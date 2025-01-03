@@ -3729,7 +3729,7 @@ var WcTab = class extends WcBaseComponent {
     const innerEl = this.querySelector(".wc-tab > *");
     if (innerEl) {
       const btns = this.querySelectorAll(".tab-link");
-      btns.forEach((btn) => btn.addEventListener("click", this._handleClick.bind(this)));
+      btns.forEach((btn2) => btn2.addEventListener("click", this._handleClick.bind(this)));
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
@@ -3737,6 +3737,9 @@ var WcTab = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
+    const hash = location.hash.slice(1);
+    const btn = this.querySelector(`button[data-label="${hash}"]`);
+    btn?.click();
     console.log("_render:wc-tab");
   }
   _createInnerElement() {
@@ -3756,6 +3759,7 @@ var WcTab = class extends WcBaseComponent {
         btn.classList.add("active");
       }
       btn.textContent = p.getAttribute("label") || `Label ${idx + 1}`;
+      btn.dataset.label = p.getAttribute("label") || `Label ${idx + 1}`;
       tabNav.appendChild(btn);
     });
     parts.forEach((p) => {

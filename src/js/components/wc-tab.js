@@ -122,6 +122,11 @@ class WcTab extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
+
+    const hash = location.hash.slice(1);
+    const btn = this.querySelector(`button[data-label="${hash}"]`);
+    btn?.click();
+
     console.log('_render:wc-tab');
   }
 
@@ -142,6 +147,7 @@ class WcTab extends WcBaseComponent {
         btn.classList.add('active');
       }
       btn.textContent = p.getAttribute('label') || `Label ${idx + 1}`;
+      btn.dataset.label = p.getAttribute('label') || `Label ${idx + 1}`;
       tabNav.appendChild(btn);
     });
     parts.forEach(p => {
