@@ -115,12 +115,15 @@ class WcTab extends WcBaseComponent {
       btns.forEach(btn => btn.addEventListener('click', this._handleClick.bind(this)));      
     } else {
       this.componentElement.innerHTML = '';
-
       this._createInnerElement();
     }
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
+
+      // // Process HTMX for nested tabs
+      // const nestedTabs = this.querySelectorAll('wc-tab');
+      // nestedTabs.forEach(tab => htmx.process(tab));
     }
 
     setTimeout(() => {
@@ -129,10 +132,11 @@ class WcTab extends WcBaseComponent {
         const btn = this.querySelector(`button[data-label="${part}"]`);
         btn?.click();  
       });
-      // const hash = location.hash.slice(1);
-      // const btn = this.querySelector(`button[data-label="${hash}"]`);
-      // btn?.click();
     }, 100);
+
+    // // Render nested tabs
+    // const nestedTabs = this.querySelectorAll('wc-tab');
+    // nestedTabs.forEach(tab => tab._render());
 
     console.log('_render:wc-tab');
   }
@@ -142,14 +146,16 @@ class WcTab extends WcBaseComponent {
     tabNav.classList.add('tab-nav');
     const tabBody = document.createElement('div');
     tabBody.classList.add('tab-body');
-    const parts = this.querySelectorAll('wc-tab > *:not(.wc-tab)');
+    // const parts = this.querySelectorAll('wc-tab > *:not(.wc-tab)');
+    const parts = Array.from(this.children).filter(p => !p.matches('wc-tab') && !p.matches('.wc-tab')); // Exclude nested wc-tab elements
+
     parts.forEach((p, idx) => {
       const tabItem = p.querySelector('.wc-tab-item');
       const btn = document.createElement('button');
       btn.type = "button";
       btn.classList.add('tab-link');
       btn.addEventListener('click', this._handleClick.bind(this));
-      const hasActive = tabItem.classList.contains('active');
+      const hasActive = tabItem?.classList.contains('active');
       if (hasActive) {
         btn.classList.add('active');
       }
@@ -194,8 +200,12 @@ class WcTab extends WcBaseComponent {
 
   _handleClick(event) {
     const {target} = event;
-    const parts = this.querySelectorAll('.active');
-    parts.forEach(p => p.classList.remove('active'));
+    // const parts = this.componentElement.querySelectorAll('.tab-nav .active, .tab-body .active');
+    const parts = document.querySelectorAll(`wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-nav > .active, wc-tab[data-wc-id="${this.wcId}"] > .wc-tab > .tab-body > wc-tab-item > .active`)
+  
+    parts.forEach(p => {
+      p.classList.remove('active')
+    });
     target.classList.add('active');
     const label = target.textContent;
     const contents = this.querySelector(`.wc-tab-item[label='${label}']`);
@@ -203,7 +213,41 @@ class WcTab extends WcBaseComponent {
     const payload = { detail: { label }};
     const custom = new CustomEvent('tabchange', payload);
     contents.dispatchEvent(custom);
-    location.hash = target.dataset.label;
+    // location.hash = target.dataset.label;    
+    location.hash = this._buildTabPathFromInnermost(target);
+  }
+
+  /**
+   * Recursively builds a '+' separated string of active tabs starting from the innermost clicked tab.
+   *
+   * @param {Element} element - The innermost clicked tab element (e.g., the button inside .tab-nav).
+   * @returns {string} - A '+' separated string of active tab names up to the outermost.
+   */
+  _buildTabPathFromInnermost(element) {
+    function traverseToOuter(tabElement) {
+        if (!tabElement || !tabElement.closest('wc-tab')) {
+            return '';
+        }
+
+        const currentTab = tabElement.closest('wc-tab');
+        const tabNav = currentTab.querySelector('.tab-nav');
+
+        let tabName = '';
+
+        if (tabNav) {
+            const activeButton = tabNav.querySelector('button.active');
+
+            if (activeButton) {
+                tabName = activeButton.textContent.trim();
+            }
+        }
+
+        const outerPath = traverseToOuter(currentTab.parentElement.closest('wc-tab'));
+
+        return outerPath ? `${outerPath}+${tabName}` : tabName;
+    }
+
+    return traverseToOuter(element);
   }
 
   _applyStyle() {
@@ -265,6 +309,11 @@ class WcTab extends WcBaseComponent {
         display: block;
       }
 
+      /* Add styling for nested tabs */
+      wc-tab .wc-tab .tab-body wc-tab {
+        margin-top: 1rem;
+      }
+      
       @keyframes tab-fade {
         from {
           opacity: 0;

@@ -80,7 +80,8 @@ class WcTabItem extends WcBaseComponent {
   }
 
   _createInnerElement() {
-    const parts = this.querySelectorAll('wc-tab-item > *:not(.wc-tab-item)');
+    // const parts = this.querySelectorAll('wc-tab-item > *:not(.wc-tab-item)');
+    const parts = Array.from(this.children).filter(p => !p.matches('wc-tab-item') && !p.matches('.wc-tab-item')); // Exclude nested wc-tab elements
     parts.forEach(part => {
       this.componentElement.appendChild(part);
     });
