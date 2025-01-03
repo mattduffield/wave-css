@@ -3821,13 +3821,12 @@ var WcTab = class extends WcBaseComponent {
     event.stopPropagation();
     event.preventDefault();
     const { target } = event;
-    let parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-nav > .active`);
+    let parts = this.componentElement.querySelectorAll(".active");
     parts.forEach((p) => {
-      p.classList.remove("active");
-    });
-    parts = document.querySelectorAll(`wc-tab[id="${this.id}"] > .wc-tab > .tab-body > wc-tab-item > .active`);
-    parts.forEach((p) => {
-      p.classList.remove("active");
+      const parent = p.closest("wc-tab");
+      if (parent == this) {
+        p.classList.remove("active");
+      }
     });
     target.classList.add("active");
     const label = target.textContent;
