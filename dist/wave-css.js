@@ -3762,6 +3762,13 @@ var WcTab = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
+    setTimeout(() => {
+      const hashParts = location.hash.slice(1).split("+");
+      hashParts.forEach((part) => {
+        const btn = this.querySelector(`button[data-label="${part}"]`);
+        btn?.click();
+      });
+    }, 100);
     console.log("_render:wc-tab");
   }
   _createInnerElement() {
@@ -3786,11 +3793,6 @@ var WcTab = class extends WcBaseComponent {
     });
     parts.forEach((p) => {
       tabBody.appendChild(p);
-    });
-    const hashParts = location.hash.slice(1).split("+");
-    hashParts.forEach((part) => {
-      const btn = this.querySelector(`button[data-label="${part}"]`);
-      btn?.click();
     });
     this.componentElement.appendChild(tabNav);
     this.componentElement.appendChild(tabBody);

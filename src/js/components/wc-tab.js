@@ -120,23 +120,15 @@ class WcTab extends WcBaseComponent {
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
-
-      // // Process HTMX for nested tabs
-      // const nestedTabs = this.querySelectorAll('wc-tab');
-      // nestedTabs.forEach(tab => htmx.process(tab));
     }
 
-    // setTimeout(() => {
-    //   const hashParts = location.hash.slice(1).split('+');
-    //   hashParts.forEach(part => {
-    //     const btn = this.querySelector(`button[data-label="${part}"]`);
-    //     btn?.click();  
-    //   });
-    // }, 100);
-
-    // // Render nested tabs
-    // const nestedTabs = this.querySelectorAll('wc-tab');
-    // nestedTabs.forEach(tab => tab._render());
+    setTimeout(() => {
+      const hashParts = location.hash.slice(1).split('+');
+      hashParts.forEach(part => {
+        const btn = this.querySelector(`button[data-label="${part}"]`);
+        btn?.click();  
+      });
+    }, 100);
 
     console.log('_render:wc-tab');
   }
@@ -164,12 +156,6 @@ class WcTab extends WcBaseComponent {
     });
     parts.forEach(p => {
       tabBody.appendChild(p);
-    });
-    
-    const hashParts = location.hash.slice(1).split('+');
-    hashParts.forEach(part => {
-      const btn = this.querySelector(`button[data-label="${part}"]`);
-      btn?.click();  
     });
 
     this.componentElement.appendChild(tabNav);
