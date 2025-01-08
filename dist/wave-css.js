@@ -3973,6 +3973,9 @@ customElements.define("wc-tab", WcTab);
 // src/js/components/wc-tabulator.js
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class"];
+    }
     icons = {
       "eye": {
         "viewport": "0 0 640 512",

@@ -13,6 +13,10 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-tabulator')) {
   class WcTabulator extends WcBaseComponent {
+    static get observedAttributes() {
+      return ['id', 'class'];
+    }
+
     icons = {
       "eye": {
         "viewport": "0 0 640 512",
@@ -189,7 +193,7 @@ if (!customElements.get('wc-tabulator')) {
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", () => {
         console.log('wc-tabulator:tableBiult - broadcasting wc-tabulator:ready');
-        wc.EventHub.broadcast('wc-tabulator:ready', [], '')
+        wc.EventHub.broadcast('wc-tabulator:ready', [], '');
       });
     }
 
