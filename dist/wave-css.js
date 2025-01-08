@@ -4131,6 +4131,10 @@ if (!customElements.get("wc-tabulator")) {
         this.loadLibrary("https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js", "Tabulator")
       ]);
       this.table = new Tabulator(this.componentElement, options);
+      this.table.on("tableBuilt", () => {
+        console.log("wc-tabulator:tableBiult - broadcasting wc-tabulator:ready");
+        wc.EventHub.broadcast("wc-tabulator:ready", [], "");
+      });
     }
     getColumnsConfig() {
       const columns = [];

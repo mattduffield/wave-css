@@ -187,6 +187,10 @@ if (!customElements.get('wc-tabulator')) {
       ]);
         
       this.table = new Tabulator(this.componentElement, options);
+      this.table.on("tableBuilt", () => {
+        console.log('wc-tabulator:tableBiult - broadcasting wc-tabulator:ready');
+        wc.EventHub.broadcast('wc-tabulator:ready', [], '')
+      });
     }
 
     getColumnsConfig() {
