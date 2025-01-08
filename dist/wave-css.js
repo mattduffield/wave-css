@@ -853,703 +853,705 @@ var WcBackgroundImage = class extends WcBaseComponent {
 customElements.define("wc-background-image", WcBackgroundImage);
 
 // src/js/components/wc-code-mirror.js
-var WcCodeMirror = class extends WcBaseComponent {
-  static get observedAttributes() {
-    return ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required"];
-  }
-  constructor() {
-    super();
-    this.childComponentName = "editor";
-    this._isResizing = false;
-    this._internals = this.attachInternals();
-    this.firstContent = "";
-    if (this.firstChild && this.firstChild.nodeName == "#text") {
-      this.firstContent = this.firstChild.textContent;
-      this.removeChild(this.firstChild);
+if (!customElements.get("wc-code-mirror")) {
+  class WcCodeMirror extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required"];
     }
-    const compEl = this.querySelector(".wc-code-mirror");
-    if (compEl) {
-      this.componentElement = compEl;
-    } else {
-      this.componentElement = document.createElement("div");
-      this.componentElement.classList.add("wc-code-mirror");
-      this.appendChild(this.componentElement);
+    constructor() {
+      super();
+      this.childComponentName = "editor";
+      this._isResizing = false;
+      this._internals = this.attachInternals();
+      this.firstContent = "";
+      if (this.firstChild && this.firstChild.nodeName == "#text") {
+        this.firstContent = this.firstChild.textContent;
+        this.removeChild(this.firstChild);
+      }
+      const compEl = this.querySelector(".wc-code-mirror");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-code-mirror");
+        this.appendChild(this.componentElement);
+      }
+      console.log("ctor:wc-code-mirror");
     }
-    console.log("ctor:wc-code-mirror");
-  }
-  async connectedCallback() {
-    super.connectedCallback();
-    this._applyStyle();
-    console.log("conntectedCallback:wc-code-mirror");
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._unWireEvents();
-  }
-  async _handleAttributeChange(attrName, newValue) {
-    if (attrName === "lbl-class") {
-      const name = this.getAttribute("name");
-      const lbl = this.querySelector(`label[for="${name}"]`);
-      lbl?.classList.add(newValue);
-    } else if (attrName === "theme") {
-      await this.loadTheme(newValue);
-    } else if (attrName === "mode") {
-      await this.loadMode(newValue);
-    } else if (attrName === "height") {
-      if (newValue) {
-        this.editor.setSize(null, newValue);
-      }
-    } else if (attrName === "line-numbers") {
-      if (newValue || newValue == "") {
-        this.editor.setOption("lineNumbers", true);
-      } else {
-        this.editor.setOption("lineNumbers", false);
-      }
-      const gutters = await this.getGutters();
-      this.editor.setOption("gutters", gutters);
-    } else if (attrName === "line-wrapping") {
-      if (newValue || newValue == "") {
-        this.editor.setOption("lineWrapping", true);
-      } else {
-        this.editor.setOption("lineWrapping", false);
-      }
-    } else if (attrName === "fold-gutter") {
-      if (newValue || newValue == "") {
-        this.editor.setOption("foldGutter", true);
-      } else {
-        this.editor.setOption("foldGutter", false);
-      }
-      const gutters = await this.getGutters();
-      this.editor.setOption("gutters", gutters);
-    } else if (attrName === "tab-size") {
-      this.editor.setOption("tabSize", parseInt(newValue, 10));
-    } else if (attrName === "indent-unit") {
-      this.editor.setOption("indentUnit", parseInt(newValue, 10));
-    } else if (attrName === "value") {
-      this.editor.setValue(newValue);
-    } else if (attrName === "disabled") {
-      if (this.hasAttribute("disabled")) {
-        this.editor.setOption("readOnly", "nocursor");
-      } else {
-        this.editor.setOption("readOnly", false);
-      }
-    } else {
-      super._handleAttributeChange(attrName, newValue);
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      console.log("conntectedCallback:wc-code-mirror");
     }
-  }
-  _render() {
-    super._render();
-    const innerEl = this.querySelector(".wc-code-mirror > *");
-    if (innerEl) {
-      const settingsIcon = this.querySelector(".settings-icon");
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    async _handleAttributeChange(attrName, newValue) {
+      if (attrName === "lbl-class") {
+        const name = this.getAttribute("name");
+        const lbl = this.querySelector(`label[for="${name}"]`);
+        lbl?.classList.add(newValue);
+      } else if (attrName === "theme") {
+        await this.loadTheme(newValue);
+      } else if (attrName === "mode") {
+        await this.loadMode(newValue);
+      } else if (attrName === "height") {
+        if (newValue) {
+          this.editor.setSize(null, newValue);
+        }
+      } else if (attrName === "line-numbers") {
+        if (newValue || newValue == "") {
+          this.editor.setOption("lineNumbers", true);
+        } else {
+          this.editor.setOption("lineNumbers", false);
+        }
+        const gutters = await this.getGutters();
+        this.editor.setOption("gutters", gutters);
+      } else if (attrName === "line-wrapping") {
+        if (newValue || newValue == "") {
+          this.editor.setOption("lineWrapping", true);
+        } else {
+          this.editor.setOption("lineWrapping", false);
+        }
+      } else if (attrName === "fold-gutter") {
+        if (newValue || newValue == "") {
+          this.editor.setOption("foldGutter", true);
+        } else {
+          this.editor.setOption("foldGutter", false);
+        }
+        const gutters = await this.getGutters();
+        this.editor.setOption("gutters", gutters);
+      } else if (attrName === "tab-size") {
+        this.editor.setOption("tabSize", parseInt(newValue, 10));
+      } else if (attrName === "indent-unit") {
+        this.editor.setOption("indentUnit", parseInt(newValue, 10));
+      } else if (attrName === "value") {
+        this.editor.setValue(newValue);
+      } else if (attrName === "disabled") {
+        if (this.hasAttribute("disabled")) {
+          this.editor.setOption("readOnly", "nocursor");
+        } else {
+          this.editor.setOption("readOnly", false);
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    _render() {
+      super._render();
+      const innerEl = this.querySelector(".wc-code-mirror > *");
+      if (innerEl) {
+        const settingsIcon = this.querySelector(".settings-icon");
+        settingsIcon.addEventListener("click", this._handleSettingsIconClick.bind(this));
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+      console.log("_render:wc-code-mirror");
+    }
+    async _createInnerElement() {
+      const labelText = this.getAttribute("lbl-label") || "";
+      const name = this.getAttribute("name") || "";
+      if (!name) {
+        throw new Error("Name attribute must be provided.");
+      }
+      if (labelText) {
+        const lblEl = document.createElement("label");
+        const value = this.getAttribute("value") || "";
+        lblEl.textContent = labelText;
+        lblEl.setAttribute("for", name);
+        this.componentElement.appendChild(lblEl);
+      }
+      this.editor = null;
+      this.popoverId = `settings-popover-${this.getAttribute("name") || "wc-code-mirror"}`;
+      const settingsIcon = document.createElement("button");
+      settingsIcon.type = "button";
+      settingsIcon.innerHTML = `
+        <svg class="h-3 w-3" fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512">
+          <path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/>
+        </svg>
+      `.trim();
+      settingsIcon.className = "settings-icon";
+      settingsIcon.setAttribute("popovertarget", this.popoverId);
       settingsIcon.addEventListener("click", this._handleSettingsIconClick.bind(this));
-    } else {
-      this.componentElement.innerHTML = "";
-      this._createInnerElement();
+      this.componentElement.appendChild(settingsIcon);
+      const settingsPopover = document.createElement("div");
+      settingsPopover.classList.add("settings-popover");
+      settingsPopover.id = this.popoverId;
+      settingsPopover.setAttribute("popover", "manual");
+      this.componentElement.appendChild(settingsPopover);
+      const initialValue = this.getAttribute("value") || this.firstContent || "";
+      await Promise.all([
+        this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"),
+        this.loadLibrary("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js", "CodeMirror")
+      ]);
+      await this.renderEditor(initialValue);
+      this._internals.setFormValue(initialValue);
     }
-    if (typeof htmx !== "undefined") {
-      htmx.process(this);
+    _handleSettingsIconClick(event) {
+      const settingsPopover = this.querySelector(".settings-popover");
+      this._buildSettingsPopover(settingsPopover);
     }
-    console.log("_render:wc-code-mirror");
-  }
-  async _createInnerElement() {
-    const labelText = this.getAttribute("lbl-label") || "";
-    const name = this.getAttribute("name") || "";
-    if (!name) {
-      throw new Error("Name attribute must be provided.");
-    }
-    if (labelText) {
-      const lblEl = document.createElement("label");
-      const value = this.getAttribute("value") || "";
-      lblEl.textContent = labelText;
-      lblEl.setAttribute("for", name);
-      this.componentElement.appendChild(lblEl);
-    }
-    this.editor = null;
-    this.popoverId = `settings-popover-${this.getAttribute("name") || "wc-code-mirror"}`;
-    const settingsIcon = document.createElement("button");
-    settingsIcon.type = "button";
-    settingsIcon.innerHTML = `
-      <svg class="h-3 w-3" fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512">
-        <path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/>
-      </svg>
-    `.trim();
-    settingsIcon.className = "settings-icon";
-    settingsIcon.setAttribute("popovertarget", this.popoverId);
-    settingsIcon.addEventListener("click", this._handleSettingsIconClick.bind(this));
-    this.componentElement.appendChild(settingsIcon);
-    const settingsPopover = document.createElement("div");
-    settingsPopover.classList.add("settings-popover");
-    settingsPopover.id = this.popoverId;
-    settingsPopover.setAttribute("popover", "manual");
-    this.componentElement.appendChild(settingsPopover);
-    const initialValue = this.getAttribute("value") || this.firstContent || "";
-    await Promise.all([
-      this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"),
-      this.loadLibrary("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js", "CodeMirror")
-    ]);
-    await this.renderEditor(initialValue);
-    this._internals.setFormValue(initialValue);
-  }
-  _handleSettingsIconClick(event) {
-    const settingsPopover = this.querySelector(".settings-popover");
-    this._buildSettingsPopover(settingsPopover);
-  }
-  _buildSettingsPopover(settingsPopover) {
-    const hasLineNumbers = this.hasAttribute("line-numbers");
-    const hasLineWrapper = this.hasAttribute("line-wrapper");
-    const hasFoldGutter = this.hasAttribute("fold-gutter");
-    const modes = [
-      "apl",
-      "asciiarmor",
-      "asn.1",
-      "asterisk",
-      "brainfuck",
-      "clike",
-      "clojure",
-      "cmake",
-      "cobol",
-      "coffeescript",
-      "commonlisp",
-      "crystal",
-      "css",
-      "cypher",
-      "d",
-      "dart",
-      "diff",
-      "django",
-      "dockerfile",
-      "dtd",
-      "dylan",
-      "ebnf",
-      "ecl",
-      "eiffel",
-      "elm",
-      "erlang",
-      "factor",
-      "fcl",
-      "forth",
-      "fortran",
-      "gas",
-      "gfm",
-      "gherkin",
-      "go",
-      "groovy",
-      "haml",
-      "handlebars",
-      "haskell",
-      "haxe",
-      "htmlembedded",
-      "htmlmixed",
-      "http",
-      "idl",
-      "javascript",
-      "jinja2",
-      "julia",
-      "kotlin",
-      "litespec",
-      "livescript",
-      "lua",
-      "markdown",
-      "mathematica",
-      "mbox",
-      "mirc",
-      "mllike",
-      "modelica",
-      "mscgen",
-      "mumps",
-      "nginx",
-      "nsis",
-      "ntriples",
-      "octave",
-      "oz",
-      "pascal",
-      "perl",
-      "php",
-      "pig",
-      "powershell",
-      "properties",
-      "protobuf",
-      "pug",
-      "puppet",
-      "python",
-      "q",
-      "r",
-      "rpm",
-      "rst",
-      "ruby",
-      "rust",
-      "sas",
-      "sass",
-      "scheme",
-      "shell",
-      "sieve",
-      "slim",
-      "smalltalk",
-      "smarty",
-      "solr",
-      "soy",
-      "sparql",
-      "spreadsheet",
-      "sql",
-      "stex",
-      "stylus",
-      "swift",
-      "tcl",
-      "textile",
-      "tiddlywiki",
-      "tiki",
-      "toml",
-      "tornado",
-      "troff",
-      "ttcn",
-      "ttcn-cfg",
-      "turtle",
-      "twig",
-      "vb",
-      "vbscript",
-      "velocity",
-      "verilog",
-      "vhdl",
-      "vue",
-      "xml",
-      "xquery",
-      "yaml",
-      "yaml-frontmatter",
-      "z80"
-    ];
-    const themes = [
-      "3024-day",
-      "3024-night",
-      "abcdef",
-      "ambiance",
-      "ayu-dark",
-      "ayu-mirage",
-      "base16-dark",
-      "base16-light",
-      "bespin",
-      "blackboard",
-      "cobalt",
-      "colorforth",
-      "default",
-      "darcula",
-      "dracula",
-      "duotone-dark",
-      "duotone-light",
-      "eclipse",
-      "elegant",
-      "erlang-dark",
-      "gruvbox-dark",
-      "hopscotch",
-      "icecoder",
-      "idea",
-      "isotope",
-      "lesser-dark",
-      "liquibyte",
-      "lucario",
-      "material",
-      "material-darker",
-      "material-palenight",
-      "material-ocean",
-      "mbo",
-      "mdn-like",
-      "midnight",
-      "monokai",
-      "moxer",
-      "neat",
-      "neo",
-      "night",
-      "nord",
-      "oceanic-next",
-      "panda-syntax",
-      "paraiso-dark",
-      "paraiso-light",
-      "pastel-on-dark",
-      "railscasts",
-      "rubyblue",
-      "seti",
-      "shadowfox",
-      "solarized",
-      "ssms",
-      "the-matrix",
-      "tomorrow-night-bright",
-      "tomorrow-night-eighties",
-      "ttcn",
-      "twilight",
-      "vibrant-ink",
-      "xq-dark",
-      "xq-light",
-      "yeti",
-      "yonce",
-      "zenburn"
-    ];
-    settingsPopover.innerHTML = `
-      <div id="popover-form" class="popover-form col gap-3">
-        <button id="closeButton" class="close-btn" type="button"
-          popovertarget="${this.popoverId}" popovertargetaction="hide"
-          >
-          <span aria-hidden="true">X</span>
-          <span class="sr-only">Close</span>
-        </button>
-        <div class="row gap-2">
-          <wc-select class="col-1" name="theme-select" lbl-label="Theme" autofocus elt-class="w-full">
-            ${themes.map((theme) => `<option value="${theme}" ${theme == this.getAttribute("theme") ? "selected" : ""}>${theme}</option>`).join("")}
-          </wc-select>
-          <wc-select class="col-1" name="mode-select" lbl-label="Mode" elt-class="w-full">
-            ${modes.map((mode) => `<option value="${mode}" ${mode == this.getAttribute("mode") ? "selected" : ""}>${mode}</option>`).join("")}
-          </wc-select>
-        </div>
-        <div class="row gap-2">
-          <wc-input class="col-1" name="line-numbers" lbl-label="Line Numbers" ${hasLineNumbers ? "checked " : ""}type="checkbox"></wc-input>
-          <wc-input class="col-1" name="line-wrapper" lbl-label="Line Wrapper" ${hasLineWrapper ? "checked " : ""}type="checkbox"></wc-input>
-          <wc-input class="col-1" name="fold-gutter" lbl-label="Fold Gutter" ${hasFoldGutter ? "checked " : ""}type="checkbox"></wc-input>
-        </div>
-        <div class="row gap-2">
-          <wc-input class="col-1" name="tab-size" lbl-label="Tab Size" value="${this.getAttribute("tab-size")}" type="number"></wc-input>
-          <wc-input class="col-1" name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute("indent-unit")}" type="number"></wc-input>
-        </div>
-        <div class="row gap-2 justify-end gap-x-4">
-          <button class="" id="apply-settings" type="submit">
-            Apply
+    _buildSettingsPopover(settingsPopover) {
+      const hasLineNumbers = this.hasAttribute("line-numbers");
+      const hasLineWrapper = this.hasAttribute("line-wrapper");
+      const hasFoldGutter = this.hasAttribute("fold-gutter");
+      const modes = [
+        "apl",
+        "asciiarmor",
+        "asn.1",
+        "asterisk",
+        "brainfuck",
+        "clike",
+        "clojure",
+        "cmake",
+        "cobol",
+        "coffeescript",
+        "commonlisp",
+        "crystal",
+        "css",
+        "cypher",
+        "d",
+        "dart",
+        "diff",
+        "django",
+        "dockerfile",
+        "dtd",
+        "dylan",
+        "ebnf",
+        "ecl",
+        "eiffel",
+        "elm",
+        "erlang",
+        "factor",
+        "fcl",
+        "forth",
+        "fortran",
+        "gas",
+        "gfm",
+        "gherkin",
+        "go",
+        "groovy",
+        "haml",
+        "handlebars",
+        "haskell",
+        "haxe",
+        "htmlembedded",
+        "htmlmixed",
+        "http",
+        "idl",
+        "javascript",
+        "jinja2",
+        "julia",
+        "kotlin",
+        "litespec",
+        "livescript",
+        "lua",
+        "markdown",
+        "mathematica",
+        "mbox",
+        "mirc",
+        "mllike",
+        "modelica",
+        "mscgen",
+        "mumps",
+        "nginx",
+        "nsis",
+        "ntriples",
+        "octave",
+        "oz",
+        "pascal",
+        "perl",
+        "php",
+        "pig",
+        "powershell",
+        "properties",
+        "protobuf",
+        "pug",
+        "puppet",
+        "python",
+        "q",
+        "r",
+        "rpm",
+        "rst",
+        "ruby",
+        "rust",
+        "sas",
+        "sass",
+        "scheme",
+        "shell",
+        "sieve",
+        "slim",
+        "smalltalk",
+        "smarty",
+        "solr",
+        "soy",
+        "sparql",
+        "spreadsheet",
+        "sql",
+        "stex",
+        "stylus",
+        "swift",
+        "tcl",
+        "textile",
+        "tiddlywiki",
+        "tiki",
+        "toml",
+        "tornado",
+        "troff",
+        "ttcn",
+        "ttcn-cfg",
+        "turtle",
+        "twig",
+        "vb",
+        "vbscript",
+        "velocity",
+        "verilog",
+        "vhdl",
+        "vue",
+        "xml",
+        "xquery",
+        "yaml",
+        "yaml-frontmatter",
+        "z80"
+      ];
+      const themes = [
+        "3024-day",
+        "3024-night",
+        "abcdef",
+        "ambiance",
+        "ayu-dark",
+        "ayu-mirage",
+        "base16-dark",
+        "base16-light",
+        "bespin",
+        "blackboard",
+        "cobalt",
+        "colorforth",
+        "default",
+        "darcula",
+        "dracula",
+        "duotone-dark",
+        "duotone-light",
+        "eclipse",
+        "elegant",
+        "erlang-dark",
+        "gruvbox-dark",
+        "hopscotch",
+        "icecoder",
+        "idea",
+        "isotope",
+        "lesser-dark",
+        "liquibyte",
+        "lucario",
+        "material",
+        "material-darker",
+        "material-palenight",
+        "material-ocean",
+        "mbo",
+        "mdn-like",
+        "midnight",
+        "monokai",
+        "moxer",
+        "neat",
+        "neo",
+        "night",
+        "nord",
+        "oceanic-next",
+        "panda-syntax",
+        "paraiso-dark",
+        "paraiso-light",
+        "pastel-on-dark",
+        "railscasts",
+        "rubyblue",
+        "seti",
+        "shadowfox",
+        "solarized",
+        "ssms",
+        "the-matrix",
+        "tomorrow-night-bright",
+        "tomorrow-night-eighties",
+        "ttcn",
+        "twilight",
+        "vibrant-ink",
+        "xq-dark",
+        "xq-light",
+        "yeti",
+        "yonce",
+        "zenburn"
+      ];
+      settingsPopover.innerHTML = `
+        <div id="popover-form" class="popover-form col gap-3">
+          <button id="closeButton" class="close-btn" type="button"
+            popovertarget="${this.popoverId}" popovertargetaction="hide"
+            >
+            <span aria-hidden="true">X</span>
+            <span class="sr-only">Close</span>
           </button>
-          <button class="btn-clear" id="cancel-settings" type="button">
-            Cancel
-          </button>
+          <div class="row gap-2">
+            <wc-select class="col-1" name="theme-select" lbl-label="Theme" autofocus elt-class="w-full">
+              ${themes.map((theme) => `<option value="${theme}" ${theme == this.getAttribute("theme") ? "selected" : ""}>${theme}</option>`).join("")}
+            </wc-select>
+            <wc-select class="col-1" name="mode-select" lbl-label="Mode" elt-class="w-full">
+              ${modes.map((mode) => `<option value="${mode}" ${mode == this.getAttribute("mode") ? "selected" : ""}>${mode}</option>`).join("")}
+            </wc-select>
+          </div>
+          <div class="row gap-2">
+            <wc-input class="col-1" name="line-numbers" lbl-label="Line Numbers" ${hasLineNumbers ? "checked " : ""}type="checkbox"></wc-input>
+            <wc-input class="col-1" name="line-wrapper" lbl-label="Line Wrapper" ${hasLineWrapper ? "checked " : ""}type="checkbox"></wc-input>
+            <wc-input class="col-1" name="fold-gutter" lbl-label="Fold Gutter" ${hasFoldGutter ? "checked " : ""}type="checkbox"></wc-input>
+          </div>
+          <div class="row gap-2">
+            <wc-input class="col-1" name="tab-size" lbl-label="Tab Size" value="${this.getAttribute("tab-size")}" type="number"></wc-input>
+            <wc-input class="col-1" name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute("indent-unit")}" type="number"></wc-input>
+          </div>
+          <div class="row gap-2 justify-end gap-x-4">
+            <button class="" id="apply-settings" type="submit">
+              Apply
+            </button>
+            <button class="btn-clear" id="cancel-settings" type="button">
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-    `;
-    settingsPopover.querySelector("#closeButton").addEventListener("click", this._handleSettingsClose.bind(this), { once: true });
-    settingsPopover.querySelector("#apply-settings").addEventListener("click", this._handleSettingsApply.bind(this), { once: true });
-    settingsPopover.querySelector("#cancel-settings").addEventListener("click", this._handleSettingsClose.bind(this), { once: true });
-  }
-  _handleSettingsApply(event) {
-    const settingsPopover = this.querySelector(".settings-popover");
-    const close = settingsPopover.querySelector("#closeButton");
-    const theme = settingsPopover.querySelector("#theme-select").value;
-    const mode = settingsPopover.querySelector("#mode-select").value;
-    const lineNumbers = settingsPopover.querySelector("#line-numbers").checked;
-    const lineWrapper = settingsPopover.querySelector("#line-wrapper").checked;
-    const foldGutter = settingsPopover.querySelector("#fold-gutter").checked;
-    const tabSize = settingsPopover.querySelector("#tab-size").value;
-    const indentUnit = settingsPopover.querySelector("#indent-unit").value;
-    this.setAttribute("theme", theme);
-    this.setAttribute("mode", mode);
-    if (lineNumbers) {
-      this.setAttribute("line-numbers", "");
-    } else {
-      this.removeAttribute("line-numbers");
+      `;
+      settingsPopover.querySelector("#closeButton").addEventListener("click", this._handleSettingsClose.bind(this), { once: true });
+      settingsPopover.querySelector("#apply-settings").addEventListener("click", this._handleSettingsApply.bind(this), { once: true });
+      settingsPopover.querySelector("#cancel-settings").addEventListener("click", this._handleSettingsClose.bind(this), { once: true });
     }
-    if (lineWrapper) {
-      this.setAttribute("line-wrapper", "");
-    } else {
-      this.removeAttribute("line-wrapper");
+    _handleSettingsApply(event) {
+      const settingsPopover = this.querySelector(".settings-popover");
+      const close = settingsPopover.querySelector("#closeButton");
+      const theme = settingsPopover.querySelector("#theme-select").value;
+      const mode = settingsPopover.querySelector("#mode-select").value;
+      const lineNumbers = settingsPopover.querySelector("#line-numbers").checked;
+      const lineWrapper = settingsPopover.querySelector("#line-wrapper").checked;
+      const foldGutter = settingsPopover.querySelector("#fold-gutter").checked;
+      const tabSize = settingsPopover.querySelector("#tab-size").value;
+      const indentUnit = settingsPopover.querySelector("#indent-unit").value;
+      this.setAttribute("theme", theme);
+      this.setAttribute("mode", mode);
+      if (lineNumbers) {
+        this.setAttribute("line-numbers", "");
+      } else {
+        this.removeAttribute("line-numbers");
+      }
+      if (lineWrapper) {
+        this.setAttribute("line-wrapper", "");
+      } else {
+        this.removeAttribute("line-wrapper");
+      }
+      if (foldGutter) {
+        this.setAttribute("fold-gutter", "");
+      } else {
+        this.removeAttribute("fold-gutter");
+      }
+      this.setAttribute("tab-size", tabSize);
+      this.setAttribute("indent-unit", indentUnit);
+      this._handleSettingsClose(event);
     }
-    if (foldGutter) {
-      this.setAttribute("fold-gutter", "");
-    } else {
-      this.removeAttribute("fold-gutter");
+    _handleSettingsClose(event) {
+      event.preventDefault();
+      const settingsPopover = this.querySelector(".settings-popover");
+      settingsPopover.togglePopover();
+      while (settingsPopover.firstChild) {
+        settingsPopover.removeChild(settingsPopover.firstChild);
+      }
     }
-    this.setAttribute("tab-size", tabSize);
-    this.setAttribute("indent-unit", indentUnit);
-    this._handleSettingsClose(event);
-  }
-  _handleSettingsClose(event) {
-    event.preventDefault();
-    const settingsPopover = this.querySelector(".settings-popover");
-    settingsPopover.togglePopover();
-    while (settingsPopover.firstChild) {
-      settingsPopover.removeChild(settingsPopover.firstChild);
+    get value() {
+      return this.editor?.getValue() || "";
     }
-  }
-  get value() {
-    return this.editor?.getValue() || "";
-  }
-  set value(val) {
-    if (this.editor) {
-      this.editor.setValue(val);
-      this._internals.setFormValue(val);
+    set value(val) {
+      if (this.editor) {
+        this.editor.setValue(val);
+        this._internals.setFormValue(val);
+      }
     }
-  }
-  _applyStyle() {
-    const style = `
-      /* Container using flex or grid layout */
-      .editor-container-flex {
-        display: flex;
-        gap: 10px;
-        height: calc(100vh - 60px); /* Adjust for the header height */
-        width: 100%;
-        flex-wrap: wrap;
-      }
+    _applyStyle() {
+      const style = `
+        /* Container using flex or grid layout */
+        .editor-container-flex {
+          display: flex;
+          gap: 10px;
+          height: calc(100vh - 60px); /* Adjust for the header height */
+          width: 100%;
+          flex-wrap: wrap;
+        }
 
-      .editor-container-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 10px;
-        height: calc(100vh - 60px); /* Adjust for the header height */
-        width: 100%;
-      }
+        .editor-container-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 10px;
+          height: calc(100vh - 60px); /* Adjust for the header height */
+          width: 100%;
+        }
 
-      /* Ensure that each editor fills its container */
-      wc-code-mirror {
-        display: block;
-        height: 100%;
-        width: 100%;
-      }
+        /* Ensure that each editor fills its container */
+        wc-code-mirror {
+          display: block;
+          height: 100%;
+          width: 100%;
+        }
 
-      .wc-code-mirror {
-        position: relative;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        border: 2px solid transparent;
+        .wc-code-mirror {
+          position: relative;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          border: 2px solid transparent;
 
-        overflow: hidden;
-        resize: vertical;
-  
-        min-height: 10em;        
-      }
-      .wc-code-mirror:focus-within {
-        border: 2px solid var(--primary-bg-color);
-      }
+          overflow: hidden;
+          resize: vertical;
+    
+          min-height: 10em;        
+        }
+        .wc-code-mirror:focus-within {
+          border: 2px solid var(--primary-bg-color);
+        }
 
-      .CodeMirror {
-        height: auto;
-        min-height: 150px;
-        width: 100%;
-        box-sizing: border-box; /* Avoid overflow caused by padding or borders */
-        overflow: auto; /* Scroll within the editor */
-      }
-      
-      .settings-icon {
-        background: none;
-        border: none;
-        position: absolute;
-        top: 2px;
-        right: 5px;
-        padding: 0;
-        cursor: pointer;
-        color: gray;
-        font-size: 1.5em;
-        z-index: 1;
-      }
-      
-      .wc-code-mirror > label ~ .settings-icon {
-        top: 22px;
-      }
+        .CodeMirror {
+          height: auto;
+          min-height: 150px;
+          width: 100%;
+          box-sizing: border-box; /* Avoid overflow caused by padding or borders */
+          overflow: auto; /* Scroll within the editor */
+        }
+        
+        .settings-icon {
+          background: none;
+          border: none;
+          position: absolute;
+          top: 2px;
+          right: 5px;
+          padding: 0;
+          cursor: pointer;
+          color: gray;
+          font-size: 1.5em;
+          z-index: 1;
+        }
+        
+        .wc-code-mirror > label ~ .settings-icon {
+          top: 22px;
+        }
 
-      .settings-popover {
-        background: transparent;
-        position: absolute;
-        left: 0;
-        right: 0;
-        padding: 0;
-        margin: 0 auto;
-        height: 100%;
-        width: 100%;
-        border: none;
-        display: flex;
-        justify-items: center;
-        align-items: center;
-      }
-
-
-      .settings-popover::backdrop {
-        background: rgb(190 190 190 / 50%);
-      }
+        .settings-popover {
+          background: transparent;
+          position: absolute;
+          left: 0;
+          right: 0;
+          padding: 0;
+          margin: 0 auto;
+          height: 100%;
+          width: 100%;
+          border: none;
+          display: flex;
+          justify-items: center;
+          align-items: center;
+        }
 
 
-      #popover-form {
-        position: relative;
-        padding: 20px;
-        margin: 0 auto;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+        .settings-popover::backdrop {
+          background: rgb(190 190 190 / 50%);
+        }
 
-      .close-btn {
-        color: gray;
-        border: none;
-        background: none;
-        position: absolute;
-        right: 0.5rem;
-        top: 0.5rem;
-        padding: 0;
-        cursor: pointer;
-      }
 
-      .sr-only:not(:focus):not(:active) {
-        clip: rect(0 0 0 0); 
-        clip-path: inset(50%);
-        height: 1px;
-        overflow: hidden;
-        position: absolute;
-        white-space: nowrap; 
-        width: 1px;
-      }
-    `.trim();
-    this.loadStyle("wc-code-mirror-style", style);
-  }
-  async renderEditor(initialValue) {
-    await Promise.all([
-      this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"),
-      this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"),
-      this.loadScript("https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js")
-    ]);
-    const gutters = await this.getGutters();
-    this.editor = CodeMirror(this.componentElement, {
-      mode: this.getAttribute("mode") || "javascript",
-      theme: this.getAttribute("theme") || "default",
-      lineNumbers: this.hasAttribute("line-numbers"),
-      lineWrapper: this.hasAttribute("line-wrapper"),
-      foldGutter: this.hasAttribute("fold-gutter"),
-      gutters,
-      extraKeys: {
-        "Ctrl-Q": function(cm) {
-          cm.foldCode(cm.getCursor());
+        #popover-form {
+          position: relative;
+          padding: 20px;
+          margin: 0 auto;
+          border-radius: 5px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-btn {
+          color: gray;
+          border: none;
+          background: none;
+          position: absolute;
+          right: 0.5rem;
+          top: 0.5rem;
+          padding: 0;
+          cursor: pointer;
+        }
+
+        .sr-only:not(:focus):not(:active) {
+          clip: rect(0 0 0 0); 
+          clip-path: inset(50%);
+          height: 1px;
+          overflow: hidden;
+          position: absolute;
+          white-space: nowrap; 
+          width: 1px;
+        }
+      `.trim();
+      this.loadStyle("wc-code-mirror-style", style);
+    }
+    async renderEditor(initialValue) {
+      await Promise.all([
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"),
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"),
+        this.loadScript("https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js")
+      ]);
+      const gutters = await this.getGutters();
+      this.editor = CodeMirror(this.componentElement, {
+        mode: this.getAttribute("mode") || "javascript",
+        theme: this.getAttribute("theme") || "default",
+        lineNumbers: this.hasAttribute("line-numbers"),
+        lineWrapper: this.hasAttribute("line-wrapper"),
+        foldGutter: this.hasAttribute("fold-gutter"),
+        gutters,
+        extraKeys: {
+          "Ctrl-Q": function(cm) {
+            cm.foldCode(cm.getCursor());
+          },
+          "Tab": (cm) => {
+            if (cm.somethingSelected()) {
+              cm.indentSelection("add");
+            } else {
+              var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+              cm.replaceSelection(spaces);
+            }
+          }
         },
-        "Tab": (cm) => {
-          if (cm.somethingSelected()) {
-            cm.indentSelection("add");
-          } else {
-            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-            cm.replaceSelection(spaces);
+        value: initialValue,
+        tabSize: parseInt(this.getAttribute("tab-size"), 10) || 4,
+        indentUnit: parseInt(this.getAttribute("indent-unit"), 10) || 2,
+        matchBrackets: true,
+        keyMap: "sublime",
+        showInvisibles: true
+      });
+      await this.loadAssets(this.getAttribute("theme"), this.getAttribute("mode"));
+      this.editor.on("change", async () => {
+        const value = this.editor.getValue();
+        this._internals.setFormValue(value);
+        const gutters2 = await this.getGutters();
+        this.editor.setOption("gutters", gutters2);
+      });
+    }
+    // This is required to inform the form that the component can be form-associated
+    static get formAssociated() {
+      return true;
+    }
+    // Method called when the form is reset
+    formResetCallback() {
+      this.editor.setValue("");
+    }
+    // Method called when the form state is restored (for example, after back/forward navigation)
+    formStateRestoreCallback(state) {
+      if (state) {
+        this.editor.setValue(state);
+      }
+    }
+    // Optional: Handle disabled state when the form element is disabled
+    formDisabledCallback(isDisabled) {
+      if (this.editor) {
+        this.editor.setOption("readOnly", isDisabled);
+      }
+    }
+    async refresh(timeout = 500) {
+      await sleep(timeout);
+      this.editor.refresh();
+      this.editor.focus();
+    }
+    async getGutters() {
+      if (this.hasAttribute("fold-gutter")) {
+        await this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldcode.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/brace-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/comment-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/xml-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js");
+      }
+      let gutters = [];
+      const hasLineNumbers = this.hasAttribute("line-numbers");
+      const hasFoldGutter = this.hasAttribute("fold-gutter");
+      if (hasLineNumbers && hasFoldGutter) {
+        gutters = ["CodeMirror-linenumbers", "CodeMirror-foldgutter"];
+      } else if (hasFoldGutter) {
+        gutters = ["CodeMirror-foldgutter"];
+      }
+      return gutters;
+    }
+    async loadAssets(theme, mode) {
+      if (theme && theme !== "default") {
+        await this.loadTheme(theme);
+      }
+      if (mode) {
+        await this.loadMode(mode);
+      }
+    }
+    async loadTheme(theme) {
+      if (!theme || theme === "default") return;
+      const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css`;
+      if (!document.querySelector(`link[href="${themeUrl}"]`)) {
+        await this.loadCSS(themeUrl);
+      }
+      this.editor.setOption("theme", theme);
+    }
+    async loadMode(mode) {
+      const modeDependencies = {
+        "htmlmixed": ["xml", "css", "javascript"],
+        "php": ["htmlmixed", "xml", "css", "javascript"],
+        "htmlembedded": ["xml", "javascript"],
+        "markdown": ["htmlmixed", "xml", "css", "javascript"]
+      };
+      const dependencies = modeDependencies[mode];
+      if (dependencies && dependencies.length > 0) {
+        for (const modeName of dependencies) {
+          await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
+        }
+      }
+      if (mode === "litespec") {
+        CodeMirror.registerHelper("fold", "litespec", function(cm, start) {
+          var line = start.line;
+          var lineText = cm.getLine(line);
+          var startChar = lineText.indexOf("{");
+          if (startChar === -1) return;
+          var tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, startChar + 1));
+          if (tokenType !== "brace") return;
+          var match = cm.findMatchingBracket(CodeMirror.Pos(line, startChar + 1));
+          if (!match || !match.match || match.to === null) return;
+          const result = {
+            from: CodeMirror.Pos(line, startChar + 1),
+            // Fold start
+            to: match.to
+            // Fold end        
+          };
+          return result;
+        });
+        this.editor.setOption("foldOptions", { widget: "\u2194" });
+        const addonModeDependencies = {
+          "litespec": ["simple"]
+        };
+        const addonDependencies = addonModeDependencies[mode];
+        if (addonDependencies && addonDependencies.length > 0) {
+          for (const modeName of addonDependencies) {
+            await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/${modeName}.min.js`);
           }
         }
-      },
-      value: initialValue,
-      tabSize: parseInt(this.getAttribute("tab-size"), 10) || 4,
-      indentUnit: parseInt(this.getAttribute("indent-unit"), 10) || 2,
-      matchBrackets: true,
-      keyMap: "sublime",
-      showInvisibles: true
-    });
-    await this.loadAssets(this.getAttribute("theme"), this.getAttribute("mode"));
-    this.editor.on("change", async () => {
-      const value = this.editor.getValue();
-      this._internals.setFormValue(value);
-      const gutters2 = await this.getGutters();
-      this.editor.setOption("gutters", gutters2);
-    });
-  }
-  // This is required to inform the form that the component can be form-associated
-  static get formAssociated() {
-    return true;
-  }
-  // Method called when the form is reset
-  formResetCallback() {
-    this.editor.setValue("");
-  }
-  // Method called when the form state is restored (for example, after back/forward navigation)
-  formStateRestoreCallback(state) {
-    if (state) {
-      this.editor.setValue(state);
-    }
-  }
-  // Optional: Handle disabled state when the form element is disabled
-  formDisabledCallback(isDisabled) {
-    if (this.editor) {
-      this.editor.setOption("readOnly", isDisabled);
-    }
-  }
-  async refresh(timeout = 500) {
-    await sleep(timeout);
-    this.editor.refresh();
-    this.editor.focus();
-  }
-  async getGutters() {
-    if (this.hasAttribute("fold-gutter")) {
-      await this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldcode.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/brace-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/comment-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/xml-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js");
-    }
-    let gutters = [];
-    const hasLineNumbers = this.hasAttribute("line-numbers");
-    const hasFoldGutter = this.hasAttribute("fold-gutter");
-    if (hasLineNumbers && hasFoldGutter) {
-      gutters = ["CodeMirror-linenumbers", "CodeMirror-foldgutter"];
-    } else if (hasFoldGutter) {
-      gutters = ["CodeMirror-foldgutter"];
-    }
-    return gutters;
-  }
-  async loadAssets(theme, mode) {
-    if (theme && theme !== "default") {
-      await this.loadTheme(theme);
-    }
-    if (mode) {
-      await this.loadMode(mode);
-    }
-  }
-  async loadTheme(theme) {
-    if (!theme || theme === "default") return;
-    const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css`;
-    if (!document.querySelector(`link[href="${themeUrl}"]`)) {
-      await this.loadCSS(themeUrl);
-    }
-    this.editor.setOption("theme", theme);
-  }
-  async loadMode(mode) {
-    const modeDependencies = {
-      "htmlmixed": ["xml", "css", "javascript"],
-      "php": ["htmlmixed", "xml", "css", "javascript"],
-      "htmlembedded": ["xml", "javascript"],
-      "markdown": ["htmlmixed", "xml", "css", "javascript"]
-    };
-    const dependencies = modeDependencies[mode];
-    if (dependencies && dependencies.length > 0) {
-      for (const modeName of dependencies) {
-        await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
-      }
-    }
-    if (mode === "litespec") {
-      CodeMirror.registerHelper("fold", "litespec", function(cm, start) {
-        var line = start.line;
-        var lineText = cm.getLine(line);
-        var startChar = lineText.indexOf("{");
-        if (startChar === -1) return;
-        var tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, startChar + 1));
-        if (tokenType !== "brace") return;
-        var match = cm.findMatchingBracket(CodeMirror.Pos(line, startChar + 1));
-        if (!match || !match.match || match.to === null) return;
-        const result = {
-          from: CodeMirror.Pos(line, startChar + 1),
-          // Fold start
-          to: match.to
-          // Fold end        
-        };
-        return result;
-      });
-      this.editor.setOption("foldOptions", { widget: "\u2194" });
-      const addonModeDependencies = {
-        "litespec": ["simple"]
-      };
-      const addonDependencies = addonModeDependencies[mode];
-      if (addonDependencies && addonDependencies.length > 0) {
-        for (const modeName of addonDependencies) {
-          await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/${modeName}.min.js`);
+        const customModes = ["litespec"];
+        if (customModes.includes(mode)) {
+          const modeUrl2 = "https://mattduffield.github.io/lite-spec/dist/highlighters/litespec.mode.cm.js";
+          await this.loadScript(modeUrl2);
+          this.editor.setOption("mode", mode);
+          return;
         }
       }
-      const customModes = ["litespec"];
-      if (customModes.includes(mode)) {
-        const modeUrl2 = "https://mattduffield.github.io/lite-spec/dist/highlighters/litespec.mode.cm.js";
-        await this.loadScript(modeUrl2);
-        this.editor.setOption("mode", mode);
-        return;
+      const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
+      if (!document.querySelector(`script[src="${modeUrl}"]`)) {
+        await this.loadScript(modeUrl);
       }
+      this.editor.setOption("mode", mode);
     }
-    const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
-    if (!document.querySelector(`script[src="${modeUrl}"]`)) {
-      await this.loadScript(modeUrl);
+    _unWireEvents() {
+      super._unWireEvents();
+      const settingsIcon = this.querySelector(".settings-icon");
+      settingsIcon.removeEventListener("click", this._handleSettingsIconClick.bind(this));
     }
-    this.editor.setOption("mode", mode);
   }
-  _unWireEvents() {
-    super._unWireEvents();
-    const settingsIcon = this.querySelector(".settings-icon");
-    settingsIcon.removeEventListener("click", this._handleSettingsIconClick.bind(this));
-  }
-};
-customElements.define("wc-code-mirror", WcCodeMirror);
+  customElements.define("wc-code-mirror", WcCodeMirror);
+}
 
 // src/js/components/wc-div.js
 var WcDiv = class extends WcBaseComponent {
@@ -1702,11 +1704,11 @@ var WcDropdown = class extends WcBaseComponent {
       svg.setAttribute("stroke-width", "1.5");
       svg.setAttribute("stroke", "currentColor");
       svg.classList.add("h-4", "w-4", "component");
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("stroke-linejoin", "round");
-      path.setAttribute("d", "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z");
-      svg.appendChild(path);
+      const path2 = document.createElementNS(svgNS, "path");
+      path2.setAttribute("stroke-linecap", "round");
+      path2.setAttribute("stroke-linejoin", "round");
+      path2.setAttribute("d", "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z");
+      svg.appendChild(path2);
       dropdownContent.appendChild(svg);
       ipt.addEventListener("input", this._handleInput.bind(this));
     }
@@ -2407,7 +2409,7 @@ var WcMenu = class extends WcBaseComponent {
     Array.from(options).forEach((option) => option.remove());
   }
   _createAnchor(viewName, viewLabel, selected) {
-    const path = this.getAttribute("path") || "/static/views/";
+    const path2 = this.getAttribute("path") || "/static/views/";
     const el = document.createElement("a");
     el.classList.add("menu-link");
     if (selected) {
@@ -2415,12 +2417,12 @@ var WcMenu = class extends WcBaseComponent {
     }
     el.dataset.name = viewName;
     el.textContent = viewLabel;
-    el.setAttribute("href", `${path}${viewName}.html`);
-    el.setAttribute("hx-get", `${path}${viewName}.html`);
+    el.setAttribute("href", `${path2}${viewName}.html`);
+    el.setAttribute("hx-get", `${path2}${viewName}.html`);
     el.setAttribute("hx-trigger", "click");
     el.setAttribute("hx-target", "#viewport");
     el.setAttribute("hx-swap", "innerHTML transition:true");
-    el.setAttribute("hx-push-url", `${path}${viewName}.html`);
+    el.setAttribute("hx-push-url", `${path2}${viewName}.html`);
     el.setAttribute("hx-select", "#page-contents");
     el.addEventListener("click", this._handleClick.bind(this));
     return el;
@@ -2444,8 +2446,8 @@ var WcMenu = class extends WcBaseComponent {
     }
   }
   _getCurrentRoute() {
-    const path = window.location.pathname;
-    const page = path.split("/").pop();
+    const path2 = window.location.pathname;
+    const page = path2.split("/").pop();
     const pageWithoutExtension = page.split(".").shift();
     return pageWithoutExtension;
   }
@@ -3969,323 +3971,738 @@ var WcTab = class extends WcBaseComponent {
 customElements.define("wc-tab", WcTab);
 
 // src/js/components/wc-tabulator.js
-var WcTabulator = class extends HTMLElement {
-  constructor() {
-    super();
-    this.table = null;
-  }
-  connectedCallback() {
-    this.render();
-  }
-  render() {
-    const container = document.createElement("div");
-    container.id = this.getAttribute("id") || "wc-tabulator";
-    this.appendChild(container);
-    const paginationCounter = this.getAttribute("pagination-counter");
-    const movableColumns = this.getAttribute("movable-columns");
-    const resizableColumns = this.getAttribute("resizable-columns");
-    const resizableColumnGuide = this.getAttribute("resizable-column-guide");
-    const movableRows = this.getAttribute("movable-rows");
-    const rowHeader = this.getAttribute("row-header");
-    const resizableRows = this.getAttribute("resizable-rows");
-    const resizableRowGuide = this.getAttribute("resizable-row-guide");
-    const frozenRows = this.getAttribute("frozen-rows");
-    const persistence = this.getAttribute("persistence");
-    const headerVisible = this.getAttribute("header-visible");
-    const options = {
-      columns: this.getColumnsConfig(),
-      layout: this.getAttribute("layout") || "fitData",
-      pagination: this.hasAttribute("pagination"),
-      paginationMode: "remote",
-      filterMode: "remote",
-      sortMode: "remote",
-      ajaxURL: this.getAttribute("ajax-url") || "",
-      // URL for server-side loading
-      ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
-      ajaxConfig: this.getAjaxConfig(),
-      ajaxResponse: this.handleAjaxResponse.bind(this),
-      // Optional custom handling of server response
-      paginationSize: parseInt(this.getAttribute("pagination-size")) || 10
+if (!customElements.get("wc-tabulator")) {
+  class WcTabulator extends WcBaseComponent {
+    icons = {
+      "eye": {
+        "viewport": "0 0 640 512",
+        "d": "M117.2 136C160.3 96 217.6 64 288 64s127.7 32 170.8 72c43.1 40 71.9 88 85.2 120c-13.3 32-42.1 80-85.2 120c-43.1 40-100.4 72-170.8 72s-127.7-32-170.8-72C74.1 336 45.3 288 32 256c13.3-32 42.1-80 85.2-120zM288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM192 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z"
+      },
+      "eyeSlash": {
+        "viewport": "0 0 640 512",
+        "d": "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"
+      },
+      "square": {
+        "viewport": "0 0 448 512",
+        "d": "M384 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l320 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"
+      },
+      "squareCheck": {
+        "viewport": "0 0 448 512",
+        "d": "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM337 209L209 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L303 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+      },
+      "remove": {
+        "viewport": "0 0 448 512",
+        "d": "M177.1 48l93.7 0c2.7 0 5.2 1.3 6.7 3.6l19 28.4-145 0 19-28.4c1.5-2.2 4-3.6 6.7-3.6zM354.2 80L317.5 24.9C307.1 9.4 289.6 0 270.9 0L177.1 0c-18.7 0-36.2 9.4-46.6 24.9L93.8 80 80.1 80 32 80l-8 0C10.7 80 0 90.7 0 104s10.7 24 24 24l11.6 0L59.6 452.7c2.5 33.4 30.3 59.3 63.8 59.3l201.1 0c33.5 0 61.3-25.9 63.8-59.3L412.4 128l11.6 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-8 0-48.1 0-13.7 0zm10.1 48L340.5 449.2c-.6 8.4-7.6 14.8-16 14.8l-201.1 0c-8.4 0-15.3-6.5-16-14.8L83.7 128l280.6 0z"
+      },
+      "clone": {
+        "viewport": "0 0 512 512",
+        "d": "M288 448L64 448l0-224 64 0 0-64-64 0c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l224 0c35.3 0 64-28.7 64-64l0-64-64 0 0 64zm-64-96l224 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L224 0c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64z"
+      },
+      "check": {
+        "viewport": "0 0 448 512",
+        "d": "M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
+      },
+      "xmark": {
+        "viewport": "0 0 384 512",
+        "d": "M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
+      }
     };
-    if (paginationCounter) options.paginationCounter = paginationCounter;
-    if (movableColumns) options.movableColumns = movableColumns.toLowerCase() == "true" ? true : false;
-    if (resizableColumns) options.resizableColumns = resizableColumns.toLowerCase() == "true" ? true : false;
-    if (resizableColumnGuide) options.resizableColumnGuide = resizableColumnGuide.toLowerCase() == "true" ? true : false;
-    if (movableRows) options.movableRows = movableRows.toLowerCase() == "true" ? true : false;
-    if (rowHeader) options.rowHeader = JSON.parse(rowHeader);
-    if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == "true" ? true : false;
-    if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == "true" ? true : false;
-    if (frozenRows) options.frozenRows = parseInt(frozenRows);
-    if (persistence) options.persistence = persistence.toLowerCase() == "true" ? true : false;
-    if (options.persistence) options.persistenceID = container.id;
-    if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == "true" ? true : false;
-    this.table = new Tabulator(container, options);
-    this.classList.add("contents");
-  }
-  getColumnsConfig() {
-    const columns = [];
-    const columnElements = this.querySelectorAll("wc-tabulator-column");
-    columnElements.forEach((col) => {
-      const field = col.getAttribute("field");
-      const title = col.getAttribute("title") || field;
-      const width = col.getAttribute("width");
-      const minWidth = col.getAttribute("min-width");
-      const maxWidth = col.getAttribute("max-width");
-      const maxInitialWidth = col.getAttribute("max-initial-width");
-      const resizable = col.getAttribute("resizable");
-      const editable = col.getAttribute("editable");
-      const frozen = col.getAttribute("frozen");
-      const responsive = col.getAttribute("responsive");
-      const tooltip = col.getAttribute("tooltip");
-      const cssClass = col.getAttribute("css-class");
-      const rowHandle = col.getAttribute("row-handle");
-      const htmlOutput = col.getAttribute("html-output");
-      const print = col.getAttribute("print");
-      const clipboard = col.getAttribute("clipboard");
-      const titleFormatter = col.getAttribute("title-formatter");
-      const formatter = col.getAttribute("formatter");
-      const formatterParams = col.getAttribute("formatter-params");
-      const hozAlign = col.getAttribute("hoz-align");
-      const vertAlign = col.getAttribute("vert-align") || "top";
-      const headerHozAlign = col.getAttribute("header-hoz-align");
-      const visible = col.getAttribute("visible");
-      const headerSort = col.getAttribute("header-sort");
-      const headerSortStartingDir = col.getAttribute("header-sort-starting-dir");
-      const headerSortTristate = col.getAttribute("header-sort-tristate");
-      const sorter = col.getAttribute("sorter");
-      const sorterParams = col.getAttribute("sorter-params");
-      const headerFilter = col.getAttribute("header-filter");
-      const headerFilterParams = col.getAttribute("header-filter-params");
-      const headerFilterPlaceholder = col.getAttribute("header-filter-placeholder");
-      const headerFilterFunc = col.getAttribute("header-filter-func");
-      const headerMenu = col.getAttribute("header-menu");
-      const editor = col.getAttribute("editor");
-      const editorParams = col.getAttribute("editor-params");
-      const cellClick = col.getAttribute("cell-click");
-      const bottomCalc = col.getAttribute("bottom-calc");
-      const bottomCalcParams = col.getAttribute("bottom-calc-params");
-      const topCalc = col.getAttribute("top-calc");
-      const topCalcParams = col.getAttribute("top-calc-params");
-      const column = { field, title };
-      if (width) column.width = width;
-      if (minWidth) column.minWidth = minWidth;
-      if (maxWidth) column.maxWidth = maxWidth;
-      if (maxInitialWidth) column.maxInitialWidth = maxInitialWidth;
-      if (resizable) column.resizable = resizable.toLowerCase() == "true" ? true : false;
-      if (editable) column.editable = editable.toLowerCase() == "true" ? true : false;
-      if (frozen) column.frozen = frozen.toLowerCase() == "true" ? true : false;
-      if (responsive) column.responsive = parseInt(responsive);
-      if (tooltip) column.tooltip = tooltip;
-      if (cssClass) column.cssClass = cssClass;
-      if (rowHandle) column.rowHandle = rowHandle.toLowerCase() == "true" ? true : false;
-      if (htmlOutput) column.htmlOutput = htmlOutput;
-      if (print) column.print = print.toLowerCase() == "true" ? true : false;
-      if (clipboard) column.clipboard = clipboard.toLowerCase() == "true" ? true : false;
-      if (headerSort) column.headerSort = headerSort.toLowerCase() == "true" ? true : false;
-      if (headerSortStartingDir) column.headerSortStartingDir = headerSortStartingDir;
-      if (headerSortTristate) column.headerSortTristate = headerSortTristate.toLowerCase() == "true" ? true : false;
-      if (headerFilter) column.headerFilter = headerFilter;
-      if (headerFilterParams) column.headerFilterParams = JSON.parse(headerFilterParams);
-      if (headerFilterPlaceholder) column.headerFilterPlaceholder = headerFilterPlaceholder;
-      if (headerFilterFunc) column.headerFilterFunc = headerFilterFunc;
-      if (headerMenu) {
-        if (headerMenu == "headerMenu") {
-          column.headerMenu = this.headerMenu.bind(this);
+    rowMenu = [
+      {
+        label: this.createMenuLabel("Select Row", this.icons.check),
+        action: function(e, row) {
+          row.select();
+        }
+      },
+      {
+        label: this.createMenuLabel("Un-Select Row", this.icons.xmark),
+        action: function(e, row) {
+          row.deselect();
+        }
+      },
+      {
+        separator: true
+      },
+      {
+        label: this.createMenuLabel("Delete Row", this.icons.remove),
+        action: function(e, row) {
+          console.log("Deleting row...");
+        }
+      },
+      {
+        label: this.createMenuLabel("Clone Row", this.icons.clone),
+        action: function(e, row) {
+          console.log("Cloning row...");
         }
       }
-      if (editor) {
-        if (editor == "dateEditor") {
-          column.editor = this.dateEditor.bind(this);
+    ];
+    constructor() {
+      super();
+      this.table = null;
+      this._internals = this.attachInternals();
+      const compEl = this.querySelector(".wc-tabulator");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-tabulator");
+        this.componentElement.id = this.getAttribute("id") || "wc-tabulator";
+        this.appendChild(this.componentElement);
+      }
+      console.log("ctor:wc-tabulator");
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      console.log("conntectedCallback:wc-tabulator");
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    async _handleAttributeChange(attrName, newValue) {
+      super._handleAttributeChange(attrName, newValue);
+    }
+    _render() {
+      super._render();
+      const innerEl = this.querySelector(".wc-tabulator > *");
+      if (innerEl) {
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+      console.log("_render:wc-code-mirror");
+    }
+    async _createInnerElement() {
+      const paginationCounter = this.getAttribute("pagination-counter");
+      const movableColumns = this.getAttribute("movable-columns");
+      const resizableColumns = this.getAttribute("resizable-columns");
+      const resizableColumnGuide = this.getAttribute("resizable-column-guide");
+      const movableRows = this.getAttribute("movable-rows");
+      const rowHeader = this.getAttribute("row-header");
+      const resizableRows = this.getAttribute("resizable-rows");
+      const resizableRowGuide = this.getAttribute("resizable-row-guide");
+      const frozenRows = this.getAttribute("frozen-rows");
+      const persistence = this.getAttribute("persistence");
+      const headerVisible = this.getAttribute("header-visible");
+      const rowContextMenu = this.getAttribute("row-context-menu");
+      const options = {
+        columns: this.getColumnsConfig(),
+        layout: this.getAttribute("layout") || "fitData",
+        pagination: this.hasAttribute("pagination"),
+        paginationMode: "remote",
+        filterMode: "remote",
+        sortMode: "remote",
+        ajaxURL: this.getAttribute("ajax-url") || "",
+        // URL for server-side loading
+        ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
+        ajaxConfig: this.getAjaxConfig(),
+        ajaxResponse: this.handleAjaxResponse.bind(this),
+        // Optional custom handling of server response
+        paginationSize: parseInt(this.getAttribute("pagination-size")) || 10
+      };
+      if (paginationCounter) options.paginationCounter = paginationCounter;
+      if (movableColumns) options.movableColumns = movableColumns.toLowerCase() == "true" ? true : false;
+      if (resizableColumns) options.resizableColumns = resizableColumns.toLowerCase() == "true" ? true : false;
+      if (resizableColumnGuide) options.resizableColumnGuide = resizableColumnGuide.toLowerCase() == "true" ? true : false;
+      if (movableRows) options.movableRows = movableRows.toLowerCase() == "true" ? true : false;
+      if (rowHeader) options.rowHeader = JSON.parse(rowHeader);
+      if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == "true" ? true : false;
+      if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == "true" ? true : false;
+      if (frozenRows) options.frozenRows = parseInt(frozenRows);
+      if (persistence) options.persistence = persistence.toLowerCase() == "true" ? true : false;
+      if (options.persistence) options.persistenceID = container.id;
+      if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == "true" ? true : false;
+      if (rowContextMenu) {
+        if (rowContextMenu == "rowContextMenu") {
+          options.rowContextMenu = this.rowMenu;
+        }
+      }
+      await this.renderTabulator(options);
+      this.classList.add("contents");
+    }
+    async renderTabulator(options) {
+      await Promise.all([
+        this.loadScript("https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js"),
+        this.loadCSS("https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"),
+        this.loadLibrary("https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js", "Tabulator")
+      ]);
+      this.table = new Tabulator(this.componentElement, options);
+    }
+    getColumnsConfig() {
+      const columns = [];
+      const columnElements = this.querySelectorAll("wc-tabulator-column");
+      columnElements.forEach((col) => {
+        const field = col.getAttribute("field");
+        const title = col.getAttribute("title") || field;
+        const width = col.getAttribute("width");
+        const minWidth = col.getAttribute("min-width");
+        const maxWidth = col.getAttribute("max-width");
+        const maxInitialWidth = col.getAttribute("max-initial-width");
+        const resizable = col.getAttribute("resizable");
+        const editable = col.getAttribute("editable");
+        const frozen = col.getAttribute("frozen");
+        const responsive = col.getAttribute("responsive");
+        const tooltip = col.getAttribute("tooltip");
+        const cssClass = col.getAttribute("css-class");
+        const rowHandle = col.getAttribute("row-handle");
+        const htmlOutput = col.getAttribute("html-output");
+        const print = col.getAttribute("print");
+        const clipboard = col.getAttribute("clipboard");
+        const titleFormatter = col.getAttribute("title-formatter");
+        const formatter = col.getAttribute("formatter");
+        const formatterParams = col.getAttribute("formatter-params");
+        const hozAlign = col.getAttribute("hoz-align");
+        const vertAlign = col.getAttribute("vert-align") || "top";
+        const headerHozAlign = col.getAttribute("header-hoz-align");
+        const visible = col.getAttribute("visible");
+        const headerSort = col.getAttribute("header-sort");
+        const headerSortStartingDir = col.getAttribute("header-sort-starting-dir");
+        const headerSortTristate = col.getAttribute("header-sort-tristate");
+        const sorter = col.getAttribute("sorter");
+        const sorterParams = col.getAttribute("sorter-params");
+        const headerFilter = col.getAttribute("header-filter");
+        const headerFilterParams = col.getAttribute("header-filter-params");
+        const headerFilterPlaceholder = col.getAttribute("header-filter-placeholder");
+        const headerFilterFunc = col.getAttribute("header-filter-func");
+        const headerMenu = col.getAttribute("header-menu");
+        const editor = col.getAttribute("editor");
+        const editorParams = col.getAttribute("editor-params");
+        const cellClick = col.getAttribute("cell-click");
+        const bottomCalc = col.getAttribute("bottom-calc");
+        const bottomCalcParams = col.getAttribute("bottom-calc-params");
+        const topCalc = col.getAttribute("top-calc");
+        const topCalcParams = col.getAttribute("top-calc-params");
+        const column = { field, title };
+        if (width) column.width = width;
+        if (minWidth) column.minWidth = minWidth;
+        if (maxWidth) column.maxWidth = maxWidth;
+        if (maxInitialWidth) column.maxInitialWidth = maxInitialWidth;
+        if (resizable) column.resizable = resizable.toLowerCase() == "true" ? true : false;
+        if (editable) column.editable = editable.toLowerCase() == "true" ? true : false;
+        if (frozen) column.frozen = frozen.toLowerCase() == "true" ? true : false;
+        if (responsive) column.responsive = parseInt(responsive);
+        if (tooltip) column.tooltip = tooltip;
+        if (cssClass) column.cssClass = cssClass;
+        if (rowHandle) column.rowHandle = rowHandle.toLowerCase() == "true" ? true : false;
+        if (htmlOutput) column.htmlOutput = htmlOutput;
+        if (print) column.print = print.toLowerCase() == "true" ? true : false;
+        if (clipboard) column.clipboard = clipboard.toLowerCase() == "true" ? true : false;
+        if (headerSort) column.headerSort = headerSort.toLowerCase() == "true" ? true : false;
+        if (headerSortStartingDir) column.headerSortStartingDir = headerSortStartingDir;
+        if (headerSortTristate) column.headerSortTristate = headerSortTristate.toLowerCase() == "true" ? true : false;
+        if (headerFilter) column.headerFilter = headerFilter;
+        if (headerFilterParams) column.headerFilterParams = JSON.parse(headerFilterParams);
+        if (headerFilterPlaceholder) column.headerFilterPlaceholder = headerFilterPlaceholder;
+        if (headerFilterFunc) column.headerFilterFunc = headerFilterFunc;
+        if (headerMenu) {
+          if (headerMenu == "headerMenu") {
+            column.headerMenu = this.headerMenu.bind(this);
+          }
+        }
+        if (editor) {
+          if (editor == "dateEditor") {
+            column.editor = this.dateEditor.bind(this);
+          } else {
+            column.editor = editor;
+          }
+        }
+        if (editorParams) column.editorParams = JSON.parse(editorParams);
+        if (cellClick) {
+          column.cellClick = this.resolveFunc(cellClick);
+        }
+        if (titleFormatter) column.titleFormatter = titleFormatter;
+        if (formatter) column.formatter = formatter;
+        if (formatterParams) column.formatterParams = JSON.parse(formatterParams);
+        if (hozAlign) column.hozAlign = hozAlign;
+        if (vertAlign) column.vertAlign = vertAlign;
+        if (headerHozAlign) column.headerHozAlign = headerHozAlign;
+        if (visible) column.visible = visible.toLowerCase() == "true" ? true : false;
+        if (sorter) column.sorter = sorter;
+        if (sorterParams) column.sorterParams = JSON.parse(sorterParams);
+        if (bottomCalc) column.bottomCalc = bottomCalc;
+        if (bottomCalcParams) column.bottomCalcParams = JSON.parse(bottomCalcParams);
+        if (topCalc) column.topCalc = topCalc;
+        if (topCalcParams) column.topCalcParams = JSON.parse(topCalcParams);
+        columns.push(column);
+      });
+      return columns;
+    }
+    resolveFunc(func) {
+      try {
+        if (func.startsWith("function")) {
+          return new Function(`return (${func})`)();
+        } else if (this[func]) {
+          return this[func];
+        } else if (window[func]) {
+          return window[func];
         } else {
-          column.editor = editor;
+          console.warn(`Func "${func}" not found.`);
+          return null;
         }
-      }
-      if (editorParams) column.editorParams = JSON.parse(editorParams);
-      if (cellClick) {
-        column.cellClick = this.resolveFunc(cellClick);
-      }
-      if (titleFormatter) column.titleFormatter = titleFormatter;
-      if (formatter) column.formatter = formatter;
-      if (formatterParams) column.formatterParams = JSON.parse(formatterParams);
-      if (hozAlign) column.hozAlign = hozAlign;
-      if (vertAlign) column.vertAlign = vertAlign;
-      if (headerHozAlign) column.headerHozAlign = headerHozAlign;
-      if (visible) column.visible = visible.toLowerCase() == "true" ? true : false;
-      if (sorter) column.sorter = sorter;
-      if (sorterParams) column.sorterParams = JSON.parse(sorterParams);
-      if (bottomCalc) column.bottomCalc = bottomCalc;
-      if (bottomCalcParams) column.bottomCalcParams = JSON.parse(bottomCalcParams);
-      if (topCalc) column.topCalc = topCalc;
-      if (topCalcParams) column.topCalcParams = JSON.parse(topCalcParams);
-      columns.push(column);
-    });
-    return columns;
-  }
-  resolveFunc(func) {
-    try {
-      if (func.startsWith("function")) {
-        return new Function(`return (${func})`)();
-      } else if (this[func]) {
-        return this[func];
-      } else if (window[func]) {
-        return window[func];
-      } else {
-        console.warn(`Func "${func}" not found.`);
+      } catch (error) {
+        console.error(`Error resolving func: ${error.message}`);
         return null;
       }
-    } catch (error) {
-      console.error(`Error resolving func: ${error.message}`);
-      return null;
     }
-  }
-  resolveFormatter(formatter) {
-    try {
-      if (formatter.startsWith("function")) {
-        return new Function(`return (${formatter})`)();
-      } else if (window[formatter]) {
-        return window[formatter];
-      } else {
-        console.warn(`Formatter "${formatter}" not found.`);
+    resolveFormatter(formatter) {
+      try {
+        if (formatter.startsWith("function")) {
+          return new Function(`return (${formatter})`)();
+        } else if (window[formatter]) {
+          return window[formatter];
+        } else {
+          console.warn(`Formatter "${formatter}" not found.`);
+          return null;
+        }
+      } catch (error) {
+        console.error(`Error resolving formatter: ${error.message}`);
         return null;
       }
-    } catch (error) {
-      console.error(`Error resolving formatter: ${error.message}`);
-      return null;
     }
-  }
-  toggleSelect(e, cell) {
-    cell.getRow().toggleSelect();
-  }
-  headerMenu() {
-    var menu = [];
-    var columns = this.table.getColumns();
-    let squareCheck = "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM337 209L209 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L303 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z";
-    let square = "M384 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l320 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z";
-    for (let column of columns) {
+    toggleSelect(e, cell) {
+      cell.getRow().toggleSelect();
+    }
+    headerMenu() {
+      var menu = [];
+      var columns = this.table.getColumns();
+      let hideLabel = this.createMenuLabel("Hide Filter", this.icons.eyeSlash);
+      menu.push({
+        label: hideLabel,
+        action: async (e) => {
+          let promises = [];
+          let cols = this.table.getColumns();
+          e.stopPropagation();
+          for (let col of cols) {
+            await col.updateDefinition({ headerFilter: false });
+          }
+        }
+      });
+      let showLabel = this.createMenuLabel("Show Filter", this.icons.eye);
+      menu.push({
+        label: showLabel,
+        action: (e) => {
+          let cols = this.getColumnsConfig();
+          e.stopPropagation();
+          this.table.setColumns(cols);
+        }
+      });
+      menu.push({
+        separator: true
+      });
+      for (let column of columns) {
+        let icon = this.createHeaderMenuIcon(column, this.icons.square, this.icons.squareCheck);
+        let label = document.createElement("span");
+        let title = document.createElement("span");
+        title.textContent = " " + column.getDefinition().title;
+        title.textContent = title.textContent.replace("null", "").replace("undefined", "");
+        label.appendChild(icon);
+        label.appendChild(title);
+        menu.push({
+          label,
+          action: function(e) {
+            e.stopPropagation();
+            column.toggle();
+            path.setAttribute(
+              "d",
+              column.isVisible() ? this.icons.squareCheck.d : this.icons.square.d
+            );
+          }
+        });
+      }
+      return menu;
+    }
+    createHeaderMenuIcon(column) {
       let icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       icon.setAttribute("aria-hidden", "true");
       icon.setAttribute("focusable", "false");
-      icon.setAttribute("data-prefix", "fas");
       icon.setAttribute("fill", "currentColor");
       icon.classList.add("h-4");
       icon.classList.add("w-4");
       icon.classList.add("align-text-top");
-      icon.setAttribute("viewBox", "0 0 448 512");
-      let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute(
+      icon.setAttribute("viewBox", this.icons.square.viewport);
+      let path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path2.setAttribute(
         "d",
-        column.isVisible() ? squareCheck : square
+        column.isVisible() ? this.icons.squareCheck.d : this.icons.square.d
       );
-      icon.appendChild(path);
+      icon.appendChild(path2);
+      return icon;
+    }
+    createMenuLabel(titleContent, icn) {
+      let icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("focusable", "false");
+      icon.setAttribute("fill", "currentColor");
+      icon.classList.add("h-4");
+      icon.classList.add("w-4");
+      icon.classList.add("align-text-top");
+      icon.setAttribute("viewBox", icn.viewport);
+      let path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path2.setAttribute("d", icn.d);
+      icon.appendChild(path2);
       let label = document.createElement("span");
       let title = document.createElement("span");
-      title.textContent = " " + column.getDefinition().title;
-      title.textContent = title.textContent.replace("null", "");
+      title.textContent = " " + titleContent;
       label.appendChild(icon);
       label.appendChild(title);
-      menu.push({
-        label,
-        action: function(e) {
-          e.stopPropagation();
-          column.toggle();
-          path.setAttribute(
-            "d",
-            column.isVisible() ? squareCheck : square
-          );
+      return label;
+    }
+    dateEditor(cell, onRendered, success, cancel) {
+      var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
+      input = document.createElement("input");
+      input.setAttribute("type", "date");
+      input.style.padding = "4px";
+      input.style.width = "100%";
+      input.style.boxSizing = "border-box";
+      input.value = cellValue;
+      onRendered(function() {
+        input.focus();
+        input.style.height = "100%";
+      });
+      function onChange() {
+        if (input.value != cellValue) {
+          success(luxon.DateTime.fromFormat(input.value, "yyyy-MM-dd").toFormat("dd/MM/yyyy"));
+        } else {
+          cancel();
+        }
+      }
+      input.addEventListener("blur", onChange);
+      input.addEventListener("keydown", function(e) {
+        if (e.keyCode == 13) {
+          onChange();
+        }
+        if (e.keyCode == 27) {
+          cancel();
         }
       });
+      return input;
     }
-    return menu;
-  }
-  dateEditor(cell, onRendered, success, cancel) {
-    var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
-    input = document.createElement("input");
-    input.setAttribute("type", "date");
-    input.style.padding = "4px";
-    input.style.width = "100%";
-    input.style.boxSizing = "border-box";
-    input.value = cellValue;
-    onRendered(function() {
-      input.focus();
-      input.style.height = "100%";
-    });
-    function onChange() {
-      if (input.value != cellValue) {
-        success(luxon.DateTime.fromFormat(input.value, "yyyy-MM-dd").toFormat("dd/MM/yyyy"));
+    getAjaxConfig() {
+      return {
+        method: "GET",
+        // Default to GET, can be overridden
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+    }
+    getAjaxURLGenerator(url, config, params) {
+      let ajaxParamsParts = [];
+      const ajaxParamsMap = JSON.parse(this.getAttribute("ajax-params-map") || "{}");
+      for (const [key, value] of Object.entries(ajaxParamsMap)) {
+        ajaxParamsParts.push(`${value}=${params[key]}`);
+      }
+      if (ajaxParamsParts.length === 0) {
+        const { page, size } = params;
+        ajaxParamsParts.push(`page=${page}`);
+        ajaxParamsParts.push(`size=${size}`);
+      }
+      const ajaxParams = JSON.parse(this.getAttribute("ajax-params") || "{}");
+      for (const [key, value] of Object.entries(ajaxParams)) {
+        ajaxParamsParts.push(`${key}=${value}`);
+      }
+      const { filter } = params;
+      if (filter && filter.length > 0) {
+        ajaxParamsParts.push(`filter=${JSON.stringify(filter)}`);
+      }
+      const { sort } = params;
+      if (sort && sort.length > 0) {
+        ajaxParamsParts.push(`sort=${JSON.stringify(sort)}`);
+      }
+      const ajaxParamsStr = ajaxParamsParts.join("&");
+      return url + `?${ajaxParamsStr}`;
+    }
+    handleAjaxResponse(url, params, response) {
+      const { results } = response;
+      const { data, last_page } = response;
+      if (data == null && last_page === 0) {
+        return { last_page: 0, data: [] };
+      } else if (data && last_page) {
+        return { last_page, data };
       } else {
-        cancel();
+        return { last_page: 10, data: results };
       }
     }
-    input.addEventListener("blur", onChange);
-    input.addEventListener("keydown", function(e) {
-      if (e.keyCode == 13) {
-        onChange();
-      }
-      if (e.keyCode == 27) {
-        cancel();
-      }
-    });
-    return input;
+    _applyStyle() {
+      const style = `
+  /*Theme the Tabulator element*/
+  .tabulator {
+    background-color: var(--component-bg-color);
+    border: 1px solid var(--component-border-color);
+    border-radius: 10px;
   }
-  getAjaxConfig() {
-    return {
-      method: "GET",
-      // Default to GET, can be overridden
-      headers: {
-        "Content-Type": "application/json"
-      }
-    };
+
+  /*Theme the header*/
+  .tabulator .tabulator-header,
+  .tabulator .tabulator-header .tabulator-col {
+    background-color: var(--component-bg-color);
+    color: var(--component-color);
   }
-  getAjaxURLGenerator(url, config, params) {
-    let ajaxParamsParts = [];
-    const ajaxParamsMap = JSON.parse(this.getAttribute("ajax-params-map") || "{}");
-    for (const [key, value] of Object.entries(ajaxParamsMap)) {
-      ajaxParamsParts.push(`${value}=${params[key]}`);
-    }
-    if (ajaxParamsParts.length === 0) {
-      const { page, size } = params;
-      ajaxParamsParts.push(`page=${page}`);
-      ajaxParamsParts.push(`size=${size}`);
-    }
-    const ajaxParams = JSON.parse(this.getAttribute("ajax-params") || "{}");
-    for (const [key, value] of Object.entries(ajaxParams)) {
-      ajaxParamsParts.push(`${key}=${value}`);
-    }
-    const { filter } = params;
-    if (filter && filter.length > 0) {
-      ajaxParamsParts.push(`filter=${JSON.stringify(filter)}`);
-    }
-    const { sort } = params;
-    if (sort && sort.length > 0) {
-      ajaxParamsParts.push(`sort=${JSON.stringify(sort)}`);
-    }
-    const ajaxParamsStr = ajaxParamsParts.join("&");
-    return url + `?${ajaxParamsStr}`;
+
+  /*Allow column header names to wrap lines*/
+  .tabulator .tabulator-header .tabulator-col,
+  .tabulator .tabulator-header .tabulator-col-row-handle {
+    white-space: normal;
   }
-  handleAjaxResponse(url, params, response) {
-    const { results } = response;
-    const { data, last_page } = response;
-    if (data == null && last_page === 0) {
-      return { last_page: 0, data: [] };
-    } else if (data && last_page) {
-      return { last_page, data };
-    } else {
-      return { last_page: 10, data: results };
+
+  /*Color the table rows*/
+  .tabulator .tabulator-tableHolder .tabulator-table .tabulator-row {
+    /* color:#fff; */
+    /* background-color: #666; */
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+
+  /*Color even rows*/
+  .tabulator .tabulator-row.tabulator-row-even {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+  .tabulator .tabulator-row.tabulator-row-odd {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+  .tabulator .tabulator-header-filter {
+    color: black;
+  }
+  .tabulator .tabulator-row.tabulator-row-even:hover,
+  .tabulator .tabulator-row.tabulator-row-even:hover * {
+    color: var(--component-color);
+    background-color: var(--component-bg-hover-color);
+    transition: all 300ms ease-in-out;
+  }
+  .tabulator .tabulator-row.tabulator-row-odd:hover,
+  .tabulator .tabulator-row.tabulator-row-odd:hover * {
+    color: var(--component-color);
+    background-color: var(--component-bg-hover-color);
+    transition: all 300ms ease-in-out;
+  }
+  .tabulator .tabulator-header input,
+  .tabulator .tabulator-row .tabulator-cell input {
+    accent-color: var(--accent-color);
+  }
+
+  .tabulator .tabulator-row .tabulator-cell.tabulator-editing {
+    border: 1px solid var(--primary_400);
+    outline: none;
+    padding: 0;
+  }
+  .tabulator .tabulator-row .tabulator-cell.tabulator-editing input,
+  .tabulator .tabulator-row .tabulator-cell.tabulator-editing select {
+    border: 1px;
+    background: white;
+    color: black;
+    outline: none;
+  }
+
+  .tabulator-header .tabulator-col:hover {
+    background-color: var(--component-bg-hover-color) !important;
+  }
+
+  .tabulator .tabulator-footer {
+    background-color: var(--component-bg-color) !important;
+    color: var(--component-color) !important;
+  }
+
+  .tabulator .tabulator-footer .tabulator-page {
+    color: black;
+    background-color: var(--component-bg-color) !important;
+  }
+
+  .tabulator .tabulator-footer .tabulator-page.active {
+    color: white;
+    background-color: var(--component-bg-color) !important;
+  }
+
+  .tabulator .tabulator-footer .tabulator-page[disabled] {
+    pointer-events: none;
+  }
+
+
+  /* Dark Theme */
+  /*Theme the Tabulator element*/
+  .dark .tabulator {
+    background-color: var(--component-bg-color);
+    border: 1px solid var(--component-border-color);
+    border-radius: 10px;
+  }
+
+  /*Theme the header*/
+  .dark .tabulator .tabulator-header,
+  .dark .tabulator .tabulator-header .tabulator-col {
+    background-color: var(--component-bg-color);
+    color: var(--component-color);
+  }
+
+  /*Allow column header names to wrap lines*/
+  .dark .tabulator .tabulator-header .tabulator-col,
+  .dark .tabulator .tabulator-header .tabulator-col-row-handle {
+    background-color: var(--component-bg-color);
+    color: var(--component-color);
+    white-space: normal;
+  }
+
+  .dark .tabulator .tabulator-header .tabulator-col:hover {
+    background-color: var(--component-bg-hover-color) !important;
+  }
+
+  .dark .tabulator .tabulator-footer {
+    background-color: var(--component-bg-color);
+    color: var(--component-color);
+  }
+
+  .dark .tabulator .tabulator-footer .tabulator-page {
+    color: black;
+    background-color: var(--component-bg-color) !important;  
+  }
+
+  .dark .tabulator .tabulator-footer .tabulator-page.active {
+    color: white;
+    background-color: var(--component-bg-color) !important;  
+  }
+
+  .dark .tabulator .tabulator-footer .tabulator-page[disabled] {
+    pointer-events: none;
+  }
+
+  /*Color the table rows*/
+  .dark .tabulator .tabulator-tableHolder .tabulator-table .tabulator-row {
+    /* color:#fff; */
+    /* background-color: #666; */
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+
+  /*Color even rows*/
+  .dark .tabulator .tabulator-row.tabulator-row-even {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+  .dark .tabulator .tabulator-row.tabulator-row-odd {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+  .dark .tabulator .tabulator-header-filter {
+    color: black;
+  }
+  .dark .tabulator .tabulator-row.tabulator-row-even:hover,
+  .dark .tabulator .tabulator-row.tabulator-row-even:hover * {
+    color: var(--component-color);
+    background-color: var(--component-bg-hover-color);
+  }
+  .dark .tabulator .tabulator-row.tabulator-row-odd:hover,
+  .dark .tabulator .tabulator-row.tabulator-row-odd:hover * {
+    color: var(--component-color);
+    background-color: var(--component-bg-hover-color);
+  }
+  .dark .tabulator .tabulator-header input,
+  .dark .tabulator .tabulator-row .tabulator-cell input {
+    accent-color: var(--accent-color);
+  }
+
+  .dark .tabulator .tabulator-row .tabulator-cell.tabulator-editing {
+    border: 1px solid var(--primary_400);
+    outline: none;
+    padding: 0;
+  }
+  .dark .tabulator .tabulator-row .tabulator-cell.tabulator-editing input,
+  .dark .tabulator .tabulator-row .tabulator-cell.tabulator-editing select {
+    border: 1px;
+    background: #111827;
+    color: #e5e7eb;
+    outline: none;
+  }
+
+  .dark .tabulator .tabulator-header input,
+  .dark .tabulator .tabulator-header select {
+    border: 1px;
+    background: #1f2937;
+    color: #9ca3af;
+    outline: none;
+  }
+
+  .dark .tabulator-menu {
+    background-color: #111827;
+    color: #9ca3af;
+  }
+  .dark .tabulator-menu .tabulator-menu-item:hover {
+    background-color: #374151;
+    color: #e5e7eb;
+  }
+  .dark .tabulator-alert .tabulator-alert-msg {
+    background-color: #111827;
+    border-color: #4b5563;
+  }
+  .dark .tabulator-alert .tabulator-alert-msg.tabulator-alert-state-msg {
+    color: #9ca3af;
+  }
+  .dark .tabulator-edit-list {
+    background-color: #111827;
+    color: #9ca3af;
+  }
+  .dark .tabulator-edit-list .tabulator-edit-list-item {
+    color: #9ca3af;
+  }
+  .dark .tabulator-edit-list .tabulator-edit-list-item:hover {
+    background-color: var(--primary_500);
+    color: #e5e7eb;
+  }
+
+  .tabulator .tabulator-row.tabulator-selected.tabulator-row-even,
+  .tabulator .tabulator-row.tabulator-selected.tabulator-row-odd,
+  .dark .tabulator .tabulator-row.tabulator-selected.tabulator-row-even,
+  .dark .tabulator .tabulator-row.tabulator-selected.tabulator-row-odd {
+    color: var(--accent-color);
+    background-color: var(--accent-bg-color);
+    transition: all 300ms ease-in-out;
+  }
+
+  .tabulator .tabulator-header .tabulator-row .tabulator-cell,
+  .tabulator .tabulator-footer .tabulator-row .tabulator-cell {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+
+  .tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle,
+  .tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle .tabulator-row-handle-box {
+    color: var(--component-color);
+    background-color: var(--component-bg-color);
+  }
+  .tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+    background: var(--bg-color);
+    background: var(--component-color);
+  }
+  .tabulator .tabulator-tableholder .tabulator-table,
+  .tabulator .tabulator-tableholder .tabulator-table .tabulator-row {
+    background-color: var(--component-bg-color);
+  }
+  .tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
+    background-color: var(--secondary-bg-color);
+  }
+        
+      `;
+      this.loadStyle("wc-tabulator-style", style);
     }
   }
-};
-customElements.define("wc-tabulator", WcTabulator);
+  customElements.define("wc-tabulator", WcTabulator);
+}
 
 // src/js/components/wc-tabulator-column.js
-var WcTabulatorColumn = class extends HTMLElement {
-  constructor() {
-    super();
-    this.classList.add("contents");
+if (!customElements.get("wc-tabulator-column")) {
+  class WcTabulatorColumn extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+    }
   }
-  connectedCallback() {
-  }
-};
-customElements.define("wc-tabulator-column", WcTabulatorColumn);
+  customElements.define("wc-tabulator-column", WcTabulatorColumn);
+}
 
 // src/js/components/wc-theme-selector.js
 var WcThemeSelector = class extends WcBaseComponent {
@@ -4518,8 +4935,8 @@ var WcTimeline = class extends WcBaseComponent {
     if (idx % 2 !== 0) {
       position = "right";
     }
-    const container = document.createElement("div");
-    container.classList.add("container", position);
+    const container2 = document.createElement("div");
+    container2.classList.add("container", position);
     const card = document.createElement("div");
     card.classList.add("card");
     const header = document.createElement("h2");
@@ -4528,8 +4945,8 @@ var WcTimeline = class extends WcBaseComponent {
     content.textContent = itemContent;
     card.appendChild(header);
     card.appendChild(content);
-    container.appendChild(card);
-    return container;
+    container2.appendChild(card);
+    return container2;
   }
   _applyStyle() {
     const style = `
@@ -5221,10 +5638,10 @@ var WcBehavior = class _WcBehavior extends HTMLElement {
   //     parentContainer.setAttribute(name, newValue);
   //   }
   // }
-  applyAttributes(container) {
+  applyAttributes(container2) {
     _WcBehavior.observedAttributes.forEach((attr) => {
       if (this.hasAttribute(attr)) {
-        container.setAttribute(attr, this.getAttribute(attr));
+        container2.setAttribute(attr, this.getAttribute(attr));
       }
     });
     _WcBehavior.observedAttributes.forEach((attr) => {
@@ -6317,10 +6734,10 @@ var WcSelect = class extends WcBaseFormComponent {
       select.name = name;
       const hostContainer = document.createElement("div");
       hostContainer.classList.add("row");
-      const container = document.createElement("div");
-      container.classList.add("chip-container");
-      container.id = "chipContainer";
-      hostContainer.appendChild(container);
+      const container2 = document.createElement("div");
+      container2.classList.add("chip-container");
+      container2.id = "chipContainer";
+      hostContainer.appendChild(container2);
       const dropdown = document.createElement("div");
       dropdown.classList.add("dropdown");
       const ipt = document.createElement("input");
