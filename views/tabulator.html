@@ -1,0 +1,159 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <div class="row gap-4">
+    <wc-tabulator
+      ajax-url="https://randomuser.me/api/"
+      ajax-params-map='{"page": "page", "size": "results"}'
+      ajax-params='{"seed": "abc", "nat": "us"}'
+      pagination
+      pagination-size="5"
+      layout="fitColumns">
+      <wc-tabulator-column field="email" title="Email"></wc-tabulator-column>
+      <wc-tabulator-column field="name.first" title="First Name"></wc-tabulator-column>
+      <wc-tabulator-column field="name.last" title="Last Name"></wc-tabulator-column>
+      <wc-tabulator-column field="location.street.number" title="Street Number"></wc-tabulator-column>
+      <wc-tabulator-column field="location.street.name" title="Street Name"></wc-tabulator-column>
+      <wc-tabulator-column field="location.city" title="City"></wc-tabulator-column>
+      <wc-tabulator-column field="location.state" title="State"></wc-tabulator-column>
+      <wc-tabulator-column field="phone" title="Phone"></wc-tabulator-column>
+    </wc-tabulator>
+  </div>
+
+  <div class="row gap-4">
+    <wc-tabulator
+      ajax-url="http://localhost:8080/api/contact"
+      pagination
+      pagination-size="5"
+      layout="fitColumns">
+      <wc-tabulator-column
+        title="Actions"
+        formatter="rowSelection"
+        title-formatter="rowSelection"
+        hoz-align="center"
+        width=45
+        header-sort="false"
+        header-menu="headerMenu"
+        cell-click="toggleSelect"
+        visible="false"
+        ></wc-tabulator-column>
+        
+      <wc-tabulator-column
+        title="#"
+        formatter="rownum"
+        hoz-align="center"
+        width=40
+        header-sort="false"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="first_name"
+        title="First Name"
+        header-filter="input"
+        header-filter-placeholder="First..."
+        header-filter-func="starts"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="last_name"
+        title="Last Name"
+        header-filter="input"
+        header-filter-placeholder="Last..."
+        header-filter-func="like"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="email"
+        title="Email"
+        header-filter="input"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="address.street"
+        title="Street"
+        header-filter="input"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="address.city"
+        title="City"
+        header-filter="input"
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="address.state"
+        title="State"
+        editor="input"
+        header-filter="list"
+        header-filter-params='{"valuesLookup":true, "clearable":true}'
+        header-menu="headerMenu"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="phone_number"
+        title="Phone"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="false"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="is_active"
+        title="Is Active?"
+        formatter="tickCross"
+        header-filter="tickCross"
+        header-filter-params='{"tristate":true}'
+        header-menu="headerMenu"
+        visible="false"
+        ></wc-tabulator-column>
+    </wc-tabulator>
+  </div>
+
+  
+  <!--
+  <div class="row gap-4">
+    <wc-tabulator
+      xclass="col-1"
+      ajax-url="https://itunes.apple.com/search"
+      ajax-params='{"term": "star+wars", "country": "us", "entity": "movie", "limit": "5"}'
+      pagination
+      pagination-size="5"
+      layout="fitDataStretch">
+      <wc-tabulator-column 
+        field="artworkUrl100"
+        title="Cover"
+        formatter="image"
+        vert-align="middle"
+        header-hoz-align="center"
+        hoz-align="center"
+        visible="false"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="artistName"
+        title="Artist"
+        vert-align="middle"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="trackName"
+        title="Title"
+        vert-align="middle"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="contentAdvisoryRating"
+        title="Rating"
+        vert-align="middle"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="releaseDate"
+        title="Release Date"
+        formatter="datetime"
+        formatter-params='{"inputFormat": "iso", "outputFormat": "MM/dd/yyyy"}'
+        vert-align="middle"
+        header-hoz-align="right"
+        hoz-align="right"
+        header-sort-tristate="true"
+        sorter="date"
+        sorter-params='{"format": "MM/dd/yyyy"}'
+        ></wc-tabulator-column>
+    </wc-tabulator>
+  </div>
+  -->
+  
+</div>

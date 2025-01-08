@@ -17,6 +17,8 @@ import './wc-slideshow-image.js';
 import './wc-slideshow.js';
 import './wc-tab-item.js';
 import './wc-tab.js';
+import './wc-tabulator.js';
+import './wc-tabulator-column.js';
 import './wc-theme-selector.js';
 import './wc-timeline.js';
 // import './wc-top-nav.js';
