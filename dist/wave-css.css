@@ -4626,3 +4626,24 @@ a {
   background-color: var(--accent-bg-color);
   transition: all 300ms ease-in-out;
 }
+.tabulator .tabulator-header .tabulator-row .tabulator-cell,
+.tabulator .tabulator-footer .tabulator-row .tabulator-cell {
+  color: var(--component-color);
+  background-color: var(--component-bg-color);
+}
+.tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle,
+.tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle .tabulator-row-handle-box {
+  color: var(--component-color);
+  background-color: var(--component-bg-color);
+}
+.tabulator .tabulator-row .tabulator-row-header.tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+  background: var(--bg-color);
+  background: var(--component-color);
+}
+.tabulator .tabulator-tableholder .tabulator-table,
+.tabulator .tabulator-tableholder .tabulator-table .tabulator-row {
+  background-color: var(--component-bg-color);
+}
+.tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
+  background-color: var(--secondary-bg-color);
+}

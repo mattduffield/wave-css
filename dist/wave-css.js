@@ -3979,7 +3979,19 @@ var WcTabulator = class extends HTMLElement {
   }
   render() {
     const container = document.createElement("div");
+    container.id = this.getAttribute("id") || "wc-tabulator";
     this.appendChild(container);
+    const paginationCounter = this.getAttribute("pagination-counter");
+    const movableColumns = this.getAttribute("movable-columns");
+    const resizableColumns = this.getAttribute("resizable-columns");
+    const resizableColumnGuide = this.getAttribute("resizable-column-guide");
+    const movableRows = this.getAttribute("movable-rows");
+    const rowHeader = this.getAttribute("row-header");
+    const resizableRows = this.getAttribute("resizable-rows");
+    const resizableRowGuide = this.getAttribute("resizable-row-guide");
+    const frozenRows = this.getAttribute("frozen-rows");
+    const persistence = this.getAttribute("persistence");
+    const headerVisible = this.getAttribute("header-visible");
     const options = {
       columns: this.getColumnsConfig(),
       layout: this.getAttribute("layout") || "fitData",
@@ -3995,6 +4007,18 @@ var WcTabulator = class extends HTMLElement {
       // Optional custom handling of server response
       paginationSize: parseInt(this.getAttribute("pagination-size")) || 10
     };
+    if (paginationCounter) options.paginationCounter = paginationCounter;
+    if (movableColumns) options.movableColumns = movableColumns.toLowerCase() == "true" ? true : false;
+    if (resizableColumns) options.resizableColumns = resizableColumns.toLowerCase() == "true" ? true : false;
+    if (resizableColumnGuide) options.resizableColumnGuide = resizableColumnGuide.toLowerCase() == "true" ? true : false;
+    if (movableRows) options.movableRows = movableRows.toLowerCase() == "true" ? true : false;
+    if (rowHeader) options.rowHeader = JSON.parse(rowHeader);
+    if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == "true" ? true : false;
+    if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == "true" ? true : false;
+    if (frozenRows) options.frozenRows = parseInt(frozenRows);
+    if (persistence) options.persistence = persistence.toLowerCase() == "true" ? true : false;
+    if (options.persistence) options.persistenceID = container.id;
+    if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == "true" ? true : false;
     this.table = new Tabulator(container, options);
     this.classList.add("contents");
   }
@@ -4009,6 +4033,7 @@ var WcTabulator = class extends HTMLElement {
       const maxWidth = col.getAttribute("max-width");
       const maxInitialWidth = col.getAttribute("max-initial-width");
       const resizable = col.getAttribute("resizable");
+      const editable = col.getAttribute("editable");
       const frozen = col.getAttribute("frozen");
       const responsive = col.getAttribute("responsive");
       const tooltip = col.getAttribute("tooltip");
@@ -4035,13 +4060,19 @@ var WcTabulator = class extends HTMLElement {
       const headerFilterFunc = col.getAttribute("header-filter-func");
       const headerMenu = col.getAttribute("header-menu");
       const editor = col.getAttribute("editor");
+      const editorParams = col.getAttribute("editor-params");
       const cellClick = col.getAttribute("cell-click");
+      const bottomCalc = col.getAttribute("bottom-calc");
+      const bottomCalcParams = col.getAttribute("bottom-calc-params");
+      const topCalc = col.getAttribute("top-calc");
+      const topCalcParams = col.getAttribute("top-calc-params");
       const column = { field, title };
       if (width) column.width = width;
       if (minWidth) column.minWidth = minWidth;
       if (maxWidth) column.maxWidth = maxWidth;
       if (maxInitialWidth) column.maxInitialWidth = maxInitialWidth;
       if (resizable) column.resizable = resizable.toLowerCase() == "true" ? true : false;
+      if (editable) column.editable = editable.toLowerCase() == "true" ? true : false;
       if (frozen) column.frozen = frozen.toLowerCase() == "true" ? true : false;
       if (responsive) column.responsive = parseInt(responsive);
       if (tooltip) column.tooltip = tooltip;
@@ -4062,7 +4093,14 @@ var WcTabulator = class extends HTMLElement {
           column.headerMenu = this.headerMenu.bind(this);
         }
       }
-      if (editor) column.editor = editor;
+      if (editor) {
+        if (editor == "dateEditor") {
+          column.editor = this.dateEditor.bind(this);
+        } else {
+          column.editor = editor;
+        }
+      }
+      if (editorParams) column.editorParams = JSON.parse(editorParams);
       if (cellClick) {
         column.cellClick = this.resolveFunc(cellClick);
       }
@@ -4075,6 +4113,10 @@ var WcTabulator = class extends HTMLElement {
       if (visible) column.visible = visible.toLowerCase() == "true" ? true : false;
       if (sorter) column.sorter = sorter;
       if (sorterParams) column.sorterParams = JSON.parse(sorterParams);
+      if (bottomCalc) column.bottomCalc = bottomCalc;
+      if (bottomCalcParams) column.bottomCalcParams = JSON.parse(bottomCalcParams);
+      if (topCalc) column.topCalc = topCalc;
+      if (topCalcParams) column.topCalcParams = JSON.parse(topCalcParams);
       columns.push(column);
     });
     return columns;
@@ -4154,6 +4196,36 @@ var WcTabulator = class extends HTMLElement {
       });
     }
     return menu;
+  }
+  dateEditor(cell, onRendered, success, cancel) {
+    var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
+    input = document.createElement("input");
+    input.setAttribute("type", "date");
+    input.style.padding = "4px";
+    input.style.width = "100%";
+    input.style.boxSizing = "border-box";
+    input.value = cellValue;
+    onRendered(function() {
+      input.focus();
+      input.style.height = "100%";
+    });
+    function onChange() {
+      if (input.value != cellValue) {
+        success(luxon.DateTime.fromFormat(input.value, "yyyy-MM-dd").toFormat("dd/MM/yyyy"));
+      } else {
+        cancel();
+      }
+    }
+    input.addEventListener("blur", onChange);
+    input.addEventListener("keydown", function(e) {
+      if (e.keyCode == 13) {
+        onChange();
+      }
+      if (e.keyCode == 27) {
+        cancel();
+      }
+    });
+    return input;
   }
   getAjaxConfig() {
     return {
