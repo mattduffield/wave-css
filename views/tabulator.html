@@ -45,6 +45,8 @@
         header-filter-placeholder="First..."
         header-filter-func="starts"
         header-menu="headerMenu"
+        formatter="link"
+        formatter-params='{"labelField":"first_name", "url": "function (cell, formatterParams, onRendered) { const data = cell.getData(); const id = data._id; const url = `/contact/${id}`; return url; }"}'
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="last_name"
@@ -71,7 +73,7 @@
         title="City"
         header-filter="input"
         header-menu="headerMenu"
-        xtop-calc="count"
+        bottom-calc="count"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="address.state"

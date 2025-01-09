@@ -4227,7 +4227,13 @@ if (!customElements.get("wc-tabulator")) {
         }
         if (titleFormatter) column.titleFormatter = titleFormatter;
         if (formatter) column.formatter = formatter;
-        if (formatterParams) column.formatterParams = JSON.parse(formatterParams);
+        const fp = JSON.parse(formatterParams);
+        if (fp) {
+          if (fp.url) {
+            fp.url = this.resolveFormatter(fp.url);
+          }
+          column.formatterParams = fp;
+        }
         if (hozAlign) column.hozAlign = hozAlign;
         if (vertAlign) column.vertAlign = vertAlign;
         if (headerHozAlign) column.headerHozAlign = headerHozAlign;
@@ -4508,6 +4514,16 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page[disabled] {
     pointer-events: none;
   }
+
+  /* Table Calcs */
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder,
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs,
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-top,
+  .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder,
+  .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
+    color: var(--color) !important;
+    background-color: var(--component-border-color) !important;
+  } 
 
   /* Table Popup */
   .tabulator-menu.tabulator-popup-container {
