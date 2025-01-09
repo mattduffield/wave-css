@@ -291,7 +291,7 @@ if (!customElements.get('wc-tabulator')) {
         const fp = JSON.parse(formatterParams);
         if (fp) {
           if (fp.url) {
-            fp.url = this.resolveFormatter(fp.url);
+            fp.url = this.resolveFormatter(fp, fp.url);
           }
           column.formatterParams = fp;
         }
@@ -331,11 +331,13 @@ if (!customElements.get('wc-tabulator')) {
       }
     }
 
-    resolveFormatter(formatter) {
+    resolveFormatter(params, formatter) {
       try {
         // Check if formatter is an inline function or a global function name
         if (formatter.startsWith('function')) {
-          return new Function(`return (${formatter})`)(); // Inline function
+          return new Function(`return (${formatter})`)(params); // Inline function
+        } else if (this[formatter]) {
+          return this[formatter]; // Class function
         } else if (window[formatter]) {
           return window[formatter]; // Global function
         } else {
@@ -346,6 +348,15 @@ if (!customElements.get('wc-tabulator')) {
         console.error(`Error resolving formatter: ${error.message}`);
         return null;
       }
+    }
+
+    urlFormatter (cell, formatterParams, onRendered) {
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
+      const screen = cell.getColumn().getDefinition().formatterParams.screen;
+      const data = cell.getData();
+      const id = data._id;
+      const url = `/${routePrefix}/${screen}/${id}`;
+      return url;
     }
 
     toggleSelect(e, cell) {

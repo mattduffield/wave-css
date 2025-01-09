@@ -46,7 +46,7 @@
         header-filter-func="starts"
         header-menu="headerMenu"
         formatter="link"
-        formatter-params='{"labelField":"first_name", "url": "function (cell, formatterParams, onRendered) { const data = cell.getData(); const id = data._id; const url = `/contact/${id}`; return url; }"}'
+        formatter-params='{"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="last_name"
