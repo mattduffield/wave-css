@@ -4162,6 +4162,7 @@ if (!customElements.get("wc-tabulator")) {
       const headerVisible = this.getAttribute("header-visible");
       const rowContextMenu = this.getAttribute("row-context-menu");
       const placeholder = this.getAttribute("placeholder");
+      const selectableRows = this.getAttribute("selectable-rows");
       const options = {
         columns: this.getColumnsConfig(),
         layout: this.getAttribute("layout") || "fitData",
@@ -4196,6 +4197,13 @@ if (!customElements.get("wc-tabulator")) {
         }
       }
       if (placeholder) options.placeholder = placeholder;
+      if (selectableRows) {
+        if (!isNaN(parseInt(selectableRows))) {
+          options.selectableRows = parseInt(selectableRows);
+        } else {
+          options.selectableRows = selectableRows.toLowerCase() == "true" ? true : false;
+        }
+      }
       await this.renderTabulator(options);
       this.classList.add("contents");
     }
