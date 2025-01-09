@@ -74,4 +74,3 @@ Execute the following to view the components locally.
 ```bash
 python3 -m http.server 3015
 ```
-
