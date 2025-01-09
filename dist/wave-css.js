@@ -4030,12 +4030,50 @@ if (!customElements.get("wc-tabulator")) {
         label: this.createMenuLabel("Delete Row", this.icons.remove),
         action: function(e, row) {
           console.log("Deleting row...");
+          wc.Prompt.question({ title: "Are you sure?", text: "This record will be deleted. Are you sure?" });
         }
       },
       {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: function(e, row) {
           console.log("Cloning row...");
+        }
+      },
+      {
+        separator: true
+      },
+      {
+        label: this.createMenuLabel("Download Table", this.icons.clone),
+        action: function(e, row) {
+          console.log("Download row...");
+          wc.Prompt.notify({
+            icon: "info",
+            title: "Download Format?",
+            text: "Please select the format:",
+            input: "select",
+            inputPlaceholder: "Select a format",
+            inputOptions: { csv: "CSV", json: "JSON", html: "HTML", pdf: "PDF", xlsx: "XLSX" },
+            callback: (result) => {
+              const table = row.getTable();
+              switch (result) {
+                case "csv":
+                  table.download("csv", "data.csv");
+                  break;
+                case "json":
+                  table.download("json", "data.json");
+                  break;
+                case "html":
+                  table.download("html", "data.html");
+                  break;
+                case "pdf":
+                  table.download("pdf", "data.pdf");
+                  break;
+                case "xlsx":
+                  table.download("xlsx", "data.xlsx", {});
+                  break;
+              }
+            }
+          });
         }
       }
     ];
@@ -4077,7 +4115,7 @@ if (!customElements.get("wc-tabulator")) {
       if (typeof htmx !== "undefined") {
         htmx.process(this);
       }
-      console.log("_render:wc-code-mirror");
+      console.log("_render:wc-tabulator");
     }
     async _createInnerElement() {
       const paginationCounter = this.getAttribute("pagination-counter");
@@ -4133,13 +4171,16 @@ if (!customElements.get("wc-tabulator")) {
     }
     async renderTabulator(options) {
       await Promise.all([
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
+        this.loadScript("https://unpkg.com/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.js"),
+        this.loadScript("https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"),
         this.loadScript("https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js"),
         this.loadCSS("https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"),
         this.loadLibrary("https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js", "Tabulator")
       ]);
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", () => {
-        console.log("wc-tabulator:tableBiult - broadcasting wc-tabulator:ready");
+        console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");
         wc.EventHub.broadcast("wc-tabulator:ready", [], "");
       });
     }
@@ -4497,9 +4538,14 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
     background: var(--color);
   }
-  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover,
-  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover {
-    background-color: var(--component-bg-hover-color);
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
+    background-color: var(--component-bg-color);
+    filter: brightness(0.85);
+    /* transition: all 300ms ease-in-out; */
+  }
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) {
     background-color: var(--component-border-color);
     filter: brightness(0.85);
     /* transition: all 300ms ease-in-out; */
@@ -5906,6 +5952,165 @@ if (!customElements.get("wc-javascript")) {
     }
   }
   customElements.define("wc-javascript", WcJavascript);
+}
+
+// src/js/components/wc-prompt.js
+if (!customElements.get("wc-prompt")) {
+  class WcPrompt extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class"];
+    }
+    constructor() {
+      super();
+      this.table = null;
+      const compEl = this.querySelector(".wc-prompt");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-prompt");
+        this.componentElement.id = this.getAttribute("id") || "wc-prompt";
+        this.appendChild(this.componentElement);
+      }
+      console.log("ctor:wc-prompt");
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      console.log("conntectedCallback:wc-prompt");
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    async _handleAttributeChange(attrName, newValue) {
+      super._handleAttributeChange(attrName, newValue);
+    }
+    _render() {
+      super._render();
+      const innerEl = this.querySelector(".wc-prompt > *");
+      if (innerEl) {
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+      console.log("_render:wc-prompt");
+    }
+    async _createInnerElement() {
+      await this.renderPrompt();
+      this.classList.add("contents");
+    }
+    async renderPrompt() {
+      await Promise.all([
+        this.loadCSS("https://unpkg.com/notie/dist/notie.min.css"),
+        this.loadLibrary("https://unpkg.com/notie", "notie"),
+        this.loadLibrary("https://cdn.jsdelivr.net/npm/sweetalert2@11", "Swal")
+      ]);
+      if (!window.wc) {
+        window.wc = {};
+      }
+      window.wc.Prompt = this;
+    }
+    banner(c) {
+      const { text = "", type = "info", stay = false, time = 3, position = "top" } = c;
+      notie.alert({ type, text, stay, time, position });
+    }
+    toast(c) {
+      const { title = "", icon = "success", position = "top-end" } = c;
+      const Toast = Swal.mixin({
+        toast: true,
+        title,
+        position,
+        icon,
+        showConfirmButton: false,
+        timer: 3e3,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+      });
+      Toast.fire({});
+    }
+    success(c) {
+      const { title = "", text = "", footer = "" } = c;
+      Swal.fire({ icon: "success", title, text, footer });
+    }
+    error(c) {
+      const { title = "", text = "", footer = "" } = c;
+      Swal.fire({ icon: "error", title, text, footer });
+    }
+    warning(c) {
+      const { title = "", text = "", footer = "" } = c;
+      Swal.fire({ icon: "warning", title, text, footer });
+    }
+    info(c) {
+      const { title = "", text = "", footer = "" } = c;
+      Swal.fire({ icon: "info", title, text, footer });
+    }
+    question(c) {
+      const { title = "", text = "", footer = "", showCancelButton = true } = c;
+      Swal.fire({ icon: "question", title, text, footer, showCancelButton });
+    }
+    async notify(c) {
+      const {
+        icon = "",
+        title = "",
+        text = "",
+        showConfirmButton = true,
+        input: input2 = "",
+        inputOptions = {},
+        inputPlaceholder = "",
+        callback = null
+      } = c;
+      const { value: result } = await Swal.fire({
+        icon,
+        title,
+        html: text,
+        input: input2,
+        inputOptions,
+        inputPlaceholder,
+        callback,
+        backdrop: false,
+        focusConfirm: false,
+        showCancelButton: true,
+        showConfirmButton,
+        willOpen: () => {
+          if (c.willOpen !== void 0) {
+            c.willOpen();
+          }
+        },
+        didOpen: () => {
+          if (c.didOpen !== void 0) {
+            c.didOpen();
+          }
+        }
+      });
+      if (result) {
+        if (result.dismiss !== Swal.DismissReason.cancel) {
+          if (result.value !== "") {
+            if (c.callback !== void 0) {
+              c.callback(result);
+            }
+          } else {
+            c.callback(false);
+          }
+        } else {
+          c.callback(false);
+        }
+      }
+    }
+    _applyStyle() {
+      const style = `
+
+      `;
+      this.loadStyle("wc-prompt-style", style);
+    }
+  }
+  customElements.define("wc-prompt", WcPrompt);
 }
 
 // src/js/components/wc-form.js

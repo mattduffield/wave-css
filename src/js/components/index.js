@@ -38,6 +38,7 @@ import './wc-hotkey.js';
 import './wc-link.js';
 import './wc-script.js';
 import './wc-javascript.js';
+import './wc-prompt.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';

@@ -72,12 +72,52 @@ if (!customElements.get('wc-tabulator')) {
         action: function(e, row) {
           // row.delete();
           console.log("Deleting row...");
+          wc.Prompt.question({title: 'Are you sure?', text: 'This record will be deleted. Are you sure?'});
         }
       },
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: function(e, row) {
           console.log("Cloning row...");
+        }
+      },
+      {
+        separator:true,
+      },
+      {
+        label: this.createMenuLabel('Download Table', this.icons.clone),
+        action: function(e, row) {
+          console.log('Download row...');
+          // wc.Prompt.banner({text: 'hello world 2', type: 'success'});
+          // wc.Prompt.toast({title: 'Save successful!', type: 'success'});
+          // wc.Prompt.success({title: 'Save successful!', text: 'The records have been saved successfuly!'});
+          // wc.Prompt.question({title: 'Are you sure?', text: 'This record will be deleted. Are you sure?'});
+          // wc.Prompt.notify({icon: 'question', title: 'Are you sure?', text: 'This record will be deleted. Are you sure?'});
+          wc.Prompt.notify({icon: 'info', title: 'Download Format?',
+            text: 'Please select the format:', input: 'select',
+            inputPlaceholder: 'Select a format',
+            inputOptions: {csv: 'CSV', json: 'JSON', html: 'HTML', pdf: 'PDF', xlsx: 'XLSX'},
+            callback: (result) => {
+              const table = row.getTable();
+              switch(result) {
+                case 'csv':
+                  table.download("csv", "data.csv");
+                  break;
+                case 'json':
+                  table.download("json", "data.json");
+                  break;
+                case 'html':
+                  table.download("html", "data.html");
+                  break;
+                case 'pdf':
+                  table.download("pdf", "data.pdf");
+                  break;
+                case 'xlsx':
+                  table.download("xlsx", "data.xlsx", {});
+                  break;
+              }
+            }
+          });
         }
       }
     ];
@@ -128,7 +168,7 @@ if (!customElements.get('wc-tabulator')) {
       if (typeof htmx !== 'undefined') {
         htmx.process(this);
       }
-      console.log('_render:wc-code-mirror');
+      console.log('_render:wc-tabulator');
     }
 
     async _createInnerElement() {
@@ -189,6 +229,9 @@ if (!customElements.get('wc-tabulator')) {
 
     async renderTabulator(options) {
       await Promise.all([
+        this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+        this.loadScript('https://unpkg.com/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.js'),
+        this.loadScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'),
         this.loadScript('https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js'),
         this.loadCSS('https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css'),
         this.loadLibrary('https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js', 'Tabulator'),
@@ -196,7 +239,7 @@ if (!customElements.get('wc-tabulator')) {
         
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", () => {
-        console.log('wc-tabulator:tableBiult - broadcasting wc-tabulator:ready');
+        console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
       });
     }
@@ -625,9 +668,14 @@ if (!customElements.get('wc-tabulator')) {
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
     background: var(--color);
   }
-  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover,
-  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover {
-    background-color: var(--component-bg-hover-color);
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
+    background-color: var(--component-bg-color);
+    filter: brightness(0.85);
+    /* transition: all 300ms ease-in-out; */
+  }
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) {
     background-color: var(--component-border-color);
     filter: brightness(0.85);
     /* transition: all 300ms ease-in-out; */
