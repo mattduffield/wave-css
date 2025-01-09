@@ -141,12 +141,14 @@ if (!customElements.get('wc-tabulator')) {
       const resizableColumnGuide = this.getAttribute('resizable-column-guide');
       const movableRows = this.getAttribute('movable-rows');
       const rowHeader = this.getAttribute('row-header');
+      const rowHeight = this.getAttribute('row-height');
       const resizableRows = this.getAttribute('resizable-rows');
       const resizableRowGuide = this.getAttribute('resizable-row-guide');
       const frozenRows = this.getAttribute('frozen-rows');
       const persistence = this.getAttribute('persistence');
       const headerVisible = this.getAttribute('header-visible');
       const rowContextMenu = this.getAttribute('row-context-menu');
+      const placeholder = this.getAttribute('placeholder');
 
       const options = {
         columns: this.getColumnsConfig(),
@@ -168,6 +170,7 @@ if (!customElements.get('wc-tabulator')) {
       if (resizableColumnGuide) options.resizableColumnGuide = resizableColumnGuide.toLowerCase() == 'true' ? true : false;
       if (movableRows) options.movableRows = movableRows.toLowerCase() == 'true' ? true : false;
       if (rowHeader) options.rowHeader = JSON.parse(rowHeader);
+      if (rowHeight) options.rowHeight = parseInt(rowHeight);
       if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == 'true' ? true : false;
       if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == 'true' ? true : false;
       if (frozenRows) options.frozenRows = parseInt(frozenRows);
@@ -179,6 +182,7 @@ if (!customElements.get('wc-tabulator')) {
           options.rowContextMenu = this.rowMenu;
         }
       }
+      if (placeholder) options.placeholder = placeholder;
       await this.renderTabulator(options);
       this.classList.add('contents');
     }
@@ -222,7 +226,7 @@ if (!customElements.get('wc-tabulator')) {
         const formatter = col.getAttribute('formatter');
         const formatterParams = col.getAttribute('formatter-params');
         const hozAlign = col.getAttribute('hoz-align');
-        const vertAlign = col.getAttribute('vert-align') || 'top';
+        const vertAlign = col.getAttribute('vert-align') || 'middle';
         const headerHozAlign = col.getAttribute('header-hoz-align');
         const visible = col.getAttribute('visible');
         const headerSort = col.getAttribute('header-sort');
