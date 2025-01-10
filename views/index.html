@@ -71,6 +71,37 @@
   <wc-mask-hub></wc-mask-hub>
   <wc-prompt></wc-prompt>
 
+
+  <template id="my-template">
+    <swal-title>
+      Clone Records
+    </swal-title>
+    <swal-icon type="info"></swal-icon>
+      <swal-input type="select" label="Collection" placeholder="Choose...">
+        <swal-input-option value="go-kart1">go-kart1</swal-input-option>
+        <swal-input-option value="go-kart2">go-kart2</swal-input-option>
+        <swal-input-option value="go-kart3">go-kart3</swal-input-option>
+        <swal-input-option value="go-kart4">go-kart4</swal-input-option>
+      </swal-input>
+    <swal-button type="confirm">
+      Clone
+    </swal-button>
+    <swal-button type="cancel">
+      Cancel
+    </swal-button>
+    <swal-param name="allowEscapeKey" value="false" />
+    <swal-param name="allowOutsideClick" value="false" />
+    <swal-param
+      name="customClass"
+      value='{ "popup": "my-popup" }' />
+    <swal-function-param
+      name="didOpen"
+      value="() => { const ipt = Swal.getInput(); ipt.multiple = true; }" />
+    <swal-function-param
+      name="preConfirm"
+      value="() => { const ipt = Swal.getInput(); const opts = Array.from(ipt.selectedOptions).map(m => m.value); return opts; }" />
+  </template>
+
   <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
   <script type="module" src="./index.js"></script>
 </body>

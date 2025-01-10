@@ -4073,6 +4073,13 @@ if (!customElements.get("wc-tabulator")) {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: function(e, row) {
           console.log("Cloning row...");
+          wc.Prompt.notifyTemplate({
+            template: "#my-template",
+            callback: (result) => {
+              wc.Prompt.toast({ title: "Clone successful!", type: "success" });
+              console.log("Clone result: ", result);
+            }
+          });
         }
       },
       {
@@ -6077,7 +6084,6 @@ if (!customElements.get("wc-prompt")) {
       console.log("conntectedCallback:wc-prompt");
     }
     disconnectedCallback() {
-      super.disconnectedCallback();
     }
     async renderPrompt() {
       await Promise.all([
@@ -6193,6 +6199,37 @@ if (!customElements.get("wc-prompt")) {
             c.didOpen();
           }
         }
+      });
+      this.handleResult(c, result);
+    }
+    async notifyTemplate(c) {
+      const body = document.querySelector("body");
+      const theme = body.dataset.theme;
+      const { template = "", callback = null } = c;
+      const customClass = {
+        container: "",
+        // popup: 'theme-midnight-slate',
+        popup: theme,
+        header: "",
+        title: "",
+        closeButton: "",
+        icon: "",
+        image: "",
+        htmlContainer: "",
+        input: "",
+        inputLabel: "",
+        validationMessage: "",
+        actions: "",
+        confirmButton: "theme-ocean-blue",
+        denyButton: "",
+        cancelButton: "theme-slate-storm",
+        loader: "",
+        footer: "",
+        timerProgressBar: ""
+      };
+      const { value: result } = await Swal.fire({
+        customClass,
+        template
       });
       this.handleResult(c, result);
     }

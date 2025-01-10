@@ -37,7 +37,7 @@ if (!customElements.get('wc-prompt')) {
     }
 
     disconnectedCallback() {
-      super.disconnectedCallback();
+      
     }
 
     async renderPrompt() {
@@ -156,6 +156,39 @@ if (!customElements.get('wc-prompt')) {
             c.didOpen();
           }
         }
+      });
+      this.handleResult(c, result);
+    }
+
+    async notifyTemplate(c) {
+      const body = document.querySelector('body');
+      const theme = body.dataset.theme;
+      const { template = '', callback=null } = c;
+
+      const customClass = {
+        container: '',
+        // popup: 'theme-midnight-slate',
+        popup: theme,
+        header: '',
+        title: '',
+        closeButton: '',
+        icon: '',
+        image: '',
+        htmlContainer: '',
+        input: '',
+        inputLabel: '',
+        validationMessage: '',
+        actions: '',
+        confirmButton: 'theme-ocean-blue',
+        denyButton: '',
+        cancelButton: 'theme-slate-storm',
+        loader: '',
+        footer: '',
+        timerProgressBar: '',
+      };
+      const {value: result} = await Swal.fire({
+        customClass,
+        template
       });
       this.handleResult(c, result);
     }

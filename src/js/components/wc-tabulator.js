@@ -114,6 +114,13 @@ if (!customElements.get('wc-tabulator')) {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: function(e, row) {
           console.log("Cloning row...");
+          wc.Prompt.notifyTemplate({
+            template: '#my-template',
+            callback: (result) => {
+              wc.Prompt.toast({title: 'Clone successful!', type: 'success'});
+              console.log('Clone result: ', result);
+            }
+          });
         }
       },
       {
