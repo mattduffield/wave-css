@@ -18,6 +18,7 @@
       pagination-counter="rows"
       header-visible="true"
       selectable-rows="true"
+      col-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
       layout="fitColumns">
       <wc-tabulator-column
         title="Actions"
@@ -68,6 +69,8 @@
         title="Street"
         header-filter="input"
         header-menu="headerMenu"
+        formatter="link"
+        formatter-params='{"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="address.city"

@@ -220,6 +220,13 @@ if (!customElements.get('wc-tabulator')) {
       const rowContextMenu = this.getAttribute('row-context-menu');
       const placeholder = this.getAttribute('placeholder');
       const selectableRows = this.getAttribute('selectable-rows');
+      const colFieldFormatter = this.getAttribute('col-field-formatter');
+
+      // Process any column field formatters.
+      if (colFieldFormatter) {
+        let obj = JSON.parse(colFieldFormatter);
+        this.colFieldFormatter = obj;
+      } 
 
       const options = {
         columns: this.getColumnsConfig(),
@@ -261,6 +268,7 @@ if (!customElements.get('wc-tabulator')) {
           options.selectableRows = selectableRows.toLowerCase() == 'true' ? true : false;
         }
       }
+
       await this.renderTabulator(options);
       this.classList.add('contents');
     }
@@ -280,11 +288,6 @@ if (!customElements.get('wc-tabulator')) {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
       });
-      // this.table.on("rowDblClick", function(e, row){
-      //   //e - the click event object
-      //   //row - row component
-      //   row.select();
-      // });
     }
 
     getColumnsConfig() {
@@ -373,15 +376,29 @@ if (!customElements.get('wc-tabulator')) {
           column.cellClick = this.resolveFunc(cellClick);
         }
         if (titleFormatter) column.titleFormatter = titleFormatter;
-        if (formatter) column.formatter = formatter;
-        const fp = JSON.parse(formatterParams);
-        if (fp) {
-          if (fp.url) {
-            fp.url = this.resolveFormatter(fp, fp.url);
+
+        if (formatter) {
+          column.formatter = formatter;
+        } else {
+          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
+          if (field && this.colFieldFormatter.cols.includes(field)) {
+            column.formatter = this.colFieldFormatter.formatter;                        
           }
-          column.formatterParams = fp;
         }
-        // if (formatterParams) column.formatterParams = JSON.parse(formatterParams);
+        const fp = JSON.parse(formatterParams);
+        if (fp && fp.url) {
+          fp.url = this.resolveFormatter(fp, fp.url);
+          column.formatterParams = fp;
+        } else {
+          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
+          if (field && this.colFieldFormatter.cols.includes(field)) {
+            const fp = JSON.parse(formatterParams);
+            if (fp && fp.url) {
+              fp.url = this.resolveFormatter(fp, fp.url);
+              column.formatterParams = fp;
+            }
+          }
+        }
         if (hozAlign) column.hozAlign = hozAlign; // left|center|right
         if (vertAlign) column.vertAlign = vertAlign; // top|middle|bottom
         if (headerHozAlign) column.headerHozAlign = headerHozAlign; // left|center|right
