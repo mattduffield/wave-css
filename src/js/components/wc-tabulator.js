@@ -225,6 +225,9 @@ if (!customElements.get('wc-tabulator')) {
       // Process any column field formatters.
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
+        if (obj && obj.params && obj.params.url) {
+          obj.params.url = this.resolveFormatter(obj.params, obj.params.url);
+        }
         this.colFieldFormatter = obj;
       } 
 
@@ -362,7 +365,6 @@ if (!customElements.get('wc-tabulator')) {
           if (headerMenu == 'headerMenu') {
             column.headerMenu = this.headerMenu.bind(this);
           }
-          // column.headerMenu = headerMenu;
         }
         if (editor) {
           if (editor == 'dateEditor') {
@@ -385,18 +387,16 @@ if (!customElements.get('wc-tabulator')) {
             column.formatter = this.colFieldFormatter.formatter;                        
           }
         }
-        const fp = JSON.parse(formatterParams);
-        if (fp && fp.url) {
-          fp.url = this.resolveFormatter(fp, fp.url);
-          column.formatterParams = fp;
+        if (formatterParams) {
+          const fp = JSON.parse(formatterParams);
+          if (fp && fp.url) {
+            fp.url = this.resolveFormatter(fp, fp.url);
+            column.formatterParams = fp;
+          }
         } else {
           // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
           if (field && this.colFieldFormatter.cols.includes(field)) {
-            const fp = JSON.parse(formatterParams);
-            if (fp && fp.url) {
-              fp.url = this.resolveFormatter(fp, fp.url);
-              column.formatterParams = fp;
-            }
+            column.formatterParams = this.colFieldFormatter.params;
           }
         }
         if (hozAlign) column.hozAlign = hozAlign; // left|center|right

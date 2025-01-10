@@ -4166,6 +4166,9 @@ if (!customElements.get("wc-tabulator")) {
       const colFieldFormatter = this.getAttribute("col-field-formatter");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
+        if (obj && obj.params && obj.params.url) {
+          obj.params.url = this.resolveFormatter(obj.params, obj.params.url);
+        }
         this.colFieldFormatter = obj;
       }
       const options = {
@@ -4317,17 +4320,15 @@ if (!customElements.get("wc-tabulator")) {
             column.formatter = this.colFieldFormatter.formatter;
           }
         }
-        const fp = JSON.parse(formatterParams);
-        if (fp && fp.url) {
-          fp.url = this.resolveFormatter(fp, fp.url);
-          column.formatterParams = fp;
+        if (formatterParams) {
+          const fp = JSON.parse(formatterParams);
+          if (fp && fp.url) {
+            fp.url = this.resolveFormatter(fp, fp.url);
+            column.formatterParams = fp;
+          }
         } else {
           if (field && this.colFieldFormatter.cols.includes(field)) {
-            const fp2 = JSON.parse(formatterParams);
-            if (fp2 && fp2.url) {
-              fp2.url = this.resolveFormatter(fp2, fp2.url);
-              column.formatterParams = fp2;
-            }
+            column.formatterParams = this.colFieldFormatter.params;
           }
         }
         if (hozAlign) column.hozAlign = hozAlign;
