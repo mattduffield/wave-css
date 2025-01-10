@@ -118,7 +118,7 @@ if (!customElements.get('wc-tabulator')) {
         action: (e, row) => {
           console.log("Cloning row...");
           wc.Prompt.notifyTemplate({
-            template: '#my-template',
+            template: '#clone-template',
             callback: (result) => {
               if (this.funcs['onClone']) {
                 this.funcs['onClone'](result);
