@@ -9,66 +9,79 @@
  *  https://github.com/jaredreich/notie
  */
 
-import { WcBaseComponent } from './wc-base-component.js';
+import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+// import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-prompt')) {
-  class WcPrompt extends WcBaseComponent {
+  // class WcPrompt extends WcBaseComponent {
+  class WcPrompt extends HTMLElement {
     static get observedAttributes() {
       return ['id', 'class'];
     }
 
     constructor() {
       super();
+      this.loadCSS = loadCSS.bind(this);
+      this.loadScript = loadScript.bind(this);
+      this.loadLibrary = loadLibrary.bind(this);
+      this.loadStyle = loadStyle.bind(this);
       this.table = null;
 
-      const compEl = this.querySelector('.wc-prompt');
-      if (compEl) {
-        this.componentElement = compEl;
-      } else {
-        this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-prompt');
-        this.componentElement.id = this.getAttribute('id') || 'wc-prompt';
-        this.appendChild(this.componentElement);      
-      }
+      // const compEl = this.querySelector('.wc-prompt');
+      // if (compEl) {
+      //   this.componentElement = compEl;
+      // } else {
+      //   this.componentElement = document.createElement('div');
+      //   this.componentElement.classList.add('wc-prompt');
+      //   this.componentElement.id = this.getAttribute('id') || 'wc-prompt';
+      //   this.appendChild(this.componentElement);      
+      // }
       console.log('ctor:wc-prompt');
     }
 
     async connectedCallback() {
-      super.connectedCallback();
+      // super.connectedCallback();
 
+      if (document.querySelector(this.tagName) !== this) {
+        console.warn(`${this.tagName} is already present on the page.`);
+        this.remove();
+      } else {
+        await this.renderPrompt();
+      }
+  
       this._applyStyle();
       console.log('conntectedCallback:wc-prompt');
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      this._unWireEvents();
+      // this._unWireEvents();
     }
 
-    async _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue); 
-    }
+    // async _handleAttributeChange(attrName, newValue) {
+    //   super._handleAttributeChange(attrName, newValue); 
+    // }
 
-    _render() {
-      super._render();
-      const innerEl = this.querySelector('.wc-prompt > *');
-      if (innerEl) {
-        // Do nothing...
-      } else {
-        this.componentElement.innerHTML = '';
-        this._createInnerElement();
-      }
+    // _render() {
+    //   super._render();
+    //   const innerEl = this.querySelector('.wc-prompt > *');
+    //   if (innerEl) {
+    //     // Do nothing...
+    //   } else {
+    //     this.componentElement.innerHTML = '';
+    //     this._createInnerElement();
+    //   }
 
-      if (typeof htmx !== 'undefined') {
-        htmx.process(this);
-      }
-      console.log('_render:wc-prompt');
-    }
+    //   if (typeof htmx !== 'undefined') {
+    //     htmx.process(this);
+    //   }
+    //   console.log('_render:wc-prompt');
+    // }
 
-    async _createInnerElement() {
-      await this.renderPrompt();
-      this.classList.add('contents');
-    }
+    // async _createInnerElement() {
+    //   await this.renderPrompt();
+    //   this.classList.add('contents');
+    // }
 
     async renderPrompt() {
       await Promise.all([
@@ -208,6 +221,9 @@ if (!customElements.get('wc-prompt')) {
 
     _applyStyle() {
       const style = `
+      wc-prompt {
+        display: none;
+      }
       .swal2-container .swal2-popup {
         background-color: var(--secondary-bg-color);
       }
