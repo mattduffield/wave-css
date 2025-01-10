@@ -74,7 +74,7 @@ if (!customElements.get('wc-prompt')) {
       await Promise.all([
         this.loadCSS('https://unpkg.com/notie/dist/notie.min.css'),
         this.loadLibrary('https://unpkg.com/notie', 'notie'),
-        this.loadLibrary('https://cdn.jsdelivr.net/npm/sweetalert2@11', 'Swal'),
+        this.loadLibrary('https://unpkg.com/sweetalert2@11.15.10/dist/sweetalert2.all.js', 'Swal'),
       ]);
 
       if (!window.wc) {
@@ -89,7 +89,7 @@ if (!customElements.get('wc-prompt')) {
     }
 
     toast(c) {
-      const { title = '', icon = 'success', position = 'top-end', } = c;
+      const { title = '', icon = 'success', position = 'top-end' } = c;
       const Toast = Swal.mixin({
         toast: true,
         title: title,
@@ -103,39 +103,68 @@ if (!customElements.get('wc-prompt')) {
           toast.addEventListener('mouseleave', Swal.resumeTimer)
         }
       });
-
       Toast.fire({});
     }
 
-    success(c) {
-      const { title = '', text = '', footer = '', } = c;
-      Swal.fire({ icon: 'success', title, text, footer });
+    async success(c) {
+      const { title = '', text = '', footer = '', callback = null } = c;
+      const {value: result} = await Swal.fire({ icon: 'success', title, text, footer, callback });
+      this.handleResult(c, result);
     }
 
-    error(c) {
-      const { title = '', text = '', footer = '', } = c;
-      Swal.fire({ icon: 'error', title, text, footer });
+    async error(c) {
+      const { title = '', text = '', footer = '', callback = null } = c;
+      const {value: result} = await Swal.fire({ icon: 'error', title, text, footer, callback });
+      this.handleResult(c, result);
     }
 
-    warning(c) {
-      const { title = '', text = '', footer = '', } = c;
-      Swal.fire({ icon: 'warning', title, text, footer });
+    async warning(c) {
+      const { title = '', text = '', footer = '', callback = null } = c;
+      const {value: result} = await Swal.fire({ icon: 'warning', title, text, footer, callback });
+      this.handleResult(c, result);
     }
 
-    info(c) {
-      const { title = '', text = '', footer = '', } = c;
-      Swal.fire({ icon: 'info', title, text, footer });
+    async info(c) {
+      const { title = '', text = '', footer = '', callback = null } = c;
+      const {value: result} = await Swal.fire({ icon: 'info', title, text, footer, callback });
+      this.handleResult(c, result);
     }
 
-    question(c) {
-      const { title = '', text = '', footer = '', showCancelButton = true } = c;
-      Swal.fire({ icon: 'question', title, text, footer, showCancelButton });
+    async question(c) {
+      const { title = '', text = '', footer = '', showCancelButton = true, callback = null } = c;
+      const {value: result} = await Swal.fire({ icon: 'question', title, text, footer, showCancelButton, callback });
+      this.handleResult(c, result);
     }
 
     async notify(c) {
+      const body = document.querySelector('body');
+      const theme = body.dataset.theme;
       const { icon = '', title = '', text = '', showConfirmButton = true,
           input='', inputOptions = {}, inputPlaceholder='', callback=null } = c;
+
+      const customClass = {
+        container: '',
+        // popup: 'theme-midnight-slate',
+        popup: theme,
+        header: '',
+        title: '',
+        closeButton: '',
+        icon: '',
+        image: '',
+        htmlContainer: '',
+        input: '',
+        inputLabel: '',
+        validationMessage: '',
+        actions: '',
+        confirmButton: 'theme-ocean-blue',
+        denyButton: '',
+        cancelButton: 'theme-slate-storm',
+        loader: '',
+        footer: '',
+        timerProgressBar: '',
+      };
       const {value: result} = await Swal.fire({
+        customClass,
         icon: icon,
         title: title,
         html: text,
@@ -158,7 +187,10 @@ if (!customElements.get('wc-prompt')) {
           }
         }
       });
+      this.handleResult(c, result);
+    }
 
+    handleResult(c, result) {
       if (result) {
         if (result.dismiss !== Swal.DismissReason.cancel) {
           if (result.value !== '') {
@@ -176,7 +208,30 @@ if (!customElements.get('wc-prompt')) {
 
     _applyStyle() {
       const style = `
-
+      .swal2-container .swal2-popup {
+        background-color: var(--secondary-bg-color);
+      }
+      .swal2-container .swal2-popup .swal2-title {
+        color: var(--secondary-color);
+      }
+      .swal2-container .swal2-popup .swal2-html-container {
+        color: var(--secondary-color);
+      }
+      .swal2-container .swal2-popup .swal2-actions .swal2-confirm {
+        background-color: var(--primary-bg-color);
+      }
+      .swal2-container .swal2-popup .swal2-actions .swal2-cancel {
+        background-color: var(--secondary-bg-color);
+      }
+      .swal2-container .swal2-popup input,
+      .swal2-container .swal2-popup select,
+      .swal2-container .swal2-popup textarea {
+        background-color: var(--component-bg-color);
+        border: 1px solid var(--component-border-color);
+        border-radius: 0.375rem;
+        color: var(--component-color);
+        padding: 0.375rem;
+      }
       `;
       this.loadStyle('wc-prompt-style', style);
     }

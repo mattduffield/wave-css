@@ -102,7 +102,12 @@ if (!customElements.get('wc-tabulator')) {
         action: function(e, row) {
           // row.delete();
           console.log("Deleting row...");
-          wc.Prompt.question({title: 'Are you sure?', text: 'This record will be deleted. Are you sure?'});
+          wc.Prompt.question({title: 'Are you sure?', 
+            text: 'This record will be deleted. Are you sure?',
+            callback: (result) => {
+              wc.Prompt.toast({title: 'Delete successful!', type: 'success'});
+            }
+          });
         }
       },
       {
@@ -146,6 +151,7 @@ if (!customElements.get('wc-tabulator')) {
                   table.download("xlsx", "data.xlsx", {});
                   break;
               }
+              wc.Prompt.toast({title: 'Download in progress...', type: 'success'});
             }
           });
         }
