@@ -67,30 +67,31 @@ if (!customElements.get('wc-tabulator')) {
         "d": "M280 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 270.1-95-95c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9L239 369c9.4 9.4 24.6 9.4 33.9 0L409 233c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95L280 24zM128.8 304L64 304c-35.3 0-64 28.7-64 64l0 80c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-80c0-35.3-28.7-64-64-64l-64.8 0-48 48L448 352c8.8 0 16 7.2 16 16l0 80c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-80c0-8.8 7.2-16 16-16l112.8 0-48-48zM432 408a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"
       }
     }
+    funcs = {};
     rowMenu = [
       {
         label: this.createMenuLabel('Select All Rows', this.icons.listCheck),
-        action: function(e, row) {
+        action: (e, row) => {
           const table = row.getTable();
           table.selectRow();
         }
       },
       {
         label: this.createMenuLabel('Un-Select Rows', this.icons.list),
-        action: function(e, row) {
+        action: (e, row) => {
           const table = row.getTable();
           table.deselectRow();
         }
       },
       {
         label: this.createMenuLabel('Select Row', this.icons.check),
-        action: function(e, row) {
+        action: (e, row) => {
           row.select();
         }
       },
       {
         label: this.createMenuLabel('Un-Select Row', this.icons.xmark),
-        action: function(e, row) {
+        action: (e, row) => {
           row.deselect();
         }
       },
@@ -99,26 +100,29 @@ if (!customElements.get('wc-tabulator')) {
       },
       {
         label: this.createMenuLabel('Delete Row', this.icons.remove),
-        action: function(e, row) {
+        action: (e, row) => {
           // row.delete();
           console.log("Deleting row...");
           wc.Prompt.question({title: 'Are you sure?', 
             text: 'This record will be deleted. Are you sure?',
             callback: (result) => {
-              wc.Prompt.toast({title: 'Delete successful!', type: 'success'});
+              if (this.funcs['onDelete']) {
+                this.funcs['onDelete'](result);
+              }
             }
           });
         }
       },
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
-        action: function(e, row) {
+        action: (e, row) => {
           console.log("Cloning row...");
           wc.Prompt.notifyTemplate({
             template: '#my-template',
             callback: (result) => {
-              wc.Prompt.toast({title: 'Clone successful!', type: 'success'});
-              console.log('Clone result: ', result);
+              if (this.funcs['onClone']) {
+                this.funcs['onClone'](result);
+              }
             }
           });
         }
@@ -128,7 +132,7 @@ if (!customElements.get('wc-tabulator')) {
       },
       {
         label: this.createMenuLabel('Download Table', this.icons.download),
-        action: function(e, row) {
+        action: (e, row) => {
           console.log('Download row...');
           // wc.Prompt.banner({text: 'hello world 2', type: 'success'});
           // wc.Prompt.toast({title: 'Save successful!', type: 'success'});
@@ -244,6 +248,7 @@ if (!customElements.get('wc-tabulator')) {
         this.colFieldFormatter = obj;
       } 
 
+      this.getFuncs();
       const options = {
         columns: this.getColumnsConfig(),
         layout: this.getAttribute('layout') || 'fitData',
@@ -303,6 +308,16 @@ if (!customElements.get('wc-tabulator')) {
       this.table.on("tableBuilt", () => {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
+      });
+    }
+
+    getFuncs() {
+      const funcElements = this.querySelectorAll('wc-tabulator-func');
+      funcElements.forEach((el) => {
+        const name = el.getAttribute('name');
+        const func = el.getAttribute('value');
+        const value = new Function(`return (${func})`)(); // Inline function
+        this.funcs[name] = value;
       });
     }
 

@@ -78,31 +78,31 @@ if (!customElements.get('wc-prompt')) {
 
     async success(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
-      const {value: result} = await Swal.fire({ icon: 'success', title, text, footer, callback });
+      const {value: result} = await Swal.fire({ icon: 'success', title, text, footer });
       this.handleResult(c, result);
     }
 
     async error(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
-      const {value: result} = await Swal.fire({ icon: 'error', title, text, footer, callback });
+      const {value: result} = await Swal.fire({ icon: 'error', title, text, footer });
       this.handleResult(c, result);
     }
 
     async warning(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
-      const {value: result} = await Swal.fire({ icon: 'warning', title, text, footer, callback });
+      const {value: result} = await Swal.fire({ icon: 'warning', title, text, footer });
       this.handleResult(c, result);
     }
 
     async info(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
-      const {value: result} = await Swal.fire({ icon: 'info', title, text, footer, callback });
+      const {value: result} = await Swal.fire({ icon: 'info', title, text, footer });
       this.handleResult(c, result);
     }
 
     async question(c) {
       const { title = '', text = '', footer = '', showCancelButton = true, callback = null } = c;
-      const {value: result} = await Swal.fire({ icon: 'question', title, text, footer, showCancelButton, callback });
+      const {value: result} = await Swal.fire({ icon: 'question', title, text, footer, showCancelButton });
       this.handleResult(c, result);
     }
 
@@ -141,7 +141,6 @@ if (!customElements.get('wc-prompt')) {
         input: input,
         inputOptions: inputOptions,
         inputPlaceholder: inputPlaceholder,
-        callback: callback,
         backdrop: false,
         focusConfirm: false,
         showCancelButton: true,

@@ -20,6 +20,10 @@
       selectable-rows="true"
       col-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
       layout="fitColumns">
+      <wc-tabulator-func name="onDelete"
+          value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />
+      <wc-tabulator-func name="onClone"
+          value="(result) => { console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'}); }" />
       <wc-tabulator-column
         title="Actions"
         formatter="rowSelection"

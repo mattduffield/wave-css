@@ -19,6 +19,7 @@ import './wc-tab-item.js';
 import './wc-tab.js';
 import './wc-tabulator.js';
 import './wc-tabulator-column.js';
+import './wc-tabulator-func.js';
 import './wc-theme-selector.js';
 import './wc-timeline.js';
 // import './wc-top-nav.js';
