@@ -5749,74 +5749,111 @@ var WcEventHandler = class extends HTMLElement {
 customElements.define("wc-event-handler", WcEventHandler);
 
 // src/js/components/wc-event-hub.js
-var WcEventHub = class extends HTMLElement {
-  static get observedAttributes() {
-    return [];
-  }
-  constructor() {
-    super();
-  }
-  connectedCallback() {
-    if (document.querySelector(this.tagName) !== this) {
-      console.warn(`${this.tagName} is already present on the page.`);
-      this.remove();
-    } else {
-      if (!window.wc) {
-        window.wc = {};
+if (!customElements.get("wc-event-hub")) {
+  class WcEventHub extends HTMLElement {
+    constructor() {
+      super();
+      this.loadCSS = loadCSS.bind(this);
+      this.loadScript = loadScript.bind(this);
+      this.loadLibrary = loadLibrary.bind(this);
+      this.loadStyle = loadStyle.bind(this);
+      console.log("ctor:wc-event-hub");
+    }
+    connectedCallback() {
+      if (document.querySelector(this.tagName) !== this) {
+        console.warn(`${this.tagName} is already present on the page.`);
+        this.remove();
+      } else {
+        if (!window.wc) {
+          window.wc = {};
+        }
+        window.wc.EventHub = this;
+        this._applyStyle();
       }
-      window.wc.EventHub = this;
+      console.log("conntectedCallback:wc-event-hub");
+    }
+    disconnectedCallback() {
+    }
+    broadcast(eventName, selector, subSelector) {
+      const payload = { detail: { selector, subSelector } };
+      const custom = new CustomEvent(eventName, payload);
+      document.body.dispatchEvent(custom);
+    }
+    _applyStyle() {
+      const style = `
+      wc-event-hub {
+        display: none;
+      }
+      `;
+      this.loadStyle("wc-event-hub-style", style);
     }
   }
-  disconnectedCallback() {
-  }
-  broadcast(eventName, selector, subSelector) {
-    const payload = { detail: { selector, subSelector } };
-    const custom = new CustomEvent(eventName, payload);
-    document.body.dispatchEvent(custom);
-  }
-};
-customElements.define("wc-event-hub", WcEventHub);
+  customElements.define("wc-event-hub", WcEventHub);
+}
 
 // src/js/components/wc-mask-hub.js
-var WcMaskHub = class extends HTMLElement {
-  static get observedAttributes() {
-    return [];
-  }
-  constructor() {
-    super();
-  }
-  connectedCallback() {
-    if (document.querySelector(this.tagName) !== this) {
-      console.warn(`${this.tagName} is already present on the page.`);
-      this.remove();
-    } else {
+if (!customElements.get("wc-mask-hub")) {
+  class WcMaskHub extends HTMLElement {
+    static get observedAttributes() {
+      return [];
+    }
+    constructor() {
+      super();
+      this.loadCSS = loadCSS.bind(this);
+      this.loadScript = loadScript.bind(this);
+      this.loadLibrary = loadLibrary.bind(this);
+      this.loadStyle = loadStyle.bind(this);
+      console.log("ctor:wc-mask-hub");
+    }
+    async connectedCallback() {
+      if (document.querySelector(this.tagName) !== this) {
+        console.warn(`${this.tagName} is already present on the page.`);
+        this.remove();
+      } else {
+        await this.renderMask();
+        this._applyStyle();
+      }
+      console.log("conntectedCallback:wc-mask-hub");
+    }
+    disconnectedCallback() {
+    }
+    async renderMask() {
+      await Promise.all([
+        this.loadLibrary("https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js", "IMask")
+      ]);
       if (!window.wc) {
         window.wc = {};
       }
       window.wc.MaskHub = this;
     }
-  }
-  disconnectedCallback() {
-  }
-  phoneMask(event) {
-    const { target } = event;
-    const phoneMask = IMask(target, {
-      mask: [
-        {
-          mask: "(000) 000-0000",
-          startsWith: ""
-          // lazy: false,
-          // eager: true
+    phoneMask(event) {
+      const { target } = event;
+      const phoneMask = IMask(target, {
+        mask: [
+          {
+            mask: "(000) 000-0000",
+            startsWith: ""
+            // lazy: false,
+            // eager: true
+          }
+        ],
+        dispatch: function(appended, dynamicMasked) {
+          const number = (dynamicMasked.value + appended).replace(/\D/g, "");
+          return dynamicMasked.compiledMasks[0];
         }
-      ],
-      dispatch: function(appended, dynamicMasked) {
-        const number = (dynamicMasked.value + appended).replace(/\D/g, "");
-        return dynamicMasked.compiledMasks[0];
+      });
+    }
+    _applyStyle() {
+      const style = `
+      wc-mask-hub {
+        display: none;
       }
-    });
+      `;
+      this.loadStyle("wc-mask-hub-style", style);
+    }
   }
-};
-customElements.define("wc-mask-hub", WcMaskHub);
+  customElements.define("wc-mask-hub", WcMaskHub);
+}
 
 // src/js/components/wc-hotkey.js
 if (!customElements.get("wc-hotkey")) {
@@ -6020,9 +6057,6 @@ if (!customElements.get("wc-javascript")) {
 // src/js/components/wc-prompt.js
 if (!customElements.get("wc-prompt")) {
   class WcPrompt extends HTMLElement {
-    static get observedAttributes() {
-      return ["id", "class"];
-    }
     constructor() {
       super();
       this.loadCSS = loadCSS.bind(this);
@@ -6045,27 +6079,6 @@ if (!customElements.get("wc-prompt")) {
     disconnectedCallback() {
       super.disconnectedCallback();
     }
-    // async _handleAttributeChange(attrName, newValue) {
-    //   super._handleAttributeChange(attrName, newValue); 
-    // }
-    // _render() {
-    //   super._render();
-    //   const innerEl = this.querySelector('.wc-prompt > *');
-    //   if (innerEl) {
-    //     // Do nothing...
-    //   } else {
-    //     this.componentElement.innerHTML = '';
-    //     this._createInnerElement();
-    //   }
-    //   if (typeof htmx !== 'undefined') {
-    //     htmx.process(this);
-    //   }
-    //   console.log('_render:wc-prompt');
-    // }
-    // async _createInnerElement() {
-    //   await this.renderPrompt();
-    //   this.classList.add('contents');
-    // }
     async renderPrompt() {
       await Promise.all([
         this.loadCSS("https://unpkg.com/notie/dist/notie.min.css"),
