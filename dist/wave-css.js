@@ -4182,6 +4182,7 @@ if (!customElements.get("wc-tabulator")) {
       const placeholder = this.getAttribute("placeholder");
       const selectableRows = this.getAttribute("selectable-rows");
       const colFieldFormatter = this.getAttribute("col-field-formatter");
+      const groupBy = this.getAttribute("group-by");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -4231,6 +4232,7 @@ if (!customElements.get("wc-tabulator")) {
           options.selectableRows = selectableRows.toLowerCase() == "true" ? true : false;
         }
       }
+      if (groupBy) options.groupBy = groupBy;
       await this.renderTabulator(options);
       this.classList.add("contents");
     }
@@ -4655,12 +4657,22 @@ if (!customElements.get("wc-tabulator")) {
     pointer-events: none;
   }
 
+  /* Table Groups */
+  .wc-tabulator.tabulator .tabulator-row.tabulator-group > span {
+    color: var(--bg-color);  
+  }
+
   /* Table Calcs */
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder,
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs,
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
+    color: var(--color) !important;
+    background-color: var(--component-border-color) !important;
+  } 
+  .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-top,
+  .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-bottom {
     color: var(--color) !important;
     background-color: var(--component-border-color) !important;
   } 
