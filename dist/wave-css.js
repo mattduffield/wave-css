@@ -4659,7 +4659,7 @@ if (!customElements.get("wc-tabulator")) {
 
   /* Table Groups */
   .wc-tabulator.tabulator .tabulator-row.tabulator-group > span {
-    color: var(--bg-color);  
+    color: var(--color);  
   }
 
   /* Table Calcs */
