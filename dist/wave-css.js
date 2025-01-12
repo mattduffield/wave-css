@@ -214,6 +214,21 @@ async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3,
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);
 }
+function fetch(url, succesCallback, errorCallback) {
+  try {
+    fetch(url, {
+      method: "GET"
+    }).then((response) => response.text()).then((text) => {
+      if (callback) {
+        succesCallback(text);
+      }
+    });
+  } catch (ex) {
+    if (errorCallback) {
+      errorCallback();
+    }
+  }
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -6157,27 +6172,27 @@ if (!customElements.get("wc-prompt")) {
       Toast.fire({});
     }
     async success(c) {
-      const { title = "", text = "", footer = "", callback = null } = c;
+      const { title = "", text = "", footer = "", callback: callback2 = null } = c;
       const { value: result } = await Swal.fire({ icon: "success", title, text, footer });
       this.handleResult(c, result);
     }
     async error(c) {
-      const { title = "", text = "", footer = "", callback = null } = c;
+      const { title = "", text = "", footer = "", callback: callback2 = null } = c;
       const { value: result } = await Swal.fire({ icon: "error", title, text, footer });
       this.handleResult(c, result);
     }
     async warning(c) {
-      const { title = "", text = "", footer = "", callback = null } = c;
+      const { title = "", text = "", footer = "", callback: callback2 = null } = c;
       const { value: result } = await Swal.fire({ icon: "warning", title, text, footer });
       this.handleResult(c, result);
     }
     async info(c) {
-      const { title = "", text = "", footer = "", callback = null } = c;
+      const { title = "", text = "", footer = "", callback: callback2 = null } = c;
       const { value: result } = await Swal.fire({ icon: "info", title, text, footer });
       this.handleResult(c, result);
     }
     async question(c) {
-      const { title = "", text = "", footer = "", showCancelButton = true, callback = null } = c;
+      const { title = "", text = "", footer = "", showCancelButton = true, callback: callback2 = null } = c;
       const { value: result } = await Swal.fire({ icon: "question", title, text, footer, showCancelButton });
       this.handleResult(c, result);
     }
@@ -6192,7 +6207,7 @@ if (!customElements.get("wc-prompt")) {
         input: input2 = "",
         inputOptions = {},
         inputPlaceholder = "",
-        callback = null
+        callback: callback2 = null
       } = c;
       const customClass = {
         container: "",
@@ -6243,7 +6258,7 @@ if (!customElements.get("wc-prompt")) {
     async notifyTemplate(c) {
       const body = document.querySelector("body");
       const theme = body.dataset.theme;
-      const { template = "", callback = null } = c;
+      const { template = "", callback: callback2 = null } = c;
       const customClass = {
         container: "",
         // popup: 'theme-midnight-slate',
@@ -7388,6 +7403,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
+  fetch,
   generateUniqueId,
   hide,
   hideAndShow,

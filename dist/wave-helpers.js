@@ -21,6 +21,7 @@ var WaveHelpers = (() => {
   var helper_function_exports = {};
   __export(helper_function_exports, {
     checkResources: () => checkResources,
+    fetch: () => fetch,
     generateUniqueId: () => generateUniqueId,
     hide: () => hide,
     hideAndShow: () => hideAndShow,
@@ -253,6 +254,21 @@ var WaveHelpers = (() => {
     await waitForSelectorsPolling([hideSelector, showSelector], timeout);
     await sleep(delay);
     hideAndShow(hideSelector, showSelector);
+  }
+  function fetch(url, succesCallback, errorCallback) {
+    try {
+      fetch(url, {
+        method: "GET"
+      }).then((response) => response.text()).then((text) => {
+        if (callback) {
+          succesCallback(text);
+        }
+      });
+    } catch (ex) {
+      if (errorCallback) {
+        errorCallback();
+      }
+    }
   }
   return __toCommonJS(helper_function_exports);
 })();

@@ -319,3 +319,20 @@ export async function waitForThenHideAndShow(hideSelector, showSelector, timeout
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);
 }
+export function fetch(url, succesCallback, errorCallback) {
+  try {
+    fetch(url, {
+      method: 'GET'
+    })
+    .then(response => response.text())
+    .then(text => {
+      if (callback) {
+        succesCallback(text);
+      }
+    });
+  } catch(ex) {
+    if (errorCallback) {
+      errorCallback();
+    }
+  }
+}
