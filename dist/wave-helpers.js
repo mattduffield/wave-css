@@ -21,7 +21,7 @@ var WaveHelpers = (() => {
   var helper_function_exports = {};
   __export(helper_function_exports, {
     checkResources: () => checkResources,
-    fetch: () => fetch,
+    fetchAPI: () => fetchAPI,
     generateUniqueId: () => generateUniqueId,
     hide: () => hide,
     hideAndShow: () => hideAndShow,
@@ -255,7 +255,7 @@ var WaveHelpers = (() => {
     await sleep(delay);
     hideAndShow(hideSelector, showSelector);
   }
-  function fetch(url, succesCallback, errorCallback) {
+  function fetchAPI(url, succesCallback, errorCallback) {
     try {
       fetch(url, {
         method: "GET"
