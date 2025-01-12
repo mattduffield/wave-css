@@ -260,7 +260,7 @@ var WaveHelpers = (() => {
       fetch(url, {
         method: "GET"
       }).then((response) => response.text()).then((text) => {
-        if (callback) {
+        if (succesCallback) {
           succesCallback(text);
         }
       });

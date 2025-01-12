@@ -326,7 +326,7 @@ export function fetchApi(url, succesCallback, errorCallback) {
     })
     .then(response => response.text())
     .then(text => {
-      if (callback) {
+      if (succesCallback) {
         succesCallback(text);
       }
     });
