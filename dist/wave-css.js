@@ -214,7 +214,7 @@ async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3,
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);
 }
-function fetchAPI(url, succesCallback, errorCallback) {
+function fetchApi(url, succesCallback, errorCallback) {
   try {
     fetch(url, {
       method: "GET"
@@ -7403,7 +7403,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
-  fetchAPI,
+  fetchApi,
   generateUniqueId,
   hide,
   hideAndShow,
