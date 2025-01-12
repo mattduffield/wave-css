@@ -332,7 +332,7 @@ export function fetch(url, succesCallback, errorCallback) {
     });
   } catch(ex) {
     if (errorCallback) {
-      errorCallback();
+      errorCallback(ex);
     }
   }
 }

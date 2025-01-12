@@ -266,7 +266,7 @@ var WaveHelpers = (() => {
       });
     } catch (ex) {
       if (errorCallback) {
-        errorCallback();
+        errorCallback(ex);
       }
     }
   }
