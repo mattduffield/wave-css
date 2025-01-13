@@ -2914,6 +2914,8 @@ if (!customElements.get("wc-split-button")) {
         mainBtn.onclick = onClickHandler;
         this.removeAttribute("onclick");
       }
+      this.removeAttribute("id");
+      this.removeAttribute("label");
     }
     _handleAttributeChange(attrName, newValue) {
       super._handleAttributeChange(attrName, newValue);
