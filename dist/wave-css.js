@@ -2847,7 +2847,7 @@ if (!customElements.get("wc-save-split-button")) {
 if (!customElements.get("wc-split-button")) {
   class WcSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return ["btn-id", "btn-class", "btn-label"];
+      return ["btn-id", "btn-class", "btn-label", "split-class"];
     }
     constructor() {
       super();
@@ -2860,6 +2860,9 @@ if (!customElements.get("wc-split-button")) {
         this.classList.add("contents");
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-split-button");
+        const splitClass = this.getAttribute("split-class");
+        const splitClsParts = splitClass.split(" ");
+        splitClsParts.forEach((p) => this.componentElement.classList.add(p));
         this.appendChild(this.componentElement);
         this._createElement();
       }
