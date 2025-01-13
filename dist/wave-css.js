@@ -2861,8 +2861,10 @@ if (!customElements.get("wc-split-button")) {
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-split-button");
         const splitClass = this.getAttribute("split-class");
-        const splitClsParts = splitClass.split(" ");
-        splitClsParts.forEach((p) => this.componentElement.classList.add(p));
+        if (splitClass) {
+          const splitClsParts = splitClass.split(" ");
+          splitClsParts.forEach((p) => this.componentElement.classList.add(p));
+        }
         this.appendChild(this.componentElement);
         this._createElement();
       }
@@ -2905,6 +2907,13 @@ if (!customElements.get("wc-split-button")) {
       this.parts.forEach((part) => {
         drpContent.appendChild(part);
       });
+      const mainBtn = this.querySelector(`button#${id}`);
+      const onClick = this.getAttribute("onclick");
+      if (onClick) {
+        const onClickHandler = new Function(onClick);
+        mainBtn.onclick = onClickHandler;
+        this.removeAttribute("onclick");
+      }
     }
     _handleAttributeChange(attrName, newValue) {
       super._handleAttributeChange(attrName, newValue);
