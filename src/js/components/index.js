@@ -11,6 +11,7 @@ import './wc-image.js';
 import './wc-menu.js';
 import './wc-save-button.js';
 import './wc-save-split-button.js';
+import './wc-split-button.js';
 import './wc-sidebar.js';
 import './wc-sidenav.js';
 import './wc-slideshow-image.js';
