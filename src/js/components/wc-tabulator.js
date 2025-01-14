@@ -9,6 +9,7 @@
  *  https://randomuser.me/documentation#howto
  */
 
+import { sleep } from './helper-function.js';
 import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-tabulator')) {
@@ -304,12 +305,13 @@ if (!customElements.get('wc-tabulator')) {
       ]);
         
       this.table = new Tabulator(this.componentElement, options);
-      this.table.on("tableBuilt", () => {
+      this.table.on("tableBuilt", async () => {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
         if (typeof htmx !== 'undefined') {
+          await sleep(500);
           htmx.process(this);
-        }  
+        }
       });
     }
 
