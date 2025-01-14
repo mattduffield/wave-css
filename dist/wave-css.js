@@ -4342,9 +4342,6 @@ if (!customElements.get("wc-tabulator")) {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
-      if (typeof htmx !== "undefined") {
-        htmx.process(this);
-      }
       console.log("_render:wc-tabulator");
     }
     async _createInnerElement() {
@@ -4431,6 +4428,9 @@ if (!customElements.get("wc-tabulator")) {
       this.table.on("tableBuilt", () => {
         console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");
         wc.EventHub.broadcast("wc-tabulator:ready", [], "");
+        if (typeof htmx !== "undefined") {
+          htmx.process(this);
+        }
       });
     }
     getFuncs() {

@@ -212,9 +212,6 @@ if (!customElements.get('wc-tabulator')) {
         this._createInnerElement();
       }
 
-      if (typeof htmx !== 'undefined') {
-        htmx.process(this);
-      }
       console.log('_render:wc-tabulator');
     }
 
@@ -310,6 +307,9 @@ if (!customElements.get('wc-tabulator')) {
       this.table.on("tableBuilt", () => {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
+        if (typeof htmx !== 'undefined') {
+          htmx.process(this);
+        }  
       });
     }
 
