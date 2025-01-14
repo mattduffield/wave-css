@@ -309,7 +309,7 @@ if (!customElements.get('wc-tabulator')) {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
         if (typeof htmx !== 'undefined') {
-          await sleep(500);
+          await sleep(1000);
           htmx.process(this);
         }
       });
