@@ -377,7 +377,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: flex;
-        height: 29.5px;
+        min-height: 29.5px;
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.5rem;
@@ -390,6 +390,11 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group:not(.modern) .radio-option {
         padding-left: 12px;
+        align-self: center;
+      }
+      wc-input .radio-group.col:not(.modern) .radio-option {
+        padding-left: 12px;
+        align-self: self-start;
       }
       wc-input .radio-group.modern {
         border: 1px solid var(--accent-bg-color);
@@ -397,8 +402,8 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group.modern .radio-option {
         padding: 0 0.5rem;
-        background-color: var(--secondary-bg-color);
-        color: var(--secondary-color);
+        background-color: var(--accent-bg-color);
+        color: var(--primary-color);
         border-right: 1px solid var(--accent-bg-color);
       }
       wc-input .radio-group.modern .radio-option:first-child {
@@ -423,7 +428,7 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
         background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        color: var(--secondary-alt-color);
       }
       wc-input .radio-group.modern:has(:focus-within) {
         outline: var(--primary-bg-color) solid 2px;
@@ -441,6 +446,7 @@ class WcInput extends WcBaseFormComponent {
         transition: border-color 0.3s;
         position: absolute;
         left: 0;
+        top: 0;
       }
       wc-input .radio-group:not(.modern) .radio-option:has(:checked)::after {
         content: "";

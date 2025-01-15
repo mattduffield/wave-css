@@ -74,3 +74,12 @@ Execute the following to view the components locally.
 ```bash
 python3 -m http.server 3015
 ```
+
+## Colors
+
+| Name             | Color     |
+| ---------------- | --------- |
+| Primary BG color | #91c5ff |
+| Primary color    | #ffffff |
+| BG color         | #0d47a1 |
+| Color            | #91c5ff |

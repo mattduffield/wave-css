@@ -1,18 +1,22 @@
 :root {
-  --bg-color: #fff;
-  --color: #000;
+  --bg-color: #ffffff;
+  --color: #000000;
   --primary-bg-color: #007bff;
-  --primary-color: #fff;
+  --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+  --primary-color: #ffffff;
   --secondary-bg-color: #6c757d;
-  --secondary-color: #fff;
+  --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+  --secondary-color: #ffffff;
   --accent-bg-color: #17a2b8;
-  --accent-color: #fff;
-  --component-bg-color: #fff;
+  --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+  --accent-color: #ffffff;
+  --component-bg-color: #ffffff;
   --component-color: #495057;
   --component-border-color: #ced4da;
   --invalid-color: red;
   --button-color: #495057;
-  --white-color: #fff;
+  --white-color: #ffffff;
+  --black-color: #000000;
 }
 
 @layer colors {
@@ -84,16 +88,22 @@
     --bg-color: #ffebee;
     --color: #b71c1c;
     --primary-bg-color: #d32f2f;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #f44336;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ff5252;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #ffcdd2;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ef9a9a;
-    --component-color: #b71c1c;
     --button-color: #b71c1c;
   }
 
@@ -101,16 +111,22 @@
     --bg-color: #b71c1c;
     --color: #ffebee;
     --primary-bg-color: #d32f2f;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #f44336;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ff5252;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #8e2c2c;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #9e3c3c;
-    --component-color: #ffebee;
     --button-color: #ffebee;
   }
 
@@ -118,16 +134,22 @@
     --bg-color: #fff3e0;
     --color: #6d4c41;
     --primary-bg-color: #d84315;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ff8a65;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #f4511e;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #ffe0b2;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ffcc80;
-    --component-color: #6d4c41;
     --button-color: #6d4c41;
   }
 
@@ -135,16 +157,22 @@
     --bg-color: #6d4c41;
     --color: #fff3e0;
     --primary-bg-color: #d84315;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ff8a65;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #f4511e;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #444;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #5e4438;
-    --component-color: #fff3e0;
     --button-color: #fff3e0;
   }
 
@@ -152,16 +180,22 @@
     --bg-color: #fbe9e7;
     --color: #d84315;
     --primary-bg-color: #e64a19;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ff5722;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ff8a65;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #ffccbc;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ffab91;
-    --component-color: #d84315;
     --button-color: #d84315;
   }
 
@@ -169,16 +203,22 @@
     --bg-color: #5d4037;
     --color: #fbe9e7;
     --primary-bg-color: #e64a19;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ff5722;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ff8a65;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #6e4c41;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #7f5845;
-    --component-color: #fbe9e7;
     --button-color: #fbe9e7;
   }
 
@@ -186,16 +226,22 @@
     --bg-color: #f3e5f5;
     --color: #4a148c;
     --primary-bg-color: #7b1fa2;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #9c27b0;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ba68c8;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #e1bee7;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ce93d8;
-    --component-color: #4a148c;
     --button-color: #4a148c;
   }
 
@@ -203,16 +249,22 @@
     --bg-color: #4a148c;
     --color: #f3e5f5;
     --primary-bg-color: #7b1fa2;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #9c27b0;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ba68c8;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #5e356b;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #70479b;
-    --component-color: #f3e5f5;
     --button-color: #f3e5f5;
   }
 
@@ -220,16 +272,22 @@
     --bg-color: #f3e5f5;
     --color: #4a148c;
     --primary-bg-color: #8e24aa;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #9c27b0;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ce93d8;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #e1bee7;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ce93d8;
-    --component-color: #4a148c;
     --button-color: #4a148c;
   }
 
@@ -237,16 +295,22 @@
     --bg-color: #4a148c;
     --color: #f3e5f5;
     --primary-bg-color: #8e24aa;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #9c27b0;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ce93d8;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #5e357b;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #70459b;
-    --component-color: #f3e5f5;
     --button-color: #f3e5f5;
   }
 
@@ -254,16 +318,22 @@
     --bg-color: #f8f8f2;
     --color: #282a36;
     --primary-bg-color: #bd93f9;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6272a4;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ff79c6;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #e8e8e8;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #dcdcdc;
-    --component-color: #282a36;
     --button-color: #282a36;
   }
 
@@ -271,16 +341,22 @@
     --bg-color: #282a36;
     --color: #f8f8f2;
     --primary-bg-color: #bd93f9;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6272a4;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ff79c6;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #44475a;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #6272a4;
-    --component-color: #f8f8f2;
     --button-color: #f8f8f2;
   }
 
@@ -288,16 +364,22 @@
     --bg-color: #e3f2fd;
     --color: #0d47a1;
     --primary-bg-color: #1565c0;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #1976d2;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #42a5f5;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #bbdefb;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #90caf9;
-    --component-color: #0d47a1;
     --button-color: #0d47a1;
   }
 
@@ -305,16 +387,22 @@
     --bg-color: #0d47a1;
     --color: #e3f2fd;
     --primary-bg-color: #1565c0;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #1976d2;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #42a5f5;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #1e88e5;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #2196f3;
-    --component-color: #e3f2fd;
     --button-color: #e3f2fd;
   }
 
@@ -322,16 +410,22 @@
     --bg-color: #e3f2fd;
     --color: #0d47a1;
     --primary-bg-color: #1976d2;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #1e88e5;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #42a5f5;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #bbdefb;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #90caf9;
-    --component-color: #0d47a1;
     --button-color: #0d47a1;
   }
 
@@ -339,16 +433,22 @@
     --bg-color: #0d47a1;
     --color: #e3f2fd;
     --primary-bg-color: #1976d2;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #1e88e5;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #42a5f5;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #333;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555;
-    --component-color: #e3f2fd;
     --button-color: #e3f2fd;
   }
 
@@ -356,16 +456,22 @@
     --bg-color: #f8f9fa;
     --color: #212529;
     --primary-bg-color: #007bff;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6c757d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #17a2b8;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #fff;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ced4da;
-    --component-color: #495057;
     --button-color: #495057;
   }
 
@@ -373,16 +479,22 @@
     --bg-color: #2c2c2c;
     --color: #e0e0e0;
     --primary-bg-color: #007bff;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6c757d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #17a2b8;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #333;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555;
-    --component-color: #e0e0e0;
     --button-color: #e0e0e0;
   }
 
@@ -390,16 +502,22 @@
     --bg-color: #f8f9fa;
     --color: #212529;
     --primary-bg-color: #0d6efd;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6c757d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #20c997;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #fff;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ced4da;
-    --component-color: #495057;
     --button-color: #495057;
   }
 
@@ -407,16 +525,22 @@
     --bg-color: #121212;
     --color: #f8f9fa;
     --primary-bg-color: #0d6efd;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #6c757d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #20c997;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #333;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555;
-    --component-color: #e0e0e0;
     --button-color: #e0e0e0;
   }
 
@@ -424,16 +548,22 @@
     --bg-color: #fdf6e3;
     --color: #657b83;
     --primary-bg-color: #268bd2;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #586e75;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #2aa198;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #eee8d5;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #93a1a1;
-    --component-color: #657b83;
     --button-color: #657b83;
   }
 
@@ -441,16 +571,22 @@
     --bg-color: #002b36;
     --color: #839496;
     --primary-bg-color: #268bd2;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #586e75;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #2aa198;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #073642;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #586e75;
-    --component-color: #839496;
     --button-color: #839496;
   }
 
@@ -458,16 +594,22 @@
     --bg-color: #e0f7fa;
     --color: #006064;
     --primary-bg-color: #00acc1;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #00838f;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #26c6da;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #b2ebf2;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #80deea;
-    --component-color: #006064;
     --button-color: #006064;
   }
 
@@ -475,16 +617,22 @@
     --bg-color: #006064;
     --color: #e0f7fa;
     --primary-bg-color: #00acc1;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #00838f;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #26c6da;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #333;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555;
-    --component-color: #e0f7fa;
     --button-color: #e0f7fa;
   }
 
@@ -492,16 +640,22 @@
     --bg-color: #d8dee9;
     --color: #2e3440;
     --primary-bg-color: #88c0d0;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #4c566a;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #8fbcbb;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #eceff4;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #d8dee9;
-    --component-color: #2e3440;
     --button-color: #2e3440;
   }
 
@@ -509,16 +663,22 @@
     --bg-color: #2e3440;
     --color: #d8dee9;
     --primary-bg-color: #88c0d0;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #4c566a;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #8fbcbb;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #3b4252;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #4c566a;
-    --component-color: #d8dee9;
     --button-color: #d8dee9;
   }
 
@@ -526,16 +686,22 @@
     --bg-color: #e8f5e9;
     --color: #1b5e20;
     --primary-bg-color: #2e7d32;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #66bb6a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #388e3c;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #c8e6c9;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #a5d6a7;
-    --component-color: #1b5e20;
     --button-color: #1b5e20;
   }
 
@@ -543,16 +709,22 @@
     --bg-color: #1b5e20;
     --color: #e8f5e9;
     --primary-bg-color: #2e7d32;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #66bb6a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #388e3c;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #2e7d32;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #4caf50;
-    --component-color: #e8f5e9;
     --button-color: #e8f5e9;
   }
 
@@ -560,16 +732,22 @@
     --bg-color: #e8f5e9;
     --color: #1b5e20;
     --primary-bg-color: #2e7d32;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #4caf50;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #66bb6a;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #f1f8e9;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #c8e6c9;
-    --component-color: #1b5e20;
     --button-color: #1b5e20;
   }
 
@@ -577,16 +755,22 @@
     --bg-color: #1b5e20;
     --color: #e8f5e9;
     --primary-bg-color: #2e7d32;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #66bb6a;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #388e3c;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #333;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555;
-    --component-color: #e8f5e9;
     --button-color: #e8f5e9;
   }
 
@@ -594,16 +778,22 @@
     --bg-color: #f1f8e9;
     --color: #33691e;
     --primary-bg-color: #8bc34a;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #689f38;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #aed581;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #dcedc8;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #c5e1a5;
-    --component-color: #33691e;
     --button-color: #33691e;
   }
 
@@ -611,16 +801,22 @@
     --bg-color: #33691e;
     --color: #f1f8e9;
     --primary-bg-color: #8bc34a;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #689f38;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #aed581;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #487d28;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #5b8e39;
-    --component-color: #f1f8e9;
     --button-color: #f1f8e9;
   }
 
@@ -628,16 +824,22 @@
     --bg-color: #e8f5e9;
     --color: #2e7d32;
     --primary-bg-color: #81c784;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #66bb6a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #a5d6a7;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #c8e6c9;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #a5d6a7;
-    --component-color: #2e7d32;
     --button-color: #2e7d32;
   }
 
@@ -645,16 +847,22 @@
     --bg-color: #2e7d32;
     --color: #e8f5e9;
     --primary-bg-color: #81c784;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #66bb6a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #a5d6a7;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #4a9b56;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #5eac6a;
-    --component-color: #e8f5e9;
     --button-color: #e8f5e9;
   }
 
@@ -662,16 +870,22 @@
     --bg-color: #fffde7;
     --color: #827717;
     --primary-bg-color: #cddc39;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #afb42b;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #dce775;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #f0f4c3;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #e6ee9c;
-    --component-color: #827717;
     --button-color: #827717;
   }
 
@@ -679,16 +893,22 @@
     --bg-color: #827717;
     --color: #fffde7;
     --primary-bg-color: #cddc39;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #afb42b;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #dce775;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #616221;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #747733;
-    --component-color: #fffde7;
     --button-color: #fffde7;
   }
 
@@ -696,16 +916,22 @@
     --bg-color: #fffde7;
     --color: #f57f17;
     --primary-bg-color: #fbc02d;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #fdd835;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ffeb3b;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #fff9c4;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #fff176;
-    --component-color: #f57f17;
     --button-color: #f57f17;
   }
 
@@ -713,16 +939,22 @@
     --bg-color: #f57f17;
     --color: #fffde7;
     --primary-bg-color: #fbc02d;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #fdd835;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ffeb3b;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #cc6e16;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #dd7f25;
-    --component-color: #fffde7;
     --button-color: #fffde7;
   }
 
@@ -730,16 +962,22 @@
     --bg-color: #fff8e1;
     --color: #e65100;
     --primary-bg-color: #fb8c00;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ffb74d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ff7043;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #ffecb3;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ffe082;
-    --component-color: #e65100;
     --button-color: #e65100;
   }
 
@@ -747,16 +985,22 @@
     --bg-color: #3e2723;
     --color: #fff8e1;
     --primary-bg-color: #fb8c00;
-    --primary-color: #fff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #ffb74d;
-    --secondary-color: #fff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ff7043;
-    --accent-color: #fff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #5d4037;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #795548;
-    --component-color: #fff8e1;
     --button-color: #fff8e1;
   }
 
@@ -764,16 +1008,22 @@
     --bg-color: #fff3e0;
     --color: #e65100;
     --primary-bg-color: #ef6c00;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #fb8c00;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #ffb74d;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #ffe0b2;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ffcc80;
-    --component-color: #e65100;
     --button-color: #e65100;
   }
 
@@ -781,16 +1031,22 @@
     --bg-color: #e65100;
     --color: #fff3e0;
     --primary-bg-color: #ef6c00;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #fb8c00;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #ffb74d;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #9c4510;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ac5530;
-    --component-color: #fff3e0;
     --button-color: #fff3e0;
   }
 
@@ -798,16 +1054,22 @@
     --bg-color: #f5f5f5;
     --color: #6d4c41;
     --primary-bg-color: #8d6e63;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #a1887f;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #bcaaa4;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #d7ccc8;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #a1887f;
-    --component-color: #6d4c41;
     --button-color: #6d4c41;
   }
 
@@ -815,16 +1077,22 @@
     --bg-color: #6d4c41;
     --color: #f5f5f5;
     --primary-bg-color: #8d6e63;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #a1887f;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #bcaaa4;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #7f594c;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #8f6c5f;
-    --component-color: #f5f5f5;
     --button-color: #f5f5f5;
   }
 
@@ -832,16 +1100,22 @@
     --bg-color: #faf3e0;
     --color: #5d4037;
     --primary-bg-color: #795548;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #8d6e63;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #a1887f;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #d7ccc8;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #bcaaa4;
-    --component-color: #5d4037;
     --button-color: #5d4037;
   }
 
@@ -849,16 +1123,22 @@
     --bg-color: #5d4037;
     --color: #faf3e0;
     --primary-bg-color: #795548;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #8d6e63;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #a1887f;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #7c5544;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #8d6854;
-    --component-color: #faf3e0;
     --button-color: #faf3e0;
   }
 
@@ -866,16 +1146,22 @@
     --bg-color: #f0f0f0;
     --color: #333333;
     --primary-bg-color: #616161;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #757575;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #9e9e9e;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #e0e0e0;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #bdbdbd;
-    --component-color: #333333;
     --button-color: #333333;
   }
 
@@ -883,16 +1169,22 @@
     --bg-color: #333333;
     --color: #f0f0f0;
     --primary-bg-color: #616161;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #757575;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #9e9e9e;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #444444;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #5a5a5a;
-    --component-color: #f0f0f0;
     --button-color: #f0f0f0;
   }
 
@@ -900,16 +1192,22 @@
     --bg-color: #eceff1;
     --color: #37474f;
     --primary-bg-color: #607d8b;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #78909c;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #90a4ae;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #cfd8dc;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #b0bec5;
-    --component-color: #37474f;
     --button-color: #37474f;
   }
 
@@ -917,16 +1215,22 @@
     --bg-color: #37474f;
     --color: #eceff1;
     --primary-bg-color: #607d8b;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #78909c;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #90a4ae;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #45565b;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #54696e;
-    --component-color: #eceff1;
     --button-color: #eceff1;
   }
 
@@ -934,16 +1238,22 @@
     --bg-color: #eceff1;
     --color: #455a64;
     --primary-bg-color: #607d8b;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #78909c;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #90a4ae;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #cfd8dc;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #b0bec5;
-    --component-color: #455a64;
     --button-color: #455a64;
   }
 
@@ -951,16 +1261,22 @@
     --bg-color: #455a64;
     --color: #eceff1;
     --primary-bg-color: #607d8b;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #78909c;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #90a4ae;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #607d8b;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #54697c;
-    --component-color: #eceff1;
     --button-color: #eceff1;
   }
 
@@ -968,16 +1284,22 @@
     --bg-color: #eceff1;
     --color: #37474f;
     --primary-bg-color: #455a64;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #546e7a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #607d8b;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #cfd8dc;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #b0bec5;
-    --component-color: #37474f;
     --button-color: #37474f;
   }
 
@@ -985,16 +1307,22 @@
     --bg-color: #263238;
     --color: #eceff1;
     --primary-bg-color: #455a64;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #546e7a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #607d8b;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #37474f;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #546e7a;
-    --component-color: #eceff1;
     --button-color: #eceff1;
   }
 
@@ -1002,16 +1330,22 @@
     --bg-color: #f1f3f5;
     --color: #1c1e21;
     --primary-bg-color: #1b1f3a;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #3a4457;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #4b5269;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #dce1e8;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #bfc6cf;
-    --component-color: #1c1e21;
     --button-color: #1c1e21;
   }
 
@@ -1019,33 +1353,45 @@
     --bg-color: #0b0f1a;
     --color: #e8ebf0;
     --primary-bg-color: #1b1f3a;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #3a4457;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #4b5269;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #1b1f3a;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #303a52;
-    --component-color: #e8ebf0;
     --button-color: #e8ebf0;
   }
 
   .theme-day {
-    --bg-color: #ffffff;
+    --bg-color: #f0f0f0;
     --color: #212529;
-    --primary-bg-color: #f0f0f0;
-    --primary-color: #000000;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
-    --secondary-bg-color: #e0e0e0;
-    --secondary-color: #000000;
+    --primary-bg-color: #212529;
+    --primary-color: var(--bg-color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
+    --secondary-bg-color: #979797;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: hsl(from var(--bg-color) h s calc(l - 5));
     --accent-bg-color: #d6d6d6;
-    --accent-color: #000000;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #f8f9fa;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #ced4da;
-    --component-color: #212529;
     --button-color: #212529;
   }
 
@@ -1053,16 +1399,22 @@
     --bg-color: #2c2c2c;
     --color: #f8f9fa;
     --primary-bg-color: #3b3b3b;
-    --primary-color: #ffffff;
-    --primary-hover-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-color: var(--color);
+    --primary-alt-bg-color: hsl(from var(--primary-bg-color) h s calc(l + -5));
+    --primary-alt-color: var(--white-color);
     --secondary-bg-color: #4a4a4a;
-    --secondary-color: #ffffff;
+    --secondary-color: var(--color);
+    --secondary-alt-bg-color: hsl(from var(--secondary-bg-color) h s calc(l + -5));
+    --secondary-alt-color: var(--white-color);
     --accent-bg-color: #5a5a5a;
-    --accent-color: #ffffff;
+    --accent-color: var(--color);
+    --accent-alt-bg-color: hsl(from var(--accent-bg-color) h s calc(l + -5));
+    --accent-alt-color: var(--white-color);
     --component-bg-color: #444444;
-    --component-bg-hover-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-color: var(--color);
+    --component-alt-bg-color: hsl(from var(--component-bg-color) h s calc(l + -5));
+    --component-alt-color: hsl(from var(--component-color) h s calc(l + 10));
     --component-border-color: #555555;
-    --component-color: #f8f9fa;
     --button-color: #f8f9fa;
   }
 }
@@ -1171,7 +1523,7 @@ input[type="button"]:disabled {
   opacity: 0.7;
 }
 input[type="button"]:hover:not(:disabled) {
-  background-color: var(--primary-hover-color);
+  background-color: var(--primary-alt-bg-color);
 }
 
 

@@ -71,7 +71,7 @@ if (!customElements.get('wc-save-button')) {
           border-radius: 0.375rem;
         }
         .wc-save-button:hover  {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle('wc-save-button-style', style);

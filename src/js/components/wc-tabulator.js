@@ -742,7 +742,7 @@ if (!customElements.get('wc-tabulator')) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--component-bg-hover-color);
+    background-color: var(--component-alt-bg-color);
   }
 
   /* Table Rows */
@@ -819,7 +819,7 @@ if (!customElements.get('wc-tabulator')) {
     background-color: var(--component-border-color);
   }
   .tabulator-menu.tabulator-popup-container .tabulator-menu-item:hover {
-    background-color: var(--component-bg-hover-color);
+    background-color: var(--component-alt-bg-color);
     background-color: var(--component-border-color);
     filter: brightness(0.85);
   }

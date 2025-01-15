@@ -181,7 +181,7 @@ if (!customElements.get('wc-save-split-button')) {
 
         /* Change color of dropdown links on hover */
         .wc-save-split-button .dropdown-content a:hover {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
 
         /* Show the dropdown menu on hover */
@@ -191,7 +191,7 @@ if (!customElements.get('wc-save-split-button')) {
 
         /* Change the background color of the dropdown button when the dropdown content is shown */
         .wc-save-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle('wc-save-split-button-style', style);

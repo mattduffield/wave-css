@@ -246,7 +246,7 @@ class WcMenu extends WcBaseComponent {
         flex-direction: row;
       }
       wc-menu .wc-menu a {
-        color: var(--secondary-color);
+        color: var(--primary-color);
         text-align: center;
         padding: 14px 16px;
         text-decoration: none;

@@ -232,6 +232,7 @@ class WcSelect extends WcBaseFormComponent {
         align-items: center; 
         padding: 5px; 
         background-color: var(--primary-bg-color); 
+        color: var(--primary-color);
         border-radius: 15px; 
         font-size: 0.75rem; /* 12px */
         line-height: 1rem; /* 16px */
@@ -316,7 +317,7 @@ class WcSelect extends WcBaseFormComponent {
         font-style: italic;
       }
       wc-select select:disabled option {
-        color: var(--component-color);
+        color: var(--component-alt-color);
       }
       wc-select .dropdown-input:disabled {
         cursor: not-allowed;

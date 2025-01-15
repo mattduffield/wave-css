@@ -2519,7 +2519,7 @@ var WcMenu = class extends WcBaseComponent {
         flex-direction: row;
       }
       wc-menu .wc-menu a {
-        color: var(--secondary-color);
+        color: var(--primary-color);
         text-align: center;
         padding: 14px 16px;
         text-decoration: none;
@@ -2645,7 +2645,7 @@ if (!customElements.get("wc-save-button")) {
           border-radius: 0.375rem;
         }
         .wc-save-button:hover  {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle("wc-save-button-style", style);
@@ -2812,7 +2812,7 @@ if (!customElements.get("wc-save-split-button")) {
 
         /* Change color of dropdown links on hover */
         .wc-save-split-button .dropdown-content a:hover {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
 
         /* Show the dropdown menu on hover */
@@ -2822,7 +2822,7 @@ if (!customElements.get("wc-save-split-button")) {
 
         /* Change the background color of the dropdown button when the dropdown content is shown */
         .wc-save-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle("wc-save-split-button-style", style);
@@ -2985,7 +2985,7 @@ if (!customElements.get("wc-split-button")) {
 
         /* Change color of dropdown links on hover */
         .wc-split-button .dropdown-content a:hover {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
 
         /* Show the dropdown menu on hover */
@@ -2995,7 +2995,7 @@ if (!customElements.get("wc-split-button")) {
 
         /* Change the background color of the dropdown button when the dropdown content is shown */
         .wc-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-hover-color);
+          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle("wc-split-button-style", style);
@@ -4789,7 +4789,7 @@ if (!customElements.get("wc-tabulator")) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--component-bg-hover-color);
+    background-color: var(--component-alt-bg-color);
   }
 
   /* Table Rows */
@@ -4866,7 +4866,7 @@ if (!customElements.get("wc-tabulator")) {
     background-color: var(--component-border-color);
   }
   .tabulator-menu.tabulator-popup-container .tabulator-menu-item:hover {
-    background-color: var(--component-bg-hover-color);
+    background-color: var(--component-alt-bg-color);
     background-color: var(--component-border-color);
     filter: brightness(0.85);
   }
@@ -6960,7 +6960,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: flex;
-        height: 29.5px;
+        min-height: 29.5px;
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.5rem;
@@ -6973,6 +6973,11 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group:not(.modern) .radio-option {
         padding-left: 12px;
+        align-self: center;
+      }
+      wc-input .radio-group.col:not(.modern) .radio-option {
+        padding-left: 12px;
+        align-self: self-start;
       }
       wc-input .radio-group.modern {
         border: 1px solid var(--accent-bg-color);
@@ -6980,8 +6985,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group.modern .radio-option {
         padding: 0 0.5rem;
-        background-color: var(--secondary-bg-color);
-        color: var(--secondary-color);
+        background-color: var(--accent-bg-color);
+        color: var(--primary-color);
         border-right: 1px solid var(--accent-bg-color);
       }
       wc-input .radio-group.modern .radio-option:first-child {
@@ -7006,7 +7011,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
         background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        color: var(--secondary-alt-color);
       }
       wc-input .radio-group.modern:has(:focus-within) {
         outline: var(--primary-bg-color) solid 2px;
@@ -7024,6 +7029,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         transition: border-color 0.3s;
         position: absolute;
         left: 0;
+        top: 0;
       }
       wc-input .radio-group:not(.modern) .radio-option:has(:checked)::after {
         content: "";
@@ -7265,6 +7271,7 @@ var WcSelect = class extends WcBaseFormComponent {
         align-items: center; 
         padding: 5px; 
         background-color: var(--primary-bg-color); 
+        color: var(--primary-color);
         border-radius: 15px; 
         font-size: 0.75rem; /* 12px */
         line-height: 1rem; /* 16px */
@@ -7349,7 +7356,7 @@ var WcSelect = class extends WcBaseFormComponent {
         font-style: italic;
       }
       wc-select select:disabled option {
-        color: var(--component-color);
+        color: var(--component-alt-color);
       }
       wc-select .dropdown-input:disabled {
         cursor: not-allowed;
