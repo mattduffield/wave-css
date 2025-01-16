@@ -537,6 +537,7 @@ if (!customElements.get('wc-tabulator')) {
 
         title.textContent = " " + column.getDefinition().title;
         title.textContent = title.textContent.replace("null", "").replace("undefined", "");
+        title.classList.add("pointer-events-none");
 
         label.appendChild(icon);
         label.appendChild(title);
