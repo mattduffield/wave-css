@@ -229,6 +229,27 @@ function fetchApi(url, succesCallback, errorCallback) {
     }
   }
 }
+function enableSortable(target) {
+  if (target) {
+    let options = {
+      animation: 150,
+      onEnd: function(evt) {
+        console.log({
+          "event": "onEnd",
+          "this": this,
+          "item": evt.item,
+          "from": evt.from,
+          "to": evt.to,
+          "oldIndex": evt.oldIndex,
+          "newIndex": evt.newIndex
+        });
+      }
+    };
+    if (typeof Sortable !== "undefined") {
+      new Sortable(target, options);
+    }
+  }
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -904,8 +925,8 @@ if (!customElements.get("wc-code-mirror")) {
     }
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === "lbl-class") {
-        const name2 = this.getAttribute("name");
-        const lbl = this.querySelector(`label[for="${name2}"]`);
+        const name = this.getAttribute("name");
+        const lbl = this.querySelector(`label[for="${name}"]`);
         lbl?.classList.add(newValue);
       } else if (attrName === "theme") {
         await this.loadTheme(newValue);
@@ -970,15 +991,15 @@ if (!customElements.get("wc-code-mirror")) {
     }
     async _createInnerElement() {
       const labelText = this.getAttribute("lbl-label") || "";
-      const name2 = this.getAttribute("name") || "";
-      if (!name2) {
+      const name = this.getAttribute("name") || "";
+      if (!name) {
         throw new Error("Name attribute must be provided.");
       }
       if (labelText) {
         const lblEl = document.createElement("label");
         const value = this.getAttribute("value") || "";
         lblEl.textContent = labelText;
-        lblEl.setAttribute("for", name2);
+        lblEl.setAttribute("for", name);
         this.componentElement.appendChild(lblEl);
       }
       this.editor = null;
@@ -4437,10 +4458,10 @@ if (!customElements.get("wc-tabulator")) {
     getFuncs() {
       const funcElements = this.querySelectorAll("wc-tabulator-func");
       funcElements.forEach((el) => {
-        const name2 = el.getAttribute("name");
+        const name = el.getAttribute("name");
         const func = el.getAttribute("value");
         const value = new Function(`return (${func})`)();
-        this.funcs[name2] = value;
+        this.funcs[name] = value;
       });
     }
     getColumnsConfig() {
@@ -6567,26 +6588,6 @@ var WcForm = class extends WcBaseComponent {
       });
       this._moveDeclarativeInner();
       this._wireEvents();
-      const insideIframe = this.componentElement.closest("iframe");
-      if (insideIframe) {
-        let options = {
-          animation: 150,
-          onEnd: function(evt) {
-            console.log({
-              "event": name,
-              "this": this,
-              "item": evt.item,
-              "from": evt.from,
-              "to": evt.to,
-              "oldIndex": evt.oldIndex,
-              "newIndex": evt.newIndex
-            });
-          }
-        };
-        if (typeof Sortable !== "undefined") {
-          new Sortable(this.componentElement, options);
-        }
-      }
     }
     if (typeof htmx !== "undefined") {
       htmx.process(this);
@@ -6772,8 +6773,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     if (this.ignoreAttributes.includes(attrName)) {
     }
     if (attrName === "lbl-class") {
-      const name2 = this.getAttribute("name");
-      const lbl = this.querySelector(`label[for="${name2}"]`);
+      const name = this.getAttribute("name");
+      const lbl = this.querySelector(`label[for="${name}"]`);
       lbl?.classList.add(newValue);
     } else if (attrName === "radio-group-class") {
       const elt = this.querySelector(".radio-group");
@@ -6815,7 +6816,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";
-    const name2 = this.getAttribute("name");
+    const name = this.getAttribute("name");
     const type = this.getAttribute("type") || "text";
     const isToggle = this.hasAttribute("toggle-switch");
     if (labelText) {
@@ -6826,7 +6827,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       } else {
         lblEl.textContent = labelText;
       }
-      lblEl.setAttribute("for", name2);
+      lblEl.setAttribute("for", name);
       this.componentElement.appendChild(lblEl);
     }
     this.formElement = document.createElement("input");
@@ -6852,7 +6853,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         radioLabel.textContent = option.key;
         const radioInput = document.createElement("input");
         radioInput.setAttribute("type", "radio");
-        radioInput.setAttribute("name", name2);
+        radioInput.setAttribute("name", name);
         radioInput.setAttribute("value", option.value);
         if (option.value === this.getAttribute("value")) {
           radioInput.setAttribute("checked", "");
@@ -6871,7 +6872,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
       const hiddenCheckbox = document.createElement("input");
-      hiddenCheckbox.name = name2;
+      hiddenCheckbox.name = name;
       hiddenCheckbox.type = "hidden";
       hiddenCheckbox.checked = true;
       hiddenCheckbox.value = "bool:False";
@@ -7191,7 +7192,7 @@ var WcSelect = class extends WcBaseFormComponent {
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";
-    const name2 = this.getAttribute("name");
+    const name = this.getAttribute("name");
     const options = this.querySelectorAll("option");
     if (this.hasAttribute("lbl-label")) {
       const lbl = document.createElement("label");
@@ -7199,13 +7200,13 @@ var WcSelect = class extends WcBaseFormComponent {
       if (this.getAttribute("mode") === "chip") {
         lbl.setAttribute("for", "dropdownInput");
       } else {
-        lbl.setAttribute("for", name2);
+        lbl.setAttribute("for", name);
       }
       this.componentElement.appendChild(lbl);
     }
     const select = document.createElement("select");
-    select.id = name2;
-    select.name = name2;
+    select.id = name;
+    select.name = name;
     if (this.getAttribute("multiple")) {
       select.multiple = true;
       select.setAttribute("multiple", "");
@@ -7215,7 +7216,7 @@ var WcSelect = class extends WcBaseFormComponent {
     });
     this.formElement = select;
     if (this.getAttribute("mode") === "chip") {
-      select.name = name2;
+      select.name = name;
       const hostContainer = document.createElement("div");
       hostContainer.classList.add("row");
       const container2 = document.createElement("div");
@@ -7576,11 +7577,11 @@ var WcTextarea = class extends WcBaseFormComponent {
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";
-    const name2 = this.getAttribute("name");
+    const name = this.getAttribute("name");
     if (labelText) {
       const lblEl = document.createElement("label");
       lblEl.textContent = labelText;
-      lblEl.setAttribute("for", name2);
+      lblEl.setAttribute("for", name);
       this.componentElement.appendChild(lblEl);
     }
     this.formElement = document.createElement("textarea");
@@ -7598,6 +7599,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
+  enableSortable,
   fetchApi,
   generateUniqueId,
   hide,

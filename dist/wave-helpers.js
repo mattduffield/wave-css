@@ -21,6 +21,7 @@ var WaveHelpers = (() => {
   var helper_function_exports = {};
   __export(helper_function_exports, {
     checkResources: () => checkResources,
+    enableSortable: () => enableSortable,
     fetchApi: () => fetchApi,
     generateUniqueId: () => generateUniqueId,
     hide: () => hide,
@@ -267,6 +268,27 @@ var WaveHelpers = (() => {
     } catch (ex) {
       if (errorCallback) {
         errorCallback(ex);
+      }
+    }
+  }
+  function enableSortable(target) {
+    if (target) {
+      let options = {
+        animation: 150,
+        onEnd: function(evt) {
+          console.log({
+            "event": "onEnd",
+            "this": this,
+            "item": evt.item,
+            "from": evt.from,
+            "to": evt.to,
+            "oldIndex": evt.oldIndex,
+            "newIndex": evt.newIndex
+          });
+        }
+      };
+      if (typeof Sortable !== "undefined") {
+        new Sortable(target, options);
       }
     }
   }

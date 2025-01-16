@@ -319,6 +319,7 @@ export async function waitForThenHideAndShow(hideSelector, showSelector, timeout
   await sleep(delay);
   hideAndShow(hideSelector, showSelector);
 }
+
 export function fetchApi(url, succesCallback, errorCallback) {
   try {
     fetch(url, {
@@ -333,6 +334,28 @@ export function fetchApi(url, succesCallback, errorCallback) {
   } catch(ex) {
     if (errorCallback) {
       errorCallback(ex);
+    }
+  }
+}
+
+export function enableSortable(target) {
+  if (target) {
+    let options = {
+      animation: 150,
+      onEnd: function (evt) {
+        console.log({
+          'event': 'onEnd',
+          'this': this,
+          'item': evt.item,
+          'from': evt.from,
+          'to': evt.to,
+          'oldIndex': evt.oldIndex,
+          'newIndex': evt.newIndex
+        });
+      }
+    };
+    if (typeof Sortable !== 'undefined') {
+      new Sortable(target, options);
     }
   }
 }
