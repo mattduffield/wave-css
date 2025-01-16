@@ -79,6 +79,12 @@ class WcForm extends WcBaseComponent {
 
       this._moveDeclarativeInner();
       this._wireEvents();
+      const insideIframe = this.componentElement.closest('iframe');
+      if (insideIframe) {
+        const els = this.componentElement.querySelectorAll('[class^="wc-"]');
+        console.log('Making components draggable...', els);
+        els.forEach(elt => elt.setAttribute('draggable', 'true'));  
+      }
     }
 
     if (typeof htmx !== 'undefined') {
@@ -107,17 +113,6 @@ class WcForm extends WcBaseComponent {
     disabledInputs.forEach(elt => elt.setAttribute('disabled', ''));
   }
 
-  _handleLoad(event) {
-    event.preventDefault();
-    const {target} = event;
-    const insideIframe = this.componentElement.closest('iframe');
-    if (insideIframe) {
-      const els = this.componentElement.querySelectorAll('[class^="wc-"]');
-      console.log('Making components draggable...', els);
-      els.forEach(elt => elt.setAttribute('draggable', 'true'));  
-    }
-  }
-
   _applyStyle() {
     const style = `
       .wc-form {
@@ -130,7 +125,6 @@ class WcForm extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
     this.componentElement.addEventListener("submit", this._handleSubmit.bind(this));
-    this.componentElement.addEventListener("load", this._handleLoad.bind(this));
   }
 
   _unWireEvents() {
