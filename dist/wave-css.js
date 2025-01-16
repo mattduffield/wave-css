@@ -4829,6 +4829,8 @@ if (!customElements.get("wc-tabulator")) {
     color: var(--color);
     background-color: var(--bg-color);
   }
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
     background: var(--color);
