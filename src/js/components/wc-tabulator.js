@@ -235,7 +235,7 @@ if (!customElements.get('wc-tabulator')) {
       const rowContextMenu = this.getAttribute('row-context-menu');
       const placeholder = this.getAttribute('placeholder');
       const selectableRows = this.getAttribute('selectable-rows');
-      const colFieldFormatter = this.getAttribute('col-field-formatter');
+      const colFieldFormatter = this.getAttribute('col-field-formatter') || '{}';
       const groupBy = this.getAttribute('group-by');
 
       // Process any column field formatters.
@@ -415,7 +415,7 @@ if (!customElements.get('wc-tabulator')) {
           column.formatter = formatter;
         } else {
           // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
-          if (field && this.colFieldFormatter.cols.includes(field)) {
+          if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatter = this.colFieldFormatter.formatter;                        
           }
         }
@@ -427,7 +427,7 @@ if (!customElements.get('wc-tabulator')) {
           }
         } else {
           // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
-          if (field && this.colFieldFormatter.cols.includes(field)) {
+          if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatterParams = this.colFieldFormatter.params;
           }
         }
@@ -723,6 +723,8 @@ if (!customElements.get('wc-tabulator')) {
   .wc-tabulator.tabulator {
     background-color: var(--component-bg-color);
     border: 1px solid var(--component-border-color);
+  }
+  .wc-tabulator.tabulator.rounded {
     border-radius: 10px;
   }
 

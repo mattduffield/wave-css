@@ -4381,7 +4381,7 @@ if (!customElements.get("wc-tabulator")) {
       const rowContextMenu = this.getAttribute("row-context-menu");
       const placeholder = this.getAttribute("placeholder");
       const selectableRows = this.getAttribute("selectable-rows");
-      const colFieldFormatter = this.getAttribute("col-field-formatter");
+      const colFieldFormatter = this.getAttribute("col-field-formatter") || "{}";
       const groupBy = this.getAttribute("group-by");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
@@ -4550,7 +4550,7 @@ if (!customElements.get("wc-tabulator")) {
         if (formatter) {
           column.formatter = formatter;
         } else {
-          if (field && this.colFieldFormatter.cols.includes(field)) {
+          if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatter = this.colFieldFormatter.formatter;
           }
         }
@@ -4561,7 +4561,7 @@ if (!customElements.get("wc-tabulator")) {
             column.formatterParams = fp;
           }
         } else {
-          if (field && this.colFieldFormatter.cols.includes(field)) {
+          if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatterParams = this.colFieldFormatter.params;
           }
         }
@@ -4791,6 +4791,8 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator {
     background-color: var(--component-bg-color);
     border: 1px solid var(--component-border-color);
+  }
+  .wc-tabulator.tabulator.rounded {
     border-radius: 10px;
   }
 
