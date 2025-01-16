@@ -4684,6 +4684,7 @@ if (!customElements.get("wc-tabulator")) {
       icon.classList.add("h-4");
       icon.classList.add("w-4");
       icon.classList.add("align-text-top");
+      icon.classList.add("pointer-events-none");
       icon.setAttribute("viewBox", this.icons.square.viewport);
       let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute(
