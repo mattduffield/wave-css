@@ -83,3 +83,8 @@ python3 -m http.server 3015
 | Primary color    | #ffffff |
 | BG color         | #0d47a1 |
 | Color            | #91c5ff |
+
+
+## References
+https://fabricweb.z5.web.core.windows.net/pr-deploy-site/refs/heads/master/theming-designer/
+https://m2.material.io/design/color/the-color-system.html#color-theme-creation

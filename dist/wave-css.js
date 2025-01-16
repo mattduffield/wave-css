@@ -7313,7 +7313,7 @@ var WcSelect = class extends WcBaseFormComponent {
         left: 0; 
         right: 0; 
         background: var(--secondary-bg-color); 
-        color: var(--secondary-color);
+        color: var(--primary-color);
         border: 1px solid var(--accent-bg-color); 
         max-height: 150px;
         margin-left 0.5rem;
