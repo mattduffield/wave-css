@@ -79,11 +79,25 @@ class WcForm extends WcBaseComponent {
 
       this._moveDeclarativeInner();
       this._wireEvents();
-      const insideIframe = this.componentElement.closest('iframe');
+      const insideIframe = this.componentElement.closest('iframe.preview');
       if (insideIframe) {
-        const els = this.componentElement.querySelectorAll('[class^="wc-"]');
-        console.log('Making components draggable...', els);
-        els.forEach(elt => elt.setAttribute('draggable', 'true'));  
+        let options = {
+          animation: 150,
+          onEnd: function (evt) {
+            console.log({
+              'event': name,
+              'this': this,
+              'item': evt.item,
+              'from': evt.from,
+              'to': evt.to,
+              'oldIndex': evt.oldIndex,
+              'newIndex': evt.newIndex
+            });
+          }
+        };
+        if (typeof Sortable !== 'undefined') {
+          new Sortable(this.componentElement, options);
+        }
       }
     }
 
