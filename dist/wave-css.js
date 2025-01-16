@@ -6589,6 +6589,15 @@ var WcForm = class extends WcBaseComponent {
     disabledInputs.forEach((elt) => elt.disabled = true);
     disabledInputs.forEach((elt) => elt.setAttribute("disabled", ""));
   }
+  _handleLoad(event) {
+    event.preventDefault();
+    const { target } = event;
+    const insideIframe = this.componentElement.closest("iframe");
+    if (insideIframe) {
+      const els = document.querySelectorAll('[class^="wc-"]');
+      els.forEach((elt) => elt.setAttribute("draggable", "true"));
+    }
+  }
   _applyStyle() {
     const style = `
       .wc-form {
@@ -6600,6 +6609,7 @@ var WcForm = class extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
     this.componentElement.addEventListener("submit", this._handleSubmit.bind(this));
+    this.componentElement.addEventListener("load", this._handleLoad.bind(this));
   }
   _unWireEvents() {
     super._unWireEvents();

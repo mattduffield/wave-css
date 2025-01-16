@@ -99,12 +99,23 @@ class WcForm extends WcBaseComponent {
     const {target} = event;
     const disabledInputs = this.componentElement.querySelectorAll("[disabled]");
     disabledInputs.forEach(elt => elt.disabled = false);
-    disabledInputs.forEach(elt => elt.removeAttribute('disabled'));      
+    disabledInputs.forEach(elt => elt.removeAttribute('disabled'));
 
     target.submit();
 
     disabledInputs.forEach(elt => elt.disabled = true);
-    disabledInputs.forEach(elt => elt.setAttribute('disabled', ''));    
+    disabledInputs.forEach(elt => elt.setAttribute('disabled', ''));
+  }
+
+  _handleLoad(event) {
+    event.preventDefault();
+    const {target} = event;
+    const insideIframe = this.componentElement.closest('iframe');
+    if (insideIframe) {
+      const els = document.querySelectorAll('[class^="wc-"]');
+      els.forEach(elt => elt.setAttribute('draggable', 'true'));  
+
+    }
   }
 
   _applyStyle() {
@@ -119,6 +130,7 @@ class WcForm extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
     this.componentElement.addEventListener("submit", this._handleSubmit.bind(this));
+    this.componentElement.addEventListener("load", this._handleLoad.bind(this));
   }
 
   _unWireEvents() {
