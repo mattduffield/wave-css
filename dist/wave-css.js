@@ -1740,11 +1740,11 @@ var WcDropdown = class extends WcBaseComponent {
       svg.setAttribute("stroke-width", "1.5");
       svg.setAttribute("stroke", "currentColor");
       svg.classList.add("h-4", "w-4", "component");
-      const path2 = document.createElementNS(svgNS, "path");
-      path2.setAttribute("stroke-linecap", "round");
-      path2.setAttribute("stroke-linejoin", "round");
-      path2.setAttribute("d", "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z");
-      svg.appendChild(path2);
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("stroke-linejoin", "round");
+      path.setAttribute("d", "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z");
+      svg.appendChild(path);
       dropdownContent.appendChild(svg);
       ipt.addEventListener("input", this._handleInput.bind(this));
     }
@@ -2445,7 +2445,7 @@ var WcMenu = class extends WcBaseComponent {
     Array.from(options).forEach((option) => option.remove());
   }
   _createAnchor(viewName, viewLabel, selected) {
-    const path2 = this.getAttribute("path") || "/static/views/";
+    const path = this.getAttribute("path") || "/static/views/";
     const el = document.createElement("a");
     el.classList.add("menu-link");
     if (selected) {
@@ -2453,12 +2453,12 @@ var WcMenu = class extends WcBaseComponent {
     }
     el.dataset.name = viewName;
     el.textContent = viewLabel;
-    el.setAttribute("href", `${path2}${viewName}.html`);
-    el.setAttribute("hx-get", `${path2}${viewName}.html`);
+    el.setAttribute("href", `${path}${viewName}.html`);
+    el.setAttribute("hx-get", `${path}${viewName}.html`);
     el.setAttribute("hx-trigger", "click");
     el.setAttribute("hx-target", "#viewport");
     el.setAttribute("hx-swap", "innerHTML transition:true");
-    el.setAttribute("hx-push-url", `${path2}${viewName}.html`);
+    el.setAttribute("hx-push-url", `${path}${viewName}.html`);
     el.setAttribute("hx-select", "#page-contents");
     el.addEventListener("click", this._handleClick.bind(this));
     return el;
@@ -2482,8 +2482,8 @@ var WcMenu = class extends WcBaseComponent {
     }
   }
   _getCurrentRoute() {
-    const path2 = window.location.pathname;
-    const page = path2.split("/").pop();
+    const path = window.location.pathname;
+    const page = path.split("/").pop();
     const pageWithoutExtension = page.split(".").shift();
     return pageWithoutExtension;
   }
@@ -4661,13 +4661,16 @@ if (!customElements.get("wc-tabulator")) {
         label.appendChild(title);
         menu.push({
           label,
-          action: function(e) {
+          action: (e) => {
+            const { target } = e;
             e.stopPropagation();
             column.toggle();
+            const path = target.querySelector("path");
             path.setAttribute(
               "d",
               column.isVisible() ? this.icons.squareCheck.d : this.icons.square.d
             );
+            this.table.redraw();
           }
         });
       }
@@ -4682,12 +4685,12 @@ if (!customElements.get("wc-tabulator")) {
       icon.classList.add("w-4");
       icon.classList.add("align-text-top");
       icon.setAttribute("viewBox", this.icons.square.viewport);
-      let path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path2.setAttribute(
+      let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute(
         "d",
         column.isVisible() ? this.icons.squareCheck.d : this.icons.square.d
       );
-      icon.appendChild(path2);
+      icon.appendChild(path);
       return icon;
     }
     createMenuLabel(titleContent, icn) {
@@ -4699,9 +4702,9 @@ if (!customElements.get("wc-tabulator")) {
       icon.classList.add("w-4");
       icon.classList.add("align-text-top");
       icon.setAttribute("viewBox", icn.viewport);
-      let path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path2.setAttribute("d", icn.d);
-      icon.appendChild(path2);
+      let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", icn.d);
+      icon.appendChild(path);
       let label = document.createElement("span");
       let title = document.createElement("span");
       title.textContent = " " + titleContent;

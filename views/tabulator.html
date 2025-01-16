@@ -19,7 +19,6 @@
       header-visible="true"
       selectable-rows="true"
       xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
-      group-by="gender"
       layout="fitColumns">
       <wc-tabulator-func name="onDelete"
           value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />

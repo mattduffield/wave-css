@@ -544,18 +544,21 @@ if (!customElements.get('wc-tabulator')) {
         //create menu item
         menu.push({
           label:label,
-          action: function(e) {
+          action: (e) => {
+            const {target} = e;
             //prevent menu closing
             e.stopPropagation();
             //toggle current column visibility
             column.toggle();
             // Update menu item icon
+            const path = target.querySelector("path");
             path.setAttribute(
               "d",
               column.isVisible()
                 ? this.icons.squareCheck.d
                 : this.icons.square.d
             );
+            this.table.redraw();
           }
         });
       }
