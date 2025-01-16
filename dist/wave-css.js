@@ -6594,7 +6594,8 @@ var WcForm = class extends WcBaseComponent {
     const { target } = event;
     const insideIframe = this.componentElement.closest("iframe");
     if (insideIframe) {
-      const els = document.querySelectorAll('[class^="wc-"]');
+      const els = this.componentElement.querySelectorAll('[class^="wc-"]');
+      console.log("Making components draggable...", els);
       els.forEach((elt) => elt.setAttribute("draggable", "true"));
     }
   }
