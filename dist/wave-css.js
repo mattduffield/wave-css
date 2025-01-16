@@ -6567,7 +6567,7 @@ var WcForm = class extends WcBaseComponent {
       });
       this._moveDeclarativeInner();
       this._wireEvents();
-      const insideIframe = this.componentElement.closest("iframe.preview");
+      const insideIframe = this.componentElement.closest("iframe");
       if (insideIframe) {
         let options = {
           animation: 150,
