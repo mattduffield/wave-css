@@ -4454,6 +4454,11 @@ if (!customElements.get("wc-tabulator")) {
           htmx.process(this);
         }
       });
+      this.table.on("rowClick", (e, row) => {
+        var data = row.getData();
+        const custom = { e, row, rowData: data };
+        wc.EventHub.broadcast("wc-tabulator:row-click", "", "", custom);
+      });
     }
     getFuncs() {
       const funcElements = this.querySelectorAll("wc-tabulator-func");
@@ -6071,10 +6076,10 @@ if (!customElements.get("wc-event-hub")) {
     }
     disconnectedCallback() {
     }
-    broadcast(eventName, selector, subSelector) {
-      const payload = { detail: { selector, subSelector } };
-      const custom = new CustomEvent(eventName, payload);
-      document.body.dispatchEvent(custom);
+    broadcast(eventName, selector, subSelector, custom) {
+      const payload = { detail: { selector, subSelector, custom } };
+      const customEvent = new CustomEvent(eventName, payload);
+      document.body.dispatchEvent(customEvent);
     }
     _applyStyle() {
       const style = `

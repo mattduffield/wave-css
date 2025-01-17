@@ -313,6 +313,13 @@ if (!customElements.get('wc-tabulator')) {
           htmx.process(this);
         }
       });
+      this.table.on("rowClick", (e, row) => {
+        //e - the click event object
+        //row - row component
+        var data = row.getData();
+        const custom = { e: e, row: row, rowData: data };
+        wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
+    });
     }
 
     getFuncs() {

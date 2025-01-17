@@ -1,6 +1,9 @@
 <div id="page-contents" class="col p-4 gap-4">
 
-  <div class="row gap-4">
+  <div class="row gap-4"
+    _="on 'wc-tabulator:row-click' from body
+      log event
+    end">
     <wc-tabulator
       class="rounded w-full"
       id="email-table"
@@ -19,7 +22,9 @@
       header-visible="true"
       selectable-rows="true"
       xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
-      layout="fitColumns">
+      layout="fitColumns"
+      group-by="description"
+      >
       <wc-tabulator-func name="onDelete"
           value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />
       <wc-tabulator-func name="onClone"
