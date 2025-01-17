@@ -7,10 +7,10 @@
       xpersistence="true"
       ajax-url="http://localhost:8080/api/email_notification"
       placeholder="No Data Available"
-      movable-columns="true"
-      movable-rows="true"
+      xmovable-columns="true"
+      xmovable-rows="true"
       xrow-header='{"formatter":"rowSelection", "titleFormatter": "rowSelection", "headerSort":false, "resizable":false, "frozen":true, "headerHozAlign":"center", "hozAlign":"center"}'
-      row-header='{"headerSort":false, "resizable": false, "minWidth":30, "width":30, "rowHandle":true, "formatter":"handle"}'
+      xrow-header='{"headerSort":false, "resizable": false, "minWidth":30, "width":30, "rowHandle":true, "formatter":"handle"}'
       row-context-menu="rowContextMenu"
       row-height="40"
       pagination
@@ -38,7 +38,16 @@
         
       <wc-tabulator-column
         title="#"
-        formatter="rownum"
+        xformatter="rownum"
+        xxformatter="pageRowNum"
+        formatter="function(cell) {
+                       var table = cell.getTable();
+                       var row = cell.getRow();
+                       var page = table.getPage() || 1;
+                       var pageSize = table.getPageSize();
+                       var index = row.getPosition(true);
+                       return (page - 1) * pageSize + index;
+                     }"
         hoz-align="center"
         width=40
         header-sort="false"

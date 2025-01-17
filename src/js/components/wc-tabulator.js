@@ -412,7 +412,7 @@ if (!customElements.get('wc-tabulator')) {
         if (titleFormatter) column.titleFormatter = titleFormatter;
 
         if (formatter) {
-          column.formatter = formatter;
+          column.formatter = this.resolveCellFormatter(formatter);
         } else {
           // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
           if (field && this.colFieldFormatter?.cols?.includes(field)) {
@@ -478,6 +478,37 @@ if (!customElements.get('wc-tabulator')) {
         } else {
           console.warn(`Formatter "${formatter}" not found.`);
           return null;
+        }
+      } catch (error) {
+        console.error(`Error resolving formatter: ${error.message}`);
+        return null;
+      }
+    }
+
+    pageRowNum = function(cell, formatterParams, onRendered) {
+      var row = cell.getRow();
+      var table = cell.getTable(); // Get reference to the table
+      var page = table.getPage() || 1; // Get current page (defaults to 1)
+      var pageSize = table.getPageSize(); // Get pagination size
+      var index = row.getPosition(true); // Get index position in the data set
+      return (page - 1) * pageSize + index; // Compute correct row number
+    }
+
+    resolveCellFormatter(formatter) {
+      try {
+        // Check if formatter is an inline function or a global function name
+        if (formatter) {
+          if (formatter.startsWith('function')) {
+            const val = new Function('cell', `return (${formatter})(cell);`);
+            return val;
+            // return new Function(`return (${formatter})`)(cell, formatterParams, onRendered); // Inline function
+          } else if (this[formatter]) {
+            return this[formatter]; // Class function
+          } else if (window[formatter]) {
+            return window[formatter]; // Global function
+          } else {
+            return formatter;
+          }
         }
       } catch (error) {
         console.error(`Error resolving formatter: ${error.message}`);

@@ -4548,7 +4548,7 @@ if (!customElements.get("wc-tabulator")) {
         }
         if (titleFormatter) column.titleFormatter = titleFormatter;
         if (formatter) {
-          column.formatter = formatter;
+          column.formatter = this.resolveCellFormatter(formatter);
         } else {
           if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatter = this.colFieldFormatter.formatter;
@@ -4607,6 +4607,33 @@ if (!customElements.get("wc-tabulator")) {
         } else {
           console.warn(`Formatter "${formatter}" not found.`);
           return null;
+        }
+      } catch (error) {
+        console.error(`Error resolving formatter: ${error.message}`);
+        return null;
+      }
+    }
+    pageRowNum = function(cell, formatterParams, onRendered) {
+      var row = cell.getRow();
+      var table = cell.getTable();
+      var page = table.getPage() || 1;
+      var pageSize = table.getPageSize();
+      var index = row.getPosition(true);
+      return (page - 1) * pageSize + index;
+    };
+    resolveCellFormatter(formatter) {
+      try {
+        if (formatter) {
+          if (formatter.startsWith("function")) {
+            const val = new Function("cell", `return (${formatter})(cell);`);
+            return val;
+          } else if (this[formatter]) {
+            return this[formatter];
+          } else if (window[formatter]) {
+            return window[formatter];
+          } else {
+            return formatter;
+          }
         }
       } catch (error) {
         console.error(`Error resolving formatter: ${error.message}`);
