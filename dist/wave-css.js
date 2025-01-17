@@ -4457,7 +4457,8 @@ if (!customElements.get("wc-tabulator")) {
       this.table.on("rowClick", (e, row) => {
         var rowData = row.getData();
         var rowIndex = row.getIndex();
-        const custom = { e, row, rowData, rowIndex };
+        var rowPosition = row.getPosition();
+        const custom = { e, row, rowData, rowIndex, rowPosition };
         wc.EventHub.broadcast("wc-tabulator:row-click", "", "", custom);
       });
     }
