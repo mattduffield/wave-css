@@ -4366,6 +4366,8 @@ if (!customElements.get("wc-tabulator")) {
       console.log("_render:wc-tabulator");
     }
     async _createInnerElement() {
+      const pagination = this.hasAttribute("pagination");
+      const paginationSize = this.getAttribute("pagination-size");
       const paginationCounter = this.getAttribute("pagination-counter");
       const movableColumns = this.getAttribute("movable-columns");
       const resizableColumns = this.getAttribute("resizable-columns");
@@ -4394,18 +4396,24 @@ if (!customElements.get("wc-tabulator")) {
       const options = {
         columns: this.getColumnsConfig(),
         layout: this.getAttribute("layout") || "fitData",
-        pagination: this.hasAttribute("pagination"),
-        paginationMode: "remote",
         filterMode: "remote",
         sortMode: "remote",
         ajaxURL: this.getAttribute("ajax-url") || "",
         // URL for server-side loading
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
         ajaxConfig: this.getAjaxConfig(),
-        ajaxResponse: this.handleAjaxResponse.bind(this),
+        ajaxResponse: this.handleAjaxResponse.bind(this)
         // Optional custom handling of server response
-        paginationSize: parseInt(this.getAttribute("pagination-size")) || 10
       };
+      if (pagination) options.pagination = pagination;
+      if (options.pagination) {
+        options.paginationMode = "remote";
+        if (paginationSize) {
+          options.paginationSize = parseInt(paginationSize) || 10;
+        } else {
+          options.paginationSize = 10;
+        }
+      }
       if (paginationCounter) options.paginationCounter = paginationCounter;
       if (movableColumns) options.movableColumns = movableColumns.toLowerCase() == "true" ? true : false;
       if (resizableColumns) options.resizableColumns = resizableColumns.toLowerCase() == "true" ? true : false;
@@ -4806,8 +4814,15 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (ajaxParamsParts.length === 0) {
         const { page, size } = params;
-        ajaxParamsParts.push(`page=${page}`);
-        ajaxParamsParts.push(`size=${size}`);
+        if (page && size) {
+          ajaxParamsParts.push(`page=${page}`);
+          ajaxParamsParts.push(`size=${size}`);
+        } else {
+          const recordSize = this.getAttribute("record-size");
+          if (recordSize) {
+            ajaxParamsParts.push(`size=${recordSize}`);
+          }
+        }
       }
       const ajaxParams = JSON.parse(this.getAttribute("ajax-params") || "{}");
       for (const [key, value] of Object.entries(ajaxParams)) {
@@ -4826,13 +4841,17 @@ if (!customElements.get("wc-tabulator")) {
     }
     handleAjaxResponse(url, params, response) {
       const { results } = response;
-      const { data, last_page } = response;
-      if (data == null && last_page === 0) {
-        return { last_page: 0, data: [] };
-      } else if (data && last_page) {
-        return { last_page, data };
+      if (this.hasAttribute("pagination")) {
+        const { data, last_page } = response;
+        if (data == null && last_page === 0) {
+          return { last_page: 0, data: [] };
+        } else if (data && last_page) {
+          return { last_page, data };
+        } else {
+          return { last_page: 10, data: results };
+        }
       } else {
-        return { last_page: 10, data: results };
+        return results;
       }
     }
     _applyStyle() {
