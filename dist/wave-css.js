@@ -4455,8 +4455,9 @@ if (!customElements.get("wc-tabulator")) {
         }
       });
       this.table.on("rowClick", (e, row) => {
-        var data = row.getData();
-        const custom = { e, row, rowData: data };
+        var rowData = row.getData();
+        var rowIndex = row.getIndex();
+        const custom = { e, row, rowData, rowIndex };
         wc.EventHub.broadcast("wc-tabulator:row-click", "", "", custom);
       });
     }

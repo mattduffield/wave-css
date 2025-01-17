@@ -316,8 +316,9 @@ if (!customElements.get('wc-tabulator')) {
       this.table.on("rowClick", (e, row) => {
         //e - the click event object
         //row - row component
-        var data = row.getData();
-        const custom = { e: e, row: row, rowData: data };
+        var rowData = row.getData();
+        var rowIndex = row.getIndex();
+        const custom = { e, row, rowData, rowIndex };
         wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
     });
     }
