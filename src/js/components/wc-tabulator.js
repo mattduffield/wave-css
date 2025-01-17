@@ -533,8 +533,11 @@ if (!customElements.get('wc-tabulator')) {
       for (let column of columns) {
         let icon = this.createHeaderMenuIcon(column, this.icons.square, this.icons.squareCheck);
         let label = document.createElement("span");
-        let title = document.createElement("span");
+        label.classList.add("flex");
+        label.classList.add("flex-row");
+        label.classList.add("gap-2");
 
+        let title = document.createElement("span");
         title.textContent = " " + column.getDefinition().title;
         title.textContent = title.textContent.replace("null", "").replace("undefined", "");
         title.classList.add("pointer-events-none");
@@ -559,6 +562,7 @@ if (!customElements.get('wc-tabulator')) {
                 ? this.icons.squareCheck.d
                 : this.icons.square.d
             );
+            path.classList.add("pointer-events-none");
             this.table.redraw();
           }
         });
@@ -585,6 +589,7 @@ if (!customElements.get('wc-tabulator')) {
           ? this.icons.squareCheck.d
           : this.icons.square.d
       );
+      path.classList.add("pointer-events-none");
       icon.appendChild(path);
       return icon;    
     }
@@ -598,13 +603,19 @@ if (!customElements.get('wc-tabulator')) {
       icon.classList.add("h-4");
       icon.classList.add("w-4");
       icon.classList.add("align-text-top");
+      icon.classList.add("pointer-events-none");
       icon.setAttribute("viewBox", icn.viewport);
       let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", icn.d);
+      path.classList.add("pointer-events-none");
       icon.appendChild(path);
       let label = document.createElement("span");
+      label.classList.add("flex");
+      label.classList.add("flex-row");
+      label.classList.add("gap-2");
       let title = document.createElement("span");
       title.textContent = " " + titleContent;
+      title.classList.add("pointer-events-none");
       label.appendChild(icon);
       label.appendChild(title);
       return label;
