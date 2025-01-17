@@ -99,7 +99,7 @@ export class WcBaseFormComponent extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
     this.formElement = this.querySelector('input, select, textarea'); // Define form element
-    console.log('wc-base-form-component:connectedCallback - formElement', this.formElement);
+    // console.log('wc-base-form-component:connectedCallback - formElement', this.formElement);
     this._wireEvents();
   }
 
