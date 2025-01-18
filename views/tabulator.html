@@ -24,8 +24,9 @@
       header-visible="true"
       selectable-rows="true"
       xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
-      layout="fitColumns"
+      xlayout="fitColumns"
       xgroup-by="description"
+      xresponsive-layout="collapse"
       >
       <wc-tabulator-func name="onDelete"
           value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />
@@ -59,6 +60,7 @@
         width=40
         header-sort="false"
         header-menu="headerMenu"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="policy"
@@ -66,6 +68,7 @@
         header-filter="input"
         header-filter-func="starts"
         header-menu="headerMenu"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="named_insured"
@@ -73,6 +76,7 @@
         header-filter="input"
         header-filter-func="like"
         header-menu="headerMenu"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="description"
@@ -80,27 +84,42 @@
         header-filter="list"
         header-filter-params='{"valuesLookup":true, "clearable":true}'
         header-menu="headerMenu"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="policy_type"
         title="Policy Type"
         header-filter="input"
         header-menu="headerMenu"
-        visible="false"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="email"
         title="Email"
         header-filter="input"
         header-menu="headerMenu"
-        visible="false"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="phone"
         title="Phone"
         header-filter="input"
         header-menu="headerMenu"
-        visible="false"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="proof_required_by"
+        title="Required By"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="email_sent_date"
+        title="Email Sent"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="is_active"
@@ -109,7 +128,7 @@
         header-filter="tickCross"
         header-filter-params='{"tristate":true}'
         header-menu="headerMenu"
-        visible="false"
+        visible="true"
         ></wc-tabulator-column>
     </wc-tabulator>
   </div>

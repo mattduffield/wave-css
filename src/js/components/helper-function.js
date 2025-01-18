@@ -343,15 +343,25 @@ export function enableSortable(target) {
     let options = {
       animation: 150,
       onEnd: function (evt) {
-        console.log({
-          'event': 'onEnd',
-          'this': this,
-          'item': evt.item,
-          'from': evt.from,
-          'to': evt.to,
-          'oldIndex': evt.oldIndex,
-          'newIndex': evt.newIndex
-        });
+        // console.log({
+        //   'event': 'onEnd',
+        //   'this': this,
+        //   'item': evt.item,
+        //   'from': evt.from,
+        //   'to': evt.to,
+        //   'oldIndex': evt.oldIndex,
+        //   'newIndex': evt.newIndex
+        // });
+        const custom = {
+          e: evt,
+          event: 'onEnd',
+          item: evt.item,
+          from: evt.from,
+          to: evt.to,
+          oldIndex: evt.oldIndex,
+          newIndex: evt.newIndex
+        };
+        wc?.EventHub?.broadcast('sortable:on-end', '', '', custom);
       }
     };
     if (typeof Sortable !== 'undefined') {

@@ -234,15 +234,16 @@ function enableSortable(target) {
     let options = {
       animation: 150,
       onEnd: function(evt) {
-        console.log({
-          "event": "onEnd",
-          "this": this,
-          "item": evt.item,
-          "from": evt.from,
-          "to": evt.to,
-          "oldIndex": evt.oldIndex,
-          "newIndex": evt.newIndex
-        });
+        const custom = {
+          e: evt,
+          event: "onEnd",
+          item: evt.item,
+          from: evt.from,
+          to: evt.to,
+          oldIndex: evt.oldIndex,
+          newIndex: evt.newIndex
+        };
+        wc?.EventHub?.broadcast("sortable:on-end", "", "", custom);
       }
     };
     if (typeof Sortable !== "undefined") {
@@ -4487,6 +4488,8 @@ if (!customElements.get("wc-tabulator")) {
         const field = col.getAttribute("field");
         const title = col.getAttribute("title") || field;
         const width = col.getAttribute("width");
+        const widthGrow = col.getAttribute("width-grow");
+        const widthShrink = col.getAttribute("width-shrink");
         const minWidth = col.getAttribute("min-width");
         const maxWidth = col.getAttribute("max-width");
         const maxInitialWidth = col.getAttribute("max-initial-width");
@@ -4526,6 +4529,8 @@ if (!customElements.get("wc-tabulator")) {
         const topCalcParams = col.getAttribute("top-calc-params");
         const column = { field, title };
         if (width) column.width = width;
+        if (widthGrow) column.widthGrow = parseInt(widthGrow);
+        if (widthShrink) column.widthShrink = parseInt(widthShrink);
         if (minWidth) column.minWidth = minWidth;
         if (maxWidth) column.maxWidth = maxWidth;
         if (maxInitialWidth) column.maxInitialWidth = maxInitialWidth;
