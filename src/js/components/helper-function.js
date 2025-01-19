@@ -342,6 +342,7 @@ export function enableSortable(target) {
   if (target) {
     let options = {
       animation: 150,
+      handle: 'preview-draggable',
       onEnd: function (evt) {
         // console.log({
         //   'event': 'onEnd',
