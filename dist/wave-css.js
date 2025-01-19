@@ -233,7 +233,7 @@ function enableSortable(target) {
   if (target) {
     let options = {
       animation: 150,
-      handle: "preview-draggable",
+      draggable: "preview-draggable",
       onEnd: function(evt) {
         const custom = {
           e: evt,
