@@ -4666,9 +4666,16 @@ if (!customElements.get("wc-tabulator")) {
     urlFormatter(cell, formatterParams, onRendered) {
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
       const screen = cell.getColumn().getDefinition().formatterParams.screen;
+      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
-      const url = `/${routePrefix}/${screen}/${id}`;
+      let url = "";
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
       return url;
     }
     toggleSelect(e, cell) {

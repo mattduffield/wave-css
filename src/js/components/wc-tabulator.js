@@ -543,9 +543,17 @@ if (!customElements.get('wc-tabulator')) {
     urlFormatter (cell, formatterParams, onRendered) {
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
       const screen = cell.getColumn().getDefinition().formatterParams.screen;
+      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
-      const url = `/${routePrefix}/${screen}/${id}`;
+      let url = '';
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
       return url;
     }
 
