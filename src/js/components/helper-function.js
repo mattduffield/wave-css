@@ -366,8 +366,10 @@ export function enableSortable(target) {
         wc?.EventHub?.broadcast('sortable:on-end', '', '', custom);
       }
     };
-    if (typeof Sortable !== 'undefined') {
-      new Sortable(target, options);
-    }
+    setTimeout(() => {
+      if (typeof Sortable !== 'undefined') {
+        new Sortable(target, options);
+      }  
+    }, 1000);
   }
 }
