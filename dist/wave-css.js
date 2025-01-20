@@ -6430,6 +6430,7 @@ if (!customElements.get("wc-prompt")) {
         window.wc = {};
       }
       window.wc.Prompt = this;
+      wc.EventHub.broadcast("wc-prompt:ready", "", "");
     }
     banner(c) {
       const { text = "", type = "info", stay = false, time = 3, position = "top" } = c;

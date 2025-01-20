@@ -51,6 +51,7 @@ if (!customElements.get('wc-prompt')) {
         window.wc = {};
       }
       window.wc.Prompt = this;
+      wc.EventHub.broadcast('wc-prompt:ready', '', '');
     }
 
     banner(c) {
