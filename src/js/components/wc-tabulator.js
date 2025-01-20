@@ -775,7 +775,11 @@ if (!customElements.get('wc-tabulator')) {
 
       const ajaxParamsStr = ajaxParamsParts.join("&");
 
-      return url + `?${ajaxParamsStr}`;
+      if (url.includes('?')) {
+        return url + `&${ajaxParamsStr}`;
+      } else {
+        return url + `?${ajaxParamsStr}`;
+      }
 
       // return url + `?page=${page}&results=${size}&${ajaxParamsStr}`;
       // return url + "?params=" + encodeURI(JSON.stringify(params)); //encode parameters as a json object

@@ -4845,7 +4845,11 @@ if (!customElements.get("wc-tabulator")) {
         ajaxParamsParts.push(`sort=${JSON.stringify(sort)}`);
       }
       const ajaxParamsStr = ajaxParamsParts.join("&");
-      return url + `?${ajaxParamsStr}`;
+      if (url.includes("?")) {
+        return url + `&${ajaxParamsStr}`;
+      } else {
+        return url + `?${ajaxParamsStr}`;
+      }
     }
     handleAjaxResponse(url, params, response) {
       const { results } = response;
