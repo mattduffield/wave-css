@@ -7074,6 +7074,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       wc-input .radio-group {
         display: flex;
         min-height: 29.5px;
+        font-size: 0.75rem; /* 12px */
+        line-height: 1rem; /* 16px */
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.5rem;
