@@ -248,11 +248,9 @@ function enableSortable(target) {
         wc?.EventHub?.broadcast("sortable:on-end", "", "", custom);
       }
     };
-    setTimeout(() => {
-      if (typeof Sortable !== "undefined") {
-        new Sortable(target, options);
-      }
-    }, 1e3);
+    if (typeof Sortable !== "undefined") {
+      new Sortable(target, options);
+    }
   }
 }
 
