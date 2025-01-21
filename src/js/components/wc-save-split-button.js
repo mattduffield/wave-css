@@ -119,6 +119,14 @@ if (!customElements.get('wc-save-split-button')) {
           e.detail.headers['Wc-Hash'] = hash;
         }
       }, {once: true});
+      document.body.addEventListener('htmx:afterSwap', (e) => {
+        console.log('wc-save-split-button:htmx:afterSwap', e);
+        const hash = sessionStorage.getItem('hash');
+        if (hash) {
+          window.location.hash = hash;
+          sessionStorage.removeItem('hash');
+        }
+      }, {once: true});
     }
 
     _applyStyle() {

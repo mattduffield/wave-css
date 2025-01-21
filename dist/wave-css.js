@@ -2774,6 +2774,14 @@ if (!customElements.get("wc-save-split-button")) {
           e.detail.headers["Wc-Hash"] = hash;
         }
       }, { once: true });
+      document.body.addEventListener("htmx:afterSwap", (e) => {
+        console.log("wc-save-split-button:htmx:afterSwap", e);
+        const hash2 = sessionStorage.getItem("hash");
+        if (hash2) {
+          window.location.hash = hash2;
+          sessionStorage.removeItem("hash");
+        }
+      }, { once: true });
     }
     _applyStyle() {
       const style = `
