@@ -115,6 +115,7 @@ if (!customElements.get('wc-save-split-button')) {
         console.log('wc-save-split-button:htmx:configRequest', e, url);
         e.detail.headers['Wc-Save-Redirect'] = url;
         if (hash) {
+          sessionStorage.setItem('hash', hash);
           e.detail.headers['Wc-Hash'] = hash;
         }
       }, {once: true});
