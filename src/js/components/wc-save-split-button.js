@@ -112,11 +112,11 @@ if (!customElements.get('wc-save-split-button')) {
       }
       console.log('wc-save-split-button:click', event, url);
       document.body.addEventListener('htmx:configRequest', (e) => {
-        if (hash) {
-          url = url + hash;
-        }
         console.log('wc-save-split-button:htmx:configRequest', e, url);
         e.detail.headers['Wc-Save-Redirect'] = url;
+        if (hash) {
+          e.detail.headers['Wc-Hash'] = hash;
+        }
       }, {once: true});
     }
 
