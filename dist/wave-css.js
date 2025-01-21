@@ -2760,16 +2760,17 @@ if (!customElements.get("wc-save-split-button")) {
     }
     _handleClick(event) {
       const method = this.getAttribute("method") || "post";
+      const isSaveBtn = event.target.classList.contains("save-btn");
       let url = event.target.dataset.url;
       let hash = window.location.hash;
-      if (method == "post" && event.target.classList.contains("save-btn")) {
+      if (method == "post" && isSaveBtn) {
         url = url.replace("create", "__id__");
       }
       console.log("wc-save-split-button:click", event, url);
       document.body.addEventListener("htmx:configRequest", (e) => {
         console.log("wc-save-split-button:htmx:configRequest", e, url);
         e.detail.headers["Wc-Save-Redirect"] = url;
-        if (hash) {
+        if (hash && isSaveBtn) {
           sessionStorage.setItem("hash", hash);
         }
       }, { once: true });
