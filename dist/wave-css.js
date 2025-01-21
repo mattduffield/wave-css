@@ -6416,9 +6416,11 @@ if (!customElements.get("wc-prompt")) {
         await this.renderPrompt();
       }
       this._applyStyle();
+      this.wireEvents();
       console.log("conntectedCallback:wc-prompt");
     }
     disconnectedCallback() {
+      this.unWireEvents();
     }
     async renderPrompt() {
       await Promise.all([
@@ -6614,6 +6616,64 @@ if (!customElements.get("wc-prompt")) {
       }
       `;
       this.loadStyle("wc-prompt-style", style);
+    }
+    wireEvents() {
+      document.body.addEventListener("wc-prompt:banner", (event) => {
+        this.banner(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:toast", (event) => {
+        this.toast(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:success", async (event) => {
+        return this.success(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:error", async (event) => {
+        return this.error(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:warning", async (event) => {
+        return this.warning(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:info", async (event) => {
+        return this.info(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:question", async (event) => {
+        return this.question(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:notify", async (event) => {
+        return this.notify(event.detail);
+      });
+      document.body.addEventListener("wc-prompt:notify-template", async (event) => {
+        return this.notifyTemplate(event.detail);
+      });
+    }
+    unWireEvents() {
+      document.body.removeEventListener("wc-prompt:banner", (event) => {
+        this.banner(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:toast", (event) => {
+        this.toast(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:success", async (event) => {
+        return this.success(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:error", async (event) => {
+        return this.error(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:warning", async (event) => {
+        return this.warning(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:info", async (event) => {
+        return this.info(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:question", async (event) => {
+        return this.question(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:notify", async (event) => {
+        return this.notify(event.detail);
+      });
+      document.body.removeEventListener("wc-prompt:notify-template", async (event) => {
+        return this.notifyTemplate(event.detail);
+      });
     }
   }
   customElements.define("wc-prompt", WcPrompt);
