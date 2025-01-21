@@ -2761,11 +2761,15 @@ if (!customElements.get("wc-save-split-button")) {
     _handleClick(event) {
       const method = this.getAttribute("method") || "post";
       let url = event.target.dataset.url;
+      let hash = window.location.hash;
       if (method == "post" && event.target.classList.contains("save-btn")) {
         url = url.replace("create", "__id__");
       }
       console.log("wc-save-split-button:click", event, url);
       document.body.addEventListener("htmx:configRequest", (e) => {
+        if (hash) {
+          url = url + hash;
+        }
         console.log("wc-save-split-button:htmx:configRequest", e, url);
         e.detail.headers["Wc-Save-Redirect"] = url;
       }, { once: true });
@@ -2861,6 +2865,12 @@ if (!customElements.get("wc-save-split-button")) {
     }
     _unWireEvents() {
       super._unWireEvents();
+      const saveBtn = this.querySelector("button.save-btn");
+      saveBtn.removeEventListener("click", this._handleClick.bind(this));
+      const saveNewBtn = this.querySelector("button.save-new-btn");
+      saveNewBtn.removeEventListener("click", this._handleClick.bind(this));
+      const saveReturnBtn = this.querySelector("button.save-return-btn");
+      saveReturnBtn.removeEventListener("click", this._handleClick.bind(this));
     }
   }
   customElements.define("wc-save-split-button", WcSaveSplitButton);
