@@ -65,7 +65,7 @@ if (!customElements.get('wc-template-preview')) {
               <option value="off">Hide</option>
             </wc-input>
             <wc-input name="drag_toggle" 
-              class="col"
+              class="col hidden"
               lbl-label="Drag n Drop"
               type="radio"
               radio-group-class="row modern"
@@ -101,10 +101,12 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         if (target.value === 'on') {
           previewFrame.src = src;
+          dragToggle.classList.add('remove');
         } else {
           previewFrame.src = '';
+          dragToggle.classList.add('hidden');
         }
-        console.log('wc-template-preview:previewToggle change - ', event);
+        // console.log('wc-template-preview:previewToggle change - ', event);
       });
       dragToggle.addEventListener('change', (event) => {
         const {target} = event;
@@ -115,7 +117,7 @@ if (!customElements.get('wc-template-preview')) {
           previewFrame.contentDocument.body.classList.remove('preview-frame');
           wc.EventHub.broadcast('wc-template-preview:disable-drag', '', '');
         }
-        console.log('wc-template-preview:dragToggle change - ', event);
+        // console.log('wc-template-preview:dragToggle change - ', event);
       });
     }
 
