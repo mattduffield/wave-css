@@ -5133,15 +5133,15 @@ if (!customElements.get("wc-template-preview")) {
       const previewFrame = this.querySelector("iframe.preview");
       const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
       const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
+      const dragToggleDiv = this.querySelector('wc-input[name="drag_toggle"] .wc-input');
       previewToggle.addEventListener("change", (event) => {
         const { target } = event;
-        const toggle = this.querySelector('wc-input[name="drag_toggle"] .wc-input');
         if (target.value === "on") {
           previewFrame.src = src;
-          toggle.classList.remove("hidden");
+          dragToggleDiv.classList.remove("hidden");
         } else {
           previewFrame.src = "";
-          toggle.classList.add("hidden");
+          dragToggleDiv.classList.add("hidden");
         }
       });
       dragToggle.addEventListener("change", (event) => {
