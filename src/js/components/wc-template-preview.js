@@ -99,18 +99,22 @@ if (!customElements.get('wc-template-preview')) {
       }
 
       this.componentElement.innerHTML = markup;
-      const previewFrame = this.querySelector('iframe.preview');
-      const previewToggle = this.querySelector('wc[name="preview_toggle"]');
-      const dragToggle = this.querySelector('wc[name="drag_toggle"]');
 
-      previewToggle.addEventListener('change', (event) => {
-        console.log('wc-template-preview:previewToggle change - ', event);
-        previewFrame.src = src;
-        previewFrame.reload();
-      });
-      dragToggle.addEventListener('change', (event) => {
-        console.log('wc-template-preview:dragToggle change - ', event);
-      });
+      this.componentElement.addEventListener('load', (e) => {
+        const previewFrame = this.querySelector('iframe.preview');
+        const previewToggle = this.querySelector('wc[name="preview_toggle"]');
+        const dragToggle = this.querySelector('wc[name="drag_toggle"]');
+  
+        previewToggle.addEventListener('change', (event) => {
+          console.log('wc-template-preview:previewToggle change - ', event);
+          previewFrame.src = src;
+          previewFrame.reload();
+        });
+        dragToggle.addEventListener('change', (event) => {
+          console.log('wc-template-preview:dragToggle change - ', event);
+        });
+  
+      }, {once: true});
     }
 
     _handleAttributeChange(attrName, newValue) {    
