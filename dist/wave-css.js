@@ -5118,12 +5118,13 @@ if (!customElements.get("wc-template-preview")) {
             </wc-input>
         </div>
       `;
-      let src2 = "";
+      let src = "";
       if (record_id === "create" || record_id === "") {
-        src2 = `/v/${slug}/create`;
+        src = `/v/${slug}/create`;
       } else {
-        src2 = `/v/${slug}/${record_id}`;
+        src = `/v/${slug}/${record_id}`;
       }
+      this.src = src;
       const markup = `${controls}
         <iframe class="preview hidden"
                 src=""
@@ -5154,7 +5155,7 @@ if (!customElements.get("wc-template-preview")) {
         const { target } = event;
         const toggle = dragToggle.querySelector(".wc-input");
         if (target.value === "on") {
-          previewFrame.src = src;
+          previewFrame.src = this.src;
           toggle.classList.remove("hidden");
           this.componentElement.classList.add("col-1");
           previewFrame.classList.remove("hidden");
@@ -5187,7 +5188,7 @@ if (!customElements.get("wc-template-preview")) {
         const { target } = event;
         const toggle = dragToggle.querySelector(".wc-input");
         if (target.value === "on") {
-          previewFrame.src = src;
+          previewFrame.src = this.src;
           toggle.classList.remove("hidden");
           this.componentElement.classList.add("col-1");
           previewFrame.classList.remove("hidden");
@@ -6503,43 +6504,43 @@ if (!customElements.get("wc-script")) {
       super();
     }
     connectedCallback() {
-      const src2 = this.getAttribute("src");
+      const src = this.getAttribute("src");
       if (!window.wc) {
         window.wc = {};
       }
       if (!window.wc.scriptsLoaded) {
         window.wc["scriptsLoaded"] = {};
       }
-      if (src2) {
+      if (src) {
         const scriptId = `wc-script-${this.id || this.dataset.id || crypto.randomUUID()}`;
         if (!document.getElementById(scriptId)) {
           const script = document.createElement("script");
           script.type = "text/javascript";
-          script.src = src2;
+          script.src = src;
           script.id = scriptId;
           script.onload = () => {
-            console.log(`Script loaded: ${src2}`);
-            window.wc.scriptsLoaded[src2] = true;
+            console.log(`Script loaded: ${src}`);
+            window.wc.scriptsLoaded[src] = true;
             document.body.dispatchEvent(new CustomEvent("script-loaded", {
-              detail: { src: src2 },
+              detail: { src },
               bubbles: true,
               composed: true
             }));
           };
           script.onerror = () => {
-            console.error(`Failed to load script: ${src2}`);
+            console.error(`Failed to load script: ${src}`);
             document.body.dispatchEvent(new CustomEvent("script-error", {
-              detail: { src: src2 },
+              detail: { src },
               bubbles: true,
               composed: true
             }));
           };
           document.head.appendChild(script);
-          console.log(`Added script: ${src2}`);
+          console.log(`Added script: ${src}`);
         } else {
-          console.log(`Script already exists, skipping append: ${src2}`);
+          console.log(`Script already exists, skipping append: ${src}`);
           document.body.dispatchEvent(new CustomEvent("script-loaded", {
-            detail: { src: src2 },
+            detail: { src },
             bubbles: true,
             composed: true
           }));

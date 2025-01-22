@@ -84,6 +84,7 @@ if (!customElements.get('wc-template-preview')) {
       } else {
         src = `/v/${slug}/${record_id}`;
       }
+      this.src = src;
       const markup = `${controls}
         <iframe class="preview hidden"
                 src=""
@@ -119,7 +120,7 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         const toggle = dragToggle.querySelector('.wc-input');
         if (target.value === 'on') {
-          previewFrame.src = src;
+          previewFrame.src = this.src;
           toggle.classList.remove('hidden');
           this.componentElement.classList.add('col-1');
           previewFrame.classList.remove('hidden');
@@ -156,7 +157,7 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         const toggle = dragToggle.querySelector('.wc-input');
         if (target.value === 'on') {
-          previewFrame.src = src;
+          previewFrame.src = this.src;
           toggle.classList.remove('hidden');
           this.componentElement.classList.add('col-1');
           previewFrame.classList.remove('hidden');
