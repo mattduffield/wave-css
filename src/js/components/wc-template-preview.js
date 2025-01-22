@@ -48,6 +48,7 @@ if (!customElements.get('wc-template-preview')) {
 
     disconnectedCallback() {
       this._unWireEvents();
+      console.log('disconnectedCallback:wc-template-preview');
     }
 
     _createElement() {
@@ -93,13 +94,27 @@ if (!customElements.get('wc-template-preview')) {
 
       this.componentElement.innerHTML = markup;
 
+    }
+
+    _handleAttributeChange(attrName, newValue) {    
+      super._handleAttributeChange(attrName, newValue);  
+    }
+
+    _applyStyle() {
+      const style = `
+        .wc-template-preview {
+        }
+      `.trim();
+      this.loadStyle('wc-template-preview-style', style);
+    }
+
+    _wireEvents() {
+      super._wireEvents();
       const previewFrame = this.querySelector('iframe.preview');
       const previewToggleInput = this.querySelector('wc-input input[name="preview_toggle"]');
       const previewToggle = previewToggleInput.closest('wc-input');
-      // const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
       const dragToggleInput = this.querySelector('wc-input input[name="drag_toggle"]');
       const dragToggle = dragToggleInput.closest('wc-input');
-      // const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
 
       previewToggle.addEventListener('change', (event) => {
         const {target} = event;
@@ -130,24 +145,41 @@ if (!customElements.get('wc-template-preview')) {
       });
     }
 
-    _handleAttributeChange(attrName, newValue) {    
-      super._handleAttributeChange(attrName, newValue);  
-    }
-
-    _applyStyle() {
-      const style = `
-        .wc-template-preview {
-        }
-      `.trim();
-      this.loadStyle('wc-template-preview-style', style);
-    }
-
-    _wireEvents() {
-      super._wireEvents();
-    }
-
     _unWireEvents() {
       super._unWireEvents();
+      const previewFrame = this.querySelector('iframe.preview');
+      const previewToggleInput = this.querySelector('wc-input input[name="preview_toggle"]');
+      const previewToggle = previewToggleInput.closest('wc-input');
+      const dragToggleInput = this.querySelector('wc-input input[name="drag_toggle"]');
+      const dragToggle = dragToggleInput.closest('wc-input');
+
+      previewToggle.removeEventListener('change', (event) => {
+        const {target} = event;
+        const toggle = dragToggle.querySelector('.wc-input');
+        if (target.value === 'on') {
+          previewFrame.src = src;
+          toggle.classList.remove('hidden');
+          this.componentElement.classList.add('col-1');
+          previewFrame.classList.remove('hidden');
+        } else {
+          previewFrame.src = '';
+          toggle.classList.add('hidden');
+          this.componentElement.classList.remove('col-1');
+          previewFrame.classList.add('hidden');
+        }
+        // console.log('wc-template-preview:previewToggle change - ', event);
+      });
+      dragToggle.removeEventListener('change', (event) => {
+        const {target} = event;
+        if (target.value === 'on') {
+          previewFrame.contentDocument.body.classList.add('preview-frame');
+          wc.EventHub.broadcast('wc-template-preview:enable-drag', '', '');
+        } else {
+          previewFrame.contentDocument.body.classList.remove('preview-frame');
+          wc.EventHub.broadcast('wc-template-preview:disable-drag', '', '');
+        }
+        // console.log('wc-template-preview:dragToggle change - ', event);
+      });
     }
 
   }

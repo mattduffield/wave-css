@@ -5089,6 +5089,7 @@ if (!customElements.get("wc-template-preview")) {
     }
     disconnectedCallback() {
       this._unWireEvents();
+      console.log("disconnectedCallback:wc-template-preview");
     }
     _createElement() {
       const record_id = this.getAttribute("record-id") || "";
@@ -5116,11 +5117,11 @@ if (!customElements.get("wc-template-preview")) {
             </wc-input>
         </div>
       `;
-      let src = "";
+      let src2 = "";
       if (record_id === "create" || record_id === "") {
-        src = `/v/${slug}/create`;
+        src2 = `/v/${slug}/create`;
       } else {
-        src = `/v/${slug}/${record_id}`;
+        src2 = `/v/${slug}/${record_id}`;
       }
       const markup = `${controls}
         <iframe class="preview hidden"
@@ -5130,6 +5131,19 @@ if (!customElements.get("wc-template-preview")) {
         </iframe>
       `.trim();
       this.componentElement.innerHTML = markup;
+    }
+    _handleAttributeChange(attrName, newValue) {
+      super._handleAttributeChange(attrName, newValue);
+    }
+    _applyStyle() {
+      const style = `
+        .wc-template-preview {
+        }
+      `.trim();
+      this.loadStyle("wc-template-preview-style", style);
+    }
+    _wireEvents() {
+      super._wireEvents();
       const previewFrame = this.querySelector("iframe.preview");
       const previewToggleInput = this.querySelector('wc-input input[name="preview_toggle"]');
       const previewToggle = previewToggleInput.closest("wc-input");
@@ -5161,21 +5175,38 @@ if (!customElements.get("wc-template-preview")) {
         }
       });
     }
-    _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue);
-    }
-    _applyStyle() {
-      const style = `
-        .wc-template-preview {
-        }
-      `.trim();
-      this.loadStyle("wc-template-preview-style", style);
-    }
-    _wireEvents() {
-      super._wireEvents();
-    }
     _unWireEvents() {
       super._unWireEvents();
+      const previewFrame = this.querySelector("iframe.preview");
+      const previewToggleInput = this.querySelector('wc-input input[name="preview_toggle"]');
+      const previewToggle = previewToggleInput.closest("wc-input");
+      const dragToggleInput = this.querySelector('wc-input input[name="drag_toggle"]');
+      const dragToggle = dragToggleInput.closest("wc-input");
+      previewToggle.removeEventListener("change", (event) => {
+        const { target } = event;
+        const toggle = dragToggle.querySelector(".wc-input");
+        if (target.value === "on") {
+          previewFrame.src = src;
+          toggle.classList.remove("hidden");
+          this.componentElement.classList.add("col-1");
+          previewFrame.classList.remove("hidden");
+        } else {
+          previewFrame.src = "";
+          toggle.classList.add("hidden");
+          this.componentElement.classList.remove("col-1");
+          previewFrame.classList.add("hidden");
+        }
+      });
+      dragToggle.removeEventListener("change", (event) => {
+        const { target } = event;
+        if (target.value === "on") {
+          previewFrame.contentDocument.body.classList.add("preview-frame");
+          wc.EventHub.broadcast("wc-template-preview:enable-drag", "", "");
+        } else {
+          previewFrame.contentDocument.body.classList.remove("preview-frame");
+          wc.EventHub.broadcast("wc-template-preview:disable-drag", "", "");
+        }
+      });
     }
   }
   customElements.define("wc-template-preview", WcTemplatePreview);
@@ -6471,43 +6502,43 @@ if (!customElements.get("wc-script")) {
       super();
     }
     connectedCallback() {
-      const src = this.getAttribute("src");
+      const src2 = this.getAttribute("src");
       if (!window.wc) {
         window.wc = {};
       }
       if (!window.wc.scriptsLoaded) {
         window.wc["scriptsLoaded"] = {};
       }
-      if (src) {
+      if (src2) {
         const scriptId = `wc-script-${this.id || this.dataset.id || crypto.randomUUID()}`;
         if (!document.getElementById(scriptId)) {
           const script = document.createElement("script");
           script.type = "text/javascript";
-          script.src = src;
+          script.src = src2;
           script.id = scriptId;
           script.onload = () => {
-            console.log(`Script loaded: ${src}`);
-            window.wc.scriptsLoaded[src] = true;
+            console.log(`Script loaded: ${src2}`);
+            window.wc.scriptsLoaded[src2] = true;
             document.body.dispatchEvent(new CustomEvent("script-loaded", {
-              detail: { src },
+              detail: { src: src2 },
               bubbles: true,
               composed: true
             }));
           };
           script.onerror = () => {
-            console.error(`Failed to load script: ${src}`);
+            console.error(`Failed to load script: ${src2}`);
             document.body.dispatchEvent(new CustomEvent("script-error", {
-              detail: { src },
+              detail: { src: src2 },
               bubbles: true,
               composed: true
             }));
           };
           document.head.appendChild(script);
-          console.log(`Added script: ${src}`);
+          console.log(`Added script: ${src2}`);
         } else {
-          console.log(`Script already exists, skipping append: ${src}`);
+          console.log(`Script already exists, skipping append: ${src2}`);
           document.body.dispatchEvent(new CustomEvent("script-loaded", {
-            detail: { src },
+            detail: { src: src2 },
             bubbles: true,
             composed: true
           }));
