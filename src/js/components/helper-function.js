@@ -367,9 +367,13 @@ export function enableSortable(target) {
       }
     };
     if (typeof Sortable !== 'undefined') {
-      new Sortable(target, options);
+      const sortable = new Sortable(target, options);
+      wc.EventHub.events[target] = sortable;
     }
   }
+}
+export function disableSortable(target) {
+  wc?.EventHub?.events[target].destroy();
 }
 export function updateJetTemplate(id, oldIndex, newIndex, cm) {
   let offset = 2;
@@ -407,28 +411,28 @@ export function updateJetTemplate(id, oldIndex, newIndex, cm) {
   }
 }
 
-export function configureSortable(id, tgt) {
-  window?.parent?.document?.body?.addEventListener('wc-template-preview:enable-drag', (event) => {
-    console.log("inside parent enable-drag");
-    enableSortable(tgt);
-  });
-  document.body.addEventListener('wc-template-preview:enable-drag', (event) => {
-    console.log("inside enable-drag");
-    enableSortable(tgt);
-  });
-  window?.parent?.document?.body?.addEventListener('wc-template-preview:disable-drag', (event) => {
-    console.log("inside parent disable-drag");
-  });
-  document.body.addEventListener('wc-template-preview:disable-drag', (event) => {
-    console.log("inside disable-drag");
-  });
-  window?.parent?.document?.body?.addEventListener('sortable:on-end', (event) => {
-    console.log("inside parent disable-drag");
-  });
-  document.body.addEventListener('sortable:on-end', (event) => {
-    console.log("inside sortable:on-end");
-    const cm = window.parent.document.querySelector(`wc-code-mirror[name='content']`);
-    const {oldIndex, newIndex} = event.detail.custom;
-    updateJetTemplate(id, oldIndex, newIndex, cm);
-  });
-}
+// export function configureSortable(id, tgt) {
+//   window?.parent?.document?.body?.addEventListener('wc-template-preview:enable-drag', (event) => {
+//     console.log("inside parent enable-drag");
+//     enableSortable(tgt);
+//   });
+//   document.body.addEventListener('wc-template-preview:enable-drag', (event) => {
+//     console.log("inside enable-drag");
+//     enableSortable(tgt);
+//   });
+//   window?.parent?.document?.body?.addEventListener('wc-template-preview:disable-drag', (event) => {
+//     console.log("inside parent disable-drag");
+//   });
+//   document.body.addEventListener('wc-template-preview:disable-drag', (event) => {
+//     console.log("inside disable-drag");
+//   });
+//   window?.parent?.document?.body?.addEventListener('sortable:on-end', (event) => {
+//     console.log("inside parent disable-drag");
+//   });
+//   document.body.addEventListener('sortable:on-end', (event) => {
+//     console.log("inside sortable:on-end");
+//     const cm = window.parent.document.querySelector(`wc-code-mirror[name='content']`);
+//     const {oldIndex, newIndex} = event.detail.custom;
+//     updateJetTemplate(id, oldIndex, newIndex, cm);
+//   });
+// }

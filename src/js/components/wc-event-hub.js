@@ -12,6 +12,8 @@ import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.j
 
 if (!customElements.get('wc-event-hub')) {
   class WcEventHub extends HTMLElement {
+    events = {};
+    
     constructor() {
       super();
       this.loadCSS = loadCSS.bind(this);

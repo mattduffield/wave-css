@@ -249,9 +249,13 @@ function enableSortable(target) {
       }
     };
     if (typeof Sortable !== "undefined") {
-      new Sortable(target, options);
+      const sortable = new Sortable(target, options);
+      wc.EventHub.events[target] = sortable;
     }
   }
+}
+function disableSortable(target) {
+  wc?.EventHub?.events[target].destroy();
 }
 function updateJetTemplate(id, oldIndex, newIndex, cm) {
   let offset = 2;
@@ -274,31 +278,6 @@ function updateJetTemplate(id, oldIndex, newIndex, cm) {
     let updatedTemplate = template.replace(formContent, updatedFormContent);
     doc.setValue(updatedTemplate);
   }
-}
-function configureSortable(id, tgt) {
-  window?.parent?.document?.body?.addEventListener("wc-template-preview:enable-drag", (event) => {
-    console.log("inside parent enable-drag");
-    enableSortable(tgt);
-  });
-  document.body.addEventListener("wc-template-preview:enable-drag", (event) => {
-    console.log("inside enable-drag");
-    enableSortable(tgt);
-  });
-  window?.parent?.document?.body?.addEventListener("wc-template-preview:disable-drag", (event) => {
-    console.log("inside parent disable-drag");
-  });
-  document.body.addEventListener("wc-template-preview:disable-drag", (event) => {
-    console.log("inside disable-drag");
-  });
-  window?.parent?.document?.body?.addEventListener("sortable:on-end", (event) => {
-    console.log("inside parent disable-drag");
-  });
-  document.body.addEventListener("sortable:on-end", (event) => {
-    console.log("inside sortable:on-end");
-    const cm = window.parent.document.querySelector(`wc-code-mirror[name='content']`);
-    const { oldIndex, newIndex } = event.detail.custom;
-    updateJetTemplate(id, oldIndex, newIndex, cm);
-  });
 }
 
 // src/js/components/wc-base-component.js
@@ -6272,6 +6251,7 @@ customElements.define("wc-event-handler", WcEventHandler);
 // src/js/components/wc-event-hub.js
 if (!customElements.get("wc-event-hub")) {
   class WcEventHub extends HTMLElement {
+    events = {};
     constructor() {
       super();
       this.loadCSS = loadCSS.bind(this);
@@ -7933,7 +7913,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
-  configureSortable,
+  disableSortable,
   enableSortable,
   fetchApi,
   generateUniqueId,
