@@ -5125,6 +5125,11 @@ if (!customElements.get("wc-template-preview")) {
       });
       dragToggle.addEventListener("change", (event) => {
         const { target } = event;
+        if (target.value === "on") {
+          previewFrame.classList.add("preview-frame");
+        } else {
+          previewFrame.classList.remove("preview-frame");
+        }
         console.log("wc-template-preview:dragToggle change - ", event);
       });
     }
