@@ -5090,6 +5090,10 @@ div[class^=wc-] :user-invalid[data-error]:hover::after {
 .text-align-justify {
   text-align: justify;
 }
+.text-2xs {
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
