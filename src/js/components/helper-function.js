@@ -371,3 +371,64 @@ export function enableSortable(target) {
     }
   }
 }
+export function updateJetTemplate(id, oldIndex, newIndex, cm) {
+  let offset = 2;
+  oldIndex = oldIndex - offset;
+  newIndex = newIndex - offset;
+  let doc = cm.editor;
+  let template = doc.getValue(); // Get current Jet template content
+
+  // Extract the <wc-form> section using a regex
+  let formRegex = new RegExp(`<wc-form[^>]*id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/wc-form>`);
+  let match = template.match(formRegex);
+
+  if (match) {
+    let formContent = match[1]; // Extract form inner content
+
+    // Match all divs with the class "draggable" including their inner content
+    // let divRegex = /<div[^>]*class=["'][^"']*draggable[^"']*["'][^>]*>[\s\S]*?<\/div>/g;
+    let divRegex = /<div[^>]*class=["'][^"']*preview-draggable[^"']*["'][^>]*>[\s\S]*?<\/div>/g;
+    let elements = formContent.match(divRegex) || [];
+
+    if (elements.length === 0) return; // No draggable divs found
+
+    // Ensure the indices are valid
+    if (oldIndex >= 0 && oldIndex < elements.length && newIndex >= 0 && newIndex < elements.length) {
+        let movedElement = elements.splice(oldIndex, 1)[0]; // Remove from old position
+        elements.splice(newIndex, 0, movedElement); // Insert at new position
+    }
+
+    // Replace only the draggable elements inside the form
+    let updatedFormContent = formContent.replace(divRegex, () => elements.shift());
+
+    // Update the template in CodeMirror
+    let updatedTemplate = template.replace(formContent, updatedFormContent);
+    doc.setValue(updatedTemplate);
+  }
+}
+
+export function configureSortable(id, tgt) {
+  window?.parent?.document?.body?.addEventListener('wc-template-preview:enable-drag', (event) => {
+    console.log("inside parent enable-drag");
+    enableSortable(tgt);
+  });
+  document.body.addEventListener('wc-template-preview:enable-drag', (event) => {
+    console.log("inside enable-drag");
+    enableSortable(tgt);
+  });
+  window?.parent?.document?.body?.addEventListener('wc-template-preview:disable-drag', (event) => {
+    console.log("inside parent disable-drag");
+  });
+  document.body.addEventListener('wc-template-preview:disable-drag', (event) => {
+    console.log("inside disable-drag");
+  });
+  window?.parent?.document?.body?.addEventListener('sortable:on-end', (event) => {
+    console.log("inside parent disable-drag");
+  });
+  document.body.addEventListener('sortable:on-end', (event) => {
+    console.log("inside sortable:on-end");
+    const cm = window.parent.document.querySelector(`wc-code-mirror[name='content']`);
+    const {oldIndex, newIndex} = event.detail.custom;
+    updateJetTemplate(id, oldIndex, newIndex, cm);
+  });
+}

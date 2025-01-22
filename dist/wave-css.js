@@ -253,6 +253,53 @@ function enableSortable(target) {
     }
   }
 }
+function updateJetTemplate(id, oldIndex, newIndex, cm) {
+  let offset = 2;
+  oldIndex = oldIndex - offset;
+  newIndex = newIndex - offset;
+  let doc = cm.editor;
+  let template = doc.getValue();
+  let formRegex = new RegExp(`<wc-form[^>]*id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/wc-form>`);
+  let match = template.match(formRegex);
+  if (match) {
+    let formContent = match[1];
+    let divRegex = /<div[^>]*class=["'][^"']*preview-draggable[^"']*["'][^>]*>[\s\S]*?<\/div>/g;
+    let elements = formContent.match(divRegex) || [];
+    if (elements.length === 0) return;
+    if (oldIndex >= 0 && oldIndex < elements.length && newIndex >= 0 && newIndex < elements.length) {
+      let movedElement = elements.splice(oldIndex, 1)[0];
+      elements.splice(newIndex, 0, movedElement);
+    }
+    let updatedFormContent = formContent.replace(divRegex, () => elements.shift());
+    let updatedTemplate = template.replace(formContent, updatedFormContent);
+    doc.setValue(updatedTemplate);
+  }
+}
+function configureSortable(id, tgt) {
+  window?.parent?.document?.body?.addEventListener("wc-template-preview:enable-drag", (event) => {
+    console.log("inside parent enable-drag");
+    enableSortable(tgt);
+  });
+  document.body.addEventListener("wc-template-preview:enable-drag", (event) => {
+    console.log("inside enable-drag");
+    enableSortable(tgt);
+  });
+  window?.parent?.document?.body?.addEventListener("wc-template-preview:disable-drag", (event) => {
+    console.log("inside parent disable-drag");
+  });
+  document.body.addEventListener("wc-template-preview:disable-drag", (event) => {
+    console.log("inside disable-drag");
+  });
+  window?.parent?.document?.body?.addEventListener("sortable:on-end", (event) => {
+    console.log("inside parent disable-drag");
+  });
+  document.body.addEventListener("sortable:on-end", (event) => {
+    console.log("inside sortable:on-end");
+    const cm = window.parent.document.querySelector(`wc-code-mirror[name='content']`);
+    const { oldIndex, newIndex } = event.detail.custom;
+    updateJetTemplate(id, oldIndex, newIndex, cm);
+  });
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -7886,6 +7933,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
+  configureSortable,
   enableSortable,
   fetchApi,
   generateUniqueId,
@@ -7900,6 +7948,7 @@ export {
   locatorAll,
   show,
   sleep,
+  updateJetTemplate,
   waitForPropertyPolling,
   waitForResourcePolling,
   waitForSelectorPolling,
