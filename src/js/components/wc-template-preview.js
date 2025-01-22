@@ -113,6 +113,7 @@ if (!customElements.get('wc-template-preview')) {
           wc.EventHub.broadcast('wc-template-preview:enable-drag', '', '');
         } else {
           previewFrame.contentDocument.body.classList.remove('preview-frame');
+          wc.EventHub.broadcast('wc-template-preview:disable-drag', '', '');
         }
         console.log('wc-template-preview:dragToggle change - ', event);
       });
