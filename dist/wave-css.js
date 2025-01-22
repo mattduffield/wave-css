@@ -5083,12 +5083,12 @@ if (!customElements.get("wc-template-preview")) {
       }
       console.log("ctor:wc-template-preview");
     }
-    async connectedCallback() {
+    async _connectedCallback() {
       this._applyStyle();
       this._wireEvents();
       console.log("connectedCallback:wc-template-preview");
     }
-    disconnectedCallback() {
+    _disconnectedCallback() {
       this._unWireEvents();
       console.log("disconnectedCallback:wc-template-preview");
     }
