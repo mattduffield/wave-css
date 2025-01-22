@@ -5137,7 +5137,7 @@ if (!customElements.get("wc-template-preview")) {
         const { target } = event;
         if (target.value === "on") {
           previewFrame.src = src;
-          dragToggle.classList.add("remove");
+          dragToggle.classList.remove("hidden");
         } else {
           previewFrame.src = "";
           dragToggle.classList.add("hidden");
