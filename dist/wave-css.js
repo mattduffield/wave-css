@@ -5069,6 +5069,7 @@ if (!customElements.get("wc-template-preview")) {
     }
     constructor() {
       super();
+      this.childComponentSelector = "wc-input";
       const compEl = this.querySelector(".wc-template-preview");
       if (compEl) {
         this.componentElement = compEl;
