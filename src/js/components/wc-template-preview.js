@@ -32,9 +32,8 @@ if (!customElements.get('wc-template-preview')) {
       } else {
         this.classList.add("contents");
         this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-template-preview');
         const cls = this.getAttribute('cls') || '';
-        this.componentElement.classList.add(cls);
+        this.componentElement.className = `wc-template-preview ${cls}`;
         this.appendChild(this.componentElement);
         this._createElement();
       }
