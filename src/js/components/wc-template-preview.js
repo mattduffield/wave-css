@@ -110,6 +110,7 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         if (target.value === 'on') {
           previewFrame.contentDocument.body.classList.add('preview-frame');
+          wc.EventHub.broadcast('wc-template-preview:enable-drag', '', '');
         } else {
           previewFrame.contentDocument.body.classList.remove('preview-frame');
         }
