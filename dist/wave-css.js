@@ -5110,7 +5110,6 @@ if (!customElements.get("wc-template-preview")) {
         </iframe>
       `.trim();
       }
-      this.componentElement.innerHTML = markup;
       this.componentElement.addEventListener("load", (e) => {
         const previewFrame = this.querySelector("iframe.preview");
         const previewToggle = this.querySelector('wc[name="preview_toggle"]');
@@ -5124,6 +5123,7 @@ if (!customElements.get("wc-template-preview")) {
           console.log("wc-template-preview:dragToggle change - ", event);
         });
       }, { once: true });
+      this.componentElement.innerHTML = markup;
     }
     _handleAttributeChange(attrName, newValue) {
       super._handleAttributeChange(attrName, newValue);

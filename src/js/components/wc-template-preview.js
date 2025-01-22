@@ -98,8 +98,6 @@ if (!customElements.get('wc-template-preview')) {
       `.trim();
       }
 
-      this.componentElement.innerHTML = markup;
-
       this.componentElement.addEventListener('load', (e) => {
         const previewFrame = this.querySelector('iframe.preview');
         const previewToggle = this.querySelector('wc[name="preview_toggle"]');
@@ -115,6 +113,8 @@ if (!customElements.get('wc-template-preview')) {
         });
   
       }, {once: true});
+
+      this.componentElement.innerHTML = markup;
     }
 
     _handleAttributeChange(attrName, newValue) {    
