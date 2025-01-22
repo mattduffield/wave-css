@@ -76,55 +76,45 @@ if (!customElements.get('wc-template-preview')) {
             </wc-input>
         </div>
       `;
-      let markup = '';
       let src = '';
 
       if (record_id === 'create' || record_id === '') {
         src = `/v/${slug}/create`;
-        markup = `${controls}
-        <iframe class="preview"
-                src=""
-                style="height: calc(-360px + 100vh);"
-                >
-        </iframe>`;
       } else {
         src = `/v/${slug}/${record_id}`;
-        markup = `${controls}
+      }
+      const markup = `${controls}
         <iframe class="preview"
                 src=""
                 style="height: calc(-360px + 100vh);"
                 >
         </iframe>
       `.trim();
-      }
 
       this.componentElement.innerHTML = markup;
 
-      // setTimeout(() => {
-        const previewFrame = this.querySelector('iframe.preview');
-        const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
-        const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
-  
-        previewToggle.addEventListener('change', (event) => {
-          const {target} = event;
-          if (target.value === 'on') {
-            previewFrame.src = src;
-          } else {
-            previewFrame.src = '';
-          }
-          console.log('wc-template-preview:previewToggle change - ', event);
-        });
-        dragToggle.addEventListener('change', (event) => {
-          const {target} = event;
-          if (target.value === 'on') {
-            previewFrame.classList.add('preview-frame');
-          } else {
-            previewFrame.classList.remove('preview-frame');
-          }
-          console.log('wc-template-preview:dragToggle change - ', event);
-        });
-  
-      // }, 250);
+      const previewFrame = this.querySelector('iframe.preview');
+      const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
+      const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
+
+      previewToggle.addEventListener('change', (event) => {
+        const {target} = event;
+        if (target.value === 'on') {
+          previewFrame.src = src;
+        } else {
+          previewFrame.src = '';
+        }
+        console.log('wc-template-preview:previewToggle change - ', event);
+      });
+      dragToggle.addEventListener('change', (event) => {
+        const {target} = event;
+        if (target.value === 'on') {
+          previewFrame.contentDocument.body.classList.add('preview-frame');
+        } else {
+          previewFrame.contentDocument.body.classList.remove('preview-frame');
+        }
+        console.log('wc-template-preview:dragToggle change - ', event);
+      });
     }
 
     _handleAttributeChange(attrName, newValue) {    
