@@ -5095,7 +5095,7 @@ if (!customElements.get("wc-template-preview")) {
       const slug = this.getAttribute("slug") || "";
       const controls = `<div class="flex flex-row justify-between">
             <wc-input name="preview_toggle" 
-              class="col"
+              class="row items-center gap-1"
               lbl-label="Preview"
               type="radio"
               radio-group-class="row modern"
@@ -5105,7 +5105,7 @@ if (!customElements.get("wc-template-preview")) {
               <option value="off">Hide</option>
             </wc-input>
             <wc-input name="drag_toggle" 
-              class="col hidden"
+              class="row items-center gap-1 hidden"
               lbl-label="Drag n Drop"
               type="radio"
               radio-group-class="row modern"
