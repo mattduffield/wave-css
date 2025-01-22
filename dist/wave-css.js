@@ -5135,12 +5135,13 @@ if (!customElements.get("wc-template-preview")) {
       const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
       previewToggle.addEventListener("change", (event) => {
         const { target } = event;
+        const toggle = this.querySelector('wc-input[name="drag_toggle"] .wc-input');
         if (target.value === "on") {
           previewFrame.src = src;
-          dragToggle.classList.remove("hidden");
+          toggle.classList.remove("hidden");
         } else {
           previewFrame.src = "";
-          dragToggle.classList.add("hidden");
+          toggle.classList.add("hidden");
         }
       });
       dragToggle.addEventListener("change", (event) => {
