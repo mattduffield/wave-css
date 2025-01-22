@@ -84,7 +84,7 @@ if (!customElements.get('wc-template-preview')) {
         src = `/v/${slug}/${record_id}`;
       }
       const markup = `${controls}
-        <iframe class="preview"
+        <iframe class="preview hidden"
                 src=""
                 style="height: calc(-360px + 100vh);"
                 >
@@ -103,9 +103,13 @@ if (!customElements.get('wc-template-preview')) {
         if (target.value === 'on') {
           previewFrame.src = src;
           toggle.classList.remove('hidden');
+          this.componentElement.classList.add('col-1');
+          previewFrame.classList.remove('hidden');
         } else {
           previewFrame.src = '';
           toggle.classList.add('hidden');
+          this.componentElement.classList.remove('col-1');
+          previewFrame.classList.add('hidden');
         }
         // console.log('wc-template-preview:previewToggle change - ', event);
       });
