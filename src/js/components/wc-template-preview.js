@@ -56,10 +56,9 @@ if (!customElements.get('wc-template-preview')) {
       const controls = `<div class="flex flex-row justify-between">
             <wc-input name="preview_toggle" 
               class="row items-center gap-1"
-              radio-group-class="text-2xs"
               lbl-label="Preview"
               type="radio"
-              radio-group-class="row modern"
+              radio-group-class="row modern text-2xs"
               value="off"
               >
               <option value="on">Show</option>
@@ -67,10 +66,9 @@ if (!customElements.get('wc-template-preview')) {
             </wc-input>
             <wc-input name="drag_toggle" 
               class="row items-center gap-1 hidden"
-              radio-group-class="text-2xs"
               lbl-label="Drag n Drop"
               type="radio"
-              radio-group-class="row modern"
+              radio-group-class="row modern text-2xs"
               value="off"
               >
               <option value="on">Enable</option>
