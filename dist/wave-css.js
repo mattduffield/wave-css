@@ -5067,22 +5067,39 @@ if (!customElements.get("wc-template-preview")) {
     _createElement() {
       const record_id = this.getAttribute("record-id") || "";
       const slug = this.getAttribute("slug") || "";
+      const controls = `<div class="flex flex-row justify-between">
+            <wc-input name="show_preview" 
+              class="col"
+              lbl-label="Show Preview"
+              type="radio"
+              radio-group-class="row modern"
+              value="hide"
+              >
+              <option value="show">Show</option>
+              <option value="hide">Hide</option>
+            </wc-input>
+            <wc-input name="enable_drag_drop" 
+              class="col"
+              lbl-label="Enable Drag n Drop"
+              type="radio"
+              radio-group-class="row modern"
+              value="hide"
+              >
+              <option value="enable">Enable</option>
+              <option value="disable">Disable</option>
+            </wc-input>
+        </div>
+      `;
       let markup = "";
       if (record_id === "create" || record_id === "") {
-        markup = `<div class="flex flex-row justify-between">
-          <label>Preview</label>
-          <div class="underline">Enable Drag-n-Drop</div>
-        </div>
+        markup = `${controls}
         <iframe class="preview"
                 src="/v/${slug}/create"
                 style="height: calc(-360px + 100vh);"
                 >
         </iframe>`;
       } else {
-        markup = `<div class="flex flex-row justify-between">
-          <label>Preview</label>
-          <div class="underline">Enable Drag-n-Drop</div>
-        </div>
+        markup = `${controls}
         <iframe class="preview"
                 src="/v/${slug}/${record_id}"
                 style="height: calc(-360px + 100vh);"
