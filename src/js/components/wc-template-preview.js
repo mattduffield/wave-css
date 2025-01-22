@@ -94,8 +94,12 @@ if (!customElements.get('wc-template-preview')) {
       this.componentElement.innerHTML = markup;
 
       const previewFrame = this.querySelector('iframe.preview');
-      const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
-      const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
+      const previewToggleInput = this.querySelector('wc-input input[name="preview_toggle"]');
+      const previewToggle = previewToggleInput.closest('wc-input');
+      // const previewToggle = this.querySelector('wc-input[name="preview_toggle"]');
+      const dragToggleInput = this.querySelector('wc-input input[name="drag_toggle"]');
+      const dragToggle = dragToggleInput.closest('wc-input');
+      // const dragToggle = this.querySelector('wc-input[name="drag_toggle"]');
 
       previewToggle.addEventListener('change', (event) => {
         const {target} = event;
