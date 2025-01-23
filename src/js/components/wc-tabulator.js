@@ -190,8 +190,6 @@ if (!customElements.get('wc-tabulator')) {
     async connectedCallback() {
       super.connectedCallback();
 
-      this.classList.add("contents");
-
       this._applyStyle();
       console.log('conntectedCallback:wc-tabulator');
     }
@@ -202,12 +200,7 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     async _handleAttributeChange(attrName, newValue) {
-      if (attrName === 'name') {
-        this._handleNameToIdLinkage(newValue);
-      } else {
-        this.componentElement.setAttribute(attrName, newValue);
-      }
-      // super._handleAttributeChange(attrName, newValue); 
+      super._handleAttributeChange(attrName, newValue); 
     }
 
     _render() {
@@ -309,7 +302,6 @@ if (!customElements.get('wc-tabulator')) {
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
 
       await this.renderTabulator(options);
-      // this.classList.add('contents');
     }
 
     async renderTabulator(options) {
@@ -822,6 +814,9 @@ if (!customElements.get('wc-tabulator')) {
     _applyStyle() {
       const style = `
   /* Tabulator */
+  wc-tabulator {
+    display: contents;
+  }
   .wc-tabulator.tabulator {
     background-color: var(--component-bg-color);
     border: 1px solid var(--component-border-color);
