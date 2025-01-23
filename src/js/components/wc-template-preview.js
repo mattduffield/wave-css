@@ -27,10 +27,10 @@ if (!customElements.get('wc-template-preview')) {
       super();
       this.childComponentSelector = 'wc-input';
       const compEl = this.querySelector('.wc-template-preview');
+      this.classList.add("contents");
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.classList.add("contents");
         this.componentElement = document.createElement('div');
         const cls = this.getAttribute('cls') || '';
         this.componentElement.className = `wc-template-preview ${cls}`;
