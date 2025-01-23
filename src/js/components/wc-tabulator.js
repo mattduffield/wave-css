@@ -184,12 +184,13 @@ if (!customElements.get('wc-tabulator')) {
         this.componentElement.id = this.getAttribute('id') || 'wc-tabulator';
         this.appendChild(this.componentElement);      
       }
-      this.classList.add("contents");
       console.log('ctor:wc-tabulator');
     }
 
     async connectedCallback() {
       super.connectedCallback();
+
+      this.classList.add("contents");
 
       this._applyStyle();
       console.log('conntectedCallback:wc-tabulator');
