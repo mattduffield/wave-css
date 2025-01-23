@@ -13,6 +13,7 @@ if (!customElements.get('wc-hotkey')) {
   class WcHotkey extends HTMLElement {
     constructor() {
       super();
+      this.classList.add('contents');
     }
 
     connectedCallback() {

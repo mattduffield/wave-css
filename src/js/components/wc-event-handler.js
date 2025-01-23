@@ -7,6 +7,7 @@ class WcEventHandler extends HTMLElement {
 
   constructor() {
     super();
+    this.classList.add('contents');
   }
 
   connectedCallback() {

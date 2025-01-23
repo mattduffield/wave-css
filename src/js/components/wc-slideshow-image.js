@@ -96,6 +96,10 @@ class WcSlideshowImage extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-slideshow-image {
+        display: contents;
+      }
+
       .wc-slideshow-image {
         position: relative;
       }

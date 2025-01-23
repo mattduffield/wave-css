@@ -17,6 +17,7 @@ if (!customElements.get('wc-javascript')) {
   class WcJavascript extends HTMLElement {
     constructor() {
       super();
+      this.classList.add('contents');
     }
 
     connectedCallback() {

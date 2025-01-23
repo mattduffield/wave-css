@@ -22,6 +22,7 @@ class WcBehavior extends HTMLElement {
 
   constructor() {
     super();
+    this.classList.add('contents');
   }
 
   connectedCallback() {

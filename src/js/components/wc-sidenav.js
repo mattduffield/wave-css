@@ -262,6 +262,9 @@ class WcSidenav extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-sidenav {
+        display: contents;
+      }
       wc-sidenav .wc-sidenav.sidenav {
         /* height: 100%; */
         width: 0;

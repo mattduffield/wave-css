@@ -109,6 +109,10 @@ class WcForm extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-form {
+        display: contents;
+      }
+
       .wc-form {
         position: relative;
       }

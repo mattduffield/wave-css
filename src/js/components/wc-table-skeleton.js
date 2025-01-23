@@ -85,6 +85,9 @@ if (!customElements.get('wc-table-skeleton')) {
 
     _applyStyle() {
       const style = `
+wc-table-skeleton {
+  display: contents;
+}
 /* Spacing */
 .md\:p-6 {
   padding: 1.5rem;

@@ -83,6 +83,10 @@ if (!customElements.get('wc-list-skeleton')) {
 
     _applyStyle() {
       const style = `
+wc-list-skeleton {
+  display: contents;
+}
+
 /* Spacing */
 .md\:p-6 {
   padding: 1.5rem;

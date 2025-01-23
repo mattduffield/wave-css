@@ -233,6 +233,9 @@ class WcMenu extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-menu {
+        display: contents;
+      }
       wc-menu .wc-menu {
         position: relative;
         display: flex;

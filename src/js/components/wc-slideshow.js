@@ -228,6 +228,9 @@ class WcSlideshow extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-slideshow {
+        display: contents;
+      }
       .wc-slideshow {
 
       }

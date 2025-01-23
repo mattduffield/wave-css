@@ -197,6 +197,9 @@ class WcImage extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-image {
+        display: contents;
+      }
       wc-image .wc-image {
         position: relative;
       }

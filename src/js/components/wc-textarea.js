@@ -117,6 +117,15 @@ class WcTextarea extends WcBaseFormComponent {
     }
   }
 
+  _applyStyle() {
+    const style = `
+      wc-textarea {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle('wc-textarea-style', style);
+  }
+
   _unWireEvents() {
     super._unWireEvents();
   }

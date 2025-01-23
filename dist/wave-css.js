@@ -704,6 +704,10 @@ var WcAccordion = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-accordion {
+        display: contents;
+      }
+
       .wc-accordion .accordion-header {
         background-color: var(--secondary-bg-color);
         color: var(--secondary-color);
@@ -878,6 +882,9 @@ var WcBackgroundImage = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-background-image {
+        display: contents;
+      }
       .wc-background-image {
         position: relative;
         opacity: 0.65;
@@ -1357,13 +1364,12 @@ if (!customElements.get("wc-code-mirror")) {
           width: 100%;
         }
 
-        /* Ensure that each editor fills its container */
+        
         wc-code-mirror {
-          display: block;
-          height: 100%;
-          width: 100%;
+          display: contents;
         }
 
+        /* Ensure that each editor fills its container */
         .wc-code-mirror {
           position: relative;
           width: 100%;
@@ -1677,6 +1683,9 @@ var WcDiv = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-div {
+        display: contents;
+      }
       .wc-div {
         position: relative;
         display: block;
@@ -1849,6 +1858,10 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-dropdown {
+        display: contents;
+      }
+
       /* Dropdown Button */
       .wc-dropdown .dropbtn {
         background-color: var(--primary-bg-color);
@@ -2016,6 +2029,10 @@ var WcFlipBox = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-flip-box {
+        display: contents;
+      }
+
       /* The flip box container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
       .wc-flip-box {
         background-color: transparent;
@@ -2217,6 +2234,9 @@ var WcImage = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-image {
+        display: contents;
+      }
       wc-image .wc-image {
         position: relative;
       }
@@ -2556,6 +2576,9 @@ var WcMenu = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-menu {
+        display: contents;
+      }
       wc-menu .wc-menu {
         position: relative;
         display: flex;
@@ -2658,7 +2681,6 @@ if (!customElements.get("wc-save-button")) {
       } else {
         const id = this.getAttribute("id") || "";
         const saveUrl = this.getAttribute("save-url") || "";
-        this.classList.add("contents");
         this.componentElement = document.createElement("button");
         this.componentElement.id = id;
         this.removeAttribute("id");
@@ -2687,6 +2709,9 @@ if (!customElements.get("wc-save-button")) {
     }
     _applyStyle() {
       const style = `
+        wc-save-button {
+          display: contents;
+        }
         .wc-save-button {
           background-color: var(--primary-bg-color);
           color: var(--primary-color);
@@ -2723,7 +2748,6 @@ if (!customElements.get("wc-save-split-button")) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.classList.add("contents");
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-save-split-button");
         this.componentElement.setAttribute("hx-target", "#viewport");
@@ -2812,6 +2836,9 @@ if (!customElements.get("wc-save-split-button")) {
     }
     _applyStyle() {
       const style = `
+        wc-save-split-button {
+          display: contents;
+        }
         .wc-save-split-button {
           /* anchor-name: --save-anchor; */
           display: flex;
@@ -2926,7 +2953,6 @@ if (!customElements.get("wc-split-button")) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.classList.add("contents");
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-split-button");
         const splitClass = this.getAttribute("split-class");
@@ -2991,6 +3017,9 @@ if (!customElements.get("wc-split-button")) {
     }
     _applyStyle() {
       const style = `
+        wc-split-button {
+          display: contents;
+        }
         .wc-split-button {
           /* anchor-name: --anchor; */
           display: flex;
@@ -3174,6 +3203,9 @@ var WcSidebar = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-sidebar {
+        display: contents;
+      }
       wc-sidebar .wc-sidebar {
         /* height: 100%; */
         position: fixed;
@@ -3416,6 +3448,9 @@ var WcSidenav = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-sidenav {
+        display: contents;
+      }
       wc-sidenav .wc-sidenav.sidenav {
         /* height: 100%; */
         width: 0;
@@ -3594,6 +3629,10 @@ var WcSlideshowImage = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-slideshow-image {
+        display: contents;
+      }
+
       .wc-slideshow-image {
         position: relative;
       }
@@ -3815,6 +3854,9 @@ var WcSlideshow = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-slideshow {
+        display: contents;
+      }
       .wc-slideshow {
 
       }
@@ -3955,6 +3997,9 @@ var WcTabItem = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-tab-item {
+        display: contents;
+      }
       .wc-tab-item {
         position: relative;
       }
@@ -4135,6 +4180,9 @@ var WcTab = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-tab {
+        display: contents;
+      }
       wc-tab .wc-tab {
         position: relative;
         overflow: hidden;
@@ -5074,7 +5122,6 @@ if (!customElements.get("wc-template-preview")) {
       super();
       this.childComponentSelector = "wc-input";
       const compEl = this.querySelector(".wc-template-preview");
-      this.classList.add("contents");
       if (compEl) {
         this.componentElement = compEl;
       } else {
@@ -5142,6 +5189,9 @@ if (!customElements.get("wc-template-preview")) {
     }
     _applyStyle() {
       const style = `
+        wc-template-preview {
+          display: contents;
+        }
         .wc-template-preview {
         }
       `.trim();
@@ -5333,6 +5383,9 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-theme-selector {
+        display: contents;
+      }
       wc-theme-selector .wc-theme-selector {
 
       }
@@ -5463,6 +5516,10 @@ var WcTimeline = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-timeline {
+        display: contents;
+      }
+        
       .wc-timeline,
       .wc-timeline * {
         box-sizing: border-box;
@@ -5668,6 +5725,10 @@ if (!customElements.get("wc-article-skeleton")) {
     }
     _applyStyle() {
       const style = `
+wc-article-skeleton {
+  display: contents;
+}
+
 /* Space Utilities */
 .space-y-8 > * + * {
   margin-top: 2rem;
@@ -5768,6 +5829,9 @@ if (!customElements.get("wc-card-skeleton")) {
     }
     _applyStyle() {
       const style = `
+      wc-card-skeleton {
+        display: contents;
+      }
       `.trim();
     }
     _unWireEvents() {
@@ -5853,6 +5917,10 @@ if (!customElements.get("wc-list-skeleton")) {
     }
     _applyStyle() {
       const style = `
+wc-list-skeleton {
+  display: contents;
+}
+
 /* Spacing */
 .md:p-6 {
   padding: 1.5rem;
@@ -5958,6 +6026,9 @@ if (!customElements.get("wc-table-skeleton")) {
     }
     _applyStyle() {
       const style = `
+wc-table-skeleton {
+  display: contents;
+}
 /* Spacing */
 .md:p-6 {
   padding: 1.5rem;
@@ -6032,6 +6103,10 @@ var WcLoader = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-loader {
+        display: contents;
+      }
+
       wc-loader .wc-loader {
         border-width: 16px;
         border-style: solid;
@@ -6134,6 +6209,7 @@ var WcBehavior = class _WcBehavior extends HTMLElement {
   }
   constructor() {
     super();
+    this.classList.add("contents");
   }
   connectedCallback() {
     const parentContainer = this.parentElement;
@@ -6178,6 +6254,7 @@ if (!customElements.get("wc-visibility-change")) {
     }
     constructor() {
       super();
+      this.classList.add("contents");
       this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
       this._pendingAttributes = {};
       this._isConnected = false;
@@ -6246,6 +6323,7 @@ var WcEventHandler = class extends HTMLElement {
   }
   constructor() {
     super();
+    this.classList.add("contents");
   }
   connectedCallback() {
     const eventName = this.getAttribute("event-name") || "";
@@ -6326,7 +6404,7 @@ if (!customElements.get("wc-event-hub")) {
     _applyStyle() {
       const style = `
       wc-event-hub {
-        display: none;
+        display: contents;
       }
       `;
       this.loadStyle("wc-event-hub-style", style);
@@ -6390,7 +6468,7 @@ if (!customElements.get("wc-mask-hub")) {
     _applyStyle() {
       const style = `
       wc-mask-hub {
-        display: none;
+        display: contents;
       }
       `;
       this.loadStyle("wc-mask-hub-style", style);
@@ -6404,6 +6482,7 @@ if (!customElements.get("wc-hotkey")) {
   class WcHotkey extends HTMLElement {
     constructor() {
       super();
+      this.classList.add("contents");
     }
     connectedCallback() {
       const keyCombination = this.getAttribute("keys") || "";
@@ -6448,6 +6527,7 @@ if (!customElements.get("wc-link")) {
   class WcLink extends HTMLElement {
     constructor() {
       super();
+      this.classList.add("contents");
     }
     connectedCallback() {
       const url = this.getAttribute("url");
@@ -6505,6 +6585,7 @@ if (!customElements.get("wc-script")) {
   class WcScript extends HTMLElement {
     constructor() {
       super();
+      this.classList.add("contents");
     }
     connectedCallback() {
       const src = this.getAttribute("src");
@@ -6562,6 +6643,7 @@ if (!customElements.get("wc-javascript")) {
   class WcJavascript extends HTMLElement {
     constructor() {
       super();
+      this.classList.add("contents");
     }
     connectedCallback() {
       const scriptContent = this.textContent.trim();
@@ -6790,7 +6872,7 @@ if (!customElements.get("wc-prompt")) {
     _applyStyle() {
       const style = `
       wc-prompt {
-        display: none;
+        display: contents;
       }
       .swal2-container .swal2-popup {
         background-color: var(--secondary-bg-color);
@@ -6967,6 +7049,10 @@ var WcForm = class extends WcBaseComponent {
   }
   _applyStyle() {
     const style = `
+      wc-form {
+        display: contents;
+      }
+
       .wc-form {
         position: relative;
       }
@@ -7264,6 +7350,10 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
   }
   _applyStyle() {
     const style = `
+      wc-input {
+        display: contents;
+      }
+
       wc-input .toggle-wrapper {
         position: relative;
         width: 50px;
@@ -7632,6 +7722,9 @@ var WcSelect = class extends WcBaseFormComponent {
   }
   _applyStyle() {
     const style = `
+      wc-select {
+        display: contents;
+      }
       wc-select .chip-container { 
         display: none;
         flex-wrap: wrap; 
@@ -7946,6 +8039,14 @@ var WcTextarea = class extends WcBaseFormComponent {
     if (this.firstContent && !value) {
       this.setAttribute("value", this.firstContent.trim());
     }
+  }
+  _applyStyle() {
+    const style = `
+      wc-textarea {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle("wc-textarea-style", style);
   }
   _unWireEvents() {
     super._unWireEvents();

@@ -119,7 +119,12 @@ class WcTopNav extends WcBaseComponent {
   }
 
   _applyStyle() {
-    const style = `.wc-top-nav {
+    const style = `
+    wc-top-nav {
+      display: contents;
+    }
+
+    .wc-top-nav {
       position: relative;
       background-color: var(--secondary-bg-color);
       opacity: 0.75;

@@ -338,13 +338,12 @@ if (!customElements.get('wc-code-mirror')) {
           width: 100%;
         }
 
-        /* Ensure that each editor fills its container */
+        
         wc-code-mirror {
-          display: block;
-          height: 100%;
-          width: 100%;
+          display: contents;
         }
 
+        /* Ensure that each editor fills its container */
         .wc-code-mirror {
           position: relative;
           width: 100%;

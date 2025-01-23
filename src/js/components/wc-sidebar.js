@@ -133,6 +133,9 @@ class WcSidebar extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-sidebar {
+        display: contents;
+      }
       wc-sidebar .wc-sidebar {
         /* height: 100%; */
         position: fixed;

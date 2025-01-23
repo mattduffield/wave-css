@@ -217,6 +217,9 @@ class WcSelect extends WcBaseFormComponent {
 
   _applyStyle() {
     const style = `
+      wc-select {
+        display: contents;
+      }
       wc-select .chip-container { 
         display: none;
         flex-wrap: wrap; 

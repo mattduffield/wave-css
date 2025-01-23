@@ -49,7 +49,7 @@ if (!customElements.get('wc-event-hub')) {
     _applyStyle() {
       const style = `
       wc-event-hub {
-        display: none;
+        display: contents;
       }
       `;
       this.loadStyle('wc-event-hub-style', style);

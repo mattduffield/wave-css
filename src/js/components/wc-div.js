@@ -88,6 +88,9 @@ class WcDiv extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-div {
+        display: contents;
+      }
       .wc-div {
         position: relative;
         display: block;

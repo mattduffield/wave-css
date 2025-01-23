@@ -12,6 +12,7 @@ if (!customElements.get('wc-link')) {
   class WcLink extends HTMLElement {
     constructor() {
       super();
+      this.classList.add('contents');
     }
 
     connectedCallback() {

@@ -213,7 +213,7 @@ if (!customElements.get('wc-prompt')) {
     _applyStyle() {
       const style = `
       wc-prompt {
-        display: none;
+        display: contents;
       }
       .swal2-container .swal2-popup {
         background-color: var(--secondary-bg-color);

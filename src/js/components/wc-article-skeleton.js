@@ -61,6 +61,10 @@ if (!customElements.get('wc-article-skeleton')) {
 
     _applyStyle() {
       const style = `
+wc-article-skeleton {
+  display: contents;
+}
+
 /* Space Utilities */
 .space-y-8 > * + * {
   margin-top: 2rem;

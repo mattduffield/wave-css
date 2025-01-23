@@ -67,6 +67,9 @@ if (!customElements.get('wc-card-skeleton')) {
 
     _applyStyle() {
       const style = `
+      wc-card-skeleton {
+        display: contents;
+      }
       `.trim();
       // this.loadStyle('wc-card-skeleton', style);
     }

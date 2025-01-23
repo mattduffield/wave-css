@@ -30,7 +30,6 @@ if (!customElements.get('wc-save-button')) {
         const id = this.getAttribute('id') || '';
         const saveUrl = this.getAttribute('save-url') || '';
   
-        this.classList.add("contents");
         this.componentElement = document.createElement('button');
         this.componentElement.id = id;
         this.removeAttribute('id');
@@ -63,6 +62,9 @@ if (!customElements.get('wc-save-button')) {
 
     _applyStyle() {
       const style = `
+        wc-save-button {
+          display: contents;
+        }
         .wc-save-button {
           background-color: var(--primary-bg-color);
           color: var(--primary-color);

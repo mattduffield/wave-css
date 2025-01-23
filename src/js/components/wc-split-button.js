@@ -32,7 +32,6 @@ if (!customElements.get('wc-split-button')) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.classList.add("contents");
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-split-button');
         const splitClass = this.getAttribute('split-class');
@@ -104,6 +103,9 @@ if (!customElements.get('wc-split-button')) {
 
     _applyStyle() {
       const style = `
+        wc-split-button {
+          display: contents;
+        }
         .wc-split-button {
           /* anchor-name: --anchor; */
           display: flex;

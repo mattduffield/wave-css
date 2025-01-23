@@ -13,6 +13,7 @@ if (!customElements.get('wc-script')) {
   class WcScript extends HTMLElement {
     constructor() {
       super();
+      this.classList.add('contents');
     }
 
     connectedCallback() {

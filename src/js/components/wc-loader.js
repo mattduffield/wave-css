@@ -76,6 +76,10 @@ class WcLoader extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-loader {
+        display: contents;
+      }
+
       wc-loader .wc-loader {
         border-width: 16px;
         border-style: solid;

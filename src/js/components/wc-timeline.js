@@ -109,6 +109,10 @@ class WcTimeline extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-timeline {
+        display: contents;
+      }
+        
       .wc-timeline,
       .wc-timeline * {
         box-sizing: border-box;

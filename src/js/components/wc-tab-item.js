@@ -89,6 +89,9 @@ class WcTabItem extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-tab-item {
+        display: contents;
+      }
       .wc-tab-item {
         position: relative;
       }

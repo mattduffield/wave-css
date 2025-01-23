@@ -65,7 +65,11 @@ class WcBaseTemplate extends WcBaseComponent {
   }
 
   _applyStyle() {
-    const style = `.wc-base-template {
+    const style = `
+    wc-base-template {
+      display: contents;
+    }
+    .wc-base-template {
 
     }`.trim();
     this.loadStyle('wc-base-template-style', style);

@@ -26,6 +26,7 @@ if (!customElements.get('wc-visibility-change')) {
 
     constructor() {
       super();
+      this.classList.add('contents');
       this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
       this._pendingAttributes = {};
       this._isConnected = false;

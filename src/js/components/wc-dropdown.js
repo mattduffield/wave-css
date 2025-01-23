@@ -198,6 +198,10 @@ class WcDropdown extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-dropdown {
+        display: contents;
+      }
+
       /* Dropdown Button */
       .wc-dropdown .dropbtn {
         background-color: var(--primary-bg-color);

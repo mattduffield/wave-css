@@ -30,7 +30,6 @@ if (!customElements.get('wc-save-split-button')) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.classList.add("contents");
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-save-split-button');
         this.componentElement.setAttribute('hx-target', '#viewport');
@@ -131,6 +130,9 @@ if (!customElements.get('wc-save-split-button')) {
 
     _applyStyle() {
       const style = `
+        wc-save-split-button {
+          display: contents;
+        }
         .wc-save-split-button {
           /* anchor-name: --save-anchor; */
           display: flex;

@@ -97,6 +97,9 @@ class WcBackgroundImage extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-background-image {
+        display: contents;
+      }
       .wc-background-image {
         position: relative;
         opacity: 0.65;

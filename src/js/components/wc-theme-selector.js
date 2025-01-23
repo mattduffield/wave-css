@@ -152,6 +152,9 @@ class WcThemeSelector extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-theme-selector {
+        display: contents;
+      }
       wc-theme-selector .wc-theme-selector {
 
       }

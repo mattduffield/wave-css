@@ -186,6 +186,10 @@ class WcAccordion extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-accordion {
+        display: contents;
+      }
+
       .wc-accordion .accordion-header {
         background-color: var(--secondary-bg-color);
         color: var(--secondary-color);

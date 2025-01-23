@@ -27,7 +27,6 @@ if (!customElements.get('wc-template-preview')) {
       super();
       this.childComponentSelector = 'wc-input';
       const compEl = this.querySelector('.wc-template-preview');
-      this.classList.add("contents");
       if (compEl) {
         this.componentElement = compEl;
       } else {
@@ -102,6 +101,9 @@ if (!customElements.get('wc-template-preview')) {
 
     _applyStyle() {
       const style = `
+        wc-template-preview {
+          display: contents;
+        }
         .wc-template-preview {
         }
       `.trim();

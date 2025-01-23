@@ -71,7 +71,7 @@ if (!customElements.get('wc-mask-hub')) {
     _applyStyle() {
       const style = `
       wc-mask-hub {
-        display: none;
+        display: contents;
       }
       `;
       this.loadStyle('wc-mask-hub-style', style);

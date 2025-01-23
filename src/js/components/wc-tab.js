@@ -266,6 +266,9 @@ class WcTab extends WcBaseComponent {
 
   _applyStyle() {
     const style = `
+      wc-tab {
+        display: contents;
+      }
       wc-tab .wc-tab {
         position: relative;
         overflow: hidden;
