@@ -103,6 +103,7 @@ export class WcBaseComponent extends HTMLElement {
 
   _render() {
     this.classList.add('contents');
+    console.log('wc-base-component:_render');
   }
 
   async _waitForChild(childRef) {

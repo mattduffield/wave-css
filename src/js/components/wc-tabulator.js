@@ -15,7 +15,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-tabulator')) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class'];
+      return ['id', 'xclass'];
     }
 
     icons = {

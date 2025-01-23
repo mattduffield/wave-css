@@ -370,6 +370,7 @@ var WcBaseComponent = class extends HTMLElement {
   }
   _render() {
     this.classList.add("contents");
+    console.log("wc-base-component:_render");
   }
   async _waitForChild(childRef) {
     return new Promise((resolve) => {
@@ -4224,7 +4225,7 @@ customElements.define("wc-tab", WcTab);
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class"];
+      return ["id", "xclass"];
     }
     icons = {
       "eye": {
