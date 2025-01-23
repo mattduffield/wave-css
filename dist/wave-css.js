@@ -6400,6 +6400,9 @@ if (!customElements.get("wc-event-hub")) {
       const payload = { detail: { selector, subSelector, custom } };
       const customEvent = new CustomEvent(eventName, payload);
       document.body.dispatchEvent(customEvent);
+      if (window.parent.document) {
+        window.parent.document.body.dispatchEvent(customEvent);
+      }
     }
     _applyStyle() {
       const style = `
