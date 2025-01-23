@@ -184,6 +184,7 @@ if (!customElements.get('wc-tabulator')) {
         this.componentElement.id = this.getAttribute('id') || 'wc-tabulator';
         this.appendChild(this.componentElement);      
       }
+      // this.classList.add("contents");
       console.log('ctor:wc-tabulator');
     }
 
@@ -302,7 +303,7 @@ if (!customElements.get('wc-tabulator')) {
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
 
       await this.renderTabulator(options);
-      this.classList.add('contents');
+      // this.classList.add('contents');
     }
 
     async renderTabulator(options) {

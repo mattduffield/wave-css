@@ -4491,7 +4491,6 @@ if (!customElements.get("wc-tabulator")) {
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
       await this.renderTabulator(options);
-      this.classList.add("contents");
     }
     async renderTabulator(options) {
       await Promise.all([
