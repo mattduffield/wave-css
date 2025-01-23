@@ -4225,7 +4225,7 @@ customElements.define("wc-tab", WcTab);
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "xclass"];
+      return ["id", "class"];
     }
     icons = {
       "eye": {
@@ -4402,7 +4402,11 @@ if (!customElements.get("wc-tabulator")) {
       this._unWireEvents();
     }
     async _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue);
+      if (attrName === "name") {
+        this._handleNameToIdLinkage(newValue);
+      } else {
+        this.componentElement.setAttribute(attrName, newValue);
+      }
     }
     _render() {
       super._render();

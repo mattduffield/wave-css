@@ -15,7 +15,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-tabulator')) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'xclass'];
+      return ['id', 'class'];
     }
 
     icons = {
@@ -202,7 +202,12 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     async _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue); 
+      if (attrName === 'name') {
+        this._handleNameToIdLinkage(newValue);
+      } else {
+        this.componentElement.setAttribute(attrName, newValue);
+      }
+      // super._handleAttributeChange(attrName, newValue); 
     }
 
     _render() {
