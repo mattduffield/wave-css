@@ -58,7 +58,7 @@ if (!customElements.get('wc-template-preview')) {
               class="row items-center gap-1"
               lbl-label="Preview"
               type="radio"
-              radio-group-class="row modern text-2xs"
+              radio-group-class="row modern"
               value="off"
               >
               <option value="on">Show</option>
@@ -68,7 +68,7 @@ if (!customElements.get('wc-template-preview')) {
               class="row items-center gap-1 hidden"
               lbl-label="Drag n Drop"
               type="radio"
-              radio-group-class="row modern text-2xs"
+              radio-group-class="row modern"
               value="off"
               >
               <option value="on">Enable</option>

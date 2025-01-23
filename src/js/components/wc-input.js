@@ -162,7 +162,8 @@ class WcInput extends WcBaseFormComponent {
         if (p) {
           elt?.classList.add(p.trim());
         }
-      })
+      });
+      elt?.classList.add('text-2xs');
       // elt?.classList.add(newValue);
     } else if (attrName === 'type') {
       this.formElement?.setAttribute('type', newValue);
