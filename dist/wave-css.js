@@ -6877,9 +6877,9 @@ if (!customElements.get("wc-prompt")) {
           if (result.value !== "") {
             if (c.callback !== void 0) {
               return c.callback(result);
+            } else {
+              return result;
             }
-          } else if (result === true) {
-            return result;
           } else {
             return c.callback(false);
           }
