@@ -81,31 +81,31 @@ if (!customElements.get('wc-prompt')) {
     async success(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
       const {value: result} = await Swal.fire({ icon: 'success', title, text, footer });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async error(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
       const {value: result} = await Swal.fire({ icon: 'error', title, text, footer });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async warning(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
       const {value: result} = await Swal.fire({ icon: 'warning', title, text, footer });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async info(c) {
       const { title = '', text = '', footer = '', callback = null } = c;
       const {value: result} = await Swal.fire({ icon: 'info', title, text, footer });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async question(c) {
       const { title = '', text = '', footer = '', showCancelButton = true, callback = null } = c;
       const {value: result} = await Swal.fire({ icon: 'question', title, text, footer, showCancelButton });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async notify(c) {
@@ -158,7 +158,7 @@ if (!customElements.get('wc-prompt')) {
           }
         }
       });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     async notifyTemplate(c) {
@@ -191,7 +191,7 @@ if (!customElements.get('wc-prompt')) {
         customClass,
         template
       });
-      this.handleResult(c, result);
+      return this.handleResult(c, result);
     }
 
     handleResult(c, result) {
@@ -199,13 +199,15 @@ if (!customElements.get('wc-prompt')) {
         if (result.dismiss !== Swal.DismissReason.cancel) {
           if (result.value !== '') {
             if (c.callback !== undefined) {
-              c.callback(result);
+              return c.callback(result);
             }
+          } else if (result === true) {
+            return result;
           } else {
-            c.callback(false);
+            return c.callback(false);
           }
         } else {
-          c.callback(false);
+          return c.callback(false);
         }
       }
     }
