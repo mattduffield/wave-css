@@ -119,6 +119,7 @@
         title="Email Sent"
         header-filter="input"
         header-menu="headerMenu"
+        formatter="localDatetimeFormatter"
         visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
@@ -284,8 +285,9 @@
       <wc-tabulator-column
         field="releaseDate"
         title="Release Date"
+        formatter="localDatetimeFormatter"
         formatter="datetime"
-        formatter-params='{"inputFormat": "iso", "outputFormat": "MM/dd/yyyy"}'
+        xformatter-params='{"inputFormat": "iso", "outputFormat": "MM/dd/yyyy"}'
         vert-align="middle"
         header-hoz-align="right"
         hoz-align="right"

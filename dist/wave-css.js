@@ -4875,9 +4875,9 @@ if (!customElements.get("wc-tabulator")) {
       label.appendChild(title);
       return label;
     }
-    localDatetimeFormatter(cell, formatterParams, onRendered) {
+    localdatetime(cell, formatterParams, onRendered) {
       let value = cell.getValue();
-      if (!value) return "(No Date)";
+      if (!value) return "";
       let date = new Date(value);
       if (isNaN(date)) return "(Invalid Date)";
       return date.toLocaleString("en-US", {

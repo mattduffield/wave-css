@@ -683,10 +683,11 @@ if (!customElements.get('wc-tabulator')) {
       return label;
     }
 
-    localDatetimeFormatter(cell, formatterParams, onRendered) {
+    localdatetime(cell, formatterParams, onRendered) {
       let value = cell.getValue(); // Get the cell value
       
-      if (!value) return "(No Date)"; // Handle null/undefined values
+      // if (!value) return "(No Date)"; // Handle null/undefined values
+      if (!value) return ""; // Handle null/undefined values
       
       let date = new Date(value); // Convert string/ISODate to Date object
       
@@ -702,7 +703,7 @@ if (!customElements.get('wc-tabulator')) {
           hour12: true
       });
     }
-    
+
     dateEditor(cell, onRendered, success, cancel) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
