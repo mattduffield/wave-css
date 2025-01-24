@@ -4875,6 +4875,20 @@ if (!customElements.get("wc-tabulator")) {
       label.appendChild(title);
       return label;
     }
+    localDatetimeFormatter(cell, formatterParams, onRendered) {
+      let value = cell.getValue();
+      if (!value) return "(No Date)";
+      let date = new Date(value);
+      if (isNaN(date)) return "(Invalid Date)";
+      return date.toLocaleString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+    }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
       input = document.createElement("input");

@@ -683,6 +683,26 @@ if (!customElements.get('wc-tabulator')) {
       return label;
     }
 
+    localDatetimeFormatter(cell, formatterParams, onRendered) {
+      let value = cell.getValue(); // Get the cell value
+      
+      if (!value) return "(No Date)"; // Handle null/undefined values
+      
+      let date = new Date(value); // Convert string/ISODate to Date object
+      
+      if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
+      
+      // Format as "MM/DD/YYYY HH:mm AM/PM"
+      return date.toLocaleString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+      });
+    }
+    
     dateEditor(cell, onRendered, success, cancel) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
