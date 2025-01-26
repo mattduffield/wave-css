@@ -98,7 +98,7 @@ class WcDropdown extends WcBaseComponent {
       btn.classList.add('dropbtn');
       btn.classList.add('grid-round');
       btn.innerHTML = `
-        <svg class="h-5 w-5 pointer-events-none"
+        <svg class="h-5 w-5 align-middle pointer-events-none"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
           <path d="M128 96A64 64 0 1 1 0 96a64 64 0 1 1 128 0zm0 160A64 64 0 1 1 0 256a64 64 0 1 1 128 0zM64 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128zM288 96A64 64 0 1 1 160 96a64 64 0 1 1 128 0zM224 320a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zm96-256a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zM384 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128z"/>
@@ -225,7 +225,7 @@ class WcDropdown extends WcBaseComponent {
       }
       .wc-dropdown .dropbtn.grid-round {
         background-color: transparent;
-        padding: 13px;
+        padding: 4px;
       }
 
       /* The container <div> - needed to position the dropdown content */
