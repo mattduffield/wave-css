@@ -26,6 +26,21 @@
   .color {
     color: var(--color);
   }
+  .color-bg {
+    color: var(--bg-color);
+  }
+  .color-primary-bg {
+    color: var(--primary-bg-color);
+  }
+  .color-secondary-bg {
+    color: var(--secondary-bg-color);
+  }
+  .color-accent-bg {
+    color: var(--accent-bg-color);
+  }
+  .color-component-bg {
+    color: var(--component-bg-color);
+  }
   .primary-bg-color {
     background-color: var(--primary-bg-color);
   }
