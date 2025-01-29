@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      /* overflow: hidden; */
+      background: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      display: block;
+      /* height: 100vh; */
+    }
+    .header {
+      display: flex;
+      min-height: 200px;
+      color: white;
+      font-size: 2.5rem;
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+    .footer {
+      display: flex;
+      height: 200px;
+      color: white;
+      font-size: 2rem;
+      padding: 2rem;
+    }
+    .canvas-container {
+      position: relative;
+    }
+    canvas {
+      border-radius: 8px;
+      border: 1px solid gray;
+      border-radius: 10px;
+      background-color: #111;
+    }
+    .aspect-video {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+    .video {
+      position: absolute;
+      top: -30px;
+      left: calc(50% - (684px / 2));
+      border: 1px solid gray;
+      border-radius: 10px;
+      padding: .5rem;
+      width: 684px;
+    }
+    .video-message {
+      position: absolute;
+      top: 400px;
+      left: calc(50% / (896px / 2));
+      width: 896px;
+      display: flex;
+      color: white;
+      font-size: 2rem;
+      padding: 2rem;
+      text-align: center;
+      pointer-events: none;
+    }    
+  </style>
+</head>
+<body>
+  <div class="header">
+    <p>
+      The first agentic IDE, and then some. The Windsurf Editor is where the work of developers and AI truly flow together, allowing for a coding experience that feels like literal magic.
+    </p>
+  </div>
+  <div class="canvas-container">
+    <canvas id="dotCanvas"></canvas>
+    <div class="video">
+      <iframe class="aspect-video"
+        src="https://www.youtube.com/embed/3xk2qG2QPdU">
+      </iframe>
+    </div>
+    <div class="video-message">
+      <p>
+        The Windsurf Editor is built for the way AI is meant to work with humans. Everything you love in Codeium and more, with unmatched performance and a user experience that keeps you in the flow.
+      </p>
+    </div>
+  </div>
+    <div class="footer">
+    <p>
+      What makes the Windsurf Editor the first AI agentic IDE, and then some?
+    </p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('dotCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size
+    canvas.width = window.innerWidth * 0.95;
+    canvas.height = window.innerHeight * 0.95;
+
+    // Configuration
+    const config = {
+      dotSpacing: 20,
+      dotRadius: 1.25,
+      highlightRadius: 160,
+      defaultColor: '#444',
+      highlightColor: '#40E0D0',
+      backgroundColor: '#111111',
+      animationSpeed: 0.15  // Speed of highlight movement (0-1)
+    };
+
+    // Calculate number of dots
+    const cols = Math.floor(canvas.width / config.dotSpacing);
+    const rows = Math.floor(canvas.height / config.dotSpacing);
+
+    // Store positions
+    let mouseX = canvas.width / 2;
+    let mouseY = canvas.height / 2;
+    let highlightX = canvas.width / 2;
+    let highlightY = canvas.height / 2;
+    let isMouseOnCanvas = false;
+    // let targetX = canvas.width / 2;
+    //let targetY = canvas.height / 2;
+    let targetX = 0;
+    let targetY = 0;
+
+    // Update mouse position
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      if (isMouseOnCanvas) {
+        targetX = mouseX;
+        targetY = mouseY;
+      }
+    });
+
+    // Handle mouse enter/leave
+    canvas.addEventListener('mouseenter', (e) => {
+      isMouseOnCanvas = true;
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      targetX = mouseX;
+      targetY = mouseY;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isMouseOnCanvas = false;
+      //targetX = canvas.width / 2;
+      //targetY = canvas.height / 2;      
+      targetX = 0;
+      targetY = 0;
+    });
+
+    // Draw function
+    function draw() {
+      // Clear canvas
+      ctx.fillStyle = config.backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Animate highlight position
+      highlightX += (targetX - highlightX) * config.animationSpeed;
+      highlightY += (targetY - highlightY) * config.animationSpeed;
+
+      // First pass: Draw all dots in default color
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = (i + 0.5) * config.dotSpacing;
+          const y = (j + 0.5) * config.dotSpacing;
+
+          ctx.fillStyle = config.defaultColor;
+          ctx.beginPath();
+          ctx.arc(x, y, config.dotRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Second pass: Draw highlight dots (with gradual fade when mouse leaves)
+      const distanceToTarget = Math.sqrt(
+        Math.pow(highlightX - targetX, 2) + 
+        Math.pow(highlightY - targetY, 2)
+      );
+      const isNearTarget = distanceToTarget < 1;
+
+      // if (!isMouseOnCanvas && isNearTarget) {
+      if (!isMouseOnCanvas) {
+        // Don't draw highlight when centered and mouse is off canvas
+        return requestAnimationFrame(draw);
+      }
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = (i + 0.5) * config.dotSpacing;
+          const y = (j + 0.5) * config.dotSpacing;
+
+          const dx = x - highlightX;
+          const dy = y - highlightY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < config.highlightRadius) {
+            const intensity = Math.pow(1 - (distance / config.highlightRadius), 2);
+            // Fade out highlight as it returns to center
+            const fadeMultiplier = isMouseOnCanvas ? 1 : Math.max(0, 1 - (isNearTarget ? 1 : 0));
+            ctx.fillStyle = config.highlightColor;
+            ctx.globalAlpha = intensity * fadeMultiplier;
+            ctx.beginPath();
+            ctx.arc(x, y, config.dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      // Reset global alpha
+      ctx.globalAlpha = 1;
+
+      // Request next frame
+      requestAnimationFrame(draw);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth * 0.95;
+      canvas.height = window.innerHeight * 0.95;
+      // Update center position
+      if (!isMouseOnCanvas) {
+        targetX = canvas.width / 2;
+        targetY = canvas.height / 2;
+      }
+    });
+
+    // Start animation
+    draw();
+  </script>
+</body>
+</html>

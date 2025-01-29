@@ -88,3 +88,87 @@ python3 -m http.server 3015
 ## References
 https://fabricweb.z5.web.core.windows.net/pr-deploy-site/refs/heads/master/theming-designer/
 https://m2.material.io/design/color/the-color-system.html#color-theme-creation
+
+
+
+  .theme-rose      { --hue: 0; }
+  .theme-petal     { --hue: 5; }
+  .theme-sunset    { --hue: 10; }
+  .theme-peach     { --hue: 15; }
+  .theme-fire      { --hue: 20; }
+  .theme-desert    { --hue: 30; }
+  .theme-golden    { --hue: 45; }
+  .theme-honey     { --hue: 50; }
+  .theme-amber     { --hue: 55; }
+  .theme-olive     { --hue: 65; } 
+  .theme-moss      { --hue: 75; } 
+  .theme-avocado   { --hue: 85; } 
+  .theme-lime      { --hue: 90; }
+  .theme-fern      { --hue: 95; } 
+  .theme-meadow    { --hue: 105; }
+  .theme-cornsilk  { --hue: 108; } 
+  .theme-sage      { --hue: 110; }
+  .theme-forest    { --hue: 120; }
+  .theme-jungle    { --hue: 130; }
+  .theme-emerald   { --hue: 140; }
+  .theme-mint      { --hue: 150; }
+  .theme-turquoise { --hue: 160; }
+  .theme-aqua      { --hue: 170; }
+  .theme-lagoon    { --hue: 180; }
+  .theme-ice       { --hue: 190; }
+  .theme-ocean     { --hue: 200; }
+  .theme-azure     { --hue: 210; }
+  .theme-sky       { --hue: 220; }
+  .theme-midsky    { --hue: 230; }
+  .theme-deepsky   { --hue: 240; }
+  .theme-royal     { --hue: 250; }
+  .theme-twilight  { --hue: 260; }
+  .theme-lavender  { --hue: 275; }
+  .theme-violet    { --hue: 290; }
+  .theme-grape     { --hue: 300; }
+  .theme-plum      { --hue: 320; }
+  .theme-fuchsia   { --hue: 330; }
+  .theme-cottoncandy { --hue: 340; }
+  .theme-blush     { --hue: 350; }
+  .theme-bubblegum { --hue: 355; }
+
+  .theme-rose,
+  .theme-petal,
+  .theme-sunset,
+  .theme-peach,
+  .theme-fire,
+  .theme-desert,
+  .theme-golden,
+  .theme-honey,
+  .theme-amber,
+  .theme-olive,
+  .theme-moss,
+  .theme-avocado,
+  .theme-lime,
+  .theme-fern,
+  .theme-meadow,
+  .theme-cornsilk,
+  .theme-sage,
+  .theme-forest,
+  .theme-jungle,
+  .theme-emerald,
+  .theme-mint,
+  .theme-turquoise,
+  .theme-aqua,
+  .theme-lagoon,
+  .theme-ice,
+  .theme-ocean,
+  .theme-azure,
+  .theme-sky,
+  .theme-midsky,
+  .theme-deepsky,
+  .theme-royal,
+  .theme-twilight,
+  .theme-lavender,
+  .theme-violet,
+  .theme-grape,
+  .theme-plum,
+  .theme-fuchsia,
+  .theme-cottoncandy,
+  .theme-blush,
+  .theme-bubblegum,

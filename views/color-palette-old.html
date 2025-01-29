@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <style>
+    @layer wc.vars {
+      html {
+        --hue: 63;
+        
+        --swatch-1: oklch(99% .05 var(--hue));
+        --swatch-2: oklch(90% .1 var(--hue));
+        --swatch-3: oklch(80% .2 var(--hue));
+        --swatch-4: oklch(72% .25 var(--hue));
+        --swatch-5: oklch(67% .31 var(--hue));
+        --swatch-6: oklch(50% .27 var(--hue));
+        --swatch-7: oklch(35% .25 var(--hue));
+        --swatch-8: oklch(25% .2 var(--hue));
+        --swatch-9: oklch(13% .2 var(--hue));
+        --swatch-10: oklch(5% .1 var(--hue));
+        
+        --text-1: var(--swatch-1);
+        --text-2: var(--swatch-2);
+        --surface-1: var(--swatch-10);
+        --surface-2: var(--swatch-9);
+        --surface-3: var(--swatch-8);
+      }
+
+      [data-theme="rose"]      { --hue: 0; }
+      [data-theme="petal"]     { --hue: 5; }
+      [data-theme="sunset"]    { --hue: 10; }
+      [data-theme="peach"]     { --hue: 15; }
+      [data-theme="fire"]      { --hue: 20; }
+      [data-theme="desert"]    { --hue: 30; }
+      [data-theme="golden"]    { --hue: 45; }
+      [data-theme="honey"]     { --hue: 50; }
+      [data-theme="amber"]     { --hue: 55; }
+      [data-theme="olive"]     { --hue: 65; } 
+      [data-theme="moss"]      { --hue: 75; } 
+      [data-theme="avocado"]   { --hue: 85; } 
+      [data-theme="lime"]      { --hue: 90; }
+      [data-theme="fern"]      { --hue: 95; } 
+      [data-theme="meadow"]    { --hue: 105; }
+      [data-theme="cornsilk"]  { --hue: 108; } 
+      [data-theme="sage"]      { --hue: 110; }
+      [data-theme="forest"]    { --hue: 120; }
+      [data-theme="jungle"]    { --hue: 130; }
+      [data-theme="emerald"]   { --hue: 140; }
+      [data-theme="mint"]      { --hue: 150; }
+      [data-theme="turquoise"] { --hue: 160; }
+      [data-theme="aqua"]      { --hue: 170; }
+      [data-theme="lagoon"]    { --hue: 180; }
+      [data-theme="ice"]       { --hue: 190; }
+      [data-theme="ocean"]     { --hue: 200; }
+      [data-theme="azure"]     { --hue: 210; }
+      [data-theme="sky"]       { --hue: 220; }
+      [data-theme="midsky"]    { --hue: 230; }
+      [data-theme="deepsky"]   { --hue: 240; }
+      [data-theme="royal"]     { --hue: 250; }
+      [data-theme="twilight"]  { --hue: 260; }
+      [data-theme="lavender"]  { --hue: 275; }
+      [data-theme="violet"]    { --hue: 290; }
+      [data-theme="grape"]     { --hue: 300; }
+      [data-theme="plum"]      { --hue: 320; }
+      [data-theme="fuchsia"]   { --hue: 330; }
+      [data-theme="cottoncandy"] { --hue: 340; }
+      [data-theme="blush"]     { --hue: 350; }
+      [data-theme="bubblegum"] { --hue: 355; }
+
+
+      @media (prefers-color-scheme: light) {
+        html {
+          --text-1: var(--swatch-10);
+          --text-2: var(--swatch-9);
+          --surface-1: var(--swatch-1);
+          --surface-2: var(--swatch-2);
+          --surface-3: var(--swatch-3);
+        }
+      }
+    }
+
+    @layer wc.usage {
+      html {
+        background: var(--surface-1);
+        color: var(--text-1);
+      }
+      
+      small {
+        color: var(--text-2);
+      }
+      
+      .swatch {
+        box-shadow: inset 0 0 0 1px oklch(50% 0 0 / 20%);
+      }
+      
+      .swatch:nth-of-type(1)  { background: var(--swatch-1); }
+      .swatch:nth-of-type(2)  { background: var(--swatch-2); }
+      .swatch:nth-of-type(3)  { background: var(--swatch-3); }
+      .swatch:nth-of-type(4)  { background: var(--swatch-4); }
+      .swatch:nth-of-type(5)  { background: var(--swatch-5); }
+      .swatch:nth-of-type(6)  { background: var(--swatch-6); }
+      .swatch:nth-of-type(7)  { background: var(--swatch-7); }
+      .swatch:nth-of-type(8)  { background: var(--swatch-8); }
+      .swatch:nth-of-type(9)  { background: var(--swatch-9); }
+      .swatch:nth-of-type(10) { background: var(--swatch-10); }
+    }
+
+    @layer wc.palette {
+      .palette {
+        display: grid;
+        grid-auto-rows: 8vh;
+        grid-template-columns: 20vw;
+      }
+    }
+
+    @layer wc.card {
+      .card {
+        display: grid;
+        gap: 1ch;
+        border-radius: 10px;
+        background: var(--surface-2);
+        border: 1px solid var(--surface-3);
+        padding: 1rem;
+      }
+    }
+
+    @layer wc.support {
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      html {
+        block-size: 100%;
+        color-scheme: dark light;
+      }
+
+      body {
+        min-block-size: 100%;
+        font-family: system-ui, sans-serif;
+
+        display: grid;
+        place-content: center;
+        gap: 5vmin;
+        grid-auto-flow: column;
+      }
+      
+      p {
+        max-inline-size: 40ch;
+      }
+      
+      article {
+        display: grid;
+        gap: 2ch;
+        align-content: start;
+      }
+    }
+  </style>
+
+</head>
+
+<body class="col-1 h-full text-sm">
+
+ <div class="palette">
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+  <div class="swatch"></div>
+</div>
+
+  <article>
+    <select onchange="setTheme(this.value)" size="10">
+      <option value="rose">Rose</option>
+      <option value="petal">Petal</option>
+      <option value="sunset">Sunset</option>
+      <option value="peach">Peach</option>
+      <option value="fire">Fire</option>
+      <option value="desert">Desert</option>
+      <option value="golden">Golden</option>
+      <option value="honey">Honey</option>
+      <option value="amber">Amber</option>
+      <option value="olive">Olive</option>
+      <option value="moss">Moss</option>
+      <option value="avocado">Avocado</option>
+      <option value="lime">Lime</option>
+      <option value="fern">Fern</option>
+      <option value="meadow">Meadow</option>
+      <option value="cornsilk">Cornsilk</option>
+      <option value="sage">Sage</option>
+      <option value="forest">Forest</option>
+      <option value="jungle">Jungle</option>
+      <option value="emerald">Emerald</option>
+      <option value="mint">Mint</option>
+      <option value="turquoise">Turquoise</option>
+      <option value="aqua">Aqua</option>
+      <option value="lagoon">Lagoon</option>
+      <option value="ice">Ice</option>
+      <option value="ocean">Ocean</option>
+      <option value="azure">Azure</option>
+      <option value="sky">Sky</option>
+      <option value="midsky">Mid Sky</option>
+      <option value="deepsky">Deep Sky</option>
+      <option value="royal">Royal</option>
+      <option value="twilight">Twilight</option>
+      <option value="lavender">Lavender</option>
+      <option value="violet">Violet</option>
+      <option value="grape">Grape</option>
+      <option value="plum">Plum</option>
+      <option value="fuchsia">Fuchsia</option>
+      <option value="cottoncandy">Cotton Candy</option>
+      <option value="blush">Blush</option>
+      <option value="bubblegum">Bubblegum</option>
+    </select>
+
+
+    <header>
+      <h2>Text Usage</h2>
+      <small>Lorem ipsum dolor</small>
+    </header>
+    <div class="card">
+      <h2>I'm a card</h2>
+      <small>Lorem ipsum dolor</small>
+      <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque doloremque modi veniam aspernatur voluptatum labore dolores perspiciatis.</p>
+    </div>
+  </article>
+
+  <script>
+    function setTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("theme") || "plum";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+
+    document.addEventListener("DOMContentLoaded", loadTheme);
+  </script>
+</body>
+</html>

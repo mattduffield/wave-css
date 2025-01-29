@@ -138,6 +138,10 @@ class WcSelect extends WcBaseFormComponent {
       select.multiple = true;
       select.setAttribute('multiple', '');
     }
+    const size = this.getAttribute('size');
+    if (size) {
+      select.setAttribute('size', size);
+    }
     options.forEach(opt => {
       select.appendChild(opt)
     });

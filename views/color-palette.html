@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="/src/css/main.css">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+
+</head>
+
+<body>
+
+  <div class="palette">
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+    <div class="swatch"></div>
+  </div>
+
+  <article>
+    <wc-select onchange="setTheme(this.value)" size="10">
+      <option value="rose" selected>Rose</option>
+      <option value="petal">Petal</option>
+      <option value="sunset">Sunset</option>
+      <option value="peach">Peach</option>
+      <option value="fire">Fire</option>
+      <option value="desert">Desert</option>
+      <option value="golden">Golden</option>
+      <option value="honey">Honey</option>
+      <option value="amber">Amber</option>
+      <option value="olive">Olive</option>
+      <option value="moss">Moss</option>
+      <option value="avocado">Avocado</option>
+      <option value="lime">Lime</option>
+      <option value="fern">Fern</option>
+      <option value="meadow">Meadow</option>
+      <option value="cornsilk">Cornsilk</option>
+      <option value="sage">Sage</option>
+      <option value="forest">Forest</option>
+      <option value="jungle">Jungle</option>
+      <option value="emerald">Emerald</option>
+      <option value="mint">Mint</option>
+      <option value="turquoise">Turquoise</option>
+      <option value="aqua">Aqua</option>
+      <option value="lagoon">Lagoon</option>
+      <option value="ice">Ice</option>
+      <option value="ocean">Ocean</option>
+      <option value="azure">Azure</option>
+      <option value="sky">Sky</option>
+      <option value="midsky">Mid Sky</option>
+      <option value="deepsky">Deep Sky</option>
+      <option value="royal">Royal</option>
+      <option value="twilight">Twilight</option>
+      <option value="lavender">Lavender</option>
+      <option value="violet">Violet</option>
+      <option value="grape">Grape</option>
+      <option value="plum">Plum</option>
+      <option value="fuchsia">Fuchsia</option>
+      <option value="cottoncandy">Cotton Candy</option>
+      <option value="blush">Blush</option>
+      <option value="bubblegum">Bubblegum</option>
+    </wc-select>
+
+
+    <header>
+      <h2>Text Usage</h2>
+      <small>Lorem ipsum dolor</small>
+    </header>
+
+    <div class="card">
+      <h2>I'm a card</h2>
+      <small>Lorem ipsum dolor</small>
+      <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque doloremque modi veniam aspernatur voluptatum labore dolores perspiciatis.</p>
+      <div class="row gap-4">
+        <wc-input class="col" name="first_name" lbl-label="First" value="" placeholder="First..."></wc-input>
+        <wc-input class="col" name="last_name" lbl-label="Last" value="Duffield" disabled></wc-input>
+      </div>
+      <div class="row gap-4 justify-end items-end">
+        <button disabled>Cancel</button>
+        <button>Save</button>
+    </div>
+
+    <div class="container">
+      <div class="col gap-4">
+        <div class="row gap-4">
+          <wc-input class="col" name="first_name" lbl-label="First" value=""></wc-input>
+          <wc-input class="col" name="last_name" lbl-label="Last" value=""></wc-input>
+        </div>
+
+        <div class="row-wrap gap-4">
+          <wc-select name="favorite_color"
+            class="col-1"
+            lbl-label="Fav. Color"
+            value="green">
+            <option value="red">Red</option>
+            <option value="green" selected>Green</option>
+            <option value="blue">Blue</option>
+          </wc-select>
+          <wc-select name="favorite_color2"
+            class="col-1"
+            lbl-label="Fav. Color 2"
+            value="green"
+            disabled>
+            <option value="red">Red</option>
+            <option value="green" selected>Green</option>
+            <option value="blue">Blue</option>
+          </wc-select>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-select name="gender1" 
+            class="col-1"
+            lbl-label="Gender 1"
+            value="male"
+            items='[{"key": "Female", "value": "female"}, {"key": "Male", "value": "male"}]'
+            required>
+          </wc-select>
+          <wc-select name="gender2" 
+            class="col-1"
+            lbl-label="Gender 2"
+            value="male"
+            display-member="label"
+            items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'
+            disabled>
+          </wc-select>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-select name="favorite_fruit1"
+            mode="chip"
+            class="col-1"
+            lbl-label="Fav. Fruit 1"
+            multiple
+            required>
+            <option value="apple" selected>Apple</option>
+            <option value="banana">Banana</option>
+            <option value="cherry">Cherry</option>
+            <option value="date" selected>Date</option>
+            <option value="elderberry">Elderberry</option>        
+            <option value="huckleberry">Huckleberry</option>        
+            <option value="raspberry">Raspberry</option>        
+            <option value="strawberry">Strawberry</option>        
+          </wc-select>
+          <wc-select name="favorite_fruit2"
+            mode="chip"
+            class="col-1"
+            lbl-label="Fav. Fruit 2"
+            multiple
+            disabled>
+            <option value="apple">Apple</option>
+            <option value="banana" selected>Banana</option>
+            <option value="cherry">Cherry</option>
+            <option value="date">Date</option>
+            <option value="elderberry">Elderberry</option>        
+          </wc-select>
+          <wc-select name="favorite_fruit3" 
+            mode="chip"
+            class="col-1"
+            lbl-label="Fav. Fruit 3"
+            display-member="label"
+            items='[{"label": "Apple", "value": "apple"}, {"label": "Banana", "value": "banana", "selected": true}, {"label": "Cherry", "value": "cherry"}]'
+            multiple>
+          </wc-select>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-select name="favorite_fruit4"
+            mode="chip"
+            class="col-1"
+            lbl-label="Fav. Fruit 4"
+            multiple
+            required>
+            <option value="apple">Apple</option>
+            <option value="banana">Banana</option>
+            <option value="cherry">Cherry</option>
+            <option value="date">Date</option>
+            <option value="elderberry">Elderberry</option>        
+            <option value="huckleberry">Huckleberry</option>        
+            <option value="raspberry">Raspberry</option>        
+            <option value="strawberry">Strawberry</option>        
+          </wc-select>
+        </div>    
+        <div class="row-wrap gap-4">
+          <wc-select name="favorite_fruit3"
+            mode="multiple"
+            class="col-1"
+            lbl-label="Fav. Fruit 3"
+            multiple>
+            <option value="apple" selected>Apple</option>
+            <option value="banana">Banana</option>
+            <option value="cherry" selected>Cherry</option>
+            <option value="date">Date</option>
+            <option value="elderberry">Elderberry</option>        
+          </wc-select>
+          <wc-select name="favorite_fruit4"
+            mode="multiple"
+            class="col-1"
+            lbl-label="Fav. Fruit 4"
+            disabled
+            multiple>
+            <option value="apple" selected>Apple</option>
+            <option value="banana">Banana</option>
+            <option value="cherry" selected>Cherry</option>
+            <option value="date">Date</option>
+            <option value="elderberry">Elderberry</option>        
+          </wc-select>
+        </div>
+
+        <div class="row-wrap gap-4">
+          <wc-input name="first_name"
+            class="col-1"
+            value="John"
+            lbl-label="First Name"
+            autocomplete="first_name"
+            minlength="2"
+            maxlength="5"
+            required>
+          </wc-input>
+          <wc-input name="middle_name"
+            class="col-1"
+            value="H"
+            lbl-label="Middle Name"
+            autocomplete="middle_name"
+            readonly>
+          </wc-input>
+          <wc-input name="last_name"
+            class="col-1"
+            value="Doe"
+            lbl-label="Last Name"
+            autocomplete="last_name"
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="budget"
+            class="col"
+            lbl-label="Budget"
+            type="number"
+            min="1"
+            max="1000">
+          </wc-input>
+          <wc-input name="credit_score"
+            class="col"
+            value="500"
+            lbl-label="Credit Score"
+            type="number"
+            min="1"
+            max="1000"
+            required
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="budget1"
+            class="col"
+            value="1500.00"
+            lbl-label="Budget 1"
+            type="currency"
+            step="0.01"
+            min="1"
+            max="10000">
+          </wc-input>
+          <wc-input name="budget2"
+            class="col"
+            value="1500.00"
+            lbl-label="Budget 2"
+            type="currency"
+            step="0.01"
+            min="1"
+            max="10000"
+            readonly>
+          </wc-input>
+          <wc-input name="budget3"
+            class="col"
+            value="1500.00"
+            lbl-label="Budget 3"
+            type="currency"
+            step="0.01"
+            min="1"
+            max="10000"
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="email1"
+            class="col"
+            lbl-label="Email 1"
+            type="email"
+            value="john@doe.com">
+          </wc-input>
+          <wc-input name="email2"
+            class="col"
+            lbl-label="Email 2"
+            type="email"
+            value="john@doe.com"
+            readonly>
+          </wc-input>
+          <wc-input name="email3"
+            class="col"
+            lbl-label="Email 3"
+            type="email"
+            value="john@doe.com"
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="phone1"
+            class="col"
+            lbl-label="Phone 1"
+            type="tel"
+            value="8005551212">
+          </wc-input>
+          <wc-input name="phone2"
+            class="col"
+            lbl-label="Phone 2"
+            type="tel"
+            value="8005551212"
+            readonly>
+          </wc-input>
+          <wc-input name="phone3"
+            class="col"
+            lbl-label="Phone 3"
+            type="tel"
+            value="8005551212"
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="appointment_date"
+            class="col"
+            value=""
+            lbl-label="Appointment"
+            type="date"
+            min="2023-01-01"
+            max="2024-12-31"
+            required>
+          </wc-input>
+          <wc-input name="appointment_time"
+            class="col"
+            value=""
+            lbl-label="Appointment Time"
+            type="time"
+            min="09:00"
+            max="18:00"
+            required>
+          </wc-input>
+          <wc-input name="appointment_week"
+            class="col"
+            value=""
+            lbl-label="Appointment Week"
+            type="week"
+            min="2024-W01"
+            max="2024-W22"
+            required>
+          </wc-input>
+          <wc-input name="appointment_month"
+            class="col"
+            value=""
+            lbl-label="Appointment Month"
+            type="month"
+            min="2024-01"
+            max="2024-06"
+            required>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="season1"
+            class="col"
+            value="50"
+            lbl-label="Season 1"
+            type="range"
+            min="1"
+            max="100"
+            step="1"
+            required>
+          </wc-input>
+          <wc-input name="season2"
+            class="col"
+            value="25"
+            lbl-label="Season 2"
+            type="range"
+            min="1"
+            max="100"
+            step="1"
+            disabled>
+          </wc-input>
+        </div>
+        <div class="row-wrap gap-4">
+          <wc-input name="is_active1"
+            class="col"
+            lbl-label="Is Active 1?"
+            type="checkbox"
+            checked>
+          </wc-input>
+          <wc-input name="is_active2"
+            class="col"
+            lbl-label="Is Active 2?"
+            type="checkbox"
+            checked
+            disabled>
+          </wc-input>
+          <wc-input name="is_eligible1"
+            class="col"
+            lbl-label="Is Eligible 1?"
+            type="checkbox"
+            toggle-switch>
+          </wc-input>
+          <wc-input name="is_eligible2"
+            class="col"
+            lbl-label="Is Eligible 2?"
+            type="checkbox"
+            toggle-switch
+            disabled>
+          </wc-input>
+        </div>
+
+        <div class="row-wrap gap-4">
+          <wc-input name="gender1"
+            lbl-label="Gender 1"
+            type="radio"
+            radio-group-class="row"
+            value="male"
+            options='[
+              {"key": "Female", "value": "female"}, 
+              {"key": "Male", "value": "male"},
+              {"key": "Other", "value": "other"}
+            ]'>
+          </wc-input>
+          <wc-input name="gender2"
+            lbl-label="Gender 2"
+            type="radio"
+            radio-group-class="row"
+            value="male"
+            options='[
+              {"key": "Female", "value": "female"}, 
+              {"key": "Male", "value": "male"},
+              {"key": "Other", "value": "other"}
+            ]'
+            disabled>
+          </wc-input>
+          <wc-input name="gender3"
+            lbl-label="Gender 3"
+            type="radio"
+            radio-group-class="row modern"
+            value="male">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </wc-input>
+          <wc-input name="gender4"
+            lbl-label="Gender 4"
+            type="radio"
+            radio-group-class="row modern"
+            value="other"
+            options='[
+              {"key": "Female", "value": "female"}, 
+              {"key": "Male", "value": "male"},
+              {"key": "Other", "value": "other"}
+            ]'
+            disabled>
+          </wc-input>
+        </div>
+
+        <div class="row-wrap gap-4">
+          <wc-input name="marital_status1"
+            lbl-label="Marital Status 1"
+            type="radio"
+            radio-group-class="col"
+            value="married"
+            options='[
+              {"key": "Single", "value": "single"}, 
+              {"key": "Married", "value": "married"},
+              {"key": "Divorced", "value": "divorced"},
+              {"key": "Widowed", "value": "widowed"}
+            ]'>
+          </wc-input>
+          <wc-input name="marital_status2"
+            lbl-label="Marital Status 2"
+            type="radio"
+            radio-group-class="col"
+            value="married"
+            options='[
+              {"key": "Single", "value": "single"}, 
+              {"key": "Married", "value": "married"},
+              {"key": "Divorced", "value": "divorced"},
+              {"key": "Widowed", "value": "widowed"}
+            ]'
+            disabled>
+          </wc-input>
+        </div>
+
+        <div class="row-wrap gap-4">
+          <wc-textarea class="col-1"
+            lbl-label="Comments"
+            rows="5"
+            name="comments"
+            value="10/10/2024 - First comment..."
+            placeholder="Enter comments here..."
+            required></wc-textarea>
+          <wc-textarea class="col-1"
+            lbl-label="Notes"
+            rows="5"
+            name="notes"
+            value="test note"
+            placeholder="Enter comments here..."
+            readonly>
+            10/30/2024 - Had a call with the client. They want to move forward.
+            10/28/2024 - Had initial call with the client. They want to think about it.
+          </wc-textarea>
+          <wc-textarea class="col-1"
+            lbl-label="Remarks"
+            rows="5"
+            name="remarks"
+            placeholder="Enter comments here..."
+            disabled>
+            10/30/2024 - Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            10/28/2024 - Lorem culpa qui officia deserunt mollit anim id est laborum.
+          </wc-textarea>
+        </div>
+        <div class="row-wrap gap-3">
+          <button type="button" class="theme-sky">Submit</button>
+          <button type="button"  class="theme-sky" disabled>Validate</button>
+          <button type="button" class="theme-emerald">Accept</button>
+          <button type="button"  class="theme-emerald" disabled>Accept</button>
+          <button type="button" class="theme-amber">Cancel</button>
+          <button type="button"  class="theme-amber" disabled>Cancel</button>
+          <button type="button" class="theme-grape">Confirm</button>
+          <button type="button"  class="theme-grape" disabled>Confirm</button>
+        </div>
+        
+        <button>Save</button>
+      </div>
+    </div>
+  </article>
+
+
+  <wc-event-hub></wc-event-hub>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+
+
+  <script>
+    function setTheme(theme) {
+      const themeClass = `theme-${theme}`;
+      document.documentElement.classList.forEach(cls => {
+        if (cls.startsWith("theme-")) {
+          document.documentElement.classList.remove(cls);
+        }
+      });
+      document.documentElement.classList.add(themeClass);
+      localStorage.setItem("theme", themeClass);
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("theme") || "plum";
+       document.documentElement.classList.add(savedTheme);
+    }
+
+    document.addEventListener("DOMContentLoaded", loadTheme);
+  </script>
+  <script type="module" src="./index.js"></script>
+</body>
+</html>

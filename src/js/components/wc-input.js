@@ -309,6 +309,111 @@ class WcInput extends WcBaseFormComponent {
       wc-input {
         display: contents;
       }
+      /*
+      wc-input label {
+        margin-bottom: 0.250rem;
+      }
+      wc-input input {
+        background-color: var(--surface-3);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.375rem;
+        color: var(--text-1);
+        padding: 0.375rem;
+      }
+      wc-input input:-webkit-autofill {
+        background-color: var(--surface-3);
+        color: var(--surface-4);
+        box-shadow: 0 0 0px 1000px var(--surface-3) inset;
+        -webkit-text-fill-color: var(--text-1);
+        transition: background-color 5000s ease-in-out 0s;
+      }
+      input:focus-visible {
+        outline: var(--surface-4) solid 2px;
+        outline-offset: 0px;
+      }
+      input:user-invalid {
+        outline: solid 2px var(--invalid-color);
+        outline-offset: 0px;
+      }
+      input[type="checkbox"],
+      input[type="range"] {
+        background-color: var(--component-bg-color);
+        border: 1px solid var(--component-border-color);
+        accent-color: var(--component-bg-color);
+      }
+      input[type="checkbox"]:hover,
+      input[type="range"]:hover {
+        accent-color: var(--primary-bg-color);
+      }
+      input[type="button"] {
+        position: relative;
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-bg-color);
+        border: none;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      input[type="button"]:focus-visible {
+        outline: var(--primary-bg-color) solid 2px;
+        outline-offset: 2px;  
+      }
+      input[type="button"]:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+      input[type="button"]:hover:not(:disabled) {
+        background-color: var(--primary-alt-bg-color);
+      }
+      */
+
+
+      div.wc-input :disabled:not(.toggle-checkbox),
+      div.wc-textarea :disabled,
+      div.wc-select :disabled,
+      div.wc-code-mirror :disabled 
+      {
+        cursor: not-allowed;
+        opacity: 0.7;
+        font-style: italic;  
+      }
+      div.wc-input label:has(:disabled),
+      div.wc-textarea label:has(:disabled),
+      div.wc-select label:has(:disabled),
+      div.wc-code-mirror label:has(:disabled)
+      {
+        cursor: not-allowed;
+      }
+      div.wc-input:has(:disabled) label,
+      div.wc-textarea:has(:disabled) label,
+      div.wc-select:has(:disabled) label,
+      div.wc-code-mirror:has(:disabled) label
+      {
+        opacity: 0.7;
+        font-style: italic;
+      }
+      div.wc-input:has(:required) label,
+      div.wc-textarea:has(:required) label,
+      div.wc-select:has(:required) label,
+      /*div.wc-code-mirror:has(:required) label*/
+      div.wc-code-mirror[required] label
+      {
+        font-weight: bold;
+      }
+      div.wc-input:has(:required) label::after,
+      div.wc-textarea:has(:required) label::after,
+      div.wc-select:has(:required) label::after,
+      /*div.wc-code-mirror:has(:required) label::after*/
+      div.wc-code-mirror[required] label::after
+      {
+        content: ' *';
+        font-weight: bold;
+      }
+
+
+
 
       wc-input .toggle-wrapper {
         position: relative;
@@ -333,7 +438,7 @@ class WcInput extends WcBaseFormComponent {
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--white-color);
+        background-color: var(--toggle-off);
         border: 1px solid var(--component-border-color);
         border-radius: 25px;
         /* cursor: pointer; */
@@ -341,9 +446,10 @@ class WcInput extends WcBaseFormComponent {
         pointer-events: none;
       }
 
-      .dark wc-input .toggle-switch {
-        background-color: var(--white-color);
+      .xdark wc-input .toggle-switch {
+        background-color: var(--toggle-off);
         border: 1px solid var(--component-border-color);
+        transition: background-color 0.25s;
       }
 
       wc-input .toggle-switch::before {
@@ -353,19 +459,19 @@ class WcInput extends WcBaseFormComponent {
         width: 15px;
         left: 2px;
         bottom: 2px;
-        background-color: var(--accent-bg-color);
-        border: 1px solid var(--secondary-bg-color);
+        background-color: var(--primary-bg-color);
+        border: 1px solid var(--toggle-off);
         border-radius: 50%;
         transition: transform 0.4s;
       }
-      wc-input .toggle-checkbox:hover:not(:disabled) + .toggle-switch::before {
-        background-color: var(--secondary-bg-color);
-      }
 
-      wc-input .toggle-checkbox:checked + .toggle-switch {
-        background-color: var(--component-bg-color);
+      wc-input .toggle-checkbox:checked + .toggle-switch::before {
+        border: 1px solid var(--toggle-on);
       }
-      .dark wc-input .toggle-checkbox:checked + .toggle-switch {
+      wc-input .toggle-checkbox:checked + .toggle-switch {
+        background-color: var(--toggle-on);
+      }
+      .xdark wc-input .toggle-checkbox:checked + .toggle-switch {
         background-color: var(--component-bg-color);
       }
 
@@ -381,11 +487,11 @@ class WcInput extends WcBaseFormComponent {
 
 
       wc-input .radio-group {
-        display: flex;
+        display: inline-flex;
         min-height: 20.5px;
       }
       wc-input .radio-group:not(.modern) {
-        gap: 0.5rem;
+        gap: 0.875rem;
       }
       wc-input .radio-group .radio-option {
         display: inline-flex;
@@ -402,14 +508,14 @@ class WcInput extends WcBaseFormComponent {
         align-self: self-start;
       }
       wc-input .radio-group.modern {
-        border: 1px solid var(--accent-bg-color);
+        border: 1px solid var(--component-bg-color);
         border-radius: 5px;
       }
       wc-input .radio-group.modern .radio-option {
         padding: 0 0.5rem;
-        background-color: var(--accent-bg-color);
+        background-color: var(--component-bg-color);
         color: var(--primary-color);
-        border-right: 1px solid var(--accent-bg-color);
+        border-right: 1px solid var(--component-bg-color);
       }
       wc-input .radio-group.modern .radio-option:first-child {
         border-top-left-radius: 5px;
@@ -459,7 +565,7 @@ class WcInput extends WcBaseFormComponent {
         width: 10px; /* Slightly smaller than outer circle */
         height: 10px;
         border-radius: 50%;
-        background-color: var(--accent-bg-color);
+        background-color: var(--primary-bg-color);
         position: absolute;
         left: 5px;
         top: 5px;
