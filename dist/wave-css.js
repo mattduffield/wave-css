@@ -5021,15 +5021,19 @@ if (!customElements.get("wc-tabulator")) {
   }
 
   /* Table Header */
+  .wc-tabulator.tabulator .tabulator-header {
+    border-bottom: none;
+  }
   .wc-tabulator.tabulator .tabulator-header,
   .wc-tabulator.tabulator .tabulator-header .tabulator-col {
     color: var(--card-color);
     background-color: var(--card-border-color);
-    /*
-    border-color: var(--component-border-color);
-    border-top: 1px solid var(--component-border-color);
-    border-bottom: 1px solid var(--component-border-color);
-    */
+  }
+  .wc-tabulator.tabulator .tabulator-header .tabulator-col:not(:last-of-type) {
+    border-right: 1px solid var(--text-3);
+  }
+  .wc-tabulator.tabulator .tabulator-header .tabulator-col:last-of-type {
+    border-right: 1px solid transparent;
   }
   /*Allow column header names to wrap lines*/
   .wc-tabulator.tabulator .tabulator-header .tabulator-col,
@@ -5081,11 +5085,29 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
     background-color: var(--secondary-bg-color);
   }
+  .wc-tabulator .tabulator-row .tabulator-cell {
+    border-right: 1px solid var(--text-3);
+  }
+  .wc-tabulator .tabulator-row .tabulator-cell:last-child {
+    border-right: 1px solid transparent;
+  }
+  /*
+  .wc-tabulator .tabulator-tableholder .tabulator-row .tabulator-cell {
+    border-right: 1px solid var(--text-3);
+  }
+  */
+  .wc-tabulator .tabulator-tableholder .tabulator-row .tabulator-cell:last-of-type {
+    border-right: 1px solid transparent;
+  }
 
   /* Table Footer */
+  .wc-tabulator.tabulator .tabulator-footer {
+    border-top: none;
+  }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents {
     color: var(--card-color);
     background-color: var(--card-border-color);
+    border-top: 1px solid var(--text-3);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page {
     color: var(--card-color);
@@ -5112,12 +5134,26 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
     color: var(--card-color) !important;
     background-color: var(--card-border-color) !important;
+
     /*
     border-color: var(--component-border-color);
     border-top: 1px solid var(--component-border-color);
     border-bottom: 1px solid var(--component-border-color);
     */
   } 
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder,
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs,
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-top {
+    border-top: 1px solid var(--text-3);
+    border-bottom: 1px solid var(--text-3);
+  }
+  .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder,
+  .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
+    border-top: 1px solid var(--text-3);
+    border-bottom: 1px solid transparent;
+  }
+
+  
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-bottom {
     color: var(--card-color) !important;
