@@ -4575,4 +4575,10 @@
     color: var(--button-disabled-color);
     cursor: not-allowed;
   }
+  a {
+    color: var(--text-1);
+  }
+  a:hover {
+    color: var(--text-3);
+  }
 }
