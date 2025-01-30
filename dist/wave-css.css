@@ -4538,7 +4538,6 @@
   label {
     display: block;
     font-weight: bold;
-    margin-bottom: 0.25rem;
     color: var(--text-1);
   }
   input[type=button],
