@@ -157,12 +157,12 @@ class WcSidebar extends WcBaseComponent {
         padding: 6px 8px 6px 16px;
         text-decoration: none;
         font-size: 25px;
-        color: var(--component-color);
+        color: var(--text-5);
         display: block;
       }
 
       wc-sidebar .wc-sidebar a:hover {
-        color: var(--accent-bg-color);
+        color: var(--text-1);
       }
     `;
     this.loadStyle('wc-sidebar-style', style);

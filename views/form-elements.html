@@ -1,125 +1,127 @@
 <div id="page-contents">
-  <form class="col p-6 gap-3">
+  <wc-form class="col p-6 gap-3" id="main_form" method="post" action="/">
     <div class="row gap-4">
       <wc-theme-selector theme="theme-slate-storm" mode="dark">
       </wc-theme-selector>
     </div>
-    <div class="row gap-4">
-      <wc-code-mirror
-        name="code"
-        line-numbers
-        line-wrapper
-        fold-gutter
-        mode="javascript"
-        theme="monokai"
-        value="class Customer { }"
-        tab-size="2"
-        indent-unit="2"></wc-code-mirror>
-    </div>
-    <div class="row gap-4">
-      <wc-select name="gender" 
-        class="col-1"
-        lbl-label="Gender"
-        value="male"
-        display-member="label"
-        items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'>
-      </wc-select>
-      <wc-select name="favorite_color"
-        class="col-1"
-        lbl-label="Fav. Color"
-        value="green">
-        <option value="red">Red</option>
-        <option value="green" selected>Green</option>
-        <option value="blue">Blue</option>
-      </wc-select>
-    </div>
-    <div class="row gap-4">
-      <wc-input name="username"
-        class="col-1"
-        elt-class="test1"
-        value="matt"
-        lbl-label="Username"
-        autocomplete="username">
-      </wc-input>
-      <wc-input name="password"
-        class="col-1"
-        type="password"
-        lbl-label="Password"
-        autocomplete="new-password">
-      </wc-input>
-      <wc-input name="confirm_password"
-        class="col-1"
-        type="password"
-        lbl-label="Confirm Password"
-        autocomplete="confirm-new-password">
-      </wc-input>
-    </div>
-    <div class="row gap-4 justify-between">
-      <wc-save-split-button id="left-save"
-        position-area="bottom span-right"
-        save-url="/screen/contact/123"
-        save-new-url="/screen/contact/create"
-        save-return-url="/screen/contact_list/list"></wc-save-split-button>
+    <div class="card">
+      <div class="row gap-4">
+        <wc-code-mirror
+          name="code"
+          line-numbers
+          line-wrapper
+          fold-gutter
+          mode="javascript"
+          theme="monokai"
+          value="class Customer { }"
+          tab-size="2"
+          indent-unit="2"></wc-code-mirror>
+      </div>
+      <div class="row-wrap gap-4">
+        <wc-select name="gender" 
+          class="col-1"
+          lbl-label="Gender"
+          value="male"
+          display-member="label"
+          items='[{"label": "Female", "value": "female"}, {"label": "Male", "value": "male"}]'>
+        </wc-select>
+        <wc-select name="favorite_color"
+          class="col-1"
+          lbl-label="Fav. Color"
+          value="green">
+          <option value="red">Red</option>
+          <option value="green" selected>Green</option>
+          <option value="blue">Blue</option>
+        </wc-select>
+      </div>
+      <div class="row-wrap gap-4">
+        <wc-input name="username"
+          class="col-1"
+          elt-class="test1"
+          value="matt"
+          lbl-label="Username"
+          autocomplete="username">
+        </wc-input>
+        <wc-input name="password"
+          class="col-1"
+          type="password"
+          lbl-label="Password"
+          autocomplete="new-password">
+        </wc-input>
+        <wc-input name="confirm_password"
+          class="col-1"
+          type="password"
+          lbl-label="Confirm Password"
+          autocomplete="confirm-new-password">
+        </wc-input>
+      </div>
+      <div class="row-wrap gap-4 justify-between">
+        <wc-save-split-button id="left-save"
+          position-area="bottom span-right"
+          save-url="/screen/contact/123"
+          save-new-url="/screen/contact/create"
+          save-return-url="/screen/contact_list/list"></wc-save-split-button>
 
-      <wc-save-button id="right-save"
-        save-url="/screen/contact/123"></wc-save-button>
+        <wc-save-button id="right-save"
+          save-url="/screen/contact/123"></wc-save-button>
 
-      <wc-save-split-button id="right-save"
-        save-url="/screen/contact/123"
-        save-new-url="/screen/contact/create"
-        save-return-url="/screen/contact_list/list"></wc-save-split-button>
-    </div>
-    <div class="row gap-4 justify-between">
-      <wc-split-button id="generate-code" label="Generate Code"
-        onclick="console.log('tests');">
-        <button id="generate-detail" 
-                type="button"
-                class="btn w-full">
-          Generate Detail
-        </button>
-        <button id="generate-table"
-                type="button"
-                class="btn w-full">
-          Generate Table
-        </button>
-      </wc-split-button>
-    </div>
-    <div class="row gap-4">
-      <wc-textarea class="col-1"
-        lbl-label="Comments"
-        rows="10"
-        name="comments"
-        value="10/10/2024 - First comment..."
-        placeholder="Enter comments here..."></wc-textarea>
-      <wc-textarea class="col-1"
-        lbl-label="Notes"
-        rows="10"
-        name="notes"
-        value="test note"
-        placeholder="Enter comments here...">
-10/30/2024 - Had a call with the client. They want to move forward.
-10/28/2024 - Had initial call with the client. They want to think about it.
-      </wc-textarea>
-    </div>
-    <div class="row gap-4">
-      <wc-input name="is_active"
-        class="col"
-        lbl-label="Is Active?"
-        type="checkbox"
-        checked>
-      </wc-input>
-      <wc-input name="is_enrolled"
-        class="col"
-        lbl-label="Is Enrolled?"
-        type="checkbox">
-      </wc-input>
-      <wc-input name="is_eligible"
-        class="col"
-        lbl-label="Is Eligible?"
-        type="checkbox"
-        toggle-switch>
-      </wc-input>
-      <button type="submit">Submit</button>
+        <wc-save-split-button id="right-save"
+          save-url="/screen/contact/123"
+          save-new-url="/screen/contact/create"
+          save-return-url="/screen/contact_list/list"></wc-save-split-button>
+      </div>
+      <div class="row-wrap gap-4 justify-between">
+        <wc-split-button id="generate-code" label="Generate Code"
+          onclick="console.log('tests');">
+          <button id="generate-detail" 
+                  type="button"
+                  class="btn w-full">
+            Generate Detail
+          </button>
+          <button id="generate-table"
+                  type="button"
+                  class="btn w-full">
+            Generate Table
+          </button>
+        </wc-split-button>
+      </div>
+      <div class="row-wrap gap-4">
+        <wc-textarea class="col-1"
+          lbl-label="Comments"
+          rows="10"
+          name="comments"
+          value="10/10/2024 - First comment..."
+          placeholder="Enter comments here..."></wc-textarea>
+        <wc-textarea class="col-1"
+          lbl-label="Notes"
+          rows="10"
+          name="notes"
+          value="test note"
+          placeholder="Enter comments here...">
+          10/30/2024 - Had a call with the client. They want to move forward.
+          10/28/2024 - Had initial call with the client. They want to think about it.
+        </wc-textarea>
+      </div>
+      <div class="row-wrap gap-4">
+        <wc-input name="is_active"
+          class="col"
+          lbl-label="Is Active?"
+          type="checkbox"
+          checked>
+        </wc-input>
+        <wc-input name="is_enrolled"
+          class="col"
+          lbl-label="Is Enrolled?"
+          type="checkbox">
+        </wc-input>
+        <wc-input name="is_eligible"
+          class="col"
+          lbl-label="Is Eligible?"
+          type="checkbox"
+          toggle-switch>
+        </wc-input>
+        <button type="submit">Submit</button>
+      </div>
     </div>
   </form>
 </div>

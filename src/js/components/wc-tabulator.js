@@ -839,8 +839,8 @@ if (!customElements.get('wc-tabulator')) {
     display: contents;
   }
   .wc-tabulator.tabulator {
-    background-color: var(--component-bg-color);
-    border: 1px solid var(--component-border-color);
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--card-border-color);
   }
   .wc-tabulator.tabulator.rounded {
     border-radius: 10px;
@@ -849,8 +849,13 @@ if (!customElements.get('wc-tabulator')) {
   /* Table Header */
   .wc-tabulator.tabulator .tabulator-header,
   .wc-tabulator.tabulator .tabulator-header .tabulator-col {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   }
   /*Allow column header names to wrap lines*/
   .wc-tabulator.tabulator .tabulator-header .tabulator-col,
@@ -862,37 +867,36 @@ if (!customElements.get('wc-tabulator')) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--component-alt-bg-color);
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
 
   /* Table Rows */
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--text-1);
+    background-color: var(--card-bg-color);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even {
-    color: var(--color);
-    background-color: var(--bg-color);
+    color: var(--text-1);
+    background-color: var(--surface-5);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
-    background: var(--color);
+    background: var(--text-1);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
-    background-color: var(--component-bg-color);
-    filter: brightness(0.85);
-    /* transition: all 300ms ease-in-out; */
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) {
-    background-color: var(--component-border-color);
-    filter: brightness(0.85);
-    /* transition: all 300ms ease-in-out; */
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
   .wc-tabulator.tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
     background-color: var(--secondary-bg-color);
@@ -900,16 +904,16 @@ if (!customElements.get('wc-tabulator')) {
 
   /* Table Footer */
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page.active {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page[disabled] {
     pointer-events: none;
@@ -917,7 +921,7 @@ if (!customElements.get('wc-tabulator')) {
 
   /* Table Groups */
   .wc-tabulator.tabulator .tabulator-row.tabulator-group > span {
-    color: var(--color);  
+    color: var(--card-color);  
   }
 
   /* Table Calcs */
@@ -926,24 +930,33 @@ if (!customElements.get('wc-tabulator')) {
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
-    color: var(--color) !important;
-    background-color: var(--component-border-color) !important;
+    color: var(--card-color) !important;
+    background-color: var(--card-border-color) !important;
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   } 
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-bottom {
-    color: var(--color) !important;
-    background-color: var(--component-border-color) !important;
+    color: var(--card-color) !important;
+    background-color: var(--card-border-color) !important;
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   } 
 
   /* Table Popup */
   .tabulator-menu.tabulator-popup-container {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--text-1);
+    background-color: var(--surface-1);
   }
   .tabulator-menu.tabulator-popup-container .tabulator-menu-item:hover {
-    background-color: var(--component-alt-bg-color);
-    background-color: var(--component-border-color);
-    filter: brightness(0.85);
+    color: var(--card-color);
+    background-color: var(--card-bg-color);
   }
       `;
       this.loadStyle('wc-tabulator-style', style);

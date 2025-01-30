@@ -32,7 +32,7 @@ esbuild.build({
 
 // CSS bundling
 esbuild.build({
-  entryPoints: ['src/css/base.css'],
+  entryPoints: ['src/css/main.css'],
   bundle: true,
   minify: false,
   outfile: 'dist/wave-css.css'
@@ -40,7 +40,7 @@ esbuild.build({
 
 // CSS bundling and minification
 esbuild.build({
-  entryPoints: ['src/css/base.css'],
+  entryPoints: ['src/css/main.css'],
   bundle: true,
   minify: true,
   outfile: 'dist/wave-css.min.css'

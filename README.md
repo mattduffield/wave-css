@@ -172,3 +172,17 @@ https://m2.material.io/design/color/the-color-system.html#color-theme-creation
   .theme-cottoncandy,
   .theme-blush,
   .theme-bubblegum,
+
+
+    --swatch-1: oklch(99% .05 var(--hue));
+    --swatch-2: oklch(95% .05 var(--hue));
+    --swatch-3: oklch(90% .1 var(--hue));
+    --swatch-4: oklch(80% .2 var(--hue));
+    --swatch-5: oklch(72% .25 var(--hue));
+    --swatch-6: oklch(67% .31 var(--hue));
+    --swatch-7: oklch(50% .27 var(--hue));
+    --swatch-8: oklch(35% .25 var(--hue));
+    --swatch-9: oklch(25% .22 var(--hue));
+    --swatch-10: oklch(14% .2 var(--hue));
+    --swatch-11: oklch(10% .19 var(--hue));
+    --swatch-12: oklch(5% .1 var(--hue));

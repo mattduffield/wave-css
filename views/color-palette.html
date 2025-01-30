@@ -10,6 +10,26 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 
+  <style>
+    body {
+      min-block-size: 100%;
+      font-family: system-ui, sans-serif;
+      display: grid;
+      place-content: center;
+      gap: 5vmin;
+      grid-auto-flow: column;
+    }
+
+    p {
+      max-inline-size: 40ch;
+    }
+
+    article {
+      display: grid;
+      gap: 2ch;
+      align-content: start;
+    }
+  </style>
 
 </head>
 
@@ -31,7 +51,7 @@
   </div>
 
   <article>
-    <wc-select onchange="setTheme(this.value)" size="10">
+    <wc-select onchange="setTheme(event)" size="10">
       <option value="rose" selected>Rose</option>
       <option value="petal">Petal</option>
       <option value="sunset">Sunset</option>
@@ -526,15 +546,31 @@
             10/28/2024 - Lorem culpa qui officia deserunt mollit anim id est laborum.
           </wc-textarea>
         </div>
-        <div class="row-wrap gap-3">
-          <button type="button" class="theme-sky">Submit</button>
-          <button type="button"  class="theme-sky" disabled>Validate</button>
-          <button type="button" class="theme-emerald">Accept</button>
-          <button type="button"  class="theme-emerald" disabled>Accept</button>
-          <button type="button" class="theme-amber">Cancel</button>
-          <button type="button"  class="theme-amber" disabled>Cancel</button>
-          <button type="button" class="theme-grape">Confirm</button>
-          <button type="button"  class="theme-grape" disabled>Confirm</button>
+        <div class="col gap-2">
+          <div class="row gap-2">
+            <button type="button" class="theme-sky">Primary</button>
+            <button type="button"  class="theme-sky" disabled>Primary</button>
+          </div>
+          <div class="row gap-2">
+            <button type="button" class="theme-violet">Link</button>
+            <button type="button"  class="theme-violet" disabled>Link</button>
+          </div>
+          <div class="row gap-2">
+            <button type="button" class="theme-azure">Info</button>
+            <button type="button"  class="theme-azure" disabled>Info</button>
+          </div>
+          <div class="row gap-2">
+            <button type="button" class="theme-emerald">Success</button>
+            <button type="button"  class="theme-emerald" disabled>Success</button>
+          </div>
+          <div class="row gap-2">
+            <button type="button" class="theme-avocado">Warning</button>
+            <button type="button"  class="theme-avocado" disabled>Warning</button>
+          </div>
+          <div class="row gap-2">
+            <button type="button" class="theme-amber">Danger</button>
+            <button type="button"  class="theme-amber" disabled>Danger</button>
+          </div>
         </div>
         
         <button>Save</button>
@@ -549,7 +585,17 @@
 
 
   <script>
-    function setTheme(theme) {
+    function setTheme(event) {
+      const {target} = event;
+      const {value} = target;
+      let theme = value;
+
+      if (!theme) {
+        theme = localStorage.getItem("theme") || "rose";
+        const select = target.querySelector('select');
+        const index = Array.from(select.options).findIndex(f => `${f.value}` == theme);
+        select.selectedIndex = index;
+      }
       const themeClass = `theme-${theme}`;
       document.documentElement.classList.forEach(cls => {
         if (cls.startsWith("theme-")) {
@@ -557,12 +603,13 @@
         }
       });
       document.documentElement.classList.add(themeClass);
-      localStorage.setItem("theme", themeClass);
+      localStorage.setItem("theme", theme);
     }
 
     function loadTheme() {
-      const savedTheme = localStorage.getItem("theme") || "plum";
-       document.documentElement.classList.add(savedTheme);
+      const savedTheme = localStorage.getItem("theme") || "rose";
+      const themeClass = `theme-${savedTheme}`;
+      document.documentElement.classList.add(themeClass);
     }
 
     document.addEventListener("DOMContentLoaded", loadTheme);

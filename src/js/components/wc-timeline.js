@@ -94,9 +94,9 @@ class WcTimeline extends WcBaseComponent {
       position = 'right';
     }
     const container = document.createElement('div');
-    container.classList.add('container', position);
+    container.classList.add('timeline-container', position);
     const card = document.createElement('div');
-    card.classList.add('card');
+    card.classList.add('timeline-card');
     const header = document.createElement('h2');
     header.textContent = itemLabel;
     const content = document.createElement('p');
@@ -137,7 +137,7 @@ class WcTimeline extends WcBaseComponent {
       }
 
       /* Container around content */
-      .wc-timeline .container {
+      .wc-timeline .timeline-container {
         padding: 10px 40px;
         position: relative;
         background-color: inherit;
@@ -145,14 +145,14 @@ class WcTimeline extends WcBaseComponent {
       }
 
       /* The circles on the timeline */
-      .wc-timeline .container::after {
+      .wc-timeline .timeline-container::after {
         content: '';
         position: absolute;
         width: 25px;
         height: 25px;
         right: -17px;
         background-color: var(--component-color);
-        border: 4px solid var(--accent-bg-color);
+        border: 4px solid var(--container-border-color);
         top: 15px;
         border-radius: 50%;
         z-index: 1;
@@ -179,7 +179,7 @@ class WcTimeline extends WcBaseComponent {
         right: 30px;
         border: medium solid white;
         border-width: 10px 0 10px 10px;
-        border-color: transparent transparent transparent var(--component-bg-color);
+        border-color: transparent transparent transparent var(--card-bg-color);
       }
 
       /* Add arrows to the right container (pointing left) */
@@ -193,7 +193,7 @@ class WcTimeline extends WcBaseComponent {
         left: 30px;
         border: medium solid white;
         border-width: 10px 10px 10px 0;
-        border-color: transparent var(--component-bg-color); transparent transparent;
+        border-color: transparent var(--card-bg-color); transparent transparent;
       }
 
       /* Fix the circle for containers on the right side */
@@ -202,10 +202,10 @@ class WcTimeline extends WcBaseComponent {
       }
 
       /* The actual content */
-      .wc-timeline .card {
+      .wc-timeline .timeline-card {
         padding: 20px 30px;
-        background-color: var(--component-bg-color);
-        color: var(--input-color);
+        background-color: var(--card-bg-color);
+        color: var(--card-color);
         position: relative;
         border-radius: 6px;
       }
@@ -217,14 +217,14 @@ class WcTimeline extends WcBaseComponent {
         }
         
         /* Full-width containers */
-        .wc-timeline .container {
+        .wc-timeline .timeline-container {
           width: 100%;
           padding-left: 70px;
           padding-right: 25px;
         }
         
         /* Make sure that all arrows are pointing leftwards */
-        .wc-timeline .container::before {
+        .wc-timeline .timeline-container::before {
           left: 60px;
           border: medium solid white;
           border-width: 10px 10px 10px 0;

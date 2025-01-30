@@ -709,8 +709,8 @@ var WcAccordion = class extends WcBaseComponent {
       }
 
       .wc-accordion .accordion-header {
-        background-color: var(--secondary-bg-color);
-        color: var(--secondary-color);
+        background-color: var(--button-bg-color);
+        color: var(--button-color);
         cursor: pointer;
         padding: 18px;
         width: 100%;
@@ -724,12 +724,13 @@ var WcAccordion = class extends WcBaseComponent {
 
       .wc-accordion .active,
       .wc-accordion .accordion-header:hover {
-        background-color: var(--primary-bg-color);
+        background-color: var(--button-hover-bg-color);
+        color: var(--button-hover-color);
       }
 
       .wc-accordion .accordion-header:after {
         content: '+';
-        color: var(--secondary-color);
+        color: var(--primary-color);
         font-weight: bold;
         float: right;
         margin-left: 5px;
@@ -1876,8 +1877,8 @@ var WcDropdown = class extends WcBaseComponent {
 
       /* Dropdown Button */
       .wc-dropdown .dropbtn {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--button-bg-color);
+        color: var(--button-color);
         padding: 16px;
         font-size: 16px;
         border: none;
@@ -1898,7 +1899,7 @@ var WcDropdown = class extends WcBaseComponent {
       .wc-dropdown .dropdown-content {
         display: none;
         position: absolute;
-        background-color: var(--component-bg-color);
+        background-color: var(--button-hover-bg-color);
         min-width: 160px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
@@ -1944,10 +1945,10 @@ var WcDropdown = class extends WcBaseComponent {
 
       /* Change the background color of the dropdown button when the dropdown content is shown */
       .wc-dropdown.dropdown:hover:not(.click):not(.search) .dropbtn {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--button-hover-bg-color);
       }
       .wc-dropdown.dropdown.show .dropbtn {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--button-hover-bg-color);
       }
     `.trim();
     this.loadStyle("wc-dropdown-style", style);
@@ -2087,14 +2088,14 @@ var WcFlipBox = class extends WcBaseComponent {
 
       /* Style the front side */
       .wc-flip-box .flip-box-front {
-        background-color: var(--bg-color);
-        color: var(--color);
+        background-color: var(--card-bg-color);
+        color: var(--text-1);
       }
 
       /* Style the back side */
       .wc-flip-box .flip-box-back {
-        background-color: var(--bg-color);
-        color: var(--color);
+        background-color: var(--card-bg-color);
+        color: var(--text-1);
         transform: rotateY(180deg);
       }`.trim();
     this.loadStyle("wc-flip-box-style", style);
@@ -2325,7 +2326,7 @@ var WcImage = class extends WcBaseComponent {
         top: 100%;
         left: 0;
         right: 0;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
         width: 100%;
         height:0;
@@ -2340,7 +2341,7 @@ var WcImage = class extends WcBaseComponent {
         bottom: 100%;
         left: 0;
         right: 0;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
         width: 100%;
         height:0;
@@ -2355,7 +2356,7 @@ var WcImage = class extends WcBaseComponent {
         bottom: 0;
         left: 100%;
         right: 0;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
         width: 0;
         height: 100%;
@@ -2370,7 +2371,7 @@ var WcImage = class extends WcBaseComponent {
         bottom: 0;
         left: 0;
         right: 100%;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
         width: 0;
         height: 100%;
@@ -2600,7 +2601,7 @@ var WcMenu = class extends WcBaseComponent {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
       }
       wc-menu .wc-menu .menu-items {
@@ -2729,14 +2730,8 @@ if (!customElements.get("wc-save-button")) {
           display: contents;
         }
         .wc-save-button {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
-          border: none;
-          outline: none;
-          border-radius: 0.375rem;
         }
         .wc-save-button:hover  {
-          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle("wc-save-button-style", style);
@@ -2797,6 +2792,18 @@ if (!customElements.get("wc-save-split-button")) {
           hx-${method}="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
+          <div class="dropdown-content">
+            <a class="save-new-btn btn w-full"
+              hx-${method}="${saveUrl}"
+              data-url="${saveNewUrl}">
+              Save and Add New
+            </a>
+            <a class="save-return-btn btn w-full"
+              hx-${method}="${saveUrl}"
+              data-url="${saveReturnUrl}">
+              Save and Return
+            </a>
+          </div>
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
@@ -2804,14 +2811,6 @@ if (!customElements.get("wc-save-split-button")) {
               <path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
             </svg>
           </button>
-          <div class="dropdown-content">
-            <button type="button" class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}"
-              data-url="${saveNewUrl}">Save and Add New</button>
-            <button type="button" class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}"
-              data-url="${saveReturnUrl}">Save and Return</button>
-          </div>
         </div>
       `.trim();
       this.componentElement.innerHTML = markup;
@@ -2821,6 +2820,7 @@ if (!customElements.get("wc-save-split-button")) {
       drpContent.style.positionAnchor = `--${id}-anchor`;
       drpContent.style.positionArea = positionArea;
       drpContent.style.positionTryFallbacks = positionTryFallbacks;
+      drpContent.style.minWidth = `${saveBtn.offsetWidth}px`;
     }
     _handleAttributeChange(attrName, newValue) {
       super._handleAttributeChange(attrName, newValue);
@@ -2862,9 +2862,7 @@ if (!customElements.get("wc-save-split-button")) {
         }
         /* Dropdown Button */
         .wc-save-split-button .btn {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
-          border: none;
+          border-right: none;
           outline: none;
           border-radius: 0;
         }
@@ -2877,7 +2875,9 @@ if (!customElements.get("wc-save-split-button")) {
         /* Dropdown Content (Hidden by Default) */
         .wc-save-split-button .dropdown-content {
           display: none;
-          background-color: var(--primary-bg-color);
+          background-color: var(--button-bg-color);
+          border: 1px solid var(--button-border-color);
+          border-top: none;
           min-width: 160px;
           z-index: 1;
 
@@ -2909,26 +2909,27 @@ if (!customElements.get("wc-save-split-button")) {
         }
 
         /* Links inside the dropdown */
-        .wc-save-split-button .dropdown-content button {
-          color: var(--primary-color);
+        .wc-save-split-button .dropdown-content a {
+          color: var(--button-color);
           padding: 12px 16px;
           text-decoration: none;
           display: block;
+          cursor: pointer;
         }
 
         /* Change color of dropdown links on hover */
         .wc-save-split-button .dropdown-content a:hover {
-          background-color: var(--primary-alt-bg-color);
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
 
         /* Show the dropdown menu on hover */
         .wc-save-split-button .dropdown:hover > .dropdown-content {
           display: block;
         }
-
-        /* Change the background color of the dropdown button when the dropdown content is shown */
-        .wc-save-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-alt-bg-color);
+        .wc-save-split-button .dropdown-content:hover ~ button {
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
       `.trim();
       this.loadStyle("wc-save-split-button-style", style);
@@ -2997,6 +2998,8 @@ if (!customElements.get("wc-split-button")) {
       const markup = `
         <button id="${id}" type="button" class="btn">${label}</button>
         <div class="dropdown">
+          <div class="dropdown-content">
+          </div>
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
@@ -3004,8 +3007,6 @@ if (!customElements.get("wc-split-button")) {
               <path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
             </svg>
           </button>
-          <div class="dropdown-content">
-          </div>
         </div>
       `.trim();
       this.componentElement.innerHTML = markup;
@@ -3015,6 +3016,7 @@ if (!customElements.get("wc-split-button")) {
       drpContent.style.positionAnchor = `--${id}-anchor`;
       drpContent.style.positionArea = positionArea;
       drpContent.style.positionTryFallbacks = positionTryFallbacks;
+      drpContent.style.minWidth = `${btn.offsetWidth}px`;
       this.parts.forEach((part) => {
         drpContent.appendChild(part);
       });
@@ -3043,9 +3045,7 @@ if (!customElements.get("wc-split-button")) {
         }
         /* Dropdown Button */
         .wc-split-button .btn {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
-          border: none;
+          border-right: none;
           outline: none;
           border-radius: 0;
         }
@@ -3058,7 +3058,9 @@ if (!customElements.get("wc-split-button")) {
         /* Dropdown Content (Hidden by Default) */
         .wc-split-button .dropdown-content {
           display: none;
-          background-color: var(--primary-bg-color);
+          background-color: var(--button-bg-color);
+          border: 1px solid var(--button-border-color);
+          border-top: none;
           min-width: 160px;
           z-index: 1;
 
@@ -3090,16 +3092,18 @@ if (!customElements.get("wc-split-button")) {
         }
 
         /* Links inside the dropdown */
-        .wc-split-button .dropdown-content button {
-          color: var(--primary-color);
+        .wc-split-button .dropdown-content a {
+          color: var(--button-color);
           padding: 12px 16px;
           text-decoration: none;
           display: block;
+          cursor: pointer;
         }
 
         /* Change color of dropdown links on hover */
         .wc-split-button .dropdown-content a:hover {
-          background-color: var(--primary-alt-bg-color);
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
 
         /* Show the dropdown menu on hover */
@@ -3108,8 +3112,14 @@ if (!customElements.get("wc-split-button")) {
         }
 
         /* Change the background color of the dropdown button when the dropdown content is shown */
+        /*
         .wc-split-button .btn:hover, .dropdown:hover .btn  {
           background-color: var(--primary-alt-bg-color);
+        }
+        */
+        .wc-split-button .dropdown-content:hover ~ button {
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
       `.trim();
       this.loadStyle("wc-split-button-style", style);
@@ -3243,12 +3253,12 @@ var WcSidebar = class extends WcBaseComponent {
         padding: 6px 8px 6px 16px;
         text-decoration: none;
         font-size: 25px;
-        color: var(--component-color);
+        color: var(--text-5);
         display: block;
       }
 
       wc-sidebar .wc-sidebar a:hover {
-        color: var(--accent-bg-color);
+        color: var(--text-1);
       }
     `;
     this.loadStyle("wc-sidebar-style", style);
@@ -3473,7 +3483,7 @@ var WcSidenav = class extends WcBaseComponent {
         position: fixed;
         z-index: 2;
         top: 0;
-        background-color: var(--bg-color);
+        background-color: var(--button-bg-color);
         overflow-x: hidden;
         padding-top: 60px;
         padding-bottom: 20px;
@@ -3489,7 +3499,7 @@ var WcSidenav = class extends WcBaseComponent {
       wc-sidenav .wc-sidenav.sidenav a {
         text-decoration: none;
         font-size: 25px;
-        color: var(--component-color);
+        color: var(--button-color);
         display: block;
         transition: 0.3s;
       }
@@ -3503,7 +3513,7 @@ var WcSidenav = class extends WcBaseComponent {
         padding: 8px 8px;
       }
       wc-sidenav .wc-sidenav.sidenav a:hover {
-        color: var(--accent-bg-color);
+        color: var(--button-hover-color);
       }
       wc-sidenav .wc-sidenav.sidenav .closebtn {
         position: absolute;
@@ -3543,7 +3553,7 @@ var WcSidenav = class extends WcBaseComponent {
         letter-spacing: 4px;
       }
       wc-sidenav .openbtn:hover {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--button-hover-bg-color);
       }
 
       .overlay {
@@ -4212,8 +4222,8 @@ var WcTab = class extends WcBaseComponent {
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        border: 1px solid var(--accent-bg-color);
-        background-color: var(--secondary-bg-color);
+        border: 1px solid var(--card-border-color);
+        background-color: var(--card-bg-color);
       }
       wc-tab[vertical] .wc-tab .tab-nav {
         flex-direction: column;
@@ -4221,7 +4231,7 @@ var WcTab = class extends WcBaseComponent {
         border-right: none;
       }
       wc-tab .wc-tab .tab-nav .tab-link {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         border: none;
         border-radius: 0;
         outline: none;
@@ -4239,12 +4249,12 @@ var WcTab = class extends WcBaseComponent {
         display: flex;
         flex-direction: column;
         flex: 1 1 0%;
-        
-        border: 1px solid var(--accent-bg-color);
+        background-color: var(--card-bg-color);
+        border: 1px solid var(--card-border-color);
         border-top: none;
       }
       wc-tab[vertical] .wc-tab .tab-body {
-        border-top: 1px solid var(--accent-bg-color);
+        border-top: 1px solid var(--card-border-color);
       }
       wc-tab .wc-tab .tab-body wc-tab-item .wc-tab-item {
         display: none;
@@ -5003,8 +5013,8 @@ if (!customElements.get("wc-tabulator")) {
     display: contents;
   }
   .wc-tabulator.tabulator {
-    background-color: var(--component-bg-color);
-    border: 1px solid var(--component-border-color);
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--card-border-color);
   }
   .wc-tabulator.tabulator.rounded {
     border-radius: 10px;
@@ -5013,8 +5023,13 @@ if (!customElements.get("wc-tabulator")) {
   /* Table Header */
   .wc-tabulator.tabulator .tabulator-header,
   .wc-tabulator.tabulator .tabulator-header .tabulator-col {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   }
   /*Allow column header names to wrap lines*/
   .wc-tabulator.tabulator .tabulator-header .tabulator-col,
@@ -5026,37 +5041,36 @@ if (!customElements.get("wc-tabulator")) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--component-alt-bg-color);
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
 
   /* Table Rows */
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--text-1);
+    background-color: var(--card-bg-color);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even {
-    color: var(--color);
-    background-color: var(--bg-color);
+    color: var(--text-1);
+    background-color: var(--surface-5);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
-    background: var(--color);
+    background: var(--text-1);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
-    background-color: var(--component-bg-color);
-    filter: brightness(0.85);
-    /* transition: all 300ms ease-in-out; */
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) {
-    background-color: var(--component-border-color);
-    filter: brightness(0.85);
-    /* transition: all 300ms ease-in-out; */
+    background-color: var(--primary-bg-color);
+    color: var(--surface-1);
   }
   .wc-tabulator.tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
     background-color: var(--secondary-bg-color);
@@ -5064,16 +5078,16 @@ if (!customElements.get("wc-tabulator")) {
 
   /* Table Footer */
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page.active {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--card-color);
+    background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page[disabled] {
     pointer-events: none;
@@ -5081,7 +5095,7 @@ if (!customElements.get("wc-tabulator")) {
 
   /* Table Groups */
   .wc-tabulator.tabulator .tabulator-row.tabulator-group > span {
-    color: var(--color);  
+    color: var(--card-color);  
   }
 
   /* Table Calcs */
@@ -5090,24 +5104,33 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder,
   .wc-tabulator.tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
-    color: var(--color) !important;
-    background-color: var(--component-border-color) !important;
+    color: var(--card-color) !important;
+    background-color: var(--card-border-color) !important;
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   } 
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-top,
   .wc-tabulator.tabulator .tabulator-row.tabulator-unselectable.tabulator-calcs.tabulator-calcs-bottom {
-    color: var(--color) !important;
-    background-color: var(--component-border-color) !important;
+    color: var(--card-color) !important;
+    background-color: var(--card-border-color) !important;
+    /*
+    border-color: var(--component-border-color);
+    border-top: 1px solid var(--component-border-color);
+    border-bottom: 1px solid var(--component-border-color);
+    */
   } 
 
   /* Table Popup */
   .tabulator-menu.tabulator-popup-container {
-    color: var(--color);
-    background-color: var(--component-border-color);
+    color: var(--text-1);
+    background-color: var(--surface-1);
   }
   .tabulator-menu.tabulator-popup-container .tabulator-menu-item:hover {
-    background-color: var(--component-alt-bg-color);
-    background-color: var(--component-border-color);
-    filter: brightness(0.85);
+    color: var(--card-color);
+    background-color: var(--card-bg-color);
   }
       `;
       this.loadStyle("wc-tabulator-style", style);
@@ -5304,6 +5327,8 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   constructor() {
     super();
+    this.prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    this.prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
     const compEl = this.querySelector(".wc-theme-selector");
     if (compEl) {
       this.componentElement = compEl;
@@ -5327,9 +5352,6 @@ var WcThemeSelector = class extends WcBaseComponent {
     if (attrName === "theme") {
       const themeButton = this.componentElement.querySelector(`button[data-theme="${newValue}"]`);
       themeButton?.click();
-    } else if (attrName === "mode") {
-      const themeModeButton = this.componentElement.querySelector(`button[data-theme-mode="${newValue}"]`);
-      themeModeButton?.click();
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -5338,8 +5360,6 @@ var WcThemeSelector = class extends WcBaseComponent {
     super._render();
     const innerEl = this.querySelector(".wc-theme-selector > *");
     if (innerEl) {
-      const themeModeBtns = this.componentElement.querySelectorAll("button[data-theme-mode]");
-      themeModeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeModeClick.bind(this)));
       const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
       themeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeClick.bind(this)));
     } else {
@@ -5353,39 +5373,46 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   _createInnerElement() {
     const themes = [
-      "theme-coral-sunset",
-      "theme-rose-gold",
-      "theme-autumn-leaves",
-      "theme-purple-haze",
-      "theme-lavender-fields",
-      "theme-dracula",
-      "theme-midnight-blue",
-      "theme-royal-blue",
-      "theme-light",
-      "theme-dark",
-      "theme-solarized",
-      "theme-ocean-blue",
-      "theme-nord",
-      "theme-emerald-mist",
-      "theme-forest-green",
-      "theme-spring-meadow",
-      "theme-mint-fresh",
-      "theme-lemon-twist",
-      "theme-golden-sun",
-      "theme-warm-autumn",
-      "theme-burnt-orange",
-      "theme-taupe-dream",
-      "theme-sandy-dune",
-      "theme-steel-gray",
-      "theme-slate-storm",
-      "theme-cool-gray",
-      "theme-midnight-slate",
-      "theme-midnight",
-      "theme-day"
-    ];
-    const themeModes = [
-      { "theme": "theme-midnight", "mode": "dark" },
-      { "theme": "theme-day", "mode": "light" }
+      "theme-rose",
+      "theme-petal",
+      "theme-sunset",
+      "theme-peach",
+      "theme-fire",
+      "theme-desert",
+      "theme-golden",
+      "theme-honey",
+      "theme-amber",
+      "theme-olive",
+      "theme-moss",
+      "theme-avocado",
+      "theme-lime",
+      "theme-fern",
+      "theme-meadow",
+      "theme-cornsilk",
+      "theme-sage",
+      "theme-forest",
+      "theme-jungle",
+      "theme-emerald",
+      "theme-mint",
+      "theme-turquoise",
+      "theme-aqua",
+      "theme-lagoon",
+      "theme-ice",
+      "theme-ocean",
+      "theme-azure",
+      "theme-sky",
+      "theme-midsky",
+      "theme-deepsky",
+      "theme-royal",
+      "theme-twilight",
+      "theme-lavender",
+      "theme-violet",
+      "theme-grape",
+      "theme-plum",
+      "theme-fuchsia",
+      "theme-cottoncandy",
+      "theme-blush",
+      "theme-bubblegum"
     ];
     const template = document.createElement("template");
     template.innerHTML = `
@@ -5398,15 +5425,23 @@ var WcThemeSelector = class extends WcBaseComponent {
           </button>
           `.trim()).join("")}
       </div>
-      <div class="row">
-        ${themeModes.map((item) => `
-          <button class="flat h-10 w-10 ${item.theme}" type="button" data-theme-mode="${item.mode}">
-            <svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-              <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
-            </svg>
-          </button>
-          `.trim()).join("")}
-      </div>
+      <wc-input name="theme_mode"
+        class="col"
+        lbl-label="Light or Dark?"
+        type="checkbox"
+        toggle-switch
+        ${this.prefersDark ? "checked" : ""}
+        _="on change
+          if me.value
+            remove .light from document.documentElement
+            add .dark to document.documentElement
+          else
+            remove .dark from document.documentElement
+            add .light to document.documentElement
+          end
+        end"
+        >
+      </wc-input>
       `.trim();
     this.componentElement.appendChild(template.content.cloneNode(true));
     this._wireEvents();
@@ -5433,39 +5468,21 @@ var WcThemeSelector = class extends WcBaseComponent {
     this.setAttribute("theme", selectedTheme);
     themeBtns.forEach((btn) => btn.classList.remove("selected"));
     target.classList.add("selected");
-    document.body.classList.forEach((cls) => {
+    document.documentElement.classList.forEach((cls) => {
       if (cls.startsWith("theme-")) {
-        document.body.classList.remove(cls);
+        document.documentElement.classList.remove(cls);
       }
     });
-    document.body.dataset.theme = selectedTheme;
-    document.body.classList.add(selectedTheme);
-  }
-  _handleThemeModeClick(event) {
-    const { target } = event;
-    const themeModeBtns = this.componentElement.querySelectorAll("button[data-theme-mode]");
-    const selectedMode = target.getAttribute("data-theme-mode");
-    this.setAttribute("mode", selectedMode);
-    themeModeBtns.forEach((btn) => btn.classList.remove("selected"));
-    target.classList.add("selected");
-    const oldMode = document.body.dataset.themeMode || selectedMode;
-    if (oldMode) {
-      document.body.classList.remove(oldMode);
-    }
-    document.body.dataset.themeMode = selectedMode;
-    document.body.classList.add(selectedMode);
+    document.documentElement.dataset.theme = selectedTheme;
+    document.documentElement.classList.add(selectedTheme);
   }
   _wireEvents() {
     super._wireEvents();
-    const themeModeBtns = this.componentElement.querySelectorAll("button[data-theme-mode]");
-    themeModeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeModeClick.bind(this)));
     const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     themeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeClick.bind(this)));
   }
   _unWireEvents() {
     super._unWireEvents();
-    const themeModeBtns = this.componentElement.querySelectorAll("button[data-theme-mode]");
-    themeModeBtns.forEach((btn) => btn.removeEventListener("click", this._handleThemeModeClick.bind(this)));
     const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     themeBtns.forEach((btn) => btn.removeEventListener("click", this._handleThemeClick.bind(this)));
   }
@@ -5532,9 +5549,9 @@ var WcTimeline = class extends WcBaseComponent {
       position = "right";
     }
     const container2 = document.createElement("div");
-    container2.classList.add("container", position);
+    container2.classList.add("timeline-container", position);
     const card = document.createElement("div");
-    card.classList.add("card");
+    card.classList.add("timeline-card");
     const header = document.createElement("h2");
     header.textContent = itemLabel;
     const content = document.createElement("p");
@@ -5574,7 +5591,7 @@ var WcTimeline = class extends WcBaseComponent {
       }
 
       /* Container around content */
-      .wc-timeline .container {
+      .wc-timeline .timeline-container {
         padding: 10px 40px;
         position: relative;
         background-color: inherit;
@@ -5582,14 +5599,14 @@ var WcTimeline = class extends WcBaseComponent {
       }
 
       /* The circles on the timeline */
-      .wc-timeline .container::after {
+      .wc-timeline .timeline-container::after {
         content: '';
         position: absolute;
         width: 25px;
         height: 25px;
         right: -17px;
         background-color: var(--component-color);
-        border: 4px solid var(--accent-bg-color);
+        border: 4px solid var(--container-border-color);
         top: 15px;
         border-radius: 50%;
         z-index: 1;
@@ -5616,7 +5633,7 @@ var WcTimeline = class extends WcBaseComponent {
         right: 30px;
         border: medium solid white;
         border-width: 10px 0 10px 10px;
-        border-color: transparent transparent transparent var(--component-bg-color);
+        border-color: transparent transparent transparent var(--card-bg-color);
       }
 
       /* Add arrows to the right container (pointing left) */
@@ -5630,7 +5647,7 @@ var WcTimeline = class extends WcBaseComponent {
         left: 30px;
         border: medium solid white;
         border-width: 10px 10px 10px 0;
-        border-color: transparent var(--component-bg-color); transparent transparent;
+        border-color: transparent var(--card-bg-color); transparent transparent;
       }
 
       /* Fix the circle for containers on the right side */
@@ -5639,10 +5656,10 @@ var WcTimeline = class extends WcBaseComponent {
       }
 
       /* The actual content */
-      .wc-timeline .card {
+      .wc-timeline .timeline-card {
         padding: 20px 30px;
-        background-color: var(--component-bg-color);
-        color: var(--input-color);
+        background-color: var(--card-bg-color);
+        color: var(--card-color);
         position: relative;
         border-radius: 6px;
       }
@@ -5654,14 +5671,14 @@ var WcTimeline = class extends WcBaseComponent {
         }
         
         /* Full-width containers */
-        .wc-timeline .container {
+        .wc-timeline .timeline-container {
           width: 100%;
           padding-left: 70px;
           padding-right: 25px;
         }
         
         /* Make sure that all arrows are pointing leftwards */
-        .wc-timeline .container::before {
+        .wc-timeline .timeline-container::before {
           left: 60px;
           border: medium solid white;
           border-width: 10px 10px 10px 0;
@@ -6140,12 +6157,8 @@ var WcLoader = class extends WcBaseComponent {
       wc-loader .wc-loader {
         border-width: 16px;
         border-style: solid;
-        border-color: var(--color);
+        border-color: var(--primary-color);
         border-top-color: var(--primary-bg-color);
-        /*
-        border: 16px solid var(--color);
-        border-top: 16px solid var(--primary-bg-color);
-        */
         border-radius: 50%;
         width: 120px;
         height: 120px;
@@ -7518,7 +7531,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--white-color);
+        background-color: var(--toggle-off);
         border: 1px solid var(--component-border-color);
         border-radius: 25px;
         /* cursor: pointer; */
@@ -7526,9 +7539,10 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         pointer-events: none;
       }
 
-      .dark wc-input .toggle-switch {
-        background-color: var(--white-color);
+      .xdark wc-input .toggle-switch {
+        background-color: var(--toggle-off);
         border: 1px solid var(--component-border-color);
+        transition: background-color 0.25s;
       }
 
       wc-input .toggle-switch::before {
@@ -7538,19 +7552,19 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         width: 15px;
         left: 2px;
         bottom: 2px;
-        background-color: var(--accent-bg-color);
-        border: 1px solid var(--secondary-bg-color);
+        background-color: var(--primary-bg-color);
+        border: 1px solid var(--toggle-off);
         border-radius: 50%;
         transition: transform 0.4s;
       }
-      wc-input .toggle-checkbox:hover:not(:disabled) + .toggle-switch::before {
-        background-color: var(--secondary-bg-color);
-      }
 
-      wc-input .toggle-checkbox:checked + .toggle-switch {
-        background-color: var(--component-bg-color);
+      wc-input .toggle-checkbox:checked + .toggle-switch::before {
+        border: 1px solid var(--toggle-on);
       }
-      .dark wc-input .toggle-checkbox:checked + .toggle-switch {
+      wc-input .toggle-checkbox:checked + .toggle-switch {
+        background-color: var(--toggle-on);
+      }
+      .xdark wc-input .toggle-checkbox:checked + .toggle-switch {
         background-color: var(--component-bg-color);
       }
 
@@ -7587,14 +7601,14 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         align-self: self-start;
       }
       wc-input .radio-group.modern {
-        border: 1px solid var(--accent-bg-color);
+        border: 1px solid var(--component-bg-color);
         border-radius: 5px;
       }
       wc-input .radio-group.modern .radio-option {
         padding: 0 0.5rem;
-        background-color: var(--accent-bg-color);
+        background-color: var(--component-bg-color);
         color: var(--primary-color);
-        border-right: 1px solid var(--accent-bg-color);
+        border-right: 1px solid var(--component-bg-color);
       }
       wc-input .radio-group.modern .radio-option:first-child {
         border-top-left-radius: 5px;
@@ -7644,7 +7658,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         width: 10px; /* Slightly smaller than outer circle */
         height: 10px;
         border-radius: 50%;
-        background-color: var(--accent-bg-color);
+        background-color: var(--primary-bg-color);
         position: absolute;
         left: 5px;
         top: 5px;

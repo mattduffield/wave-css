@@ -83,12 +83,8 @@ class WcLoader extends WcBaseComponent {
       wc-loader .wc-loader {
         border-width: 16px;
         border-style: solid;
-        border-color: var(--color);
+        border-color: var(--primary-color);
         border-top-color: var(--primary-bg-color);
-        /*
-        border: 16px solid var(--color);
-        border-top: 16px solid var(--primary-bg-color);
-        */
         border-radius: 50%;
         width: 120px;
         height: 120px;

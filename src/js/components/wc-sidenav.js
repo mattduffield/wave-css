@@ -271,7 +271,7 @@ class WcSidenav extends WcBaseComponent {
         position: fixed;
         z-index: 2;
         top: 0;
-        background-color: var(--bg-color);
+        background-color: var(--button-bg-color);
         overflow-x: hidden;
         padding-top: 60px;
         padding-bottom: 20px;
@@ -287,7 +287,7 @@ class WcSidenav extends WcBaseComponent {
       wc-sidenav .wc-sidenav.sidenav a {
         text-decoration: none;
         font-size: 25px;
-        color: var(--component-color);
+        color: var(--button-color);
         display: block;
         transition: 0.3s;
       }
@@ -301,7 +301,7 @@ class WcSidenav extends WcBaseComponent {
         padding: 8px 8px;
       }
       wc-sidenav .wc-sidenav.sidenav a:hover {
-        color: var(--accent-bg-color);
+        color: var(--button-hover-color);
       }
       wc-sidenav .wc-sidenav.sidenav .closebtn {
         position: absolute;
@@ -341,7 +341,7 @@ class WcSidenav extends WcBaseComponent {
         letter-spacing: 4px;
       }
       wc-sidenav .openbtn:hover {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--button-hover-bg-color);
       }
 
       .overlay {

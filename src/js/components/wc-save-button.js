@@ -66,14 +66,8 @@ if (!customElements.get('wc-save-button')) {
           display: contents;
         }
         .wc-save-button {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
-          border: none;
-          outline: none;
-          border-radius: 0.375rem;
         }
         .wc-save-button:hover  {
-          background-color: var(--primary-alt-bg-color);
         }
       `.trim();
       this.loadStyle('wc-save-button-style', style);

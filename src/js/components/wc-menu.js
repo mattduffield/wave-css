@@ -241,7 +241,7 @@ class WcMenu extends WcBaseComponent {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        background-color: var(--secondary-bg-color);
+        background-color: var(--card-bg-color);
         overflow: hidden;
       }
       wc-menu .wc-menu .menu-items {

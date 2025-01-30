@@ -1,0 +1,58 @@
+<div id="page-contents">
+  <style>
+    .theme-container {
+      min-block-size: 100%;
+      font-family: system-ui, sans-serif;
+      display: grid;
+      place-content: center;
+      gap: 5vmin;
+      grid-auto-flow: column;
+    }
+
+    article {
+      display: grid;
+      gap: 2ch;
+      align-content: start;
+    }
+  </style>
+
+  <div class="theme-container py-2 px-4">
+    <div class="palette">
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+    </div>
+
+    <article>    
+      <wc-theme-selector theme="theme-ocean" mode="light"></wc-theme-selector>
+
+      <header>
+        <h2>Text Usage</h2>
+        <small>Lorem ipsum dolor</small>
+      </header>
+
+      <div class="card">
+        <h2>I'm a card</h2>
+        <small>Lorem ipsum dolor</small>
+        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque doloremque modi veniam aspernatur voluptatum labore dolores perspiciatis.</p>
+        <div class="row gap-4">
+          <wc-input class="col" name="first_name" lbl-label="First" value="" placeholder="First..."></wc-input>
+          <wc-input class="col" name="last_name" lbl-label="Last" value="Duffield" disabled></wc-input>
+        </div>
+        <div class="row gap-4 justify-end items-end">
+          <button disabled>Cancel</button>
+          <button>Save</button>
+      </div>
+
+    </article>
+  </div>
+</div>

@@ -67,6 +67,18 @@ if (!customElements.get('wc-save-split-button')) {
           hx-${method}="${saveUrl}"
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
+          <div class="dropdown-content">
+            <a class="save-new-btn btn w-full"
+              hx-${method}="${saveUrl}"
+              data-url="${saveNewUrl}">
+              Save and Add New
+            </a>
+            <a class="save-return-btn btn w-full"
+              hx-${method}="${saveUrl}"
+              data-url="${saveReturnUrl}">
+              Save and Return
+            </a>
+          </div>
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"
@@ -74,14 +86,6 @@ if (!customElements.get('wc-save-split-button')) {
               <path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
             </svg>
           </button>
-          <div class="dropdown-content">
-            <button type="button" class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}"
-              data-url="${saveNewUrl}">Save and Add New</button>
-            <button type="button" class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}"
-              data-url="${saveReturnUrl}">Save and Return</button>
-          </div>
         </div>
       `.trim();
       this.componentElement.innerHTML = markup;
@@ -91,6 +95,7 @@ if (!customElements.get('wc-save-split-button')) {
       drpContent.style.positionAnchor = `--${id}-anchor`;
       drpContent.style.positionArea = positionArea;
       drpContent.style.positionTryFallbacks = positionTryFallbacks;
+      drpContent.style.minWidth = `${saveBtn.offsetWidth}px`;
     }
 
     _handleAttributeChange(attrName, newValue) {    
@@ -140,9 +145,7 @@ if (!customElements.get('wc-save-split-button')) {
         }
         /* Dropdown Button */
         .wc-save-split-button .btn {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
-          border: none;
+          border-right: none;
           outline: none;
           border-radius: 0;
         }
@@ -155,7 +158,9 @@ if (!customElements.get('wc-save-split-button')) {
         /* Dropdown Content (Hidden by Default) */
         .wc-save-split-button .dropdown-content {
           display: none;
-          background-color: var(--primary-bg-color);
+          background-color: var(--button-bg-color);
+          border: 1px solid var(--button-border-color);
+          border-top: none;
           min-width: 160px;
           z-index: 1;
 
@@ -187,26 +192,27 @@ if (!customElements.get('wc-save-split-button')) {
         }
 
         /* Links inside the dropdown */
-        .wc-save-split-button .dropdown-content button {
-          color: var(--primary-color);
+        .wc-save-split-button .dropdown-content a {
+          color: var(--button-color);
           padding: 12px 16px;
           text-decoration: none;
           display: block;
+          cursor: pointer;
         }
 
         /* Change color of dropdown links on hover */
         .wc-save-split-button .dropdown-content a:hover {
-          background-color: var(--primary-alt-bg-color);
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
 
         /* Show the dropdown menu on hover */
         .wc-save-split-button .dropdown:hover > .dropdown-content {
           display: block;
         }
-
-        /* Change the background color of the dropdown button when the dropdown content is shown */
-        .wc-save-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-alt-bg-color);
+        .wc-save-split-button .dropdown-content:hover ~ button {
+          background-color: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
         }
       `.trim();
       this.loadStyle('wc-save-split-button-style', style);
