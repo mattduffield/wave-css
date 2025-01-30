@@ -5068,8 +5068,14 @@ if (!customElements.get("wc-tabulator")) {
     color: var(--surface-1);
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
-  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) {
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) 
+  {
     background-color: var(--primary-bg-color);
+    color: var(--surface-1);
+  }
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected) a,
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) a 
+  {
     color: var(--surface-1);
   }
   .wc-tabulator.tabulator.tabulator-block-select .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-placeholder {
