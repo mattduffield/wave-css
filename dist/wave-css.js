@@ -5066,6 +5066,9 @@ if (!customElements.get("wc-tabulator")) {
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even .tabulator-cell.tabulator-row-header.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
     background: var(--text-1);
   }
+  .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row .tabulator-cell.tabulator-row-header.tabulator-row-handle {
+      border-bottom: none;
+  }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
     background-color: var(--primary-bg-color);
@@ -5108,6 +5111,7 @@ if (!customElements.get("wc-tabulator")) {
     color: var(--card-color);
     background-color: var(--card-border-color);
     border-top: 1px solid var(--text-3);
+    border-top: 1px solid transparent;
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page {
     color: var(--card-color);

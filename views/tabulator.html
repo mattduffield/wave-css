@@ -137,6 +137,140 @@
   </div>
   
 
+ <div class="row gap-4"
+    _="on 'wc-tabulator:row-click' from body
+      log event
+    end">
+    <wc-tabulator
+      class="rounded w-full max-h-500"
+      id="contact-table"
+      xpersistence="true"
+      ajax-url="http://localhost:8080/api/email_notification"
+      placeholder="No Data Available"
+      movable-columns="true"
+      movable-rows="true"
+      xrow-header='{"formatter":"rowSelection", "titleFormatter": "rowSelection", "headerSort":false, "resizable":false, "frozen":true, "headerHozAlign":"center", "hozAlign":"center"}'
+      row-header='{"headerSort":false, "resizable": false, "minWidth":30, "width":30, "rowHandle":true, "formatter":"handle"}'
+      row-context-menu="rowContextMenu"
+      row-height="40"
+      pagination
+      pagination-size="5"
+      pagination-counter="rows"
+      record-size="200"
+      header-visible="true"
+      selectable-rows="true"
+      xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
+      xlayout="fitColumns"
+      xgroup-by="description"
+      xresponsive-layout="collapse"
+      >
+      <wc-tabulator-func name="onDelete"
+          value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />
+      <wc-tabulator-func name="onClone"
+          value="(result) => { console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'}); }" />
+      <wc-tabulator-column
+        title="Actions"
+        formatter="rowSelection"
+        title-formatter="rowSelection"
+        hoz-align="center"
+        width=45
+        header-sort="false"
+        header-menu="headerMenu"
+        cell-click="toggleSelect"
+        visible="false"
+        ></wc-tabulator-column>
+        
+      <wc-tabulator-column
+        title="#"
+        xformatter="rownum"
+        xxformatter="pageRowNum"
+        formatter="function(cell) {
+                       var table = cell.getTable();
+                       var row = cell.getRow();
+                       var page = table.getPage() || 1;
+                       var pageSize = table.getPageSize();
+                       var index = row.getPosition(true);
+                       return (page - 1) * pageSize + index;
+                     }"
+        hoz-align="center"
+        width=40
+        header-sort="false"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="policy"
+        title="Policy #"
+        header-filter="input"
+        header-filter-func="starts"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="named_insured"
+        title="Named Insured"
+        header-filter="input"
+        header-filter-func="like"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="description"
+        title="Description"
+        header-filter="list"
+        header-filter-params='{"valuesLookup":true, "clearable":true}'
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="policy_type"
+        title="Policy Type"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="email"
+        title="Email"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="phone"
+        title="Phone"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="proof_required_by"
+        title="Required By"
+        header-filter="input"
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="email_sent_date"
+        title="Email Sent"
+        header-filter="input"
+        header-menu="headerMenu"
+        formatter="localdatetime"
+        visible="true"
+        ></wc-tabulator-column>
+      <wc-tabulator-column
+        field="is_active"
+        title="Is Active?"
+        formatter="tickCross"
+        header-filter="tickCross"
+        header-filter-params='{"tristate":true}'
+        header-menu="headerMenu"
+        visible="true"
+        ></wc-tabulator-column>
+    </wc-tabulator>
+  </div>
+ 
+
   <!--
   <div class="row gap-4">
     <wc-tabulator
