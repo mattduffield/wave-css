@@ -1,7 +1,10 @@
 <div id="page-contents" class="col p-4 gap-4">
   
+  <div class="row gap-4">
+    <wc-theme-selector theme="theme-ocean-blue" mode="light"></wc-theme-selector>
+  </div>
   
-  <div class="row gap-4"
+  <div class="row gap-4 hidden"
     _="on 'wc-tabulator:row-click' from body
       log event
     end">
@@ -154,11 +157,12 @@
       row-context-menu="rowContextMenu"
       row-height="40"
       pagination
-      pagination-size="5"
+      pagination-size="10"
       pagination-counter="rows"
       record-size="200"
       header-visible="true"
       selectable-rows="true"
+      initial-filter='[{"field": "description", "type": "in", "value": ["Auto Pay Authorization", "Correct License Information", "DynamicDrive discount", "License information Required", "Renewal ToDo: NC Driver License Number", "Renewal ToDo: Proof of Driving Experience required", "Credit Card Expiring", "Eligible Risk Cancel", "Eligible Risk Proof", "Foreign Experience"]}]'
       xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
       xlayout="fitColumns"
       xgroup-by="description"
@@ -227,21 +231,21 @@
         title="Policy Type"
         header-filter="input"
         header-menu="headerMenu"
-        visible="true"
+        visible="false"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="email"
         title="Email"
         header-filter="input"
         header-menu="headerMenu"
-        visible="true"
+        visible="false"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="phone"
         title="Phone"
         header-filter="input"
         header-menu="headerMenu"
-        visible="true"
+        visible="false"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="proof_required_by"

@@ -240,6 +240,7 @@ if (!customElements.get('wc-tabulator')) {
       const colFieldFormatter = this.getAttribute('col-field-formatter') || '{}';
       const responsiveLayout = this.getAttribute('responsive-layout');
       const groupBy = this.getAttribute('group-by');
+      const initialFilter = this.getAttribute('initial-filter');
 
       // Process any column field formatters.
       if (colFieldFormatter) {
@@ -300,6 +301,7 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
+      if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
 
       await this.renderTabulator(options);
     }
