@@ -217,9 +217,6 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     async _createInnerElement() {
-      // const container = document.createElement('div');
-      // container.id = this.getAttribute('id') || 'wc-tabulator';
-      // this.appendChild(container);
       const pagination = this.hasAttribute('pagination');
       const paginationSize = this.getAttribute('pagination-size');
       const paginationCounter = this.getAttribute('pagination-counter');
