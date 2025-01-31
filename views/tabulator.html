@@ -162,6 +162,7 @@
       record-size="200"
       header-visible="true"
       selectable-rows="true"
+      header-filter="true"
       initial-filter='[{"field": "description", "type": "in", "value": ["Auto Pay Authorization", "Correct License Information", "DynamicDrive discount", "License information Required", "Renewal ToDo: NC Driver License Number", "Renewal ToDo: Proof of Driving Experience required", "Credit Card Expiring", "Eligible Risk Cancel", "Eligible Risk Proof", "Foreign Experience"]}]'
       xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
       xlayout="fitColumns"
@@ -222,7 +223,8 @@
         field="description"
         title="Description"
         header-filter="list"
-        header-filter-params='{"valuesLookup":true, "clearable":true}'
+        header-filter-params='{"values": ["Auto Pay Authorization", "Correct License Information", "DynamicDrive discount", "License information Required", "Renewal ToDo: NC Driver License Number", "Renewal ToDo: Proof of Driving Experience required", "Credit Card Expiring", "Eligible Risk Cancel", "Eligible Risk Proof", "Foreign Experience"]}'
+        xheader-filter-params='{"valuesLookup":true, "clearable":true}'
         header-menu="headerMenu"
         visible="true"
         ></wc-tabulator-column>

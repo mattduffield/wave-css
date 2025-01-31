@@ -240,6 +240,7 @@ if (!customElements.get('wc-tabulator')) {
       const colFieldFormatter = this.getAttribute('col-field-formatter') || '{}';
       const responsiveLayout = this.getAttribute('responsive-layout');
       const groupBy = this.getAttribute('group-by');
+      const headerFilter = this.getAttribute('header-filter');
       const initialFilter = this.getAttribute('initial-filter');
 
       // Process any column field formatters.
@@ -261,6 +262,7 @@ if (!customElements.get('wc-tabulator')) {
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
         ajaxConfig: this.getAjaxConfig(),
         ajaxResponse: this.handleAjaxResponse.bind(this), // Optional custom handling of server response
+        headerFilterLive: true,
       };
 
       if (pagination) options.pagination = pagination;
@@ -301,6 +303,7 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
+      if (headerFilter) options.headerFilter = headerFilter.toLowerCase() == 'true' ? true : false;
       if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
 
       await this.renderTabulator(options);
@@ -333,7 +336,26 @@ if (!customElements.get('wc-tabulator')) {
         var rowPosition = row.getPosition();
         const custom = { e, row, rowData, rowIndex, rowPosition };
         wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
-    });
+      });
+      this.table.on("dataFiltering", (filters) => {
+        if (!this.table.headerFiltersInitialized) {
+          this.table.headerFiltersInitialized = true;
+          return;
+        }
+
+        const headerFilters = this.table.getHeaderFilters();    
+        // If no header filters are active, apply initial filter
+        if (headerFilters.length === 0) {
+          this.table.headerFiltersInitialized = false;
+          this.table.clearFilter(true);
+          this.table.setFilter(initialFilter);
+        }
+        // If header filters are active, use only those
+        else {
+          this.table.headerFiltersInitialized = false;
+          this.table.setFilter(headerFilters);
+        }
+      });
     }
 
     getFuncs() {

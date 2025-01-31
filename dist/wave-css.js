@@ -4508,7 +4508,8 @@ if (!customElements.get("wc-tabulator")) {
       const colFieldFormatter = this.getAttribute("col-field-formatter") || "{}";
       const responsiveLayout = this.getAttribute("responsive-layout");
       const groupBy = this.getAttribute("group-by");
-      const initialFilter = this.getAttribute("initial-filter");
+      const headerFilter = this.getAttribute("header-filter");
+      const initialFilter2 = this.getAttribute("initial-filter");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -4526,8 +4527,9 @@ if (!customElements.get("wc-tabulator")) {
         // URL for server-side loading
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
         ajaxConfig: this.getAjaxConfig(),
-        ajaxResponse: this.handleAjaxResponse.bind(this)
+        ajaxResponse: this.handleAjaxResponse.bind(this),
         // Optional custom handling of server response
+        headerFilterLive: true
       };
       if (pagination) options.pagination = pagination;
       if (options.pagination) {
@@ -4566,7 +4568,8 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
-      if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
+      if (headerFilter) options.headerFilter = headerFilter.toLowerCase() == "true" ? true : false;
+      if (initialFilter2) options.initialFilter = JSON.parse(initialFilter2);
       await this.renderTabulator(options);
     }
     async renderTabulator(options) {
@@ -4593,6 +4596,21 @@ if (!customElements.get("wc-tabulator")) {
         var rowPosition = row.getPosition();
         const custom = { e, row, rowData, rowIndex, rowPosition };
         wc.EventHub.broadcast("wc-tabulator:row-click", "", "", custom);
+      });
+      this.table.on("dataFiltering", (filters) => {
+        if (!this.table.headerFiltersInitialized) {
+          this.table.headerFiltersInitialized = true;
+          return;
+        }
+        const headerFilters = this.table.getHeaderFilters();
+        if (headerFilters.length === 0) {
+          this.table.headerFiltersInitialized = false;
+          this.table.clearFilter(true);
+          this.table.setFilter(initialFilter);
+        } else {
+          this.table.headerFiltersInitialized = false;
+          this.table.setFilter(headerFilters);
+        }
       });
     }
     getFuncs() {
