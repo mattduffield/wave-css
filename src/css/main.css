@@ -563,11 +563,17 @@
   .text-bg-color-4 { background-color: var(--text-4); }
   .text-bg-color-5 { background-color: var(--text-5); }
 
+  .container-bg-color { background-color: var(--container-bg-color); }
+  .container-color { color: var(--container-color); }
+  .container-border-color { border-color: var(--container-border-color); }
 
-  .component-bg-color {
-    background-color: var(--component-bg-color);
-  }
+  .card-bg-color { background-color: var(--card-bg-color); }
+  .card-color { color: var(--card-color); }
+  .card-border-color { border-color: var(--card-border-color); }
 
+  .component-bg-color { background-color: var(--component-bg-color); }
+  .component-color { color: var(--component-color); }
+  .component-border-color { border-color: var(--component-border-color); }
 }
 
 @layer wc.utility {

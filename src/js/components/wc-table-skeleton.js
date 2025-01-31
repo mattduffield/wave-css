@@ -40,44 +40,44 @@ if (!customElements.get('wc-table-skeleton')) {
     _createElement() {
       this.componentElement.id = 'table-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'wc-table-skeleton max-w-full m-4 p-4 space-y-4 border border-solid text-bg-color-3 rounded-md shadow animate-pulse md:p-6';
+      this.componentElement.className = 'wc-table-skeleton max-w-full m-4 p-4 space-y-4 border border-solid card-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <!-- Table Header Skeleton -->
         <div class="flex items-center justify-between">
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
         </div>
         <!-- Table Row Skeletons -->
         <div class="flex items-center justify-between pt-4">
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
-          <div class="w-1/6 h-4 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
+          <div class="w-1/6 h-4 card-bg-color rounded-full"></div>
         </div>
         <span class="sr-only">Loading...</span>
       `.trim();
@@ -90,7 +90,6 @@ wc-table-skeleton {
 }
 wc-table-skeleton .wc-table-skeleton {
   background-color: var(--surface-1);
-  color: var(--text-3);
 }
 /* Spacing */
 .md\:p-6 {

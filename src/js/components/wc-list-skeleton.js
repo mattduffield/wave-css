@@ -40,42 +40,42 @@ if (!customElements.get('wc-list-skeleton')) {
     _createElement() {
       this.componentElement.id = 'list-skeleton';
       this.componentElement.setAttribute('role', 'status');
-      this.componentElement.className = 'wc-list-skeleton m-4 p-4 space-y-4 border border-solid text-bg-color-3 rounded-md shadow animate-pulse md:p-6';
+      this.componentElement.className = 'wc-list-skeleton m-4 p-4 space-y-4 border border-solid card-border-color rounded-md shadow animate-pulse md:p-6';
       this.componentElement.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="w-5/6">
-            <div class="h-2.5 text-bg-color-3 rounded-full w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 text-bg-color-3 rounded-full"></div>
+            <div class="h-2.5 card-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 card-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-2.5 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 text-bg-color-3 rounded-full w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 text-bg-color-3 rounded-full"></div>
+            <div class="h-2.5 card-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 card-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-2.5 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 text-bg-color-3 rounded-full w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 text-bg-color-3 rounded-full"></div>
+            <div class="h-2.5 card-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 card-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-2.5 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 text-bg-color-3 rounded-full w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 text-bg-color-3 rounded-full"></div>
+            <div class="h-2.5 card-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 card-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-2.5 card-bg-color rounded-full"></div>
         </div>
         <div class="flex items-center justify-between pt-4">
           <div class="w-5/6">
-            <div class="h-2.5 text-bg-color-3 rounded-full w-3/6 mb-2.5"></div>
-            <div class="w-5/6 h-2 text-bg-color-3 rounded-full"></div>
+            <div class="h-2.5 card-bg-color rounded-full w-3/6 mb-2.5"></div>
+            <div class="w-5/6 h-2 card-bg-color rounded-full"></div>
           </div>
-          <div class="w-1/6 h-2.5 text-bg-color-3 rounded-full"></div>
+          <div class="w-1/6 h-2.5 card-bg-color rounded-full"></div>
         </div>
         <span class="sr-only">Loading...</span>
       `.trim();
@@ -88,7 +88,6 @@ wc-list-skeleton {
 }
 wc-list-skeleton .wc-list-skeleton {
   background-color: var(--surface-1);
-  color: var(--text-3);
 }
 /* Spacing */
 .md\:p-6 {
