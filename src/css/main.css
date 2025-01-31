@@ -516,6 +516,57 @@
     --radio-checked-bg: var(--swatch-6);
     --radio-checked-border: var(--swatch-5);
   }
+}
+
+@layer wc.classes {
+  .swatch-color-1 { color: var(--swatch-1); }
+  .swatch-color-2 { color: var(--swatch-2); }
+  .swatch-color-3 { color: var(--swatch-3); }
+  .swatch-color-4 { color: var(--swatch-4); }
+  .swatch-color-5 { color: var(--swatch-5); }
+  .swatch-color-6 { color: var(--swatch-6); }
+  .swatch-color-7 { color: var(--swatch-7); }
+  .swatch-color-8 { color: var(--swatch-8); }
+  .swatch-color-9 { color: var(--swatch-9); }
+  .swatch-color-10 { color: var(--swatch-10); }
+  .swatch-color-11 { color: var(--swatch-11); }
+  .swatch-color-12 { color: var(--swatch-12); }
+
+  .swatch-bg-color-1 { background-color: var(--swatch-1); }
+  .swatch-bg-color-2 { background-color: var(--swatch-2); }
+  .swatch-bg-color-3 { background-color: var(--swatch-3); }
+  .swatch-bg-color-4 { background-color: var(--swatch-4); }
+  .swatch-bg-color-5 { background-color: var(--swatch-5); }
+  .swatch-bg-color-6 { background-color: var(--swatch-6); }
+  .swatch-bg-color-7 { background-color: var(--swatch-7); }
+  .swatch-bg-color-8 { background-color: var(--swatch-8); }
+  .swatch-bg-color-9 { background-color: var(--swatch-9); }
+  .swatch-bg-color-10 { background-color: var(--swatch-10); }
+  .swatch-bg-color-11 { background-color: var(--swatch-11); }
+  .swatch-bg-color-12 { background-color: var(--swatch-12); }
+
+  .surface-1 { background-color: var(--surface-1); }
+  .surface-2 { background-color: var(--surface-2); }
+  .surface-3 { background-color: var(--surface-3); }
+  .surface-4 { background-color: var(--surface-4); }
+  .surface-5 { background-color: var(--surface-5); }
+
+  .text-1 { color: var(--text-1); }
+  .text-2 { color: var(--text-2); }
+  .text-3 { color: var(--text-3); }
+  .text-4 { color: var(--text-4); }
+  .text-5 { color: var(--text-5); }
+
+  .text-bg-color-1 { background-color: var(--text-1); }
+  .text-bg-color-2 { background-color: var(--text-2); }
+  .text-bg-color-3 { background-color: var(--text-3); }
+  .text-bg-color-4 { background-color: var(--text-4); }
+  .text-bg-color-5 { background-color: var(--text-5); }
+
+
+  .component-bg-color {
+    background-color: var(--component-bg-color);
+  }
 
 }
 
