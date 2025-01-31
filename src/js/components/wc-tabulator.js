@@ -240,7 +240,6 @@ if (!customElements.get('wc-tabulator')) {
       const colFieldFormatter = this.getAttribute('col-field-formatter') || '{}';
       const responsiveLayout = this.getAttribute('responsive-layout');
       const groupBy = this.getAttribute('group-by');
-      const headerFilter = this.getAttribute('header-filter');
       const initialFilter = this.getAttribute('initial-filter');
 
       // Process any column field formatters.
@@ -262,7 +261,6 @@ if (!customElements.get('wc-tabulator')) {
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
         ajaxConfig: this.getAjaxConfig(),
         ajaxResponse: this.handleAjaxResponse.bind(this), // Optional custom handling of server response
-        headerFilterLive: true,
       };
 
       if (pagination) options.pagination = pagination;
@@ -303,7 +301,6 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
-      if (headerFilter) options.headerFilter = headerFilter.toLowerCase() == 'true' ? true : false;
       if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
 
       await this.renderTabulator(options);
