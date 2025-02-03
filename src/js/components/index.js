@@ -3,6 +3,7 @@ import './wc-base-component.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
 import './wc-background-image.js';
+import './wc-breadcrumb.js';
 import './wc-code-mirror.js';
 import './wc-div.js';
 import './wc-dropdown.js';
