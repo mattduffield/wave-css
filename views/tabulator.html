@@ -153,7 +153,7 @@
       movable-columns="true"
       movable-rows="true"
       xrow-header='{"formatter":"rowSelection", "titleFormatter": "rowSelection", "headerSort":false, "resizable":false, "frozen":true, "headerHozAlign":"center", "hozAlign":"center"}'
-      row-header='{"headerSort":false, "resizable": false, "minWidth":30, "width":30, "rowHandle":true, "formatter":"handle"}'
+      xrow-header='{"headerSort":false, "resizable": false, "minWidth":30, "width":30, "rowHandle":true, "formatter":"handle"}'
       row-context-menu="rowContextMenu"
       row-height="40"
       pagination
@@ -176,13 +176,16 @@
         title="Actions"
         formatter="rowSelection"
         title-formatter="rowSelection"
+        css-class="pt-5"
         hoz-align="center"
+        header-hoz-align="center"
         width=45
         header-sort="false"
-        header-menu="headerMenu"
+        resizable="false"
+        frozen="true"
         cell-click="toggleSelect"
-        visible="false"
-        ></wc-tabulator-column>
+        visible="true"
+        ></wc-tabulator-column>        
       <wc-tabulator-column
         title="#"
         xformatter="rownum"

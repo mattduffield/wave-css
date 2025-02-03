@@ -5442,6 +5442,19 @@ if (!customElements.get("wc-tabulator")) {
     color: var(--card-color);
     background-color: var(--card-bg-color);
   }
+
+  /* Tabulator Edit List / Popup Container */
+  .tabulator-edit-list.tabulator-popup-container {
+    color: var(--text-1);
+    background-color: var(--surface-1);
+  }
+  .tabulator-edit-list-item.tabulator-edit-list-group-level-0 {
+    color: var(--text-1);
+  }
+  .tabulator-edit-list-item.tabulator-edit-list-group-level-0:hover {
+    color: var(--card-color);
+    background-color: var(--card-bg-color);
+  }
       `;
       this.loadStyle("wc-tabulator-style", style);
     }
