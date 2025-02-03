@@ -301,7 +301,10 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
-      if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
+      if (initialFilter) {
+        options.initialFilter = JSON.parse(initialFilter);
+        this.initialFilter = options.initialFilter;
+      } 
       if (rowClick) {
         this.rowClick = this.resolveFunc(rowClick);
       }
@@ -363,7 +366,7 @@ if (!customElements.get('wc-tabulator')) {
         if (headerFilters.length === 0) {
           this.table.headerFiltersInitialized = false;
           this.table.clearFilter(true);
-          this.table.setFilter(initialFilter);
+          this.table.setFilter(this.initialFilter);
         }
         // If header filters are active, use only those
         else {

@@ -4732,7 +4732,7 @@ if (!customElements.get("wc-tabulator")) {
       const colFieldFormatter = this.getAttribute("col-field-formatter") || "{}";
       const responsiveLayout = this.getAttribute("responsive-layout");
       const groupBy = this.getAttribute("group-by");
-      const initialFilter2 = this.getAttribute("initial-filter");
+      const initialFilter = this.getAttribute("initial-filter");
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
       const rowDeselected = this.getAttribute("row-deselected");
@@ -4793,7 +4793,10 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
-      if (initialFilter2) options.initialFilter = JSON.parse(initialFilter2);
+      if (initialFilter) {
+        options.initialFilter = JSON.parse(initialFilter);
+        this.initialFilter = options.initialFilter;
+      }
       if (rowClick) {
         this.rowClick = this.resolveFunc(rowClick);
       }
@@ -4841,7 +4844,7 @@ if (!customElements.get("wc-tabulator")) {
         if (headerFilters.length === 0) {
           this.table.headerFiltersInitialized = false;
           this.table.clearFilter(true);
-          this.table.setFilter(initialFilter);
+          this.table.setFilter(this.initialFilter);
         } else {
           this.table.headerFiltersInitialized = false;
           this.table.setFilter(headerFilters);
