@@ -238,6 +238,7 @@ if (!customElements.get('wc-tabulator')) {
       const responsiveLayout = this.getAttribute('responsive-layout');
       const groupBy = this.getAttribute('group-by');
       const initialFilter = this.getAttribute('initial-filter');
+      const rowClick = this.getAttribute('row-click');
 
       // Process any column field formatters.
       if (colFieldFormatter) {
@@ -299,6 +300,9 @@ if (!customElements.get('wc-tabulator')) {
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
       if (initialFilter) options.initialFilter = JSON.parse(initialFilter);
+      if (rowClick) {
+        options.rowClick = this.resolveFunc(rowClick);
+      }
 
       await this.renderTabulator(options);
     }
@@ -322,15 +326,15 @@ if (!customElements.get('wc-tabulator')) {
           htmx.process(this);
         }
       });
-      this.table.on("rowClick", (e, row) => {
-        //e - the click event object
-        //row - row component
-        var rowData = row.getData();
-        var rowIndex = row.getIndex();
-        var rowPosition = row.getPosition();
-        const custom = { e, row, rowData, rowIndex, rowPosition };
-        wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
-      });
+      // this.table.on("rowClick", (e, row) => {
+      //   //e - the click event object
+      //   //row - row component
+      //   var rowData = row.getData();
+      //   var rowIndex = row.getIndex();
+      //   var rowPosition = row.getPosition();
+      //   const custom = { e, row, rowData, rowIndex, rowPosition };
+      //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
+      // });
       this.table.on("dataFiltering", (filters) => {
         if (!this.table.headerFiltersInitialized) {
           this.table.headerFiltersInitialized = true;

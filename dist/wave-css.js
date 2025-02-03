@@ -4733,6 +4733,7 @@ if (!customElements.get("wc-tabulator")) {
       const responsiveLayout = this.getAttribute("responsive-layout");
       const groupBy = this.getAttribute("group-by");
       const initialFilter2 = this.getAttribute("initial-filter");
+      const rowClick = this.getAttribute("row-click");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -4791,6 +4792,9 @@ if (!customElements.get("wc-tabulator")) {
       if (groupBy) options.groupBy = groupBy;
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
       if (initialFilter2) options.initialFilter = JSON.parse(initialFilter2);
+      if (rowClick) {
+        options.rowClick = this.resolveFunc(rowClick);
+      }
       await this.renderTabulator(options);
     }
     async renderTabulator(options) {
@@ -4810,13 +4814,6 @@ if (!customElements.get("wc-tabulator")) {
           await sleep(1e3);
           htmx.process(this);
         }
-      });
-      this.table.on("rowClick", (e, row) => {
-        var rowData = row.getData();
-        var rowIndex = row.getIndex();
-        var rowPosition = row.getPosition();
-        const custom = { e, row, rowData, rowIndex, rowPosition };
-        wc.EventHub.broadcast("wc-tabulator:row-click", "", "", custom);
       });
       this.table.on("dataFiltering", (filters) => {
         if (!this.table.headerFiltersInitialized) {
