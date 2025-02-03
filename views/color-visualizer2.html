@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Scales Visualization</title>
+    <style>
+        .color-box {
+            width: 100px;
+            height: 100px;
+            display: inline-block;
+            margin: 5px;
+            color: white;
+            text-align: center;
+            line-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Color Scales Visualization (OKLCH)</h1>
+    <div id="colors-container"></div>
+
+    <script>
+        const lightness = 0.7;  // constant lightness
+        const chroma = 0.15;    // constant chroma
+        const scales = 12;
+        const hueIncrement = 360 / scales;
+
+        function oklchToHex(l, c, h) {
+            // Convert OKLCH to HEX using CSS Colors 4 color function
+            const color = `oklch(${l} ${c} ${h})`;
+            return color;
+        }
+
+        const colorsContainer = document.getElementById('colors-container');
+
+        for (let i = 0; i < scales; i++) {
+            const hue = i * hueIncrement;
+            const color = oklchToHex(lightness, chroma, hue);
+            const colorBox = document.createElement('div');
+            colorBox.className = 'color-box';
+            colorBox.style.backgroundColor = color;
+            colorBox.textContent = hue.toFixed(0) + '°';
+            colorsContainer.appendChild(colorBox);
+        }
+    </script>
+</body>
+</html>

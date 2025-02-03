@@ -74,12 +74,12 @@ class WcThemeSelector extends WcBaseComponent {
     const innerEl = this.querySelector('.wc-theme-selector > *');
     if (innerEl) {
       // Do nothing...
-      const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
-      themeBtns.forEach(btn => btn.addEventListener('click', this._handleThemeClick.bind(this)));
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
     }
+
+    this._wireEvents();
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
@@ -103,6 +103,7 @@ class WcThemeSelector extends WcBaseComponent {
       "theme-avocado",
       "theme-lime",
       "theme-fern",
+      "theme-yellow",
       "theme-meadow",
       "theme-cornsilk",
       "theme-sage",
@@ -160,7 +161,6 @@ class WcThemeSelector extends WcBaseComponent {
       </wc-input>
       `.trim();
       this.componentElement.appendChild(template.content.cloneNode(true));
-      this._wireEvents();
   }
 
   _applyStyle() {
@@ -181,32 +181,45 @@ class WcThemeSelector extends WcBaseComponent {
 
   _handleThemeClick(event) {
     const {target} = event;
-    const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     const selectedTheme = target.getAttribute('data-theme');
-    this.setAttribute('theme', selectedTheme);
+    this._setTheme(target, selectedTheme);
+    localStorage.setItem("theme", selectedTheme.replace('theme-', ''));
+  }
+
+  _setTheme(target, theme) {
+    const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     // Remove "selected" class from all buttons
-    themeBtns.forEach(btn => btn.classList.remove('selected'));        
+    themeBtns.forEach(btn => {
+      btn.classList.remove('selected')
+      btn.innerHTML = '';
+    });
     // Add "selected" class to the clicked button
-    target.classList.add('selected');        
+    target.classList.add('selected');
+    target.innerHTML = `<svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+        <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+      </svg>`.trim();
     // Remove any current theme classes
     document.documentElement.classList.forEach(cls => {
       if (cls.startsWith('theme-')) {
         document.documentElement.classList.remove(cls);
       }
     });
-    // const oldTheme = document.documentElement.dataset.theme || selectedTheme;
-    // if (oldTheme) {
-    //   document.documentElement.classList.remove(oldTheme);
-    // }
-    document.documentElement.dataset.theme = selectedTheme;
     // Add the selected theme class to the documentElement
-    document.documentElement.classList.add(selectedTheme);
+    document.documentElement.classList.add(theme);
+  }
+
+  _handleLoadTheme() {
+    const savedTheme = localStorage.getItem("theme") || "rose";
+    const themeClass = `theme-${savedTheme}`;
+    const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
+    this._setTheme(target, themeClass);
   }
 
   _wireEvents() {
     super._wireEvents();
     const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     themeBtns.forEach(btn => btn.addEventListener('click', this._handleThemeClick.bind(this)));
+    this.componentElement.addEventListener('load', this._handleLoadTheme.bind(this));
   }
 
   _unWireEvents() {

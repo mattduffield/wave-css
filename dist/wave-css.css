@@ -18,6 +18,7 @@
   .theme-avocado,
   .theme-lime,
   .theme-fern,
+  .theme-yellow,
   .theme-meadow,
   .theme-cornsilk,
   .theme-sage,
@@ -47,15 +48,16 @@
     --swatch-1: oklch(99% .05 var(--hue));
     --swatch-2: oklch(95% .05 var(--hue));
     --swatch-3: oklch(90% .1 var(--hue));
-    --swatch-4: oklch(80% .2 var(--hue));
-    --swatch-5: oklch(72% .25 var(--hue));
-    --swatch-6: oklch(67% .31 var(--hue));
-    --swatch-7: oklch(50% .27 var(--hue));
-    --swatch-8: oklch(35% .25 var(--hue));
-    --swatch-9: oklch(25% .22 var(--hue));
-    --swatch-10: oklch(14% .2 var(--hue));
-    --swatch-11: oklch(10% .19 var(--hue));
-    --swatch-12: oklch(5% .1 var(--hue));
+    --swatch-4: oklch(85% .15 var(--hue));
+    --swatch-5: oklch(80% .2 var(--hue));
+    --swatch-6: oklch(72% .25 var(--hue));
+    --swatch-7: oklch(67% .31 var(--hue));
+    --swatch-8: oklch(50% .27 var(--hue));
+    --swatch-9: oklch(35% .25 var(--hue));
+    --swatch-10: oklch(25% .22 var(--hue));
+    --swatch-11: oklch(14% .2 var(--hue));
+    --swatch-12: oklch(10% .19 var(--hue));
+    --swatch-13: oklch(5% .1 var(--hue));
   }
   * {
     box-sizing: border-box;
@@ -112,6 +114,9 @@
   }
   .theme-fern {
     --hue: 95;
+  }
+  .theme-yellow {
+    --hue: 102;
   }
   .theme-meadow {
     --hue: 105;
@@ -191,6 +196,8 @@
   .theme-bubblegum {
     --hue: 355;
   }
+}
+@layer wc.prefers-light {
   @media (prefers-color-scheme: light) {
     .theme-rose,
     .theme-petal,
@@ -206,6 +213,7 @@
     .theme-avocado,
     .theme-lime,
     .theme-fern,
+    .theme-yellow,
     .theme-meadow,
     .theme-cornsilk,
     .theme-sage,
@@ -232,16 +240,32 @@
     .theme-cottoncandy,
     .theme-blush,
     .theme-bubblegum {
-      --text-1: var(--swatch-12);
-      --text-2: var(--swatch-11);
-      --text-3: var(--swatch-10);
-      --text-4: var(--swatch-9);
-      --text-5: var(--swatch-8);
+      --text-1: var(--swatch-13);
+      --text-2: var(--swatch-12);
+      --text-3: var(--swatch-11);
+      --text-4: var(--swatch-10);
+      --text-5: var(--swatch-9);
+      --text-6: var(--swatch-8);
+      --text-7: var(--swatch-7);
+      --text-8: var(--swatch-6);
+      --text-9: var(--swatch-5);
+      --text-10: var(--swatch-4);
+      --text-11: var(--swatch-3);
+      --text-12: var(--swatch-2);
+      --text-13: var(--swatch-1);
       --surface-1: var(--swatch-1);
       --surface-2: var(--swatch-2);
       --surface-3: var(--swatch-3);
       --surface-4: var(--swatch-4);
       --surface-5: var(--swatch-5);
+      --surface-6: var(--swatch-6);
+      --surface-7: var(--swatch-7);
+      --surface-8: var(--swatch-8);
+      --surface-9: var(--swatch-9);
+      --surface-10: var(--swatch-10);
+      --surface-11: var(--swatch-11);
+      --surface-12: var(--swatch-12);
+      --surface-13: var(--swatch-13);
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-4);
@@ -266,13 +290,13 @@
       --checkbox-checked-bg: var(--swatch-5);
       --slider-track: var(--surface-1);
       --slider-thumb: var(--primary-bg-color);
-      --button-bg-color: var(--swatch-6);
-      --button-hover-bg-color: var(--swatch-7);
+      --button-bg-color: var(--swatch-7);
+      --button-hover-bg-color: var(--swatch-8);
       --button-hover-color: var(--swatch-1);
-      --button-active-bg-color: var(--swatch-6);
+      --button-active-bg-color: var(--swatch-7);
       --button-color: var(--swatch-12);
-      --button-border-color: var(--swatch-6);
-      --button-focus-border-color: var(--swatch-5);
+      --button-border-color: var(--swatch-7);
+      --button-focus-border-color: var(--swatch-6);
       --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
       --button-disabled-bg-color: var(--swatch-9);
       --button-disabled-border-color: var(--swatch-10);
@@ -283,6 +307,8 @@
       --radio-checked-border: var(--swatch-6);
     }
   }
+}
+@layer wc.prefers-dark {
   @media (prefers-color-scheme: dark) {
     .theme-rose,
     .theme-petal,
@@ -297,6 +323,7 @@
     .theme-moss,
     .theme-avocado,
     .theme-lime,
+    .theme-yellow,
     .theme-fern,
     .theme-meadow,
     .theme-cornsilk,
@@ -329,11 +356,27 @@
       --text-3: var(--swatch-3);
       --text-4: var(--swatch-4);
       --text-5: var(--swatch-5);
-      --surface-1: var(--swatch-12);
-      --surface-2: var(--swatch-11);
-      --surface-3: var(--swatch-10);
-      --surface-4: var(--swatch-9);
-      --surface-5: var(--swatch-8);
+      --text-6: var(--swatch-6);
+      --text-7: var(--swatch-7);
+      --text-8: var(--swatch-8);
+      --text-9: var(--swatch-9);
+      --text-10: var(--swatch-10);
+      --text-11: var(--swatch-11);
+      --text-12: var(--swatch-12);
+      --text-13: var(--swatch-13);
+      --surface-1: var(--swatch-13);
+      --surface-2: var(--swatch-12);
+      --surface-3: var(--swatch-11);
+      --surface-4: var(--swatch-10);
+      --surface-5: var(--swatch-9);
+      --surface-6: var(--swatch-8);
+      --surface-7: var(--swatch-7);
+      --surface-8: var(--swatch-6);
+      --surface-9: var(--swatch-5);
+      --surface-10: var(--swatch-4);
+      --surface-11: var(--swatch-3);
+      --surface-12: var(--swatch-2);
+      --surface-13: var(--swatch-1);
       --container-bg-color: var(--surface-4);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-5);
@@ -376,6 +419,8 @@
       --radio-checked-border: var(--swatch-5);
     }
   }
+}
+@layer wc.theme-light {
   .light.theme-rose,
   .light.theme-petal,
   .light.theme-sunset,
@@ -390,6 +435,7 @@
   .light.theme-avocado,
   .light.theme-lime,
   .light.theme-fern,
+  .light.theme-yellow,
   .light.theme-meadow,
   .light.theme-cornsilk,
   .light.theme-sage,
@@ -416,16 +462,32 @@
   .light.theme-cottoncandy,
   .light.theme-blush,
   .light.theme-bubblegum {
-    --text-1: var(--swatch-12);
-    --text-2: var(--swatch-11);
-    --text-3: var(--swatch-10);
-    --text-4: var(--swatch-9);
-    --text-5: var(--swatch-8);
+    --text-1: var(--swatch-13);
+    --text-2: var(--swatch-12);
+    --text-3: var(--swatch-11);
+    --text-4: var(--swatch-10);
+    --text-5: var(--swatch-9);
+    --text-6: var(--swatch-8);
+    --text-7: var(--swatch-7);
+    --text-8: var(--swatch-6);
+    --text-9: var(--swatch-5);
+    --text-10: var(--swatch-4);
+    --text-11: var(--swatch-3);
+    --text-12: var(--swatch-2);
+    --text-13: var(--swatch-1);
     --surface-1: var(--swatch-1);
     --surface-2: var(--swatch-2);
     --surface-3: var(--swatch-3);
     --surface-4: var(--swatch-4);
     --surface-5: var(--swatch-5);
+    --surface-6: var(--swatch-6);
+    --surface-7: var(--swatch-7);
+    --surface-8: var(--swatch-8);
+    --surface-9: var(--swatch-9);
+    --surface-10: var(--swatch-10);
+    --surface-11: var(--swatch-11);
+    --surface-12: var(--swatch-12);
+    --surface-13: var(--swatch-13);
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-4);
@@ -466,6 +528,8 @@
     --radio-checked-bg: var(--swatch-5);
     --radio-checked-border: var(--swatch-6);
   }
+}
+@layer wc.theme-dark {
   .dark.theme-rose,
   .dark.theme-petal,
   .dark.theme-sunset,
@@ -480,6 +544,7 @@
   .dark.theme-avocado,
   .dark.theme-lime,
   .dark.theme-fern,
+  .dark.theme-yellow,
   .dark.theme-meadow,
   .dark.theme-cornsilk,
   .dark.theme-sage,
@@ -511,11 +576,27 @@
     --text-3: var(--swatch-3);
     --text-4: var(--swatch-4);
     --text-5: var(--swatch-5);
-    --surface-1: var(--swatch-12);
-    --surface-2: var(--swatch-11);
-    --surface-3: var(--swatch-10);
-    --surface-4: var(--swatch-9);
-    --surface-5: var(--swatch-8);
+    --text-6: var(--swatch-6);
+    --text-7: var(--swatch-7);
+    --text-8: var(--swatch-8);
+    --text-9: var(--swatch-9);
+    --text-10: var(--swatch-10);
+    --text-11: var(--swatch-11);
+    --text-12: var(--swatch-12);
+    --text-13: var(--swatch-13);
+    --surface-1: var(--swatch-13);
+    --surface-2: var(--swatch-12);
+    --surface-3: var(--swatch-11);
+    --surface-4: var(--swatch-10);
+    --surface-5: var(--swatch-9);
+    --surface-6: var(--swatch-8);
+    --surface-7: var(--swatch-7);
+    --surface-8: var(--swatch-6);
+    --surface-9: var(--swatch-5);
+    --surface-10: var(--swatch-4);
+    --surface-11: var(--swatch-3);
+    --surface-12: var(--swatch-2);
+    --surface-13: var(--swatch-1);
     --container-bg-color: var(--surface-4);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-5);
@@ -595,6 +676,9 @@
   .swatch-color-12 {
     color: var(--swatch-12);
   }
+  .swatch-color-13 {
+    color: var(--swatch-13);
+  }
   .swatch-bg-color-1 {
     background-color: var(--swatch-1);
   }
@@ -630,6 +714,9 @@
   }
   .swatch-bg-color-12 {
     background-color: var(--swatch-12);
+  }
+  .swatch-bg-color-13 {
+    background-color: var(--swatch-13);
   }
   .surface-1 {
     background-color: var(--surface-1);

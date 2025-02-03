@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OKLCH Color Visualizer</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #f8f9fa;
+    }
+    
+    h1 {
+      margin-bottom: 2rem;
+      color: #1a1a1a;
+    }
+    
+    .color-group {
+      margin-bottom: 2rem;
+    }
+    
+    .color-name {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      color: #333;
+    }
+    
+    .color-row {
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 4px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .color-swatch {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .color-swatch:hover::after {
+      content: attr(data-color);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>OKLCH Color Palette Visualization</h1>
+  <div id="colorContainer"></div>
+
+  <script>
+    function generateColorScale(hue) {
+      //
+      // We reviewed this to see if it would
+      // be any better than the current implementation
+      // but it doesn't really add any value.
+      //
+      const scales = {
+        1:  { l: 0.98, c: 0.01 },
+        2:  { l: 0.95, c: 0.03 },
+        3:  { l: 0.92, c: 0.06 },
+        4:  { l: 0.87, c: 0.10 },
+        5:  { l: 0.80, c: 0.14 },
+        6:  { l: 0.73, c: 0.18 },
+        7:  { l: 0.65, c: 0.20 },
+        8:  { l: 0.56, c: 0.22 },
+        9:  { l: 0.45, c: 0.20 },
+        10: { l: 0.35, c: 0.18 },
+        11: { l: 0.25, c: 0.15 },
+        12: { l: 0.15, c: 0.12 },
+        13: { l: 0.12, c: 0.10 },
+      };
+
+      const colorScale = {};
+      for (const [shade, values] of Object.entries(scales)) {
+        colorScale[shade] = `oklch(${values.l} ${values.c} ${hue})`;
+      }
+      return colorScale;
+    }
+
+    const colors = {
+    /*
+      slate: generateColorScale(270),
+      gray: generateColorScale(0),
+      zinc: generateColorScale(90),
+      red: generateColorScale(25),
+      orange: generateColorScale(45),
+      amber: generateColorScale(65),
+      yellow: generateColorScale(85),
+      lime: generateColorScale(105),
+      green: generateColorScale(135),
+      emerald: generateColorScale(155),
+      teal: generateColorScale(175),
+      cyan: generateColorScale(195),
+      sky: generateColorScale(215),
+      blue: generateColorScale(235),
+      indigo: generateColorScale(255),
+      violet: generateColorScale(275),
+      purple: generateColorScale(295),
+      fuchsia: generateColorScale(315),
+      pink: generateColorScale(335),
+    */
+      rose: generateColorScale(0),
+      petal: generateColorScale(5),
+      sunset: generateColorScale(10),
+      peach: generateColorScale(15),
+      fire: generateColorScale(20),
+      desert: generateColorScale(30),
+      golden: generateColorScale(45),
+      honey: generateColorScale(50),
+      amber: generateColorScale(55),
+      olive: generateColorScale(65),
+      avocado: generateColorScale(85),
+      lime: generateColorScale(90),
+      fern: generateColorScale(95),
+      meadow: generateColorScale(105),
+      cornsilk: generateColorScale(108),
+      sage: generateColorScale(110),
+      forest: generateColorScale(120),
+      jungle: generateColorScale(130),
+      emerald: generateColorScale(140),
+      mint: generateColorScale(150),
+      turquoise: generateColorScale(160),
+      aqua: generateColorScale(170),
+      lagoon: generateColorScale(180),
+      ice: generateColorScale(190),
+      ocean: generateColorScale(200),
+      azure: generateColorScale(210),
+      sky: generateColorScale(220),
+      midsky: generateColorScale(230),
+      deepsky: generateColorScale(240),
+      royal: generateColorScale(250),
+      twilight: generateColorScale(260),
+      lavender: generateColorScale(275),
+      violet: generateColorScale(290),
+      grape: generateColorScale(300),
+      plum: generateColorScale(320),
+      fuchsia: generateColorScale(330),
+      cottoncandy: generateColorScale(340),
+      blush: generateColorScale(350),
+      bubblegum: generateColorScale(355),
+    };
+
+    const container = document.getElementById('colorContainer');
+
+    for (const [colorName, scales] of Object.entries(colors)) {
+      const colorGroup = document.createElement('div');
+      colorGroup.className = 'color-group';
+      
+      const nameElement = document.createElement('div');
+      nameElement.className = 'color-name';
+      nameElement.textContent = colorName;
+      colorGroup.appendChild(nameElement);
+      
+      const row = document.createElement('div');
+      row.className = 'color-row';
+      
+      for (const [scale, value] of Object.entries(scales)) {
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = value;
+        swatch.setAttribute('data-color', value);
+        row.appendChild(swatch);
+      }
+      
+      colorGroup.appendChild(row);
+      container.appendChild(colorGroup);
+    }
+  </script>
+</body>
+</html>

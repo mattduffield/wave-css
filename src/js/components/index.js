@@ -42,6 +42,7 @@ import './wc-link.js';
 import './wc-script.js';
 import './wc-javascript.js';
 import './wc-prompt.js';
+import './wc-theme.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';

@@ -5423,12 +5423,11 @@ var WcThemeSelector = class extends WcBaseComponent {
     super._render();
     const innerEl = this.querySelector(".wc-theme-selector > *");
     if (innerEl) {
-      const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
-      themeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeClick.bind(this)));
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
     }
+    this._wireEvents();
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
@@ -5450,6 +5449,7 @@ var WcThemeSelector = class extends WcBaseComponent {
       "theme-avocado",
       "theme-lime",
       "theme-fern",
+      "theme-yellow",
       "theme-meadow",
       "theme-cornsilk",
       "theme-sage",
@@ -5507,7 +5507,6 @@ var WcThemeSelector = class extends WcBaseComponent {
       </wc-input>
       `.trim();
     this.componentElement.appendChild(template.content.cloneNode(true));
-    this._wireEvents();
   }
   _applyStyle() {
     const style = `
@@ -5526,23 +5525,38 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   _handleThemeClick(event) {
     const { target } = event;
-    const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     const selectedTheme = target.getAttribute("data-theme");
-    this.setAttribute("theme", selectedTheme);
-    themeBtns.forEach((btn) => btn.classList.remove("selected"));
+    this._setTheme(target, selectedTheme);
+    localStorage.setItem("theme", selectedTheme.replace("theme-", ""));
+  }
+  _setTheme(target, theme) {
+    const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
+    themeBtns.forEach((btn) => {
+      btn.classList.remove("selected");
+      btn.innerHTML = "";
+    });
     target.classList.add("selected");
+    target.innerHTML = `<svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+        <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+      </svg>`.trim();
     document.documentElement.classList.forEach((cls) => {
       if (cls.startsWith("theme-")) {
         document.documentElement.classList.remove(cls);
       }
     });
-    document.documentElement.dataset.theme = selectedTheme;
-    document.documentElement.classList.add(selectedTheme);
+    document.documentElement.classList.add(theme);
+  }
+  _handleLoadTheme() {
+    const savedTheme = localStorage.getItem("theme") || "rose";
+    const themeClass = `theme-${savedTheme}`;
+    const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
+    this._setTheme(target, themeClass);
   }
   _wireEvents() {
     super._wireEvents();
     const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     themeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeClick.bind(this)));
+    this.componentElement.addEventListener("load", this._handleLoadTheme.bind(this));
   }
   _unWireEvents() {
     super._unWireEvents();
@@ -7082,6 +7096,30 @@ if (!customElements.get("wc-prompt")) {
     }
   }
   customElements.define("wc-prompt", WcPrompt);
+}
+
+// src/js/components/wc-theme.js
+if (!customElements.get("wc-theme")) {
+  class WcTheme extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+      this._handleLoadTheme();
+    }
+    _handleLoadTheme() {
+      const savedTheme = localStorage.getItem("theme") || "rose";
+      const themeClass = `theme-${savedTheme}`;
+      document.documentElement.classList.forEach((cls) => {
+        if (cls.startsWith("theme-")) {
+          document.documentElement.classList.remove(cls);
+        }
+      });
+      document.documentElement.classList.add(themeClass);
+    }
+  }
+  customElements.define("wc-theme", WcTheme);
 }
 
 // src/js/components/wc-form.js

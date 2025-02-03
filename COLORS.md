@@ -135,9 +135,7 @@
   .theme-cottoncandy { --hue: 340; }
   .theme-blush       { --hue: 350; }
   .theme-bubblegum   { --hue: 355; }
-}
 
-@layer wc.prefers-light {
   @media (prefers-color-scheme: light) {
     .theme-rose,
     .theme-petal,
@@ -181,32 +179,16 @@
     .theme-blush,
     .theme-bubblegum
     {
-      --text-1: var(--swatch-13);
-      --text-2: var(--swatch-12);
-      --text-3: var(--swatch-11);
-      --text-4: var(--swatch-10);
-      --text-5: var(--swatch-9);
-      --text-6: var(--swatch-8);
-      --text-7: var(--swatch-7);
-      --text-8: var(--swatch-6);
-      --text-9: var(--swatch-5);
-      --text-10: var(--swatch-4);
-      --text-11: var(--swatch-3);
-      --text-12: var(--swatch-2);
-      --text-13: var(--swatch-1);
+      --text-1: var(--swatch-12);
+      --text-2: var(--swatch-11);
+      --text-3: var(--swatch-10);
+      --text-4: var(--swatch-9);
+      --text-5: var(--swatch-8);
       --surface-1: var(--swatch-1);
       --surface-2: var(--swatch-2);
       --surface-3: var(--swatch-3);
       --surface-4: var(--swatch-4);
       --surface-5: var(--swatch-5);
-      --surface-6: var(--swatch-6);
-      --surface-7: var(--swatch-7);
-      --surface-8: var(--swatch-8);
-      --surface-9: var(--swatch-9);
-      --surface-10: var(--swatch-10);
-      --surface-11: var(--swatch-11);
-      --surface-12: var(--swatch-12);
-      --surface-13: var(--swatch-13);
 
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
@@ -254,9 +236,7 @@
       --radio-checked-border: var(--swatch-6);
     }
   }
-}
 
-@layer wc.prefers-dark {
   @media (prefers-color-scheme: dark) {
     .theme-rose,
     .theme-petal,
@@ -305,27 +285,11 @@
       --text-3: var(--swatch-3);
       --text-4: var(--swatch-4);
       --text-5: var(--swatch-5);
-      --text-6: var(--swatch-6);
-      --text-7: var(--swatch-7);
-      --text-8: var(--swatch-8);
-      --text-9: var(--swatch-9);
-      --text-10: var(--swatch-10);
-      --text-11: var(--swatch-11);
-      --text-12: var(--swatch-12);
-      --text-13: var(--swatch-13);
-      --surface-1: var(--swatch-13);
-      --surface-2: var(--swatch-12);
-      --surface-3: var(--swatch-11);
-      --surface-4: var(--swatch-10);
-      --surface-5: var(--swatch-9);
-      --surface-6: var(--swatch-8);
-      --surface-7: var(--swatch-7);
-      --surface-8: var(--swatch-6);
-      --surface-9: var(--swatch-5);
-      --surface-10: var(--swatch-4);
-      --surface-11: var(--swatch-3);
-      --surface-12: var(--swatch-2);
-      --surface-13: var(--swatch-1);
+      --surface-1: var(--swatch-12);
+      --surface-2: var(--swatch-11);
+      --surface-3: var(--swatch-10);
+      --surface-4: var(--swatch-9);
+      --surface-5: var(--swatch-8);
 
       --container-bg-color: var(--surface-4);
       --container-color: var(--text-2);
@@ -435,9 +399,8 @@
     }
     */
   }
-}
 
-@layer wc.theme-light {
+  /* For manually overriding to light mode */
   .light.theme-rose,
   .light.theme-petal,
   .light.theme-sunset,
@@ -480,32 +443,16 @@
   .light.theme-blush,
   .light.theme-bubblegum
   {
-    --text-1: var(--swatch-13);
-    --text-2: var(--swatch-12);
-    --text-3: var(--swatch-11);
-    --text-4: var(--swatch-10);
-    --text-5: var(--swatch-9);
-    --text-6: var(--swatch-8);
-    --text-7: var(--swatch-7);
-    --text-8: var(--swatch-6);
-    --text-9: var(--swatch-5);
-    --text-10: var(--swatch-4);
-    --text-11: var(--swatch-3);
-    --text-12: var(--swatch-2);
-    --text-13: var(--swatch-1);
+    --text-1: var(--swatch-12);
+    --text-2: var(--swatch-11);
+    --text-3: var(--swatch-10);
+    --text-4: var(--swatch-9);
+    --text-5: var(--swatch-8);
     --surface-1: var(--swatch-1);
     --surface-2: var(--swatch-2);
     --surface-3: var(--swatch-3);
     --surface-4: var(--swatch-4);
     --surface-5: var(--swatch-5);
-    --surface-6: var(--swatch-6);
-    --surface-7: var(--swatch-7);
-    --surface-8: var(--swatch-8);
-    --surface-9: var(--swatch-9);
-    --surface-10: var(--swatch-10);
-    --surface-11: var(--swatch-11);
-    --surface-12: var(--swatch-12);
-    --surface-13: var(--swatch-13);
 
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
@@ -552,9 +499,8 @@
     --radio-checked-bg: var(--swatch-5);
     --radio-checked-border: var(--swatch-6);      
   }
-}
 
-@layer wc.theme-dark {
+  /* For manually overriding to dark mode */
   .dark.theme-rose,
   .dark.theme-petal,
   .dark.theme-sunset,
@@ -602,27 +548,11 @@
     --text-3: var(--swatch-3);
     --text-4: var(--swatch-4);
     --text-5: var(--swatch-5);
-    --text-6: var(--swatch-6);
-    --text-7: var(--swatch-7);
-    --text-8: var(--swatch-8);
-    --text-9: var(--swatch-9);
-    --text-10: var(--swatch-10);
-    --text-11: var(--swatch-11);
-    --text-12: var(--swatch-12);
-    --text-13: var(--swatch-13);
-    --surface-1: var(--swatch-13);
-    --surface-2: var(--swatch-12);
-    --surface-3: var(--swatch-11);
-    --surface-4: var(--swatch-10);
-    --surface-5: var(--swatch-9);
-    --surface-6: var(--swatch-8);
-    --surface-7: var(--swatch-7);
-    --surface-8: var(--swatch-6);
-    --surface-9: var(--swatch-5);
-    --surface-10: var(--swatch-4);
-    --surface-11: var(--swatch-3);
-    --surface-12: var(--swatch-2);
-    --surface-13: var(--swatch-1);
+    --surface-1: var(--swatch-12);
+    --surface-2: var(--swatch-11);
+    --surface-3: var(--swatch-10);
+    --surface-4: var(--swatch-9);
+    --surface-5: var(--swatch-8);
 
     --container-bg-color: var(--surface-4);
     --container-color: var(--text-2);
@@ -731,8 +661,8 @@
     --radio-checked-border: var(--swatch-5);
   }
   */
-}
 
+}
 
 @layer wc.classes {
   .swatch-color-1 { color: var(--swatch-1); }
