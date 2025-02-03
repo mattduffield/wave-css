@@ -4793,7 +4793,7 @@ if (!customElements.get("wc-tabulator")) {
       if (responsiveLayout) options.responsiveLayout = responsiveLayout;
       if (initialFilter2) options.initialFilter = JSON.parse(initialFilter2);
       if (rowClick) {
-        options.rowClick = this.resolveFunc(rowClick);
+        this.rowClick = this.resolveFunc(rowClick);
       }
       await this.renderTabulator(options);
     }
@@ -4815,6 +4815,9 @@ if (!customElements.get("wc-tabulator")) {
           htmx.process(this);
         }
       });
+      if (this.rowClick) {
+        this.table.on("rowClick", this.rowClick.bind(this));
+      }
       this.table.on("dataFiltering", (filters) => {
         if (!this.table.headerFiltersInitialized) {
           this.table.headerFiltersInitialized = true;
