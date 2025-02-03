@@ -240,6 +240,7 @@ if (!customElements.get('wc-tabulator')) {
       const initialFilter = this.getAttribute('initial-filter');
       const rowClick = this.getAttribute('row-click');
       const rowSelected = this.getAttribute('row-selected');
+      const rowDeselected = this.getAttribute('row-deselected');
 
       // Process any column field formatters.
       if (colFieldFormatter) {
@@ -307,6 +308,9 @@ if (!customElements.get('wc-tabulator')) {
       if (rowSelected) {
         this.rowSelected = this.resolveFunc(rowSelected);
       }
+      if (rowDeselected) {
+        this.rowDeselected = this.resolveFunc(rowDeselected);
+      }
 
       await this.renderTabulator(options);
     }
@@ -335,6 +339,9 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (this.rowSelected) {
         this.table.on("rowSelected", this.rowSelected.bind(this));  
+      }
+      if (this.rowDeselected) {
+        this.table.on("rowDeselected", this.rowDeselected.bind(this));  
       }
       // this.table.on("rowClick", (e, row) => {
       //   //e - the click event object

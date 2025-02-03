@@ -4735,6 +4735,7 @@ if (!customElements.get("wc-tabulator")) {
       const initialFilter2 = this.getAttribute("initial-filter");
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
+      const rowDeselected = this.getAttribute("row-deselected");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -4799,6 +4800,9 @@ if (!customElements.get("wc-tabulator")) {
       if (rowSelected) {
         this.rowSelected = this.resolveFunc(rowSelected);
       }
+      if (rowDeselected) {
+        this.rowDeselected = this.resolveFunc(rowDeselected);
+      }
       await this.renderTabulator(options);
     }
     async renderTabulator(options) {
@@ -4824,6 +4828,9 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (this.rowSelected) {
         this.table.on("rowSelected", this.rowSelected.bind(this));
+      }
+      if (this.rowDeselected) {
+        this.table.on("rowDeselected", this.rowDeselected.bind(this));
       }
       this.table.on("dataFiltering", (filters) => {
         if (!this.table.headerFiltersInitialized) {
