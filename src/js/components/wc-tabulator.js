@@ -278,7 +278,13 @@ if (!customElements.get('wc-tabulator')) {
       if (resizableColumns) options.resizableColumns = resizableColumns.toLowerCase() == 'true' ? true : false;
       if (resizableColumnGuide) options.resizableColumnGuide = resizableColumnGuide.toLowerCase() == 'true' ? true : false;
       if (movableRows) options.movableRows = movableRows.toLowerCase() == 'true' ? true : false;
-      if (rowHeader) options.rowHeader = JSON.parse(rowHeader);
+      if (rowHeader) {
+        const rowHeaderObj = JSON.parse(rowHeader);
+        if (rowHeaderObj.cellClick) {
+          rowHeaderObj.cellClick = this.resolveFunc(rowHeaderObj.cellClick);
+          options.rowHeader = rowHeaderObj;
+        }        
+      }
       if (rowHeight) options.rowHeight = parseInt(rowHeight);
       if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == 'true' ? true : false;
       if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == 'true' ? true : false;
