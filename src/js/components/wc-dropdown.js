@@ -241,6 +241,7 @@ class WcDropdown extends WcBaseComponent {
       .wc-dropdown .dropbtn.avatar {
         padding: 10px;
         border-radius: 50%;
+        font-size: 0.825rem;
       }
 
       /* The container <div> - needed to position the dropdown content */
