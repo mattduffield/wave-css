@@ -37,7 +37,7 @@ class WcDropdown extends WcBaseComponent {
       this.componentElement = compEl;
     } else {
       this.componentElement = document.createElement('div');
-      this.componentElement.classList.add('wc-dropdown', 'dropdown', this.mode);
+      this.componentElement.classList.add('wc-dropdown', this.mode);
       this.appendChild(this.componentElement);      
     }
     console.log('ctor:wc-dropdown');
@@ -89,6 +89,9 @@ class WcDropdown extends WcBaseComponent {
   }
 
   _createInnerElement() {
+    const id = this.getAttribute('id') || '';
+    const positionArea = this.getAttribute('position-area') || 'bottom span-left';
+    const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';    
     const lbl = this.getAttribute('label') || '';
     const format = this.getAttribute('format') || 'standard';
     const btn = document.createElement('button');    
@@ -116,7 +119,8 @@ class WcDropdown extends WcBaseComponent {
         `;  
       }
     }
-    this.componentElement.appendChild(btn);
+    const dropdown = document.createElement('div');
+    dropdown.classList.add('dropdown');
     const dropdownContent = document.createElement('div');
     dropdownContent.classList.add('dropdown-content');
     if (this.mode === 'search') {
@@ -143,11 +147,21 @@ class WcDropdown extends WcBaseComponent {
     }
     const parts = this.querySelectorAll('a');
     parts.forEach(p => dropdownContent.appendChild(p));
-    this.componentElement.appendChild(dropdownContent);
+    dropdown.appendChild(dropdownContent);
+    dropdown.append(btn);
+    this.componentElement.append(dropdown);
     if (this.clickModes.includes(this.mode)) {
       btn.addEventListener('click', this._handleClick.bind(this));
       window.addEventListener('click', this._handleWindowClick.bind(this));
     }
+
+    const wcDropdown = this.querySelector('.wc-dropdown');
+    wcDropdown.style.anchorName = `--${id}-anchor`;
+    const drpContent = this.querySelector('.wc-dropdown .dropdown-content');
+    drpContent.style.positionAnchor = `--${id}-anchor`;
+    drpContent.style.positionArea = positionArea;
+    drpContent.style.positionTryFallbacks = positionTryFallbacks;
+    drpContent.style.minWidth = `${wcDropdown.offsetWidth}px`;    
   }
 
   _handleHelper(event, mode='open') {
@@ -202,7 +216,7 @@ class WcDropdown extends WcBaseComponent {
   _handleWindowClick(event) {
     const {target} = event;
     if (target.matches('.dropbtn') || target.matches('.search')) return;
-    const parts = this.querySelectorAll('.dropdown');
+    const parts = this.querySelectorAll('.wc-dropdown');
     parts.forEach(p => p.classList.remove('show'));
   }
 
@@ -225,6 +239,11 @@ class WcDropdown extends WcBaseComponent {
         display: contents;
       }
 
+      .wc-dropdown {
+        display: flex;
+        flex-direction: row;
+      }
+
       /* Dropdown Button */
       .wc-dropdown .dropbtn {
         background-color: var(--button-bg-color);
@@ -245,9 +264,7 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* The container <div> - needed to position the dropdown content */
-      .wc-dropdown.dropdown {
-        position: relative;
-        display: inline-block;
+      .wc-dropdown .dropdown {
       }
 
       /* Dropdown Content (Hidden by Default) */
@@ -292,19 +309,38 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* Show the dropdown menu on hover */
-      .wc-dropdown.dropdown:hover:not(.click):not(.search) .dropdown-content {
+      .wc-dropdown:hover:not(.click):not(.search) .dropdown .dropdown-content {
         display: block;
       }
-      .wc-dropdown.dropdown.show .dropdown-content {
+      .wc-dropdown.show .dropdown .dropdown-content {
         display: block;
       }
 
       /* Change the background color of the dropdown button when the dropdown content is shown */
-      .wc-dropdown.dropdown:hover:not(.click):not(.search) .dropbtn {
+      .wc-dropdown:hover:not(.click):not(.search) .dropdown .dropbtn {
         background-color: var(--button-hover-bg-color);
       }
-      .wc-dropdown.dropdown.show .dropbtn {
+      .wc-dropdown.show .dropdown .dropbtn {
         background-color: var(--button-hover-bg-color);
+      }
+
+      @position-try --bottom-left {
+        position-area: bottom span-left;
+      }
+      @position-try --bottom-right {
+        position-area: bottom span-right;
+      }
+      @position-try --top-left {
+        position-area: top span-left;
+      }
+      @position-try --top-right {
+        position-area: top span-right;
+      }
+      @position-try --right {
+        position-area: right;
+      }
+      @position-try --left {
+        position-area: left;
       }
     `.trim();
     this.loadStyle('wc-dropdown-style', style);
