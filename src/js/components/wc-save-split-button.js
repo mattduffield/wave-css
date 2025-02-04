@@ -227,7 +227,7 @@ if (!customElements.get('wc-save-split-button')) {
         saveNewBtn.addEventListener('click', this._handleClick.bind(this));
         const saveReturnBtn = this.querySelector('button.save-return-btn');
         saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
-      }, 250);
+      }, 500);
     }
 
     _unWireEvents() {
@@ -239,7 +239,7 @@ if (!customElements.get('wc-save-split-button')) {
         saveNewBtn.removeEventListener('click', this._handleClick.bind(this));
         const saveReturnBtn = this.querySelector('button.save-return-btn');
         saveReturnBtn.removeEventListener('click', this._handleClick.bind(this));
-      }, 250);
+      }, 500);
     }
 
   }
