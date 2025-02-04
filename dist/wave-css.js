@@ -2003,7 +2003,7 @@ var WcDropdown = class extends WcBaseComponent {
         btn.classList.add("dropbtn");
         btn.classList.add("avatar");
         btn.innerHTML = `
-          <svg class="h-5 w-5 align-middle pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="h-4 w-4 align-middle pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         `;
@@ -2125,7 +2125,7 @@ var WcDropdown = class extends WcBaseComponent {
       }
       .wc-dropdown .dropbtn.avatar {
         padding: 10px;
-        border-radius: 9999px;
+        border-radius: 50%;
       }
 
       /* The container <div> - needed to position the dropdown content */
