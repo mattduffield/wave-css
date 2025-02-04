@@ -1015,7 +1015,7 @@ if (!customElements.get("wc-breadcrumb")) {
         </span>
       `);
       this.componentElement.id = "breadcrumb";
-      this.componentElement.className = "wc-breadcrumb flex flex-row px-2 gap-4";
+      this.componentElement.className = "wc-breadcrumb flex flex-row px-2 gap-3";
       this.componentElement.innerHTML = html;
       this.componentElement.innerHTML2 = `
         <a href="/v/home"
