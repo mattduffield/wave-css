@@ -220,26 +220,22 @@ if (!customElements.get('wc-save-split-button')) {
 
     _wireEvents() {
       super._wireEvents();
-      setTimeout(() => {
-        const saveBtn = this.querySelector('button.save-btn');
-        saveBtn.addEventListener('click', this._handleClick.bind(this));
-        const saveNewBtn = this.querySelector('button.save-new-btn');
-        saveNewBtn.addEventListener('click', this._handleClick.bind(this));
-        const saveReturnBtn = this.querySelector('button.save-return-btn');
-        saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
-      }, 500);
+      const saveBtn = this.querySelector('button.save-btn');
+      saveBtn.addEventListener('click', this._handleClick.bind(this));
+      const saveNewBtn = this.querySelector('a.save-new-btn');
+      saveNewBtn.addEventListener('click', this._handleClick.bind(this));
+      const saveReturnBtn = this.querySelector('a.save-return-btn');
+      saveReturnBtn.addEventListener('click', this._handleClick.bind(this));
     }
 
     _unWireEvents() {
       super._unWireEvents();
-      setTimeout(() => {
-        const saveBtn = this.querySelector('button.save-btn');
-        saveBtn.removeEventListener('click', this._handleClick.bind(this));
-        const saveNewBtn = this.querySelector('button.save-new-btn');
-        saveNewBtn.removeEventListener('click', this._handleClick.bind(this));
-        const saveReturnBtn = this.querySelector('button.save-return-btn');
-        saveReturnBtn.removeEventListener('click', this._handleClick.bind(this));
-      }, 500);
+      const saveBtn = this.querySelector('button.save-btn');
+      saveBtn.removeEventListener('click', this._handleClick.bind(this));
+      const saveNewBtn = this.querySelector('a.save-new-btn');
+      saveNewBtn.removeEventListener('click', this._handleClick.bind(this));
+      const saveReturnBtn = this.querySelector('a.save-return-btn');
+      saveReturnBtn.removeEventListener('click', this._handleClick.bind(this));
     }
 
   }
