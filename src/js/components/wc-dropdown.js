@@ -242,7 +242,6 @@ class WcDropdown extends WcBaseComponent {
     const style = `
       wc-dropdown {
         display: contents;
-        display: none;
       }
 
       .wc-dropdown {
