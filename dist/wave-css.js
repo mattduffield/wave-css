@@ -2124,7 +2124,7 @@ var WcDropdown = class extends WcBaseComponent {
         padding: 4px;
       }
       .wc-dropdown .dropbtn.avatar {
-        padding: 10px;
+        padding: 6px;
         border-radius: 50%;
         font-size: 0.825rem;
       }
