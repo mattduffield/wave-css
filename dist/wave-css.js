@@ -1987,6 +1987,7 @@ var WcDropdown = class extends WcBaseComponent {
     const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
     const lbl = this.getAttribute("label") || "";
     const format = this.getAttribute("format") || "standard";
+    const dropdownHeight = this.getAttribute("dropdown-height") || "";
     const btn = document.createElement("button");
     if (lbl && format === "standard") {
       btn.classList.add("dropbtn");
@@ -2038,11 +2039,15 @@ var WcDropdown = class extends WcBaseComponent {
       dropdownContent.appendChild(svg);
       ipt.addEventListener("input", this._handleInput.bind(this));
     }
-    const parts = this.querySelectorAll("a");
+    const parts = this.querySelectorAll("*");
     parts.forEach((p) => dropdownContent.appendChild(p));
     dropdown.appendChild(dropdownContent);
     dropdown.append(btn);
     this.componentElement.append(dropdown);
+    if (dropdownHeight) {
+      dropdownContent.style.height = dropdownHeight;
+      dropdownContent.style.overflow = "auto";
+    }
     if (this.clickModes.includes(this.mode)) {
       btn.addEventListener("click", this._handleClick.bind(this));
       window.addEventListener("click", this._handleWindowClick.bind(this));
