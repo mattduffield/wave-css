@@ -1982,6 +1982,7 @@ var WcDropdown = class extends WcBaseComponent {
     console.log("_render:wc-dropdown");
   }
   _createInnerElement() {
+    const parts = this.querySelectorAll("*");
     const id = this.getAttribute("id") || "";
     const positionArea = this.getAttribute("position-area") || "bottom span-left";
     const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
@@ -2039,7 +2040,6 @@ var WcDropdown = class extends WcBaseComponent {
       dropdownContent.appendChild(svg);
       ipt.addEventListener("input", this._handleInput.bind(this));
     }
-    const parts = this.querySelectorAll("*");
     parts.forEach((p) => dropdownContent.appendChild(p));
     dropdown.appendChild(dropdownContent);
     dropdown.append(btn);
