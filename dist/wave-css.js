@@ -2017,7 +2017,7 @@ var WcDropdown = class extends WcBaseComponent {
     const dropdown = document.createElement("div");
     dropdown.classList.add("dropdown");
     const dropdownContent = document.createElement("div");
-    dropdownContent.classList.add("dropdown-content");
+    dropdownContent.classList.add("dropdown-content", "text-sm");
     if (this.mode === "search") {
       const ipt = document.createElement("input");
       ipt.classList.add("search", "component");
