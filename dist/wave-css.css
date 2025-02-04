@@ -4774,7 +4774,7 @@
     color: var(--text-1);
   }
   input[type=button],
-  button.btn {
+  button {
     background: var(--button-bg-color);
     color: var(--button-color);
     padding: 0.6rem 1.2rem;
@@ -4786,22 +4786,22 @@
     transition: all 0.2s ease-in-out;
   }
   input[type=button]:focus,
-  button.btn:focus {
+  button:focus {
     outline: none;
     border-color: var(--button-focus-border-color);
     box-shadow: 0 0 4px var(--button-focus-ring-color);
   }
   input[type=button]:hover,
-  button.btn:hover {
+  button:hover {
     background: var(--button-hover-bg-color);
     color: var(--button-hover-color);
   }
   input[type=button]:active,
-  button.btn:active {
+  button:active {
     background: var(--button-active-bg-color);
   }
   input[type=button]:disabled,
-  button.btn:disabled {
+  button:disabled {
     background: var(--button-disabled-bg-color);
     border: 1px solid var(--button-disabled-border-color);
     color: var(--button-disabled-color);

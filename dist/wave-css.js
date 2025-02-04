@@ -4453,7 +4453,7 @@ var WcTab = class extends WcBaseComponent {
         border-right: none;
       }
       wc-tab .wc-tab .tab-nav .tab-link {
-        background-color: var(--surface-1);
+        background-color: transparent;
         border: none;
         border-radius: 0;
         outline: none;
