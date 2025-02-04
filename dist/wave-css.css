@@ -4812,4 +4812,9 @@
   a:hover {
     color: var(--text-3);
   }
+  hr {
+    border: none;
+    height: 1px;
+    background-color: var(--button-disabled-bg-color);
+  }
 }
