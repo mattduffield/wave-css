@@ -1927,7 +1927,7 @@ customElements.define("wc-div", WcDiv);
 // src/js/components/wc-dropdown.js
 var WcDropdown = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "label", "mode"];
+    return ["id", "class", "label", "mode", "format"];
   }
   constructor() {
     super();
@@ -1983,20 +1983,31 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _createInnerElement() {
     const lbl = this.getAttribute("label") || "";
+    const format = this.getAttribute("format") || "standard";
     const btn = document.createElement("button");
-    if (lbl) {
+    if (lbl && format === "standard") {
       btn.classList.add("dropbtn");
       btn.textContent = lbl;
     } else {
-      btn.classList.add("dropbtn");
-      btn.classList.add("grid-round");
-      btn.innerHTML = `
-        <svg class="h-5 w-5 align-middle pointer-events-none"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-          <path d="M128 96A64 64 0 1 1 0 96a64 64 0 1 1 128 0zm0 160A64 64 0 1 1 0 256a64 64 0 1 1 128 0zM64 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128zM288 96A64 64 0 1 1 160 96a64 64 0 1 1 128 0zM224 320a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zm96-256a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zM384 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128z"/>
-        </svg>
-      `;
+      if (format === "grid-round") {
+        btn.classList.add("dropbtn");
+        btn.classList.add("grid-round");
+        btn.innerHTML = `
+          <svg class="h-5 w-5 align-middle pointer-events-none"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M128 96A64 64 0 1 1 0 96a64 64 0 1 1 128 0zm0 160A64 64 0 1 1 0 256a64 64 0 1 1 128 0zM64 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128zM288 96A64 64 0 1 1 160 96a64 64 0 1 1 128 0zM224 320a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zm96-256a64 64 0 1 1 0-128 64 64 0 1 1 0 128zm64 96a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zM384 480a64 64 0 1 1 0-128 64 64 0 1 1 0 128z"/>
+          </svg>
+        `;
+      } else if (format === "avatar") {
+        btn.classList.add("dropbtn");
+        btn.classList.add("avatar");
+        btn.innerHTML = `
+          <svg class="h-5 w-5 align-middle pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        `;
+      }
     }
     this.componentElement.appendChild(btn);
     const dropdownContent = document.createElement("div");
@@ -2112,6 +2123,10 @@ var WcDropdown = class extends WcBaseComponent {
         background-color: transparent;
         padding: 4px;
       }
+      .wc-dropdown .dropbtn.avatar {
+        padding: 10px;
+        border-radius: 9999px;
+      }
 
       /* The container <div> - needed to position the dropdown content */
       .wc-dropdown.dropdown {
@@ -2134,6 +2149,7 @@ var WcDropdown = class extends WcBaseComponent {
         box-sizing: border-box;
         font-size: 12px;
         padding: 14px 20px 12px 35px;
+        border-radius: 0;
       }
       .wc-dropdown .dropdown-content svg {
         position: absolute;
