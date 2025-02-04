@@ -357,7 +357,7 @@ if (!customElements.get('wc-code-mirror')) {
           min-height: 10em;        
         }
         .wc-code-mirror:focus-within {
-          border: 2px solid var(--primary-bg-color);
+          /* border: 2px solid var(--primary-bg-color); */
         }
 
         .CodeMirror {
