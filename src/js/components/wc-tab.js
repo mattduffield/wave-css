@@ -282,8 +282,6 @@ class WcTab extends WcBaseComponent {
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        border: 1px solid var(--card-border-color);
-        background-color: var(--card-bg-color);
       }
       wc-tab[vertical] .wc-tab .tab-nav {
         flex-direction: column;
@@ -291,7 +289,7 @@ class WcTab extends WcBaseComponent {
         border-right: none;
       }
       wc-tab .wc-tab .tab-nav .tab-link {
-        background-color: var(--card-bg-color);
+        background-color: var(--surface-1);
         border: none;
         border-radius: 0;
         outline: none;
@@ -302,7 +300,10 @@ class WcTab extends WcBaseComponent {
       }
       wc-tab .wc-tab .tab-nav .tab-link.active,
       wc-tab .wc-tab .tab-nav .tab-link:hover {
-        background-color: var(--primary-bg-color);
+        border-top-left-radius: .5rem;
+        border-top-right-radius: .5rem;
+        border-bottom: 1px solid var(--card-bg-color);
+        background-color: var(--card-bg-color);
       }
 
       wc-tab .wc-tab .tab-body {
@@ -310,8 +311,6 @@ class WcTab extends WcBaseComponent {
         flex-direction: column;
         flex: 1 1 0%;
         background-color: var(--card-bg-color);
-        border: 1px solid var(--card-border-color);
-        border-top: none;
       }
       wc-tab[vertical] .wc-tab .tab-body {
         border-top: 1px solid var(--card-border-color);
