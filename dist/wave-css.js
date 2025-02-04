@@ -1982,7 +1982,7 @@ var WcDropdown = class extends WcBaseComponent {
     console.log("_render:wc-dropdown");
   }
   _createInnerElement() {
-    const parts = this.querySelectorAll("*");
+    const parts = this.querySelectorAll("*:not(.wc-dropdown");
     const id = this.getAttribute("id") || "";
     const positionArea = this.getAttribute("position-area") || "bottom span-left";
     const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
