@@ -4512,6 +4512,7 @@ var WcTab = class extends WcBaseComponent {
       wc-tab .wc-tab .tab-nav .tab-link {
         background-color: transparent;
         border: none;
+        border-bottom: 1px solid var(--card-bg-color);
         border-radius: 0;
         outline: none;
         cursor: pointer;
