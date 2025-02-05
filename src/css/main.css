@@ -2366,6 +2366,10 @@
     width: 100%;
     height: 100%;
   }
+  .notie-container {
+    box-shadow: none;
+  }
+  
   @keyframes ldio-qjspg5uvdp {
     0% { transform: rotate(0) }
     100% { transform: rotate(360deg) }
