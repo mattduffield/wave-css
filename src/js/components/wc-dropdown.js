@@ -307,7 +307,7 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* Links inside the dropdown */
-      .wc-dropdown .dropdown-content .wc-input,
+      /* .wc-dropdown .dropdown-content .wc-input, */
       .wc-dropdown .dropdown-content a {
         color: var(--component-color);
         padding: 12px 16px;
@@ -316,7 +316,7 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* Change color of dropdown links on hover */
-      .wc-dropdown .dropdown-content .wc-input:hover,
+      /* .wc-dropdown .dropdown-content .wc-input:hover, */
       .wc-dropdown .dropdown-content a:hover {
         background-color: var(--component-border-color);
       }
