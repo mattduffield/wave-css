@@ -1931,6 +1931,7 @@ var WcDropdown = class extends WcBaseComponent {
   }
   constructor() {
     super();
+    this.classList.add("contents");
     this.clickModes = ["search", "click"];
     this.mode = this.getAttribute("mode") || "click";
     const compEl = this.querySelector(".wc-dropdown");
