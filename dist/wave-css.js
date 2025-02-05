@@ -2179,6 +2179,7 @@ var WcDropdown = class extends WcBaseComponent {
         position: absolute;
         background-color: var(--button-hover-bg-color);
         min-width: 160px;
+        max-width: 250px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
       }
