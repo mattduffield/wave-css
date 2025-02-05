@@ -1944,7 +1944,7 @@ var WcDropdown = class extends WcBaseComponent {
   }
   constructor() {
     super();
-    this.childComponentSelector = "a,hr";
+    this.childComponentSelector = "a,hr,wc-input";
     this.classList.add("contents");
     this.clickModes = ["search", "click"];
     this.mode = this.getAttribute("mode") || "click";
