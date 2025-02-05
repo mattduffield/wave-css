@@ -737,19 +737,22 @@ if (!customElements.get('wc-tabulator')) {
       // if (!value) return "(No Date)"; // Handle null/undefined values
       if (!value) return ""; // Handle null/undefined values
       
-      let date = new Date(value); // Convert string/ISODate to Date object
+      // let date = new Date(value); // Convert string/ISODate to Date object
       
-      if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
+      // if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
       
-      // Format as "MM/DD/YYYY HH:mm AM/PM"
-      return date.toLocaleString("en-US", {
-          month: "2-digit",
-          day: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true
-      });
+      // // Format as "MM/DD/YYYY HH:mm AM/PM"
+      // return date.toLocaleString("en-US", {
+      //     month: "2-digit",
+      //     day: "2-digit",
+      //     year: "numeric",
+      //     hour: "2-digit",
+      //     minute: "2-digit",
+      //     hour12: true
+      // });
+
+      let formatted = luxon.DateTime.fromISO(value, { zone: 'America/New_York' }).toLocaleString(luxon.DateTime.DATETIME_MED);
+      return formatted;
     }
 
     dateEditor(cell, onRendered, success, cancel) {
