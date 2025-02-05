@@ -30,6 +30,7 @@ class WcDropdown extends WcBaseComponent {
 
   constructor() {
     super();
+    this.childComponentSelector = 'a,hr';
     this.classList.add('contents');
     this.clickModes = ['search', 'click'];
     this.mode = this.getAttribute('mode') || 'click';
