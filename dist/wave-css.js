@@ -5266,8 +5266,8 @@ if (!customElements.get("wc-tabulator")) {
     localdatetime(cell, formatterParams, onRendered) {
       let value = cell.getValue();
       if (!value) return "";
-      let formatted = luxon.DateTime.fromISO(value, { zone: "America/New_York" }).toLocaleString(luxon.DateTime.DATETIME_MED);
-      return formatted;
+      let formattedDate = luxon.DateTime.fromISO(value, { zone: "utc" }).setZone("America/New_York").toLocaleString(luxon.DateTime.DATETIME_MED);
+      return formattedDate;
     }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");

@@ -751,8 +751,10 @@ if (!customElements.get('wc-tabulator')) {
       //     hour12: true
       // });
 
-      let formatted = luxon.DateTime.fromISO(value, { zone: 'America/New_York' }).toLocaleString(luxon.DateTime.DATETIME_MED);
-      return formatted;
+    let formattedDate = luxon.DateTime.fromISO(value, { zone: 'utc' })
+      .setZone('America/New_York') // Convert to New York time
+      .toLocaleString(luxon.DateTime.DATETIME_MED); 
+    return formattedDate;
     }
 
     dateEditor(cell, onRendered, success, cancel) {
