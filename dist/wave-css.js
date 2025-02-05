@@ -1997,7 +1997,7 @@ var WcDropdown = class extends WcBaseComponent {
     console.log("_render:wc-dropdown");
   }
   _createInnerElement() {
-    const parts = this.querySelectorAll("*:not(.wc-dropdown");
+    const parts = Array.from(this.children).filter((p) => !p.matches("wc-dropdown") && !p.matches(".wc-dropdown"));
     const id = this.getAttribute("id") || "";
     const positionArea = this.getAttribute("position-area") || "bottom span-left";
     const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
@@ -2122,6 +2122,8 @@ var WcDropdown = class extends WcBaseComponent {
   _handleWindowClick(event) {
     const { target } = event;
     if (target.matches(".dropbtn") || target.matches(".search")) return;
+    const haltElt = target.closest(".halt-event");
+    if (haltElt) return;
     const parts = this.querySelectorAll(".wc-dropdown");
     parts.forEach((p) => p.classList.remove("show"));
   }
@@ -2200,6 +2202,7 @@ var WcDropdown = class extends WcBaseComponent {
       }
 
       /* Links inside the dropdown */
+      .wc-dropdown .dropdown-content .wc-input,
       .wc-dropdown .dropdown-content a {
         color: var(--component-color);
         padding: 12px 16px;
@@ -2208,6 +2211,7 @@ var WcDropdown = class extends WcBaseComponent {
       }
 
       /* Change color of dropdown links on hover */
+      .wc-dropdown .dropdown-content .wc-input:hover,
       .wc-dropdown .dropdown-content a:hover {
         background-color: var(--component-border-color);
       }

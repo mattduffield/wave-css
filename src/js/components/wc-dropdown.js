@@ -91,7 +91,8 @@ class WcDropdown extends WcBaseComponent {
   }
 
   _createInnerElement() {
-    const parts = this.querySelectorAll('*:not(.wc-dropdown');
+    const parts = Array.from(this.children).filter(p => !p.matches('wc-dropdown') && !p.matches('.wc-dropdown')); // Exclude nested wc-tab elements
+
     const id = this.getAttribute('id') || '';
     const positionArea = this.getAttribute('position-area') || 'bottom span-left';
     const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';    
@@ -217,12 +218,14 @@ class WcDropdown extends WcBaseComponent {
   _handleClick(event) {
     const {target} = event;
     const parent = target.closest('.wc-dropdown');
-    parent.classList.toggle('show');
+    parent.classList.toggle('show');  
   }
 
   _handleWindowClick(event) {
     const {target} = event;
     if (target.matches('.dropbtn') || target.matches('.search')) return;
+    const haltElt = target.closest('.halt-event');
+    if (haltElt) return;
     const parts = this.querySelectorAll('.wc-dropdown');
     parts.forEach(p => p.classList.remove('show'));
   }
@@ -303,6 +306,7 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* Links inside the dropdown */
+      .wc-dropdown .dropdown-content .wc-input,
       .wc-dropdown .dropdown-content a {
         color: var(--component-color);
         padding: 12px 16px;
@@ -311,6 +315,7 @@ class WcDropdown extends WcBaseComponent {
       }
 
       /* Change color of dropdown links on hover */
+      .wc-dropdown .dropdown-content .wc-input:hover,
       .wc-dropdown .dropdown-content a:hover {
         background-color: var(--component-border-color);
       }

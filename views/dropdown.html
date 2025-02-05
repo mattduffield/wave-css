@@ -37,10 +37,13 @@
     <wc-dropdown id="avatar" class="ml-20 mb-4" label="" mode="search" format="avatar"
       position-area="bottom span-right">
       <wc-input name="is_eligible1"
-        class="col"
+        class="col halt-event"
         lbl-label="Is Eligible 1?"
         type="checkbox"
-        toggle-switch>
+        toggle-switch
+        x_="on click from first <input /> in me
+          halt the event
+        end">
       </wc-input>
       <a href="#about">About</a>
       <a href="#base">Base</a>
