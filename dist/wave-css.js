@@ -4516,7 +4516,7 @@ var WcTab = class extends WcBaseComponent {
         border-radius: 0;
         outline: none;
         cursor: pointer;
-        padding: 14px 16px;
+        padding: 10px 16px;
         user-select: none;
         transition: 0.3s;
       }
