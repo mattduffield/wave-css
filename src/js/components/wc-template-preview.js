@@ -55,10 +55,10 @@ if (!customElements.get('wc-template-preview')) {
       const slug = this.getAttribute('slug') || '';
       const controls = `<div class="flex flex-row justify-between">
             <wc-input name="preview_toggle" 
-              class="flex flex-col items-center gap-1"
+              class="row items-center gap-1"
               lbl-label="Preview"
               type="radio"
-              radio-group-class="flex-1 row modern"
+              radio-group-class="row modern text-2xs"
               value="off"
               >
               <option value="on">Show</option>
@@ -68,7 +68,7 @@ if (!customElements.get('wc-template-preview')) {
               class="row items-center gap-1 hidden"
               lbl-label="Drag n Drop"
               type="radio"
-              radio-group-class="row modern"
+              radio-group-class="row modern text-2xs"
               value="off"
               >
               <option value="on">Enable</option>
