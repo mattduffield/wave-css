@@ -55,10 +55,10 @@ if (!customElements.get('wc-template-preview')) {
       const slug = this.getAttribute('slug') || '';
       const controls = `<div class="flex flex-row justify-between">
             <wc-input name="preview_toggle" 
-              class="row items-center gap-1"
+              class="flex flex-col items-center gap-1"
               lbl-label="Preview"
               type="radio"
-              radio-group-class="row modern"
+              radio-group-class="flex-1 row modern"
               value="off"
               >
               <option value="on">Show</option>
