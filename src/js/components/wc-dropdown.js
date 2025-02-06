@@ -141,7 +141,7 @@ class WcDropdown extends WcBaseComponent {
       svg.setAttribute('viewBox', '0 0 24 24');
       svg.setAttribute('stroke-width', '1.5');
       svg.setAttribute('stroke', 'currentColor');
-      svg.classList.add('h-4', 'w-4', 'component');
+      svg.classList.add('search-svg', 'h-4', 'w-4', 'component');
       const path = document.createElementNS(svgNS, 'path');
       path.setAttribute('stroke-linecap', 'round');
       path.setAttribute('stroke-linejoin', 'round');
@@ -295,7 +295,7 @@ class WcDropdown extends WcBaseComponent {
         padding: 14px 20px 12px 35px;
         border-radius: 0;
       }
-      .wc-dropdown .dropdown-content svg {
+      .wc-dropdown .dropdown-content svg.search-svg {
         position: absolute;
         left: 8px;
         top: 20px;

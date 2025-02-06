@@ -2046,7 +2046,7 @@ var WcDropdown = class extends WcBaseComponent {
       svg.setAttribute("viewBox", "0 0 24 24");
       svg.setAttribute("stroke-width", "1.5");
       svg.setAttribute("stroke", "currentColor");
-      svg.classList.add("h-4", "w-4", "component");
+      svg.classList.add("search-svg", "h-4", "w-4", "component");
       const path = document.createElementNS(svgNS, "path");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("stroke-linejoin", "round");
@@ -2191,7 +2191,7 @@ var WcDropdown = class extends WcBaseComponent {
         padding: 14px 20px 12px 35px;
         border-radius: 0;
       }
-      .wc-dropdown .dropdown-content svg {
+      .wc-dropdown .dropdown-content svg.search-svg {
         position: absolute;
         left: 8px;
         top: 20px;
@@ -5808,9 +5808,9 @@ var WcThemeSelector = class extends WcBaseComponent {
     ];
     const template = document.createElement("template");
     template.innerHTML = `
-      <div class="row flex-wrap">
+      <div class="relative row flex-wrap">
         ${themes.map((theme) => `
-          <button class="flat h-10 w-10 rounded-t-md ${theme}" type="button" data-theme="${theme}" title="${theme}">
+          <button class="theme-button flat h-10 w-10 rounded-t-md ${theme}" type="button" data-theme="${theme}" title="${theme}">
             <svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
               <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
             </svg>
@@ -5845,8 +5845,11 @@ var WcThemeSelector = class extends WcBaseComponent {
       wc-theme-selector .wc-theme-selector {
 
       }
-
+      wc-theme-selector .wc-theme-selector .theme-button {
+        padding: 0;
+      }
       wc-theme-selector .wc-theme-selector .selectmark {
+        padding: 0;
         pointer-events: none;
       }
     `;
@@ -5854,6 +5857,7 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   _handleThemeClick(event) {
     const { target } = event;
+    console.log("target", target);
     const selectedTheme = target.getAttribute("data-theme");
     this._setTheme(target, selectedTheme);
     localStorage.setItem("theme", selectedTheme.replace("theme-", ""));

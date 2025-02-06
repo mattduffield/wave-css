@@ -36,15 +36,13 @@
 
     <wc-dropdown id="avatar" class="ml-20 mb-4" label="" mode="search" format="avatar"
       position-area="bottom span-right">
-      <wc-input name="is_eligible1"
-        class="col halt-event"
-        lbl-label="Is Eligible 1?"
-        type="checkbox"
-        toggle-switch
-        x_="on click from first <input /> in me
-          halt the event
-        end">
-      </wc-input>
+      <wc-accordion class="halt-event">
+        <option value="Theme Selector">
+          <wc-theme-selector class="contents col m-4 halt-event">
+          </wc-theme-selector>
+        </option>
+      </wc-accordion>
+      <hr>    
       <a href="#about">About</a>
       <a href="#base">Base</a>
       <a href="#blog">Blog</a>
