@@ -121,12 +121,18 @@ var WaveHelpers = (() => {
     });
   }
   function loadStyle(id, content) {
-    if (!document.getElementById(id)) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`style#${id}`)) {
+        resolve();
+        return;
+      }
       const style = document.createElement("style");
       style.id = id;
       style.textContent = content.trim();
+      style.onload = resolve;
+      style.onerror = reject;
       document.head.appendChild(style);
-    }
+    });
   }
   function loadStylesheet(href) {
     return new Promise((resolve, reject) => {
