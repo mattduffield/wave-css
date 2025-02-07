@@ -41,14 +41,8 @@ export function loadScript(url) {
 
     const script = document.createElement('script');
     script.src = url;
-    script.onload = () => {
-      resolve();
-      return;
-    };
-    script.onerror = (error) => {
-      reject(error);
-      return;
-    }
+    script.onload = resolve;
+    script.onerror = reject;
     document.head.appendChild(script);
   });
 }
@@ -101,6 +95,21 @@ export function loadStyle(id, content) {
     style.textContent = content.trim();
     document.head.appendChild(style);
   }
+}
+
+export function loadStylesheet(href) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`link[href="${href}"]`)) {
+      resolve();
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
+  });
 }
 
 export function locator(root, selector) {
