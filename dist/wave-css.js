@@ -1959,7 +1959,6 @@ var WcDropdown = class extends WcBaseComponent {
   constructor() {
     super();
     this.childComponentSelector = "a,hr,wc-input";
-    this.classList.add("hidden");
     this.clickModes = ["search", "click"];
     this.mode = this.getAttribute("mode") || "click";
     const compEl = this.querySelector(".wc-dropdown");
