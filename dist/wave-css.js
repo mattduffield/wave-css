@@ -1976,6 +1976,7 @@ var WcDropdown = class extends WcBaseComponent {
     await this._applyStyle();
     this.classList.add("contents");
     this.classList.remove("hidden");
+    this.componentElement.classList.remove("hidden");
     this._wireEvents();
     console.log("connectedCallback:wc-dropdown");
   }
