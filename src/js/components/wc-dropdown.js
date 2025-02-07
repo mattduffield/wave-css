@@ -48,7 +48,7 @@ class WcDropdown extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
 
-    this._applyStyle();
+    await this._applyStyle();
     this._wireEvents();
     console.log('connectedCallback:wc-dropdown');
   }
@@ -243,7 +243,7 @@ class WcDropdown extends WcBaseComponent {
     });
   }
 
-  _applyStyle() {
+  async _applyStyle() {
     const style = `
       wc-dropdown {
         display: contents;
@@ -356,7 +356,7 @@ class WcDropdown extends WcBaseComponent {
         position-area: left;
       }
     `.trim();
-    this.loadStyle('wc-dropdown-style', style);
+    await this.loadStyle('wc-dropdown-style', style);
   }
 
   _wireEvents() {
