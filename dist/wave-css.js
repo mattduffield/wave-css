@@ -1975,8 +1975,8 @@ var WcDropdown = class extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
     await this._applyStyle();
-    this.classList.remove("hidden");
     this.classList.add("contents");
+    this.classList.remove("hidden");
     this._wireEvents();
     console.log("connectedCallback:wc-dropdown");
   }
@@ -2158,7 +2158,7 @@ var WcDropdown = class extends WcBaseComponent {
   async _applyStyle() {
     const style = `
       wc-dropdown {
-        display: contents;
+        /* display: contents; */
       }
 
       .wc-dropdown {
