@@ -51,7 +51,6 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - [wc-hotkey](docs/wc-hotkey.md)
 - [wc-javascript](docs/wc-javascript.md)
 - [wc-mask-hub](docs/wc-mask-hub.md)
-- wc-menu
 - [wc-prompt](docs/wc-prompt.md)
 - [wc-theme](docs/wc-theme.md)
 - [wc-visibility-change](docs/wc-visibility-change.md)
