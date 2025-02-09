@@ -11,6 +11,9 @@ A customizable dropdown web component that supports multiple modes, formats, and
 - Event-driven API
 - Customizable styling through CSS variables
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript files:

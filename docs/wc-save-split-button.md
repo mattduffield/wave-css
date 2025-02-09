@@ -2,6 +2,21 @@
 
 The `wc-save-split-button` is a custom web component that creates a split button with a primary save action and a dropdown menu containing additional save options. It includes built-in HTMX functionality for handling form submissions and page transitions.
 
+## Features
+
+- Split button design with primary save action and dropdown menu
+- Three save options:
+  - Save: Simple save action
+  - Save and Add New: Saves and redirects to create new item
+  - Save and Return: Saves and redirects to list view
+- Built-in HTMX integration
+- Automatic position management for dropdown menu
+- Hash preservation across navigation
+- Customizable styling through CSS variables
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Ensure you have the following dependencies in your project:
@@ -30,17 +45,6 @@ Ensure you have the following dependencies in your project:
 | `position-area` | String | Position of the dropdown (default: 'bottom span-left') | No |
 | `position-try-fallbacks` | String | Fallback positions for the dropdown | No |
 
-## Features
-
-- Split button design with primary save action and dropdown menu
-- Three save options:
-  - Save: Simple save action
-  - Save and Add New: Saves and redirects to create new item
-  - Save and Return: Saves and redirects to list view
-- Built-in HTMX integration
-- Automatic position management for dropdown menu
-- Hash preservation across navigation
-- Customizable styling through CSS variables
 
 ## Default HTMX Configuration
 

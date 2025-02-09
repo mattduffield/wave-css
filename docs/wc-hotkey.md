@@ -10,6 +10,9 @@
 - Target element selection via CSS selectors
 - Case-insensitive key matching
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

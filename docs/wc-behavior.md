@@ -10,6 +10,9 @@
 - Attribute cleanup after delegation
 - Support for all standard HTMX attributes
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

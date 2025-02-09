@@ -13,6 +13,9 @@ A lightweight, customizable slideshow web component that supports auto-play, man
 - Pause on tab/window visibility change
 - Event-driven API for external control
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the required components:

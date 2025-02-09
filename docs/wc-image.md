@@ -2,6 +2,17 @@
 
 The `wc-image` is a versatile web component that provides enhanced image display capabilities, including modal viewing and hover overlay effects.
 
+## Features
+
+- Basic image display with captions
+- Modal view support
+- Hover overlay effects with multiple animation directions
+- Custom content overlay support
+- Event-driven control for modal display
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the required files:
@@ -17,14 +28,6 @@ import { WcImage } from './wc-image.js';
   caption="Image Caption">
 </wc-image>
 ```
-
-## Features
-
-- Basic image display with captions
-- Modal view support
-- Hover overlay effects with multiple animation directions
-- Custom content overlay support
-- Event-driven control for modal display
 
 ## Props & Attributes
 

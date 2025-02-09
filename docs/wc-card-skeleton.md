@@ -12,6 +12,9 @@ The `wc-card-skeleton` is a custom web component that creates a loading skeleton
 - Customizable through CSS variables
 - Extends WcBaseComponent for consistent behavior
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the component:

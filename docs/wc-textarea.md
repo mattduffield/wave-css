@@ -13,6 +13,9 @@ A custom web component that provides an enhanced textarea input with form associ
 - Value handling for both attribute and content
 - Standard textarea attributes support (rows, cols, etc.)
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript files:

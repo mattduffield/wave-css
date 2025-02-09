@@ -10,6 +10,9 @@
 - Resource loading utilities
 - Global event management
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

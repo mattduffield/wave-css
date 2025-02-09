@@ -13,6 +13,9 @@ The `wc-background-image` is a custom web component that creates a parallax back
 - Letter-spaced caption styling
 - Extends WcBaseComponent
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the component:

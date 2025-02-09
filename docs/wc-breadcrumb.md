@@ -11,6 +11,9 @@ The `wc-breadcrumb` is a custom web component that creates a navigation breadcru
 - Customizable through CSS
 - Extends WcBaseComponent
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the components:

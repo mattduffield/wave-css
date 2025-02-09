@@ -11,6 +11,9 @@
 - Event-driven architecture
 - Template-based notifications
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

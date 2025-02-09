@@ -2,6 +2,12 @@
 
 The `wc-sidenav` is a customizable web component that creates a collapsible side navigation panel with support for both left and right positioning, push content functionality, and overlay effects.
 
+## Features
+
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Ensure you have the following dependencies:
@@ -44,8 +50,6 @@ Ensure you have the following dependencies:
 | `auto-height` | Boolean | Use content height instead of 100% | false | No |
 | `background-color` | String | Custom background color | - | No |
 | `open` | Boolean | Initially open the sidenav | false | No |
-
-## Features
 
 ### Positioning and Layout
 ```html

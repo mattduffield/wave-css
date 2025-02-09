@@ -18,6 +18,9 @@ The `wc-code-mirror` is a custom web component that wraps CodeMirror 5, providin
 - HTMX integration
 - Responsive design
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the component and its dependencies:

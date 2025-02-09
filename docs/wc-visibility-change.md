@@ -11,6 +11,9 @@ A custom web component that enables automatic HTMX requests when a user switches
 - Support for all HTMX swap methods
 - Customizable indicators and targets
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript file:

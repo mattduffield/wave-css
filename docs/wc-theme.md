@@ -10,6 +10,9 @@ A lightweight web component that automatically applies saved theme preferences t
 - Lightweight implementation
 - Non-visual component (uses `display: contents`)
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript file:

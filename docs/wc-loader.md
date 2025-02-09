@@ -10,6 +10,9 @@
 - HTMX compatibility
 - Responsive and scalable design
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

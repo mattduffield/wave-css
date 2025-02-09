@@ -10,6 +10,9 @@
 - Singleton pattern enforcement
 - Lazy loading of dependencies
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

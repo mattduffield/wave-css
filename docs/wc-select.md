@@ -2,6 +2,18 @@
 
 The `wc-select` is a customizable web component that provides enhanced select/dropdown functionality with support for both single and multiple selections, including a modern chip-based interface.
 
+## Features
+
+- Support for standard HTML select
+- Multiple support
+- Chip support
+- Disabled/readonly states
+- Required field indication
+
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Ensure you have the following dependencies:
@@ -74,8 +86,6 @@ Ensure you have the following dependencies:
 | `required` | Boolean | Make the field required | false | No |
 | `class` | String | CSS classes | - | No |
 | `autofocus` | Boolean | Automatically focus the select | false | No |
-
-## Features
 
 ### Chip Mode
 - Modern interface for multiple selections

@@ -15,6 +15,9 @@ A powerful and flexible table/data grid web component built on top of the Tabula
 - Responsive layouts
 - Export capabilities (CSV, JSON, HTML, PDF, XLSX)
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript files:

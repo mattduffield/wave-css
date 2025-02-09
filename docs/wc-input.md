@@ -2,6 +2,20 @@
 
 The `wc-input` is a versatile web component that provides enhanced form input functionality with support for various input types, styling, and validation.
 
+## Features
+
+- Support for all standard HTML input types
+- Custom input types (currency, toggle switches)
+- Radio button groups with modern styling
+- Built-in validation
+- Icon support for specific input types
+- Label customization
+- Disabled/readonly states
+- Required field indication
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript
@@ -18,17 +32,6 @@ import { WcInput } from './wc-input.js';
   required>
 </wc-input>
 ```
-
-## Features
-
-- Support for all standard HTML input types
-- Custom input types (currency, toggle switches)
-- Radio button groups with modern styling
-- Built-in validation
-- Icon support for specific input types
-- Label customization
-- Disabled/readonly states
-- Required field indication
 
 ## Props & Attributes
 

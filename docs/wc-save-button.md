@@ -2,6 +2,20 @@
 
 The `wc-save-button` is a custom web component that creates a standardized save button with built-in HTMX functionality for handling form submissions and page transitions.
 
+## Features
+
+- Automatically creates a button element with "Save" text
+- Built-in HTMX integration with the following defaults:
+  - POST request to specified `save-url`
+  - Updates `#viewport` target
+  - Uses innerHTML swap with transition
+  - Shows `#content-loader` during request
+  - Pushes URL to browser history
+
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Ensure you have the following dependencies in your project:
@@ -21,16 +35,6 @@ Ensure you have the following dependencies in your project:
 |-----------|------|-------------|-----------|
 | `save-url` | String | The endpoint URL where the form data will be submitted via POST request | Yes |
 | `id` | String | Optional ID for the button element | No |
-
-## Features
-
-- Automatically creates a button element with "Save" text
-- Built-in HTMX integration with the following defaults:
-  - POST request to specified `save-url`
-  - Updates `#viewport` target
-  - Uses innerHTML swap with transition
-  - Shows `#content-loader` during request
-  - Pushes URL to browser history
 
 ## Default HTMX Configuration
 

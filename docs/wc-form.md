@@ -10,6 +10,9 @@
 - Support for HTMX attributes
 - Seamless integration with other form-related web components
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

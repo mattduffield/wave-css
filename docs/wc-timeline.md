@@ -12,6 +12,9 @@ A custom web component that creates a responsive, vertical timeline with alterna
 - Automatic card creation
 - HTMX compatible
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript file:

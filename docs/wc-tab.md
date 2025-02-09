@@ -12,6 +12,9 @@ A flexible and customizable tab system that supports both horizontal and vertica
 - Responsive design
 - Theme support
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Import the required components:

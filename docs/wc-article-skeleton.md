@@ -10,6 +10,9 @@ The `wc-article-skeleton` is a custom web component that creates a loading skele
 - Customizable through CSS variables
 - Inherits from WcBaseComponent for consistent behavior
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the required dependencies:

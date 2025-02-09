@@ -11,6 +11,9 @@ A customizable split button web component that combines a primary action button 
 - Support for multiple dropdown items
 - Smart fallback positioning
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Import the required component:

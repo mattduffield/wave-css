@@ -2,6 +2,13 @@
 
 The `wc-sidebar` is a customizable web component that creates a fixed sidebar navigation with support for both left and right positioning, theme customization, and content pushing capabilities.
 
+## Features
+
+
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Ensure you have the following dependencies:
@@ -37,8 +44,6 @@ Ensure you have the following dependencies:
 | `auto-height` | Boolean | Use content height instead of 100% | false | No |
 | `background-color` | String | Custom background color | - | No |
 | `class` | String | CSS classes for theming | - | No |
-
-## Features
 
 ### Positioning
 - Left-side positioning (default)

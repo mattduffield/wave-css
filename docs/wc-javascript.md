@@ -9,6 +9,9 @@
 - Support for global helper functions through the `window.wc` namespace
 - Clean DOM rendering with script content removal after execution
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 ```javascript

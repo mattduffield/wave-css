@@ -2,6 +2,17 @@
 
 The `wc-flip-box` is a web component that creates an interactive flip card effect, where content can be displayed on both front and back sides with a smooth transition on hover.
 
+## Features
+
+- Smooth 3D flip animation on hover
+- Customizable dimensions through CSS classes
+- Support for distinct front and back content
+- Automatic perspective handling for 3D effect
+- Theme support for styling variations
+
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 1. Import the required files:
@@ -23,14 +34,6 @@ import { WcFlipBox } from './wc-flip-box.js';
   </div>
 </wc-flip-box>
 ```
-
-## Features
-
-- Smooth 3D flip animation on hover
-- Customizable dimensions through CSS classes
-- Support for distinct front and back content
-- Automatic perspective handling for 3D effect
-- Theme support for styling variations
 
 ## Props & Attributes
 

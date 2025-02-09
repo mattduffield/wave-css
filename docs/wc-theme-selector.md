@@ -12,6 +12,9 @@ A custom web component that provides a theme selection interface with support fo
 - Theme switching without page reload
 - Accessible button controls
 
+## Demo
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
+
 ## Installation
 
 Include the required JavaScript files:
