@@ -11,6 +11,9 @@ A customizable accordion web component that provides collapsible content section
 - Event-driven API for external control
 - Customizable styling through CSS variables
 
+## Demo
+[wc-accordion](../views/accordion.html)
+
 ## Installation
 
 Include the required JavaScript file:

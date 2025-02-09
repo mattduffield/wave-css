@@ -1,26 +1,46 @@
-<div id="page-contents">
-  <div class="my-2 px-4">
-    <p class="mb-4">
-      The following is an example of an accordion where only one can be open at any time.
-    </p>
-    <wc-accordion class="mb-4">
-      <option value="Section 1" selected>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </option>
-      <option value="Section 2">
-        Lorem ipsum dolor sit amet, consectetur <span class="text-lg">adipisicing</span> elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </option>
-    </wc-accordion>
-    <p class="mb-4">
-      The following is an example of an according where many can be open at a time.
-    </p>
-    <wc-accordion class="mb-4" allow-many>
-      <option value="Section I" selected>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </option>
-      <option value="Section II">
-        Lorem ipsum dolor sit amet, consectetur <span class="text-lg">adipisicing</span> elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </option>
-    </wc-accordion>
+<!doctype html>
+<html lang="en" class="h-full theme-royal dark">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+  <div id="page-contents">
+    <div class="my-2 px-4">
+      <p class="mb-4">
+        The following is an example of an accordion where only one can be open at any time.
+      </p>
+      <wc-accordion class="mb-4">
+        <option value="Section 1" selected>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </option>
+        <option value="Section 2">
+          Lorem ipsum dolor sit amet, consectetur <span class="text-lg">adipisicing</span> elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </option>
+      </wc-accordion>
+      <p class="mb-4">
+        The following is an example of an according where many can be open at a time.
+      </p>
+      <wc-accordion class="mb-4" allow-many>
+        <option value="Section I" selected>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </option>
+        <option value="Section II">
+          Lorem ipsum dolor sit amet, consectetur <span class="text-lg">adipisicing</span> elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </option>
+      </wc-accordion>
+    </div>
   </div>
-</div>
+
+  <wc-event-hub></wc-event-hub>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+  <script type="module" src="./index.js"></script>
+</body>
+</html>
