@@ -6,14 +6,13 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 
 ## General Web Components
 
-- wc-base-component
+- [wc-base-component](docs/wc-base-component.md)
 - [wc-accordion](docs/wc-accordion.md)
 - [wc-background-image](docs/wc-background-image.md)
 - [wc-breadcrumb](docs/wc-breadcrumb.md)
 - [wc-dropdown](docs/wc-dropdown.md)
 - [wc-flip-box](docs/wc-flip-box.md)
 - [wc-image](docs/wc-image.md)
-- wc-menu
 - [wc-save-button](docs/wc-save-button.md)
 - [wc-save-split-button](docs/wc-save-split-button.md)
 - [wc-sidebar](docs/wc-sidebar.md)
@@ -24,11 +23,10 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - [wc-tabulator](docs/wc-tabulator.md)
 - [wc-theme-selector](docs/wc-theme-selector.md)
 - [wc-timeline](docs/wc-timeline.md)
-- wc-top-nav
 
 
 ## Form Web Components
-- wc-base-form-component
+- [wc-base-form-component](docs/wc-base-form-component.md)
 - [wc-form](docs/wc-form.md)
 - [wc-code-mirror](docs/wc-code-mirror.md)
 - [wc-input](docs/wc-input.md)
