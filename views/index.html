@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full theme-ocean">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wave CSS</title>
@@ -9,14 +9,15 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 
-  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <link rel="stylesheet" href="/src/css/main.css">
 </head>
 
-<body class="theme-midnight-blue dark col-1 h-full text-sm">
+<body class="col-1 h-full text-sm">
   <div class="top-menu">
     <wc-menu id="menu" path="./" wrap>
       <option value="home" selected>Home</option>
-      <option value="theme">Theme</option>
+      <option value="color-theme">Theme</option>
+      <option value="skeletons">Skeletons</option>
       <option value="accordion">Accordion</option>
       <option value="parallax">Parallax</option>
       <option value="sidenav">Sidenav</option>
@@ -31,15 +32,8 @@
       <option value="tabulator">Tabulator</option>
       <option value="code-mirror">Code Mirror</option>
       <option value="loader">Loader</option>
-      <option value="form-elements">Form Elements</option>
       <option value="form-states">Form States</option>
       <option value="color-palette">Color Palette</option>
-
-      <!--
-      <option value="news">News</option>
-      <option value="contact">Contact</option>
-      <option value="about">About</option>
-      -->
     </wc-menu>
   </div>
 
@@ -71,6 +65,7 @@
   <wc-event-hub></wc-event-hub>
   <wc-mask-hub></wc-mask-hub>
   <wc-prompt></wc-prompt>
+  <wc-theme></wc-theme>
 
 
   <template id="clone-template">
@@ -103,7 +98,6 @@
       value="() => { const ipt = Swal.getInput(); const opts = Array.from(ipt.selectedOptions).map(m => m.value); return opts; }" />
   </template>
 
-  <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
   <script type="module" src="./index.js"></script>
 </body>
 </html>

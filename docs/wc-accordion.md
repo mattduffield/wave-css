@@ -12,7 +12,7 @@ A customizable accordion web component that provides collapsible content section
 - Customizable styling through CSS variables
 
 ## Demo
-[wc-accordion](../views/accordion.html)
+[Demo Site](https://mattduffield.github.io/wave-css/views/)
 
 ## Installation
 
