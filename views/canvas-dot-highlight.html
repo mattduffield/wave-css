@@ -1,0 +1,71 @@
+<div id="page-contents" class="mt-4">
+  <style>
+    .header {
+      display: flex;
+      min-height: 200px;
+      color: white;
+      font-size: 2.5rem;
+      line-height: 2.5rem;
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+    .footer {
+      display: flex;
+      height: 200px;
+      color: white;
+      font-size: 2rem;
+      line-height: 2rem;
+      padding: 2rem;
+    }  
+    .aspect-video {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+    .video {
+      position: absolute;
+      top: -30px;
+      left: calc(50% - (684px / 2));
+      border: 1px solid gray;
+      border-radius: 10px;
+      padding: .5rem;
+      width: 684px;
+    }
+    .video-message {
+      position: absolute;
+      top: 400px;
+      left: calc(50% / (896px / 2));
+      width: 896px;
+      display: flex;
+      color: white;
+      font-size: 2rem;
+      line-height: 2rem;
+      padding: 2rem;
+      text-align: center;
+      pointer-events: none;
+    }
+  </style>
+  <div class="flex flex-col gap-4 p-8">
+    <div class="header">
+      <p>
+        The first agentic IDE, and then some. The Windsurf Editor is where the work of developers and AI truly flow together, allowing for a coding experience that feels like literal magic.
+      </p>
+    </div>
+    <wc-canvas-highlight>
+      <div class="video">
+        <iframe class="aspect-video"
+          src="https://www.youtube.com/embed/3xk2qG2QPdU">
+        </iframe>
+      </div>
+      <div class="video-message">
+        <p>
+          The Windsurf Editor is built for the way AI is meant to work with humans. Everything you love in Codeium and more, with unmatched performance and a user experience that keeps you in the flow.
+        </p>
+      </div>
+    </wc-canvas-highlight>
+    <div class="footer">
+      <p>
+        What makes the Windsurf Editor the first AI agentic IDE, and then some?
+      </p>
+    </div>
+  </div>
+</div>

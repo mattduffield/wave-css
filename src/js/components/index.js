@@ -5,6 +5,7 @@ import './wc-accordion.js';
 import './wc-background-image.js';
 import './wc-breadcrumb-item.js';
 import './wc-breadcrumb.js';
+import './wc-canvas-dot-highlight.js';
 import './wc-code-mirror.js';
 import './wc-div.js';
 import './wc-dropdown-item.js';

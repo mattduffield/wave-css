@@ -10,6 +10,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - [wc-accordion](docs/wc-accordion.md)
 - [wc-background-image](docs/wc-background-image.md)
 - [wc-breadcrumb](docs/wc-breadcrumb.md)
+- [wc-canvas-dot-hightlight](docs/wc-canvas-dot-highlight.md)
 - [wc-dropdown](docs/wc-dropdown.md)
 - [wc-flip-box](docs/wc-flip-box.md)
 - [wc-image](docs/wc-image.md)
