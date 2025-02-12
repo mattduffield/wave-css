@@ -338,7 +338,9 @@ if (!customElements.get('wc-tabulator')) {
         this.loadCSS('https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css'),
         this.loadLibrary('https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js', 'Tabulator'),
       ]);
-        
+
+      // Tabulator.extendModule("format", "formatters", {localdatetime: this.localdatetime.bind(this)});
+
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
@@ -499,6 +501,8 @@ if (!customElements.get('wc-tabulator')) {
           const fp = JSON.parse(formatterParams);
           if (fp && fp.url) {
             fp.url = this.resolveFormatter(fp, fp.url);
+            column.formatterParams = fp;
+          } else {
             column.formatterParams = fp;
           }
         } else {

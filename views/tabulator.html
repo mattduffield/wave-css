@@ -408,7 +408,7 @@
   -->
 
   
-  <!--
+
   <div class="row gap-4">
     <wc-tabulator
       xclass="col-1"
@@ -444,8 +444,9 @@
       <wc-tabulator-column
         field="releaseDate"
         title="Release Date"
-        formatter="localDatetimeFormatter"
-        formatter="datetime"
+        xformatter="localDatetimeFormatter"
+        formatter="localdatetime"
+        formatter-params='{"format": "DATE_SHORT"}'
         xformatter-params='{"inputFormat": "iso", "outputFormat": "MM/dd/yyyy"}'
         vert-align="middle"
         header-hoz-align="right"
@@ -456,7 +457,7 @@
         ></wc-tabulator-column>
     </wc-tabulator>
   </div>
-  -->
+
 
   <!--
   <div class="row gap-4">

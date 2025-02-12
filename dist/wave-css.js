@@ -5252,6 +5252,8 @@ if (!customElements.get("wc-tabulator")) {
           if (fp && fp.url) {
             fp.url = this.resolveFormatter(fp, fp.url);
             column.formatterParams = fp;
+          } else {
+            column.formatterParams = fp;
           }
         } else {
           if (field && this.colFieldFormatter?.cols?.includes(field)) {
