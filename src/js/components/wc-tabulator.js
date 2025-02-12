@@ -981,6 +981,10 @@ if (!customElements.get('wc-tabulator')) {
   .wc-tabulator .tabulator-tableholder .tabulator-row .tabulator-cell:last-of-type {
     border-right: 1px solid transparent;
   }
+  .wc-tabulator .tabulator-row .tabulator-cell a {
+    text-decoration: underline;
+    text-decoration-color: var(--text-1);
+  }
 
   /* Table Footer */
   .wc-tabulator.tabulator .tabulator-footer {
