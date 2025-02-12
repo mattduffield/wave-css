@@ -737,11 +737,59 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     localdatetime(cell, formatterParams, onRendered) {
+      const {format} = formatterParams;
       let value = cell.getValue(); // Get the cell value
       
       // if (!value) return "(No Date)"; // Handle null/undefined values
       if (!value) return ""; // Handle null/undefined values
       
+      let dtFormat = luxon.DateTime.DATETIME_MED;
+      switch(format) {
+        case 'DATE_SHORT':
+          dtFormat = luxon.DateTime.DATE_SHORT;
+          break;
+        case 'DATE_MED':
+          dtFormat = luxon.DateTime.DATE_MED;
+          break;
+        case 'DATE_MED_WITH_WEEKDAY':
+          dtFormat = luxon.DateTime.DATE_MED_WITH_WEEKDAY;
+          break;
+        case 'DATE_FULL':
+          dtFormat = luxon.DateTime.DATE_FULL;
+          break;
+        case 'DATE_HUGE':
+          dtFormat = luxon.DateTime.DATE_HUGE;
+          break;
+        case 'DATETIME_SHORT':
+          dtFormat = luxon.DateTime.DATETIME_SHORT;
+          break;
+        case 'DATETIME_SHORT_WITH_SECONDS':
+          dtFormat = luxon.DateTime.DATETIME_SHORT_WITH_SECONDS;
+          break;
+        case 'DATETIME_MED':
+          dtFormat = luxon.DateTime.DATETIME_MED;
+          break;
+        case 'DATETIME_MED_WITH_SECONDS':
+          dtFormat = luxon.DateTime.DATETIME_MED_WITH_SECONDS;
+          break;
+        case 'DATETIME_MED_WITH_WEEKDAY':
+          dtFormat = luxon.DateTime.DATETIME_MED_WITH_WEEKDAY;
+          break;
+        case 'DATETIME_FULL':
+          dtFormat = luxon.DateTime.DATETIME_FULL;
+          break;
+        case 'DATETIME_FULL_WITH_SECONDS':
+          dtFormat = luxon.DateTime.DATETIME_FULL_WITH_SECONDS;
+          break;
+        case 'DATETIME_HUGE':
+          dtFormat = luxon.DateTime.DATETIME_HUGE;
+          break;
+        case 'DATETIME_HUGE_WITH_SECONDS':
+          dtFormat = luxon.DateTime.DATETIME_HUGE_WITH_SECONDS;
+          break;
+      }
+
+
       // let date = new Date(value); // Convert string/ISODate to Date object
       
       // if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
@@ -758,7 +806,7 @@ if (!customElements.get('wc-tabulator')) {
 
     let formattedDate = luxon.DateTime.fromISO(value, { zone: 'utc' })
       .setZone('America/New_York') // Convert to New York time
-      .toLocaleString(luxon.DateTime.DATETIME_MED); 
+      .toLocaleString(dtFormat); 
     return formattedDate;
     }
 
