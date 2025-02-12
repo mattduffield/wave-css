@@ -5015,6 +5015,7 @@ if (!customElements.get("wc-tabulator")) {
       const responsiveLayout = this.getAttribute("responsive-layout");
       const groupBy = this.getAttribute("group-by");
       const initialFilter = this.getAttribute("initial-filter");
+      const initialSort = this.getAttribute("initial-sort");
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
       const rowDeselected = this.getAttribute("row-deselected");
@@ -5084,6 +5085,10 @@ if (!customElements.get("wc-tabulator")) {
       if (initialFilter) {
         options.initialFilter = JSON.parse(initialFilter);
         this.initialFilter = options.initialFilter;
+      }
+      if (initialSort) {
+        options.initialSort = JSON.parse(initialSort);
+        this.initialSort = options.initialSort;
       }
       if (rowClick) {
         this.rowClick = this.resolveFunc(rowClick);
