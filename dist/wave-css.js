@@ -4907,8 +4907,29 @@ if (!customElements.get("wc-tabulator")) {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: (e, row) => {
           console.log("Cloning row...");
-          wc.Prompt.notifyTemplate({
-            template: "#clone-template",
+          wc.Prompt.fire({
+            title: "Clone",
+            html: `
+               <wc-select name="swal-clone-database"
+                mode="chip"
+                class="col-1"
+                lbl-label="Database"
+                display-member="label"
+                multiple
+                hx-config='{"allowExternalUrls": true}'
+                hx-get="http://localhost:8080/api/list-databases-as-options"
+                hx-target="#swal-clone-database"
+                hx-trigger="load"
+                hx-swap="innerHTML"
+                >
+              </wc-select>
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+              return [
+                document.getElementById("swal-clone-database").value
+              ];
+            },
             callback: (result) => {
               if (this.funcs["onClone"]) {
                 this.funcs["onClone"](result);
@@ -7575,6 +7596,47 @@ if (!customElements.get("wc-prompt")) {
       });
       return this.handleResult(c, result);
     }
+    async fire(c) {
+      const body = document.querySelector("body");
+      const theme = body.dataset.theme;
+      let defaultArgs = {
+        container: "",
+        popup: theme,
+        header: "",
+        title: "",
+        closeButton: "",
+        icon: "",
+        image: "",
+        htmlContainer: "",
+        input: "",
+        inputLabel: "",
+        validationMessage: "",
+        actions: "",
+        confirmButton: "theme-ocean-blue",
+        denyButton: "",
+        cancelButton: "theme-slate-storm",
+        loader: "",
+        footer: "",
+        timerProgressBar: "",
+        backdrop: false,
+        focusConfirm: false,
+        showCancelButton: true,
+        showConfirmButton: true,
+        willOpen: () => {
+          if (c.willOpen !== void 0) {
+            c.willOpen();
+          }
+        },
+        didOpen: () => {
+          if (c.didOpen !== void 0) {
+            c.didOpen();
+          }
+        }
+      };
+      const customArgs = { ...defaultArgs, ...c };
+      const { value: result } = await Swal.fire(customArgs);
+      return this.handleResult(c, result);
+    }
     handleResult(c, result) {
       if (result) {
         if (result.dismiss !== Swal.DismissReason.cancel) {
@@ -7620,6 +7682,10 @@ if (!customElements.get("wc-prompt")) {
         border-radius: 0.375rem;
         color: var(--component-color);
         padding: 0.375rem;
+      }
+      .swal2-container .swal2-html-container {
+        overflow: visible;
+        z-index: auto;
       }
       `;
       this.loadStyle("wc-prompt-style", style);

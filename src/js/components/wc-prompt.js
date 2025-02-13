@@ -9,7 +9,7 @@
  *  https://github.com/jaredreich/notie
  */
 
-import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { loadCSS, loadScript, loadLibrary, loadStyle, show } from './helper-function.js';
 
 if (!customElements.get('wc-prompt')) {
   class WcPrompt extends HTMLElement {
@@ -194,6 +194,48 @@ if (!customElements.get('wc-prompt')) {
       return this.handleResult(c, result);
     }
 
+    async fire(c) {
+      const body = document.querySelector('body');
+      const theme = body.dataset.theme;
+      let defaultArgs = {
+        container: '',
+        popup: theme,
+        header: '',
+        title: '',
+        closeButton: '',
+        icon: '',
+        image: '',
+        htmlContainer: '',
+        input: '',
+        inputLabel: '',
+        validationMessage: '',
+        actions: '',
+        confirmButton: 'theme-ocean-blue',
+        denyButton: '',
+        cancelButton: 'theme-slate-storm',
+        loader: '',
+        footer: '',
+        timerProgressBar: '',
+        backdrop: false,
+        focusConfirm: false,
+        showCancelButton: true,
+        showConfirmButton: true,
+        willOpen: () => {
+          if (c.willOpen !== undefined) {
+            c.willOpen();
+          }
+        },
+        didOpen: () => {
+          if (c.didOpen !== undefined) {
+            c.didOpen();
+          }
+        }
+      };
+      const customArgs = { ...defaultArgs, ...c };
+      const {value: result} = await Swal.fire(customArgs);
+      return this.handleResult(c, result);
+    }
+
     handleResult(c, result) {
       if (result) {
         if (result.dismiss !== Swal.DismissReason.cancel) {
@@ -240,6 +282,10 @@ if (!customElements.get('wc-prompt')) {
         border-radius: 0.375rem;
         color: var(--component-color);
         padding: 0.375rem;
+      }
+      .swal2-container .swal2-html-container {
+        overflow: visible;
+        z-index: auto;
       }
       `;
       this.loadStyle('wc-prompt-style', style);

@@ -4515,6 +4515,9 @@
   .overflow-scroll {
     overflow: scroll;
   }
+  .overflow-visible {
+    overflow: visible;
+  }
   .hidden {
     display: none !important;
   }

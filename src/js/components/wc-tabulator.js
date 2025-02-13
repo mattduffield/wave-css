@@ -118,14 +118,43 @@ if (!customElements.get('wc-tabulator')) {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: (e, row) => {
           console.log("Cloning row...");
-          wc.Prompt.notifyTemplate({
-            template: '#clone-template',
+          wc.Prompt.fire({
+            title: 'Clone',
+            html: `
+               <wc-select name="swal-clone-database"
+                mode="chip"
+                class="col-1"
+                lbl-label="Database"
+                display-member="label"
+                multiple
+                hx-config='{"allowExternalUrls": true}'
+                hx-get="http://localhost:8080/api/list-databases-as-options"
+                hx-target="#swal-clone-database"
+                hx-trigger="load"
+                hx-swap="innerHTML"
+                >
+              </wc-select>
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+              return [
+                document.getElementById("swal-clone-database").value
+              ];
+            },
             callback: (result) => {
               if (this.funcs['onClone']) {
                 this.funcs['onClone'](result);
               }
             }
           });
+          // wc.Prompt.notifyTemplate({
+          //   template: '#clone-template',
+          //   callback: (result) => {
+          //     if (this.funcs['onClone']) {
+          //       this.funcs['onClone'](result);
+          //     }
+          //   }
+          // });
         }
       },
       {
