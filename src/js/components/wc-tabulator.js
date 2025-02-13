@@ -128,7 +128,7 @@ if (!customElements.get('wc-tabulator')) {
                 display-member="label"
                 multiple
                 hx-config='{"allowExternalUrls": true}'
-                hx-get="http://localhost:8080/api/list-databases-as-options"
+                hx-get="/api/list-databases-as-options"
                 hx-target="#swal-clone-database"
                 hx-trigger="load"
                 hx-swap="innerHTML"
