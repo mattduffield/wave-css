@@ -445,9 +445,8 @@
         field="releaseDate"
         title="Release Date"
         xformatter="localDatetimeFormatter"
-        formatter="localdatetime"
-        formatter-params='{"format": "DATETIME_STANDARD"}'
-        xformatter-params='{"inputFormat": "iso", "outputFormat": "MM/dd/yyyy"}'
+        formatter="linklocaldatetime"
+        formatter-params='{"format": "DATETIME_STANDARD", "routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
         vert-align="middle"
         header-hoz-align="right"
         hoz-align="right"

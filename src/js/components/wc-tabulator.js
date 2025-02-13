@@ -552,7 +552,7 @@ if (!customElements.get('wc-tabulator')) {
         if (formatter.startsWith('function')) {
           return new Function(`return (${formatter})`)(params); // Inline function
         } else if (this[formatter]) {
-          return this[formatter]; // Class function
+          return this[formatter].bind(this); // Class function
         } else if (window[formatter]) {
           return window[formatter]; // Global function
         } else {
@@ -583,7 +583,7 @@ if (!customElements.get('wc-tabulator')) {
             return val;
             // return new Function(`return (${formatter})`)(cell, formatterParams, onRendered); // Inline function
           } else if (this[formatter]) {
-            return this[formatter]; // Class function
+            return this[formatter].bind(this); // Class function
           } else if (window[formatter]) {
             return window[formatter]; // Global function
           } else {
@@ -596,7 +596,7 @@ if (!customElements.get('wc-tabulator')) {
       }
     }
 
-    urlFormatter (cell, formatterParams, onRendered) {
+    urlFormatter(cell, formatterParams, onRendered) {
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
       const screen = cell.getColumn().getDefinition().formatterParams.screen;
       const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
@@ -810,6 +810,12 @@ if (!customElements.get('wc-tabulator')) {
         .setZone('America/New_York') // Convert to New York time
         .toLocaleString(dtFormat); 
       return formattedDate;
+    }
+
+    linklocaldatetime(cell, formatterParams, onRendered) {
+      const url = this.urlFormatter(cell, formatterParams, onRendered);
+      const formattedDate = this.localdatetime(cell, formatterParams, onRendered);
+      return `<a href="${url}">${formattedDate}</a>`;
     }
 
     dateEditor(cell, onRendered, success, cancel) {

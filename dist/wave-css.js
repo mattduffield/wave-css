@@ -5296,7 +5296,7 @@ if (!customElements.get("wc-tabulator")) {
         if (formatter.startsWith("function")) {
           return new Function(`return (${formatter})`)(params);
         } else if (this[formatter]) {
-          return this[formatter];
+          return this[formatter].bind(this);
         } else if (window[formatter]) {
           return window[formatter];
         } else {
@@ -5517,6 +5517,11 @@ if (!customElements.get("wc-tabulator")) {
       if (isNaN(date)) return "(Invalid Date)";
       let formattedDate = luxon.DateTime.fromISO(value, { zone: "utc" }).setZone("America/New_York").toLocaleString(dtFormat);
       return formattedDate;
+    }
+    linklocaldatetime(cell, formatterParams, onRendered) {
+      const url = this.urlFormatter(cell, formatterParams, onRendered);
+      const formattedDate = this.localdatetime(cell, formatterParams, onRendered);
+      return `<a href="${url}">${formattedDate}</a>`;
     }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
