@@ -5478,6 +5478,16 @@ if (!customElements.get("wc-tabulator")) {
         case "DATETIME_SHORT":
           dtFormat = luxon.DateTime.DATETIME_SHORT;
           break;
+        case "DATETIME_STANDARD":
+          dtFormat = {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+          };
+          break;
         case "DATETIME_SHORT_WITH_SECONDS":
           dtFormat = luxon.DateTime.DATETIME_SHORT_WITH_SECONDS;
           break;
@@ -5503,6 +5513,8 @@ if (!customElements.get("wc-tabulator")) {
           dtFormat = luxon.DateTime.DATETIME_HUGE_WITH_SECONDS;
           break;
       }
+      let date = new Date(value);
+      if (isNaN(date)) return "(Invalid Date)";
       let formattedDate = luxon.DateTime.fromISO(value, { zone: "utc" }).setZone("America/New_York").toLocaleString(dtFormat);
       return formattedDate;
     }

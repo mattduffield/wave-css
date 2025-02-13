@@ -767,6 +767,16 @@ if (!customElements.get('wc-tabulator')) {
         case 'DATETIME_SHORT':
           dtFormat = luxon.DateTime.DATETIME_SHORT;
           break;
+        case 'DATETIME_STANDARD':
+          dtFormat = {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+          };
+          break;
         case 'DATETIME_SHORT_WITH_SECONDS':
           dtFormat = luxon.DateTime.DATETIME_SHORT_WITH_SECONDS;
           break;
@@ -793,25 +803,13 @@ if (!customElements.get('wc-tabulator')) {
           break;
       }
 
-
-      // let date = new Date(value); // Convert string/ISODate to Date object
+      let date = new Date(value); // Convert string/ISODate to Date object
+      if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
       
-      // if (isNaN(date)) return "(Invalid Date)"; // Handle invalid dates
-      
-      // // Format as "MM/DD/YYYY HH:mm AM/PM"
-      // return date.toLocaleString("en-US", {
-      //     month: "2-digit",
-      //     day: "2-digit",
-      //     year: "numeric",
-      //     hour: "2-digit",
-      //     minute: "2-digit",
-      //     hour12: true
-      // });
-
-    let formattedDate = luxon.DateTime.fromISO(value, { zone: 'utc' })
-      .setZone('America/New_York') // Convert to New York time
-      .toLocaleString(dtFormat); 
-    return formattedDate;
+      let formattedDate = luxon.DateTime.fromISO(value, { zone: 'utc' })
+        .setZone('America/New_York') // Convert to New York time
+        .toLocaleString(dtFormat); 
+      return formattedDate;
     }
 
     dateEditor(cell, onRendered, success, cancel) {
