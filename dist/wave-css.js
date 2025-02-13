@@ -5323,7 +5323,7 @@ if (!customElements.get("wc-tabulator")) {
             const val = new Function("cell", `return (${formatter})(cell);`);
             return val;
           } else if (this[formatter]) {
-            return this[formatter];
+            return this[formatter].bind(this);
           } else if (window[formatter]) {
             return window[formatter];
           } else {
