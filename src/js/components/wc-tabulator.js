@@ -124,7 +124,7 @@ if (!customElements.get('wc-tabulator')) {
                <wc-select name="swal-clone-database"
                 mode="chip"
                 class="col-1"
-                lbl-label="Database"
+                lbl-label="Database(s)"
                 display-member="label"
                 multiple
                 url="http://localhost:8080/api/list-databases"
