@@ -260,13 +260,14 @@ if (!customElements.get('wc-prompt')) {
         display: contents;
       }
       .swal2-container .swal2-popup {
-        background-color: var(--secondary-bg-color);
+        background-color: var(--surface-5);
+        color: var(--text-1);
       }
       .swal2-container .swal2-popup .swal2-title {
-        color: var(--secondary-color);
+        color: var(--text-1);
       }
       .swal2-container .swal2-popup .swal2-html-container {
-        color: var(--secondary-color);
+        color: var(--text-1);
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-confirm {
         background-color: var(--primary-bg-color);
