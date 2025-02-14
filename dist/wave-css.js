@@ -4913,6 +4913,9 @@ if (!customElements.get("wc-tabulator")) {
           wc.Prompt.fire({
             title: "Clone",
             html: `
+               <wc-input name="srcConnName" type="hidden" value="default"/>
+               <wc-input name="srcDbName" type="hidden" value="local"/>
+               <wc-input name="srcCollName" type="hidden" value="contact"/>
                <wc-input name="tgtConnName" type="hidden" value="mango-dev"/>
                <wc-select name="tgtDbNames"
                 mode="chip"
@@ -4927,12 +4930,16 @@ if (!customElements.get("wc-tabulator")) {
             `,
             focusConfirm: false,
             preConfirm: () => {
-              return [
-                document.getElementById("tgtConnName").value,
-                [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map((m) => m.value))],
-                document.getElementById("tgtCollName").value,
-                recordIds
-              ];
+              const payload = {
+                "srcConnName": document.getElementById("srcConnName").value,
+                "srcDbName": document.getElementById("srcDbName").value,
+                "srcCollName": document.getElementById("srcCollName").value,
+                "tgtConnName": document.getElementById("tgtConnName").value,
+                "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map((m) => m.value))],
+                "tgtCollName": document.getElementById("tgtCollName").value,
+                "recordIds": recordIds
+              };
+              return payload;
             },
             callback: (result) => {
               if (this.funcs["onClone"]) {
