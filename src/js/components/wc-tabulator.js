@@ -144,7 +144,7 @@ if (!customElements.get('wc-tabulator')) {
             preConfirm: () => {
               return [
                 document.getElementById("tgtConnName").value,
-                Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value),
+                [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
                 document.getElementById("tgtCollName").value,
                 recordIds
               ];
