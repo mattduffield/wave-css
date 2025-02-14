@@ -4907,10 +4907,14 @@ if (!customElements.get("wc-tabulator")) {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: (e, row) => {
           console.log("Cloning row...");
+          const table = row.getTable();
+          const selectedData = table.getSelectedData();
+          const recordIds = selectedData.map((m) => m._id);
           wc.Prompt.fire({
             title: "Clone",
             html: `
-               <wc-select name="swal-clone-database"
+               <wc-input name="tgtConnName" type="hidden" value="mango-dev"/>
+               <wc-select name="tgtDbNames"
                 mode="chip"
                 class="col-1"
                 lbl-label="Database(s)"
@@ -4919,11 +4923,15 @@ if (!customElements.get("wc-tabulator")) {
                 url="http://localhost:8080/api/list-databases"
                 >
               </wc-select>
+              <wc-input name="tgtCollName" type="hidden" value="contact"/>
             `,
             focusConfirm: false,
             preConfirm: () => {
               return [
-                document.getElementById("swal-clone-database").value
+                document.getElementById("tgtConnName").value,
+                document.getElementById("tgtDbNames").value,
+                document.getElementById("tgtCollName").value,
+                recordIds
               ];
             },
             callback: (result) => {
