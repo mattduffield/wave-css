@@ -121,29 +121,50 @@ if (!customElements.get('wc-tabulator')) {
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map(m => m._id);
-            // ${recordIds.forEach(f => `
-            // <wc-input name="recordIds" type="hidden" value="${f}"/>
-            // `)}
-
           wc.Prompt.fire({
             title: 'Clone',
             html: `
-               <wc-input name="srcConnName" type="hidden" value="default"/>
-               <wc-input name="srcDbName" type="hidden" value="local"/>
-               <wc-input name="srcCollName" type="hidden" value="contact"/>
-               <wc-input name="tgtConnName" type="hidden" value="mango-dev"/>
-               <wc-select name="tgtDbNames"
+              <wc-input name="srcConnName" type="hidden" value="default"/>
+              <wc-input name="srcDbName" type="hidden" value="local"/>
+              <wc-input name="srcCollName" type="hidden" value="${this.collectionName}"/>
+              <wc-select name="tgtConnName" 
+                class="col-1"
+                lbl-label="Target Connection"
+                value="mango-dev"
+                url="/api/list-connections"
+                required
+                _='on load or change from first <select#tgtConnName />
+                  set tc to first <wc-select[lbl-label="Target Collection"] />
+                  set url to "/api/list-databases?connName=" + me.value
+                  tc.setAttribute("url", url)
+                end'>
+              </wc-select>
+              <wc-select name="tgtDbNames"
                 mode="chip"
                 class="col-1"
-                lbl-label="Database(s)"
+                lbl-label="Target Database(s)"
                 display-member="label"
                 multiple
-                url="http://localhost:8080/api/list-databases?connName=mango-dev"
+                url="/api/list-databases?connName=mango-dev"
+                required
                 >
               </wc-select>
-              <wc-input name="tgtCollName" type="hidden" value="contact"/>
+              <wc-select name="tgtCollName" 
+                class="col-1"
+                lbl-label="Target Collection"
+                value=""
+                url=""
+                required>
+              </wc-select>
             `,
             focusConfirm: false,
+            didOpen: () => {
+              const cnt = document.querySelector(".swal2-container");
+              if (cnt) {
+                htmx.process(cnt);
+                _hyperscript.processNode(cnt);
+              }
+            },
             preConfirm: () => {
               const payload = {
                 "srcConnName": document.getElementById("srcConnName").value,
@@ -216,6 +237,7 @@ if (!customElements.get('wc-tabulator')) {
 
     constructor() {
       super();
+      this.collectionName = this.getAttribute('collection-name') || '';
       this.table = null;
 
       this._internals = this.attachInternals();
