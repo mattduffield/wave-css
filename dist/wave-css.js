@@ -4920,7 +4920,7 @@ if (!customElements.get("wc-tabulator")) {
                 lbl-label="Database(s)"
                 display-member="label"
                 multiple
-                url="http://localhost:8080/api/list-databases"
+                url="http://localhost:8080/api/list-databases?connName=mango-dev"
                 >
               </wc-select>
               <wc-input name="tgtCollName" type="hidden" value="contact"/>
