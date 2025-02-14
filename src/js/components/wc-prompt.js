@@ -267,7 +267,11 @@ if (!customElements.get('wc-prompt')) {
         color: var(--text-1);
       }
       .swal2-container .swal2-popup .swal2-html-container {
+        background-color: var(--surface-5);
         color: var(--text-1);
+        overflow: visible;
+        text-align: inherit;
+        z-index: auto;
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-confirm {
         background-color: var(--primary-bg-color);
@@ -283,10 +287,6 @@ if (!customElements.get('wc-prompt')) {
         border-radius: 0.375rem;
         color: var(--component-color);
         padding: 0.375rem;
-      }
-      .swal2-container .swal2-html-container {
-        overflow: visible;
-        z-index: auto;
       }
       `;
       this.loadStyle('wc-prompt-style', style);
