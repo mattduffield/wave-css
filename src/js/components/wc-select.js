@@ -29,7 +29,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
 
 class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
-    return ['name', 'id', 'class', 'multiple', 'value', 'items', 'display-member', 'value-member', 'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class'];
+    return ['name', 'id', 'class', 'multiple', 'value', 'items', 'url', 'display-member', 'value-member', 'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class'];
     // return ['mode']; // Allows switching between "multiple" and "chip" modes
   }
 
@@ -65,6 +65,21 @@ class WcSelect extends WcBaseFormComponent {
   _handleAttributeChange(attrName, newValue) {
     if (attrName === 'autofocus') {
       this.formElement?.setAttribute('autofocus', '');
+    } else if (attrName === 'url') {
+      if (newValue) {
+        fetch(newValue).then(response => response.json())
+          .then(data => {
+            this._items = data;  
+            this._generateOptionsFromItems();
+            this._items.forEach(item => {
+              if (item.selected) {
+                const displayMember = this.getAttribute('display-member') || 'key';
+                const valueMember = this.getAttribute('value-member') || 'value';
+                this.addChip(item[valueMember], item[displayMember]);
+              }
+            });
+          });
+      }           
     } else if (attrName === 'items') {
       if (typeof newValue === 'string') {
         this._items = JSON.parse(newValue);

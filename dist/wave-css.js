@@ -4916,11 +4916,7 @@ if (!customElements.get("wc-tabulator")) {
                 lbl-label="Database"
                 display-member="label"
                 multiple
-                hx-config='{"allowExternalUrls": true}'
-                hx-get="/api/list-databases-as-options"
-                hx-target="#swal-clone-database"
-                hx-trigger="load"
-                hx-swap="innerHTML"
+                url="http://localhost:8080/api/list-databases"
                 >
               </wc-select>
             `,
@@ -8483,7 +8479,7 @@ customElements.define("wc-input", WcInput);
 // src/js/components/wc-select.js
 var WcSelect = class extends WcBaseFormComponent {
   static get observedAttributes() {
-    return ["name", "id", "class", "multiple", "value", "items", "display-member", "value-member", "lbl-label", "disabled", "required", "autofocus", "elt-class"];
+    return ["name", "id", "class", "multiple", "value", "items", "url", "display-member", "value-member", "lbl-label", "disabled", "required", "autofocus", "elt-class"];
   }
   constructor() {
     super();
@@ -8512,6 +8508,20 @@ var WcSelect = class extends WcBaseFormComponent {
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "autofocus") {
       this.formElement?.setAttribute("autofocus", "");
+    } else if (attrName === "url") {
+      if (newValue) {
+        fetch(newValue).then((response) => response.json()).then((data) => {
+          this._items = data;
+          this._generateOptionsFromItems();
+          this._items.forEach((item) => {
+            if (item.selected) {
+              const displayMember = this.getAttribute("display-member") || "key";
+              const valueMember = this.getAttribute("value-member") || "value";
+              this.addChip(item[valueMember], item[displayMember]);
+            }
+          });
+        });
+      }
     } else if (attrName === "items") {
       if (typeof newValue === "string") {
         this._items = JSON.parse(newValue);
