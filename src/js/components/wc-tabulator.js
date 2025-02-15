@@ -141,17 +141,19 @@ if (!customElements.get('wc-tabulator')) {
               if (this.funcs['onClonePreConfirm']) {
                 const payload = this.funcs['onClonePreConfirm'](row);
                 return payload;
+              } else {
+                // Fallback, to reduce redundancies.
+                const payload = {
+                  "srcConnName": document.getElementById("srcConnName").value,
+                  "srcDbName": document.getElementById("srcDbName").value,
+                  "srcCollName": document.getElementById("srcCollName").value,
+                  "tgtConnName": document.getElementById("tgtConnName").value,
+                  "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
+                  "tgtCollName": document.getElementById("tgtCollName").value,
+                  "recordIds": recordIds
+                }
+                return payload;
               }
-              // const payload = {
-              //   "srcConnName": document.getElementById("srcConnName").value,
-              //   "srcDbName": document.getElementById("srcDbName").value,
-              //   "srcCollName": document.getElementById("srcCollName").value,
-              //   "tgtConnName": document.getElementById("tgtConnName").value,
-              //   "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
-              //   "tgtCollName": document.getElementById("tgtCollName").value,
-              //   "recordIds": recordIds
-              // }
-              // return payload;
             },
             callback: (result) => {
               if (this.funcs['onClone']) {
