@@ -117,17 +117,12 @@ if (!customElements.get('wc-tabulator')) {
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: (e, row) => {
-          console.log("Cloning row...");
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map(m => m._id);
-          // const cloneTemplate = document.querySelector('template#clone-template');
-          // let html = '';
-          // if (cloneTemplate) {
-          //   html = cloneTemplate.content.firstElementChild.outerHTML;
-          // }
           const promptPayload = {
-            title: 'Clone',
+            title: 'Clone Record(s)',
+            icon: 'info',
             focusConfirm: false,
             template: 'template#clone-template',
             didOpen: () => {
@@ -208,14 +203,6 @@ if (!customElements.get('wc-tabulator')) {
 
     constructor() {
       super();
-      // this.connectionName = this.getAttribute('connection-name') || '';
-      // this.databaseName = this.getAttribute('database-name') || '';
-      // this.collectionName = this.getAttribute('collection-name') || '';
-
-      // this.cloneTemplate = 'template#clone-template';
-      // if (this.getAttribute('template#clone-template')) {
-      //   this.cloneTemplate = 'template#clone-template';
-      // }
       this.table = null;
 
       this._internals = this.attachInternals();

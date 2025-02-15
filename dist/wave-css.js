@@ -4775,19 +4775,6 @@ var WcTab = class extends WcBaseComponent {
 };
 customElements.define("wc-tab", WcTab);
 
-// src/js/components/wc-tabulator-tmpl.js
-if (!customElements.get("wc-tabulator-template")) {
-  class WcTabulatorTemplate extends HTMLElement {
-    constructor() {
-      super();
-      this.classList.add("contents");
-    }
-    connectedCallback() {
-    }
-  }
-  customElements.define("wc-tabulator-template", WcTabulatorTemplate);
-}
-
 // src/js/components/wc-tabulator-column.js
 if (!customElements.get("wc-tabulator-column")) {
   class WcTabulatorColumn extends HTMLElement {
@@ -4919,12 +4906,12 @@ if (!customElements.get("wc-tabulator")) {
       {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: (e, row) => {
-          console.log("Cloning row...");
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map((m) => m._id);
           const promptPayload = {
-            title: "Clone",
+            title: "Clone Record(s)",
+            icon: "info",
             focusConfirm: false,
             template: "template#clone-template",
             didOpen: () => {
@@ -4934,7 +4921,7 @@ if (!customElements.get("wc-tabulator")) {
                 _hyperscript.processNode(cnt);
               }
             },
-            preConfirm: () => {
+            preConfirm2: () => {
               if (this.funcs["onClonePreConfirm"]) {
                 const payload = this.funcs["onClonePreConfirm"](row);
                 return payload;
