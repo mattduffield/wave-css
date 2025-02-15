@@ -4910,9 +4910,7 @@ if (!customElements.get("wc-tabulator")) {
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map((m) => m._id);
-          wc.Prompt.fire({
-            title: "Clone",
-            html: `
+          const html = `
               <wc-input name="srcConnName" type="hidden" value="${this.connectionName}"/>
               <wc-input name="srcDbName" type="hidden" value="${this.databaseName}"/>
               <wc-input name="srcCollName" type="hidden" value="${this.collectionName}"/>
@@ -4948,7 +4946,9 @@ if (!customElements.get("wc-tabulator")) {
                 url="/api/list-collections?connName=${this.connectionName}&dbName=${this.databaseName}"
                 required>
               </wc-select>
-            `,
+            `;
+          const promptPayload = {
+            title: "Clone",
             focusConfirm: false,
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
@@ -4974,7 +4974,13 @@ if (!customElements.get("wc-tabulator")) {
                 this.funcs["onClone"](result);
               }
             }
-          });
+          };
+          if (this.cloneTemplate) {
+            promptPayload.template = this.cloneTemplate;
+          } else {
+            promptPayload.html = html;
+          }
+          wc.Prompt.fire(promptPayload);
         }
       },
       {
@@ -5021,6 +5027,7 @@ if (!customElements.get("wc-tabulator")) {
       this.connectionName = this.getAttribute("connection-name") || "";
       this.databaseName = this.getAttribute("database-name") || "";
       this.collectionName = this.getAttribute("collection-name") || "";
+      this.cloneTemplate = this.getAttribute("clone-template") || "";
       this.table = null;
       this._internals = this.attachInternals();
       const compEl = this.querySelector(".wc-tabulator");
