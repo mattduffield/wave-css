@@ -117,9 +117,9 @@ if (!customElements.get('wc-tabulator')) {
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: (e, row) => {
-          const table = row.getTable();
-          const selectedData = table.getSelectedData();
-          const recordIds = selectedData.map(m => m._id);
+          // const table = row.getTable();
+          // const selectedData = table.getSelectedData();
+          // const recordIds = selectedData.map(m => m._id);
           const promptPayload = {
             title: 'Clone Record(s)',
             icon: 'info',
@@ -132,24 +132,24 @@ if (!customElements.get('wc-tabulator')) {
                 _hyperscript.processNode(cnt);
               }
             },
-            preConfirm2: () => {
-              if (this.funcs['onClonePreConfirm']) {
-                const payload = this.funcs['onClonePreConfirm'](row);
-                return payload;
-              } else {
-                // Fallback, to reduce redundancies.
-                const payload = {
-                  "srcConnName": document.getElementById("srcConnName").value,
-                  "srcDbName": document.getElementById("srcDbName").value,
-                  "srcCollName": document.getElementById("srcCollName").value,
-                  "tgtConnName": document.getElementById("tgtConnName").value,
-                  "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
-                  "tgtCollName": document.getElementById("tgtCollName").value,
-                  "recordIds": recordIds
-                }
-                return payload;
-              }
-            },
+            // preConfirm: () => {
+            //   if (this.funcs['onClonePreConfirm']) {
+            //     const payload = this.funcs['onClonePreConfirm'](row);
+            //     return payload;
+            //   } else {
+            //     // Fallback, to reduce redundancies.
+            //     const payload = {
+            //       "srcConnName": document.getElementById("srcConnName").value,
+            //       "srcDbName": document.getElementById("srcDbName").value,
+            //       "srcCollName": document.getElementById("srcCollName").value,
+            //       "tgtConnName": document.getElementById("tgtConnName").value,
+            //       "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
+            //       "tgtCollName": document.getElementById("tgtCollName").value,
+            //       "recordIds": recordIds
+            //     }
+            //     return payload;
+            //   }
+            // },
             callback: (result) => {
               if (this.funcs['onClone']) {
                 this.funcs['onClone'](row, result);
