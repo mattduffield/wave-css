@@ -4775,6 +4775,19 @@ var WcTab = class extends WcBaseComponent {
 };
 customElements.define("wc-tab", WcTab);
 
+// src/js/components/wc-tabulator-tmpl.js
+if (!customElements.get("wc-tabulator-template")) {
+  class WcTabulatorTemplate extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+    }
+  }
+  customElements.define("wc-tabulator-template", WcTabulatorTemplate);
+}
+
 // src/js/components/wc-tabulator-column.js
 if (!customElements.get("wc-tabulator-column")) {
   class WcTabulatorColumn extends HTMLElement {
@@ -4910,46 +4923,15 @@ if (!customElements.get("wc-tabulator")) {
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map((m) => m._id);
-          const html = `
-              <wc-input name="srcConnName" type="hidden" value="${this.connectionName}"/>
-              <wc-input name="srcDbName" type="hidden" value="${this.databaseName}"/>
-              <wc-input name="srcCollName" type="hidden" value="${this.collectionName}"/>
-              <wc-select name="tgtConnName" 
-                class="col-1"
-                lbl-label="Target Connection"
-                value="mango-dev"
-                url="/api/list-connections"
-                required
-                _='on load or change from first <select#tgtConnName />
-                  set td to first <wc-select[lbl-label="Target Database(s)"] />
-                  set tdUrl to "/api/list-databases?connName=" + me.value
-                  td.setAttribute("url", tdUrl)
-                end'
-                >
-              </wc-select>
-              <wc-select name="tgtDbNames"
-                mode="chip"
-                class="col-1"
-                lbl-label="Target Database(s)"
-                display-member="label"
-                multiple
-                xurl="/api/list-databases?connName=mango-dev"
-                url=""
-                required
-                >
-              </wc-select>
-              <wc-select name="tgtCollName" 
-                class="col-1"
-                lbl-label="Target Collection"
-                value=""
-                xurl="/api/list-databases?connName=mango-dev&dbName=mango_matt"
-                url="/api/list-collections?connName=${this.connectionName}&dbName=${this.databaseName}"
-                required>
-              </wc-select>
-            `;
+          const cloneTemplate = this.querySelector("template#clone-template");
+          let html = "";
+          if (cloneTemplate) {
+            html = cloneTemplate.content.firstElementChild.outerHTML;
+          }
           const promptPayload = {
             title: "Clone",
             focusConfirm: false,
+            html,
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
               if (cnt) {
@@ -4958,16 +4940,10 @@ if (!customElements.get("wc-tabulator")) {
               }
             },
             preConfirm: () => {
-              const payload = {
-                "srcConnName": document.getElementById("srcConnName").value,
-                "srcDbName": document.getElementById("srcDbName").value,
-                "srcCollName": document.getElementById("srcCollName").value,
-                "tgtConnName": document.getElementById("tgtConnName").value,
-                "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map((m) => m.value))],
-                "tgtCollName": document.getElementById("tgtCollName").value,
-                "recordIds": recordIds
-              };
-              return payload;
+              if (this.funcs["onClonePreConfirm"]) {
+                const payload = this.funcs["onClonePreConfirm"]();
+                return payload;
+              }
             },
             callback: (result) => {
               if (this.funcs["onClone"]) {
@@ -4975,11 +4951,6 @@ if (!customElements.get("wc-tabulator")) {
               }
             }
           };
-          if (this.cloneTemplate) {
-            promptPayload.template = this.cloneTemplate;
-          } else {
-            promptPayload.html = html;
-          }
           wc.Prompt.fire(promptPayload);
         }
       },
@@ -5024,10 +4995,6 @@ if (!customElements.get("wc-tabulator")) {
     ];
     constructor() {
       super();
-      this.connectionName = this.getAttribute("connection-name") || "";
-      this.databaseName = this.getAttribute("database-name") || "";
-      this.collectionName = this.getAttribute("collection-name") || "";
-      this.cloneTemplate = this.getAttribute("clone-template") || "";
       this.table = null;
       this._internals = this.attachInternals();
       const compEl = this.querySelector(".wc-tabulator");
