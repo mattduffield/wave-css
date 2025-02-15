@@ -213,7 +213,10 @@
         </template>
       </wc-tabulator-tmpl>
       <wc-tabulator-func name="onClonePreConfirm"
-          value='() => {
+          value='(row) => {
+              const table = row.getTable();
+              const selectedData = table.getSelectedData();
+              const recordIds = selectedData.map(m => m._id);
               const payload = {
                 "srcConnName": document.getElementById("srcConnName").value,
                 "srcDbName": document.getElementById("srcDbName").value,

@@ -137,9 +137,9 @@ if (!customElements.get('wc-tabulator')) {
                 _hyperscript.processNode(cnt);
               }
             },
-            preConfirm: () => {
+            preConfirm: (row) => {
               if (this.funcs['onClonePreConfirm']) {
-                const payload = this.funcs['onClonePreConfirm']();
+                const payload = this.funcs['onClonePreConfirm'](row);
                 return payload;
               }
               // const payload = {
