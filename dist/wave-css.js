@@ -4938,9 +4938,9 @@ if (!customElements.get("wc-tabulator")) {
                 return payload;
               }
             },
-            callback: (row2, result) => {
+            callback: (result) => {
               if (this.funcs["onClone"]) {
-                this.funcs["onClone"](row2, result);
+                this.funcs["onClone"](row, result);
               }
             }
           };

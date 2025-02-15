@@ -150,7 +150,7 @@ if (!customElements.get('wc-tabulator')) {
                 return payload;
               }
             },
-            callback: (row, result) => {
+            callback: (result) => {
               if (this.funcs['onClone']) {
                 this.funcs['onClone'](row, result);
               }
