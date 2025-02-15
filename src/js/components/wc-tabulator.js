@@ -121,15 +121,15 @@ if (!customElements.get('wc-tabulator')) {
           const table = row.getTable();
           const selectedData = table.getSelectedData();
           const recordIds = selectedData.map(m => m._id);
-          const cloneTemplate = this.querySelector('template#clone-template');
-          let html = '';
-          if (cloneTemplate) {
-            html = cloneTemplate.content.firstElementChild.outerHTML;
-          }
+          // const cloneTemplate = document.querySelector('template#clone-template');
+          // let html = '';
+          // if (cloneTemplate) {
+          //   html = cloneTemplate.content.firstElementChild.outerHTML;
+          // }
           const promptPayload = {
             title: 'Clone',
             focusConfirm: false,
-            html: html,
+            template: 'template#clone-template',
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
               if (cnt) {
