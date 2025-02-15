@@ -11,6 +11,7 @@
     <wc-tabulator
       class="rounded w-full max-h-500"
       id="email-table"
+      collection-name="email_notification"
       xpersistence="true"
       ajax-url="http://localhost:8080/api/email_notification"
       placeholder="No Data Available"
@@ -147,6 +148,7 @@
     <wc-tabulator
       class="rounded w-full max-h-500"
       id="contact-table"
+      collection-name="contact"
       xpersistence="true"
       ajax-url="http://localhost:8080/api/email_notification"
       placeholder="No Data Available"
@@ -411,6 +413,7 @@
 
   <div class="row gap-4">
     <wc-tabulator
+      collection-name="artist"
       xclass="col-1"
       ajax-url="https://itunes.apple.com/search"
       ajax-params='{"term": "star+wars", "country": "us", "entity": "movie", "limit": "5"}'

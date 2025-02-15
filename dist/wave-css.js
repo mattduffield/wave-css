@@ -4913,8 +4913,8 @@ if (!customElements.get("wc-tabulator")) {
           wc.Prompt.fire({
             title: "Clone",
             html: `
-              <wc-input name="srcConnName" type="hidden" value="default"/>
-              <wc-input name="srcDbName" type="hidden" value="local"/>
+              <wc-input name="srcConnName" type="hidden" value="${this.connectionName}"/>
+              <wc-input name="srcDbName" type="hidden" value="${this.databaseName}"/>
               <wc-input name="srcCollName" type="hidden" value="${this.collectionName}"/>
               <wc-select name="tgtConnName" 
                 class="col-1"
@@ -4923,10 +4923,11 @@ if (!customElements.get("wc-tabulator")) {
                 url="/api/list-connections"
                 required
                 _='on load or change from first <select#tgtConnName />
-                  set tc to first <wc-select[lbl-label="Target Collection"] />
-                  set url to "/api/list-databases?connName=" + me.value
-                  tc.setAttribute("url", url)
-                end'>
+                  set td to first <wc-select[lbl-label="Target Database(s)"] />
+                  set tdUrl to "/api/list-databases?connName=" + me.value
+                  td.setAttribute("url", tdUrl)
+                end'
+                >
               </wc-select>
               <wc-select name="tgtDbNames"
                 mode="chip"
@@ -4934,7 +4935,8 @@ if (!customElements.get("wc-tabulator")) {
                 lbl-label="Target Database(s)"
                 display-member="label"
                 multiple
-                url="/api/list-databases?connName=mango-dev"
+                xurl="/api/list-databases?connName=mango-dev"
+                url=""
                 required
                 >
               </wc-select>
@@ -4942,7 +4944,8 @@ if (!customElements.get("wc-tabulator")) {
                 class="col-1"
                 lbl-label="Target Collection"
                 value=""
-                url=""
+                xurl="/api/list-databases?connName=mango-dev&dbName=mango_matt"
+                url="/api/list-collections?connName=${this.connectionName}&dbName=${this.databaseName}"
                 required>
               </wc-select>
             `,
@@ -5015,6 +5018,8 @@ if (!customElements.get("wc-tabulator")) {
     ];
     constructor() {
       super();
+      this.connectionName = this.getAttribute("connection-name") || "";
+      this.databaseName = this.getAttribute("database-name") || "";
       this.collectionName = this.getAttribute("collection-name") || "";
       this.table = null;
       this._internals = this.attachInternals();
