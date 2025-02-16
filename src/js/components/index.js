@@ -7,6 +7,7 @@ import './wc-breadcrumb-item.js';
 import './wc-breadcrumb.js';
 import './wc-canvas-dot-highlight.js';
 import './wc-code-mirror.js';
+import './wc-contact-chip.js';
 import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';
