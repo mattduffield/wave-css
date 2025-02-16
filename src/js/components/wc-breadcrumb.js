@@ -72,7 +72,7 @@ if (!customElements.get('wc-breadcrumb')) {
           `);
         } else if ((crumbs.length - 1) == index) {
           markup.push(`
-            <span>
+            <span id="title-content">
               ${item.label}
             </span>            
           `);
