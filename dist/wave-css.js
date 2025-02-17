@@ -827,53 +827,144 @@ var WcAccordion = class extends WcBaseComponent {
 customElements.define("wc-accordion", WcAccordion);
 
 // src/js/components/wc-article-card.js
-var WcArticleCard = class extends HTMLElement {
-  constructor() {
-    super();
-    this.articleData = null;
-  }
-  static get observedAttributes() {
-    return ["url"];
-  }
-  async attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "url" && oldValue !== newValue) {
-      await this.fetchArticleData(newValue);
+if (!customElements.get("wc-article-card")) {
+  class WcArticleCard2 extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["url"];
     }
-  }
-  async fetchArticleData(url) {
-    try {
-      const response = await fetch(`/api/article-metadata?url=${encodeURIComponent(url)}`);
-      this.articleData = await response.json();
-      this.render();
-    } catch (error) {
-      console.error("Error fetching article data:", error);
+    constructor() {
+      super();
+      this.articleData = null;
+      const compEl = this.querySelector(".wc-article-card");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this._createElement();
+        this.appendChild(this.componentElement);
+      }
     }
-  }
-  connectedCallback() {
-    if (this.getAttribute("url")) {
-      this.fetchArticleData(this.getAttribute("url"));
+    async connectedCallback() {
+      super.connectedCallback();
+      if (this.getAttribute("url")) {
+        this.fetchArticleData(this.getAttribute("url"));
+      }
+      this._applyStyle();
     }
-  }
-  render() {
-    if (!this.articleData) return;
-    const { title, description, imageUrl, publishDate, domain } = this.articleData;
-    this.innerHTML = `
-      <div class="wc-article-card">
-        <div class="article-image">
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    // _handleAttributeChange(attrName, newValue) {    
+    //   if (attrName === 'url') {
+    //     await this.fetchArticleData(newValue);
+    //   } else {
+    //     super._handleAttributeChange(attrName, newValue);  
+    //   }
+    // }
+    async attributeChangedCallback(name, oldValue, newValue) {
+      if (name === "url" && oldValue !== newValue) {
+        await this.fetchArticleData(newValue);
+      }
+    }
+    async fetchArticleData(url) {
+      try {
+        const response = await fetch(`/api/article-metadata?url=${encodeURIComponent(url)}`);
+        this.articleData = await response.json();
+        this._createElement();
+      } catch (error) {
+        console.error("Error fetching article data:", error);
+      }
+    }
+    _createElement() {
+      if (!this.articleData) return;
+      const { title, description, imageUrl, publishDate, domain } = this.articleData;
+      this.componentElement.className = "wc-article-card";
+      this.componentElement.innerHTML = `
+        <div class="article-card-image">
           <img src="${imageUrl ? imageUrl : ""}" alt="${title}">
         </div>
-        <div class="article-content">
-          <h2 class="article-title">${title}</h2>
-          <p class="article-description">${description}</p>
-          <div class="article-meta">
-            <span class="article-domain">${domain}</span>
-            <span class="article-date">${new Date(publishDate).toLocaleDateString()}</span>
+        <div class="article-card-content">
+          <h2 class="article-card-title">${title}</h2>
+          <p class="article-card-description">${description}</p>
+          <div class="article-card-meta">
+            <span class="article-card-domain">${domain}</span>
+            <span class="article-card-date">${new Date(publishDate).toLocaleDateString()}</span>
           </div>
         </div>
-      </div>
-    `;
+      `.trim();
+    }
+    _applyStyle() {
+      const style = `
+        wc-article-card {
+          display: contents;
+        }
+        .wc-article-card {
+          background: white;
+          border-radius: var(--card-radius);
+          box-shadow: var(--card-shadow);
+          overflow: hidden;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .wc-article-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .wc-article-card .article-card-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          background: #e5e7eb;
+        }
+
+        .wc-article-card .article-card-content {
+          padding: 16px;
+        }
+
+        .wc-article-card .article-card-title {
+          margin: 0 0 8px 0;
+          font-size: 1.25rem;
+          color: var(--text-color);
+          text-decoration: none;
+        }
+
+        .wc-article-card .article-card-description {
+          margin: 0 0 16px 0;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          color: #6b7280;
+        }
+
+        .wc-article-card .article-card-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.75rem;
+          color: #9ca3af;
+        }
+
+        .wc-article-card .article-card-source {
+          font-weight: 500;
+        }
+
+        .wc-article-card a {
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .wc-article-card a:hover .article-card-title {
+          color: var(--primary-color);
+        }
+      `.trim();
+      this.loadStyle("wc-article-card", style);
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+    }
   }
-};
+}
 customElements.define("wc-article-card", WcArticleCard);
 
 // src/js/components/wc-background-image.js
