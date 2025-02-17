@@ -34,13 +34,13 @@ if (!customElements.get('wc-article-card')) {
       this._unWireEvents();
     }
 
-    // _handleAttributeChange(attrName, newValue) {    
-    //   if (attrName === 'url') {
-    //     await this.fetchArticleData(newValue);
-    //   } else {
-    //     super._handleAttributeChange(attrName, newValue);  
-    //   }
-    // }
+    _handleAttributeChange(attrName, newValue) {    
+      if (attrName === 'url') {
+        // await this.fetchArticleData(newValue);
+      } else {
+        super._handleAttributeChange(attrName, newValue);  
+      }
+    }
 
 
     async attributeChangedCallback(name, oldValue, newValue) {

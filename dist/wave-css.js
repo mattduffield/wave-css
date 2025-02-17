@@ -855,13 +855,12 @@ if (!customElements.get("wc-article-card")) {
       super.disconnectedCallback();
       this._unWireEvents();
     }
-    // _handleAttributeChange(attrName, newValue) {    
-    //   if (attrName === 'url') {
-    //     await this.fetchArticleData(newValue);
-    //   } else {
-    //     super._handleAttributeChange(attrName, newValue);  
-    //   }
-    // }
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === "url") {
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
     async attributeChangedCallback(name, oldValue, newValue) {
       if (name === "url" && oldValue !== newValue) {
         await this.fetchArticleData(newValue);
