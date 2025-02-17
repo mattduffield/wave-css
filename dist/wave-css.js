@@ -827,7 +827,7 @@ var WcAccordion = class extends WcBaseComponent {
 customElements.define("wc-accordion", WcAccordion);
 
 // src/js/components/wc-article-card.js
-var ArticleCard = class extends HTMLElement {
+var WcArticleCard = class extends HTMLElement {
   constructor() {
     super();
     this.articleData = null;
@@ -870,7 +870,7 @@ var ArticleCard = class extends HTMLElement {
     if (!this.articleData) return;
     const { title, description, imageUrl, publishDate, domain } = this.articleData;
     this.innerHTML = `
-          <div class="article-card">
+          <div class="wc-article-card">
               <div class="article-image">
                   <img src="${imageUrl}" alt="${title}" onerror="this.src='placeholder.jpg'">
               </div>
@@ -886,7 +886,7 @@ var ArticleCard = class extends HTMLElement {
       `;
   }
 };
-customElements.define("article-card", ArticleCard);
+customElements.define("wc-article-card", WcArticleCard);
 
 // src/js/components/wc-background-image.js
 var WcBackgroundImage = class extends WcBaseComponent {

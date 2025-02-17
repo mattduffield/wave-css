@@ -1,4 +1,4 @@
-class ArticleCard extends HTMLElement {
+class WcArticleCard extends HTMLElement {
   constructor() {
       super();
       this.articleData = null;
@@ -51,7 +51,7 @@ class ArticleCard extends HTMLElement {
       const { title, description, imageUrl, publishDate, domain } = this.articleData;
       
       this.innerHTML = `
-          <div class="article-card">
+          <div class="wc-article-card">
               <div class="article-image">
                   <img src="${imageUrl}" alt="${title}" onerror="this.src='placeholder.jpg'">
               </div>
@@ -68,4 +68,4 @@ class ArticleCard extends HTMLElement {
   }
 }
 
-customElements.define('article-card', ArticleCard);
+customElements.define('wc-article-card', WcArticleCard);
