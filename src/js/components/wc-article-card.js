@@ -92,37 +92,31 @@ if (!customElements.get('wc-article-card')) {
           overflow: hidden;
           transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .wc-article-card:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
-
         .wc-article-card .article-card-image {
           width: 100%;
           height: 200px;
           object-fit: cover;
           background: #e5e7eb;
         }
-
         .wc-article-card .article-card-content {
           padding: 16px;
         }
-
         .wc-article-card .article-card-title {
           margin: 0 0 8px 0;
           font-size: 1.25rem;
           color: var(--text-color);
           text-decoration: none;
         }
-
         .wc-article-card .article-card-description {
           margin: 0 0 16px 0;
           font-size: 0.875rem;
           line-height: 1.5;
           color: #6b7280;
         }
-
         .wc-article-card .article-card-meta {
           display: flex;
           align-items: center;
@@ -130,16 +124,13 @@ if (!customElements.get('wc-article-card')) {
           font-size: 0.75rem;
           color: #9ca3af;
         }
-
         .wc-article-card .article-card-source {
           font-weight: 500;
         }
-
         .wc-article-card a {
           text-decoration: none;
           color: inherit;
         }
-
         .wc-article-card a:hover .article-card-title {
           color: var(--primary-color);
         }
@@ -151,5 +142,6 @@ if (!customElements.get('wc-article-card')) {
       super._unWireEvents();
     }
   }
+  
+  customElements.define('wc-article-card', WcArticleCard);
 }
-customElements.define('wc-article-card', WcArticleCard);
