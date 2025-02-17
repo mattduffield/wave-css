@@ -2,6 +2,7 @@ export * from './helper-function.js';
 import './wc-base-component.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
+import './wc-article-card.js';
 import './wc-background-image.js';
 import './wc-breadcrumb-item.js';
 import './wc-breadcrumb.js';
