@@ -934,7 +934,8 @@ if (!customElements.get("wc-article-card")) {
           text-decoration: none;
         }
         .wc-article-card a.article-card-title:hover {
-          color: var(--surface-1);
+          /* color: var(--surface-1); */
+          text-shadow: var(--text-3) 1px 0 10px;
         }
         .wc-article-card .article-card-description {
           margin: 0 0 16px 0;
