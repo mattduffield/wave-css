@@ -860,7 +860,7 @@ var WcArticleCard = class extends HTMLElement {
     this.innerHTML = `
       <div class="wc-article-card">
         <div class="article-image">
-          <img src="${imageUrl}" alt="${title}" onerror="this.src='placeholder.jpg'">
+          <img src="${imageUrl ? imageUrl : ""}" alt="${title}">
         </div>
         <div class="article-content">
           <h2 class="article-title">${title}</h2>
