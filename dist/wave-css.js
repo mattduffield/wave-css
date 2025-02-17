@@ -849,7 +849,7 @@ if (!customElements.get("wc-article-card")) {
       if (this.getAttribute("url")) {
         this.fetchArticleData(this.getAttribute("url"));
       }
-      this._applyStyle();
+      await this._applyStyle();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -861,11 +861,11 @@ if (!customElements.get("wc-article-card")) {
         super._handleAttributeChange(attrName, newValue);
       }
     }
-    async attributeChangedCallback(name, oldValue, newValue) {
-      if (name === "url" && oldValue !== newValue) {
-        await this.fetchArticleData(newValue);
-      }
-    }
+    // async attributeChangedCallback(name, oldValue, newValue) {
+    //   if (name === 'url' && oldValue !== newValue) {
+    //     await this.fetchArticleData(newValue);
+    //   }
+    // }
     async fetchArticleData(url) {
       try {
         const response = await fetch(`/api/article-metadata?url=${encodeURIComponent(url)}`);

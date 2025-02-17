@@ -26,7 +26,7 @@ if (!customElements.get('wc-article-card')) {
         this.fetchArticleData(this.getAttribute('url'));
       }
 
-      this._applyStyle();
+      await this._applyStyle();
     }
 
     disconnectedCallback() {
@@ -43,11 +43,11 @@ if (!customElements.get('wc-article-card')) {
     }
 
 
-    async attributeChangedCallback(name, oldValue, newValue) {
-      if (name === 'url' && oldValue !== newValue) {
-        await this.fetchArticleData(newValue);
-      }
-    }
+    // async attributeChangedCallback(name, oldValue, newValue) {
+    //   if (name === 'url' && oldValue !== newValue) {
+    //     await this.fetchArticleData(newValue);
+    //   }
+    // }
 
     async fetchArticleData(url) {
       try {
