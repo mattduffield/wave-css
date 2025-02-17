@@ -878,6 +878,7 @@ if (!customElements.get("wc-article-card")) {
     }
     _createElement() {
       if (!this.articleData) return;
+      const url = this.getAttribute("url");
       const { title, description, imageUrl, publishDate, domain } = this.articleData;
       this.componentElement.className = "wc-article-card";
       this.componentElement.innerHTML = `
@@ -885,7 +886,7 @@ if (!customElements.get("wc-article-card")) {
           <img src="${imageUrl ? imageUrl : ""}" alt="${title}">
         </div>
         <div class="article-card-content">
-          <h2 class="article-card-title">${title}</h2>
+          <a class="article-card-title" href="${url}" target="_blank">${title}</a>
           <p class="article-card-description">${description}</p>
           <div class="article-card-meta">
             <span class="article-card-domain">${domain}</span>
@@ -925,6 +926,9 @@ if (!customElements.get("wc-article-card")) {
           color: var(--text-1);
           text-decoration: none;
         }
+        .wc-article-card a.article-card-title:hover {
+          color: var(--surface-1);
+        }
         .wc-article-card .article-card-description {
           margin: 0 0 16px 0;
           font-size: 0.875rem;
@@ -940,13 +944,6 @@ if (!customElements.get("wc-article-card")) {
         }
         .wc-article-card .article-card-source {
           font-weight: 500;
-        }
-        .wc-article-card a {
-          text-decoration: none;
-          color: inherit;
-        }
-        .wc-article-card a:hover .article-card-title {
-          color: var(--surface-1);
         }
       `.trim();
       this.loadStyle("wc-article-card", style);
