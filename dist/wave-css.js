@@ -899,6 +899,14 @@ if (!customElements.get("wc-article-card")) {
         wc-article-card {
           display: contents;
         }
+        .articles-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+          padding: 20px;
+        }
         .wc-article-card {
           background-color: var(--primary-bg-color);
           color: var(--primary-color);
