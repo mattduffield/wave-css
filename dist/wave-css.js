@@ -830,11 +830,19 @@ customElements.define("wc-accordion", WcAccordion);
 if (!customElements.get("wc-article-card")) {
   class WcArticleCard extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "url"];
+      return ["id", "class", "url", "img-url", "article-type"];
     }
     constructor() {
       super();
+      this.imgUrl = "";
+      this.articleTypes = {
+        "news": "https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO",
+        "technology": "https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO",
+        "css": "https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO",
+        "programming": "https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO"
+      };
       this.articleData = null;
+      this.articleType = "news";
       const compEl = this.querySelector(".wc-article-card");
       if (compEl) {
         this.componentElement = compEl;
@@ -858,6 +866,10 @@ if (!customElements.get("wc-article-card")) {
     }
     _handleAttributeChange(attrName, newValue) {
       if (attrName === "url") {
+      } else if (attrName === "img-url") {
+        this.imgUrl = newValue;
+      } else if (attrName === "article-type") {
+        this.imgUrl = this.articleTypes[newValue] || this.articleTypes["news"];
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -879,7 +891,10 @@ if (!customElements.get("wc-article-card")) {
     _createElement() {
       if (!this.articleData) return;
       const url = this.getAttribute("url");
-      const { title, description, imageUrl, publishDate, domain } = this.articleData;
+      let { title, description, imageUrl, publishDate, domain } = this.articleData;
+      if (this.imgUrl) {
+        imageUrl = this.imgUrl;
+      }
       this.componentElement.innerHTML = `
         <div class="article-card-image">
           <img src="${imageUrl ? imageUrl : ""}" alt="${title}">
