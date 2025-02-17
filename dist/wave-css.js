@@ -840,6 +840,7 @@ if (!customElements.get("wc-article-card")) {
         this.componentElement = compEl;
       } else {
         this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-article-card");
         this._createElement();
         this.appendChild(this.componentElement);
       }
@@ -879,7 +880,6 @@ if (!customElements.get("wc-article-card")) {
       if (!this.articleData) return;
       const url = this.getAttribute("url");
       const { title, description, imageUrl, publishDate, domain } = this.articleData;
-      this.componentElement.className = "wc-article-card";
       this.componentElement.innerHTML = `
         <div class="article-card-image">
           <img src="${imageUrl ? imageUrl : ""}" alt="${title}">
