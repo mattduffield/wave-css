@@ -10,10 +10,10 @@ if (!customElements.get('wc-article-card')) {
       super();
       this.imgUrl = '';
       this.articleTypes = {
-        'news': 'https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO',
-        'technology': 'https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO',
-        'css': 'https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO',
-        'programming': 'https://miro.medium.com/v2/da:true/resize:fit:1200/0*1YrO9YLbwHnzExsO'
+        'news': 'https://images.pexels.com/photos/1755683/pexels-photo-1755683.jpeg?auto=compress&cs=tinysrgb&w=400',
+        'technology': 'https://miro.medium.com/v2/da:true/resize:fit:400/0*1YrO9YLbwHnzExsO',
+        'css': 'https://images.pexels.com/photos/2653362/pexels-photo-2653362.jpeg?auto=compress&cs=tinysrgb&w=400',
+        'programming': 'https://images.pexels.com/photos/6424591/pexels-photo-6424591.jpeg?auto=compress&cs=tinysrgb&w=400'
       };
       this.articleData = null;
       this.articleType = 'news';
