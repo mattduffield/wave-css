@@ -5411,6 +5411,7 @@ if (!customElements.get("wc-tabulator")) {
       const movableRows = this.getAttribute("movable-rows");
       const rowHeader = this.getAttribute("row-header");
       const rowHeight = this.getAttribute("row-height");
+      const rowFormatter = this.getAttribute("row-formatter");
       const resizableRows = this.getAttribute("resizable-rows");
       const resizableRowGuide = this.getAttribute("resizable-row-guide");
       const frozenRows = this.getAttribute("frozen-rows");
@@ -5468,6 +5469,7 @@ if (!customElements.get("wc-tabulator")) {
           options.rowHeader = rowHeaderObj;
         }
       }
+      if (rowFormatter) options.rowFormatter = this.resolveRowFormatter(rowFormatter);
       if (rowHeight) options.rowHeight = parseInt(rowHeight);
       if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == "true" ? true : false;
       if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == "true" ? true : false;
@@ -5681,6 +5683,25 @@ if (!customElements.get("wc-tabulator")) {
         columns.push(column);
       });
       return columns;
+    }
+    resolveRowFormatter(formatter) {
+      try {
+        if (formatter) {
+          if (formatter.startsWith("function")) {
+            const val = new Function("row", `return (${formatter})(row);`);
+            return val;
+          } else if (this[formatter]) {
+            return this[formatter].bind(this);
+          } else if (window[formatter]) {
+            return window[formatter];
+          } else {
+            return formatter;
+          }
+        }
+      } catch (error) {
+        console.error(`Error resolving row formatter: ${error.message}`);
+        return null;
+      }
     }
     resolveFunc(func) {
       try {
