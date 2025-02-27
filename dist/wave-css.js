@@ -5634,6 +5634,13 @@ if (!customElements.get("wc-tabulator")) {
         if (maxInitialWidth) column.maxInitialWidth = maxInitialWidth;
         if (resizable) column.resizable = resizable.toLowerCase() == "true" ? true : false;
         if (editable) column.editable = editable.toLowerCase() == "true" ? true : false;
+        if (editable) {
+          if (editable.toLowerCase() == "true" || editable.toLowerCase() == "false") {
+            column.editable = editable.toLowerCase() == "true" ? true : false;
+          } else {
+            column.editable = this.resolveFunc(editable);
+          }
+        }
         if (frozen) column.frozen = frozen.toLowerCase() == "true" ? true : false;
         if (responsive) column.responsive = parseInt(responsive);
         if (tooltip) column.tooltip = tooltip;
@@ -5722,6 +5729,8 @@ if (!customElements.get("wc-tabulator")) {
     resolveFunc(func) {
       try {
         if (func.startsWith("function")) {
+          return new Function(`return (${func})`)();
+        } else if (func.includes("=>")) {
           return new Function(`return (${func})`)();
         } else if (this[func]) {
           return this[func];
