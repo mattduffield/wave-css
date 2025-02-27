@@ -5543,7 +5543,7 @@ if (!customElements.get("wc-tabulator")) {
           htmx.process(this);
         }
       });
-      if (this.cellEdited) {
+      if ("onCellEdited" in this.funcs) {
         this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));
       }
       if (this.rowClick) {

@@ -399,10 +399,13 @@ if (!customElements.get('wc-tabulator')) {
           htmx.process(this);
         }
       });
-      if (this.cellEdited) {
-        // this.table.on("cellEdited", this.cellEdited.bind(this));  
+      // if (this.cellEdited) {
+      //   this.table.on("cellEdited", this.cellEdited.bind(this));  
+      // }
+      if ("onCellEdited" in this.funcs) {
         this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));  
       }
+
       if (this.rowClick) {
         this.table.on("rowClick", this.rowClick.bind(this));  
       }
