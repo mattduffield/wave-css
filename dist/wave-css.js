@@ -5242,8 +5242,11 @@ if (!customElements.get("wc-tabulator")) {
       {
         label: this.createMenuLabel("Edit Email", this.icons.listCheck),
         action: (e, row) => {
+          const table = row.getTable();
+          table.allowEdit = true;
           const cell = row.getCell("email");
           cell.edit();
+          table.allowEdit = true;
         }
       },
       {
@@ -5533,6 +5536,9 @@ if (!customElements.get("wc-tabulator")) {
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
         console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");
+        if ("onInit" in this.funcs) {
+          this.funcs["onInit"](this.table);
+        }
         wc.EventHub.broadcast("wc-tabulator:ready", [], "");
         if (typeof htmx !== "undefined") {
           await sleep(1e3);
