@@ -5512,7 +5512,7 @@ if (!customElements.get("wc-tabulator")) {
         this.initialSort = options.initialSort;
       }
       if (cellEdited) {
-        options.cellEdited = this.resolveCellFormatter(cellEdited);
+        options.cellEdited = this.resolveFunc(cellEdited);
       }
       if (rowClick) {
         this.rowClick = this.resolveFunc(rowClick);
