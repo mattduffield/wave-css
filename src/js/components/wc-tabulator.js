@@ -398,6 +398,9 @@ if (!customElements.get('wc-tabulator')) {
       if ("onCellEdited" in this.funcs) {
         this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));  
       }
+      if ("onCellDblClick" in this.funcs) {
+        this.table.on("cellDblClick", this.funcs["onCellDblClick"].bind(this));  
+      }
 
       if (this.rowClick) {
         this.table.on("rowClick", this.rowClick.bind(this));  
