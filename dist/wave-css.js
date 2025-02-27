@@ -5438,6 +5438,7 @@ if (!customElements.get("wc-tabulator")) {
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
       const rowDeselected = this.getAttribute("row-deselected");
+      const cellEdited = this.getAttribute("cell-edited");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -5518,6 +5519,9 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (rowDeselected) {
         this.rowDeselected = this.resolveFunc(rowDeselected);
+      }
+      if (cellEdited) {
+        this.cellEdited = this.resolveFunc(cellEdited);
       }
       await this.renderTabulator(options);
     }
