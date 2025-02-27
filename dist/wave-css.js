@@ -5240,6 +5240,16 @@ if (!customElements.get("wc-tabulator")) {
     funcs = {};
     rowMenu = [
       {
+        label: this.createMenuLabel("Edit Email", this.icons.listCheck),
+        action: (e, row) => {
+          const cell = row.getCell("email");
+          cell.edit();
+        }
+      },
+      {
+        separator: true
+      },
+      {
         label: this.createMenuLabel("Select All Rows", this.icons.listCheck),
         action: (e, row) => {
           const table = row.getTable();
