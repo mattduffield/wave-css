@@ -77,7 +77,9 @@ if (!customElements.get('wc-tabulator')) {
           table.allowEdit = true;
           const cell = row.getCell("email");
           cell.edit();
-          table.allowEdit = true;
+          setTimeout(() => { 
+            table.allowEdit = false;
+          }, 500);
         }
       },
       {
