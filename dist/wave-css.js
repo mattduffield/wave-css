@@ -5521,7 +5521,7 @@ if (!customElements.get("wc-tabulator")) {
         this.rowDeselected = this.resolveFunc(rowDeselected);
       }
       if (cellEdited) {
-        this.cellEdited = this.resolveFunc(cellEdited);
+        this.cellEdited = this.resolveCellFormatter(cellEdited);
       }
       await this.renderTabulator(options);
     }
