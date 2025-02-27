@@ -286,7 +286,6 @@ if (!customElements.get('wc-tabulator')) {
       const rowClick = this.getAttribute('row-click');
       const rowSelected = this.getAttribute('row-selected');
       const rowDeselected = this.getAttribute('row-deselected');
-      const cellEdited = this.getAttribute('cell-edited');
 
       // Process any column field formatters.
       if (colFieldFormatter) {
@@ -371,9 +370,6 @@ if (!customElements.get('wc-tabulator')) {
       if (rowDeselected) {
         this.rowDeselected = this.resolveFunc(rowDeselected);
       }
-      if (cellEdited) {
-        this.cellEdited = this.resolveFunc(cellEdited);
-      }
 
       await this.renderTabulator(options);
     }
@@ -399,9 +395,6 @@ if (!customElements.get('wc-tabulator')) {
           htmx.process(this);
         }
       });
-      // if (this.cellEdited) {
-      //   this.table.on("cellEdited", this.cellEdited.bind(this));  
-      // }
       if ("onCellEdited" in this.funcs) {
         this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));  
       }
