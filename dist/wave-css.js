@@ -5435,10 +5435,10 @@ if (!customElements.get("wc-tabulator")) {
       const groupBy = this.getAttribute("group-by");
       const initialFilter = this.getAttribute("initial-filter");
       const initialSort = this.getAttribute("initial-sort");
+      const cellEdited = this.getAttribute("cell-edited");
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
       const rowDeselected = this.getAttribute("row-deselected");
-      const cellEdited = this.getAttribute("cell-edited");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -5511,6 +5511,9 @@ if (!customElements.get("wc-tabulator")) {
         options.initialSort = JSON.parse(initialSort);
         this.initialSort = options.initialSort;
       }
+      if (cellEdited) {
+        options.cellEdited = this.resolveCellFormatter(cellEdited);
+      }
       if (rowClick) {
         this.rowClick = this.resolveFunc(rowClick);
       }
@@ -5519,9 +5522,6 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (rowDeselected) {
         this.rowDeselected = this.resolveFunc(rowDeselected);
-      }
-      if (cellEdited) {
-        this.cellEdited = this.resolveCellFormatter(cellEdited);
       }
       await this.renderTabulator(options);
     }
