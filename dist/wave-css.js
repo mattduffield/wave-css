@@ -5544,7 +5544,7 @@ if (!customElements.get("wc-tabulator")) {
         }
       });
       if (this.cellEdited) {
-        this.table.on("cellEdited", this.cellEdited.bind(this));
+        this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));
       }
       if (this.rowClick) {
         this.table.on("rowClick", this.rowClick.bind(this));
