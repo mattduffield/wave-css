@@ -5244,13 +5244,11 @@ if (!customElements.get("wc-tabulator")) {
         action: (e, row) => {
           const table = row.getTable();
           table.allowEdit = true;
+          const cell = row.getCell("email");
+          cell.edit();
           setTimeout(() => {
-            const cell = row.getCell("email");
-            cell.edit();
-            setTimeout(() => {
-              table.allowEdit = false;
-            }, 500);
-          }, 250);
+            table.allowEdit = false;
+          }, 500);
         }
       },
       {
