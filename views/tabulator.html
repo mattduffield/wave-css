@@ -170,10 +170,31 @@
       group-by="description"
       xresponsive-layout="collapse"
       >
+      <wc-tabulator-row-menu order=0 label="Edit Email" icon="listCheck">
+        (e, row) => {
+          const table = row.getTable();
+          table.allowEdit = true;
+          const cell = row.getCell("email");
+          cell.edit();
+          setTimeout(() => { 
+            table.allowEdit = false;
+          }, 500);
+        }
+      </wc-tabulator-row-menu>
+      <wc-tabulator-row-menu order=1 separator="true">
+      </wc-tabulator-row-menu>
+      <wc-tabulator-func name="onInit"
+        value="(table) => {
+                console.log('on init...');
+                table.allowEdit = false;
+                }">
+      </wc-tabulator-func>      
       <wc-tabulator-func name="onDelete"
-          value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }" />
+          value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }">
+      </wc-tabulator-func>
       <wc-tabulator-func name="onClone"
-          value="(result) => { console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'}); }" />
+          value="(result) => { console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'}); }">
+      </wc-tabulator-func>
       <wc-tabulator-column
         title="Actions"
         formatter="rowSelection"
@@ -256,9 +277,10 @@
       <wc-tabulator-column
         field="email"
         title="Email"
+        editor="input"
         header-filter="input"
         header-menu="headerMenu"
-        visible="false"
+        visible="true"
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="phone"

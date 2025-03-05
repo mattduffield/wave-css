@@ -27,6 +27,7 @@ import './wc-tab-item.js';
 import './wc-tab.js';
 import './wc-tabulator-column.js';
 import './wc-tabulator-func.js';
+import './wc-tabulator-row-menu.js';
 import './wc-tabulator.js';
 import './wc-template-preview.js';
 import './wc-theme-selector.js';
