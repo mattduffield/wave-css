@@ -5181,6 +5181,19 @@ if (!customElements.get("wc-tabulator-func")) {
   customElements.define("wc-tabulator-func", WcTabulatorFunc);
 }
 
+// src/js/components/wc-tabulator-row-menu.js
+if (!customElements.get("wc-tabulator-row-menu")) {
+  class WcTabulatorRowMenu extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+    }
+  }
+  customElements.define("wc-tabulator-row-menu", WcTabulatorRowMenu);
+}
+
 // src/js/components/wc-tabulator.js
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
@@ -5238,22 +5251,23 @@ if (!customElements.get("wc-tabulator")) {
       }
     };
     funcs = {};
+    rowMenus = [];
     rowMenu = [
-      {
-        label: this.createMenuLabel("Edit Email", this.icons.listCheck),
-        action: (e, row) => {
-          const table = row.getTable();
-          table.allowEdit = true;
-          const cell = row.getCell("email");
-          cell.edit();
-          setTimeout(() => {
-            table.allowEdit = false;
-          }, 500);
-        }
-      },
-      {
-        separator: true
-      },
+      // {
+      //   label: this.createMenuLabel('Edit Email', this.icons.listCheck),
+      //   action: (e, row) => {
+      //     const table = row.getTable();
+      //     table.allowEdit = true;
+      //     const cell = row.getCell("email");
+      //     cell.edit();
+      //     setTimeout(() => { 
+      //       table.allowEdit = false;
+      //     }, 500);
+      //   }
+      // },
+      // {
+      //   separator:true,
+      // },
       {
         label: this.createMenuLabel("Select All Rows", this.icons.listCheck),
         action: (e, row) => {
@@ -5451,6 +5465,7 @@ if (!customElements.get("wc-tabulator")) {
         this.colFieldFormatter = obj;
       }
       this.getFuncs();
+      this.getRowMenu();
       const options = {
         columns: this.getColumnsConfig(),
         layout: this.getAttribute("layout") || "fitData",
@@ -5585,6 +5600,39 @@ if (!customElements.get("wc-tabulator")) {
         const func = el.getAttribute("value");
         const value = new Function(`return (${func})`)();
         this.funcs[name] = value;
+      });
+    }
+    getRowMenu() {
+      const rowMenuElements = this.querySelectorAll("wc-tabulator-row-menu");
+      rowMenuElements.forEach((el) => {
+        const order = el.getAttribute("order");
+        const isSeparator = el.hasAttribute("separator");
+        let mnu = {};
+        if (isSeparator) {
+          mnu = {
+            separator: true,
+            order
+          };
+        } else {
+          const label = el.getAttribute("label");
+          const icon = el.getAttribute("icon");
+          const func = el.textContent;
+          const value = new Function(`return (${func})`)();
+          mnu = {
+            label: this.createMenuLabel(label, this.icons[icon]),
+            action: value,
+            order
+          };
+        }
+        el.innerHTML = "";
+        this.rowMenus.push(mnu);
+      });
+      this.rowMenus.forEach((menu) => {
+        if (menu.order !== null && !isNaN(menu.order) && menu.order >= 0) {
+          this.rowMenu.splice(menu.order, 0, menu);
+        } else {
+          this.rowMenu.push(menu);
+        }
       });
     }
     getColumnsConfig() {
