@@ -71,21 +71,6 @@ if (!customElements.get('wc-tabulator')) {
     funcs = {};
     rowMenus = [];
     rowMenu = [
-      // {
-      //   label: this.createMenuLabel('Edit Email', this.icons.listCheck),
-      //   action: (e, row) => {
-      //     const table = row.getTable();
-      //     table.allowEdit = true;
-      //     const cell = row.getCell("email");
-      //     cell.edit();
-      //     setTimeout(() => { 
-      //       table.allowEdit = false;
-      //     }, 500);
-      //   }
-      // },
-      // {
-      //   separator:true,
-      // },
       {
         label: this.createMenuLabel('Select All Rows', this.icons.listCheck),
         action: (e, row) => {
@@ -453,9 +438,11 @@ if (!customElements.get('wc-tabulator')) {
       const funcElements = this.querySelectorAll('wc-tabulator-func');
       funcElements.forEach((el) => {
         const name = el.getAttribute('name');
-        const func = el.getAttribute('value');
+        // const func = el.getAttribute('value');
+        const func = el.textContent;
         const value = new Function(`return (${func})`)(); // Inline function
         this.funcs[name] = value;
+        el.innerHTML = "";
       });
     }
 
