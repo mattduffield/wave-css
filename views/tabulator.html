@@ -183,17 +183,21 @@
       </wc-tabulator-row-menu>
       <wc-tabulator-row-menu order=1 separator="true">
       </wc-tabulator-row-menu>
-      <wc-tabulator-func name="onInit"
-        value="(table) => {
-                console.log('on init...');
-                table.allowEdit = false;
-                }">
-      </wc-tabulator-func>      
-      <wc-tabulator-func name="onDelete"
-          value="(result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }">
+      <wc-tabulator-func name="onInit">
+        (table) => {
+          console.log('on init...');
+          table.allowEdit = false;
+        }
       </wc-tabulator-func>
-      <wc-tabulator-func name="onClone"
-          value="(result) => { console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'}); }">
+      <wc-tabulator-func name="onDelete">
+        (result) => {
+          wc.Prompt.toast({title: 'Delete successful!', type: 'success'});
+        }
+      </wc-tabulator-func>
+      <wc-tabulator-func name="onClone">
+        (result) => {
+          console.log('Clone result: ', result); wc.Prompt.toast({title: 'Clone successful!', type: 'success'});
+        }
       </wc-tabulator-func>
       <wc-tabulator-column
         title="Actions"

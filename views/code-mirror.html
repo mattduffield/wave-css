@@ -34,5 +34,35 @@ def to_float_format(value, expr=',.2f', *args, **kwargs):
         value = str(value)
     result = format(float(value), expr)
     return result</wc-code-mirror>
+  <wc-code-mirror
+    name="html-custom"
+    lbl-label="HTML Custom Editor"
+    line-numbers
+    line-wrapper
+    fold-gutter
+    mode="htmlmixed"
+    theme="monokai"
+    tab-size="2"
+    indent-unit="2">
+<div>
+  <wc-tabulator-row-menu order=0 label="Edit Email" icon="listCheck">
+    (e, row) => {
+      const table = row.getTable();
+      table.allowEdit = true;
+      const cell = row.getCell("email");
+      cell.edit();
+      setTimeout(() => { 
+      table.allowEdit = false;
+      }, 500);
+    }
+  </wc-tabulator-row-menu>
+  <wc-tabulator-func name="onInit">
+    (table) => {
+      console.log('on init...');
+      table.allowEdit = false;
+    }
+  </wc-tabulator-func>
+</div>
+  </wc-code-mirror>
 
 </div>
