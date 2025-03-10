@@ -1490,7 +1490,7 @@ if (!customElements.get("wc-code-mirror")) {
       this._internals = this.attachInternals();
       this.firstContent = "";
       if (this.innerHTML.trim() != "") {
-        this.firstContent = this.innerHTML;
+        this.firstContent = this.innerHTML.replaceAll("=&gt;", "=>");
         this.innerHTML = "";
       } else if (this.firstChild && this.firstChild.nodeName == "#text") {
         this.firstContent = this.firstChild.textContent;
@@ -2259,7 +2259,7 @@ if (!customElements.get("wc-code-mirror")) {
       existingMarks.forEach((mark) => mark.clear());
       const jsLines = jsContent.split("\n");
       const patterns = [
-        { pattern: /\b(function|var|let|const|return|if|else|for|while|switch|case|break|continue|this|new|typeof|instanceof|class)\b/g, className: "cm-js-keyword" },
+        { pattern: /\b(function|var|let|const|return|if|else|for|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await)\b/g, className: "cm-js-keyword" },
         { pattern: /\b(true|false|null|undefined)\b/g, className: "cm-js-atom" },
         { pattern: /\b\d+(\.\d+)?\b/g, className: "cm-js-number" },
         { pattern: /(["'`])(?:[^\\]|\\.)*?\1/g, className: "cm-js-string" },
@@ -2267,7 +2267,7 @@ if (!customElements.get("wc-code-mirror")) {
         // Arrow functions
         { pattern: /=>/g, className: "cm-js-keyword" },
         // Function/property access
-        { pattern: /\.\w+/g, className: "cm-js-property" }
+        { pattern: /\b\.[A-Za-z]+/g, className: "cm-js-property" }
       ];
       jsLines.forEach((line, lineIndex) => {
         doc.markText(

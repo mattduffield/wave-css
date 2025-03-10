@@ -1,39 +1,25 @@
 <div id="page-contents" class="col p-4 gap-4">
-
-  <wc-code-mirror
-    height="calc(100vh - 360px)"
-    name="code"
+<wc-code-mirror
+    name="js-custom"
+    lbl-label="JS Custom Editor"
     line-numbers
     line-wrapper
     fold-gutter
     mode="javascript"
     theme="monokai"
-    value="class Customer { }"
     tab-size="2"
-    indent-unit="2"></wc-code-mirror>
-  <wc-code-mirror
-    name="python"
-    lbl-label="Python Editor"
-    required
-    line-numbers
-    line-wrapper
-    fold-gutter
-    mode="python"
-    theme="monokai"
-    tab-size="4"
-    indent-unit="4">def to_number_format(value, *args, **kwargs):
-    if not value:
-        return value
-    return format(int(value), ',')
-
-
-def to_float_format(value, expr=',.2f', *args, **kwargs):
-    if not value:
-        return value
-    if isinstance(value, object):
-        value = str(value)
-    result = format(float(value), expr)
-    return result</wc-code-mirror>
+    indent-unit="2">
+(async () => {
+  async function run() {
+    document.body.addEventListener('wc-tabulator:ready', async (e) => {
+      await WaveHelpers.waitForThenHideAndShow('#table-skeleton', '.page-content', 3000, 500);
+    });
+  }
+  window.wc.scripts["wc-javascript-contact_list_table"] = run;
+  run();
+})();
+  </wc-code-mirror>
+  
   <wc-code-mirror
     name="html-custom"
     lbl-label="HTML Custom Editor"
@@ -45,24 +31,17 @@ def to_float_format(value, expr=',.2f', *args, **kwargs):
     tab-size="2"
     indent-unit="2">
 <div>
-  <wc-tabulator-row-menu order=0 label="Edit Email" icon="listCheck">
-    (e, row) => {
-      const table = row.getTable();
-      table.allowEdit = true;
-      const cell = row.getCell("email");
-      cell.edit();
-      setTimeout(() => { 
-      table.allowEdit = false;
-      }, 500);
-    }
-  </wc-tabulator-row-menu>
-  <wc-tabulator-func name="onInit">
-    (table) => {
-      console.log('on init...');
-      table.allowEdit = false;
-    }
-  </wc-tabulator-func>
+  <wc-javascript id="contact_list_table" class="hidden">
+    (async () => {
+      async function run() {
+        document.body.addEventListener('wc-tabulator:ready', async (e) => {
+          await WaveHelpers.waitForThenHideAndShow('#table-skeleton', '.page-content', 3000, 500);
+        });
+      }
+      window.wc.scripts["wc-javascript-contact_list_table"] = run;
+      run();
+    })();
+  </wc-javascript>
 </div>
   </wc-code-mirror>
-
 </div>
