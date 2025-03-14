@@ -765,7 +765,7 @@ if (!customElements.get('wc-code-mirror')) {
       
       // Use simple regex patterns to identify JavaScript tokens
       const patterns = [
-        { pattern: /\b(function|var|let|const|return|if|else|endif|for|endfor|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await)\b/g, className: 'cm-js-keyword' },
+        { pattern: /\b(function|var|let|const|return|if|else|endif|for|endfor|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await|in)\b/g, className: 'cm-js-keyword' },
         { pattern: /\b(true|false|null|undefined)\b/g, className: 'cm-js-atom' },
         { pattern: /\b\d+(\.\d+)?\b/g, className: 'cm-js-number' },
         { pattern: /(["'`])(?:[^\\]|\\.)*?\1/g, className: 'cm-js-string' },
