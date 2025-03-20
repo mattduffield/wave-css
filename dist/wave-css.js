@@ -9456,8 +9456,11 @@ var WcSelect = class extends WcBaseFormComponent {
     setTimeout(() => {
       if (allowDynamic) {
         const selectElement = this.querySelector("select");
-        const newOption = new Option(label, value);
-        selectElement.add(newOption);
+        let exists = Array.from(selectElement.options).some((option) => option.value === value);
+        if (!exists) {
+          const newOption = new Option(label, value);
+          selectElement.add(newOption);
+        }
       }
       this.selectedOptions.push(value);
       this.updateSelect();
