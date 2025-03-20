@@ -9400,6 +9400,7 @@ var WcSelect = class extends WcBaseFormComponent {
   handleKeyboardNavigation(e) {
     const optionsContainer = this.querySelector("#optionsContainer");
     const options = Array.from(optionsContainer.querySelectorAll(".option")).filter((option) => option.style.display !== "none");
+    const allowDynamic = this.hasAttribute("allow-dynamic");
     if (e.key === "ArrowDown") {
       e.preventDefault();
       this.highlightedIndex = (this.highlightedIndex + 1) % options.length;
@@ -9412,6 +9413,11 @@ var WcSelect = class extends WcBaseFormComponent {
       e.preventDefault();
       const highlightedOption = options[this.highlightedIndex];
       this.addChip(highlightedOption.getAttribute("data-value"), highlightedOption.textContent);
+      this.resetDropdown();
+    } else if (e.key === "Enter" && allowDynamic) {
+      e.preventDefault();
+      const value = e.target.value;
+      this.addChip(value, value);
       this.resetDropdown();
     } else if (e.key === "Escape") {
       this.resetDropdown();
