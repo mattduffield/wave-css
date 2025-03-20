@@ -446,9 +446,15 @@ class WcSelect extends WcBaseFormComponent {
   }
 
   addChip(value, label) {
+    const allowDynamic = this.hasAttribute('allow-dynamic');
     if (this.selectedOptions.includes(value)) return;
 
     setTimeout(() => {
+      if (allowDynamic) {
+        const selectElement = this.querySelector('select');
+        const newOption = new Option(label, value);
+        selectElement.add(newOption);
+      }
       this.selectedOptions.push(value);
       this.updateSelect();
       this.updateChips();
