@@ -78,14 +78,16 @@ export class WcBaseComponent extends HTMLElement {
         fe.setAttribute('class', newValue);
       }
     } else if (attrName === 'class') {
-      const cls = newValue.replace('contents', '');
-      const parts = cls.split(' ');
-      parts.forEach(part => {
-        if (part) {
-          this.componentElement.classList.add(part);
-          this.classList.remove(part);
-        }
-      })
+      if (newValue) {
+        const cls = newValue.replace('contents', '');
+        const parts = cls.split(' ');
+        parts.forEach(part => {
+          if (part) {
+            this.componentElement.classList.add(part);
+            this.classList.remove(part);
+          }
+        });  
+      }
     } else {
       this.componentElement.setAttribute(attrName, newValue);
     }
