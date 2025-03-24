@@ -22,6 +22,10 @@ if (!customElements.get('wc-article-skeleton')) {
       super.connectedCallback();
 
       this._applyStyle();
+
+      const payload = { detail: {} };
+      const custom = new CustomEvent('load', payload);
+      this.dispatchEvent(custom);
     }
 
     disconnectedCallback() {
