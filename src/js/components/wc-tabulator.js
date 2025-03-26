@@ -1046,12 +1046,12 @@ if (!customElements.get('wc-tabulator')) {
       // For example, adapting to a specific API format
       const {results} = response;
       if (this.hasAttribute('pagination')) {
-        const {data, last_page} = response;
+        const {data, last_page, last_row} = response;
         if (data == null && last_page === 0) {
-          return {last_page: 0, data: []};  
+          return {last_page: 0, last_row: 0, data: []};  
         }
-        else if (data && last_page) {
-          return {last_page, data};  
+        else if (data && last_page && last_row) {
+          return {last_page, last_row, data};  
         } else {
           return {last_page: 10, data: results};
         }  
