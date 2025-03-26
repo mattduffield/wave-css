@@ -2350,6 +2350,10 @@
     text-transform: lowercase;
   }
 
+  .underline {
+    text-decoration: underline;
+  }
+
   .overflow-auto {
     overflow: auto;
   }
