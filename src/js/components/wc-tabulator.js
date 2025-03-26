@@ -383,6 +383,7 @@ if (!customElements.get('wc-tabulator')) {
           this.funcs["onInit"](this.table);
         }  
         wc.EventHub.broadcast('wc-tabulator:ready', [], '');
+        wc.EventHub.broadcast('wc-tabulator-ready', [], '');
         if (typeof htmx !== 'undefined') {
           await sleep(1000);
           htmx.process(this);
