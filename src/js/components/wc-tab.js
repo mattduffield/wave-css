@@ -125,7 +125,7 @@ class WcTab extends WcBaseComponent {
     setTimeout(() => {
       const hashParts = location.hash.slice(1).split('+');
       hashParts.forEach(part => {
-        const btn = this.querySelector(`button[data-label="${part}"]`);
+        const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
         btn?.click();  
       });
     }, 100);
