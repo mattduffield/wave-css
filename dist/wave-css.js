@@ -5685,6 +5685,11 @@ if (!customElements.get("wc-tabulator")) {
       if (this.rowDeselected) {
         this.table.on("rowDeselected", this.rowDeselected.bind(this));
       }
+      this.table.on("pageLoaded", function(pageno) {
+        if (typeof htmx !== "undefined") {
+          htmx.process(this);
+        }
+      });
       this.table.on("dataFiltering", (filters) => {
         if (!this.table.headerFiltersInitialized) {
           this.table.headerFiltersInitialized = true;
