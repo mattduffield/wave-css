@@ -746,7 +746,7 @@ if (!customElements.get('wc-tabulator')) {
       }
 
       // Set the link text - either using labelField or the value itself
-      link.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
 
       // If custom attributes are specified, add them to the link
       if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {

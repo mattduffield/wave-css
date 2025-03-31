@@ -13,12 +13,12 @@ function loadCSS(url) {
       resolve();
       return;
     }
-    const link2 = document.createElement("link");
-    link2.rel = "stylesheet";
-    link2.href = url;
-    link2.onload = () => resolve();
-    link2.onerror = (error) => reject(error);
-    document.head.appendChild(link2);
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url;
+    link.onload = () => resolve();
+    link.onerror = (error) => reject(error);
+    document.head.appendChild(link);
     const checkCSSLoaded = setInterval(() => {
       if (getComputedStyle(document.body).getPropertyValue("display")) {
         clearInterval(checkCSSLoaded);
@@ -95,12 +95,12 @@ function loadStylesheet(href) {
       resolve();
       return;
     }
-    const link2 = document.createElement("link");
-    link2.rel = "stylesheet";
-    link2.href = href;
-    link2.onload = resolve;
-    link2.onerror = reject;
-    document.head.appendChild(link2);
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
   });
 }
 function locator(root, selector) {
@@ -151,9 +151,9 @@ function waitForSelectorPolling(selector, timeout = 3e3, interval = 100) {
     checkVisibility();
   });
 }
-function checkResources(link2, script) {
+function checkResources(link, script) {
   let result = false;
-  result = wc.linksLoaded[link2] && wc.scriptsLoaded[script];
+  result = wc.linksLoaded[link] && wc.scriptsLoaded[script];
   return result;
 }
 function waitForResourcePolling(scriptDependencies = [], linkDependencies = [], timeout = 5e3, interval = 100) {
@@ -1214,8 +1214,8 @@ if (!customElements.get("wc-breadcrumb")) {
       const els = this.querySelectorAll("wc-breadcrumb-item");
       Array.from(els).forEach((item) => {
         const label = item.getAttribute("label") || "";
-        const link2 = item.getAttribute("link") || "";
-        result.push({ label, link: link2 });
+        const link = item.getAttribute("link") || "";
+        result.push({ label, link });
       });
       return result;
     }
@@ -3436,7 +3436,7 @@ var WcMenu = class extends WcBaseComponent {
     const innerEl = this.querySelector(".wc-menu > *");
     if (innerEl) {
       const links = this.querySelectorAll(".menu-link");
-      links.forEach((link2) => link2.addEventListener("click", this._handleClick.bind(this)));
+      links.forEach((link) => link.addEventListener("click", this._handleClick.bind(this)));
       const menuIcon = this.querySelector(".menu-toggle");
       menuIcon.addEventListener("click", this._handleMenuToggle.bind(this));
       this._setActiveLink();
@@ -3458,8 +3458,8 @@ var WcMenu = class extends WcBaseComponent {
       menuDiv.classList.add("flex-wrap");
     }
     this._items.forEach((item) => {
-      const link2 = this._createAnchor(item.name, item.label, item.selected);
-      menuDiv.appendChild(link2);
+      const link = this._createAnchor(item.name, item.label, item.selected);
+      menuDiv.appendChild(link);
     });
     const hamburgerDiv = document.createElement("div");
     hamburgerDiv.classList.add("menu-toggle");
@@ -3658,7 +3658,7 @@ var WcMenu = class extends WcBaseComponent {
     super._unWireEvents();
     document.body.removeEventListener("wc-menu:click", this._handleOnClick.bind(this));
     const links = this.querySelectorAll(".menu-link");
-    links.forEach((link2) => link2.removeEventListener("click", this._handleClick.bind(this)));
+    links.forEach((link) => link.removeEventListener("click", this._handleClick.bind(this)));
     const menuIcon = this.querySelector(".menu-toggle");
     menuIcon.removeEventListener("click", this._handleMenuToggle.bind(this));
   }
@@ -5977,7 +5977,7 @@ if (!customElements.get("wc-tabulator")) {
       if (formatterParams.target) {
         linkElement.setAttribute("target", formatterParams.target);
       }
-      link.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
       if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
         Object.entries(formatterParams.attributes).forEach(([key, value2]) => {
           linkElement.setAttribute(key, value2);
@@ -7899,11 +7899,11 @@ if (!customElements.get("wc-link")) {
           window.wc["linksLoaded"] = {};
         }
         if (!document.getElementById(linkId)) {
-          const link2 = document.createElement("link");
-          link2.rel = "stylesheet";
-          link2.href = url;
-          link2.id = linkId;
-          link2.onload = () => {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = url;
+          link.id = linkId;
+          link.onload = () => {
             console.log(`Link loaded: ${url}`);
             window.wc.linksLoaded[url] = true;
             document.body.dispatchEvent(new CustomEvent("link-loaded", {
@@ -7912,7 +7912,7 @@ if (!customElements.get("wc-link")) {
               composed: true
             }));
           };
-          link2.onerror = () => {
+          link.onerror = () => {
             console.error(`Failed to load link: ${url}`);
             document.body.dispatchEvent(new CustomEvent("link-error", {
               detail: { url },
@@ -7920,7 +7920,7 @@ if (!customElements.get("wc-link")) {
               composed: true
             }));
           };
-          document.head.appendChild(link2);
+          document.head.appendChild(link);
           console.log(`Added link: ${url}`);
         } else {
           console.log(`Link already exists, skipping append: ${url}`);
