@@ -5654,6 +5654,7 @@ if (!customElements.get("wc-tabulator")) {
         this.loadCSS("https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"),
         this.loadLibrary("https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js", "Tabulator")
       ]);
+      Tabulator.prototype.modules.format.register("linkFormatter", this.linkFormatter);
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
         console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");
@@ -5965,6 +5966,16 @@ if (!customElements.get("wc-tabulator")) {
         url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
       }
       return url;
+    }
+    // Create an extended link formatter
+    linkFormatter(cell, formatterParams, onRendered) {
+      const linkElement = Tabulator.formatters.link(cell, formatterParams, onRendered);
+      if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
+        Object.entries(formatterParams.attributes).forEach(([key, value]) => {
+          linkElement.setAttribute(key, value);
+        });
+      }
+      return linkElement;
     }
     toggleSelect(e, cell) {
       cell.getRow().toggleSelect();

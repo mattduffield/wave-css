@@ -375,6 +375,9 @@ if (!customElements.get('wc-tabulator')) {
       ]);
 
       // Tabulator.extendModule("format", "formatters", {localdatetime: this.localdatetime.bind(this)});
+      
+      // Register your custom formatter
+      Tabulator.prototype.modules.format.register("linkFormatter", this.linkFormatter);
 
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
@@ -725,6 +728,23 @@ if (!customElements.get('wc-tabulator')) {
         url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
       }
       return url;
+    }
+
+
+    // Create an extended link formatter
+    linkFormatter(cell, formatterParams, onRendered) {
+      // First get the original link element from Tabulator's built-in formatter
+      const linkElement = Tabulator.formatters.link(cell, formatterParams, onRendered);
+      
+      // If custom attributes are specified, add them to the link
+      if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {
+        // The formatter returns an HTML element, so we can modify it directly
+        Object.entries(formatterParams.attributes).forEach(([key, value]) => {
+          linkElement.setAttribute(key, value);
+        });
+      }
+      
+      return linkElement;
     }
 
     toggleSelect(e, cell) {
