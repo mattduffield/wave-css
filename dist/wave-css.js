@@ -5563,11 +5563,11 @@ if (!customElements.get("wc-tabulator")) {
       const rowDeselected = this.getAttribute("row-deselected");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
-        if (obj && obj.formatter && obj.params) {
-          obj.formatter = this.resolveFormatter(obj.params, obj.formatter);
-        }
         if (obj && obj.params && obj.params.url) {
           obj.params.url = this.resolveFormatter(obj.params, obj.params.url);
+        }
+        if (obj && obj.formatter && obj.params) {
+          obj.formatter = this.resolveFormatter(obj.params, obj.formatter);
         }
         this.colFieldFormatter = obj;
       }
