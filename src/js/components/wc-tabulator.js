@@ -374,11 +374,6 @@ if (!customElements.get('wc-tabulator')) {
         this.loadLibrary('https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js', 'Tabulator'),
       ]);
 
-      // Tabulator.extendModule("format", "formatters", {localdatetime: this.localdatetime.bind(this)});
-      
-      // Register your custom formatter
-      Tabulator.extendModule("format", "formatters", {linkFormatter: this.linkFormatter.bind(this)});
-
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
         console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
@@ -733,8 +728,22 @@ if (!customElements.get('wc-tabulator')) {
 
     // Create an extended link formatter
     linkFormatter(cell, formatterParams, onRendered) {
-      // First get the original link element from Tabulator's built-in formatter
-      const linkElement = Tabulator.formatters.link(cell, formatterParams, onRendered);
+      // Get the value from the cell
+      var value = cell.getValue();
+          
+      // Create the anchor element
+      var linkElement = document.createElement("a");
+
+      // Set the href attribute
+      linkElement.setAttribute("href", formatterParams.urlPrefix ? formatterParams.urlPrefix + value : value);
+
+      // Set the target attribute if specified
+      if (formatterParams.target) {
+        linkElement.setAttribute("target", formatterParams.target);
+      }
+
+      // Set the link text - either using labelField or the value itself
+      link.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
       
       // If custom attributes are specified, add them to the link
       if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {
