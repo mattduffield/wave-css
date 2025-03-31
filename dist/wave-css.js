@@ -5654,7 +5654,7 @@ if (!customElements.get("wc-tabulator")) {
         this.loadCSS("https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"),
         this.loadLibrary("https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js", "Tabulator")
       ]);
-      Tabulator.prototype.modules.format.register("linkFormatter", this.linkFormatter);
+      Tabulator.extendModule("format", "formatters", { linkFormatter: this.linkFormatter.bind(this) });
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
         console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");

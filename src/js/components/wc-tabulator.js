@@ -377,7 +377,7 @@ if (!customElements.get('wc-tabulator')) {
       // Tabulator.extendModule("format", "formatters", {localdatetime: this.localdatetime.bind(this)});
       
       // Register your custom formatter
-      Tabulator.prototype.modules.format.register("linkFormatter", this.linkFormatter);
+      Tabulator.extendModule("format", "formatters", {linkFormatter: this.linkFormatter.bind(this)});
 
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
