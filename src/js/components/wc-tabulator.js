@@ -279,6 +279,9 @@ if (!customElements.get('wc-tabulator')) {
       // Process any column field formatters.
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
+        if (obj && obj.formatter && obj.params) {
+          obj.formatter = this.resolveFormatter(obj.params, obj.formatter);
+        }
         if (obj && obj.params && obj.params.url) {
           obj.params.url = this.resolveFormatter(obj.params, obj.params.url);
         }
@@ -744,7 +747,7 @@ if (!customElements.get('wc-tabulator')) {
 
       // Set the link text - either using labelField or the value itself
       link.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
-      
+
       // If custom attributes are specified, add them to the link
       if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {
         // The formatter returns an HTML element, so we can modify it directly
