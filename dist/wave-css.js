@@ -7053,6 +7053,7 @@ if (!customElements.get("wc-article-skeleton")) {
         this._createElement();
         this.appendChild(this.componentElement);
       }
+      this.dataset.component = "wc-table-skeleton";
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -7060,6 +7061,10 @@ if (!customElements.get("wc-article-skeleton")) {
       const payload = { detail: {} };
       const custom = new CustomEvent("load", payload);
       this.dispatchEvent(custom);
+      this.dispatchEvent(new CustomEvent("wc-connected", {
+        bubbles: true,
+        detail: { component: "wc-table-skeleton", id: this.id || this.wcId }
+      }));
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -7135,6 +7140,15 @@ wc-article-skeleton .wc-article-skeleton {
     }
     _unWireEvents() {
       super._unWireEvents();
+    }
+    // Add a method specifically for DataStar to call after morphing
+    updateAfterMorph() {
+      console.log("WcTableSkeleton updated after morph");
+      this._applyStyle();
+      this.dispatchEvent(new CustomEvent("wc-updated", {
+        bubbles: true,
+        detail: { component: "wc-table-skeleton", id: this.id || this.wcId }
+      }));
     }
   }
   customElements.define("wc-article-skeleton", WcArticleSkeleton);
