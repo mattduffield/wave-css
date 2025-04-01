@@ -8,20 +8,14 @@ if (!customElements.get('wc-article-skeleton')) {
 
     constructor() {
       super();
-      // const compEl = this.querySelector('.wc-article-skeleton');
-      // if (compEl) {
-      //   this.componentElement = compEl;
-      // } else {
-      //   this.componentElement = document.createElement('div');
-      //   this._createElement();
-      //   this.appendChild(this.componentElement);      
-      // }
-      this.componentElement = document.createElement('div');
-      this._createElement();
-      this.appendChild(this.componentElement);      
-
-      // This is important for DataStar/Idiomorph to track this component
-      this.dataset.component = 'wc-table-skeleton';
+      const compEl = this.querySelector('.wc-article-skeleton');
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement('div');
+        this._createElement();
+        this.appendChild(this.componentElement);      
+      }
     }
 
     async connectedCallback() {
@@ -32,11 +26,6 @@ if (!customElements.get('wc-article-skeleton')) {
       const payload = { detail: {} };
       const custom = new CustomEvent('load', payload);
       this.dispatchEvent(custom);
-      // Dispatch an event that DataStar might be listening for
-      this.dispatchEvent(new CustomEvent('wc-connected', {
-        bubbles: true,
-        detail: { component: 'wc-table-skeleton', id: this.id || this.wcId }
-      }));
     }
 
     disconnectedCallback() {
@@ -77,7 +66,7 @@ if (!customElements.get('wc-article-skeleton')) {
     _applyStyle() {
       const style = `
 wc-article-skeleton {
-  /* display: contents; */
+  display: contents;
 }
 wc-article-skeleton .wc-article-skeleton {
   background-color: var(--surface-1);
@@ -118,18 +107,6 @@ wc-article-skeleton .wc-article-skeleton {
 
     _unWireEvents() {
       super._unWireEvents();
-    }
-
-    // Add a method specifically for DataStar to call after morphing
-    updateAfterMorph() {
-      console.log('WcTableSkeleton updated after morph');
-      // Ensure styles are applied
-      this._applyStyle();
-      // Re-dispatch connected event if needed
-      this.dispatchEvent(new CustomEvent('wc-updated', {
-        bubbles: true,
-        detail: { component: 'wc-table-skeleton', id: this.id || this.wcId }
-      }));
     }
   }
 
