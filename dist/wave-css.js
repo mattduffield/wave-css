@@ -5687,7 +5687,9 @@ if (!customElements.get("wc-tabulator")) {
       }
       this.table.on("pageLoaded", (pageno) => {
         if (typeof htmx !== "undefined") {
-          htmx.process(this);
+          setTimeout(() => {
+            htmx.process(this);
+          }, 10);
         }
       });
       this.table.on("dataFiltering", (filters) => {
