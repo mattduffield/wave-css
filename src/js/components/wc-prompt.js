@@ -47,7 +47,7 @@ if (!customElements.get('wc-prompt')) {
         // this.loadLibrary('https://unpkg.com/notie', 'notie'),
         // this.loadLibrary('https://unpkg.com/sweetalert2@11.15.10/dist/sweetalert2.all.js', 'Swal'),
         this.loadCSS('/static/css/notie@4.3.1.min.css'),
-        this.loadLibrary('/static/js/notie', 'notie.js'),
+        this.loadLibrary('/static/js/notie.js', 'notie'),
         this.loadLibrary('/static/js/sweetalert2@11.15.10.js', 'Swal'),
       ]);
 
