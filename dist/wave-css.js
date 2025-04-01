@@ -7100,7 +7100,7 @@ if (!customElements.get("wc-article-skeleton")) {
     _applyStyle() {
       const style = `
 wc-article-skeleton {
-  display: contents;
+  /* display: contents; */
 }
 wc-article-skeleton .wc-article-skeleton {
   background-color: var(--surface-1);
