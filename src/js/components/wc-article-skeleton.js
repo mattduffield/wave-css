@@ -8,14 +8,17 @@ if (!customElements.get('wc-article-skeleton')) {
 
     constructor() {
       super();
-      const compEl = this.querySelector('.wc-article-skeleton');
-      if (compEl) {
-        this.componentElement = compEl;
-      } else {
-        this.componentElement = document.createElement('div');
-        this._createElement();
-        this.appendChild(this.componentElement);      
-      }
+      // const compEl = this.querySelector('.wc-article-skeleton');
+      // if (compEl) {
+      //   this.componentElement = compEl;
+      // } else {
+      //   this.componentElement = document.createElement('div');
+      //   this._createElement();
+      //   this.appendChild(this.componentElement);      
+      // }
+      this.componentElement = document.createElement('div');
+      this._createElement();
+      this.appendChild(this.componentElement);      
 
       // This is important for DataStar/Idiomorph to track this component
       this.dataset.component = 'wc-table-skeleton';
