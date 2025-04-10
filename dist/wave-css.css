@@ -892,6 +892,12 @@
   .card-border-color {
     border-color: var(--card-border-color);
   }
+  .primary-border-color {
+    border-color: var(--primary-color);
+  }
+  .primary-bg-border-color {
+    border-color: var(--primary-bg-color);
+  }
   .component-bg-color {
     background-color: var(--component-bg-color);
   }
