@@ -19,7 +19,7 @@ if (!customElements.get('wc-breadcrumb')) {
       setTimeout(() => {
         const titleParts = [];
         const origTitle = document.title;
-        const docTitle = this.getAttribute('doc-title') || '';
+        const docTitle = this.getAttribute('doc-title') || origTitle;
         const parts = this.querySelectorAll('wc-breadcrumb-item');
         Array.from(parts).forEach((p) => {
           const lbl = p.getAttribute('label');
