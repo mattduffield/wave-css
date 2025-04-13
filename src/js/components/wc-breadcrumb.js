@@ -18,6 +18,7 @@ if (!customElements.get('wc-breadcrumb')) {
       }
       setTimeout(() => {
         const titleParts = [];
+        const origTitle = document.title;
         const docTitle = this.getAttribute('doc-title') || '';
         const parts = this.querySelectorAll('wc-breadcrumb-item');
         Array.from(parts).forEach((p) => {
@@ -26,8 +27,10 @@ if (!customElements.get('wc-breadcrumb')) {
             titleParts.push(lbl);
           }
         });
-        const title = titleParts.join(' ');
-        document.title = title + ' - ' + docTitle;
+        const title = titleParts.join(' > ');
+        if (title) {
+          document.title = title + ' - ' + docTitle;
+        }
       }, 250);
     }
 
