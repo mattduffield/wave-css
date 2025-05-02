@@ -443,6 +443,7 @@ export function toggleIndicator(selector, show) {
   }
 }
 export function processJSONField(event, selector) {
+  console.log("Attempting to process JSON for selector: ", selector);
   const form = event.detail.elt;
   const jsonField = form.querySelector(selector);
   
@@ -490,6 +491,7 @@ export function processJSONField(event, selector) {
       }
       
       flattenJSON(jsonData, 'json_data');
+      console.log('Processing complete for selector: ', selector, form);
     } catch (error) {
       console.error('Error parsing JSON:', error);
     }
