@@ -3850,7 +3850,10 @@ if (!customElements.get("wc-save-split-button")) {
       const saveReturnUrl = this.getAttribute("save-return-url") || "";
       const positionArea = this.getAttribute("position-area") || "bottom span-left";
       const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
-      const beforeSend = this.getAttribute("before-send") || "";
+      let beforeSend = this.getAttribute("before-send") || "";
+      if (beforeSend) {
+        beforeSend = `hx-on:beforeSend="${beforeSend})"`;
+      }
       const markup = `
         <button type="button" class="save-btn btn"
           hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
