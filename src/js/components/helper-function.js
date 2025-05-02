@@ -443,9 +443,9 @@ export function toggleIndicator(selector, show) {
   }
 }
 export function processJSONField(event, selector) {
-  console.log("-->Attempting to process JSON for selector: ", selector);
   const form = event.detail.elt;
   const jsonField = form.querySelector(selector);
+  console.log("-->Attempting to process JSON for selector: ", selector, form, jsonField?.value);
   
   if (jsonField) {
     try {
