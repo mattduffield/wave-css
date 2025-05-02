@@ -36,6 +36,7 @@ var WaveHelpers = (() => {
     loadStylesheet: () => loadStylesheet,
     locator: () => locator,
     locatorAll: () => locatorAll,
+    processJSONField: () => processJSONField,
     show: () => show,
     sleep: () => sleep,
     toggleIndicator: () => toggleIndicator,
@@ -354,6 +355,51 @@ var WaveHelpers = (() => {
         indicator.classList.add("htmx-request");
       } else {
         indicator.classList.remove("htmx-request");
+      }
+    }
+  }
+  function processJSONField(event, selector) {
+    const form = event.detail.elt;
+    const jsonField = form.querySelector(selector);
+    if (jsonField) {
+      try {
+        let flattenJSON = function(obj, prefix = "") {
+          for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+              const value = obj[key];
+              const fieldName = prefix ? `${prefix}.${key}` : key;
+              if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+                flattenJSON(value, fieldName);
+              } else if (Array.isArray(value)) {
+                value.forEach((item, index) => {
+                  if (typeof item === "object" && item !== null) {
+                    flattenJSON(item, `${fieldName}[${index}]`);
+                  } else {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = `${fieldName}[${index}]`;
+                    input.value = item;
+                    input.setAttribute("data-json-field", "true");
+                    form.appendChild(input);
+                  }
+                });
+              } else {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = fieldName;
+                input.value = value;
+                input.setAttribute("data-json-field", "true");
+                form.appendChild(input);
+              }
+            }
+          }
+        };
+        const existingFields = form.querySelectorAll('input[data-json-field="true"]');
+        existingFields.forEach((field) => field.remove());
+        const jsonData = JSON.parse(jsonField.value);
+        flattenJSON(jsonData, "json_data");
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
       }
     }
   }

@@ -310,6 +310,51 @@ function toggleIndicator(selector, show2) {
     }
   }
 }
+function processJSONField(event, selector) {
+  const form = event.detail.elt;
+  const jsonField = form.querySelector(selector);
+  if (jsonField) {
+    try {
+      let flattenJSON = function(obj, prefix = "") {
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            const fieldName = prefix ? `${prefix}.${key}` : key;
+            if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+              flattenJSON(value, fieldName);
+            } else if (Array.isArray(value)) {
+              value.forEach((item, index) => {
+                if (typeof item === "object" && item !== null) {
+                  flattenJSON(item, `${fieldName}[${index}]`);
+                } else {
+                  const input2 = document.createElement("input");
+                  input2.type = "hidden";
+                  input2.name = `${fieldName}[${index}]`;
+                  input2.value = item;
+                  input2.setAttribute("data-json-field", "true");
+                  form.appendChild(input2);
+                }
+              });
+            } else {
+              const input2 = document.createElement("input");
+              input2.type = "hidden";
+              input2.name = fieldName;
+              input2.value = value;
+              input2.setAttribute("data-json-field", "true");
+              form.appendChild(input2);
+            }
+          }
+        }
+      };
+      const existingFields = form.querySelectorAll('input[data-json-field="true"]');
+      existingFields.forEach((field) => field.remove());
+      const jsonData = JSON.parse(jsonField.value);
+      flattenJSON(jsonData, "json_data");
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+    }
+  }
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -9699,6 +9744,7 @@ export {
   loadStylesheet,
   locator,
   locatorAll,
+  processJSONField,
   show,
   sleep,
   toggleIndicator,

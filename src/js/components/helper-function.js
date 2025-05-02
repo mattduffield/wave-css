@@ -442,3 +442,56 @@ export function toggleIndicator(selector, show) {
     }
   }
 }
+export function processJSONField(event, selector) {
+  const form = event.detail.elt;
+  const jsonField = form.querySelector(selector);
+  
+  if (jsonField) {
+    try {
+      // First, remove any previously created fields from this JSON
+      const existingFields = form.querySelectorAll('input[data-json-field="true"]');
+      existingFields.forEach(field => field.remove());
+      
+      const jsonData = JSON.parse(jsonField.value);
+      
+      function flattenJSON(obj, prefix = '') {
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            const fieldName = prefix ? `${prefix}.${key}` : key;
+            
+            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+              flattenJSON(value, fieldName);
+            } else if (Array.isArray(value)) {
+              value.forEach((item, index) => {
+                if (typeof item === 'object' && item !== null) {
+                  flattenJSON(item, `${fieldName}[${index}]`);
+                } else {
+                  const input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = `${fieldName}[${index}]`;
+                  input.value = item;
+                  // Mark this input as created from JSON to find it later
+                  input.setAttribute('data-json-field', 'true');
+                  form.appendChild(input);
+                }
+              });
+            } else {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = fieldName;
+              input.value = value;
+              // Mark this input as created from JSON to find it later
+              input.setAttribute('data-json-field', 'true');
+              form.appendChild(input);
+            }
+          }
+        }
+      }
+      
+      flattenJSON(jsonData, 'json_data');
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+    }
+  }
+}
