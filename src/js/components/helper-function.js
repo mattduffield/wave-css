@@ -443,7 +443,7 @@ export function toggleIndicator(selector, show) {
   }
 }
 export function processJSONField(event, selector) {
-  console.log("Attempting to process JSON for selector: ", selector);
+  console.log("-->Attempting to process JSON for selector: ", selector);
   const form = event.detail.elt;
   const jsonField = form.querySelector(selector);
   
@@ -454,7 +454,7 @@ export function processJSONField(event, selector) {
       existingFields.forEach(field => field.remove());
       
       const jsonData = JSON.parse(jsonField.value);
-      
+      console.log("-->JSON contents: ", jsonField.value);
       function flattenJSON(obj, prefix = '') {
         for (const key in obj) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -491,7 +491,7 @@ export function processJSONField(event, selector) {
       }
       
       flattenJSON(jsonData, 'json_data');
-      console.log('Processing complete for selector: ', selector, form);
+      console.log('-->Processing complete for selector: ', selector, form);
     } catch (error) {
       console.error('Error parsing JSON:', error);
     }
