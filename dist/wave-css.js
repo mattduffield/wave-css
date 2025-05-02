@@ -3850,19 +3850,20 @@ if (!customElements.get("wc-save-split-button")) {
       const saveReturnUrl = this.getAttribute("save-return-url") || "";
       const positionArea = this.getAttribute("position-area") || "bottom span-left";
       const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
+      const beforeSend = this.getAttribute("before-send") || "";
       const markup = `
         <button type="button" class="save-btn btn"
-          hx-${method}="${saveUrl}"
+          hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
           <div class="dropdown-content">
             <a class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}"
+              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
               data-url="${saveNewUrl}">
               Save and Add New
             </a>
             <a class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}"
+              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
               data-url="${saveReturnUrl}">
               Save and Return
             </a>
