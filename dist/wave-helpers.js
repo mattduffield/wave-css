@@ -362,7 +362,7 @@ var WaveHelpers = (() => {
     const elt = event.detail.elt;
     const form = elt.closest("form");
     const jsonField = form.querySelector(selector);
-    console.log("-->Attempting to process JSON for selector: ", selector, form, jsonField?.value);
+    console.log("-->Attempting to process JSON for selector: ", selector, form);
     if (jsonField) {
       try {
         let flattenJSON = function(obj, prefix = "") {
@@ -383,6 +383,7 @@ var WaveHelpers = (() => {
                     input.value = item;
                     input.setAttribute("data-json-field", "true");
                     form.appendChild(input);
+                    console.log("-->Appending array primitive:", input);
                   }
                 });
               } else {
@@ -392,6 +393,7 @@ var WaveHelpers = (() => {
                 input.value = value;
                 input.setAttribute("data-json-field", "true");
                 form.appendChild(input);
+                console.log("-->Appending primitive:", input);
               }
             }
           }
@@ -399,7 +401,7 @@ var WaveHelpers = (() => {
         const existingFields = form.querySelectorAll('input[data-json-field="true"]');
         existingFields.forEach((field) => field.remove());
         const jsonData = JSON.parse(jsonField.value);
-        console.log("-->JSON contents: ", jsonField.value);
+        console.log("-->JSON contents: ", jsonData);
         flattenJSON(jsonData, "json_data");
         console.log("-->Processing complete for selector: ", selector, form);
       } catch (error) {

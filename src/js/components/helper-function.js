@@ -446,7 +446,7 @@ export function processJSONField(event, selector) {
   const elt = event.detail.elt;
   const form = elt.closest('form');
   const jsonField = form.querySelector(selector);
-  console.log("-->Attempting to process JSON for selector: ", selector, form, jsonField?.value);
+  console.log("-->Attempting to process JSON for selector: ", selector, form);
   
   if (jsonField) {
     try {
@@ -455,7 +455,7 @@ export function processJSONField(event, selector) {
       existingFields.forEach(field => field.remove());
       
       const jsonData = JSON.parse(jsonField.value);
-      console.log("-->JSON contents: ", jsonField.value);
+      console.log("-->JSON contents: ", jsonData);
       function flattenJSON(obj, prefix = '') {
         for (const key in obj) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -476,6 +476,7 @@ export function processJSONField(event, selector) {
                   // Mark this input as created from JSON to find it later
                   input.setAttribute('data-json-field', 'true');
                   form.appendChild(input);
+                  console.log('-->Appending array primitive:', input);
                 }
               });
             } else {
@@ -486,6 +487,7 @@ export function processJSONField(event, selector) {
               // Mark this input as created from JSON to find it later
               input.setAttribute('data-json-field', 'true');
               form.appendChild(input);
+              console.log('-->Appending primitive:', input);
             }
           }
         }

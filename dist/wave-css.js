@@ -314,7 +314,7 @@ function processJSONField(event, selector) {
   const elt = event.detail.elt;
   const form = elt.closest("form");
   const jsonField = form.querySelector(selector);
-  console.log("-->Attempting to process JSON for selector: ", selector, form, jsonField?.value);
+  console.log("-->Attempting to process JSON for selector: ", selector, form);
   if (jsonField) {
     try {
       let flattenJSON = function(obj, prefix = "") {
@@ -335,6 +335,7 @@ function processJSONField(event, selector) {
                   input2.value = item;
                   input2.setAttribute("data-json-field", "true");
                   form.appendChild(input2);
+                  console.log("-->Appending array primitive:", input2);
                 }
               });
             } else {
@@ -344,6 +345,7 @@ function processJSONField(event, selector) {
               input2.value = value;
               input2.setAttribute("data-json-field", "true");
               form.appendChild(input2);
+              console.log("-->Appending primitive:", input2);
             }
           }
         }
@@ -351,7 +353,7 @@ function processJSONField(event, selector) {
       const existingFields = form.querySelectorAll('input[data-json-field="true"]');
       existingFields.forEach((field) => field.remove());
       const jsonData = JSON.parse(jsonField.value);
-      console.log("-->JSON contents: ", jsonField.value);
+      console.log("-->JSON contents: ", jsonData);
       flattenJSON(jsonData, "json_data");
       console.log("-->Processing complete for selector: ", selector, form);
     } catch (error) {
