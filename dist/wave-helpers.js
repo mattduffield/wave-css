@@ -359,7 +359,8 @@ var WaveHelpers = (() => {
     }
   }
   function processJSONField(event, selector) {
-    const form = event.detail.elt;
+    const elt = event.detail.elt;
+    const form = elt.closest("form");
     const jsonField = form.querySelector(selector);
     console.log("-->Attempting to process JSON for selector: ", selector, form, jsonField?.value);
     if (jsonField) {
