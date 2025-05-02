@@ -425,3 +425,20 @@ export function updateJetTemplate(id, oldIndex, newIndex, cm) {
     doc.setValue(updatedTemplate);
   }
 }
+export function countElements(selector) {
+  let pos = -1;
+  if (selector) {
+    pos = document.querySelectorAll(selector).length;
+  }
+  return pos
+}
+export function toggleIndicator(selector, show) {
+  const indicator = document.querySelector(selector);
+  if (indicator) {
+    if (show) {
+      indicator.classList.add('htmx-request');
+    } else {
+      indicator.classList.remove('htmx-request');
+    }
+  }
+}

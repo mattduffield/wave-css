@@ -293,6 +293,23 @@ function updateJetTemplate(id, oldIndex, newIndex, cm) {
     doc.setValue(updatedTemplate);
   }
 }
+function countElements(selector) {
+  let pos = -1;
+  if (selector) {
+    pos = document.querySelectorAll(selector).length;
+  }
+  return pos;
+}
+function toggleIndicator(selector, show2) {
+  const indicator = document.querySelector(selector);
+  if (indicator) {
+    if (show2) {
+      indicator.classList.add("htmx-request");
+    } else {
+      indicator.classList.remove("htmx-request");
+    }
+  }
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -9667,6 +9684,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 customElements.define("wc-textarea", WcTextarea);
 export {
   checkResources,
+  countElements,
   disableSortable,
   enableSortable,
   fetchApi,
@@ -9683,6 +9701,7 @@ export {
   locatorAll,
   show,
   sleep,
+  toggleIndicator,
   updateJetTemplate,
   waitForPropertyPolling,
   waitForResourcePolling,

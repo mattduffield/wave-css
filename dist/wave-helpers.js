@@ -21,6 +21,7 @@ var WaveHelpers = (() => {
   var helper_function_exports = {};
   __export(helper_function_exports, {
     checkResources: () => checkResources,
+    countElements: () => countElements,
     disableSortable: () => disableSortable,
     enableSortable: () => enableSortable,
     fetchApi: () => fetchApi,
@@ -37,6 +38,7 @@ var WaveHelpers = (() => {
     locatorAll: () => locatorAll,
     show: () => show,
     sleep: () => sleep,
+    toggleIndicator: () => toggleIndicator,
     updateJetTemplate: () => updateJetTemplate,
     waitForPropertyPolling: () => waitForPropertyPolling,
     waitForResourcePolling: () => waitForResourcePolling,
@@ -336,6 +338,23 @@ var WaveHelpers = (() => {
       let updatedFormContent = formContent.replace(divRegex, () => elements.shift());
       let updatedTemplate = template.replace(formContent, updatedFormContent);
       doc.setValue(updatedTemplate);
+    }
+  }
+  function countElements(selector) {
+    let pos = -1;
+    if (selector) {
+      pos = document.querySelectorAll(selector).length;
+    }
+    return pos;
+  }
+  function toggleIndicator(selector, show2) {
+    const indicator = document.querySelector(selector);
+    if (indicator) {
+      if (show2) {
+        indicator.classList.add("htmx-request");
+      } else {
+        indicator.classList.remove("htmx-request");
+      }
     }
   }
   return __toCommonJS(helper_function_exports);
