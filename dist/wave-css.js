@@ -3852,7 +3852,7 @@ if (!customElements.get("wc-save-split-button")) {
       const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
       let beforeSend = this.getAttribute("before-send") || "";
       if (beforeSend) {
-        beforeSend = `hx-on:beforeSend="${beforeSend})"`;
+        beforeSend = `hx-on::before-send="${beforeSend})"`;
       }
       const markup = `
         <button type="button" class="save-btn btn"
