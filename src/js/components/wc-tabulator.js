@@ -450,24 +450,29 @@ if (!customElements.get('wc-tabulator')) {
           return;
         }
         
+        // Prevent the default filtering behavior
+        // This is crucial - it stops the automatic AJAX request
+        filters.preventDefault();
+        
         const headerFilters = this.table.getHeaderFilters();
         this.table.headerFiltersInitialized = false;
         
-        // Important: Use blockRedraw to prevent multiple AJAX requests
-        this.table.blockRedraw();
+        // Create a single combined filter object
+        let combinedFilter;
         
         if (headerFilters.length === 0) {
-          // If no header filters, apply initial filter
-          this.table.clearFilter(true);
-          this.table.setFilter(this.initialFilter);
+          combinedFilter = this.initialFilter;
         } else {
-          // If header filters are active, use only those
-          this.table.setFilter(headerFilters);
+          combinedFilter = headerFilters;
         }
         
-        // Resume redraw with a single request
-        this.table.restoreRedraw();
+        // Apply the filter without triggering AJAX
+        this.table.setFilter(combinedFilter, false, true); // true for silent mode
+        
+        // Now manually trigger a single data refresh
+        this.table.setPage(this.table.getPage()); // Reloads current page with new filters
       });
+
     }
 
     getFuncs() {
