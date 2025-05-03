@@ -480,26 +480,26 @@ if (!customElements.get('wc-tabulator')) {
           return;
         }
         
-        // Store the filters but don't apply them immediately
         const headerFilters = this.table.getHeaderFilters();
+        
+        // Temporarily disable ajax
+        const originalAjaxURL = this.table.modules.ajax.url;
+        this.table.modules.ajax.url = false;
+        
+        // Apply filters without triggering ajax
+        if (headerFilters.length === 0) {
+          this.table.clearFilter(true);
+          this.table.setFilter(this.initialFilter);
+        } else {
+          this.table.setFilter(headerFilters);
+        }
+        
+        // Restore ajax and trigger a single request
+        this.table.modules.ajax.url = originalAjaxURL;
         this.table.headerFiltersInitialized = false;
         
-        // Prevent the default filtering action
-        filters.preventDefault();
-        
-        // Schedule our custom filtering to happen after the current event cycle
-        setTimeout(() => {
-          // Set filters in memory but don't trigger data load yet
-          if (headerFilters.length === 0) {
-            this.table.filterManager.clearFilters(true);
-            this.table.filterManager.setFilter(this.initialFilter);
-          } else {
-            this.table.filterManager.setFilter(headerFilters);
-          }
-          
-          // Force a table refresh with the new filters
-          this.table.setData();
-        }, 0);
+        // Force a single data refresh
+        this.table.getData();
       });
 
     }
