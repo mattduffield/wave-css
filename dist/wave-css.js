@@ -5789,14 +5789,15 @@ if (!customElements.get("wc-tabulator")) {
           return;
         }
         const headerFilters = this.table.getHeaderFilters();
+        this.table.headerFiltersInitialized = false;
+        this.table.blockRedraw();
         if (headerFilters.length === 0) {
-          this.table.headerFiltersInitialized = false;
           this.table.clearFilter(true);
           this.table.setFilter(this.initialFilter);
         } else {
-          this.table.headerFiltersInitialized = false;
           this.table.setFilter(headerFilters);
         }
+        this.table.restoreRedraw();
       });
     }
     getFuncs() {

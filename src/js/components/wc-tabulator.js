@@ -422,24 +422,51 @@ if (!customElements.get('wc-tabulator')) {
       //   const custom = { e, row, rowData, rowIndex, rowPosition };
       //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
       // });
+
+      // this.table.on("dataFiltering", (filters) => {
+      //   if (!this.table.headerFiltersInitialized) {
+      //     this.table.headerFiltersInitialized = true;
+      //     return;
+      //   }
+
+      //   const headerFilters = this.table.getHeaderFilters();    
+      //   // If no header filters are active, apply initial filter
+      //   if (headerFilters.length === 0) {
+      //     this.table.headerFiltersInitialized = false;
+      //     this.table.clearFilter(true);
+      //     this.table.setFilter(this.initialFilter);
+      //   }
+      //   // If header filters are active, use only those
+      //   else {
+      //     this.table.headerFiltersInitialized = false;
+      //     this.table.setFilter(headerFilters);
+      //   }
+      // });
+
       this.table.on("dataFiltering", (filters) => {
+        // Skip if this is just initialization
         if (!this.table.headerFiltersInitialized) {
           this.table.headerFiltersInitialized = true;
           return;
         }
-
-        const headerFilters = this.table.getHeaderFilters();    
-        // If no header filters are active, apply initial filter
+        
+        const headerFilters = this.table.getHeaderFilters();
+        this.table.headerFiltersInitialized = false;
+        
+        // Important: Use blockRedraw to prevent multiple AJAX requests
+        this.table.blockRedraw();
+        
         if (headerFilters.length === 0) {
-          this.table.headerFiltersInitialized = false;
+          // If no header filters, apply initial filter
           this.table.clearFilter(true);
           this.table.setFilter(this.initialFilter);
-        }
-        // If header filters are active, use only those
-        else {
-          this.table.headerFiltersInitialized = false;
+        } else {
+          // If header filters are active, use only those
           this.table.setFilter(headerFilters);
         }
+        
+        // Resume redraw with a single request
+        this.table.restoreRedraw();
       });
     }
 
