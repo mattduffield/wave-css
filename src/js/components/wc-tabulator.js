@@ -433,8 +433,8 @@ if (!customElements.get('wc-tabulator')) {
       //   // If no header filters are active, apply initial filter
       //   if (headerFilters.length === 0) {
       //     this.table.headerFiltersInitialized = false;
-      //     this.table.clearFilter(true);
-      //     this.table.setFilter(this.initialFilter);
+      //     this.table.clearFilter(true); // triggers ajax
+      //     this.table.setFilter(this.initialFilter); // triggers ajax
       //   }
       //   // If header filters are active, use only those
       //   else {
@@ -472,6 +472,35 @@ if (!customElements.get('wc-tabulator')) {
       //   // Now manually trigger a single data refresh
       //   this.table.setPage(this.table.getPage()); // Reloads current page with new filters
       // });
+
+      this.table.on("dataFiltering", (filters) => {
+        // Skip if this is just initialization
+        if (!this.table.headerFiltersInitialized) {
+          this.table.headerFiltersInitialized = true;
+          return;
+        }
+        
+        // Store the filters but don't apply them immediately
+        const headerFilters = this.table.getHeaderFilters();
+        this.table.headerFiltersInitialized = false;
+        
+        // Prevent the default filtering action
+        filters.preventDefault();
+        
+        // Schedule our custom filtering to happen after the current event cycle
+        setTimeout(() => {
+          // Set filters in memory but don't trigger data load yet
+          if (headerFilters.length === 0) {
+            this.table.filterManager.clearFilters(true);
+            this.table.filterManager.setFilter(this.initialFilter);
+          } else {
+            this.table.filterManager.setFilter(headerFilters);
+          }
+          
+          // Force a table refresh with the new filters
+          this.table.setData();
+        }, 0);
+      });
 
     }
 

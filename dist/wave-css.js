@@ -5783,6 +5783,24 @@ if (!customElements.get("wc-tabulator")) {
           }, 10);
         }
       });
+      this.table.on("dataFiltering", (filters) => {
+        if (!this.table.headerFiltersInitialized) {
+          this.table.headerFiltersInitialized = true;
+          return;
+        }
+        const headerFilters = this.table.getHeaderFilters();
+        this.table.headerFiltersInitialized = false;
+        filters.preventDefault();
+        setTimeout(() => {
+          if (headerFilters.length === 0) {
+            this.table.filterManager.clearFilters(true);
+            this.table.filterManager.setFilter(this.initialFilter);
+          } else {
+            this.table.filterManager.setFilter(headerFilters);
+          }
+          this.table.setData();
+        }, 0);
+      });
     }
     getFuncs() {
       const funcElements = this.querySelectorAll("wc-tabulator-func");
