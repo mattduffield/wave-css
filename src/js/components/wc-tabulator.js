@@ -423,56 +423,6 @@ if (!customElements.get('wc-tabulator')) {
       //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
       // });
 
-      // this.table.on("dataFiltering", (filters) => {
-      //   if (!this.table.headerFiltersInitialized) {
-      //     this.table.headerFiltersInitialized = true;
-      //     return;
-      //   }
-
-      //   const headerFilters = this.table.getHeaderFilters();    
-      //   // If no header filters are active, apply initial filter
-      //   if (headerFilters.length === 0) {
-      //     this.table.headerFiltersInitialized = false;
-      //     this.table.clearFilter(true); // triggers ajax
-      //     this.table.setFilter(this.initialFilter); // triggers ajax
-      //   }
-      //   // If header filters are active, use only those
-      //   else {
-      //     this.table.headerFiltersInitialized = false;
-      //     this.table.setFilter(headerFilters);
-      //   }
-      // });
-
-      // this.table.on("dataFiltering", (filters) => {
-      //   // Skip if this is just initialization
-      //   if (!this.table.headerFiltersInitialized) {
-      //     this.table.headerFiltersInitialized = true;
-      //     return;
-      //   }
-        
-      //   // Prevent the default filtering behavior
-      //   // This is crucial - it stops the automatic AJAX request
-      //   filters.preventDefault();
-        
-      //   const headerFilters = this.table.getHeaderFilters();
-      //   this.table.headerFiltersInitialized = false;
-        
-      //   // Create a single combined filter object
-      //   let combinedFilter;
-        
-      //   if (headerFilters.length === 0) {
-      //     combinedFilter = this.initialFilter;
-      //   } else {
-      //     combinedFilter = headerFilters;
-      //   }
-        
-      //   // Apply the filter without triggering AJAX
-      //   this.table.setFilter(combinedFilter, false, true); // true for silent mode
-        
-      //   // Now manually trigger a single data refresh
-      //   this.table.setPage(this.table.getPage()); // Reloads current page with new filters
-      // });
-
       this.table.on("dataFiltering", (filters) => {
         // Skip if this is just initialization
         if (!this.table.headerFiltersInitialized) {
