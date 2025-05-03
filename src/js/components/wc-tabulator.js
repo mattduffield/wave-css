@@ -443,35 +443,35 @@ if (!customElements.get('wc-tabulator')) {
       //   }
       // });
 
-      this.table.on("dataFiltering", (filters) => {
-        // Skip if this is just initialization
-        if (!this.table.headerFiltersInitialized) {
-          this.table.headerFiltersInitialized = true;
-          return;
-        }
+      // this.table.on("dataFiltering", (filters) => {
+      //   // Skip if this is just initialization
+      //   if (!this.table.headerFiltersInitialized) {
+      //     this.table.headerFiltersInitialized = true;
+      //     return;
+      //   }
         
-        // Prevent the default filtering behavior
-        // This is crucial - it stops the automatic AJAX request
-        filters.preventDefault();
+      //   // Prevent the default filtering behavior
+      //   // This is crucial - it stops the automatic AJAX request
+      //   filters.preventDefault();
         
-        const headerFilters = this.table.getHeaderFilters();
-        this.table.headerFiltersInitialized = false;
+      //   const headerFilters = this.table.getHeaderFilters();
+      //   this.table.headerFiltersInitialized = false;
         
-        // Create a single combined filter object
-        let combinedFilter;
+      //   // Create a single combined filter object
+      //   let combinedFilter;
         
-        if (headerFilters.length === 0) {
-          combinedFilter = this.initialFilter;
-        } else {
-          combinedFilter = headerFilters;
-        }
+      //   if (headerFilters.length === 0) {
+      //     combinedFilter = this.initialFilter;
+      //   } else {
+      //     combinedFilter = headerFilters;
+      //   }
         
-        // Apply the filter without triggering AJAX
-        this.table.setFilter(combinedFilter, false, true); // true for silent mode
+      //   // Apply the filter without triggering AJAX
+      //   this.table.setFilter(combinedFilter, false, true); // true for silent mode
         
-        // Now manually trigger a single data refresh
-        this.table.setPage(this.table.getPage()); // Reloads current page with new filters
-      });
+      //   // Now manually trigger a single data refresh
+      //   this.table.setPage(this.table.getPage()); // Reloads current page with new filters
+      // });
 
     }
 
