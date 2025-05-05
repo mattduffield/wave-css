@@ -4086,7 +4086,7 @@ if (!customElements.get("wc-split-button")) {
       drpContent.style.positionAnchor = `--${id}-anchor`;
       drpContent.style.positionArea = positionArea;
       drpContent.style.positionTryFallbacks = positionTryFallbacks;
-      drpContent.style.minWidth = `${btn.offsetWidth}px`;
+      drpContent.style.minWidth = `calc(100% - 20px`;
       this.parts.forEach((part) => {
         drpContent.appendChild(part);
       });
