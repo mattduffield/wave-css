@@ -64,7 +64,7 @@ if (!customElements.get('wc-split-button')) {
       const markup = `
         <button id="${id}" type="button" class="btn">${label}</button>
         <div class="dropdown">
-          <div class="dropdown-content">
+          <div class="dropdown-content text-sm">
           </div>
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"

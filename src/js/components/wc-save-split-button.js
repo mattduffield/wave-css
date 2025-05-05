@@ -71,7 +71,7 @@ if (!customElements.get('wc-save-split-button')) {
           hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
-          <div class="dropdown-content">
+          <div class="dropdown-content text-sm">
             <a class="save-new-btn btn w-full"
               hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''}
               data-url="${saveNewUrl}">

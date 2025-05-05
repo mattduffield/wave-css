@@ -3865,7 +3865,7 @@ if (!customElements.get("wc-save-split-button")) {
           hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
-          <div class="dropdown-content">
+          <div class="dropdown-content text-sm">
             <a class="save-new-btn btn w-full"
               hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""}
               data-url="${saveNewUrl}">
@@ -4068,7 +4068,7 @@ if (!customElements.get("wc-split-button")) {
       const markup = `
         <button id="${id}" type="button" class="btn">${label}</button>
         <div class="dropdown">
-          <div class="dropdown-content">
+          <div class="dropdown-content text-sm">
           </div>
           <button type="button" class="btn" style="border-left:1px solid var(--component-border-color);">
             <svg class="h-3 w-3 pointer-events-none"
