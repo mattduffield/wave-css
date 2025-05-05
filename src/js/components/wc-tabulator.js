@@ -423,7 +423,7 @@ if (!customElements.get('wc-tabulator')) {
       //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
       // });
 
-      this.table.on("dataFiltering", (filters) => {
+      this.table.on("dataFiltering2", (filters) => {
         // Skip if this is just initialization
         if (!this.table.headerFiltersInitialized) {
           this.table.headerFiltersInitialized = true;
@@ -452,6 +452,50 @@ if (!customElements.get('wc-tabulator')) {
         this.table.getData();
       });
 
+      // Create a flag to track programmatic filter changes
+      let isInternalFilterChange = false;
+
+      // Handle dataFiltering event
+      this.table.on("dataFiltering", (filters) => {
+        // Skip if this is an internal change we're making
+        if (isInternalFilterChange) {
+          return;
+        }
+        
+        // Skip if this is just initialization
+        if (!this.table.headerFiltersInitialized) {
+          this.table.headerFiltersInitialized = true;
+          return;
+        }
+        
+        const headerFilters = this.table.getHeaderFilters();
+        
+        // Temporarily disable ajax
+        const originalAjaxURL = this.table.modules.ajax.url;
+        this.table.modules.ajax.url = false;
+        
+        // Set flag to prevent recursion
+        isInternalFilterChange = true;
+        
+        // Apply filters without triggering recursive events
+        if (headerFilters.length === 0) {
+          this.table.clearFilter(true);
+          this.table.setFilter(this.initialFilter);
+        } else {
+          this.table.setFilter(headerFilters);
+        }
+        
+        // Reset flag
+        isInternalFilterChange = false;
+        
+        // Restore ajax and trigger a single request
+        this.table.modules.ajax.url = originalAjaxURL;
+        this.table.headerFiltersInitialized = false;
+        
+        // Force a single data refresh without triggering filter events
+        // Use setPage instead of getData to avoid recursive filtering
+        this.table.setPage(this.table.getPage());
+      });
     }
 
     getFuncs() {
