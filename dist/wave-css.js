@@ -5783,24 +5783,6 @@ if (!customElements.get("wc-tabulator")) {
           }, 10);
         }
       });
-      this.table.on("dataFiltering2", (filters) => {
-        if (!this.table.headerFiltersInitialized) {
-          this.table.headerFiltersInitialized = true;
-          return;
-        }
-        const headerFilters = this.table.getHeaderFilters();
-        const originalAjaxURL = this.table.modules.ajax.url;
-        this.table.modules.ajax.url = false;
-        if (headerFilters.length === 0) {
-          this.table.clearFilter(true);
-          this.table.setFilter(this.initialFilter);
-        } else {
-          this.table.setFilter(headerFilters);
-        }
-        this.table.modules.ajax.url = originalAjaxURL;
-        this.table.headerFiltersInitialized = false;
-        this.table.getData();
-      });
       let isInternalFilterChange = false;
       this.table.on("dataFiltering", (filters) => {
         if (isInternalFilterChange) {

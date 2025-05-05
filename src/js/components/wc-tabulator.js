@@ -423,35 +423,6 @@ if (!customElements.get('wc-tabulator')) {
       //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
       // });
 
-      this.table.on("dataFiltering2", (filters) => {
-        // Skip if this is just initialization
-        if (!this.table.headerFiltersInitialized) {
-          this.table.headerFiltersInitialized = true;
-          return;
-        }
-        
-        const headerFilters = this.table.getHeaderFilters();
-        
-        // Temporarily disable ajax
-        const originalAjaxURL = this.table.modules.ajax.url;
-        this.table.modules.ajax.url = false;
-        
-        // Apply filters without triggering ajax
-        if (headerFilters.length === 0) {
-          this.table.clearFilter(true);
-          this.table.setFilter(this.initialFilter);
-        } else {
-          this.table.setFilter(headerFilters);
-        }
-        
-        // Restore ajax and trigger a single request
-        this.table.modules.ajax.url = originalAjaxURL;
-        this.table.headerFiltersInitialized = false;
-        
-        // Force a single data refresh
-        this.table.getData();
-      });
-
 
       // Create a flag to track programmatic filter changes
       let isInternalFilterChange = false;
