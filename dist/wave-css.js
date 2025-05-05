@@ -5810,20 +5810,22 @@ if (!customElements.get("wc-tabulator")) {
           this.table.headerFiltersInitialized = true;
           return;
         }
-        const headerFilters = this.table.getHeaderFilters();
-        const originalAjaxURL = this.table.modules.ajax.url;
-        this.table.modules.ajax.url = false;
-        isInternalFilterChange = true;
-        if (headerFilters.length === 0) {
-          this.table.clearFilter(true);
-          this.table.setFilter(this.initialFilter);
-        } else {
-          this.table.setFilter(headerFilters);
+        if (this.initialFilter && this.initialFilter.length > 0) {
+          const headerFilters = this.table.getHeaderFilters();
+          const originalAjaxURL = this.table.modules.ajax.url;
+          this.table.modules.ajax.url = false;
+          isInternalFilterChange = true;
+          if (headerFilters.length === 0) {
+            this.table.clearFilter(true);
+            this.table.setFilter(this.initialFilter);
+          } else {
+            this.table.setFilter(headerFilters);
+          }
+          isInternalFilterChange = false;
+          this.table.modules.ajax.url = originalAjaxURL;
+          this.table.headerFiltersInitialized = false;
+          this.table.setPage(this.table.getPage());
         }
-        isInternalFilterChange = false;
-        this.table.modules.ajax.url = originalAjaxURL;
-        this.table.headerFiltersInitialized = false;
-        this.table.setPage(this.table.getPage());
       });
     }
     getFuncs() {

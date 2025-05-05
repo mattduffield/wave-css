@@ -452,6 +452,7 @@ if (!customElements.get('wc-tabulator')) {
         this.table.getData();
       });
 
+
       // Create a flag to track programmatic filter changes
       let isInternalFilterChange = false;
 
@@ -468,33 +469,35 @@ if (!customElements.get('wc-tabulator')) {
           return;
         }
         
-        const headerFilters = this.table.getHeaderFilters();
-        
-        // Temporarily disable ajax
-        const originalAjaxURL = this.table.modules.ajax.url;
-        this.table.modules.ajax.url = false;
-        
-        // Set flag to prevent recursion
-        isInternalFilterChange = true;
-        
-        // Apply filters without triggering recursive events
-        if (headerFilters.length === 0) {
-          this.table.clearFilter(true);
-          this.table.setFilter(this.initialFilter);
-        } else {
-          this.table.setFilter(headerFilters);
+        // Only proceed if there's an initial filter defined
+        if (this.initialFilter && this.initialFilter.length > 0) {
+          const headerFilters = this.table.getHeaderFilters();
+          
+          // Temporarily disable ajax
+          const originalAjaxURL = this.table.modules.ajax.url;
+          this.table.modules.ajax.url = false;
+          
+          // Set flag to prevent recursion
+          isInternalFilterChange = true;
+          
+          // Apply filters without triggering recursive events
+          if (headerFilters.length === 0) {
+            this.table.clearFilter(true);
+            this.table.setFilter(this.initialFilter);
+          } else {
+            this.table.setFilter(headerFilters);
+          }
+          
+          // Reset flag
+          isInternalFilterChange = false;
+          
+          // Restore ajax and trigger a single request
+          this.table.modules.ajax.url = originalAjaxURL;
+          this.table.headerFiltersInitialized = false;
+          
+          // Force a single data refresh without triggering filter events
+          this.table.setPage(this.table.getPage());
         }
-        
-        // Reset flag
-        isInternalFilterChange = false;
-        
-        // Restore ajax and trigger a single request
-        this.table.modules.ajax.url = originalAjaxURL;
-        this.table.headerFiltersInitialized = false;
-        
-        // Force a single data refresh without triggering filter events
-        // Use setPage instead of getData to avoid recursive filtering
-        this.table.setPage(this.table.getPage());
       });
     }
 
