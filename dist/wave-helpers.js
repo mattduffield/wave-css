@@ -20,14 +20,18 @@ var WaveHelpers = (() => {
   // src/js/components/helper-function.js
   var helper_function_exports = {};
   __export(helper_function_exports, {
+    applyRule: () => applyRule,
     checkResources: () => checkResources,
     countElements: () => countElements,
     disableSortable: () => disableSortable,
     enableSortable: () => enableSortable,
+    extractRules: () => extractRules,
     fetchApi: () => fetchApi,
     generateUniqueId: () => generateUniqueId,
+    getSourcePropertyValue: () => getSourcePropertyValue,
     hide: () => hide,
     hideAndShow: () => hideAndShow,
+    initRules: () => initRules,
     isCustomElement: () => isCustomElement,
     loadCSS: () => loadCSS,
     loadLibrary: () => loadLibrary,
@@ -39,6 +43,7 @@ var WaveHelpers = (() => {
     processJSONField: () => processJSONField,
     show: () => show,
     sleep: () => sleep,
+    testSchema: () => testSchema,
     toggleIndicator: () => toggleIndicator,
     updateJetTemplate: () => updateJetTemplate,
     waitForPropertyPolling: () => waitForPropertyPolling,
@@ -408,6 +413,145 @@ var WaveHelpers = (() => {
         console.error("Error parsing JSON:", error);
       }
     }
+  }
+  function testSchema(value, schema) {
+    if (value === void 0 || value === null) {
+      return false;
+    }
+    if ("const" in schema) {
+      return value === schema.const;
+    }
+    if ("enum" in schema) {
+      return Array.isArray(schema.enum) && schema.enum.includes(value);
+    }
+    if ("minimum" in schema) {
+      const num = typeof value === "number" ? value : parseFloat(value);
+      if (isNaN(num) || num < schema.minimum) {
+        return false;
+      }
+    }
+    if ("maximum" in schema) {
+      const num = typeof value === "number" ? value : parseFloat(value);
+      if (isNaN(num) || num > schema.maximum) {
+        return false;
+      }
+    }
+    if ("minLength" in schema) {
+      const str = String(value);
+      if (str.length < schema.minLength) {
+        return false;
+      }
+    }
+    if ("maxLength" in schema) {
+      const str = String(value);
+      if (str.length > schema.maxLength) {
+        return false;
+      }
+    }
+    if ("pattern" in schema) {
+      const re = new RegExp(schema.pattern);
+      if (typeof value !== "string" || !re.test(value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function getSourcePropertyValue(srcDataId, srcSelector, srcProperty) {
+    let selector = "";
+    if (srcDataId) {
+      selector = `[data-id="${srcDataId}"]`;
+      if (srcSelector) {
+        selector += ` ${srcSelector}`;
+      }
+    } else {
+      if (srcSelector) {
+        selector = srcSelector;
+      }
+    }
+    if (!selector) return void 0;
+    const el = document.querySelector(selector);
+    if (!el) return void 0;
+    if (srcProperty && srcProperty in el) {
+      return el[srcProperty];
+    }
+    if (el.type === "checkbox") {
+      return el.checked;
+    }
+    return el.value;
+  }
+  function applyRule(rule) {
+    const { effect, condition, tgtDataId, tgtSelector, tgtProperty } = rule;
+    const { scope, schema, srcDataId, srcSelector, srcProperty, property } = condition;
+    const value = getSourcePropertyValue(srcDataId, srcSelector, srcProperty);
+    let match = false;
+    if (schema) {
+      match = testSchema(value, schema);
+    }
+    let selector = `[data-id="${tgtDataId}"]`;
+    if (tgtSelector) {
+      selector += ` ${tgtSelector}`;
+    }
+    let targetEl = document.querySelector(selector);
+    if (!targetEl) return;
+    switch (effect) {
+      case "COPY":
+        targetEl[tgtProperty] = value;
+        break;
+      case "COPY-TOLOWER":
+        targetEl[tgtProperty] = value.toString().toLowerCase();
+        break;
+      case "COPY-TOLOWER-UNDERSCORE":
+        targetEl[tgtProperty] = value.toString().toLowerCase().replaceAll(" ", "_");
+        break;
+      case "HIDE":
+        targetEl.style.display = match ? "none" : "";
+        break;
+      case "SHOW":
+        targetEl.style.display = match ? "" : "none";
+        break;
+      case "DISABLE":
+        targetEl.disabled = match;
+        break;
+      case "ENABLE":
+        targetEl.disabled = !match;
+        break;
+      case "REQUIRE":
+        targetEl.required = !match;
+        break;
+      case "UN-REQUIRE":
+        targetEl.required = match;
+        break;
+      default:
+        console.warn("Unknown rule effect:", effect);
+    }
+  }
+  function initRules(rules) {
+    const srcDataIds = Array.from(new Set(rules.map((r) => r.condition.srcDataId)));
+    srcDataIds.forEach((id) => {
+      document.querySelectorAll(`[data-id="${id}"]`).forEach((el) => {
+        const elRules = Array.from(rules).filter((r) => r.condition.srcDataId == id);
+        el.addEventListener("change", () => {
+          elRules.forEach(applyRule);
+        });
+        el.addEventListener("input", () => {
+          elRules.forEach(applyRule);
+        });
+      });
+    });
+    rules.forEach(applyRule);
+  }
+  function extractRules(node) {
+    const rules = [];
+    (function traverse(obj) {
+      if (!obj || typeof obj !== "object") return;
+      if (obj.rules) {
+        rules.push(...obj.rules);
+      }
+      if (Array.isArray(obj.elements)) {
+        obj.elements.forEach(traverse);
+      }
+    })(node);
+    return rules;
   }
   return __toCommonJS(helper_function_exports);
 })();

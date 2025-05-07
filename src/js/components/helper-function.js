@@ -442,6 +442,9 @@ export function toggleIndicator(selector, show) {
     }
   }
 }
+//
+//TODO: Need to remove this
+//
 export function processJSONField(event, selector) {
   const elt = event.detail.elt;
   const form = elt.closest('form');
@@ -499,4 +502,201 @@ export function processJSONField(event, selector) {
       console.error('Error parsing JSON:', error);
     }
   }
+}
+
+
+
+/**
+ * Very minimal JSON-Schema check: supports const, enum,
+ * minimum/maximum, minLength/maxLength, and pattern.
+ * 
+ * Example rule format:
+ * {
+ *   effect:   'HIDE' | 'SHOW' | 'ENABLE' | 'DISABLE' | 'REQUIRE' | 'UN-REQUIRE',
+ *   condition: {
+ *     scope:    '#/properties/foo',
+ *     schema:   { minimum: 0, maxLength: 5, pattern: '^[A-Z]' },
+ *     property: 'value'          // optional, defaults to checkbox/value logic
+ *   },
+ *   target:   '#some-container'  // CSS selector for the control wrapper
+ * }
+ */
+
+export function testSchema(value, schema) {
+  // Treat undefined as no-match
+  if (value === undefined || value === null) {
+    return false;
+  }
+
+  // const
+  if ('const' in schema) {
+    return value === schema.const;
+  }
+
+  // enum
+  if ('enum' in schema) {
+    return Array.isArray(schema.enum) && schema.enum.includes(value);
+  }
+
+  // minimum (>=)
+  if ('minimum' in schema) {
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(num) || num < schema.minimum) {
+      return false;
+    }
+  }
+
+  // maximum (<=)
+  if ('maximum' in schema) {
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(num) || num > schema.maximum) {
+      return false;
+    }
+  }
+
+  // minLength (string length >=)
+  if ('minLength' in schema) {
+    const str = String(value);
+    if (str.length < schema.minLength) {
+      return false;
+    }
+  }
+
+  // maxLength (string length <=)
+  if ('maxLength' in schema) {
+    const str = String(value);
+    if (str.length > schema.maxLength) {
+      return false;
+    }
+  }
+
+  // pattern (RegExp match)
+  if ('pattern' in schema) {
+    // Note: pattern should not include delimiters like /^...$/ in JSON Schema
+    const re = new RegExp(schema.pattern);
+    if (typeof value !== 'string' || !re.test(value)) {
+      return false;
+    }
+  }
+
+  // Passed all checks we care about
+  return true;
+}
+
+export function getSourcePropertyValue(srcDataId, srcSelector, srcProperty) {
+  let selector = '';
+  if (srcDataId) {
+    selector = `[data-id="${srcDataId}"]`;
+    if (srcSelector) {
+      selector += ` ${srcSelector}`;
+    }  
+  } else {
+    if (srcSelector) {
+      selector = srcSelector;
+    }
+  }
+  if (!selector) return undefined;
+  
+  const el = document.querySelector(selector);
+  if (!el) return undefined;
+
+  if (srcProperty && srcProperty in el) {
+    return el[srcProperty];
+  }
+  if (el.type === 'checkbox') {
+    return el.checked;
+  }
+  return el.value;
+}
+
+export function applyRule(rule) {
+  const { effect, condition, tgtDataId, tgtSelector, tgtProperty } = rule;
+  const { scope, schema, srcDataId, srcSelector, srcProperty, property } = condition;
+  const value = getSourcePropertyValue(srcDataId, srcSelector, srcProperty);
+  let match = false;
+  if (schema) {
+    match = testSchema(value, schema);
+  }
+  let selector = `[data-id="${tgtDataId}"]`;
+  if (tgtSelector) {
+    selector += ` ${tgtSelector}`;
+  }
+  let targetEl = document.querySelector(selector);
+  if (!targetEl) return;
+
+  switch (effect) {
+    case 'COPY':
+      targetEl[tgtProperty] = value;
+      break;
+    case 'COPY-TOLOWER':
+      targetEl[tgtProperty] = value.toString().toLowerCase();
+      break;
+    case 'COPY-TOLOWER-UNDERSCORE':
+      targetEl[tgtProperty] = value.toString().toLowerCase().replaceAll(' ', '_');
+      break;
+    case 'HIDE':
+      targetEl.style.display = match ? 'none' : '';
+      break;
+    case 'SHOW':
+      targetEl.style.display = match ? '' : 'none';
+      break;
+    case 'DISABLE':
+      targetEl.disabled = match;
+      break;
+    case 'ENABLE':
+      targetEl.disabled = !match;
+      break;
+    case 'REQUIRE':
+      targetEl.required = !match;
+      break;
+    case 'UN-REQUIRE':
+      targetEl.required = match;
+      break;
+    default:
+      console.warn('Unknown rule effect:', effect);
+  }
+}
+
+export function initRules(rules) {
+  const srcDataIds = Array.from(new Set(rules.map(r => r.condition.srcDataId)));
+  srcDataIds.forEach(id => {
+    document
+      .querySelectorAll(`[data-id="${id}"]`)
+      .forEach(el => {
+        const elRules = Array.from(rules).filter(r => r.condition.srcDataId == id);
+        el.addEventListener('change', () => {
+          elRules.forEach(applyRule)
+        });
+        el.addEventListener('input',  () => {
+          elRules.forEach(applyRule)
+        });
+      });
+  });
+  // initial application
+  rules.forEach(applyRule);
+}
+
+/**
+ * Recursively extract all rule objects from a Pongo-style UI schema.
+ * @param {object} node  The root of your layout JSON
+ * @returns {Array}      An array of all `rule` entries found
+ */
+export function extractRules(node) {
+  const rules = [];
+
+  (function traverse(obj) {
+    if (!obj || typeof obj !== 'object') return;
+
+    // if this node has a rule, grab it
+    if (obj.rules) {
+      rules.push(...obj.rules);
+    }
+
+    // if it has an "elements" array, recurse into each child
+    if (Array.isArray(obj.elements)) {
+      obj.elements.forEach(traverse);
+    }
+  })(node);
+
+  return rules;
 }
