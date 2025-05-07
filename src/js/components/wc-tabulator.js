@@ -109,7 +109,7 @@ if (!customElements.get('wc-tabulator')) {
             text: 'This record will be deleted. Are you sure?',
             callback: (result) => {
               if (this.funcs['onDelete']) {
-                this.funcs['onDelete'](result);
+                this.funcs['onDelete'](row, result);
               }
             }
           });
