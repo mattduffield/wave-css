@@ -429,10 +429,11 @@ if (!customElements.get('wc-tabulator')) {
 
       // Handle dataFiltering event
       this.table.on("dataFiltering", (filters) => {
-        // Skip if this is an internal change we're making
-        if (isInternalFilterChange) {
-          return;
-        }
+        console.log('dataFiltering', filters);
+        // // Skip if this is an internal change we're making
+        // if (isInternalFilterChange) {
+        //   return;
+        // }
         
         // // Skip if this is just initialization
         // if (!this.table.headerFiltersInitialized) {
@@ -440,35 +441,35 @@ if (!customElements.get('wc-tabulator')) {
         //   return;
         // }
         
-        // Only proceed if there's an initial filter defined
-        if (this.initialFilter && this.initialFilter.length > 0) {
-          const headerFilters = this.table.getHeaderFilters();
+        // // Only proceed if there's an initial filter defined
+        // if (this.initialFilter && this.initialFilter.length > 0) {
+        //   const headerFilters = this.table.getHeaderFilters();
           
-          // Temporarily disable ajax
-          const originalAjaxURL = this.table.modules.ajax.url;
-          this.table.modules.ajax.url = false;
+        //   // Temporarily disable ajax
+        //   const originalAjaxURL = this.table.modules.ajax.url;
+        //   this.table.modules.ajax.url = false;
           
-          // Set flag to prevent recursion
-          isInternalFilterChange = true;
+        //   // Set flag to prevent recursion
+        //   isInternalFilterChange = true;
           
-          // Apply filters without triggering recursive events
-          if (headerFilters.length === 0) {
-            // this.table.clearFilter(true);
-            this.table.setFilter(this.initialFilter);
-          } else {
-            this.table.setFilter(headerFilters);
-          }
+        //   // Apply filters without triggering recursive events
+        //   if (headerFilters.length === 0) {
+        //     this.table.clearFilter(true);
+        //     this.table.setFilter(this.initialFilter);
+        //   } else {
+        //     this.table.setFilter(headerFilters);
+        //   }
           
-          // Reset flag
-          isInternalFilterChange = false;
+        //   // Reset flag
+        //   isInternalFilterChange = false;
           
-          // Restore ajax and trigger a single request
-          this.table.modules.ajax.url = originalAjaxURL;
-          // this.table.headerFiltersInitialized = false;
+        //   // Restore ajax and trigger a single request
+        //   this.table.modules.ajax.url = originalAjaxURL;
+        //   this.table.headerFiltersInitialized = false;
           
-          // Force a single data refresh without triggering filter events
-          this.table.setPage(this.table.getPage());
-        }
+        //   // Force a single data refresh without triggering filter events
+        //   this.table.setPage(this.table.getPage());
+        // }
       });
     }
 

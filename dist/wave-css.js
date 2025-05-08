@@ -5924,23 +5924,7 @@ if (!customElements.get("wc-tabulator")) {
       });
       let isInternalFilterChange = false;
       this.table.on("dataFiltering", (filters) => {
-        if (isInternalFilterChange) {
-          return;
-        }
-        if (this.initialFilter && this.initialFilter.length > 0) {
-          const headerFilters = this.table.getHeaderFilters();
-          const originalAjaxURL = this.table.modules.ajax.url;
-          this.table.modules.ajax.url = false;
-          isInternalFilterChange = true;
-          if (headerFilters.length === 0) {
-            this.table.setFilter(this.initialFilter);
-          } else {
-            this.table.setFilter(headerFilters);
-          }
-          isInternalFilterChange = false;
-          this.table.modules.ajax.url = originalAjaxURL;
-          this.table.setPage(this.table.getPage());
-        }
+        console.log("dataFiltering", filters);
       });
     }
     getFuncs() {
