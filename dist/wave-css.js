@@ -5933,7 +5933,6 @@ if (!customElements.get("wc-tabulator")) {
           this.table.modules.ajax.url = false;
           isInternalFilterChange = true;
           if (headerFilters.length === 0) {
-            this.table.clearFilter(true);
             this.table.setFilter(this.initialFilter);
           } else {
             this.table.setFilter(headerFilters);

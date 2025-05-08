@@ -453,7 +453,7 @@ if (!customElements.get('wc-tabulator')) {
           
           // Apply filters without triggering recursive events
           if (headerFilters.length === 0) {
-            this.table.clearFilter(true);
+            // this.table.clearFilter(true);
             this.table.setFilter(this.initialFilter);
           } else {
             this.table.setFilter(headerFilters);
