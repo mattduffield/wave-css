@@ -6529,6 +6529,9 @@ if (!customElements.get("wc-tabulator")) {
     background-color: var(--primary-bg-color);
     color: var(--surface-1);
   }
+  .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover input {
+    color: var(--component-color);
+  }
 
   /* Table Rows */
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd .tabulator-cell.tabulator-row-header.tabulator-row-handle,
