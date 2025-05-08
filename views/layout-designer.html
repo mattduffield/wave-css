@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layout JSON Designer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+  <link href="layout-designer.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Layout JSON Designer</a>
+      <div class="d-flex">
+        <button id="preview-button" class="btn btn-outline-primary me-2">Preview</button>
+        <button id="generate-json-button" class="btn btn-primary">Generate JSON</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="designer-container">
+    <!-- Left Panel - Elements -->
+    <div class="panel left-panel">
+      <h5>Containers</h5>
+      <div class="element-list" id="container-elements">
+        <div class="element-item" data-element-type="wc-tab" draggable="true">Tab Container</div>
+        <div class="element-item" data-element-type="wc-tab-item" draggable="true">Tab Item</div>
+        <div class="element-item" data-element-type="column" draggable="true">Column</div>
+        <div class="element-item" data-element-type="row" draggable="true">Row</div>
+        <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
+        <div class="element-item" data-element-type="array" draggable="true">Array</div>
+        <div class="element-item" data-element-type="wc-card" draggable="true">Card</div>
+      </div>
+      
+      <h5>Form Elements</h5>
+      <div class="element-list" id="form-elements">
+        <div class="element-item" data-element-type="wc-input" draggable="true">Input</div>
+        <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">Checkbox</div>
+        <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
+      </div>
+      
+      <h5>Schema Fields</h5>
+      <div class="element-list" id="schema-fields">
+        <!-- Will be populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Center Panel - Designer Surface -->
+    <div class="panel center-panel">
+      <div class="designer-surface" id="designer-surface"></div>
+      
+      <div class="preview-container hidden" id="preview-container">
+        <div class="d-flex justify-content-between mb-3">
+          <h4>Preview</h4>
+          <button id="close-preview-button" class="btn btn-outline-secondary">Close</button>
+        </div>
+        <div id="preview-content"></div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Properties -->
+    <div class="panel right-panel">
+      <div class="tab-container">
+        <div class="tab-headers">
+          <div class="tab-header active" data-tab="properties">Properties</div>
+          <div class="tab-header" data-tab="rules">Rules</div>
+          <div class="tab-header" data-tab="schema">Schema</div>
+        </div>
+        <div class="tab-content">
+          <!-- Properties Tab -->
+          <div id="properties-tab" class="tab-pane active">
+            <div id="no-selection" class="text-center text-muted py-4">
+              <p>Select an element to view and edit its properties</p>
+            </div>
+            <div id="element-properties" class="d-none">
+              <div class="mb-3">
+                <label for="prop-id" class="form-label">ID</label>
+                <input type="text" class="form-control" id="prop-id" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="prop-type" class="form-label">Type</label>
+                <input type="text" class="form-control" id="prop-type" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="prop-label" class="form-label">Label</label>
+                <input type="text" class="form-control" id="prop-label">
+              </div>
+              <div class="mb-3">
+                <label for="prop-scope" class="form-label">Scope</label>
+                <input type="text" class="form-control" id="prop-scope">
+              </div>
+              <div class="mb-3">
+                <label for="prop-css" class="form-label">CSS Classes</label>
+                <input type="text" class="form-control" id="prop-css">
+              </div>
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="prop-required">
+                <label class="form-check-label" for="prop-required">Required</label>
+              </div>
+              <button id="save-properties" class="btn btn-primary">Apply</button>
+            </div>
+          </div>
+          
+          <!-- Rules Tab -->
+          <div id="rules-tab" class="tab-pane d-none">
+            <div id="rules-no-selection" class="text-center text-muted py-4">
+              <p>Select an element to view and edit its rules</p>
+            </div>
+            <div id="element-rules" class="d-none">
+              <div id="rules-list">
+                <!-- Rules will be added here -->
+              </div>
+              <button id="add-rule" class="btn btn-primary mt-3">Add Rule</button>
+            </div>
+          </div>
+          
+          <!-- Schema Tab -->
+          <div id="schema-tab" class="tab-pane d-none">
+            <div class="mb-3">
+              <label for="schema-json" class="form-label">JSON Schema</label>
+              <textarea class="form-control" id="schema-json" rows="10"></textarea>
+            </div>
+            <button id="load-schema" class="btn btn-primary">Load Schema</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Rule Modal -->
+  <div class="modal fade" id="rule-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Rule</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="rule-effect" class="form-label">Effect</label>
+            <select class="form-select" id="rule-effect">
+              <option value="COPY">Copy Value</option>
+              <option value="COPY-TOLOWER">Copy to Lowercase</option>
+              <option value="COPY-TOLOWER-UNDERSCORE">Copy to Lowercase with Underscores</option>
+              <option value="SHOW">Show Element</option>
+              <option value="HIDE">Hide Element</option>
+              <option value="ENABLE">Enable Element</option>
+              <option value="DISABLE">Disable Element</option>
+              <option value="REQUIRE">Make Required</option>
+              <option value="UN-REQUIRE">Make Optional</option>
+            </select>
+          </div>
+          
+          <h6>Condition</h6>
+          <div class="mb-3">
+            <label for="rule-condition-scope" class="form-label">Scope</label>
+            <input type="text" class="form-control" id="rule-condition-scope">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Schema Validation</label>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <select class="form-select" id="rule-schema-type">
+                  <option value="minLength">Min Length</option>
+                  <option value="maxLength">Max Length</option>
+                  <option value="pattern">Pattern</option>
+                  <option value="minimum">Minimum</option>
+                  <option value="maximum">Maximum</option>
+                  <option value="const">Constant</option>
+                  <option value="enum">Enum</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <input type="text" class="form-control" id="rule-schema-value" placeholder="Value">
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="rule-src-data-id" class="form-label">Source Element ID</label>
+            <input type="text" class="form-control" id="rule-src-data-id">
+          </div>
+          
+          <div class="mb-3">
+            <label for="rule-src-selector" class="form-label">Source Selector (optional)</label>
+            <input type="text" class="form-control" id="rule-src-selector" placeholder="e.g. input">
+          </div>
+          
+          <div class="mb-3">
+            <label for="rule-src-property" class="form-label">Source Property (optional)</label>
+            <input type="text" class="form-control" id="rule-src-property" placeholder="e.g. value">
+          </div>
+          
+          <h6>Target</h6>
+          <div class="mb-3">
+            <label for="rule-tgt-data-id" class="form-label">Target Element ID</label>
+            <input type="text" class="form-control" id="rule-tgt-data-id">
+          </div>
+          
+          <div class="mb-3">
+            <label for="rule-tgt-selector" class="form-label">Target Selector (optional)</label>
+            <input type="text" class="form-control" id="rule-tgt-selector" placeholder="e.g. input">
+          </div>
+          
+          <div class="mb-3">
+            <label for="rule-tgt-property" class="form-label">Target Property</label>
+            <input type="text" class="form-control" id="rule-tgt-property" placeholder="e.g. value">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-rule">Save Rule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JSON Output Modal -->
+  <div class="modal fade" id="json-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Generated Layout JSON</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <pre id="json-output" class="bg-light p-3" style="max-height: 70vh; overflow-y: auto; white-space: pre-wrap;"></pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="copy-json">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout-designer.js"></script>
+</body>
+</html>

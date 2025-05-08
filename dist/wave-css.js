@@ -5927,10 +5927,6 @@ if (!customElements.get("wc-tabulator")) {
         if (isInternalFilterChange) {
           return;
         }
-        if (!this.table.headerFiltersInitialized) {
-          this.table.headerFiltersInitialized = true;
-          return;
-        }
         if (this.initialFilter && this.initialFilter.length > 0) {
           const headerFilters = this.table.getHeaderFilters();
           const originalAjaxURL = this.table.modules.ajax.url;
@@ -5944,7 +5940,6 @@ if (!customElements.get("wc-tabulator")) {
           }
           isInternalFilterChange = false;
           this.table.modules.ajax.url = originalAjaxURL;
-          this.table.headerFiltersInitialized = false;
           this.table.setPage(this.table.getPage());
         }
       });

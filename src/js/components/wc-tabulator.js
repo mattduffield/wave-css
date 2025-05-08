@@ -434,11 +434,11 @@ if (!customElements.get('wc-tabulator')) {
           return;
         }
         
-        // Skip if this is just initialization
-        if (!this.table.headerFiltersInitialized) {
-          this.table.headerFiltersInitialized = true;
-          return;
-        }
+        // // Skip if this is just initialization
+        // if (!this.table.headerFiltersInitialized) {
+        //   this.table.headerFiltersInitialized = true;
+        //   return;
+        // }
         
         // Only proceed if there's an initial filter defined
         if (this.initialFilter && this.initialFilter.length > 0) {
@@ -464,7 +464,7 @@ if (!customElements.get('wc-tabulator')) {
           
           // Restore ajax and trigger a single request
           this.table.modules.ajax.url = originalAjaxURL;
-          this.table.headerFiltersInitialized = false;
+          // this.table.headerFiltersInitialized = false;
           
           // Force a single data refresh without triggering filter events
           this.table.setPage(this.table.getPage());
