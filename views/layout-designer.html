@@ -1,28 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-azure light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Layout JSON Designer</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
   <link href="layout-designer.css" rel="stylesheet">
+
+  <link href="https://mattduffield.github.io/wave-css/dist/wave-css.css" rel="stylesheet" type="text/css">
+  
+  <script type="module" src="https://mattduffield.github.io/wave-css/dist/wave-css.js"></script>
+  <script src="https://mattduffield.github.io/wave-css/dist/wave-helpers.js"></script>
+  <script src="https://mattduffield.github.io/lite-spec/dist/lite-spec.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Layout JSON Designer</a>
-      <div class="d-flex">
-        <button id="preview-button" class="btn btn-outline-primary me-2">Preview</button>
-        <button id="generate-json-button" class="btn btn-primary">Generate JSON</button>
-      </div>
-    </div>
-  </nav>
-
-  <div class="designer-container">
+  <div class="flex flex-row flex-1 xdesigner-container">
     <!-- Left Panel - Elements -->
-    <div class="panel left-panel">
+    <div class="flex flex-col panel left-panel">
       <h5>Containers</h5>
       <div class="element-list" id="container-elements">
         <div class="element-item" data-element-type="wc-tab" draggable="true">Tab Container</div>
@@ -48,63 +45,88 @@
     </div>
 
     <!-- Center Panel - Designer Surface -->
-    <div class="panel center-panel">
-      <div class="designer-surface" id="designer-surface"></div>
-      
-      <div class="preview-container hidden" id="preview-container">
-        <div class="d-flex justify-content-between mb-3">
-          <h4>Preview</h4>
-          <button id="close-preview-button" class="btn btn-outline-secondary">Close</button>
-        </div>
-        <div id="preview-content"></div>
-      </div>
+    <div id="center-panel" class="flex flex-col flex-1">
+      <wc-tab id="center-tab-control" class="h-full p-2" animate>
+        <wc-tab-item class="active" label="Canvas">
+          <div class="designer-surface min-h-200 max-h-700 overflow-scroll" id="designer-surface"></div>
+        </wc-tab-item>
+        <wc-tab-item label="Schema">
+          <div class="col-1 gap-2 p-4">
+            <wc-code-mirror class="min-h-200 max-h-700"
+              name="schema-json"
+              line-numbers
+              line-wrapper
+              fold-gutter
+              mode="javascript"
+              theme="monokai"
+              tab-size="2"
+              indent-unit="2">
+            </wc-code-mirror>
+            <button id="load-schema" class="btn btn-primary">Load Schema</button>
+          </div>
+        </wc-tab-item>
+        <wc-tab-item class="" label="Preview">
+          <div class="p-4" id="preview-container">
+            <div id="preview-content"></div>
+          </div>
+        </wc-tab-item>
+        <wc-tab-item class="h-full" label="Layout JSON">
+          <wc-code-mirror class="min-h-200 max-h-700"
+            name="json-output"
+            line-numbers
+            line-wrapper
+            fold-gutter
+            mode="javascript"
+            theme="monokai"
+            tab-size="2"
+            indent-unit="2">
+          </wc-code-mirror>
+        </wc-tab-item>
+        <wc-tab-item class="min-h-500 xh-full" label="Pre Rendered Preview">
+          <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="min-h-200 max-h-700 w-full">
+          </iframe>
+        </wc-tab-item>
+        <wc-tab-item class="min-h-500 xh-full" label="Rendered Preview">
+          <iframe id="rendered-preview" name="rendered-preview" class="min-h-200 max-h-700 w-full">
+          </iframe>
+        </wc-tab-item>
+      </wc-tab>
     </div>
-
     <!-- Right Panel - Properties -->
-    <div class="panel right-panel">
-      <div class="tab-container">
-        <div class="tab-headers">
-          <div class="tab-header active" data-tab="properties">Properties</div>
-          <div class="tab-header" data-tab="rules">Rules</div>
-          <div class="tab-header" data-tab="schema">Schema</div>
-        </div>
-        <div class="tab-content">
-          <!-- Properties Tab -->
-          <div id="properties-tab" class="tab-pane active">
-            <div id="no-selection" class="text-center text-muted py-4">
+    <div class="flex flex-col xpanel right-panel">
+      <wc-tab id="right-panel" class="flex flex-col flex-1 p-2" animate>
+        <wc-tab-item class="active" label="Properties">
+          <div class="col-1 gap-2 pt-2 pb-10 px-4">
+            <div id="no-selection" class="col-1 text-center text-muted py-4">
               <p>Select an element to view and edit its properties</p>
             </div>
-            <div id="element-properties" class="d-none">
-              <div class="mb-3">
-                <label for="prop-id" class="form-label">ID</label>
-                <input type="text" class="form-control" id="prop-id" readonly>
+            <div id="element-properties" class="col-1 gap-2 hidden">
+              <div class="row">
+                <wc-input name="prop-id" lbl-label="ID" class="col-1" readonly></wc-input>
               </div>
-              <div class="mb-3">
-                <label for="prop-type" class="form-label">Type</label>
-                <input type="text" class="form-control" id="prop-type" readonly>
+              <div class="row">
+                <wc-input name="prop-type" lbl-label="Type" class="col-1" readonly></wc-input>
               </div>
-              <div class="mb-3">
-                <label for="prop-label" class="form-label">Label</label>
-                <input type="text" class="form-control" id="prop-label">
+              <div class="row">
+                <wc-input name="prop-label" lbl-label="Label" class="col-1"></wc-input>
               </div>
-              <div class="mb-3">
-                <label for="prop-scope" class="form-label">Scope</label>
-                <input type="text" class="form-control" id="prop-scope">
+              <div class="row">
+                <wc-input name="prop-scope" lbl-label="Scope" class="col-1"></wc-input>
               </div>
-              <div class="mb-3">
-                <label for="prop-css" class="form-label">CSS Classes</label>
-                <input type="text" class="form-control" id="prop-css">
+              <div class="row">
+                <wc-input name="prop-css" lbl-label="CSS" class="col-1"></wc-input>
               </div>
-              <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="prop-required">
-                <label class="form-check-label" for="prop-required">Required</label>
+              <div class="row">
+                <wc-input name="prop-required" lbl-label="Required" class="col" type="checkbox" toggle-switch></wc-input>
               </div>
-              <button id="save-properties" class="btn btn-primary">Apply</button>
+              <div class="row">
+                <button id="save-properties" class="col-1 btn btn-primary">Apply</button>
+              </div>
             </div>
           </div>
-          
-          <!-- Rules Tab -->
-          <div id="rules-tab" class="tab-pane d-none">
+        </wc-tab-item>
+        <wc-tab-item class="p-4" label="Rules">
+          <div class="col-1 gap-2 pt-2 pb-10 px-10">
             <div id="rules-no-selection" class="text-center text-muted py-4">
               <p>Select an element to view and edit its rules</p>
             </div>
@@ -115,17 +137,9 @@
               <button id="add-rule" class="btn btn-primary mt-3">Add Rule</button>
             </div>
           </div>
-          
-          <!-- Schema Tab -->
-          <div id="schema-tab" class="tab-pane d-none">
-            <div class="mb-3">
-              <label for="schema-json" class="form-label">JSON Schema</label>
-              <textarea class="form-control" id="schema-json" rows="10"></textarea>
-            </div>
-            <button id="load-schema" class="btn btn-primary">Load Schema</button>
-          </div>
-        </div>
-      </div>
+        </wc-tab-item>
+      </wc-tab>
+
     </div>
   </div>
   
@@ -218,26 +232,9 @@
     </div>
   </div>
   
-  <!-- JSON Output Modal -->
-  <div class="modal fade" id="json-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Generated Layout JSON</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <pre id="json-output" class="bg-light p-3" style="max-height: 70vh; overflow-y: auto; white-space: pre-wrap;"></pre>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="copy-json">Copy to Clipboard</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!--
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  -->
   <script src="layout-designer.js"></script>
 </body>
 </html>

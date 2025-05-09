@@ -38,35 +38,80 @@ const sampleSchema = {
 };
 
 // DOM Elements
-const designerSurface = document.getElementById('designer-surface');
-const containerElements = document.getElementById('container-elements');
-const formElements = document.getElementById('form-elements');
-const schemaFields = document.getElementById('schema-fields');
-const previewContainer = document.getElementById('preview-container');
-const previewContent = document.getElementById('preview-content');
-const previewButton = document.getElementById('preview-button');
-const closePreviewButton = document.getElementById('close-preview-button');
-const generateJsonButton = document.getElementById('generate-json-button');
-const copyJsonButton = document.getElementById('copy-json');
-const jsonOutput = document.getElementById('json-output');
-const propId = document.getElementById('prop-id');
-const propType = document.getElementById('prop-type');
-const propLabel = document.getElementById('prop-label');
-const propScope = document.getElementById('prop-scope');
-const propCss = document.getElementById('prop-css');
-const propRequired = document.getElementById('prop-required');
-const savePropertiesButton = document.getElementById('save-properties');
-const noSelectionPanel = document.getElementById('no-selection');
-const elementPropertiesPanel = document.getElementById('element-properties');
-const schemaJson = document.getElementById('schema-json');
-const loadSchemaButton = document.getElementById('load-schema');
-const addRuleButton = document.getElementById('add-rule');
-const rulesList = document.getElementById('rules-list');
-const saveRuleButton = document.getElementById('save-rule');
+let designerSurface = document.getElementById('designer-surface');
+let containerElements = document.getElementById('container-elements');
+let formElements = document.getElementById('form-elements');
+let schemaFields = document.getElementById('schema-fields');
+let previewContainer = document.getElementById('preview-container');
+let previewContent = document.getElementById('preview-content');
+let previewButton = document.querySelector('button[data-label="Preview"]');
+let renderedPreviewButton = document.querySelector('button[data-label="Rendered Preview"]');
+let preRenderedPreviewButton = document.querySelector('button[data-label="Pre Rendered Preview"]');
+let schemaButton = document.querySelector('button[data-label="Schema"]');
+let previewFrame = document.getElementById('rendered-preview');
+let closePreviewButton = document.querySelector('button[data-label="Canvas"]');
+// let generateJsonButton = document.getElementById('generate-json-button');
+// let generateJsonButton = document.getElementById('button[data-label="Layout 
+let generateJsonButton = document.querySelector('button[data-label="Layout JSON"]')
+// let copyJsonButton = document.getElementById('copy-json');
+let jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
+let propId = document.getElementById('prop-id');
+let propType = document.getElementById('prop-type');
+let propLabel = document.getElementById('prop-label');
+let propScope = document.getElementById('prop-scope');
+let propCss = document.getElementById('prop-css');
+let propRequired = document.getElementById('prop-required');
+let savePropertiesButton = document.getElementById('save-properties');
+let noSelectionPanel = document.getElementById('no-selection');
+let elementPropertiesPanel = document.getElementById('element-properties');
+let schemaJson = document.querySelector('wc-code-mirror[name="schema-json"]');
+let loadSchemaButton = document.getElementById('load-schema');
+let addRuleButton = document.getElementById('add-rule');
+let rulesList = document.getElementById('rules-list');
+let saveRuleButton = document.getElementById('save-rule');
 
 // Modals
-const jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
-const ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
+// let jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
+// let ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
+
+function setup() {
+  // DOM Elements
+  designerSurface = document.getElementById('designer-surface');
+  containerElements = document.getElementById('container-elements');
+  formElements = document.getElementById('form-elements');
+  schemaFields = document.getElementById('schema-fields');
+  previewContainer = document.getElementById('preview-container');
+  previewContent = document.getElementById('preview-content');
+  previewButton = document.querySelector('button[data-label="Preview"]');
+  closePreviewButton = document.querySelector('button[data-label="Canvas"]');
+  renderedPreviewButton = document.querySelector('button[data-label="Rendered Preview"]');
+  preRenderedPreviewButton = document.querySelector('button[data-label="Pre Rendered Preview"]');
+  schemaButton = document.querySelector('button[data-label="Schema"]');
+  // generateJsonButton = document.getElementById('generate-json-button');
+  generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
+  // copyJsonButton = document.getElementById('copy-json');
+  jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
+  propId = document.getElementById('prop-id');
+  propType = document.getElementById('prop-type');
+  propLabel = document.getElementById('prop-label');
+  propScope = document.getElementById('prop-scope');
+  propCss = document.getElementById('prop-css');
+  propRequired = document.getElementById('prop-required');
+  savePropertiesButton = document.getElementById('save-properties');
+  noSelectionPanel = document.getElementById('no-selection');
+  elementPropertiesPanel = document.getElementById('element-properties');
+  schemaJson = document.querySelector('wc-code-mirror[name="schema-json"]');
+  loadSchemaButton = document.getElementById('load-schema');
+  addRuleButton = document.getElementById('add-rule');
+  rulesList = document.getElementById('rules-list');
+  saveRuleButton = document.getElementById('save-rule');
+
+  // Modals
+  // jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
+  // ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
+
+  init();
+}
 
 // Initialize Designer
 function init() {
@@ -89,7 +134,8 @@ function init() {
   initEventListeners();
   
   // Set initial schema
-  schemaJson.value = JSON.stringify(sampleSchema, null, 2);
+  // schemaJson.value = JSON.stringify(sampleSchema, null, 2);
+  schemaJson.editor.setValue(JSON.stringify(sampleSchema, null, 2));
   loadSchema(sampleSchema);
 }
 
@@ -123,8 +169,8 @@ function initTabs() {
       header.classList.add('active');
       
       // Update active tab content
-      tabPanes.forEach(pane => pane.classList.add('d-none'));
-      document.getElementById(`${tabId}-tab`).classList.remove('d-none');
+      tabPanes.forEach(pane => pane.classList.add('hidden'));
+      document.getElementById(`${tabId}-tab`).classList.remove('hidden');
       document.getElementById(`${tabId}-tab`).classList.add('active');
     });
   });
@@ -267,16 +313,25 @@ function initDropZone(element, parentElementId = null) {
 // Initialize Event Listeners
 function initEventListeners() {
   // Preview Button
-  previewButton.addEventListener('click', togglePreview);
+  previewButton.addEventListener('click', showPreview);
   
   // Close Preview Button
-  closePreviewButton.addEventListener('click', togglePreview);
-  
+  closePreviewButton.addEventListener('click', hidePreview);
+
+  // Rendered Preview Button
+  renderedPreviewButton.addEventListener('click', renderPreview);
+
+  // Pre Rendered Preview Button
+  preRenderedPreviewButton.addEventListener('click', preRenderPreview);
+
+  // Schema Button
+  schemaButton.addEventListener('click', setSchema);
+
   // Generate JSON Button
   generateJsonButton.addEventListener('click', generateJson);
   
   // Copy JSON Button
-  copyJsonButton.addEventListener('click', copyJson);
+  // copyJsonButton.addEventListener('click', copyJson);
   
   // Save Properties Button
   savePropertiesButton.addEventListener('click', saveProperties);
@@ -284,7 +339,8 @@ function initEventListeners() {
   // Load Schema Button
   loadSchemaButton.addEventListener('click', () => {
     try {
-      const schema = JSON.parse(schemaJson.value);
+      // const schema = JSON.parse(schemaJson.value);
+      const schema = JSON.parse(schemaJson.editor.getValue());
       loadSchema(schema);
     } catch (e) {
       alert('Invalid JSON schema');
@@ -478,12 +534,12 @@ function selectElement(elementId) {
   updateRulesPanel(element);
   
   // Show properties panel
-  noSelectionPanel.classList.add('d-none');
-  elementPropertiesPanel.classList.remove('d-none');
+  noSelectionPanel.classList.add('hidden');
+  elementPropertiesPanel.classList.remove('hidden');
   
   // Show rules panel
-  document.getElementById('rules-no-selection').classList.add('d-none');
-  document.getElementById('element-rules').classList.remove('d-none');
+  document.getElementById('rules-no-selection').classList.add('hidden');
+  document.getElementById('element-rules').classList.remove('hidden');
 }
 
 // Update Properties
@@ -795,10 +851,10 @@ function removeElement(elementId) {
   // Clear selection if the removed element was selected
   if (designerState.selectedElement && designerState.selectedElement.id === elementId) {
     designerState.selectedElement = null;
-    noSelectionPanel.classList.remove('d-none');
-    elementPropertiesPanel.classList.add('d-none');
-    document.getElementById('rules-no-selection').classList.remove('d-none');
-    document.getElementById('element-rules').classList.add('d-none');
+    noSelectionPanel.classList.remove('hidden');
+    elementPropertiesPanel.classList.add('hidden');
+    document.getElementById('rules-no-selection').classList.remove('hidden');
+    document.getElementById('element-rules').classList.add('hidden');
   }
   
   // Refresh the designer
@@ -938,15 +994,84 @@ function addSchemaField(path, prop, required) {
 // Preview
 //
 
-// Toggle Preview
-function togglePreview() {
-  if (previewContainer.classList.contains('hidden')) {
-    // Generate preview
-    generatePreview();
-    previewContainer.classList.remove('hidden');
-  } else {
-    previewContainer.classList.add('hidden');
-  }
+// Hide Preview
+function hidePreview() {
+  // previewContainer.classList.add('hidden');
+  previewButton.src = '';
+}
+
+// Show Preview
+function showPreview() {
+  // Generate preview
+  generatePreview();
+  // previewContainer.classList.remove('hidden');
+}
+
+// Render Preview
+function renderPreview() {
+  generateJson();
+
+  // previewFrame.src = 'http://localhost:8080';
+
+  // 1. Create a form targeting the iframe
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'http://localhost:8080/gen/generate_dynamic_layout';
+  form.target = 'rendered-preview';
+
+  // 2. Add any parameters
+  const jsonInput = document.createElement('input');
+  jsonInput.type = 'hidden';
+  jsonInput.name = 'JSONSchema';
+  // jsonInput.value = schemaJson.value;
+  jsonInput.value = schemaJson.editor.getValue();
+  form.appendChild(jsonInput);
+
+  const layoutInput = document.createElement('input');
+  layoutInput.type = 'hidden';
+  layoutInput.name = 'UILayout';
+  layoutInput.value = jsonOutput.editor.getValue();
+  form.appendChild(layoutInput);
+
+  // 3. Add the form to the document, submit it, then remove it
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+}
+
+// Pre Render Preview
+function preRenderPreview() {
+  generateJson();
+
+  // 1. Create a form targeting the iframe
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'http://localhost:8080/gen/generate_pre_dynamic_layout';
+  form.target = 'pre-rendered-preview';
+
+  // 2. Add any parameters
+  const jsonInput = document.createElement('input');
+  jsonInput.type = 'hidden';
+  jsonInput.name = 'JSONSchema';
+  // jsonInput.value = schemaJson.value;
+  jsonInput.value = schemaJson.editor.getValue();
+  form.appendChild(jsonInput);
+
+  const layoutInput = document.createElement('input');
+  layoutInput.type = 'hidden';
+  layoutInput.name = 'UILayout';
+  layoutInput.value = jsonOutput.editor.getValue();
+  form.appendChild(layoutInput);
+
+  // 3. Add the form to the document, submit it, then remove it
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+}
+
+// Set Schema
+function setSchema() {
+  schemaJson.editor.setValue(JSON.stringify(sampleSchema, null, 2));
 }
 
 // Generate Preview
@@ -1315,7 +1440,8 @@ function generateJson() {
       cleanIds(rootElement.elements);
     }
     
-    jsonOutput.textContent = JSON.stringify(rootElement, null, 2);
+    // jsonOutput.textContent = JSON.stringify(rootElement, null, 2);
+    jsonOutput.editor.setValue(JSON.stringify(rootElement, null, 2));
   } else {
     // Remove temporary IDs from final JSON
     const cleanJson = JSON.parse(JSON.stringify(json)); // Deep clone to avoid reference issues
@@ -1332,10 +1458,11 @@ function generateJson() {
     };
     
     cleanIds(cleanJson.elements);
-    jsonOutput.textContent = JSON.stringify(cleanJson, null, 2);
+    // jsonOutput.textContent = JSON.stringify(cleanJson, null, 2);
+    jsonOutput.editor.setValue(JSON.stringify(cleanJson, null, 2));
   }
   
-  jsonModal.show();
+  // jsonModal.show();
 }
 
 // Copy JSON to Clipboard
@@ -1396,4 +1523,6 @@ function getDefaultLabel(type) {
 }
 
 // Initialize the designer
-init();
+setTimeout(() => {
+  setup();
+}, 250);

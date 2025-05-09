@@ -2615,6 +2615,30 @@
   .hidden {
     display: none !important;
   }
+  .block {
+    display: block;
+  }
+  .grid {
+    display: grid;
+  }
+  .inline {
+    display: inline;
+  }
+  .inline-block {
+    display: inline-block;
+  }
+  .inline-flex {
+    display: inline-flex;
+  }
+  .inline-grid {
+    display: inline-grid;
+  }
+  .inline-table {
+    display: inline-table;
+  }
+  .table {
+    display: table;
+  }
 
 
 
