@@ -93,6 +93,10 @@ class WcTabItem extends WcBaseComponent {
         display: contents;
       }
       .wc-tab-item {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0%;
+        min-height: 0;
         position: relative;
       }
     `.trim();
