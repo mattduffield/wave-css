@@ -5240,6 +5240,7 @@ var WcTabItem = class extends WcBaseComponent {
         flex-direction: column;
         flex: 1 1 0%;
         min-height: 0;
+        
         position: relative;
       }
     `.trim();
@@ -5477,7 +5478,7 @@ var WcTab = class extends WcBaseComponent {
         animation: tab-fade 1s;
       }
       wc-tab .wc-tab .tab-body wc-tab-item .wc-tab-item.active {
-        display: block;
+        display: flex;
       }
 
       /* Add styling for nested tabs */
