@@ -5470,6 +5470,11 @@
     background: var(--surface-1);
     color: var(--text-1);
   }
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
   small {
     color: var(--text-2);
   }
