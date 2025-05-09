@@ -1105,10 +1105,8 @@ if (!customElements.get('wc-tabulator')) {
 
       const {filter} = params;
       if (filter && filter.length > 0) {
-        this.dedupeByField(filter);
-        // const [first] = filter;
-        // ajaxParamsParts.push(`filter=${first.value}`);
-        ajaxParamsParts.push(`filter=${JSON.stringify(filter)}`);
+        const effectiveFilter = this.dedupeByField(filter);
+        ajaxParamsParts.push(`filter=${JSON.stringify(effectiveFilter)}`);
       }
 
       const {sort} = params;

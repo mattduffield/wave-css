@@ -6459,8 +6459,8 @@ if (!customElements.get("wc-tabulator")) {
       }
       const { filter } = params;
       if (filter && filter.length > 0) {
-        this.dedupeByField(filter);
-        ajaxParamsParts.push(`filter=${JSON.stringify(filter)}`);
+        const effectiveFilter = this.dedupeByField(filter);
+        ajaxParamsParts.push(`filter=${JSON.stringify(effectiveFilter)}`);
       }
       const { sort } = params;
       if (sort && sort.length > 0) {
