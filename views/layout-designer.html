@@ -17,7 +17,7 @@
 
 </head>
 <body>
-  <div class="flex flex-row flex-1 xdesigner-container">
+  <div class="flex flex-row flex-1 h-screen xdesigner-container">
     <!-- Left Panel - Elements -->
     <div class="flex flex-col panel left-panel">
       <h5>Containers</h5>
@@ -45,10 +45,10 @@
     </div>
 
     <!-- Center Panel - Designer Surface -->
-    <div id="center-panel" class="flex flex-col flex-1">
-      <wc-tab id="center-tab-control" class="h-full p-2" animate>
+    <div id="center-panel" class="flex flex-col flex-1 min-h-0" style="background-color: red;">
+      <wc-tab id="center-tab-control" class="flex flex-col flex-1 min-h-0 p-2" animate>
         <wc-tab-item class="active" label="Canvas">
-          <div class="designer-surface min-h-200 max-h-700 overflow-scroll" id="designer-surface"></div>
+          <div class="designer-surface min-h-200 max-h-700 overflow-scroll" id="designer-surface" style="background-color: green;"></div>
         </wc-tab-item>
         <wc-tab-item label="Schema">
           <div class="col-1 gap-2 p-4">
@@ -82,12 +82,12 @@
             indent-unit="2">
           </wc-code-mirror>
         </wc-tab-item>
-        <wc-tab-item class="min-h-500 xh-full" label="Pre Rendered Preview">
-          <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="min-h-200 max-h-700 w-full">
+        <wc-tab-item class="flex-1 min-h-0" label="Pre Rendered Preview">
+          <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="block border-none min-h-0 h-full w-full">
           </iframe>
         </wc-tab-item>
-        <wc-tab-item class="min-h-500 xh-full" label="Rendered Preview">
-          <iframe id="rendered-preview" name="rendered-preview" class="min-h-200 max-h-700 w-full">
+        <wc-tab-item class="flex-1 min-h-0" label="Rendered Preview">
+          <iframe id="rendered-preview" name="rendered-preview" class="block border-none min-h-0 h-full w-full">
           </iframe>
         </wc-tab-item>
       </wc-tab>

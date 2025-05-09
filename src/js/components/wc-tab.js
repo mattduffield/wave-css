@@ -311,6 +311,7 @@ class WcTab extends WcBaseComponent {
         display: flex;
         flex-direction: column;
         flex: 1 1 0%;
+        min-height: 0;
         background-color: var(--card-bg-color);
       }
       wc-tab[vertical] .wc-tab .tab-body {
