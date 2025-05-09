@@ -5172,8 +5172,12 @@ var WcSlideshow = class extends WcBaseComponent {
     document.body.removeEventListener("wc-slideshow:stop", this._handleStop.bind(this));
     const prev = this.querySelector(".prev");
     const next = this.querySelector(".next");
-    prev.removeEventListener("click", this._prevSlide.bind(this));
-    next.removeEventListener("click", this._nextSlide.bind(this));
+    if (prev) {
+      prev.removeEventListener("click", this._prevSlide.bind(this));
+    }
+    if (next) {
+      next.removeEventListener("click", this._nextSlide.bind(this));
+    }
     document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
   }
 };

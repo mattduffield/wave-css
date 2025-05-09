@@ -38,37 +38,33 @@ const sampleSchema = {
 };
 
 // DOM Elements
-let designerSurface = document.getElementById('designer-surface');
-let containerElements = document.getElementById('container-elements');
-let formElements = document.getElementById('form-elements');
-let schemaFields = document.getElementById('schema-fields');
-let previewContainer = document.getElementById('preview-container');
-let previewContent = document.getElementById('preview-content');
-let previewButton = document.querySelector('button[data-label="Preview"]');
-let renderedPreviewButton = document.querySelector('button[data-label="Rendered Preview"]');
-let preRenderedPreviewButton = document.querySelector('button[data-label="Pre Rendered Preview"]');
-let schemaButton = document.querySelector('button[data-label="Schema"]');
-let previewFrame = document.getElementById('rendered-preview');
-let closePreviewButton = document.querySelector('button[data-label="Canvas"]');
-// let generateJsonButton = document.getElementById('generate-json-button');
-// let generateJsonButton = document.getElementById('button[data-label="Layout 
-let generateJsonButton = document.querySelector('button[data-label="Layout JSON"]')
-// let copyJsonButton = document.getElementById('copy-json');
-let jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
-let propId = document.getElementById('prop-id');
-let propType = document.getElementById('prop-type');
-let propLabel = document.getElementById('prop-label');
-let propScope = document.getElementById('prop-scope');
-let propCss = document.getElementById('prop-css');
-let propRequired = document.getElementById('prop-required');
-let savePropertiesButton = document.getElementById('save-properties');
-let noSelectionPanel = document.getElementById('no-selection');
-let elementPropertiesPanel = document.getElementById('element-properties');
-let schemaJson = document.querySelector('wc-code-mirror[name="schema-json"]');
-let loadSchemaButton = document.getElementById('load-schema');
-let addRuleButton = document.getElementById('add-rule');
-let rulesList = document.getElementById('rules-list');
-let saveRuleButton = document.getElementById('save-rule');
+let designerSurface = null;
+let containerElements = null;
+let formElements = null;
+let schemaFields = null;
+let previewButton = null;
+let renderedPreviewButton = null;
+let preRenderedPreviewButton = null;
+let schemaButton = null;
+let previewFrame = null;
+let closePreviewButton = null;
+let generateJsonButton = null;
+let copyJsonButton = null;
+let jsonOutput = null;
+let propId = null;
+let propType = null;
+let propLabel = null;
+let propScope = null;
+let propCss = null;
+let propRequired = null;
+let savePropertiesButton = null;
+let noSelectionPanel = null;
+let elementPropertiesPanel = null;
+let schemaJson = null;
+let loadSchemaButton = null;
+let addRuleButton = null;
+let rulesList = null;
+let saveRuleButton = null;
 
 // Modals
 // let jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
@@ -80,14 +76,11 @@ function setup() {
   containerElements = document.getElementById('container-elements');
   formElements = document.getElementById('form-elements');
   schemaFields = document.getElementById('schema-fields');
-  previewContainer = document.getElementById('preview-container');
-  previewContent = document.getElementById('preview-content');
   previewButton = document.querySelector('button[data-label="Preview"]');
   closePreviewButton = document.querySelector('button[data-label="Canvas"]');
-  renderedPreviewButton = document.querySelector('button[data-label="Rendered Preview"]');
-  preRenderedPreviewButton = document.querySelector('button[data-label="Pre Rendered Preview"]');
+  renderedPreviewButton = document.querySelector('button[data-label="Preview"]');
+  preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
   schemaButton = document.querySelector('button[data-label="Schema"]');
-  // generateJsonButton = document.getElementById('generate-json-button');
   generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
   // copyJsonButton = document.getElementById('copy-json');
   jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
@@ -312,9 +305,6 @@ function initDropZone(element, parentElementId = null) {
 
 // Initialize Event Listeners
 function initEventListeners() {
-  // Preview Button
-  previewButton.addEventListener('click', showPreview);
-  
   // Close Preview Button
   closePreviewButton.addEventListener('click', hidePreview);
 
@@ -801,6 +791,7 @@ function saveProperties() {
   if (!designerState.selectedElement) return;
   
   // Update element properties in the data model
+  designerState.selectedElement.type = propType.value;
   designerState.selectedElement.label = propLabel.value;
   designerState.selectedElement.scope = propScope.value;
   designerState.selectedElement.css = propCss.value;
@@ -996,15 +987,7 @@ function addSchemaField(path, prop, required) {
 
 // Hide Preview
 function hidePreview() {
-  // previewContainer.classList.add('hidden');
   previewButton.src = '';
-}
-
-// Show Preview
-function showPreview() {
-  // Generate preview
-  generatePreview();
-  // previewContainer.classList.remove('hidden');
 }
 
 // Render Preview
@@ -1072,345 +1055,6 @@ function preRenderPreview() {
 // Set Schema
 function setSchema() {
   schemaJson.editor.setValue(JSON.stringify(sampleSchema, null, 2));
-}
-
-// Generate Preview
-function generatePreview() {
-  previewContent.innerHTML = '';
-  
-  const previewLayout = createPreviewLayout(designerState.elements);
-  previewContent.appendChild(previewLayout);
-}
-
-// Create Preview Layout
-function createPreviewLayout(elements) {
-  const container = document.createElement('div');
-  container.className = 'preview-layout';
-  
-  if (elements && elements.length > 0) {
-    elements.forEach(element => {
-      const elementNode = createPreviewElement(element);
-      if (elementNode) {
-        container.appendChild(elementNode);
-      }
-    });
-  }
-  
-  return container;
-}
-
-// Create Preview Element
-function createPreviewElement(element) {
-  if (!element) return null;
-  
-  switch (element.type) {
-    case 'wc-tab':
-      return createPreviewTabContainer(element);
-    case 'wc-tab-item':
-      return createPreviewTabItem(element);
-    case 'column':
-      return createPreviewColumn(element);
-    case 'row':
-      return createPreviewRow(element);
-    case 'fieldset':
-      return createPreviewFieldset(element);
-    case 'array':
-      return createPreviewArray(element);
-    case 'wc-card':
-      return createPreviewCard(element);
-    case 'wc-input':
-      return createPreviewInput(element);
-    case 'wc-input-checkbox':
-      return createPreviewCheckbox(element);
-    case 'hr':
-      return createPreviewHR(element);
-    default:
-      return null;
-  }
-}
-
-// Create Preview Tab Item
-function createPreviewTabItem(element) {
-  const tabItem = document.createElement('div');
-  tabItem.className = 'tab-element-content';
-  
-  if (element.css) {
-    tabItem.className += ` ${element.css}`;
-  }
-  
-  if (element.elements && element.elements.length > 0) {
-    element.elements.forEach(childElement => {
-      const childNode = createPreviewElement(childElement);
-      if (childNode) {
-        tabItem.appendChild(childNode);
-      }
-    });
-  }
-  
-  return tabItem;
-}
-
-// Create Preview Tab Container
-function createPreviewTabContainer(element) {
-  const container = document.createElement('div');
-  container.className = 'tab-element';
-  
-  // Tab headers
-  const headers = document.createElement('div');
-  headers.className = 'tab-element-headers';
-  
-  // Tab contents
-  const contents = document.createElement('div');
-  contents.className = 'tab-element-content';
-  
-  // Process tab items
-  const tabItems = element.elements.filter(e => e.type === 'wc-tab-item');
-  
-  tabItems.forEach((tabItem, index) => {
-    // Create tab header
-    const header = document.createElement('div');
-    header.className = 'tab-element-header';
-    header.textContent = tabItem.label || `Tab ${index + 1}`;
-    
-    if (index === 0) {
-      header.classList.add('active');
-    }
-    
-    headers.appendChild(header);
-    
-    // Create tab content
-    const content = document.createElement('div');
-    content.className = 'tab-element-content';
-    content.style.display = index === 0 ? 'block' : 'none';
-    
-    // Add child elements to tab content
-    if (tabItem.elements && tabItem.elements.length > 0) {
-      const childContainer = createPreviewLayout(tabItem.elements);
-      content.appendChild(childContainer);
-    }
-    
-    contents.appendChild(content);
-    
-    // Add click handler
-    header.addEventListener('click', () => {
-      // Update active header
-      const allHeaders = headers.querySelectorAll('.tab-element-header');
-      allHeaders.forEach(h => h.classList.remove('active'));
-      header.classList.add('active');
-      
-      // Update visible content
-      const allContents = contents.querySelectorAll('.tab-element-content');
-      allContents.forEach(c => c.style.display = 'none');
-      content.style.display = 'block';
-    });
-  });
-  
-  container.appendChild(headers);
-  container.appendChild(contents);
-  
-  return container;
-}
-
-// Create Preview Column
-function createPreviewColumn(element) {
-  const column = document.createElement('div');
-  column.className = 'column-element';
-  
-  if (element.css) {
-    column.className += ` ${element.css}`;
-  }
-  
-  if (element.elements && element.elements.length > 0) {
-    element.elements.forEach(childElement => {
-      const childNode = createPreviewElement(childElement);
-      if (childNode) {
-        column.appendChild(childNode);
-      }
-    });
-  }
-  
-  return column;
-}
-
-// Create Preview Row
-function createPreviewRow(element) {
-  const row = document.createElement('div');
-  row.className = 'row-element';
-  
-  if (element.css) {
-    row.className += ` ${element.css}`;
-  }
-  
-  if (element.elements && element.elements.length > 0) {
-    element.elements.forEach(childElement => {
-      const childNode = createPreviewElement(childElement);
-      if (childNode) {
-        row.appendChild(childNode);
-      }
-    });
-  }
-  
-  return row;
-}
-
-// Create Preview Fieldset
-function createPreviewFieldset(element) {
-  const fieldset = document.createElement('div');
-  fieldset.className = 'fieldset-element';
-  
-  if (element.css) {
-    fieldset.className += ` ${element.css}`;
-  }
-  
-  // Add legend
-  if (element.label) {
-    const legend = document.createElement('div');
-    legend.className = 'fieldset-legend';
-    legend.textContent = element.label;
-    fieldset.appendChild(legend);
-  }
-  
-  if (element.elements && element.elements.length > 0) {
-    element.elements.forEach(childElement => {
-      const childNode = createPreviewElement(childElement);
-      if (childNode) {
-        fieldset.appendChild(childNode);
-      }
-    });
-  }
-  
-  return fieldset;
-}
-
-// Create Preview Array
-function createPreviewArray(element) {
-  const array = document.createElement('div');
-  array.className = 'array-element';
-  
-  if (element.css) {
-    array.className += ` ${element.css}`;
-  }
-  
-  // Add "Add New" button
-  const addButton = document.createElement('button');
-  addButton.className = 'btn btn-sm btn-outline-primary mb-2';
-  addButton.textContent = 'Add New';
-  array.appendChild(addButton);
-  
-  // Add a sample item if there are child elements
-  if (element.elements && element.elements.length > 0) {
-    const childElement = element.elements[0];
-    const childNode = createPreviewElement(childElement);
-    if (childNode) {
-      array.appendChild(childNode);
-    }
-  }
-  
-  return array;
-}
-
-// Create Preview Card
-function createPreviewCard(element) {
-  const card = document.createElement('div');
-  card.className = 'card-element p-3'; // Added padding for better visibility
-  
-  if (element.css) {
-    card.className += ` ${element.css}`;
-  }
-  
-  // Add delete button
-  const deleteButton = document.createElement('button');
-  deleteButton.className = 'btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2';
-  deleteButton.textContent = 'X';
-  card.appendChild(deleteButton);
-  
-  if (element.elements && element.elements.length > 0) {
-    element.elements.forEach(childElement => {
-      const childNode = createPreviewElement(childElement);
-      if (childNode) {
-        card.appendChild(childNode);
-      }
-    });
-  }
-  
-  return card;
-}
-
-// Create Preview Input
-function createPreviewInput(element) {
-  const inputContainer = document.createElement('div');
-  inputContainer.className = 'input-element';
-  
-  if (element.label) {
-    const label = document.createElement('label');
-    label.className = 'input-label';
-    label.textContent = element.label;
-    
-    if (element.required) {
-      const requiredSpan = document.createElement('span');
-      requiredSpan.className = 'text-danger ms-1';
-      requiredSpan.textContent = '*';
-      label.appendChild(requiredSpan);
-    }
-    
-    inputContainer.appendChild(label);
-  }
-  
-  const input = document.createElement('input');
-  input.className = 'input-field';
-  input.type = 'text';
-  
-  if (element.required) {
-    input.required = true;
-  }
-  
-  inputContainer.appendChild(input);
-  
-  return inputContainer;
-}
-
-// Create Preview Checkbox
-function createPreviewCheckbox(element) {
-  const checkboxContainer = document.createElement('div');
-  checkboxContainer.className = 'checkbox-element';
-  
-  const input = document.createElement('input');
-  input.className = 'checkbox-input';
-  input.type = 'checkbox';
-  
-  if (element.required) {
-    input.required = true;
-  }
-  
-  checkboxContainer.appendChild(input);
-  
-  if (element.label) {
-    const label = document.createElement('label');
-    label.textContent = element.label;
-    
-    if (element.required) {
-      const requiredSpan = document.createElement('span');
-      requiredSpan.className = 'text-danger ms-1';
-      requiredSpan.textContent = '*';
-      label.appendChild(requiredSpan);
-    }
-    
-    checkboxContainer.appendChild(label);
-  }
-  
-  return checkboxContainer;
-}
-
-// Create Preview HR
-function createPreviewHR(element) {
-  const hr = document.createElement('div');
-  hr.className = 'hr-element';
-  
-  if (element.css) {
-    hr.className += ` ${element.css}`;
-  }
-  
-  return hr;
 }
 
 // Generate JSON
@@ -1486,7 +1130,13 @@ function copyJson() {
 
 // Check if element type is a container
 function isContainerElement(type) {
-  return ['wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card'].includes(type);
+  return [
+    'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card',
+    'option',
+    'wc-accordion', 'wc-split-button', 'wc-sidebar-left', 'wc-sidebar-right', 'wc-sidenav-left', 'wc-sidenav-right',
+    'wc-timeline', 'wc-tabulator', 'wc-slideshow'
+
+  ].includes(type);
 }
 
 // Generate Unique ID

@@ -14,45 +14,70 @@
   <script src="https://mattduffield.github.io/lite-spec/dist/lite-spec.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.14"></script>
 
 </head>
 <body>
   <div class="flex flex-row flex-1 h-screen xdesigner-container">
     <!-- Left Panel - Elements -->
-    <div class="flex flex-col panel left-panel">
-      <h5>Containers</h5>
-      <div class="element-list" id="container-elements">
-        <div class="element-item" data-element-type="wc-tab" draggable="true">Tab Container</div>
-        <div class="element-item" data-element-type="wc-tab-item" draggable="true">Tab Item</div>
-        <div class="element-item" data-element-type="column" draggable="true">Column</div>
-        <div class="element-item" data-element-type="row" draggable="true">Row</div>
-        <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
-        <div class="element-item" data-element-type="array" draggable="true">Array</div>
-        <div class="element-item" data-element-type="wc-card" draggable="true">Card</div>
-      </div>
-      
-      <h5>Form Elements</h5>
-      <div class="element-list" id="form-elements">
-        <div class="element-item" data-element-type="wc-input" draggable="true">Input</div>
-        <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">Checkbox</div>
-        <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
-      </div>
-      
-      <h5>Schema Fields</h5>
-      <div class="element-list" id="schema-fields">
-        <!-- Will be populated dynamically -->
-      </div>
+    <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
+      <wc-tab class="flex flex-col flex-1 min-h-0" animate>
+        <wc-tab-item class="active" label="Containers">
+          <div class="element-list p-2" id="container-elements">
+            <div class="element-item" data-element-type="wc-tab" draggable="true">WC Tab Container</div>
+            <div class="element-item" data-element-type="wc-tab-item" draggable="true">WC Tab Item</div>
+            <div class="element-item" data-element-type="column" draggable="true">Column</div>
+            <div class="element-item" data-element-type="row" draggable="true">Row</div>
+            <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
+            <div class="element-item" data-element-type="array" draggable="true">Array</div>
+            <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
+            <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
+            <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
+            <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
+            <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
+            <div class="element-item" data-element-type="wc-sidenav-right" draggable="true">WC Sidenav Right</div>
+            <div class="element-item" data-element-type="wc-split-button" draggable="true">WC Split Button</div>
+            <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
+            <div class="element-item" data-element-type="wc-timeline" draggable="true">WC Timeline</div>
+            <div class="element-item" data-element-type="wc-tabulator" draggable="true">WC Tabulator</div>
+            <div class="element-item" data-element-type="option" draggable="true">Option</div>
+          </div>
+        </wc-tab-item>
+        <wc-tab-item class="" label="Elements">
+          <div class="element-list p-2" id="form-elements">
+            <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
+            <div class="element-item" data-element-type="wc-article-skeleton" draggable="true">WC Article Skeleton</div>
+            <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
+            <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
+            <div class="element-item" data-element-type="wc-input" draggable="true">WC Input</div>
+            <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">WC Input Checkbox</div>
+            <div class="element-item" data-element-type="wc-code-mirror" draggable="true">WC Code Mirror</div>
+            <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
+            <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
+            <div class="element-item" data-element-type="wc-slideshow-image" draggable="true">WC Slideshow Image</div>
+            <div class="element-item" data-element-type="wc-tabulator-column" draggable="true">WC Tabulator Column</div>
+            <div class="element-item" data-element-type="wc-tabulator-func" draggable="true">WC Tabulator Func</div>
+            <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
+          </div>
+        </wc-tab-item>
+        <wc-tab-item class="" label="Fields">
+          <div class="element-list p-2" id="schema-fields">
+            <!-- Will be populated dynamically -->
+          </div>
+        </wc-tab-item>
+      </wc-tab>      
     </div>
 
     <!-- Center Panel - Designer Surface -->
-    <div id="center-panel" class="flex flex-col flex-1 min-h-0" style="background-color: red;">
+    <div id="center-panel" class="flex flex-col flex-1 min-h-0">
       <wc-tab id="center-tab-control" class="flex flex-col flex-1 min-h-0 p-2" animate>
         <wc-tab-item class="active" label="Canvas">
-          <div class="designer-surface min-h-200 max-h-700 overflow-scroll" id="designer-surface" style="background-color: green;"></div>
+          <div class="designer-surface flex flex-col flex-1 min-h-0 overflow-scroll" id="designer-surface"></div>
         </wc-tab-item>
         <wc-tab-item label="Schema">
-          <div class="col-1 gap-2 p-4">
-            <wc-code-mirror class="min-h-200 max-h-700"
+          <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
+            <wc-code-mirror class="flex flex-col flex-1 min-h-0"
               name="schema-json"
               line-numbers
               line-wrapper
@@ -65,13 +90,8 @@
             <button id="load-schema" class="btn btn-primary">Load Schema</button>
           </div>
         </wc-tab-item>
-        <wc-tab-item class="" label="Preview">
-          <div class="p-4" id="preview-container">
-            <div id="preview-content"></div>
-          </div>
-        </wc-tab-item>
-        <wc-tab-item class="h-full" label="Layout JSON">
-          <wc-code-mirror class="min-h-200 max-h-700"
+        <wc-tab-item label="Layout JSON">
+          <wc-code-mirror class="flex flex-col flex-1 min-h-0"
             name="json-output"
             line-numbers
             line-wrapper
@@ -82,19 +102,19 @@
             indent-unit="2">
           </wc-code-mirror>
         </wc-tab-item>
-        <wc-tab-item class="flex-1 min-h-0" label="Pre Rendered Preview">
-          <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="block border-none min-h-0 h-full w-full">
+        <wc-tab-item label="Raw Preview">
+          <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="border-none flex flex-col flex-1 min-h-0 overflow-scroll">
           </iframe>
         </wc-tab-item>
-        <wc-tab-item class="flex-1 min-h-0" label="Rendered Preview">
-          <iframe id="rendered-preview" name="rendered-preview" class="block border-none min-h-0 h-full w-full">
+        <wc-tab-item label="Preview">
+          <iframe id="rendered-preview" name="rendered-preview" class="border-none flex flex-col flex-1 min-h-0 overflow-scroll">
           </iframe>
         </wc-tab-item>
       </wc-tab>
     </div>
     <!-- Right Panel - Properties -->
-    <div class="flex flex-col xpanel right-panel">
-      <wc-tab id="right-panel" class="flex flex-col flex-1 p-2" animate>
+    <div class="right-panel flex flex-col min-h-0 overflow-scroll p-2">
+      <wc-tab id="right-panel" class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Properties">
           <div class="col-1 gap-2 pt-2 pb-10 px-4">
             <div id="no-selection" class="col-1 text-center text-muted py-4">
@@ -105,7 +125,7 @@
                 <wc-input name="prop-id" lbl-label="ID" class="col-1" readonly></wc-input>
               </div>
               <div class="row">
-                <wc-input name="prop-type" lbl-label="Type" class="col-1" readonly></wc-input>
+                <wc-input name="prop-type" lbl-label="Type" class="col-1"></wc-input>
               </div>
               <div class="row">
                 <wc-input name="prop-label" lbl-label="Label" class="col-1"></wc-input>
@@ -144,7 +164,7 @@
   </div>
   
   <!-- Rule Modal -->
-  <div class="modal fade" id="rule-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade hidden" id="rule-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -231,10 +251,14 @@
       </div>
     </div>
   </div>
-  
+
+  <wc-event-hub></wc-event-hub>
   <!--
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+  <wc-theme></wc-theme>
   -->
+  
   <script src="layout-designer.js"></script>
 </body>
 </html>

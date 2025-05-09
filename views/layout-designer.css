@@ -10,7 +10,7 @@ body {
   overflow-y: auto;
 }
 .left-panel {
-  width: 250px;
+  width: 275px;
   border-right: 1px solid #dee2e6;
 }
 .center-panel {
@@ -38,10 +38,8 @@ body {
   background-color: #f8f9fa;
 }
 .designer-surface {
-  /* min-height: 100%; */
   padding: 20px;
   background-color: white;
-  /* border: 1px dashed #dee2e6; */
 }
 /* Designer element styling */
 .designer-element {
@@ -154,96 +152,4 @@ body {
   height: 0;
   padding: 0;
   margin: 0;
-}
-
-/* Row styling */
-.row-element {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-}
-
-/* Column styling */
-.column-element {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Card styling */
-.card-element {
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  position: relative;
-  padding: 15px;
-}
-
-/* Fieldset styling */
-.fieldset-element {
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 15px;
-  margin-top: 20px;
-  position: relative;
-}
-.fieldset-legend {
-  position: absolute;
-  top: -10px;
-  left: 10px;
-  background-color: white;
-  padding: 0 5px;
-  font-weight: bold;
-}
-
-/* Tab styling */
-.tab-element {
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-}
-.tab-element-headers {
-  display: flex;
-  border-bottom: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-}
-.tab-element-header {
-  padding: 8px 15px;
-  cursor: pointer;
-}
-.tab-element-header.active {
-  background-color: white;
-  border-bottom: 2px solid #0d6efd;
-}
-.tab-element-content {
-  padding: 15px;
-}
-
-/* Form input styling */
-.input-element {
-  margin-bottom: 10px;
-}
-.input-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-.input-field {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-}
-
-/* HR styling */
-.hr-element {
-  border-top: 1px solid #dee2e6;
-  margin: 15px 0;
-}
-
-/* Checkbox styling */
-.checkbox-element {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.checkbox-input {
-  margin-right: 8px;
 }
