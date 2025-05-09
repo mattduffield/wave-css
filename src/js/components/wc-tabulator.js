@@ -1105,6 +1105,7 @@ if (!customElements.get('wc-tabulator')) {
 
       const {filter} = params;
       if (filter && filter.length > 0) {
+        this.dedupeByField(filter);
         // const [first] = filter;
         // ajaxParamsParts.push(`filter=${first.value}`);
         ajaxParamsParts.push(`filter=${JSON.stringify(filter)}`);
@@ -1125,6 +1126,26 @@ if (!customElements.get('wc-tabulator')) {
 
       // return url + `?page=${page}&results=${size}&${ajaxParamsStr}`;
       // return url + "?params=" + encodeURI(JSON.stringify(params)); //encode parameters as a json object
+    }
+
+    /**
+     * If you have multiple filters on the same `field`, keep only the first one.
+     * Earlier filters always trump later ones.
+     *
+     * @param {Array<Object>} filters
+     * @returns {Array<Object>} a new array with no duplicate‐field filters
+     */
+    dedupeByField(filters) {
+      const seen = new Set();
+      return filters.filter(f => {
+        if (seen.has(f.field)) {
+          // we already kept a filter for this field, so drop this one
+          return false;
+        }
+        // first time we see this field → keep it
+        seen.add(f.field);
+        return true;
+      });
     }
 
     handleAjaxResponse(url, params, response) {
