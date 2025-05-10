@@ -1134,7 +1134,7 @@ function isContainerElement(type) {
     'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card',
     'option',
     'wc-accordion', 'wc-split-button', 'wc-sidebar-left', 'wc-sidebar-right', 'wc-sidenav-left', 'wc-sidenav-right',
-    'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select'
+    'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form'
 
   ].includes(type);
 }
