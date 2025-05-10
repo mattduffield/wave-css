@@ -2821,6 +2821,9 @@
   small {
     color: var(--text-2);
   }
+  .dark small {
+    color: var(--text-5);
+  }
   
   .swatch {
     box-shadow: inset 0 0 0 1px oklch(50% 0 0 / 20%);

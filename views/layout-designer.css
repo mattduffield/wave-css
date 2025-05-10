@@ -1,14 +1,6 @@
 body {
   overflow-x: hidden;
 }
-.designer-container {
-  display: flex;
-  height: calc(100vh - 60px);
-}
-.panel {
-  padding: 15px;
-  overflow-y: auto;
-}
 .left-panel {
   width: 275px;
   border-right: 1px solid #dee2e6;
@@ -28,14 +20,21 @@ body {
 .element-item {
   padding: 8px 12px;
   margin-bottom: 5px;
+  /*
   background-color: white;
   border: 1px solid #dee2e6;
+  */
+  border: 1px solid var(--button-bg-color);
   border-radius: 4px;
+  color: var(--button-color);
   cursor: move;
   user-select: none;
 }
 .element-item:hover {
+  /*
   background-color: #f8f9fa;
+  */
+  background-color: var(--button-hover-bg-color);
 }
 .designer-surface {
   padding: 20px;
@@ -100,7 +99,9 @@ body {
 }
 .element-label {
   font-weight: bold;
+  color: var(--button-bg-color);
 }
+/*
 .tab-container {
   height: 100%;
   display: flex;
@@ -127,6 +128,7 @@ body {
   padding: 15px;
   overflow-y: auto;
 }
+*/
 .rule-item {
   border: 1px solid #dee2e6;
   border-radius: 4px;
