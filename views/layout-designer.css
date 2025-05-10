@@ -20,10 +20,6 @@ body {
 .element-item {
   padding: 8px 12px;
   margin-bottom: 5px;
-  /*
-  background-color: white;
-  border: 1px solid #dee2e6;
-  */
   border: 1px solid var(--button-bg-color);
   border-radius: 4px;
   color: var(--button-color);
@@ -31,9 +27,6 @@ body {
   user-select: none;
 }
 .element-item:hover {
-  /*
-  background-color: #f8f9fa;
-  */
   background-color: var(--button-hover-bg-color);
 }
 .designer-surface {
@@ -44,17 +37,17 @@ body {
 .designer-element {
   padding: 10px;
   margin: 5px 0;
-  border: 1px solid #dee2e6;
+  border: 2px solid #dee2e6;
   border-radius: 4px;
   position: relative;
 }
 .designer-element.selected {
-  border: 2px solid #0d6efd;
+  border: 2px solid var(--swatch-9);
 }
 .designer-element-container {
   min-height: 50px;
   padding: 10px;
-  border: 1px dashed #6c757d;
+  border: 2px dashed #6c757d;
   margin: 8px 0;
   position: relative;
 }
