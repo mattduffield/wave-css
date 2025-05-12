@@ -49,7 +49,6 @@ let schemaButton = null;
 let previewFrame = null;
 let closePreviewButton = null;
 let generateJsonButton = null;
-let copyJsonButton = null;
 let jsonOutput = null;
 let propId = null;
 let propType = null;
@@ -66,17 +65,9 @@ let addRuleButton = null;
 let rulesList = null;
 let saveRuleButton = null;
 
-let saveDesignButton = null;
-let saveDesignTextarea = null;
-let saveDesignNameInput = null;
 let loadDesignButton = null;
-let downloadDesignJsonButton = null;
-let copyDesignJsonButton = null;
-
-
-// Modals
-// let jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
-// let ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
+let copyDesignButton = null;
+let downloadDesignButton = null;
 
 function setup() {
   // DOM Elements
@@ -90,7 +81,6 @@ function setup() {
   preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
   schemaButton = document.querySelector('button[data-label="Schema"]');
   generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
-  // copyJsonButton = document.getElementById('copy-json');
   jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
   propId = document.getElementById('prop-id');
   propType = document.getElementById('prop-type');
@@ -107,12 +97,9 @@ function setup() {
   rulesList = document.getElementById('rules-list');
   saveRuleButton = document.getElementById('save-rule');
 
-  saveDesignButton = document.getElementById('save-design');
-  saveDesignTextarea = document.getElementById('save-design-textarea');
-  saveDesignNameInput = document.getElementById('save-design-name');
   loadDesignButton = document.getElementById('load-design');
-  downloadDesignJsonButton = document.getElementById('download-design-json');
-  copyDesignJsonButton = document.getElementById('copy-design-json');
+  copyDesignButton = document.getElementById('copy-design');
+  downloadDesignButton = document.getElementById('download-design');
   
   init();
 }
@@ -331,9 +318,6 @@ function initEventListeners() {
   // Generate JSON Button
   generateJsonButton.addEventListener('click', generateJson);
   
-  // Copy JSON Button
-  // copyJsonButton.addEventListener('click', copyJson);
-  
   // Save Properties Button
   savePropertiesButton.addEventListener('click', saveProperties);
   
@@ -351,11 +335,6 @@ function initEventListeners() {
   // Add Rule Button
   addRuleButton.addEventListener('click', () => {
     designerState.editingRuleIndex = -1;
-    // clearRuleForm();
-    // if (designerState.selectedElement) {
-    //   document.getElementById('rule-src-data-id').value = designerState.selectedElement.id;
-    // }
-    // ruleModal.show();
     const promptPayload = {
       focusConfirm: false,
       template: 'template#rule-template',
@@ -363,11 +342,15 @@ function initEventListeners() {
         const cnt = document.querySelector(".swal2-container");
         if (cnt) {
           if (designerState.selectedElement) {
-            document.getElementById('rule-src-data-id').value = designerState.selectedElement.id;
+            const src = document.getElementById('rule-src-data-id');
+            src.value = designerState.selectedElement.id;
           }
           htmx.process(cnt);
           _hyperscript.processNode(cnt);
         }
+      },
+      preConfirm: () => {
+
       },
       callback: (result) => {
         console.log('rule-template - result:', result);
@@ -376,45 +359,6 @@ function initEventListeners() {
     wc.Prompt.notifyTemplate(promptPayload);
   });
   
-  // Save Rule Button
-  saveRuleButton.addEventListener('click', saveRule);
-
-
-
-  // Save Design Button
-  saveDesignButton.addEventListener('click', () => {
-    // Generate JSON first to make sure we have the latest layout
-    generateJson();
-    
-    // Set the JSON in the textarea
-    saveDesignTextarea.value = jsonOutput.editor.getValue();
-    
-    // Set a default design name based on timestamp
-    const date = new Date();
-    const timestamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}`;
-    saveDesignNameInput.value = `Design_${timestamp}`;
-    
-    // Show the modal
-    const promptPayload = {
-      // title: 'Save Design',
-      icon: 'info',
-      focusConfirm: false,
-      template: 'template#save-design-template',
-      didOpen: () => {
-        const cnt = document.querySelector(".swal2-container");
-        if (cnt) {
-          htmx.process(cnt);
-          _hyperscript.processNode(cnt);
-        }
-      },
-      callback: (result) => {
-        console.log('save-design - result:', result);
-      }
-    };
-    wc.Prompt.notifyTemplate(promptPayload);
-    // new bootstrap.Modal(saveDesignModal).show();
-  });
-
   // Load Design Button
   loadDesignButton.addEventListener('click2', () => {
     // Show the modal
@@ -469,10 +413,13 @@ function initEventListeners() {
     }
   });
 
+  // Copy Design Button
+  copyDesignButton.addEventListener('click', copyDesign);
+
   // Download Design JSON Button
-  downloadDesignJsonButton.addEventListener('click', () => {
-    const jsonText = saveDesignTextarea.value;
-    const designName = saveDesignNameInput.value || 'design';
+  downloadDesignButton.addEventListener('click', () => {
+    const jsonText = jsonOutput.editor.getValue();
+    const designName = 'layout-ui-design';
     const fileName = `${designName}.json`;
     
     // Create a blob with the JSON content
@@ -490,21 +437,6 @@ function initEventListeners() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
-
-  // Copy Design JSON Button
-  copyDesignJsonButton.addEventListener('click', () => {
-    const jsonText = saveDesignTextarea.value;
-    
-    navigator.clipboard.writeText(jsonText)
-      .then(() => {
-        alert('Design JSON copied to clipboard');
-      })
-      .catch(err => {
-        console.error('Failed to copy: ', err);
-        alert('Failed to copy JSON to clipboard');
-      });
-  });
-
 }
 
 // Create Element Object
@@ -732,7 +664,7 @@ function updateRulesPanel(element) {
     const deleteButton = document.createElement('button');
     deleteButton.className = 'btn btn-sm btn-outline-danger';
     deleteButton.textContent = 'Delete';
-    deleteButton.addEventListener('click', () => deleteRule(index));
+    deleteButton.addEventListener('click', async () => deleteRule(index));
     ruleActions.appendChild(deleteButton);
     
     ruleHeader.appendChild(ruleActions);
@@ -800,52 +732,6 @@ function editRule(index) {
   if (!rule) return;
   
   designerState.editingRuleIndex = index;
-  
-  // Fill the form with rule data
-  document.getElementById('rule-effect').value = rule.effect;
-  document.getElementById('rule-condition-scope').value = rule.condition.scope || '';
-  
-  // Set schema values
-  if (rule.condition.schema) {
-    const schema = rule.condition.schema;
-    let schemaType = '';
-    let schemaValue = '';
-    
-    if (schema.minLength !== undefined) {
-      schemaType = 'minLength';
-      schemaValue = schema.minLength;
-    } else if (schema.maxLength !== undefined) {
-      schemaType = 'maxLength';
-      schemaValue = schema.maxLength;
-    } else if (schema.pattern !== undefined) {
-      schemaType = 'pattern';
-      schemaValue = schema.pattern;
-    } else if (schema.minimum !== undefined) {
-      schemaType = 'minimum';
-      schemaValue = schema.minimum;
-    } else if (schema.maximum !== undefined) {
-      schemaType = 'maximum';
-      schemaValue = schema.maximum;
-    } else if (schema.const !== undefined) {
-      schemaType = 'const';
-      schemaValue = schema.const;
-    } else if (schema.enum !== undefined) {
-      schemaType = 'enum';
-      schemaValue = schema.enum.join(',');
-    }
-    
-    document.getElementById('rule-schema-type').value = schemaType;
-    document.getElementById('rule-schema-value').value = schemaValue;
-  }
-  
-  document.getElementById('rule-src-data-id').value = rule.condition.srcDataId || '';
-  document.getElementById('rule-src-selector').value = rule.condition.srcSelector || '';
-  document.getElementById('rule-src-property').value = rule.condition.srcProperty || '';
-  document.getElementById('rule-tgt-data-id').value = rule.tgtDataId || '';
-  document.getElementById('rule-tgt-selector').value = rule.tgtSelector || '';
-  document.getElementById('rule-tgt-property').value = rule.tgtProperty || '';
-  
-  ruleModal.show();
 
   const promptPayload = {
     focusConfirm: false,
@@ -853,6 +739,50 @@ function editRule(index) {
     didOpen: () => {
       const cnt = document.querySelector(".swal2-container");
       if (cnt) {
+        // Fill the form with rule data
+        document.getElementById('rule-effect').value = rule.effect;
+        document.getElementById('rule-condition-scope').value = rule.condition.scope || '';
+        
+        // Set schema values
+        if (rule.condition.schema) {
+          const schema = rule.condition.schema;
+          let schemaType = '';
+          let schemaValue = '';
+          
+          if (schema.minLength !== undefined) {
+            schemaType = 'minLength';
+            schemaValue = schema.minLength;
+          } else if (schema.maxLength !== undefined) {
+            schemaType = 'maxLength';
+            schemaValue = schema.maxLength;
+          } else if (schema.pattern !== undefined) {
+            schemaType = 'pattern';
+            schemaValue = schema.pattern;
+          } else if (schema.minimum !== undefined) {
+            schemaType = 'minimum';
+            schemaValue = schema.minimum;
+          } else if (schema.maximum !== undefined) {
+            schemaType = 'maximum';
+            schemaValue = schema.maximum;
+          } else if (schema.const !== undefined) {
+            schemaType = 'const';
+            schemaValue = schema.const;
+          } else if (schema.enum !== undefined) {
+            schemaType = 'enum';
+            schemaValue = schema.enum.join(',');
+          }
+          
+          document.getElementById('rule-schema-type').value = schemaType;
+          document.getElementById('rule-schema-value').value = schemaValue;
+        }
+        
+        document.getElementById('rule-src-data-id').value = rule.condition.srcDataId || '';
+        document.getElementById('rule-src-selector').value = rule.condition.srcSelector || '';
+        document.getElementById('rule-src-property').value = rule.condition.srcProperty || '';
+        document.getElementById('rule-tgt-data-id').value = rule.tgtDataId || '';
+        document.getElementById('rule-tgt-selector').value = rule.tgtSelector || '';
+        document.getElementById('rule-tgt-property').value = rule.tgtProperty || '';
+        
         htmx.process(cnt);
         _hyperscript.processNode(cnt);
       }
@@ -865,10 +795,15 @@ function editRule(index) {
 }
 
 // Delete Rule
-function deleteRule(index) {
+async function deleteRule(index) {
   if (!designerState.selectedElement || !designerState.selectedElement.rules) return;
   
-  if (confirm('Are you sure you want to delete this rule?')) {
+  const result = await wc.Prompt.question({
+    title: 'Confirm Delete',
+    text: 'Are you are you want to delete this rule?',
+    showCancelButton: true
+  });
+  if (result) {
     designerState.selectedElement.rules.splice(index, 1);
     updateRulesPanel(designerState.selectedElement);
   }
@@ -1255,17 +1190,17 @@ function generateJson() {
   return cleanJson.elements;
 }
 
-// Copy JSON to Clipboard
-function copyJson() {
+// Copy Design to Clipboard
+function copyDesign() {
   const textToCopy = jsonOutput.editor.getValue();
   
   navigator.clipboard.writeText(textToCopy)
     .then(() => {
-      const originalText = copyJsonButton.textContent;
-      copyJsonButton.textContent = 'Copied!';
+      const originalText = copyDesignButton.textContent;
+      copyDesignButton.textContent = 'Copied!';
       
       setTimeout(() => {
-        copyJsonButton.textContent = originalText;
+        copyDesignButton.textContent = originalText;
       }, 2000);
     })
     .catch(err => {
@@ -1320,8 +1255,8 @@ function getDefaultLabel(type) {
 
 
 function saveDesignToLocalStorage() {
-  const designName = saveDesignNameInput.value || 'design';
-  const jsonText = saveDesignTextarea.value;
+  const designName = 'layout-ui-design';
+  const jsonText = jsonOutput.editor.getValue();
   
   try {
     // Get existing saved designs

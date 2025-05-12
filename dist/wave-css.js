@@ -8458,7 +8458,7 @@ if (!customElements.get("wc-prompt")) {
     async notifyTemplate(c) {
       const body = document.querySelector("body");
       const theme = body.dataset.theme;
-      const { template = "", didOpen = null, callback = null } = c;
+      const { template = "", didOpen = null, preConfirm = null, callback = null } = c;
       const customClass = {
         container: "",
         // popup: 'theme-midnight-slate',
@@ -8483,7 +8483,9 @@ if (!customElements.get("wc-prompt")) {
       const { value: result } = await Swal.fire({
         customClass,
         template,
-        didOpen
+        didOpen,
+        preConfirm,
+        callback
       });
       return this.handleResult(c, result);
     }

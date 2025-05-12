@@ -100,7 +100,9 @@
               tab-size="2"
               indent-unit="2">
             </wc-code-mirror>
-            <button id="load-schema" class="btn btn-primary">Load Schema</button>
+            <div class="flex flex-row justify-end gap-2 p-2">
+              <button id="load-schema" class="btn btn-primary">Load Schema</button>
+            </div>
           </div>
         </wc-tab-item>
         <wc-tab-item label="Layout JSON">
@@ -115,9 +117,9 @@
               tab-size="2"
               indent-unit="2">
             </wc-code-mirror>
-            <div class="flex flex-row gap-2 p-2">
-              <button id="copy-json" class="btn btn-secondary">Copy to Clipboard</button>
-              <button id="save-design" class="btn btn-success">Save Design</button>
+            <div class="flex flex-row justify-end gap-2 p-2">
+              <button id="copy-design" class="btn btn-secondary">Copy to Clipboard</button>
+              <button id="download-design" class="btn btn-primary">Download Design</button>
               <button id="load-design" class="btn btn-info">Apply Design</button>
             </div>
           </div>
@@ -182,144 +184,8 @@
     </div>
   </div>
   
-  <!-- Rule Modal -->
-  <div class="modal fade hidden" id="rule-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Rule</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="rule-effect" class="form-label">Effect</label>
-            <select class="form-select" id="rule-effect">
-              <option value="COPY">Copy Value</option>
-              <option value="COPY-TOLOWER">Copy to Lowercase</option>
-              <option value="COPY-TOLOWER-UNDERSCORE">Copy to Lowercase with Underscores</option>
-              <option value="SHOW">Show Element</option>
-              <option value="HIDE">Hide Element</option>
-              <option value="ENABLE">Enable Element</option>
-              <option value="DISABLE">Disable Element</option>
-              <option value="REQUIRE">Make Required</option>
-              <option value="UN-REQUIRE">Make Optional</option>
-            </select>
-          </div>
-          
-          <h6>Condition</h6>
-          <div class="mb-3">
-            <label for="rule-condition-scope" class="form-label">Scope</label>
-            <input type="text" class="form-control" id="rule-condition-scope">
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">Schema Validation</label>
-            <div class="row g-2">
-              <div class="col-md-4">
-                <select class="form-select" id="rule-schema-type">
-                  <option value="minLength">Min Length</option>
-                  <option value="maxLength">Max Length</option>
-                  <option value="pattern">Pattern</option>
-                  <option value="minimum">Minimum</option>
-                  <option value="maximum">Maximum</option>
-                  <option value="const">Constant</option>
-                  <option value="enum">Enum</option>
-                </select>
-              </div>
-              <div class="col-md-8">
-                <input type="text" class="form-control" id="rule-schema-value" placeholder="Value">
-              </div>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label for="rule-src-data-id" class="form-label">Source Element ID</label>
-            <input type="text" class="form-control" id="rule-src-data-id">
-          </div>
-          
-          <div class="mb-3">
-            <label for="rule-src-selector" class="form-label">Source Selector (optional)</label>
-            <input type="text" class="form-control" id="rule-src-selector" placeholder="e.g. input">
-          </div>
-          
-          <div class="mb-3">
-            <label for="rule-src-property" class="form-label">Source Property (optional)</label>
-            <input type="text" class="form-control" id="rule-src-property" placeholder="e.g. value">
-          </div>
-          
-          <h6>Target</h6>
-          <div class="mb-3">
-            <label for="rule-tgt-data-id" class="form-label">Target Element ID</label>
-            <input type="text" class="form-control" id="rule-tgt-data-id">
-          </div>
-          
-          <div class="mb-3">
-            <label for="rule-tgt-selector" class="form-label">Target Selector (optional)</label>
-            <input type="text" class="form-control" id="rule-tgt-selector" placeholder="e.g. input">
-          </div>
-          
-          <div class="mb-3">
-            <label for="rule-tgt-property" class="form-label">Target Property</label>
-            <input type="text" class="form-control" id="rule-tgt-property" placeholder="e.g. value">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="save-rule">Save Rule</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Load Design Modal -->
-  <div class="modal fade hidden" id="load-design-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Load Design</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="load-design-textarea" class="form-label">Paste Layout JSON</label>
-            <textarea id="load-design-textarea" class="form-control" rows="10"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirm-load-design">Load</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Save Design Modal -->
-  <div class="modal fade hidden" id="save-design-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Save Design</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="save-design-name" class="form-label">Design Name</label>
-            <input type="text" class="form-control" id="save-design-name" placeholder="My Design">
-          </div>
-          <div class="mb-3">
-            <label for="save-design-textarea" class="form-label">Layout JSON</label>
-            <textarea id="save-design-textarea" class="form-control" rows="10" readonly></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success" id="copy-design-json">Copy to Clipboard</button>
-          <button type="button" class="btn btn-primary" id="download-design-json">Download JSON</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- Templates -->
   <template id="rule-template">
    <swal-title class="text-sm">
       Edit Rule
@@ -395,13 +261,14 @@
     <swal-function-param
       name="didOpen2"
       value='(e) => {
-        console.log("didOpen...", e);
-        if (designerState.selectedElement) {
-          document.getElementById("rule-src-data-id").value = designerState.selectedElement.id;
-        }
+        setTimeout(() => {
+          if (designerState.selectedElement) {
+            document.getElementById("rule-src-data-id").value = designerState.selectedElement.id;
+          }        
+        }, 50);
       }' />
     <swal-function-param
-      name="preConfirm"
+      name="preConfirm2"
       value='() => { 
         const payload = {
           "uiLayout": document.querySelector(`wc-code-mirror[name="load-layout"]`).editor.getValue()
