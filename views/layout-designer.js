@@ -66,6 +66,15 @@ let addRuleButton = null;
 let rulesList = null;
 let saveRuleButton = null;
 
+let saveDesignButton = null;
+let saveDesignTextarea = null;
+let saveDesignNameInput = null;
+let loadDesignButton = null;
+let confirmLoadDesignButton = null;
+let downloadDesignJsonButton = null;
+let copyDesignJsonButton = null;
+
+
 // Modals
 // let jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
 // let ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
@@ -99,10 +108,24 @@ function setup() {
   rulesList = document.getElementById('rules-list');
   saveRuleButton = document.getElementById('save-rule');
 
+  saveDesignButton = document.getElementById('save-design');
+  saveDesignTextarea = document.getElementById('save-design-textarea');
+  saveDesignNameInput = document.getElementById('save-design-name');
+  loadDesignButton = document.getElementById('load-design');
+  confirmLoadDesignButton = document.getElementById('confirm-load-design');
+  downloadDesignJsonButton = document.getElementById('download-design-json');
+  copyDesignJsonButton = document.getElementById('copy-design-json');
+
+
   // Modals
   // jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
   // ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
 
+  // Initialize Bootstrap modals
+  // ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
+  // const saveDesignModalEl = new bootstrap.Modal(saveDesignModal);
+  // const loadDesignModalEl = new bootstrap.Modal(loadDesignModal);
+  
   init();
 }
 
@@ -349,6 +372,125 @@ function initEventListeners() {
   
   // Save Rule Button
   saveRuleButton.addEventListener('click', saveRule);
+
+
+
+  // Save Design Button
+  saveDesignButton.addEventListener('click', () => {
+    // Generate JSON first to make sure we have the latest layout
+    generateJson();
+    
+    // Set the JSON in the textarea
+    saveDesignTextarea.value = jsonOutput.editor.getValue();
+    
+    // Set a default design name based on timestamp
+    const date = new Date();
+    const timestamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}`;
+    saveDesignNameInput.value = `Design_${timestamp}`;
+    
+    // Show the modal
+    const promptPayload = {
+      title: 'Save Design',
+      icon: 'info',
+      focusConfirm: false,
+      template: 'template#save-design-template',
+      didOpen: () => {
+        const cnt = document.querySelector(".swal2-container");
+        if (cnt) {
+          htmx.process(cnt);
+          _hyperscript.processNode(cnt);
+        }
+      },
+      // preConfirm: () => {
+      //   if (this.funcs['onClonePreConfirm']) {
+      //     const payload = this.funcs['onClonePreConfirm'](row);
+      //     return payload;
+      //   } else {
+      //     // Fallback, to reduce redundancies.
+      //     const payload = {
+      //       "srcConnName": document.getElementById("srcConnName").value,
+      //       "srcDbName": document.getElementById("srcDbName").value,
+      //       "srcCollName": document.getElementById("srcCollName").value,
+      //       "tgtConnName": document.getElementById("tgtConnName").value,
+      //       "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
+      //       "tgtCollName": document.getElementById("tgtCollName").value,
+      //       "recordIds": recordIds
+      //     }
+      //     return payload;
+      //   }
+      // },
+      callback: (result) => {
+        
+      }
+    };
+    wc.Prompt.fire(promptPayload);    
+    // new bootstrap.Modal(saveDesignModal).show();
+  });
+
+  // Load Design Button
+  loadDesignButton.addEventListener('click', () => {
+    // Clear the textarea
+    loadDesignTextarea.value = '';
+    
+    // Show the modal
+    new bootstrap.Modal(loadDesignModal).show();
+  });
+
+  // Confirm Load Design Button
+  confirmLoadDesignButton.addEventListener('click', () => {
+    const jsonText = loadDesignTextarea.value.trim();
+    if (!jsonText) {
+      alert('Please paste a valid JSON layout');
+      return;
+    }
+    
+    try {
+      const layoutData = JSON.parse(jsonText);
+      loadDesign(layoutData);
+      
+      // Hide the modal
+      bootstrap.Modal.getInstance(loadDesignModal).hide();
+    } catch (e) {
+      alert('Invalid JSON format: ' + e.message);
+    }
+  });
+
+  // Download Design JSON Button
+  downloadDesignJsonButton.addEventListener('click', () => {
+    const jsonText = saveDesignTextarea.value;
+    const designName = saveDesignNameInput.value || 'design';
+    const fileName = `${designName}.json`;
+    
+    // Create a blob with the JSON content
+    const blob = new Blob([jsonText], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link and click it
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // Copy Design JSON Button
+  copyDesignJsonButton.addEventListener('click', () => {
+    const jsonText = saveDesignTextarea.value;
+    
+    navigator.clipboard.writeText(jsonText)
+      .then(() => {
+        alert('Design JSON copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy JSON to clipboard');
+      });
+  });
+
 }
 
 // Create Element Object
@@ -1063,55 +1205,29 @@ function generateJson() {
     elements: designerState.elements
   };
   
-  // If there's only one top-level element, make it the root
-  if (json.elements.length === 1) {
-    const rootElement = JSON.parse(JSON.stringify(json.elements[0])); // Deep clone to avoid reference issues
-    delete rootElement.id; // Remove temporary ID from final JSON
-    
-    // Clean ids from child elements
-    const cleanIds = (elements) => {
-      if (!elements) return;
-      
-      elements.forEach(element => {
-        delete element.id;
-        if (element.elements) {
-          cleanIds(element.elements);
-        }
-      });
-    };
-    
-    if (rootElement.elements) {
-      cleanIds(rootElement.elements);
-    }
-    
-    // jsonOutput.textContent = JSON.stringify(rootElement, null, 2);
-    jsonOutput.editor.setValue(JSON.stringify(rootElement, null, 2));
-  } else {
-    // Remove temporary IDs from final JSON
-    const cleanJson = JSON.parse(JSON.stringify(json)); // Deep clone to avoid reference issues
-    
-    const cleanIds = (elements) => {
-      if (!elements) return;
-      
-      elements.forEach(element => {
-        delete element.id;
-        if (element.elements) {
-          cleanIds(element.elements);
-        }
-      });
-    };
-    
-    cleanIds(cleanJson.elements);
-    // jsonOutput.textContent = JSON.stringify(cleanJson, null, 2);
-    jsonOutput.editor.setValue(JSON.stringify(cleanJson, null, 2));
-  }
+  // Remove temporary IDs from final JSON
+  const cleanJson = JSON.parse(JSON.stringify(json)); // Deep clone to avoid reference issues
   
-  // jsonModal.show();
+  const cleanIds = (elements) => {
+    if (!elements) return;
+    
+    elements.forEach(element => {
+      delete element.id;
+      if (element.elements) {
+        cleanIds(element.elements);
+      }
+    });
+  };
+  
+  cleanIds(cleanJson.elements);
+  jsonOutput.editor.setValue(JSON.stringify(cleanJson.elements, null, 2));
+
+  return cleanJson.elements;
 }
 
 // Copy JSON to Clipboard
 function copyJson() {
-  const textToCopy = jsonOutput.textContent;
+  const textToCopy = jsonOutput.editor.getValue();
   
   navigator.clipboard.writeText(textToCopy)
     .then(() => {
@@ -1131,10 +1247,9 @@ function copyJson() {
 // Check if element type is a container
 function isContainerElement(type) {
   return [
-    'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card',
-    'option',
+    'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card', 'option',
     'wc-accordion', 'wc-split-button', 'wc-sidebar-left', 'wc-sidebar-right', 'wc-sidenav-left', 'wc-sidenav-right',
-    'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form'
+    'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form', 'wc-breadcrumb'
 
   ].includes(type);
 }
@@ -1171,6 +1286,75 @@ function getDefaultLabel(type) {
       return type;
   }
 }
+
+
+
+function saveDesignToLocalStorage() {
+  const designName = saveDesignNameInput.value || 'design';
+  const jsonText = saveDesignTextarea.value;
+  
+  try {
+    // Get existing saved designs
+    let savedDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '{}');
+    
+    // Add/update this design
+    savedDesigns[designName] = jsonText;
+    
+    // Save back to localStorage
+    localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
+    
+    alert(`Design "${designName}" saved successfully`);
+  } catch (e) {
+    console.error('Error saving design to localStorage:', e);
+    alert('Failed to save design to localStorage');
+  }
+}
+
+function loadDesign(layoutData) {
+  try {
+    // Verify the data is an array (elements) or has an elements property
+    let elements = Array.isArray(layoutData) ? layoutData : 
+                  (layoutData.elements ? layoutData.elements : null);
+    
+    if (!elements) {
+      throw new Error('Invalid layout structure. Expected an array or an object with an elements property.');
+    }
+    
+    // Clear the current elements
+    designerState.elements = [];
+    
+    // Recursively add IDs to all elements
+    const addIds = (elements) => {
+      if (!elements) return;
+      
+      elements.forEach(element => {
+        element.id = generateUniqueId();
+        if (element.elements) {
+          addIds(element.elements);
+        }
+      });
+    };
+    
+    // Add IDs to all elements
+    addIds(elements);
+    
+    // Update the designer state
+    designerState.elements = elements;
+    
+    // Rebuild the designer surface
+    refreshDesigner();
+    
+    // Update the JSON output
+    jsonOutput.editor.setValue(JSON.stringify(generateJson(), null, 2));
+    
+    return true;
+  } catch (e) {
+    console.error('Error loading design:', e);
+    alert('Failed to load design: ' + e.message);
+    return false;
+  }
+}
+
 
 // Initialize the designer
 setTimeout(() => {

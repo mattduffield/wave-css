@@ -8336,12 +8336,12 @@ if (!customElements.get("wc-prompt")) {
     }
     async renderPrompt() {
       await Promise.all([
-        // this.loadCSS('https://unpkg.com/notie/dist/notie.min.css'),
-        // this.loadLibrary('https://unpkg.com/notie', 'notie'),
-        // this.loadLibrary('https://unpkg.com/sweetalert2@11.15.10/dist/sweetalert2.all.js', 'Swal'),
-        this.loadCSS("/static/css/notie@4.3.1.min.css"),
-        this.loadLibrary("/static/js/notie.js", "notie"),
-        this.loadLibrary("/static/js/sweetalert2@11.15.10.js", "Swal")
+        this.loadCSS("https://unpkg.com/notie/dist/notie.min.css"),
+        this.loadLibrary("https://unpkg.com/notie", "notie"),
+        this.loadLibrary("https://unpkg.com/sweetalert2@11.15.10/dist/sweetalert2.all.js", "Swal")
+        // this.loadCSS('/static/css/notie@4.3.1.min.css'),
+        // this.loadLibrary('/static/js/notie.js', 'notie'),
+        // this.loadLibrary('/static/js/sweetalert2@11.15.10.js', 'Swal'),
       ]);
       if (!window.wc) {
         window.wc = {};

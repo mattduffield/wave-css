@@ -24,7 +24,7 @@
     <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Containers">
-          <div class="element-list p-2" id="container-elements">
+          <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
             <div class="element-item" data-element-type="wc-tab" draggable="true">WC Tab Container</div>
             <div class="element-item" data-element-type="wc-tab-item" draggable="true">WC Tab Item</div>
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
@@ -43,13 +43,15 @@
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
             <div class="element-item" data-element-type="wc-timeline" draggable="true">WC Timeline</div>
             <div class="element-item" data-element-type="wc-tabulator" draggable="true">WC Tabulator</div>
+            <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="option" draggable="true">Option</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Elements">
-          <div class="element-list p-2" id="form-elements">
+          <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="form-elements">
             <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
             <div class="element-item" data-element-type="wc-article-skeleton" draggable="true">WC Article Skeleton</div>
+            <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
             <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
             <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
             <div class="element-item" data-element-type="wc-input" draggable="true">WC Input</div>
@@ -65,11 +67,15 @@
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-image" draggable="true">WC Image</div>
+            <div class="element-item" data-element-type="wc-contact-card" draggable="true">WC Contact Card</div>
+            <div class="element-item" data-element-type="wc-contact-chip" draggable="true">WC Contact Chip</div>
+            <div class="element-item" data-element-type="wc-breadcrumb-item" draggable="true">WC Breadcrumb Item</div>
+            <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Backgruond Image</div>
             <div class="element-item" data-element-type="wc-hotkey" draggable="true">WC Hotkey</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
-          <div class="element-list p-2" id="schema-fields">
+          <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="schema-fields">
             <!-- Will be populated dynamically -->
           </div>
         </wc-tab-item>
@@ -98,16 +104,24 @@
           </div>
         </wc-tab-item>
         <wc-tab-item label="Layout JSON">
-          <wc-code-mirror class="flex flex-col flex-1 min-h-0"
-            name="json-output"
-            line-numbers
-            line-wrapper
-            fold-gutter
-            mode="javascript"
-            theme="monokai"
-            tab-size="2"
-            indent-unit="2">
-          </wc-code-mirror>
+          <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
+            <wc-code-mirror class="flex flex-col flex-1 min-h-0"
+              name="json-output"
+              line-numbers
+              line-wrapper
+              fold-gutter
+              mode="javascript"
+              theme="monokai"
+              tab-size="2"
+              indent-unit="2">
+            </wc-code-mirror>
+            <div class="flex flex-row gap-2 mt-2">
+              <button id="generate-json" class="btn btn-primary">Generate JSON</button>
+              <button id="copy-json" class="btn btn-secondary">Copy to Clipboard</button>
+              <button id="save-design" class="btn btn-success">Save Design</button>
+              <button id="load-design" class="btn btn-info">Load Design</button>
+            </div>
+          </div>
         </wc-tab-item>
         <wc-tab-item label="Raw Preview">
           <iframe id="pre-rendered-preview" name="pre-rendered-preview" class="border-none flex flex-col flex-1 min-h-0 overflow-scroll">
@@ -166,7 +180,6 @@
           </div>
         </wc-tab-item>
       </wc-tab>
-
     </div>
   </div>
   
@@ -259,10 +272,120 @@
     </div>
   </div>
 
+  <!-- Load Design Modal -->
+  <div class="modal fade hidden" id="load-design-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Load Design</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="load-design-textarea" class="form-label">Paste Layout JSON</label>
+            <textarea id="load-design-textarea" class="form-control" rows="10"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirm-load-design">Load</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Design Modal -->
+  <div class="modal fade hidden" id="save-design-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Save Design</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="save-design-name" class="form-label">Design Name</label>
+            <input type="text" class="form-control" id="save-design-name" placeholder="My Design">
+          </div>
+          <div class="mb-3">
+            <label for="save-design-textarea" class="form-label">Layout JSON</label>
+            <textarea id="save-design-textarea" class="form-control" rows="10" readonly></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" id="copy-design-json">Copy to Clipboard</button>
+          <button type="button" class="btn btn-primary" id="download-design-json">Download JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <template id="save-design-template">
+    <swal-html>
+      <wc-input name="srcConnName" type="hidden" value="default"/>
+      <wc-input name="srcDbName" type="hidden" value="local"/>
+      <wc-input name="srcCollName" type="hidden" value="contact"/>
+      <wc-select name="tgtConnName" 
+        class="col-1"
+        lbl-label="Target Connection"
+        value="mango-dev"
+        url="/api/list-connections"
+        required
+        _='on load or change from first <select#tgtConnName />
+          set td to first <wc-select[lbl-label="Target Database(s)"] />
+          set tdUrl to "/api/list-databases?connName=" + me.value
+          td.setAttribute("url", tdUrl)
+        end'
+        >
+      </wc-select>
+      <wc-select name="tgtDbNames"
+        mode="chip"
+        class="col-1"
+        lbl-label="Target Database(s)"
+        display-member="label"
+        multiple
+        xurl="/api/list-databases?connName=mango-dev"
+        url=""
+        required
+        >
+      </wc-select>
+      <wc-input name="tgtCollName" type="hidden" value="contact"/>
+    </swal-html>
+    <swal-button type="confirm">
+      Clone
+    </swal-button>
+    <swal-button type="cancel">
+      Cancel
+    </swal-button>
+    <swal-param name="allowEscapeKey" value="false" />
+    <swal-param name="allowOutsideClick" value="false" />
+    <swal-param
+      name="customClass"
+      value='{ "popup": "my-popup" }' />
+    <swal-function-param
+      name="didOpen"
+      value="() => { const ipt = Swal.getInput(); ipt.multiple = true; }" />
+    <swal-function-param
+      name="preConfirm"
+      value='() => { 
+        const payload = {
+          "srcConnName": document.getElementById("srcConnName").value,
+          "srcDbName": document.getElementById("srcDbName").value,
+          "srcCollName": document.getElementById("srcCollName").value,
+          "tgtConnName": document.getElementById("tgtConnName").value,
+          "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
+          "tgtCollName": document.getElementById("tgtCollName").value,
+          "recordIds": []
+        };
+        return payload;
+      }' />
+  </template>
+
   <wc-event-hub></wc-event-hub>
+  <wc-prompt></wc-prompt>
   <!--
   <wc-mask-hub></wc-mask-hub>
-  <wc-prompt></wc-prompt>
   <wc-theme></wc-theme>
   -->
   
