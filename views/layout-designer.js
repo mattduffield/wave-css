@@ -125,7 +125,6 @@ function init() {
   initEventListeners();
   
   // Set initial schema
-  // schemaJson.value = JSON.stringify(sampleSchema, null, 2);
   schemaJson.editor.setValue(JSON.stringify(sampleSchema, null, 2));
   loadSchema(sampleSchema);
 }
@@ -236,8 +235,10 @@ function initDropZone(element, parentElementId = null) {
       }
       
       // Create the element object in the data model
+      const id = generateUniqueId();
       const newElement = {
-        id: generateUniqueId(),
+        id: id,
+        "data-id": id,
         type: elementType,
         label,
         scope,
@@ -350,10 +351,57 @@ function initEventListeners() {
         }
       },
       preConfirm: () => {
+        const effect = document.getElementById('rule-effect').value;
+        const conditionScope = document.getElementById('rule-condition-scope').value;
+        const schemaType = document.getElementById('rule-schema-type').value;
+        const schemaValue = document.getElementById('rule-schema-value').value;
+        const srcDataId = document.getElementById('rule-src-data-id').value;
+        const srcSelector = document.getElementById('rule-src-selector').value || '';
+        const srcProperty = document.getElementById('rule-src-property').value || '';
+        const tgtDataId = document.getElementById('rule-tgt-data-id').value;
+        const tgtSelector = document.getElementById('rule-tgt-selector').value || '';
+        const tgtProperty = document.getElementById('rule-tgt-property').value || '';
 
+        const rule = {
+          effect: effect,
+          condition: {
+            scope: conditionScope,
+            schema: {
+              [schemaType]: schemaValue
+            },
+            srcDataId: srcDataId,
+            srcSelector: srcSelector,
+            srcProperty: srcProperty
+          },
+          tgtDataId: tgtDataId,
+          tgtSelector: tgtSelector,
+          tgtProperty: tgtProperty
+        };
+
+        if (schemaType && schemaValue) {
+          switch (schemaType) {
+            case 'minLength':
+            case 'maxLength':
+            case 'minimum':
+            case 'maximum':
+              rule.condition.schema[schemaType] = parseInt(schemaValue);
+              break;
+            case 'pattern':
+              rule.condition.schema[schemaType] = schemaValue;
+              break;
+            case 'const':
+              rule.condition.schema[schemaType] = schemaValue;
+              break;
+            case 'enum':
+              rule.condition.schema[schemaType] = schemaValue.split(',').map(v => v.trim());
+              break;
+          }
+        }
+        return rule;
       },
       callback: (result) => {
         console.log('rule-template - result:', result);
+        saveRule(result);
       }
     };
     wc.Prompt.notifyTemplate(promptPayload);
@@ -445,6 +493,7 @@ function createElementObject({ type, label = '', scope = '', parentElement = nul
   
   const element = {
     id: elementId,
+    "data-id": elementId,
     type,
     label,
     scope,
@@ -787,8 +836,58 @@ function editRule(index) {
         _hyperscript.processNode(cnt);
       }
     },
+    preConfirm: () => {
+      const effect = document.getElementById('rule-effect').value;
+      const conditionScope = document.getElementById('rule-condition-scope').value;
+      const schemaType = document.getElementById('rule-schema-type').value;
+      const schemaValue = document.getElementById('rule-schema-value').value;
+      const srcDataId = document.getElementById('rule-src-data-id').value;
+      const srcSelector = document.getElementById('rule-src-selector').value || '';
+      const srcProperty = document.getElementById('rule-src-property').value || '';
+      const tgtDataId = document.getElementById('rule-tgt-data-id').value;
+      const tgtSelector = document.getElementById('rule-tgt-selector').value || '';
+      const tgtProperty = document.getElementById('rule-tgt-property').value || '';
+
+      const rule = {
+        effect: effect,
+        condition: {
+          scope: conditionScope,
+          schema: {
+            [schemaType]: schemaValue
+          },
+          srcDataId: srcDataId,
+          srcSelector: srcSelector,
+          srcProperty: srcProperty
+        },
+        tgtDataId: tgtDataId,
+        tgtSelector: tgtSelector,
+        tgtProperty: tgtProperty
+      };
+
+      if (schemaType && schemaValue) {
+        switch (schemaType) {
+          case 'minLength':
+          case 'maxLength':
+          case 'minimum':
+          case 'maximum':
+            rule.condition.schema[schemaType] = parseInt(schemaValue);
+            break;
+          case 'pattern':
+            rule.condition.schema[schemaType] = schemaValue;
+            break;
+          case 'const':
+            rule.condition.schema[schemaType] = schemaValue;
+            break;
+          case 'enum':
+            rule.condition.schema[schemaType] = schemaValue.split(',').map(v => v.trim());
+            break;
+        }
+      }
+      return rule;
+    },
     callback: (result) => {
       console.log('rule-template - result:', result);
+      saveRule(result);
     }
   };
   wc.Prompt.notifyTemplate(promptPayload);
@@ -810,58 +909,9 @@ async function deleteRule(index) {
 }
 
 // Save Rule
-function saveRule() {
+function saveRule(rule) {
   if (!designerState.selectedElement) return;
-  
-  const effect = document.getElementById('rule-effect').value;
-  const conditionScope = document.getElementById('rule-condition-scope').value;
-  const schemaType = document.getElementById('rule-schema-type').value;
-  const schemaValue = document.getElementById('rule-schema-value').value;
-  const srcDataId = document.getElementById('rule-src-data-id').value;
-  const srcSelector = document.getElementById('rule-src-selector').value;
-  const srcProperty = document.getElementById('rule-src-property').value;
-  const tgtDataId = document.getElementById('rule-tgt-data-id').value;
-  const tgtSelector = document.getElementById('rule-tgt-selector').value;
-  const tgtProperty = document.getElementById('rule-tgt-property').value;
-  
-  // Create schema object
-  const schema = {};
-  
-  if (schemaType && schemaValue) {
-    switch (schemaType) {
-      case 'minLength':
-      case 'maxLength':
-      case 'minimum':
-      case 'maximum':
-        schema[schemaType] = parseInt(schemaValue);
-        break;
-      case 'pattern':
-        schema[schemaType] = schemaValue;
-        break;
-      case 'const':
-        schema[schemaType] = schemaValue;
-        break;
-      case 'enum':
-        schema[schemaType] = schemaValue.split(',').map(v => v.trim());
-        break;
-    }
-  }
-  
-  // Create rule object
-  const rule = {
-    effect,
-    condition: {
-      scope: conditionScope,
-      schema,
-      srcDataId,
-      srcSelector: srcSelector || undefined,
-      srcProperty: srcProperty || undefined
-    },
-    tgtDataId,
-    tgtSelector: tgtSelector || undefined,
-    tgtProperty
-  };
-  
+    
   // Save rule
   if (designerState.editingRuleIndex >= 0) {
     designerState.selectedElement.rules[designerState.editingRuleIndex] = rule;
@@ -874,9 +924,6 @@ function saveRule() {
   
   // Update rules panel
   updateRulesPanel(designerState.selectedElement);
-  
-  // Close modal
-  ruleModal.hide();
 }
 
 // Clear Rule Form
@@ -1308,10 +1355,7 @@ function loadDesign(layoutData) {
     
     // Rebuild the designer surface
     refreshDesigner();
-    
-    // Update the JSON output
-    // jsonOutput.editor.setValue(JSON.stringify(generateJson(), null, 2));
-    
+        
     return true;
   } catch (e) {
     console.error('Error loading design:', e);

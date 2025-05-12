@@ -487,7 +487,7 @@ function initRules(rules) {
   });
   rules.forEach(applyRule);
 }
-function extractRules(node) {
+function extractRules2(node) {
   const rules = [];
   (function traverse(obj) {
     if (!obj || typeof obj !== "object") return;
@@ -498,6 +498,20 @@ function extractRules(node) {
       obj.elements.forEach(traverse);
     }
   })(node);
+  return rules;
+}
+function extractRules(nodes) {
+  const rules = [];
+  function traverse(obj) {
+    if (!obj || typeof obj !== "object") return;
+    if (obj.rules) {
+      rules.push(...obj.rules);
+    }
+    if (Array.isArray(obj.elements)) {
+      obj.elements.forEach(traverse);
+    }
+  }
+  nodes.forEach(traverse);
   return rules;
 }
 
@@ -9910,6 +9924,7 @@ export {
   disableSortable,
   enableSortable,
   extractRules,
+  extractRules2,
   fetchApi,
   generateUniqueId,
   getSourcePropertyValue,

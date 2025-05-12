@@ -26,6 +26,7 @@ var WaveHelpers = (() => {
     disableSortable: () => disableSortable,
     enableSortable: () => enableSortable,
     extractRules: () => extractRules,
+    extractRules2: () => extractRules2,
     fetchApi: () => fetchApi,
     generateUniqueId: () => generateUniqueId,
     getSourcePropertyValue: () => getSourcePropertyValue,
@@ -540,7 +541,7 @@ var WaveHelpers = (() => {
     });
     rules.forEach(applyRule);
   }
-  function extractRules(node) {
+  function extractRules2(node) {
     const rules = [];
     (function traverse(obj) {
       if (!obj || typeof obj !== "object") return;
@@ -551,6 +552,20 @@ var WaveHelpers = (() => {
         obj.elements.forEach(traverse);
       }
     })(node);
+    return rules;
+  }
+  function extractRules(nodes) {
+    const rules = [];
+    function traverse(obj) {
+      if (!obj || typeof obj !== "object") return;
+      if (obj.rules) {
+        rules.push(...obj.rules);
+      }
+      if (Array.isArray(obj.elements)) {
+        obj.elements.forEach(traverse);
+      }
+    }
+    nodes.forEach(traverse);
     return rules;
   }
   return __toCommonJS(helper_function_exports);

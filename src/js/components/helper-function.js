@@ -681,7 +681,7 @@ export function initRules(rules) {
  * @param {object} node  The root of your layout JSON
  * @returns {Array}      An array of all `rule` entries found
  */
-export function extractRules(node) {
+export function extractRules2(node) {
   const rules = [];
 
   (function traverse(obj) {
@@ -697,6 +697,26 @@ export function extractRules(node) {
       obj.elements.forEach(traverse);
     }
   })(node);
+
+  return rules;
+}
+export function extractRules(nodes) {
+  const rules = [];
+
+  function traverse(obj) {
+    if (!obj || typeof obj !== 'object') return;
+
+    // if this node has a rule, grab it
+    if (obj.rules) {
+      rules.push(...obj.rules);
+    }
+
+    // if it has an "elements" array, recurse into each child
+    if (Array.isArray(obj.elements)) {
+      obj.elements.forEach(traverse);
+    }
+  }
+  nodes.forEach(traverse);
 
   return rules;
 }
