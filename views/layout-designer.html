@@ -321,11 +321,11 @@
   </div>
 
   <template id="rule-template">
-   <swal-title>
+   <swal-title class="text-sm">
       Edit Rule
     </swal-title>
     <swal-html>
-      <div class="flex flex-col flex-1 gap-2">
+      <div class="flex flex-col flex-1 gap-2 text-sm">
         <div class="flex flex-row flex-1">
           <wc-select name="rule-effect" lbl-label="Effect" class="flex-1">
             <option value="COPY">Copy Value</option>
@@ -362,17 +362,44 @@
             <wc-input name="rule-src-data-id" lbl-label="Source Element ID" class="flex-1">
             </wc-input>
           </div>
+          <div class="flex flex-row flex-1 gap-2">
+            <wc-input name="rule-src-selector" lbl-label="Source Selector (optional)" class="flex-1">
+            </wc-input>
+            <wc-input name="rule-src-property" lbl-label="Source Property (optional)" class="flex-1">
+            </wc-input>
+          </div>
+        </fieldset>
+        <fieldset class="flex flex-col flex-1 p-2 gap-2">
+          <legend>Target</legend>
+          <div class="flex flex-row flex-1">
+            <wc-input name="rule-tgt-data-id" lbl-label="Target Element ID" class="flex-1">
+            </wc-input>
+          </div>
+          <div class="flex flex-row flex-1 gap-2">
+            <wc-input name="rule-tgt-selector" lbl-label="Target Selector (optional)" class="flex-1">
+            </wc-input>
+            <wc-input name="rule-tgt-property" lbl-label="Target Property (optional)" class="flex-1">
+            </wc-input>
+          </div>
         </fieldset>
       </div>
     </swal-html>
-    <swal-button type="confirm">
-      Save Rule
-    </swal-button>
     <swal-button type="cancel">
       Cancel
     </swal-button>
+    <swal-button type="confirm">
+      Save Rule
+    </swal-button>
     <swal-param name="allowEscapeKey" value="false" />
     <swal-param name="allowOutsideClick" value="false" />
+    <swal-function-param
+      name="didOpen2"
+      value='(e) => {
+        console.log("didOpen...", e);
+        if (designerState.selectedElement) {
+          document.getElementById("rule-src-data-id").value = designerState.selectedElement.id;
+        }
+      }' />
     <swal-function-param
       name="preConfirm"
       value='() => { 

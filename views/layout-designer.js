@@ -362,6 +362,9 @@ function initEventListeners() {
       didOpen: () => {
         const cnt = document.querySelector(".swal2-container");
         if (cnt) {
+          if (designerState.selectedElement) {
+            document.getElementById('rule-src-data-id').value = designerState.selectedElement.id;
+          }
           htmx.process(cnt);
           _hyperscript.processNode(cnt);
         }

@@ -167,7 +167,7 @@ if (!customElements.get('wc-prompt')) {
     async notifyTemplate(c) {
       const body = document.querySelector('body');
       const theme = body.dataset.theme;
-      const { template = '', callback=null } = c;
+      const { template = '', didOpen=null, callback=null } = c;
 
       const customClass = {
         container: '',
@@ -192,7 +192,8 @@ if (!customElements.get('wc-prompt')) {
       };
       const {value: result} = await Swal.fire({
         customClass,
-        template
+        template,
+        didOpen: didOpen
       });
       return this.handleResult(c, result);
     }
