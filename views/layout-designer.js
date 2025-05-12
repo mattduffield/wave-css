@@ -47,7 +47,6 @@ let renderedPreviewButton = null;
 let preRenderedPreviewButton = null;
 let schemaButton = null;
 let previewFrame = null;
-let closePreviewButton = null;
 let generateJsonButton = null;
 let jsonOutput = null;
 let propId = null;
@@ -76,7 +75,6 @@ function setup() {
   formElements = document.getElementById('form-elements');
   schemaFields = document.getElementById('schema-fields');
   previewButton = document.querySelector('button[data-label="Preview"]');
-  closePreviewButton = document.querySelector('button[data-label="Canvas"]');
   renderedPreviewButton = document.querySelector('button[data-label="Preview"]');
   preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
   schemaButton = document.querySelector('button[data-label="Schema"]');
@@ -304,9 +302,6 @@ function initDropZone(element, parentElementId = null) {
 
 // Initialize Event Listeners
 function initEventListeners() {
-  // Close Preview Button
-  closePreviewButton.addEventListener('click', hidePreview);
-
   // Rendered Preview Button
   renderedPreviewButton.addEventListener('click', renderPreview);
 
@@ -693,25 +688,26 @@ function updateRulesPanel(element) {
   
   element.rules.forEach((rule, index) => {
     const ruleItem = document.createElement('div');
-    ruleItem.className = 'rule-item';
+    ruleItem.className = 'rule-item flex flex-col rounded border-1 border-solid gap-2 p-2';
     
     const ruleHeader = document.createElement('div');
-    ruleHeader.className = 'd-flex justify-content-between align-items-center mb-2';
+    ruleHeader.className = 'flex flex-col gap-2';
     
     const ruleTitle = document.createElement('h6');
     ruleTitle.textContent = `Rule: ${rule.effect}`;
     ruleHeader.appendChild(ruleTitle);
     
     const ruleActions = document.createElement('div');
+    ruleActions.className = 'flex flex-row justify-between align-center';
     
     const editButton = document.createElement('button');
-    editButton.className = 'btn btn-sm btn-outline-primary me-2';
+    editButton.className = 'theme-azure dark';
     editButton.textContent = 'Edit';
     editButton.addEventListener('click', () => editRule(index));
     ruleActions.appendChild(editButton);
     
     const deleteButton = document.createElement('button');
-    deleteButton.className = 'btn btn-sm btn-outline-danger';
+    deleteButton.className = 'theme-fire dark';
     deleteButton.textContent = 'Delete';
     deleteButton.addEventListener('click', async () => deleteRule(index));
     ruleActions.appendChild(deleteButton);
@@ -1138,11 +1134,6 @@ function addSchemaField(path, prop, required) {
 //
 // Preview
 //
-
-// Hide Preview
-function hidePreview() {
-  previewButton.src = '';
-}
 
 // Render Preview
 function renderPreview() {

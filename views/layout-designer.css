@@ -95,10 +95,12 @@ body {
   color: var(--text-9);
 }
 .rule-item {
+  /*
   border: 1px solid #dee2e6;
   border-radius: 4px;
   padding: 10px;
   margin-bottom: 10px;
+  */
 }
 .preview-container {
   height: 100%;

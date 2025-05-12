@@ -487,19 +487,6 @@ function initRules(rules) {
   });
   rules.forEach(applyRule);
 }
-function extractRules2(node) {
-  const rules = [];
-  (function traverse(obj) {
-    if (!obj || typeof obj !== "object") return;
-    if (obj.rules) {
-      rules.push(...obj.rules);
-    }
-    if (Array.isArray(obj.elements)) {
-      obj.elements.forEach(traverse);
-    }
-  })(node);
-  return rules;
-}
 function extractRules(nodes) {
   const rules = [];
   function traverse(obj) {
@@ -513,6 +500,24 @@ function extractRules(nodes) {
   }
   nodes.forEach(traverse);
   return rules;
+}
+function extractSrcElements(nodes) {
+  const result = [];
+  function processElement(element) {
+    const label = element.label || "";
+    const scope = element.scope || "";
+    const formattedLabel = scope ? `${label} (${scope})` : label;
+    const output = {
+      "data-id": element["data-id"],
+      "label": formattedLabel
+    };
+    result.push(output);
+    if (element.elements && Array.isArray(element.elements)) {
+      element.elements.forEach((child) => processElement(child));
+    }
+  }
+  nodes.forEach((element) => processElement(element));
+  return result;
 }
 
 // src/js/components/wc-base-component.js
@@ -9924,7 +9929,7 @@ export {
   disableSortable,
   enableSortable,
   extractRules,
-  extractRules2,
+  extractSrcElements,
   fetchApi,
   generateUniqueId,
   getSourcePropertyValue,

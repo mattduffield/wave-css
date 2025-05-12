@@ -681,25 +681,6 @@ export function initRules(rules) {
  * @param {object} node  The root of your layout JSON
  * @returns {Array}      An array of all `rule` entries found
  */
-export function extractRules2(node) {
-  const rules = [];
-
-  (function traverse(obj) {
-    if (!obj || typeof obj !== 'object') return;
-
-    // if this node has a rule, grab it
-    if (obj.rules) {
-      rules.push(...obj.rules);
-    }
-
-    // if it has an "elements" array, recurse into each child
-    if (Array.isArray(obj.elements)) {
-      obj.elements.forEach(traverse);
-    }
-  })(node);
-
-  return rules;
-}
 export function extractRules(nodes) {
   const rules = [];
 
@@ -719,4 +700,33 @@ export function extractRules(nodes) {
   nodes.forEach(traverse);
 
   return rules;
+}
+
+export function extractSrcElements(nodes) {
+  const result = [];
+  
+  function processElement(element) {
+    // Extract label and scope, format as required
+    const label = element.label || '';
+    const scope = element.scope || '';
+    const formattedLabel = scope ? `${label} (${scope})` : label;
+    
+    // Create the output object with the required properties
+    const output = {
+      'data-id': element['data-id'],
+      'label': formattedLabel
+    };
+    
+    result.push(output);
+    
+    // Recursively process elements if they exist
+    if (element.elements && Array.isArray(element.elements)) {
+      element.elements.forEach(child => processElement(child));
+    }
+  }
+  
+  // Process each top-level element in the array
+  nodes.forEach(element => processElement(element));
+  
+  return result;
 }
