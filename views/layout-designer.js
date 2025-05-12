@@ -70,7 +70,6 @@ let saveDesignButton = null;
 let saveDesignTextarea = null;
 let saveDesignNameInput = null;
 let loadDesignButton = null;
-let confirmLoadDesignButton = null;
 let downloadDesignJsonButton = null;
 let copyDesignJsonButton = null;
 
@@ -112,19 +111,8 @@ function setup() {
   saveDesignTextarea = document.getElementById('save-design-textarea');
   saveDesignNameInput = document.getElementById('save-design-name');
   loadDesignButton = document.getElementById('load-design');
-  confirmLoadDesignButton = document.getElementById('confirm-load-design');
   downloadDesignJsonButton = document.getElementById('download-design-json');
   copyDesignJsonButton = document.getElementById('copy-design-json');
-
-
-  // Modals
-  // jsonModal = new bootstrap.Modal(document.getElementById('json-modal'));
-  // ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
-
-  // Initialize Bootstrap modals
-  // ruleModal = new bootstrap.Modal(document.getElementById('rule-modal'));
-  // const saveDesignModalEl = new bootstrap.Modal(saveDesignModal);
-  // const loadDesignModalEl = new bootstrap.Modal(loadDesignModal);
   
   init();
 }
@@ -390,7 +378,7 @@ function initEventListeners() {
     
     // Show the modal
     const promptPayload = {
-      title: 'Save Design',
+      // title: 'Save Design',
       icon: 'info',
       focusConfirm: false,
       template: 'template#save-design-template',
@@ -401,55 +389,53 @@ function initEventListeners() {
           _hyperscript.processNode(cnt);
         }
       },
-      // preConfirm: () => {
-      //   if (this.funcs['onClonePreConfirm']) {
-      //     const payload = this.funcs['onClonePreConfirm'](row);
-      //     return payload;
-      //   } else {
-      //     // Fallback, to reduce redundancies.
-      //     const payload = {
-      //       "srcConnName": document.getElementById("srcConnName").value,
-      //       "srcDbName": document.getElementById("srcDbName").value,
-      //       "srcCollName": document.getElementById("srcCollName").value,
-      //       "tgtConnName": document.getElementById("tgtConnName").value,
-      //       "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
-      //       "tgtCollName": document.getElementById("tgtCollName").value,
-      //       "recordIds": recordIds
-      //     }
-      //     return payload;
-      //   }
-      // },
       callback: (result) => {
-        
+        console.log('save-design - result:', result);
       }
     };
-    wc.Prompt.fire(promptPayload);    
+    wc.Prompt.notifyTemplate(promptPayload);
     // new bootstrap.Modal(saveDesignModal).show();
   });
 
   // Load Design Button
-  loadDesignButton.addEventListener('click', () => {
-    // Clear the textarea
-    loadDesignTextarea.value = '';
-    
+  loadDesignButton.addEventListener('click2', () => {
     // Show the modal
-    new bootstrap.Modal(loadDesignModal).show();
+    const promptPayload = {
+      focusConfirm: false,
+      template: 'template#load-design-template',
+      didOpen: () => {
+        const cnt = document.querySelector(".swal2-container");
+        if (cnt) {
+          htmx.process(cnt);
+          _hyperscript.processNode(cnt);
+        }
+      },
+      callback: (result) => {
+        console.log('load-design - result:', result);
+        try {
+          const jsonText = result.uiLayout.trim();
+          if (!jsonText) {
+            alert('Please paste a valid JSON layout');
+            return;
+          }
+          const layoutData = JSON.parse(jsonText);
+          loadDesign(layoutData);          
+        } catch (e) {
+          alert('Invalid JSON format: ' + e.message);
+        }        
+      }
+    };
+    wc.Prompt.notifyTemplate(promptPayload);
   });
-
-  // Confirm Load Design Button
-  confirmLoadDesignButton.addEventListener('click', () => {
-    const jsonText = loadDesignTextarea.value.trim();
-    if (!jsonText) {
-      alert('Please paste a valid JSON layout');
-      return;
-    }
-    
+  loadDesignButton.addEventListener('click', () => {
     try {
+      const jsonText = jsonOutput.editor.getValue().trim();
+      if (!jsonText) {
+        alert('Please paste a valid JSON layout');
+        return;
+      }
       const layoutData = JSON.parse(jsonText);
-      loadDesign(layoutData);
-      
-      // Hide the modal
-      bootstrap.Modal.getInstance(loadDesignModal).hide();
+      loadDesign(layoutData);          
     } catch (e) {
       alert('Invalid JSON format: ' + e.message);
     }

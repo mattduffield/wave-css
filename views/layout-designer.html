@@ -83,8 +83,8 @@
     </div>
 
     <!-- Center Panel - Designer Surface -->
-    <div id="center-panel" class="flex flex-col flex-1 min-h-0">
-      <wc-tab id="center-tab-control" class="flex flex-col flex-1 min-h-0 p-2" animate>
+    <div id="center-panel" class="flex flex-col flex-1 min-h-0 min-w-0">
+      <wc-tab id="center-tab-control" class="flex flex-col flex-1 min-h-0 min-w-0 p-2" animate>
         <wc-tab-item class="active" label="Canvas">
           <div class="designer-surface flex flex-col flex-1 min-h-0 overflow-scroll" id="designer-surface"></div>
         </wc-tab-item>
@@ -104,8 +104,8 @@
           </div>
         </wc-tab-item>
         <wc-tab-item label="Layout JSON">
-          <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
-            <wc-code-mirror class="flex flex-col flex-1 min-h-0"
+          <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll gap-2">
+            <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
               name="json-output"
               line-numbers
               line-wrapper
@@ -322,6 +322,9 @@
   </div>
 
   <template id="save-design-template">
+   <swal-title>
+      Save Design Template
+    </swal-title>
     <swal-html>
       <wc-input name="srcConnName" type="hidden" value="default"/>
       <wc-input name="srcDbName" type="hidden" value="local"/>
@@ -377,6 +380,41 @@
           "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
           "tgtCollName": document.getElementById("tgtCollName").value,
           "recordIds": []
+        };
+        return payload;
+      }' />
+  </template>
+
+  <template id="load-design-template">
+   <swal-title>
+      Load Design
+    </swal-title>
+    <swal-html>
+      <wc-code-mirror
+        name="load-layout"
+        class="h-400"
+        line-numbers
+        line-wrapper
+        fold-gutter
+        mode="javascript"
+        theme="monokai"
+        tab-size="2"
+        indent-unit="2">
+      </wc-code-mirror>      
+    </swal-html>
+    <swal-button type="confirm">
+      Load
+    </swal-button>
+    <swal-button type="cancel">
+      Cancel
+    </swal-button>
+    <swal-param name="allowEscapeKey" value="false" />
+    <swal-param name="allowOutsideClick" value="false" />
+    <swal-function-param
+      name="preConfirm"
+      value='() => { 
+        const payload = {
+          "uiLayout": document.querySelector(`wc-code-mirror[name="load-layout"]`).editor.getValue()
         };
         return payload;
       }' />
