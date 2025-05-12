@@ -339,13 +339,13 @@
             <option value="UN-REQUIRE">Make Optional</option>
           </wc-select>
         </div>
-        <fieldset class="flex flex-col flex-1 p-0 gap-2">
+        <fieldset class="flex flex-col flex-1 p-2 gap-2">
           <legend>Condition</legend>
           <div class="flex flex-row flex-1">
             <wc-input name="rule-condition-scope" lbl-label="Scope" class="flex-1">
             </wc-input>
           </div>
-          <div class="flex flex-row flex-1">
+          <div class="flex flex-row flex-1 gap-2">
             <wc-select name="rule-schema-type" lbl-label="Rule Type" class="flex-1">
               <option value="minLength">Min Length</option>
               <option value="maxLength">Max Length</option>
@@ -357,6 +357,10 @@
             </wc-select>
             <wc-input name="rule-schema-value" lbl-label="Value" class="flex-1">
             </wc-input>            
+          </div>
+          <div class="flex flex-row flex-1">
+            <wc-input name="rule-src-data-id" lbl-label="Source Element ID" class="flex-1">
+            </wc-input>
           </div>
         </fieldset>
       </div>

@@ -9068,6 +9068,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         border-radius: 0.375rem;
         color: var(--text-1);
         padding: 0.375rem;
+        width: 100%;
       }
       wc-input input:-webkit-autofill {
         background-color: var(--surface-3);
