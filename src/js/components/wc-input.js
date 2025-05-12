@@ -415,7 +415,9 @@ class WcInput extends WcBaseFormComponent {
 
 
 
-
+      wc-input input {
+        width: 100%;
+      }
       wc-input .toggle-wrapper {
         position: relative;
         width: 50px;
