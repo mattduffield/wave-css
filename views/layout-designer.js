@@ -351,11 +351,26 @@ function initEventListeners() {
   // Add Rule Button
   addRuleButton.addEventListener('click', () => {
     designerState.editingRuleIndex = -1;
-    clearRuleForm();
-    if (designerState.selectedElement) {
-      document.getElementById('rule-src-data-id').value = designerState.selectedElement.id;
-    }
-    ruleModal.show();
+    // clearRuleForm();
+    // if (designerState.selectedElement) {
+    //   document.getElementById('rule-src-data-id').value = designerState.selectedElement.id;
+    // }
+    // ruleModal.show();
+    const promptPayload = {
+      focusConfirm: false,
+      template: 'template#rule-template',
+      didOpen: () => {
+        const cnt = document.querySelector(".swal2-container");
+        if (cnt) {
+          htmx.process(cnt);
+          _hyperscript.processNode(cnt);
+        }
+      },
+      callback: (result) => {
+        console.log('rule-template - result:', result);
+      }
+    };
+    wc.Prompt.notifyTemplate(promptPayload);
   });
   
   // Save Rule Button
@@ -427,6 +442,15 @@ function initEventListeners() {
     };
     wc.Prompt.notifyTemplate(promptPayload);
   });
+  jsonOutput.editor.on('change2', async () => {
+    try {
+      const jsonText = jsonOutput.editor.getValue().trim();
+      const layoutData = JSON.parse(jsonText);
+      loadDesign(layoutData);
+    } catch (e) {
+      alert('Invalid JSON format: ' + e.message);
+    }
+  });  
   loadDesignButton.addEventListener('click', () => {
     try {
       const jsonText = jsonOutput.editor.getValue().trim();
@@ -435,7 +459,8 @@ function initEventListeners() {
         return;
       }
       const layoutData = JSON.parse(jsonText);
-      loadDesign(layoutData);          
+      loadDesign(layoutData);
+      wc.Prompt.toast({title: 'Load Succeeded!'});
     } catch (e) {
       alert('Invalid JSON format: ' + e.message);
     }
@@ -712,7 +737,7 @@ function updateRulesPanel(element) {
     
     // Rule summary
     const ruleSummary = document.createElement('div');
-    ruleSummary.className = 'small';
+    ruleSummary.className = 'text-sm';
     
     const condition = document.createElement('div');
     condition.textContent = `When ${rule.condition.scope} ${getSchemaDescription(rule.condition.schema)}`;
@@ -818,6 +843,22 @@ function editRule(index) {
   document.getElementById('rule-tgt-property').value = rule.tgtProperty || '';
   
   ruleModal.show();
+
+  const promptPayload = {
+    focusConfirm: false,
+    template: 'template#rule-template',
+    didOpen: () => {
+      const cnt = document.querySelector(".swal2-container");
+      if (cnt) {
+        htmx.process(cnt);
+        _hyperscript.processNode(cnt);
+      }
+    },
+    callback: (result) => {
+      console.log('rule-template - result:', result);
+    }
+  };
+  wc.Prompt.notifyTemplate(promptPayload);
 }
 
 // Delete Rule
@@ -1331,7 +1372,7 @@ function loadDesign(layoutData) {
     refreshDesigner();
     
     // Update the JSON output
-    jsonOutput.editor.setValue(JSON.stringify(generateJson(), null, 2));
+    // jsonOutput.editor.setValue(JSON.stringify(generateJson(), null, 2));
     
     return true;
   } catch (e) {

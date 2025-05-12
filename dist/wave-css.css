@@ -5656,7 +5656,6 @@
   }
   fieldset {
     border: 2px solid var(--component-border-color);
-    padding: 1rem;
     border-radius: 6px;
   }
   legend {

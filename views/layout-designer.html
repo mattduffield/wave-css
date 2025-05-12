@@ -104,7 +104,7 @@
           </div>
         </wc-tab-item>
         <wc-tab-item label="Layout JSON">
-          <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll gap-2">
+          <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
               name="json-output"
               line-numbers
@@ -115,11 +115,10 @@
               tab-size="2"
               indent-unit="2">
             </wc-code-mirror>
-            <div class="flex flex-row gap-2 mt-2">
-              <button id="generate-json" class="btn btn-primary">Generate JSON</button>
+            <div class="flex flex-row gap-2 p-2">
               <button id="copy-json" class="btn btn-secondary">Copy to Clipboard</button>
               <button id="save-design" class="btn btn-success">Save Design</button>
-              <button id="load-design" class="btn btn-info">Load Design</button>
+              <button id="load-design" class="btn btn-info">Apply Design</button>
             </div>
           </div>
         </wc-tab-item>
@@ -137,7 +136,7 @@
     <div class="right-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab id="right-panel" class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Properties">
-          <div class="col-1 gap-2 pt-2 pb-10 px-4">
+          <div class="col-1 gap-2 py-2 px-4">
             <div id="no-selection" class="col-1 text-center text-muted py-4">
               <p>Select an element to view and edit its properties</p>
             </div>
@@ -166,8 +165,8 @@
             </div>
           </div>
         </wc-tab-item>
-        <wc-tab-item class="p-4" label="Rules">
-          <div class="col-1 gap-2 pt-2 pb-10 px-10">
+        <wc-tab-item class="" label="Rules">
+          <div class="col-1 gap-2 py-2 px-4">
             <div id="rules-no-selection" class="text-center text-muted py-4">
               <p>Select an element to view and edit its rules</p>
             </div>
@@ -320,6 +319,65 @@
       </div>
     </div>
   </div>
+
+  <template id="rule-template">
+   <swal-title>
+      Edit Rule
+    </swal-title>
+    <swal-html>
+      <div class="flex flex-col flex-1 gap-2">
+        <div class="flex flex-row flex-1">
+          <wc-select name="rule-effect" lbl-label="Effect" class="flex-1">
+            <option value="COPY">Copy Value</option>
+            <option value="COPY-TOLOWER">Copy to Lowercase</option>
+            <option value="COPY-TOLOWER-UNDERSCORE">Copy to Lowercase with Underscores</option>
+            <option value="SHOW">Show Element</option>
+            <option value="HIDE">Hide Element</option>
+            <option value="ENABLE">Enable Element</option>
+            <option value="DISABLE">Disable Element</option>
+            <option value="REQUIRE">Make Required</option>
+            <option value="UN-REQUIRE">Make Optional</option>
+          </wc-select>
+        </div>
+        <fieldset class="flex flex-col flex-1 p-0 gap-2">
+          <legend>Condition</legend>
+          <div class="flex flex-row flex-1">
+            <wc-input name="rule-condition-scope" lbl-label="Scope" class="flex-1">
+            </wc-input>
+          </div>
+          <div class="flex flex-row flex-1">
+            <wc-select name="rule-schema-type" lbl-label="Rule Type" class="flex-1">
+              <option value="minLength">Min Length</option>
+              <option value="maxLength">Max Length</option>
+              <option value="pattern">Pattern</option>
+              <option value="minimum">Minimum</option>
+              <option value="maximum">Maximum</option>
+              <option value="const">Constant</option>
+              <option value="enum">Enum</option>
+            </wc-select>
+            <wc-input name="rule-schema-value" lbl-label="Value" class="flex-1">
+            </wc-input>            
+          </div>
+        </fieldset>
+      </div>
+    </swal-html>
+    <swal-button type="confirm">
+      Save Rule
+    </swal-button>
+    <swal-button type="cancel">
+      Cancel
+    </swal-button>
+    <swal-param name="allowEscapeKey" value="false" />
+    <swal-param name="allowOutsideClick" value="false" />
+    <swal-function-param
+      name="preConfirm"
+      value='() => { 
+        const payload = {
+          "uiLayout": document.querySelector(`wc-code-mirror[name="load-layout"]`).editor.getValue()
+        };
+        return payload;
+      }' />
+  </template>
 
   <template id="save-design-template">
    <swal-title>
