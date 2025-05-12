@@ -713,7 +713,7 @@ export function extractSrcElements(nodes) {
     
     // Create the output object with the required properties
     const output = {
-      'data-id': element['data-id'],
+      'dataId': element['data-id'],
       'label': formattedLabel
     };
     

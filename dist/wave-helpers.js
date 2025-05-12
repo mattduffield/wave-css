@@ -562,7 +562,7 @@ var WaveHelpers = (() => {
       const scope = element.scope || "";
       const formattedLabel = scope ? `${label} (${scope})` : label;
       const output = {
-        "data-id": element["data-id"],
+        "dataId": element["data-id"],
         "label": formattedLabel
       };
       result.push(output);

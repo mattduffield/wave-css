@@ -340,6 +340,16 @@ function initEventListeners() {
           if (designerState.selectedElement) {
             const src = document.getElementById('rule-src-data-id');
             src.value = designerState.selectedElement.id;
+
+            const schema = JSON.parse(schemaJson.editor.getValue());
+            const srcElements = WaveHelpers.extractSrcElements(schema);
+            const tgt = document.getElementById('rule-tgt-data-id');
+            const options = srcElements.map(m => `<option value="${m.dataId}">${m.label}</option>`);
+            tgt.options = options;
+
+
+
+
           }
           htmx.process(cnt);
           _hyperscript.processNode(cnt);
