@@ -341,15 +341,20 @@ function initEventListeners() {
             const src = document.getElementById('rule-src-data-id');
             src.value = designerState.selectedElement.id;
 
-            const schema = JSON.parse(schemaJson.editor.getValue());
-            const srcElements = WaveHelpers.extractSrcElements(schema);
+            const layout = JSON.parse(jsonOutput.editor.getValue());
+            const srcElements = WaveHelpers.extractSrcElements(layout);
             const tgt = document.getElementById('rule-tgt-data-id');
-            const options = srcElements.map(m => `<option value="${m.dataId}">${m.label}</option>`);
-            tgt.options = options;
-
-
-
-
+            tgt.innerHTML = '';
+            let option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Choose...';
+            tgt.appendChild(option);
+            srcElements.forEach(el => {
+              option = document.createElement('option');
+              option.value = el.dataId;
+              option.textContent = el.label;
+              tgt.appendChild(option);
+            });
           }
           htmx.process(cnt);
           _hyperscript.processNode(cnt);
@@ -1341,7 +1346,11 @@ function loadDesign(layoutData) {
       if (!elements) return;
       
       elements.forEach(element => {
-        element.id = generateUniqueId();
+        if (element['data-id']) {
+          element.id = element['data-id'];
+        } else {
+          element.id = generateUniqueId();
+        }
         if (element.elements) {
           addIds(element.elements);
         }
