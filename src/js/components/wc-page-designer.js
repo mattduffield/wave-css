@@ -1633,7 +1633,7 @@ if (!customElements.get('wc-page-designer')) {
 
     // Set Schema
     setSchema() {
-      this.schemaJson.editor.setValue(JSON.stringify(sampleSchema, null, 2));
+      this.schemaJson.editor.setValue(JSON.stringify(this.sampleSchema, null, 2));
     }
 
     // Generate JSON
