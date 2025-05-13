@@ -4677,7 +4677,7 @@ if (!customElements.get("wc-page-designer")) {
       });
       this.jsonOutput.editor.on("change2", async () => {
         try {
-          const jsonText = jsonOutput.editor.getValue().trim();
+          const jsonText = this.jsonOutput.editor.getValue().trim();
           const layoutData = JSON.parse(jsonText);
           this.loadDesign(layoutData);
         } catch (e) {
@@ -4686,7 +4686,7 @@ if (!customElements.get("wc-page-designer")) {
       });
       this.loadDesignButton.addEventListener("click", () => {
         try {
-          const jsonText = jsonOutput.editor.getValue().trim();
+          const jsonText = this.jsonOutput.editor.getValue().trim();
           if (!jsonText) {
             alert("Please paste a valid JSON layout");
             return;
