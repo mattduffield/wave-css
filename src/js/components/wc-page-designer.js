@@ -123,7 +123,10 @@ if (!customElements.get('wc-page-designer')) {
 
     attributeChangedCallback(attrName, oldValue, newValue) {
       if (attrName === 'theme') {
+        const oldTheme = this.theme;
         this.theme = newValue;
+        const designer = this.querySelector('.wc-page-designer');
+        designer.className.replace(oldTheme, newValue);
       }
     }
   
