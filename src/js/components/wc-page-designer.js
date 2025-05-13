@@ -504,6 +504,7 @@ if (!customElements.get('wc-page-designer')) {
     wireEvents() {
     }
     unWireEvents() {
+      console.log('unWireEvents:wc-page-designer');
       // Rendered Preview Button
       this.renderedPreviewButton.removeEventListener('click', this.renderPreview.bind(this));
 
@@ -668,6 +669,135 @@ if (!customElements.get('wc-page-designer')) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+
+
+
+      const elementItems = document.querySelectorAll('.element-item');
+      elementItems.forEach(item => {
+        item.removeEventListener('dragstart', e => {
+          e.dataTransfer.setData('element-type', item.getAttribute('data-element-type'));
+          e.dataTransfer.setData('schema-field', item.getAttribute('data-schema-field') || '');
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+      });
+  
+      this.designerSurface.removeEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        // Add a visual indicator for valid drop target
+        this.designerSurface.classList.add('drag-over');
+      });
+      
+      this.designerSurface.addEventListener('dragleave', e => {
+        // Remove visual indicator
+        this.designerSurface.classList.remove('drag-over');
+      });
+      
+      this.designerSurface.addEventListener('drop', e => {
+        e.preventDefault();
+        e.stopPropagation(); // Stop event propagation to prevent multiple drops
+        
+        // Remove visual indicator
+        this.designerSurface.classList.remove('drag-over');
+        
+        const elementType = e.dataTransfer.getData('element-type');
+        const schemaField = e.dataTransfer.getData('schema-field');
+        
+        if (elementType) {
+          let scope = '';
+          let label = '';
+          
+          if (schemaField) {
+            scope = schemaField;
+            
+            // Format the label based on the schema field
+            const parts = schemaField.split('/');
+            if (parts.length > 0) {
+              label = parts[parts.length - 1];
+              
+              // Handle nested $defs elements
+              if (schemaField.includes('$defs')) {
+                // For $defs items, we need to add parent prefix
+                const defName = parts[2]; // The definition name
+                const fieldName = parts[parts.length - 1]; // The property name
+                
+                // Format as parent.field if it's from a $defs
+                if (defName && fieldName) {
+                  label = defName + '.' + fieldName;
+                }
+              }
+            }
+          } else {
+            label = this.getDefaultLabel(elementType);
+          }
+          
+          // Create the element object in the data model
+          const id = this.generateUniqueId();
+          const newElement = {
+            id: id,
+            "data-id": id,
+            type: elementType,
+            label,
+            scope,
+            css: '',
+            required: false,
+            rules: [],
+            elements: []
+          };
+          
+          // Add to parent in the data model
+          if (parentElementId) {
+            const parentElement = this.findElementById(parentElementId);
+            if (parentElement) {
+              if (!parentElement.elements) {
+                parentElement.elements = [];
+              }
+              parentElement.elements.push(newElement);
+            }
+          } else {
+            this.designerState.elements.push(newElement);
+          }
+          
+          // If dropping into a container, safely remove placeholder if it exists
+          const placeholder = element.querySelector('.designer-element-placeholder');
+          if (placeholder && placeholder.parentNode === element) {
+            try {
+              element.removeChild(placeholder);
+            } catch (e) {
+              console.log('Could not remove placeholder:', e);
+            }
+          }
+          
+          // Create the DOM element
+          const elementNode = this.createElementNode(newElement);
+          this.designerSurface.appendChild(elementNode);
+          
+          // Add a new placeholder after a short delay to ensure proper rendering
+          if (this.designerSurface.classList.contains('designer-element-container')) {
+            setTimeout(() => {
+              // Only add a placeholder if there isn't one already
+              if (!this.designerSurface.querySelector('.designer-element-placeholder')) {
+                const newPlaceholder = document.createElement('div');
+                newPlaceholder.className = 'designer-element-placeholder';
+                newPlaceholder.textContent = 'Drop more elements here';
+                this.designerSurface.appendChild(newPlaceholder);
+              }
+            }, 100);
+          }
+          
+          // Refresh drop zone initialization for newly added containers
+          if (this.isContainerElement(elementType)) {
+            const containerElements = document.querySelectorAll('.designer-element-container:not([data-drop-zone])');
+            containerElements.forEach(containerElement => {
+              const containerId = containerElement.getAttribute('data-container-for');
+              if (containerId) {
+                this.initDropZone(containerElement, containerId);
+              }
+            });
+          }
+        }
+      });
+
     }
 
 

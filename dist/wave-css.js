@@ -1,6 +1,6 @@
 // src/js/components/helper-function.js
-function isCustomElement(element) {
-  return element.tagName.includes("-");
+function isCustomElement(element2) {
+  return element2.tagName.includes("-");
 }
 function generateUniqueId2() {
   return "xxxx-xxxx-xxxx-xxxx".replace(/[x]/g, () => {
@@ -107,9 +107,9 @@ function locator(root, selector) {
   if (root.matches && root.matches(selector)) {
     return root;
   }
-  const element = root.querySelector(selector);
-  if (element) {
-    return element;
+  const element2 = root.querySelector(selector);
+  if (element2) {
+    return element2;
   }
   const shadowHosts = root.querySelectorAll("*");
   for (const shadowHost of shadowHosts) {
@@ -139,9 +139,9 @@ function waitForSelectorPolling(selector, timeout = 3e3, interval = 100) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const checkVisibility = () => {
-      const element = document.querySelector(selector);
-      if (element && element.offsetParent !== null) {
-        resolve(element);
+      const element2 = document.querySelector(selector);
+      if (element2 && element2.offsetParent !== null) {
+        resolve(element2);
       } else if (Date.now() - startTime > timeout) {
         reject(new Error(`Timeout: Selector "${selector}" not found or not visible after ${timeout}ms`));
       } else {
@@ -503,20 +503,20 @@ function extractRules(nodes) {
 }
 function extractSrcElements(nodes) {
   const result = [];
-  function processElement(element) {
-    const label = element.label || "";
-    const scope = element.scope || "";
+  function processElement(element2) {
+    const label = element2.label || "";
+    const scope = element2.scope || "";
     const formattedLabel = scope ? `${label} (${scope})` : label;
     const output = {
-      "dataId": element["data-id"],
+      "dataId": element2["data-id"],
       "label": formattedLabel
     };
     result.push(output);
-    if (element.elements && Array.isArray(element.elements)) {
-      element.elements.forEach((child) => processElement(child));
+    if (element2.elements && Array.isArray(element2.elements)) {
+      element2.elements.forEach((child) => processElement(child));
     }
   }
-  nodes.forEach((element) => processElement(element));
+  nodes.forEach((element2) => processElement(element2));
   return result;
 }
 
@@ -4389,6 +4389,7 @@ if (!customElements.get("wc-page-designer")) {
     wireEvents() {
     }
     unWireEvents() {
+      console.log("unWireEvents:wc-page-designer");
       this.renderedPreviewButton.removeEventListener("click", this.renderPreview.bind(this));
       this.preRenderedPreviewButton.removeEventListener("click", this.preRenderPreview.bind(this));
       this.schemaButton.removeEventListener("click", this.setSchema.bind(this));
@@ -4524,6 +4525,101 @@ if (!customElements.get("wc-page-designer")) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
+      const elementItems = document.querySelectorAll(".element-item");
+      elementItems.forEach((item) => {
+        item.removeEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("element-type", item.getAttribute("data-element-type"));
+          e.dataTransfer.setData("schema-field", item.getAttribute("data-schema-field") || "");
+          e.dataTransfer.effectAllowed = "copy";
+        });
+      });
+      this.designerSurface.removeEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        this.designerSurface.classList.add("drag-over");
+      });
+      this.designerSurface.addEventListener("dragleave", (e) => {
+        this.designerSurface.classList.remove("drag-over");
+      });
+      this.designerSurface.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.designerSurface.classList.remove("drag-over");
+        const elementType = e.dataTransfer.getData("element-type");
+        const schemaField = e.dataTransfer.getData("schema-field");
+        if (elementType) {
+          let scope = "";
+          let label = "";
+          if (schemaField) {
+            scope = schemaField;
+            const parts = schemaField.split("/");
+            if (parts.length > 0) {
+              label = parts[parts.length - 1];
+              if (schemaField.includes("$defs")) {
+                const defName = parts[2];
+                const fieldName = parts[parts.length - 1];
+                if (defName && fieldName) {
+                  label = defName + "." + fieldName;
+                }
+              }
+            }
+          } else {
+            label = this.getDefaultLabel(elementType);
+          }
+          const id = this.generateUniqueId();
+          const newElement = {
+            id,
+            "data-id": id,
+            type: elementType,
+            label,
+            scope,
+            css: "",
+            required: false,
+            rules: [],
+            elements: []
+          };
+          if (parentElementId) {
+            const parentElement = this.findElementById(parentElementId);
+            if (parentElement) {
+              if (!parentElement.elements) {
+                parentElement.elements = [];
+              }
+              parentElement.elements.push(newElement);
+            }
+          } else {
+            this.designerState.elements.push(newElement);
+          }
+          const placeholder = element.querySelector(".designer-element-placeholder");
+          if (placeholder && placeholder.parentNode === element) {
+            try {
+              element.removeChild(placeholder);
+            } catch (e2) {
+              console.log("Could not remove placeholder:", e2);
+            }
+          }
+          const elementNode = this.createElementNode(newElement);
+          this.designerSurface.appendChild(elementNode);
+          if (this.designerSurface.classList.contains("designer-element-container")) {
+            setTimeout(() => {
+              if (!this.designerSurface.querySelector(".designer-element-placeholder")) {
+                const newPlaceholder = document.createElement("div");
+                newPlaceholder.className = "designer-element-placeholder";
+                newPlaceholder.textContent = "Drop more elements here";
+                this.designerSurface.appendChild(newPlaceholder);
+              }
+            }, 100);
+          }
+          if (this.isContainerElement(elementType)) {
+            const containerElements = document.querySelectorAll(".designer-element-container:not([data-drop-zone])");
+            containerElements.forEach((containerElement) => {
+              const containerId = containerElement.getAttribute("data-container-for");
+              if (containerId) {
+                this.initDropZone(containerElement, containerId);
+              }
+            });
+          }
+        }
+      });
     }
     setup() {
       this.designerSurface = document.getElementById("designer-surface");
@@ -4595,20 +4691,20 @@ if (!customElements.get("wc-page-designer")) {
       });
     }
     // Initialize Drop Zone
-    initDropZone(element, parentElementId = null) {
-      element.setAttribute("data-drop-zone", "true");
-      element.addEventListener("dragover", (e) => {
+    initDropZone(element2, parentElementId2 = null) {
+      element2.setAttribute("data-drop-zone", "true");
+      element2.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
-        element.classList.add("drag-over");
+        element2.classList.add("drag-over");
       });
-      element.addEventListener("dragleave", (e) => {
-        element.classList.remove("drag-over");
+      element2.addEventListener("dragleave", (e) => {
+        element2.classList.remove("drag-over");
       });
-      element.addEventListener("drop", (e) => {
+      element2.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        element.classList.remove("drag-over");
+        element2.classList.remove("drag-over");
         const elementType = e.dataTransfer.getData("element-type");
         const schemaField = e.dataTransfer.getData("schema-field");
         if (elementType) {
@@ -4642,8 +4738,8 @@ if (!customElements.get("wc-page-designer")) {
             rules: [],
             elements: []
           };
-          if (parentElementId) {
-            const parentElement = this.findElementById(parentElementId);
+          if (parentElementId2) {
+            const parentElement = this.findElementById(parentElementId2);
             if (parentElement) {
               if (!parentElement.elements) {
                 parentElement.elements = [];
@@ -4653,23 +4749,23 @@ if (!customElements.get("wc-page-designer")) {
           } else {
             this.designerState.elements.push(newElement);
           }
-          const placeholder = element.querySelector(".designer-element-placeholder");
-          if (placeholder && placeholder.parentNode === element) {
+          const placeholder = element2.querySelector(".designer-element-placeholder");
+          if (placeholder && placeholder.parentNode === element2) {
             try {
-              element.removeChild(placeholder);
+              element2.removeChild(placeholder);
             } catch (e2) {
               console.log("Could not remove placeholder:", e2);
             }
           }
           const elementNode = this.createElementNode(newElement);
-          element.appendChild(elementNode);
-          if (element.classList.contains("designer-element-container")) {
+          element2.appendChild(elementNode);
+          if (element2.classList.contains("designer-element-container")) {
             setTimeout(() => {
-              if (!element.querySelector(".designer-element-placeholder")) {
+              if (!element2.querySelector(".designer-element-placeholder")) {
                 const newPlaceholder = document.createElement("div");
                 newPlaceholder.className = "designer-element-placeholder";
                 newPlaceholder.textContent = "Drop more elements here";
-                element.appendChild(newPlaceholder);
+                element2.appendChild(newPlaceholder);
               }
             }, 100);
           }
@@ -4826,7 +4922,7 @@ if (!customElements.get("wc-page-designer")) {
     // Create Element Object
     createElementObject({ type, label = "", scope = "", parentElement = null, css = "", id = null }) {
       const elementId = id || this.generateUniqueId();
-      const element = {
+      const element2 = {
         id: elementId,
         "data-id": elementId,
         type,
@@ -4840,42 +4936,42 @@ if (!customElements.get("wc-page-designer")) {
       if (parentElement) {
         const parent = this.findElementById(parentElement);
         if (parent) {
-          parent.elements.push(element);
+          parent.elements.push(element2);
         }
-        return element;
+        return element2;
       } else {
-        this.designerState.elements.push(element);
-        return element;
+        this.designerState.elements.push(element2);
+        return element2;
       }
     }
     // Add Element to Designer
-    addElementToDesigner(element, containerElement) {
+    addElementToDesigner(element2, containerElement) {
       const placeholder = containerElement.querySelector(".designer-element-placeholder");
       if (placeholder) {
         containerElement.removeChild(placeholder);
       }
-      const elementNode = this.createElementNode(element);
+      const elementNode = this.createElementNode(element2);
       containerElement.appendChild(elementNode);
     }
     // Create Element Node
-    createElementNode(element) {
+    createElementNode(element2) {
       const node = document.createElement("div");
       node.className = "designer-element";
-      node.setAttribute("data-id", element.id);
-      node.setAttribute("data-type", element.type);
+      node.setAttribute("data-id", element2.id);
+      node.setAttribute("data-type", element2.type);
       const typeHeader = document.createElement("span");
       typeHeader.className = "element-type-header";
-      typeHeader.textContent = element.type;
+      typeHeader.textContent = element2.type;
       node.appendChild(typeHeader);
-      if (element.label) {
+      if (element2.label) {
         const labelElement = document.createElement("span");
         labelElement.className = "element-label";
-        labelElement.textContent = element.label;
+        labelElement.textContent = element2.label;
         node.appendChild(labelElement);
-        if (element.scope) {
+        if (element2.scope) {
           const scopeElement = document.createElement("small");
           scopeElement.className = "ms-2 text-muted";
-          scopeElement.textContent = `(${element.scope})`;
+          scopeElement.textContent = `(${element2.scope})`;
           labelElement.appendChild(scopeElement);
         }
       }
@@ -4886,35 +4982,35 @@ if (!customElements.get("wc-page-designer")) {
       deleteButton.textContent = "Delete";
       deleteButton.addEventListener("click", (e) => {
         e.stopPropagation();
-        this.removeElement(element.id);
+        this.removeElement(element2.id);
       });
       actions.appendChild(deleteButton);
       node.appendChild(actions);
       node.addEventListener("click", (e) => {
         e.stopPropagation();
-        this.selectElement(element.id);
+        this.selectElement(element2.id);
       });
-      if (this.isContainerElement(element.type)) {
+      if (this.isContainerElement(element2.type)) {
         const container2 = document.createElement("div");
         container2.className = "designer-element-container";
-        container2.setAttribute("data-container-for", element.id);
-        if (!element.elements || element.elements.length === 0) {
+        container2.setAttribute("data-container-for", element2.id);
+        if (!element2.elements || element2.elements.length === 0) {
           const placeholder = document.createElement("div");
           placeholder.className = "designer-element-placeholder";
           placeholder.textContent = "Drop elements here";
           container2.appendChild(placeholder);
         } else {
-          element.elements.forEach((childElement) => {
+          element2.elements.forEach((childElement) => {
             const childNode = this.createElementNode(childElement);
             container2.appendChild(childNode);
           });
         }
-        this.initDropZone(container2, element.id);
+        this.initDropZone(container2, element2.id);
         new Sortable(container2, {
           group: "elements",
           animation: 150,
           onEnd: (evt) => {
-            this.updateElementsOrder(container2, element.id);
+            this.updateElementsOrder(container2, element2.id);
           }
         });
         node.appendChild(container2);
@@ -4940,40 +5036,40 @@ if (!customElements.get("wc-page-designer")) {
     selectElement(elementId) {
       const selectedNodes = document.querySelectorAll(".designer-element.selected");
       selectedNodes.forEach((node2) => node2.classList.remove("selected"));
-      const element = this.findElementById(elementId);
-      if (!element) return;
-      this.designerState.selectedElement = element;
+      const element2 = this.findElementById(elementId);
+      if (!element2) return;
+      this.designerState.selectedElement = element2;
       const node = document.querySelector(`.designer-element[data-id="${elementId}"]`);
       if (node) {
         node.classList.add("selected");
       }
-      this.updateProperties(element);
-      this.updateRulesPanel(element);
+      this.updateProperties(element2);
+      this.updateRulesPanel(element2);
       this.noSelectionPanel.classList.add("hidden");
       this.elementPropertiesPanel.classList.remove("hidden");
       document.getElementById("rules-no-selection").classList.add("hidden");
       document.getElementById("element-rules").classList.remove("hidden");
     }
     // Update Properties
-    updateProperties(element) {
-      this.propId.value = element.id;
-      this.propType.value = element.type;
-      this.propLabel.value = element.label || "";
-      this.propScope.value = element.scope || "";
-      this.propCss.value = element.css || "";
-      this.propRequired.checked = element.required || false;
+    updateProperties(element2) {
+      this.propId.value = element2.id;
+      this.propType.value = element2.type;
+      this.propLabel.value = element2.label || "";
+      this.propScope.value = element2.scope || "";
+      this.propCss.value = element2.css || "";
+      this.propRequired.checked = element2.required || false;
     }
     // Update Rules Panel
-    updateRulesPanel(element) {
+    updateRulesPanel(element2) {
       this.rulesList.innerHTML = "";
-      if (!element.rules || element.rules.length === 0) {
+      if (!element2.rules || element2.rules.length === 0) {
         const emptyMessage = document.createElement("p");
         emptyMessage.className = "text-muted text-center";
         emptyMessage.textContent = "No rules defined";
         this.rulesList.appendChild(emptyMessage);
         return;
       }
-      element.rules.forEach((rule, index) => {
+      element2.rules.forEach((rule, index) => {
         const ruleItem = document.createElement("div");
         ruleItem.className = "rule-item flex flex-col rounded border-1 border-solid gap-2 p-2";
         const ruleHeader = document.createElement("div");
@@ -5194,8 +5290,8 @@ if (!customElements.get("wc-page-designer")) {
     refreshDesigner() {
       const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
       this.designerSurface.innerHTML = "";
-      this.designerState.elements.forEach((element) => {
-        this.addElementToDesigner(element, this.designerSurface);
+      this.designerState.elements.forEach((element2) => {
+        this.addElementToDesigner(element2, this.designerSurface);
       });
       if (selectedId) {
         this.selectElement(selectedId);
@@ -5204,8 +5300,8 @@ if (!customElements.get("wc-page-designer")) {
     // Remove Element
     removeElement(elementId) {
       if (!confirm("Are you sure you want to delete this element?")) return;
-      const element = this.findElementById(elementId);
-      if (!element) return;
+      const element2 = this.findElementById(elementId);
+      if (!element2) return;
       const parent = this.findParentElement(elementId);
       if (parent) {
         parent.elements = parent.elements.filter((e) => e.id !== elementId);
@@ -5227,10 +5323,10 @@ if (!customElements.get("wc-page-designer")) {
       if (found) return found;
       const checkElements = (elements) => {
         if (!elements) return null;
-        for (const element of elements) {
-          if (element.id === elementId) return element;
-          if (element.elements && element.elements.length > 0) {
-            const nestedFound = checkElements(element.elements);
+        for (const element2 of elements) {
+          if (element2.id === elementId) return element2;
+          if (element2.elements && element2.elements.length > 0) {
+            const nestedFound = checkElements(element2.elements);
             if (nestedFound) return nestedFound;
           }
         }
@@ -5242,12 +5338,12 @@ if (!customElements.get("wc-page-designer")) {
     findParentElement(elementId) {
       const checkElements = (elements) => {
         if (!elements) return null;
-        for (const element of elements) {
-          if (element.elements && element.elements.some((e) => e.id === elementId)) {
-            return element;
+        for (const element2 of elements) {
+          if (element2.elements && element2.elements.some((e) => e.id === elementId)) {
+            return element2;
           }
-          if (element.elements && element.elements.length > 0) {
-            const nestedFound = checkElements(element.elements);
+          if (element2.elements && element2.elements.length > 0) {
+            const nestedFound = checkElements(element2.elements);
             if (nestedFound) return nestedFound;
           }
         }
@@ -5371,10 +5467,10 @@ if (!customElements.get("wc-page-designer")) {
       const cleanJson = JSON.parse(JSON.stringify(json));
       const cleanIds = (elements) => {
         if (!elements) return;
-        elements.forEach((element) => {
-          delete element.id;
-          if (element.elements) {
-            cleanIds(element.elements);
+        elements.forEach((element2) => {
+          delete element2.id;
+          if (element2.elements) {
+            cleanIds(element2.elements);
           }
         });
       };
@@ -5474,14 +5570,14 @@ if (!customElements.get("wc-page-designer")) {
         this.designerState.elements = [];
         const addIds = (elements2) => {
           if (!elements2) return;
-          elements2.forEach((element) => {
-            if (element["data-id"]) {
-              element.id = element["data-id"];
+          elements2.forEach((element2) => {
+            if (element2["data-id"]) {
+              element2.id = element2["data-id"];
             } else {
-              element.id = generateUniqueId();
+              element2.id = generateUniqueId();
             }
-            if (element.elements) {
-              addIds(element.elements);
+            if (element2.elements) {
+              addIds(element2.elements);
             }
           });
         };
@@ -6996,8 +7092,8 @@ var WcTab = class extends WcBaseComponent {
     location.hash = this._buildActiveTabStringFromRoot(target);
   }
   _buildActiveTabStringFromRoot(startElement) {
-    function findRootMostTab(element) {
-      let current = element.closest("wc-tab");
+    function findRootMostTab(element2) {
+      let current = element2.closest("wc-tab");
       let root = current;
       while (current) {
         const parentTab = current.parentElement?.closest("wc-tab");
