@@ -4389,6 +4389,141 @@ if (!customElements.get("wc-page-designer")) {
     wireEvents() {
     }
     unWireEvents() {
+      this.renderedPreviewButton.removeEventListener("click", this.renderPreview.bind(this));
+      this.preRenderedPreviewButton.removeEventListener("click", this.preRenderPreview.bind(this));
+      this.schemaButton.removeEventListener("click", this.setSchema.bind(this));
+      this.generateJsonButton.removeEventListener("click", this.generateJson.bind(this));
+      this.savePropertiesButton.removeEventListener("click", this.saveProperties.bind(this));
+      this.loadSchemaButton.removeEventListener("click", () => {
+        try {
+          const schema = JSON.parse(this.schemaJson.editor.getValue());
+          this.loadSchema(schema);
+        } catch (e) {
+          alert("Invalid JSON schema");
+        }
+      });
+      this.addRuleButton.removeEventListener("click", () => {
+        this.designerState.editingRuleIndex = -1;
+        const promptPayload = {
+          focusConfirm: false,
+          template: "template#rule-template",
+          didOpen: () => {
+            const cnt = document.querySelector(".swal2-container");
+            if (cnt) {
+              if (this.designerState.selectedElement) {
+                const src = document.getElementById("rule-src-data-id");
+                src.value = this.designerState.selectedElement.id;
+                const layout = JSON.parse(this.jsonOutput.editor.getValue());
+                const srcElements = WaveHelpers.extractSrcElements(layout);
+                const tgt = document.getElementById("rule-tgt-data-id");
+                tgt.innerHTML = "";
+                let option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Choose...";
+                tgt.appendChild(option);
+                srcElements.forEach((el) => {
+                  option = document.createElement("option");
+                  option.value = el.dataId;
+                  option.textContent = el.label;
+                  tgt.appendChild(option);
+                });
+              }
+              htmx.process(cnt);
+              _hyperscript.processNode(cnt);
+            }
+          },
+          preConfirm: () => {
+            const effect = document.getElementById("rule-effect").value;
+            const conditionScope = document.getElementById("rule-condition-scope").value;
+            const schemaType = document.getElementById("rule-schema-type").value;
+            const schemaValue = document.getElementById("rule-schema-value").value;
+            const srcDataId = document.getElementById("rule-src-data-id").value;
+            const srcSelector = document.getElementById("rule-src-selector").value || "";
+            const srcProperty = document.getElementById("rule-src-property").value || "";
+            const tgtDataId = document.getElementById("rule-tgt-data-id").value;
+            const tgtSelector = document.getElementById("rule-tgt-selector").value || "";
+            const tgtProperty = document.getElementById("rule-tgt-property").value || "";
+            const rule = {
+              effect,
+              condition: {
+                scope: conditionScope,
+                schema: {
+                  [schemaType]: schemaValue
+                },
+                srcDataId,
+                srcSelector,
+                srcProperty
+              },
+              tgtDataId,
+              tgtSelector,
+              tgtProperty
+            };
+            if (schemaType && schemaValue) {
+              switch (schemaType) {
+                case "minLength":
+                case "maxLength":
+                case "minimum":
+                case "maximum":
+                  rule.condition.schema[schemaType] = parseInt(schemaValue);
+                  break;
+                case "pattern":
+                  rule.condition.schema[schemaType] = schemaValue;
+                  break;
+                case "const":
+                  rule.condition.schema[schemaType] = schemaValue;
+                  break;
+                case "enum":
+                  rule.condition.schema[schemaType] = schemaValue.split(",").map((v) => v.trim());
+                  break;
+              }
+            }
+            return rule;
+          },
+          callback: (result) => {
+            console.log("rule-template - result:", result);
+            this.saveRule(result);
+          }
+        };
+        wc.Prompt.notifyTemplate(promptPayload);
+      });
+      this.jsonOutput.editor.on("change2", async () => {
+        try {
+          const jsonText = this.jsonOutput.editor.getValue().trim();
+          const layoutData = JSON.parse(jsonText);
+          this.loadDesign(layoutData);
+        } catch (e) {
+          alert("Invalid JSON format: " + e.message);
+        }
+      });
+      this.loadDesignButton.removeEventListener("click", () => {
+        try {
+          const jsonText = this.jsonOutput.editor.getValue().trim();
+          if (!jsonText) {
+            alert("Please paste a valid JSON layout");
+            return;
+          }
+          const layoutData = JSON.parse(jsonText);
+          this.loadDesign(layoutData);
+          wc.Prompt.toast({ title: "Load Succeeded!" });
+        } catch (e) {
+          alert("Invalid JSON format: " + e.message);
+        }
+      });
+      this.copyDesignButton.removeEventListener("click", this.copyDesign.bind(this));
+      this.downloadDesignButton.removeEventListener("click", () => {
+        const jsonText = this.jsonOutput.editor.getValue();
+        const designName = "layout-ui-design";
+        const fileName = `${designName}.json`;
+        const blob = new Blob([jsonText], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
     }
     setup() {
       this.designerSurface = document.getElementById("designer-surface");
