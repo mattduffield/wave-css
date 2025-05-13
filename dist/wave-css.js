@@ -4438,7 +4438,7 @@ if (!customElements.get("wc-page-designer")) {
     // Update top-level elements order
     updateTopLevelElementsOrder() {
       const newOrder = [];
-      const childElements = designerSurface.querySelectorAll(":scope > .designer-element");
+      const childElements = this.designerSurface.querySelectorAll(":scope > .designer-element");
       childElements.forEach((childNode) => {
         const childId = childNode.getAttribute("data-id");
         const child = this.findElementById(childId);
@@ -4552,11 +4552,11 @@ if (!customElements.get("wc-page-designer")) {
     }
     // Initialize Event Listeners
     initEventListeners() {
-      this.renderedPreviewButton.addEventListener("click", this.renderPreview);
-      this.preRenderedPreviewButton.addEventListener("click", this.preRenderPreview);
-      this.schemaButton.addEventListener("click", this.setSchema);
-      this.generateJsonButton.addEventListener("click", this.generateJson);
-      this.savePropertiesButton.addEventListener("click", this.saveProperties);
+      this.renderedPreviewButton.addEventListener("click", this.renderPreview.bind(this));
+      this.preRenderedPreviewButton.addEventListener("click", this.preRenderPreview.bind(this));
+      this.schemaButton.addEventListener("click", this.setSchema.bind(this));
+      this.generateJsonButton.addEventListener("click", this.generateJson.bind(this));
+      this.savePropertiesButton.addEventListener("click", this.saveProperties.bind(this));
       this.loadSchemaButton.addEventListener("click", () => {
         try {
           const schema = JSON.parse(this.schemaJson.editor.getValue());
@@ -4649,34 +4649,6 @@ if (!customElements.get("wc-page-designer")) {
         };
         wc.Prompt.notifyTemplate(promptPayload);
       });
-      this.loadDesignButton.addEventListener("click2", () => {
-        const promptPayload = {
-          focusConfirm: false,
-          template: "template#load-design-template",
-          didOpen: () => {
-            const cnt = document.querySelector(".swal2-container");
-            if (cnt) {
-              htmx.process(cnt);
-              _hyperscript.processNode(cnt);
-            }
-          },
-          callback: (result) => {
-            console.log("load-design - result:", result);
-            try {
-              const jsonText = result.uiLayout.trim();
-              if (!jsonText) {
-                alert("Please paste a valid JSON layout");
-                return;
-              }
-              const layoutData = JSON.parse(jsonText);
-              this.loadDesign(layoutData);
-            } catch (e) {
-              alert("Invalid JSON format: " + e.message);
-            }
-          }
-        };
-        wc.Prompt.notifyTemplate(promptPayload);
-      });
       this.jsonOutput.editor.on("change2", async () => {
         try {
           const jsonText = this.jsonOutput.editor.getValue().trim();
@@ -4700,7 +4672,7 @@ if (!customElements.get("wc-page-designer")) {
           alert("Invalid JSON format: " + e.message);
         }
       });
-      this.copyDesignButton.addEventListener("click", this.copyDesign);
+      this.copyDesignButton.addEventListener("click", this.copyDesign.bind(this));
       this.downloadDesignButton.addEventListener("click", () => {
         const jsonText = this.jsonOutput.editor.getValue();
         const designName = "layout-ui-design";

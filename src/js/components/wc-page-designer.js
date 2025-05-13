@@ -571,7 +571,7 @@ if (!customElements.get('wc-page-designer')) {
     // Update top-level elements order
     updateTopLevelElementsOrder() {
       const newOrder = [];
-      const childElements = designerSurface.querySelectorAll(':scope > .designer-element');
+      const childElements = this.designerSurface.querySelectorAll(':scope > .designer-element');
       
       childElements.forEach(childNode => {
         const childId = childNode.getAttribute('data-id');
@@ -723,19 +723,19 @@ if (!customElements.get('wc-page-designer')) {
     // Initialize Event Listeners
     initEventListeners() {
       // Rendered Preview Button
-      this.renderedPreviewButton.addEventListener('click', this.renderPreview);
+      this.renderedPreviewButton.addEventListener('click', this.renderPreview.bind(this));
 
       // Pre Rendered Preview Button
-      this.preRenderedPreviewButton.addEventListener('click', this.preRenderPreview);
+      this.preRenderedPreviewButton.addEventListener('click', this.preRenderPreview.bind(this));
 
       // Schema Button
-      this.schemaButton.addEventListener('click', this.setSchema);
+      this.schemaButton.addEventListener('click', this.setSchema.bind(this));
 
       // Generate JSON Button
-      this.generateJsonButton.addEventListener('click', this.generateJson);
+      this.generateJsonButton.addEventListener('click', this.generateJson.bind(this));
       
       // Save Properties Button
-      this.savePropertiesButton.addEventListener('click', this.saveProperties);
+      this.savePropertiesButton.addEventListener('click', this.saveProperties.bind(this));
       
       // Load Schema Button
       this.loadSchemaButton.addEventListener('click', () => {
@@ -837,36 +837,6 @@ if (!customElements.get('wc-page-designer')) {
       });
       
       // Load Design Button
-      this.loadDesignButton.addEventListener('click2', () => {
-        // Show the modal
-        const promptPayload = {
-          focusConfirm: false,
-          template: 'template#load-design-template',
-          didOpen: () => {
-            const cnt = document.querySelector(".swal2-container");
-            if (cnt) {
-              htmx.process(cnt);
-              _hyperscript.processNode(cnt);
-            }
-          },
-          callback: (result) => {
-            console.log('load-design - result:', result);
-            try {
-              const jsonText = result.uiLayout.trim();
-              if (!jsonText) {
-                alert('Please paste a valid JSON layout');
-                return;
-              }
-              const layoutData = JSON.parse(jsonText);
-              this.loadDesign(layoutData);          
-            } catch (e) {
-              alert('Invalid JSON format: ' + e.message);
-            }        
-          }
-        };
-        wc.Prompt.notifyTemplate(promptPayload);
-      });
-
       this.jsonOutput.editor.on('change2', async () => {
         try {
           const jsonText = this.jsonOutput.editor.getValue().trim();
@@ -893,7 +863,7 @@ if (!customElements.get('wc-page-designer')) {
       });
 
       // Copy Design Button
-      this.copyDesignButton.addEventListener('click', this.copyDesign);
+      this.copyDesignButton.addEventListener('click', this.copyDesign.bind(this));
 
       // Download Design JSON Button
       this.downloadDesignButton.addEventListener('click', () => {
