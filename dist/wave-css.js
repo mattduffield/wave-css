@@ -5109,6 +5109,7 @@ if (!customElements.get("wc-page-designer")) {
       this.designerState.selectedElement.css = this.propCss.value;
       this.designerState.selectedElement.required = this.propRequired.checked;
       this.refreshDesigner();
+      wc.Prompt.toast({ title: "Properties Updated!" });
     }
     // Refresh Designer
     refreshDesigner() {

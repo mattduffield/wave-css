@@ -1413,6 +1413,7 @@ if (!customElements.get('wc-page-designer')) {
       
       // Refresh the designer to show the changes
       this.refreshDesigner();
+      wc.Prompt.toast({title: 'Properties Updated!'});
     }
 
     // Refresh Designer
