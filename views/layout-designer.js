@@ -1159,7 +1159,7 @@ function renderPreview() {
   // 1. Create a form targeting the iframe
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = 'http://localhost:8080/gen/generate_dynamic_layout';
+  form.action = '/gen/generate_dynamic_layout';
   form.target = 'rendered-preview';
 
   // 2. Add any parameters
@@ -1189,7 +1189,7 @@ function preRenderPreview() {
   // 1. Create a form targeting the iframe
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = 'http://localhost:8080/gen/generate_pre_dynamic_layout';
+  form.action = '/gen/generate_pre_dynamic_layout';
   form.target = 'pre-rendered-preview';
 
   // 2. Add any parameters
