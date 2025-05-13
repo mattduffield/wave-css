@@ -16,6 +16,7 @@ import './wc-dropdown.js';
 import './wc-flip-box.js';
 import './wc-image.js';
 import './wc-menu.js';
+import './wc-page-designer.js';
 import './wc-save-button.js';
 import './wc-save-split-button.js';
 import './wc-split-button.js';
