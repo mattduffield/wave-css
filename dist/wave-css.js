@@ -3997,7 +3997,9 @@ if (!customElements.get("wc-page-designer")) {
       await this.render();
       this._applyStyle();
       this.wireEvents();
-      this.setup();
+      setTimeout(() => {
+        this.setup();
+      }, 50);
       console.log("conntectedCallback:wc-page-designer");
     }
     disconnectedCallback() {
