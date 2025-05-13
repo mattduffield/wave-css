@@ -740,8 +740,7 @@ if (!customElements.get('wc-page-designer')) {
       // Load Schema Button
       this.loadSchemaButton.addEventListener('click', () => {
         try {
-          // const schema = JSON.parse(schemaJson.value);
-          const schema = JSON.parse(schemaJson.editor.getValue());
+          const schema = JSON.parse(this.schemaJson.editor.getValue());
           this.loadSchema(schema);
         } catch (e) {
           alert('Invalid JSON schema');
@@ -750,18 +749,18 @@ if (!customElements.get('wc-page-designer')) {
       
       // Add Rule Button
       this.addRuleButton.addEventListener('click', () => {
-        designerState.editingRuleIndex = -1;
+        this.designerState.editingRuleIndex = -1;
         const promptPayload = {
           focusConfirm: false,
           template: 'template#rule-template',
           didOpen: () => {
             const cnt = document.querySelector(".swal2-container");
             if (cnt) {
-              if (designerState.selectedElement) {
+              if (this.designerState.selectedElement) {
                 const src = document.getElementById('rule-src-data-id');
-                src.value = designerState.selectedElement.id;
+                src.value = this.designerState.selectedElement.id;
 
-                const layout = JSON.parse(jsonOutput.editor.getValue());
+                const layout = JSON.parse(this.jsonOutput.editor.getValue());
                 const srcElements = WaveHelpers.extractSrcElements(layout);
                 const tgt = document.getElementById('rule-tgt-data-id');
                 tgt.innerHTML = '';
@@ -898,7 +897,7 @@ if (!customElements.get('wc-page-designer')) {
 
       // Download Design JSON Button
       this.downloadDesignButton.addEventListener('click', () => {
-        const jsonText = jsonOutput.editor.getValue();
+        const jsonText = this.jsonOutput.editor.getValue();
         const designName = 'layout-ui-design';
         const fileName = `${designName}.json`;
         
@@ -1588,14 +1587,13 @@ if (!customElements.get('wc-page-designer')) {
       const jsonInput = document.createElement('input');
       jsonInput.type = 'hidden';
       jsonInput.name = 'JSONSchema';
-      // jsonInput.value = schemaJson.value;
-      jsonInput.value = schemaJson.editor.getValue();
+      jsonInput.value = this.schemaJson.editor.getValue();
       form.appendChild(jsonInput);
 
       const layoutInput = document.createElement('input');
       layoutInput.type = 'hidden';
       layoutInput.name = 'UILayout';
-      layoutInput.value = jsonOutput.editor.getValue();
+      layoutInput.value = this.jsonOutput.editor.getValue();
       form.appendChild(layoutInput);
 
       // 3. Add the form to the document, submit it, then remove it
@@ -1618,14 +1616,13 @@ if (!customElements.get('wc-page-designer')) {
       const jsonInput = document.createElement('input');
       jsonInput.type = 'hidden';
       jsonInput.name = 'JSONSchema';
-      // jsonInput.value = schemaJson.value;
-      jsonInput.value = schemaJson.editor.getValue();
+      jsonInput.value = this.schemaJson.editor.getValue();
       form.appendChild(jsonInput);
 
       const layoutInput = document.createElement('input');
       layoutInput.type = 'hidden';
       layoutInput.name = 'UILayout';
-      layoutInput.value = jsonOutput.editor.getValue();
+      layoutInput.value = this.jsonOutput.editor.getValue();
       form.appendChild(layoutInput);
 
       // 3. Add the form to the document, submit it, then remove it
