@@ -534,11 +534,12 @@ if (!customElements.get('wc-page-designer')) {
         }
         wc-page-designer .dark .designer-element-container.drag-over {
           background-color: rgba(13, 110, 253, 0.1);
-          border: 1px dashed #0d6efd;
+          background-color: color-mix(in oklch, var(--surface-2) 50%, transparent);
+          border: 1px dashed var(--surface-5);
         }
         wc-page-designer .dark .designer-element-placeholder {
-          background-color: #f1f1f1;
-          color: #6c757d;
+          background-color: var(--surface-3);
+          color: var(--text-7);
         }          
         wc-page-designer .dark .element-type-header {
           color: var(--text-3);
