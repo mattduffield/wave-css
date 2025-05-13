@@ -127,6 +127,7 @@ if (!customElements.get('wc-page-designer')) {
         this.theme = newValue;
         const designer = this.querySelector('.wc-page-designer');
         designer.className.replace(oldTheme, newValue);
+        console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
       }
     }
   
