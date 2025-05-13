@@ -13,6 +13,12 @@ import { loadCSS, loadScript, loadLibrary, loadStyle, show } from './helper-func
 
 if (!customElements.get('wc-page-designer')) {
   class WcPageDesigner extends HTMLElement {
+    static get observedAttributes() {
+      return [
+        'theme'
+      ];
+    }
+    theme = 'theme-royal dark';
     // Designer State
     designerState = {
       elements: [],
@@ -115,6 +121,13 @@ if (!customElements.get('wc-page-designer')) {
       this.unWireEvents();
     }
 
+    attributeChangedCallback(attrName, oldValue, newValue) {
+      if (attrName === 'theme') {
+        this.theme = newValue;
+      }
+    }
+  
+
     async render() {
       await Promise.all([
         this.loadLibrary('https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js', 'Sortable'),
@@ -127,7 +140,7 @@ if (!customElements.get('wc-page-designer')) {
 
     createElement() {
       const markup = `
-  <div class="wc-page-designer theme-fern dark flex flex-row flex-1 h-screen">
+  <div class="wc-page-designer ${this.theme} flex flex-row flex-1 h-screen">
     <!-- Left Panel - Elements -->
     <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
