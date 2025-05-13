@@ -126,7 +126,7 @@ if (!customElements.get('wc-page-designer')) {
         const oldTheme = this.theme;
         this.theme = newValue;
         const designer = this.querySelector('.wc-page-designer');
-        designer.className.replace(oldTheme, newValue);
+        designer.className = designer.className.replace(oldTheme, newValue);
         console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
       }
     }
