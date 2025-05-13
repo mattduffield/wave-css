@@ -5241,6 +5241,11 @@ if (!customElements.get("wc-page-designer")) {
     // Render Preview
     renderPreview() {
       this.generateJson();
+      const iframe = document.getElementById("rendered-preview");
+      iframe.addEventListener("load", () => {
+        WaveHelpers.toggleIndicator("#content-loader", false);
+      }, { once: true });
+      WaveHelpers.toggleIndicator("#content-loader", true);
       const form = document.createElement("form");
       form.method = "POST";
       form.action = "/gen/generate_dynamic_layout";
@@ -5262,6 +5267,11 @@ if (!customElements.get("wc-page-designer")) {
     // Pre Render Preview
     preRenderPreview() {
       this.generateJson();
+      const iframe = document.getElementById("pre-rendered-preview");
+      iframe.addEventListener("load", () => {
+        WaveHelpers.toggleIndicator("#content-loader", false);
+      }, { once: true });
+      WaveHelpers.toggleIndicator("#content-loader", true);
       const form = document.createElement("form");
       form.method = "POST";
       form.action = "/gen/generate_pre_dynamic_layout";

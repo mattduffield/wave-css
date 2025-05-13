@@ -1604,7 +1604,12 @@ if (!customElements.get('wc-page-designer')) {
     renderPreview() {
       this.generateJson();
 
-      // previewFrame.src = 'http://localhost:8080';
+      const iframe = document.getElementById('rendered-preview')
+      // listen *before* you submit
+      iframe.addEventListener('load', () => {
+        WaveHelpers.toggleIndicator('#content-loader', false);
+      }, { once: true });
+      WaveHelpers.toggleIndicator('#content-loader', true);
 
       // 1. Create a form targeting the iframe
       const form = document.createElement('form');
@@ -1634,6 +1639,13 @@ if (!customElements.get('wc-page-designer')) {
     // Pre Render Preview
     preRenderPreview() {
       this.generateJson();
+
+      const iframe = document.getElementById('pre-rendered-preview')
+      // listen *before* you submit
+      iframe.addEventListener('load', () => {
+        WaveHelpers.toggleIndicator('#content-loader', false);
+      }, { once: true });
+      WaveHelpers.toggleIndicator('#content-loader', true);
 
       // 1. Create a form targeting the iframe
       const form = document.createElement('form');
