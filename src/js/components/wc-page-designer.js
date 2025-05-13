@@ -581,7 +581,7 @@ if (!customElements.get('wc-page-designer')) {
         }
       });
       
-      designerState.elements = newOrder;
+      this.designerState.elements = newOrder;
     }
 
     // Initialize Drag and Drop
@@ -676,7 +676,7 @@ if (!customElements.get('wc-page-designer')) {
               parentElement.elements.push(newElement);
             }
           } else {
-            designerState.elements.push(newElement);
+            this.designerState.elements.push(newElement);
           }
           
           // If dropping into a container, safely remove placeholder if it exists
@@ -941,7 +941,7 @@ if (!customElements.get('wc-page-designer')) {
         }
         return element;
       } else {
-        designerState.elements.push(element);
+        this.designerState.elements.push(element);
         return element;
       }
     }
@@ -1077,7 +1077,7 @@ if (!customElements.get('wc-page-designer')) {
       if (!element) return;
       
       // Set as selected in state
-      designerState.selectedElement = element;
+      this.designerState.selectedElement = element;
       
       // Mark the node as selected
       const node = document.querySelector(`.designer-element[data-id="${elementId}"]`);

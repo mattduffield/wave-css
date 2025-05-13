@@ -4446,7 +4446,7 @@ if (!customElements.get("wc-page-designer")) {
           newOrder.push(child);
         }
       });
-      designerState.elements = newOrder;
+      this.designerState.elements = newOrder;
     }
     // Initialize Drag and Drop
     initDragAndDrop() {
@@ -4516,7 +4516,7 @@ if (!customElements.get("wc-page-designer")) {
               parentElement.elements.push(newElement);
             }
           } else {
-            designerState.elements.push(newElement);
+            this.designerState.elements.push(newElement);
           }
           const placeholder = element.querySelector(".designer-element-placeholder");
           if (placeholder && placeholder.parentNode === element) {
@@ -4737,7 +4737,7 @@ if (!customElements.get("wc-page-designer")) {
         }
         return element;
       } else {
-        designerState.elements.push(element);
+        this.designerState.elements.push(element);
         return element;
       }
     }
@@ -4835,7 +4835,7 @@ if (!customElements.get("wc-page-designer")) {
       selectedNodes.forEach((node2) => node2.classList.remove("selected"));
       const element = this.findElementById(elementId);
       if (!element) return;
-      designerState.selectedElement = element;
+      this.designerState.selectedElement = element;
       const node = document.querySelector(`.designer-element[data-id="${elementId}"]`);
       if (node) {
         node.classList.add("selected");
