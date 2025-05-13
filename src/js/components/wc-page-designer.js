@@ -103,10 +103,10 @@ if (!customElements.get('wc-page-designer')) {
       await this.render();  
       this._applyStyle();
       this.wireEvents();
-      
+
       setTimeout(() => {
         this.setup();
-      }, 50);
+      }, 250);
       
       console.log('conntectedCallback:wc-page-designer');
     }
