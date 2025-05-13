@@ -127,7 +127,7 @@ if (!customElements.get('wc-page-designer')) {
 
     createElement() {
       const markup = `
-  <div class="wc-page-designer flex flex-row flex-1 h-screen">
+  <div class="wc-page-designer theme-fern dark flex flex-row flex-1 h-screen">
     <!-- Left Panel - Elements -->
     <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
