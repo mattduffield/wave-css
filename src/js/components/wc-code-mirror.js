@@ -115,13 +115,15 @@ if (!customElements.get('wc-code-mirror')) {
       } else if (attrName === 'fetch') {
         const url = newValue;
         try {
-          fetch(url, {
-            method: 'GET'
-          })
-          .then(response => response.text())
-          .then(text => {
-            this.editor.setValue(text);  
-          });
+          if (url && url !== 'undefined') {
+            fetch(url, {
+              method: 'GET'
+            })
+            .then(response => response.text())
+            .then(text => {
+              this.editor.setValue(text);  
+            });  
+          }
         } catch(ex) {
           console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
         }
