@@ -1728,7 +1728,24 @@ if (!customElements.get("wc-canvas-dot-highlight")) {
 if (!customElements.get("wc-code-mirror")) {
   class WcCodeMirror extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required", "fetch"];
+      return [
+        "id",
+        "class",
+        "height",
+        "theme",
+        "mode",
+        "lbl-label",
+        "lbl-class",
+        "line-numbers",
+        "line-wrapping",
+        "fold-gutter",
+        "tab-size",
+        "indent-unit",
+        "value",
+        "disabled",
+        "required"
+        // , 'fetch'
+      ];
     }
     constructor() {
       super();
@@ -1809,8 +1826,6 @@ if (!customElements.get("wc-code-mirror")) {
         } else {
           this.editor.setOption("readOnly", false);
         }
-      } else if (attrName === "fetch") {
-        this.fetchUrl = newValue;
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -2330,9 +2345,10 @@ if (!customElements.get("wc-code-mirror")) {
       document.body.dispatchEvent(customEvent);
       console.log("----> broadcasting event: wc-code-mirror:ready");
       try {
-        if (this.fetchUrl && this.fetchUrl !== "undefined") {
-          console.log("----> wc-code-mirror - fetching from: ", this.fetchUrl);
-          fetch(this.fetchUrl, {
+        if (this.hasAttribute("fetch")) {
+          const url = this.getAttribute("fetch");
+          console.log("----> wc-code-mirror - fetching from: ", url);
+          fetch(url, {
             method: "GET"
           }).then((response) => response.text()).then((text) => {
             this.editor.setValue(text);
