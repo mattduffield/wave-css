@@ -4020,7 +4020,7 @@ if (!customElements.get("wc-page-designer")) {
     previewButton = null;
     renderedPreviewButton = null;
     preRenderedPreviewButton = null;
-    schemaButton = null;
+    // schemaButton = null;
     previewFrame = null;
     generateJsonButton = null;
     jsonOutput = null;
@@ -4522,7 +4522,6 @@ if (!customElements.get("wc-page-designer")) {
       this.previewButton = document.querySelector('button[data-label="Preview"]');
       this.renderedPreviewButton = document.querySelector('button[data-label="Preview"]');
       this.preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
-      this.schemaButton = document.querySelector('button[data-label="Schema"]');
       this.generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
       this.jsonOutput = document.querySelector('wc-code-mirror[name="jsonLayout"]');
       this.propId = document.getElementById("prop-id");
@@ -4677,7 +4676,6 @@ if (!customElements.get("wc-page-designer")) {
     initEventListeners() {
       this.renderedPreviewButton.addEventListener("click", this.renderPreview.bind(this));
       this.preRenderedPreviewButton.addEventListener("click", this.preRenderPreview.bind(this));
-      this.schemaButton.addEventListener("click", this.setSchema.bind(this));
       this.generateJsonButton.addEventListener("click", this.generateJson.bind(this));
       this.savePropertiesButton.addEventListener("click", this.saveProperties.bind(this));
       this.loadSchemaButton.addEventListener("click", () => {
