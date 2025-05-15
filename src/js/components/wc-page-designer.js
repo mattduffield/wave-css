@@ -15,7 +15,9 @@ if (!customElements.get('wc-page-designer')) {
   class WcPageDesigner extends HTMLElement {
     static get observedAttributes() {
       return [
-        'theme', 'json-layout', 'json-layout-fetch-url'
+        'theme', 
+        'json-layout', 'json-layout-fetch-url',
+        'json-schema-fetch-url'
       ];
     }
     theme = 'theme-royal dark';
@@ -136,6 +138,11 @@ if (!customElements.get('wc-page-designer')) {
         const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
         layoutEditor.setAttribute('fetch', this.jsonLayoutFetchUrl);
         console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
+      } else if (attrName === 'json-schema-fetch-url') {
+        this.jsonSchemaFetchUrl = newValue;
+        const schemaJson = this.querySelector('wc-code-mirror[name="schema-json"]');
+        schemaJson.setAttribute('fetch', this.jsonSchemaFetchUrl);
+        console.log('wc-page-designer:attributeChangedCallback - json-schema-fetch-url', this.jsonSchemaFetchUrl);
       }
     }
   
@@ -631,8 +638,8 @@ if (!customElements.get('wc-page-designer')) {
       this.initEventListeners();
       
       // Set initial schema
-      this.schemaJson.editor.setValue(JSON.stringify(this.sampleSchema, null, 2));
-      this.loadSchema(this.sampleSchema);
+      // this.schemaJson.editor.setValue(JSON.stringify(this.sampleSchema, null, 2));
+      // this.loadSchema(this.sampleSchema);
     }
 
     // Update top-level elements order
@@ -813,7 +820,12 @@ if (!customElements.get('wc-page-designer')) {
           alert('Invalid JSON schema');
         }
       });
-      
+
+      this.schemaJson.addEventListener('fetch-complete', (e) => {
+        const schema = JSON.parse(this.schemaJson.editor.getValue());
+        this.loadSchema(schema);
+      });
+
       // Add Rule Button
       this.addRuleButton.addEventListener('click', () => {
         this.designerState.editingRuleIndex = -1;
