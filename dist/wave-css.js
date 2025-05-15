@@ -2350,8 +2350,8 @@ if (!customElements.get("wc-code-mirror")) {
           console.log("----> wc-code-mirror - fetching from: ", url);
           fetch(url, {
             method: "GET"
-          }).then((response) => response.text()).then((text) => {
-            this.editor.setValue(text);
+          }).then((response) => response.json()).then((json) => {
+            this.editor.setValue(json.result);
             const payload2 = {
               detail: { name: this.getAttribute("name"), editor: this.editor },
               bubbles: true,

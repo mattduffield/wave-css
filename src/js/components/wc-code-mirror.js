@@ -523,9 +523,9 @@ if (!customElements.get('wc-code-mirror')) {
           fetch(url, {
             method: 'GET'
           })
-          .then(response => response.text())
-          .then(text => {
-            this.editor.setValue(text);
+          .then(response => response.json())
+          .then(json => {
+            this.editor.setValue(json.result);
             const payload = { 
               detail: { name: this.getAttribute('name'), editor: this.editor },
               bubbles: true,
