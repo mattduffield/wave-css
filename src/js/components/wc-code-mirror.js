@@ -113,22 +113,7 @@ if (!customElements.get('wc-code-mirror')) {
           this.editor.setOption('readOnly', false);
         }
       } else if (attrName === 'fetch') {
-        const url = newValue;
-        try {
-          if (url && url !== 'undefined') {
-            setTimeout(() => {
-              fetch(url, {
-                method: 'GET'
-              })
-              .then(response => response.text())
-              .then(text => {
-                this.editor.setValue(text);  
-              });
-            }, 250);
-          }
-        } catch(ex) {
-          console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
-        }
+        this.fetchUrl = newValue;
       } else {
         super._handleAttributeChange(attrName, newValue);  
       }
@@ -528,6 +513,21 @@ if (!customElements.get('wc-code-mirror')) {
       const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
       document.body.dispatchEvent(customEvent);
       console.log('----> broadcasting event: wc-code-mirror:ready');
+
+      try {
+        if (this.fetchUrl && this.fetchUrl !== 'undefined') {
+          console.log('----> wc-code-mirror - fetching from: ', this.fetchUrl);
+          fetch(this.fetchUrl, {
+            method: 'GET'
+          })
+          .then(response => response.text())
+          .then(text => {
+            this.editor.setValue(text);  
+          });
+        }
+      } catch(ex) {
+        console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
+      }
     }
     
     // This is required to inform the form that the component can be form-associated
