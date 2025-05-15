@@ -247,7 +247,7 @@ if (!customElements.get('wc-page-designer')) {
               theme="monokai"
               tab-size="2"
               indent-unit="2"
-              fetch="${jsonLayoutFetchUrl}"
+              fetch="${this.jsonLayoutFetchUrl}"
               >
             </wc-code-mirror>
             <div class="flex flex-row justify-end gap-2 p-2">
