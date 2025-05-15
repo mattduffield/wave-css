@@ -1743,8 +1743,8 @@ if (!customElements.get("wc-code-mirror")) {
         "indent-unit",
         "value",
         "disabled",
-        "required"
-        // , 'fetch'
+        "required",
+        "fetch"
       ];
     }
     constructor() {
@@ -1825,6 +1825,11 @@ if (!customElements.get("wc-code-mirror")) {
           this.editor.setOption("readOnly", "nocursor");
         } else {
           this.editor.setOption("readOnly", false);
+        }
+      } else if (attrName === "fetch") {
+        if (this.editor) {
+          this.fetchUrl = newValue;
+          this.handleFetch(this.fetchUrl);
         }
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -2344,30 +2349,33 @@ if (!customElements.get("wc-code-mirror")) {
       const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
       document.body.dispatchEvent(customEvent);
       console.log("----> broadcasting event: wc-code-mirror:ready");
+      const url = this.getAttribute("fetch");
+      this.handleFetch(url);
+    }
+    // This is required to inform the form that the component can be form-associated
+    static get formAssociated() {
+      return true;
+    }
+    handleFetch(url) {
       try {
-        if (this.hasAttribute("fetch")) {
-          const url = this.getAttribute("fetch");
+        if (url) {
           console.log("----> wc-code-mirror - fetching from: ", url);
           fetch(url, {
             method: "GET"
           }).then((response) => response.json()).then((json) => {
             this.editor.setValue(json.result);
-            const payload2 = {
+            const payload = {
               detail: { name: this.getAttribute("name"), editor: this.editor },
               bubbles: true,
               composed: true
             };
-            const customEvent2 = new CustomEvent("fetch-complete", payload2);
-            this.dispatchEvent(customEvent2);
+            const customEvent = new CustomEvent("fetch-complete", payload);
+            this.dispatchEvent(customEvent);
           });
         }
       } catch (ex) {
         console.error("Error encountered while trying to fetch wc-code-mirror data!", ex);
       }
-    }
-    // This is required to inform the form that the component can be form-associated
-    static get formAssociated() {
-      return true;
     }
     // Method called when the form is reset
     formResetCallback() {
@@ -4815,15 +4823,6 @@ if (!customElements.get("wc-page-designer")) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
-    }
-    onSchemaChange(schemaStr) {
-      try {
-        this.schemaJson.editor.setValue(schemaStr);
-        const schema = JSON.parse(schemaStr);
-        this.loadSchema(schema);
-      } catch (e) {
-        alert("Invalid JSON schema");
-      }
     }
     // Create Element Object
     createElementObject({ type, label = "", scope = "", parentElement = null, css = "", id = null }) {

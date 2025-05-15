@@ -27,7 +27,7 @@ if (!customElements.get('wc-code-mirror')) {
   class WcCodeMirror extends WcBaseComponent {
     static get observedAttributes() {
       return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required'
-        // , 'fetch'
+        , 'fetch'
       ];
     }
 
@@ -114,8 +114,11 @@ if (!customElements.get('wc-code-mirror')) {
         } else {
           this.editor.setOption('readOnly', false);
         }
-      // } else if (attrName === 'fetch') {
-      //   this.fetchUrl = newValue;
+      } else if (attrName === 'fetch') {
+        if (this.editor) {
+          this.fetchUrl = newValue;
+          this.handleFetch(this.fetchUrl);
+        }
       } else {
         super._handleAttributeChange(attrName, newValue);  
       }
@@ -516,9 +519,18 @@ if (!customElements.get('wc-code-mirror')) {
       document.body.dispatchEvent(customEvent);
       console.log('----> broadcasting event: wc-code-mirror:ready');
 
+      const url = this.getAttribute('fetch');
+      this.handleFetch(url);
+    }
+    
+    // This is required to inform the form that the component can be form-associated
+    static get formAssociated() {
+      return true;
+    }
+
+    handleFetch(url) {
       try {
-        if (this.hasAttribute('fetch')) {
-          const url = this.getAttribute('fetch');
+        if (url) {
           console.log('----> wc-code-mirror - fetching from: ', url);
           fetch(url, {
             method: 'GET'
@@ -537,12 +549,7 @@ if (!customElements.get('wc-code-mirror')) {
         }
       } catch(ex) {
         console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
-      }
-    }
-    
-    // This is required to inform the form that the component can be form-associated
-    static get formAssociated() {
-      return true;
+      }      
     }
     
     // Method called when the form is reset

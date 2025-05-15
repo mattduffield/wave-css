@@ -973,17 +973,6 @@ if (!customElements.get('wc-page-designer')) {
       });
     }
 
-    onSchemaChange(schemaStr) {
-      try {
-        this.schemaJson.editor.setValue(schemaStr);
-        const schema = JSON.parse(schemaStr);
-        this.loadSchema(schema);
-      } catch (e) {
-        alert('Invalid JSON schema');
-      }
-    }
-
-
     // Create Element Object
     createElementObject({ type, label = '', scope = '', parentElement = null, css = '', id = null }) {
       const elementId = id || this.generateUniqueId();
