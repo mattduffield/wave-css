@@ -15,7 +15,7 @@ if (!customElements.get('wc-page-designer')) {
   class WcPageDesigner extends HTMLElement {
     static get observedAttributes() {
       return [
-        'theme'
+        'theme', 'json-layout'
       ];
     }
     theme = 'theme-royal dark';
@@ -128,6 +128,8 @@ if (!customElements.get('wc-page-designer')) {
         const designer = this.querySelector('.wc-page-designer');
         designer.className = designer.className.replace(oldTheme, newValue);
         console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
+      } else if (attrName === 'json-layout') {
+        this.jsonOutput.editor.setValue(newValue);
       }
     }
   
@@ -241,7 +243,6 @@ if (!customElements.get('wc-page-designer')) {
               theme="monokai"
               tab-size="2"
               indent-unit="2"
-              value="{{Record.jsonLayout}}"
               >
             </wc-code-mirror>
             <div class="flex flex-row justify-end gap-2 p-2">
