@@ -505,7 +505,7 @@ if (!customElements.get('wc-code-mirror')) {
 
       const payload = { detail: { name: this.getAttribute('name'), editor: this.editor } };
       const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
-      this.dispatchEvent(customEvent);
+      document.body.dispatchEvent(customEvent);
     }
     
     // This is required to inform the form that the component can be form-associated
