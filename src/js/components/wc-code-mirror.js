@@ -503,7 +503,7 @@ if (!customElements.get('wc-code-mirror')) {
         this.editor.setOption('gutters', gutters);
       });
 
-      const payload = { name: this.getAttribute('name'), editor: this.editor };
+      const payload = { detail: { name: this.getAttribute('name'), editor: this.editor } };
       const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
       this.dispatchEvent(customEvent);
     }
