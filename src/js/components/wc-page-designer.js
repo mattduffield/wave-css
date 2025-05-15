@@ -15,7 +15,7 @@ if (!customElements.get('wc-page-designer')) {
   class WcPageDesigner extends HTMLElement {
     static get observedAttributes() {
       return [
-        'theme', 'json-layout'
+        'theme', 'json-layout', 'json-layout-fetch-url'
       ];
     }
     theme = 'theme-royal dark';
@@ -131,6 +131,9 @@ if (!customElements.get('wc-page-designer')) {
       } else if (attrName === 'json-layout') {
         this.jsonLayout = newValue;
         console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
+      } else if (attrName === 'json-layout-fetch-url') {
+        this.jsonLayoutFetchUrl = newValue;
+        console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
       }
     }
   
@@ -244,6 +247,7 @@ if (!customElements.get('wc-page-designer')) {
               theme="monokai"
               tab-size="2"
               indent-unit="2"
+              fetch="${jsonLayoutFetchUrl}"
               >
             </wc-code-mirror>
             <div class="flex flex-row justify-end gap-2 p-2">

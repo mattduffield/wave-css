@@ -1728,7 +1728,7 @@ if (!customElements.get("wc-canvas-dot-highlight")) {
 if (!customElements.get("wc-code-mirror")) {
   class WcCodeMirror extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required"];
+      return ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required", "fetch"];
     }
     constructor() {
       super();
@@ -1808,6 +1808,17 @@ if (!customElements.get("wc-code-mirror")) {
           this.editor.setOption("readOnly", "nocursor");
         } else {
           this.editor.setOption("readOnly", false);
+        }
+      } else if (attrName === "fetch") {
+        const url = newValue;
+        try {
+          fetch(url, {
+            method: "GET"
+          }).then((response) => response.text()).then((text) => {
+            this.editor.setValue(text);
+          });
+        } catch (ex) {
+          console.error("Error encountered while trying to fetch wc-code-mirror data!", ex);
         }
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -3924,7 +3935,8 @@ if (!customElements.get("wc-page-designer")) {
     static get observedAttributes() {
       return [
         "theme",
-        "json-layout"
+        "json-layout",
+        "json-layout-fetch-url"
       ];
     }
     theme = "theme-royal dark";
@@ -4030,6 +4042,9 @@ if (!customElements.get("wc-page-designer")) {
       } else if (attrName === "json-layout") {
         this.jsonLayout = newValue;
         console.log("wc-page-designer:attributeChangedCallback - json-layout", this.jsonLayout);
+      } else if (attrName === "json-layout-fetch-url") {
+        this.jsonLayoutFetchUrl = newValue;
+        console.log("wc-page-designer:attributeChangedCallback - json-layout-fetch-url", this.jsonLayoutFetchUrl);
       }
     }
     async render() {
@@ -4138,6 +4153,7 @@ if (!customElements.get("wc-page-designer")) {
               theme="monokai"
               tab-size="2"
               indent-unit="2"
+              fetch="${jsonLayoutFetchUrl}"
               >
             </wc-code-mirror>
             <div class="flex flex-row justify-end gap-2 p-2">

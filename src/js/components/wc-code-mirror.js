@@ -26,7 +26,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-code-mirror')) {
   class WcCodeMirror extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required'];
+      return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required', 'fetch'];
     }
 
     constructor() {
@@ -111,6 +111,19 @@ if (!customElements.get('wc-code-mirror')) {
           this.editor.setOption('readOnly', 'nocursor');
         } else {
           this.editor.setOption('readOnly', false);
+        }
+      } else if (attrName === 'fetch') {
+        const url = newValue;
+        try {
+          fetch(url, {
+            method: 'GET'
+          })
+          .then(response => response.text())
+          .then(text => {
+            this.editor.setValue(text);  
+          });
+        } catch(ex) {
+          console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
         }
       } else {
         super._handleAttributeChange(attrName, newValue);  
