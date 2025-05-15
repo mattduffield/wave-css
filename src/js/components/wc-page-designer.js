@@ -914,6 +914,12 @@ if (!customElements.get('wc-page-designer')) {
         }
       });
 
+      this.jsonOutput.addEventListener('fetch-complete', (e) => {
+        const jsonText = this.jsonOutput.editor.getValue().trim();
+        const layoutData = JSON.parse(jsonText);
+        this.loadDesign(layoutData);
+      });
+
       this.loadDesignButton.addEventListener('click', () => {
         try {
           const jsonText = this.jsonOutput.editor.getValue().trim();

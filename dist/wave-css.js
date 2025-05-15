@@ -2352,6 +2352,13 @@ if (!customElements.get("wc-code-mirror")) {
             method: "GET"
           }).then((response) => response.text()).then((text) => {
             this.editor.setValue(text);
+            const payload2 = {
+              detail: { name: this.getAttribute("name"), editor: this.editor },
+              bubbles: true,
+              composed: true
+            };
+            const customEvent2 = new CustomEvent("fetch-complete", payload2);
+            this.dispatchEvent(customEvent2);
           });
         }
       } catch (ex) {
@@ -4761,6 +4768,11 @@ if (!customElements.get("wc-page-designer")) {
         } catch (e) {
           alert("Invalid JSON format: " + e.message);
         }
+      });
+      this.jsonOutput.addEventListener("fetch-complete", (e) => {
+        const jsonText = this.jsonOutput.editor.getValue().trim();
+        const layoutData = JSON.parse(jsonText);
+        this.loadDesign(layoutData);
       });
       this.loadDesignButton.addEventListener("click", () => {
         try {

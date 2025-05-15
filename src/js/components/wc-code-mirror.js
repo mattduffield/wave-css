@@ -525,7 +525,14 @@ if (!customElements.get('wc-code-mirror')) {
           })
           .then(response => response.text())
           .then(text => {
-            this.editor.setValue(text);  
+            this.editor.setValue(text);
+            const payload = { 
+              detail: { name: this.getAttribute('name'), editor: this.editor },
+              bubbles: true,
+              composed: true
+            };
+            const customEvent = new CustomEvent('fetch-complete', payload);
+            this.dispatchEvent(customEvent);      
           });
         }
       } catch(ex) {
