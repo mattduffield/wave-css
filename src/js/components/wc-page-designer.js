@@ -197,9 +197,10 @@ if (!customElements.get('wc-page-designer')) {
         <wc-tab-item class="active" label="Canvas">
           <div class="designer-surface flex flex-col flex-1 min-h-0 overflow-scroll" id="designer-surface"></div>
         </wc-tab-item>
-        <wc-tab-item label="Schema" _="install HandleCodeMirrorTabChange end">
+        <wc-tab-item label="Schema">
           <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0"
+              _="install HandleCodeMirrorTabChange end"
               name="jsonSchema"
               line-numbers
               line-wrapper
@@ -214,9 +215,10 @@ if (!customElements.get('wc-page-designer')) {
             </div>
           </div>
         </wc-tab-item>
-        <wc-tab-item label="Layout JSON" _="install HandleCodeMirrorTabChange end">
+        <wc-tab-item label="Layout JSON">
           <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
+              _="install HandleCodeMirrorTabChange end"
               name="jsonLayout"
               line-numbers
               line-wrapper
