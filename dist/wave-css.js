@@ -2319,6 +2319,9 @@ if (!customElements.get("wc-code-mirror")) {
         const gutters2 = await this.getGutters();
         this.editor.setOption("gutters", gutters2);
       });
+      const payload = { editor: this.editor };
+      const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
+      this.dispatchEvent(customEvent);
     }
     // This is required to inform the form that the component can be form-associated
     static get formAssociated() {
@@ -4020,8 +4023,8 @@ if (!customElements.get("wc-page-designer")) {
         designer.className = designer.className.replace(oldTheme, newValue);
         console.log("wc-page-designer:attributeChangedCallback - designer", designer.className);
       } else if (attrName === "json-layout") {
-        const jsonLayout = document.querySelector('wc-code-mirror[name="jsonLayout"]');
-        jsonLayout.editor.setValue(newValue);
+        this.jsonLayout = newValue;
+        console.log("wc-page-designer:attributeChangedCallback - json-layout", this.jsonLayout);
       }
     }
     async render() {

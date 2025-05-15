@@ -129,8 +129,8 @@ if (!customElements.get('wc-page-designer')) {
         designer.className = designer.className.replace(oldTheme, newValue);
         console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
       } else if (attrName === 'json-layout') {
-        const jsonLayout = document.querySelector('wc-code-mirror[name="jsonLayout"]');
-        jsonLayout.editor.setValue(newValue);
+        this.jsonLayout = newValue;
+        console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
       }
     }
   

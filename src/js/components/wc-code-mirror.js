@@ -502,6 +502,10 @@ if (!customElements.get('wc-code-mirror')) {
         const gutters = await this.getGutters();
         this.editor.setOption('gutters', gutters);
       });
+
+      const payload = { editor: this.editor };
+      const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
+      this.dispatchEvent(customEvent);
     }
     
     // This is required to inform the form that the component can be form-associated
