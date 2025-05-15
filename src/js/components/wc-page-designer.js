@@ -140,7 +140,7 @@ if (!customElements.get('wc-page-designer')) {
         console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
       } else if (attrName === 'json-schema-fetch-url') {
         this.jsonSchemaFetchUrl = newValue;
-        const schemaJson = this.querySelector('wc-code-mirror[name="schema-json"]');
+        const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
         schemaJson.setAttribute('fetch', this.jsonSchemaFetchUrl);
         console.log('wc-page-designer:attributeChangedCallback - json-schema-fetch-url', this.jsonSchemaFetchUrl);
       }
@@ -231,7 +231,7 @@ if (!customElements.get('wc-page-designer')) {
         <wc-tab-item label="Schema">
           <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0"
-              name="schema-json"
+              name="jsonSchema"
               line-numbers
               line-wrapper
               fold-gutter
@@ -603,7 +603,7 @@ if (!customElements.get('wc-page-designer')) {
       this.savePropertiesButton = document.getElementById('save-properties');
       this.noSelectionPanel = document.getElementById('no-selection');
       this.elementPropertiesPanel = document.getElementById('element-properties');
-      this.schemaJson = document.querySelector('wc-code-mirror[name="schema-json"]');
+      this.schemaJson = document.querySelector('wc-code-mirror[name="jsonSchema"]');
       this.loadSchemaButton = document.getElementById('load-schema');
       this.addRuleButton = document.getElementById('add-rule');
       this.rulesList = document.getElementById('rules-list');
@@ -636,10 +636,6 @@ if (!customElements.get('wc-page-designer')) {
       });
       
       this.initEventListeners();
-      
-      // Set initial schema
-      // this.schemaJson.editor.setValue(JSON.stringify(this.sampleSchema, null, 2));
-      // this.loadSchema(this.sampleSchema);
     }
 
     // Update top-level elements order
@@ -822,8 +818,12 @@ if (!customElements.get('wc-page-designer')) {
       });
 
       this.schemaJson.addEventListener('fetch-complete', (e) => {
-        const schema = JSON.parse(this.schemaJson.editor.getValue());
-        this.loadSchema(schema);
+        try {
+          const schema = JSON.parse(this.schemaJson.editor.getValue());
+          this.loadSchema(schema);
+        } catch (e) {
+          alert('Invalid JSON schema');
+        }
       });
 
       // Add Rule Button
@@ -972,6 +972,17 @@ if (!customElements.get('wc-page-designer')) {
         URL.revokeObjectURL(url);
       });
     }
+
+    onSchemaChange(schemaStr) {
+      try {
+        this.schemaJson.editor.setValue(schemaStr);
+        const schema = JSON.parse(schemaStr);
+        this.loadSchema(schema);
+      } catch (e) {
+        alert('Invalid JSON schema');
+      }
+    }
+
 
     // Create Element Object
     createElementObject({ type, label = '', scope = '', parentElement = null, css = '', id = null }) {
