@@ -233,14 +233,16 @@ if (!customElements.get('wc-page-designer')) {
         <wc-tab-item label="Layout JSON">
           <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
-              name="json-output"
+              name="jsonLayout"
               line-numbers
               line-wrapper
               fold-gutter
               mode="javascript"
               theme="monokai"
               tab-size="2"
-              indent-unit="2">
+              indent-unit="2"
+              value="{{Record.content}}"
+              >
             </wc-code-mirror>
             <div class="flex flex-row justify-end gap-2 p-2">
               <button id="copy-design" class="btn btn-secondary">Copy to Clipboard</button>
@@ -577,7 +579,7 @@ if (!customElements.get('wc-page-designer')) {
       this.preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
       this.schemaButton = document.querySelector('button[data-label="Schema"]');
       this.generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
-      this.jsonOutput = document.querySelector('wc-code-mirror[name="json-output"]');
+      this.jsonOutput = document.querySelector('wc-code-mirror[name="jsonLayout"]');
       this.propId = document.getElementById('prop-id');
       this.propType = document.getElementById('prop-type');
       this.propLabel = document.getElementById('prop-label');
