@@ -2319,7 +2319,11 @@ if (!customElements.get("wc-code-mirror")) {
         const gutters2 = await this.getGutters();
         this.editor.setOption("gutters", gutters2);
       });
-      const payload = { detail: { name: this.getAttribute("name"), editor: this.editor } };
+      const payload = {
+        detail: { name: this.getAttribute("name"), editor: this.editor },
+        bubbles: true,
+        composed: true
+      };
       const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
       document.body.dispatchEvent(customEvent);
       console.log("----> broadcasting event: wc-code-mirror:ready");
