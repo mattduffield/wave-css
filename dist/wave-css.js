@@ -1813,11 +1813,13 @@ if (!customElements.get("wc-code-mirror")) {
         const url = newValue;
         try {
           if (url && url !== "undefined") {
-            fetch(url, {
-              method: "GET"
-            }).then((response) => response.text()).then((text) => {
-              this.editor.setValue(text);
-            });
+            setTimeout(() => {
+              fetch(url, {
+                method: "GET"
+              }).then((response) => response.text()).then((text) => {
+                this.editor.setValue(text);
+              });
+            }, 250);
           }
         } catch (ex) {
           console.error("Error encountered while trying to fetch wc-code-mirror data!", ex);
