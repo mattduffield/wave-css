@@ -4692,6 +4692,7 @@ if (!customElements.get("wc-page-designer")) {
         try {
           const schema = JSON.parse(this.schemaJson.editor.getValue());
           this.loadSchema(schema);
+          console.log("wc-page-designer:schemaJson - fetch-complete");
         } catch (e2) {
           alert("Invalid JSON schema");
         }
