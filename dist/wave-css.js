@@ -3983,35 +3983,6 @@ if (!customElements.get("wc-page-designer")) {
       rules: [],
       editingRuleIndex: -1
     };
-    // Sample Schema JSON
-    sampleSchema = {
-      "$defs": {
-        "navitem": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string", "minLength": 1, "default": "" },
-            "slug": { "type": "string", "minLength": 1, "default": "" },
-            "suffix": { "type": "string", "default": "" },
-            "url": { "type": "string", "default": "" },
-            "route_prefix": { "type": "string", "default": "" }
-          },
-          "required": ["name", "slug"]
-        }
-      },
-      "title": "Screen",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string", "minLength": 3, "default": "" },
-        "slug": { "type": "string", "minLength": 3, "default": "" },
-        "navigation_items": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/navitem" },
-          "default": []
-        },
-        "is_active": { "type": "boolean", "default": false }
-      },
-      "required": ["name", "slug"]
-    };
     // DOM Elements
     designerSurface = null;
     containerElements = null;
@@ -4020,7 +3991,6 @@ if (!customElements.get("wc-page-designer")) {
     previewButton = null;
     renderedPreviewButton = null;
     preRenderedPreviewButton = null;
-    // schemaButton = null;
     previewFrame = null;
     generateJsonButton = null;
     jsonOutput = null;
@@ -4167,7 +4137,7 @@ if (!customElements.get("wc-page-designer")) {
         <wc-tab-item class="active" label="Canvas">
           <div class="designer-surface flex flex-col flex-1 min-h-0 overflow-scroll" id="designer-surface"></div>
         </wc-tab-item>
-        <wc-tab-item label="Schema">
+        <wc-tab-item label="Schema" _="install HandleCodeMirrorTabChange end">
           <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0"
               name="jsonSchema"
@@ -4184,7 +4154,7 @@ if (!customElements.get("wc-page-designer")) {
             </div>
           </div>
         </wc-tab-item>
-        <wc-tab-item label="Layout JSON">
+        <wc-tab-item label="Layout JSON" _="install HandleCodeMirrorTabChange end">
           <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
               name="jsonLayout"
@@ -5369,10 +5339,6 @@ if (!customElements.get("wc-page-designer")) {
       document.body.appendChild(form);
       form.submit();
       form.remove();
-    }
-    // Set Schema
-    setSchema() {
-      this.schemaJson.editor.setValue(JSON.stringify(this.sampleSchema, null, 2));
     }
     // Generate JSON
     generateJson() {
