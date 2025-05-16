@@ -4971,7 +4971,7 @@ if (!customElements.get("wc-page-designer")) {
         const ruleSummary = document.createElement("div");
         ruleSummary.className = "text-sm";
         const condition = document.createElement("div");
-        condition.textContent = `When ${rule.condition.scope} ${getSchemaDescription(rule.condition.schema)}`;
+        condition.textContent = `When ${rule.condition.scope} ${this.getSchemaDescription(rule.condition.schema)}`;
         ruleSummary.appendChild(condition);
         const effect = document.createElement("div");
         effect.textContent = `${rule.effect} on ${rule.tgtDataId}`;
