@@ -568,17 +568,17 @@ var WcBaseComponent = class extends HTMLElement {
     if (!this._isConnected) {
       this._pendingAttributes[attrName] = newValue;
     } else {
-      this._handleAttributeChange(attrName, newValue);
+      this._handleAttributeChange(attrName, newValue, oldValue);
     }
   }
   _applyPendingAttributes() {
     Object.keys(this._pendingAttributes).forEach((attrName) => {
       const value = this._pendingAttributes[attrName];
-      this._handleAttributeChange(attrName, value);
+      this._handleAttributeChange(attrName, value, null);
     });
     this._pendingAttributes = {};
   }
-  _handleAttributeChange(attrName, newValue) {
+  _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === "name") {
       this._handleNameToIdLinkage(newValue);
     } else if (attrName === "elt-class") {
@@ -1779,7 +1779,7 @@ if (!customElements.get("wc-code-mirror")) {
       super.disconnectedCallback();
       this._unWireEvents();
     }
-    async _handleAttributeChange(attrName, newValue) {
+    async _handleAttributeChange(attrName, newValue, oldValue) {
       if (attrName === "lbl-class") {
         const name = this.getAttribute("name");
         const lbl = this.querySelector(`label[for="${name}"]`);
@@ -1827,12 +1827,13 @@ if (!customElements.get("wc-code-mirror")) {
           this.editor.setOption("readOnly", false);
         }
       } else if (attrName === "fetch") {
+        if (!oldValue) return;
         if (this.editor) {
           this.fetchUrl = newValue;
           this.handleFetch(this.fetchUrl);
         }
       } else {
-        super._handleAttributeChange(attrName, newValue);
+        super._handleAttributeChange(attrName, newValue, oldValue);
       }
     }
     _render() {
@@ -4048,13 +4049,11 @@ if (!customElements.get("wc-page-designer")) {
         this.jsonLayout = newValue;
         console.log("wc-page-designer:attributeChangedCallback - json-layout", this.jsonLayout);
       } else if (attrName === "json-layout-fetch-url") {
-        if (!oldValue) return;
         this.jsonLayoutFetchUrl = newValue;
         const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
         layoutEditor.setAttribute("fetch", this.jsonLayoutFetchUrl);
         console.log("wc-page-designer:attributeChangedCallback - json-layout-fetch-url", this.jsonLayoutFetchUrl);
       } else if (attrName === "json-schema-fetch-url") {
-        if (!oldValue) return;
         this.jsonSchemaFetchUrl = newValue;
         const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
         schemaJson.setAttribute("fetch", this.jsonSchemaFetchUrl);

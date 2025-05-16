@@ -103,13 +103,11 @@ if (!customElements.get('wc-page-designer')) {
         this.jsonLayout = newValue;
         console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
       } else if (attrName === 'json-layout-fetch-url') {
-        if (!oldValue) return;
         this.jsonLayoutFetchUrl = newValue;
         const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
         layoutEditor.setAttribute('fetch', this.jsonLayoutFetchUrl);
         console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
       } else if (attrName === 'json-schema-fetch-url') {
-        if (!oldValue) return;
         this.jsonSchemaFetchUrl = newValue;
         const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
         schemaJson.setAttribute('fetch', this.jsonSchemaFetchUrl);

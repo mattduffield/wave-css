@@ -67,7 +67,7 @@ if (!customElements.get('wc-code-mirror')) {
       this._unWireEvents();
     }
 
-    async _handleAttributeChange(attrName, newValue) {
+    async _handleAttributeChange(attrName, newValue, oldValue) {
       if (attrName === 'lbl-class') {
         const name = this.getAttribute('name');
         const lbl = this.querySelector(`label[for="${name}"]`);
@@ -115,12 +115,13 @@ if (!customElements.get('wc-code-mirror')) {
           this.editor.setOption('readOnly', false);
         }
       } else if (attrName === 'fetch') {
+        if (!oldValue) return;
         if (this.editor) {
           this.fetchUrl = newValue;
           this.handleFetch(this.fetchUrl);
         }
       } else {
-        super._handleAttributeChange(attrName, newValue);  
+        super._handleAttributeChange(attrName, newValue, oldValue);  
       }
     }
 

@@ -57,19 +57,19 @@ export class WcBaseComponent extends HTMLElement {
     if (!this._isConnected) {
       this._pendingAttributes[attrName] = newValue;
     } else {
-      this._handleAttributeChange(attrName, newValue);
+      this._handleAttributeChange(attrName, newValue, oldValue);
     }
   }
 
   _applyPendingAttributes() {
     Object.keys(this._pendingAttributes).forEach((attrName) => {
       const value = this._pendingAttributes[attrName];
-      this._handleAttributeChange(attrName, value);
+      this._handleAttributeChange(attrName, value, null);
     });
     this._pendingAttributes = {};
   }
 
-  _handleAttributeChange(attrName, newValue) {
+  _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === 'name') {
       this._handleNameToIdLinkage(newValue);
     } else if (attrName === 'elt-class') {
