@@ -4232,7 +4232,7 @@ if (!customElements.get("wc-page-designer")) {
               <p>Select an element to view and edit its rules</p>
             </div>
             <div id="element-rules" class="d-none">
-              <div id="rules-list">
+              <div id="rules-list" class="flex flex-col gap-2">
                 <!-- Rules will be added here -->
               </div>
               <div class="flex flex-row justify-end mt-2">
