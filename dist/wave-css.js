@@ -4965,12 +4965,12 @@ if (!customElements.get("wc-page-designer")) {
         const editButton = document.createElement("button");
         editButton.className = "theme-azure dark";
         editButton.textContent = "Edit";
-        editButton.addEventListener("click", () => editRule(index));
+        editButton.addEventListener("click", () => this.editRule(index));
         ruleActions.appendChild(editButton);
         const deleteButton = document.createElement("button");
         deleteButton.className = "theme-fire dark";
         deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", async () => deleteRule(index));
+        deleteButton.addEventListener("click", async () => this.deleteRule(index));
         ruleActions.appendChild(deleteButton);
         ruleHeader.appendChild(ruleActions);
         ruleItem.appendChild(ruleHeader);
