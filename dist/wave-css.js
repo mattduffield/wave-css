@@ -4846,17 +4846,15 @@ if (!customElements.get("wc-page-designer")) {
       typeHeader.className = "element-type-header";
       typeHeader.textContent = element.type;
       node.appendChild(typeHeader);
-      if (element.label) {
-        const labelElement = document.createElement("span");
-        labelElement.className = "element-label";
-        labelElement.textContent = element.label;
-        node.appendChild(labelElement);
-        if (element.scope) {
-          const scopeElement = document.createElement("small");
-          scopeElement.className = "ms-2 text-muted";
-          scopeElement.textContent = `(${element.scope})`;
-          labelElement.appendChild(scopeElement);
-        }
+      const labelElement = document.createElement("span");
+      labelElement.className = "element-label";
+      labelElement.textContent = element.label;
+      node.appendChild(labelElement);
+      if (element.scope) {
+        const scopeElement = document.createElement("small");
+        scopeElement.className = "ms-2 text-muted";
+        scopeElement.textContent = `(${element.scope})`;
+        labelElement.appendChild(scopeElement);
       }
       const actions = document.createElement("div");
       actions.className = "element-actions";

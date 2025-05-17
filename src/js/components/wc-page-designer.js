@@ -996,7 +996,7 @@ if (!customElements.get('wc-page-designer')) {
       node.appendChild(typeHeader);
       
       // Add label if present
-      if (element.label) {
+      // if (element.label) {
         const labelElement = document.createElement('span');
         labelElement.className = 'element-label';
         labelElement.textContent = element.label;
@@ -1009,7 +1009,7 @@ if (!customElements.get('wc-page-designer')) {
           scopeElement.textContent = `(${element.scope})`;
           labelElement.appendChild(scopeElement);
         }
-      }
+      // }
       
       // Add element actions
       const actions = document.createElement('div');
