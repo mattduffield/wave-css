@@ -430,6 +430,7 @@ function applyRule(rule) {
   const { effect, condition, tgtDataId, tgtSelector, tgtProperty } = rule;
   const { scope, schema, srcDataId, srcSelector, srcProperty, property } = condition;
   const value = getSourcePropertyValue(srcDataId, srcSelector, srcProperty);
+  if (value == void 0) return;
   let match = false;
   if (schema) {
     match = testSchema(value, schema);
