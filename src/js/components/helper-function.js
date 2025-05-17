@@ -627,10 +627,6 @@ export function applyRule(rule) {
   } else if (tgtSelector) {
     selector = tgtSelector;
   }
-  // let selector = `[data-id="${tgtDataId}"]`;
-  // if (tgtSelector) {
-  //   selector += ` ${tgtSelector}`;
-  // }
   let targetEl = document.querySelector(selector);
   if (!targetEl) return;
 
