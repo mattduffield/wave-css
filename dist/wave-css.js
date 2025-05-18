@@ -4091,6 +4091,7 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
+            <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
             <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
             <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
             <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
