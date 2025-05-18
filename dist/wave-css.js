@@ -4026,8 +4026,8 @@ if (!customElements.get("wc-page-designer")) {
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
         "wc-select-lookup": [
-          { name: "lookupName", label: "Collection Name", type: "string" },
-          { name: "lookupCSS", label: "Collection CSS", type: "string" }
+          { name: "lookupName", label: "Lookup Name", type: "string" },
+          { name: "lookupCSS", label: "Lookup CSS", type: "string" }
         ],
         "wc-select-collection": [
           { name: "collName", label: "Collection Name", type: "string" },
@@ -5506,7 +5506,7 @@ if (!customElements.get("wc-page-designer")) {
       let input2;
       const propId = `prop-custom-${property.name}`;
       if (property.type === "boolean") {
-        input2 = document.createElement("wc-input");
+        input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col");
@@ -5514,7 +5514,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("toggle-switch", "");
         input2.checked = value === true;
       } else if (property.type === "number") {
-        input2 = document.createElement("wc-input");
+        input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
