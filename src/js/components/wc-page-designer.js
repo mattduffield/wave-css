@@ -1608,22 +1608,25 @@ if (!customElements.get('wc-page-designer')) {
 
       // 1. Create a form targeting the iframe
       const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '/gen/generate_dynamic_layout';
+      const _id = document.querySelector('input[name="_id"]').value;
+      // form.method = 'POST';
+      // form.action = '/gen/generate_dynamic_layout';
+      form.method = 'GET';
+      form.action = `/view/${_id}`;
       form.target = 'rendered-preview';
 
       // 2. Add any parameters
-      const jsonInput = document.createElement('input');
-      jsonInput.type = 'hidden';
-      jsonInput.name = 'JSONSchema';
-      jsonInput.value = this.schemaJson.editor.getValue();
-      form.appendChild(jsonInput);
+      // const jsonInput = document.createElement('input');
+      // jsonInput.type = 'hidden';
+      // jsonInput.name = 'JSONSchema';
+      // jsonInput.value = this.schemaJson.editor.getValue();
+      // form.appendChild(jsonInput);
 
-      const layoutInput = document.createElement('input');
-      layoutInput.type = 'hidden';
-      layoutInput.name = 'UILayout';
-      layoutInput.value = this.jsonOutput.editor.getValue();
-      form.appendChild(layoutInput);
+      // const layoutInput = document.createElement('input');
+      // layoutInput.type = 'hidden';
+      // layoutInput.name = 'UILayout';
+      // layoutInput.value = this.jsonOutput.editor.getValue();
+      // form.appendChild(layoutInput);
 
       // 3. Add the form to the document, submit it, then remove it
       document.body.appendChild(form);
@@ -1648,7 +1651,7 @@ if (!customElements.get('wc-page-designer')) {
       // form.method = 'POST';
       // form.action = '/gen/generate_pre_dynamic_layout';
       form.method = 'GET';
-      form.action = `/view/${_id}`;
+      form.action = `/view/pre/${_id}`;
       form.target = 'pre-rendered-preview';
 
       // // 2. Add any parameters
