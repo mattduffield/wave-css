@@ -1892,7 +1892,8 @@ if (!customElements.get('wc-page-designer')) {
         input.value = value !== undefined ? value : '';
       } else {
         // Default to string type
-        input = document.createElement('wc-input');
+        input = new (customElements.get('wc-input'))();
+        // input = document.createElement('wc-input');
         input.setAttribute('name', propId);
         input.setAttribute('lbl-label', property.label);
         input.setAttribute('class', 'col-1');
