@@ -5512,7 +5512,12 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("class", "col");
         input2.setAttribute("type", "checkbox");
         input2.setAttribute("toggle-switch", "");
-        input2.checked = value === true;
+        if (value === true) {
+          input2.setAttribute("checked", "");
+          setTimeout(() => {
+            input2.checked = true;
+          }, 10);
+        }
       } else if (property.type === "number") {
         input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);
@@ -5525,7 +5530,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
-        input2.value = value !== void 0 ? value : "";
+        input2.setAttribute("value", value !== void 0 ? value : "");
       }
       input2.dataset.propertyName = property.name;
       input2.dataset.propertyType = property.type;

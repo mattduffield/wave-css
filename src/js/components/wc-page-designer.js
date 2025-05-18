@@ -1884,7 +1884,12 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('class', 'col');
         input.setAttribute('type', 'checkbox');
         input.setAttribute('toggle-switch', '');
-        input.checked = value === true;
+        if (value === true) {
+          input.setAttribute('checked', '');
+          setTimeout(() => {
+            input.checked = true;
+          }, 10);
+        }
       } else if (property.type === 'number') {
         input = new (customElements.get('wc-input'))();
         input.setAttribute('name', propId);
@@ -1898,7 +1903,8 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('name', propId);
         input.setAttribute('lbl-label', property.label);
         input.setAttribute('class', 'col-1');
-        input.value = value !== undefined ? value : '';
+        input.setAttribute('value', value !== undefined ? value : '');
+        // input.value = value !== undefined ? value : '';
       }
       
       // Store a reference to the property name for later retrieval
