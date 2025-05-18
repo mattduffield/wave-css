@@ -5330,7 +5330,7 @@ if (!customElements.get("wc-page-designer")) {
       }, { once: true });
       WaveHelpers.toggleIndicator("#content-loader", true);
       const form = document.createElement("form");
-      const _id = document.querySelector('input[name="_id"]');
+      const _id = document.querySelector('input[name="_id"]').value;
       form.method = "GET";
       form.action = `/view/${_id}`;
       form.target = "pre-rendered-preview";

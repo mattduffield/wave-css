@@ -1644,7 +1644,7 @@ if (!customElements.get('wc-page-designer')) {
 
       // 1. Create a form targeting the iframe
       const form = document.createElement('form');
-      const _id = document.querySelector('input[name="_id"]');
+      const _id = document.querySelector('input[name="_id"]').value;
       // form.method = 'POST';
       // form.action = '/gen/generate_pre_dynamic_layout';
       form.method = 'GET';
