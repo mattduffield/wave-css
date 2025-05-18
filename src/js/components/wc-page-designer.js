@@ -66,6 +66,19 @@ if (!customElements.get('wc-page-designer')) {
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+      // Define custom properties for different element types
+      this.elementCustomProperties = {
+        'wc-select-lookup': [
+          { name: 'lookupName', label: 'Collection Name', type: 'string' },
+          { name: 'lookupCSS', label: 'Collection CSS', type: 'string' }
+        ],
+        'wc-select-collection': [
+          { name: 'collName', label: 'Collection Name', type: 'string' },
+          { name: 'collCSS', label: 'Collection CSS', type: 'string' },
+          { name: 'collDisplayMember', label: 'Display Member', type: 'string' },
+          { name: 'collValueMember', label: 'Value Member', type: 'string' }
+        ]
+      };
 
       const compEl = this.querySelector('.wc-page-designer');
       if (compEl) {
@@ -273,6 +286,11 @@ if (!customElements.get('wc-page-designer')) {
               </div>
               <div class="row">
                 <wc-input name="prop-required" lbl-label="Required" class="col" type="checkbox" toggle-switch></wc-input>
+              </div>
+              <!-- Custom properties will be dynamically added here -->
+              <div id="custom-properties-container" class="mt-3">
+                <h6 class="text-muted mb-2 element-type-header">Custom Properties</h6>
+                <div id="custom-properties" class="col-1 gap-2"></div>
               </div>
               <div class="row">
                 <button id="save-properties" class="col-1 btn btn-primary">Apply</button>
@@ -706,6 +724,20 @@ if (!customElements.get('wc-page-designer')) {
             rules: [],
             elements: []
           };
+
+          // Initialize custom properties with default values if this element type has custom properties
+          const customProps = this.elementCustomProperties[elementType];
+          if (customProps && customProps.length > 0) {
+            customProps.forEach(prop => {
+              if (prop.type === 'boolean') {
+                newElement[prop.name] = false;
+              } else if (prop.type === 'number') {
+                newElement[prop.name] = null;
+              } else {
+                newElement[prop.name] = '';
+              }
+            });
+          }
           
           // Add to parent in the data model
           if (parentElementId) {
@@ -1011,6 +1043,32 @@ if (!customElements.get('wc-page-designer')) {
           labelElement.appendChild(scopeElement);
         }
       // }
+
+
+      // Add indicator for custom properties
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        // Check if any custom properties have non-empty values
+        const hasCustomValues = customProps.some(prop => {
+          const value = element[prop.name];
+          if (prop.type === 'boolean') {
+            return value === true;
+          } else if (prop.type === 'number') {
+            return value !== null && value !== undefined;
+          } else {
+            return value && value.trim() !== '';
+          }
+        });
+        
+        if (hasCustomValues) {
+          const customPropsIndicator = document.createElement('small');
+          customPropsIndicator.className = 'ms-2 text-primary';
+          customPropsIndicator.textContent = '(*)';
+          customPropsIndicator.title = 'Has custom properties';
+          labelElement.appendChild(customPropsIndicator);
+        }
+      }
+
       
       // Add element actions
       const actions = document.createElement('div');
@@ -1132,6 +1190,27 @@ if (!customElements.get('wc-page-designer')) {
       this.propScope.value = element.scope || '';
       this.propCss.value = element.css || '';
       this.propRequired.checked = element.required || false;
+      
+      // Clear existing custom properties
+      const customPropertiesContainer = document.getElementById('custom-properties');
+      customPropertiesContainer.innerHTML = '';
+      
+      // Hide the custom properties section by default
+      document.getElementById('custom-properties-container').style.display = 'none';
+      
+      // Check if this element type has custom properties
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        // Show the custom properties section
+        document.getElementById('custom-properties-container').style.display = 'block';
+        
+        // Add custom property inputs
+        customProps.forEach(prop => {
+          const value = element[prop.name];
+          const propInput = this.createCustomPropertyInput(prop, value);
+          customPropertiesContainer.appendChild(propInput);
+        });
+      }      
     }
 
     // Update Rules Panel
@@ -1407,6 +1486,27 @@ if (!customElements.get('wc-page-designer')) {
       this.designerState.selectedElement.css = this.propCss.value;
       this.designerState.selectedElement.required = this.propRequired.checked;
       
+      // Update custom properties
+      const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
+      if (customProps && customProps.length > 0) {
+        customProps.forEach(prop => {
+          const input = document.getElementById(`prop-custom-${prop.name}`);
+          if (input) {
+            let value;
+            if (prop.type === 'boolean') {
+              value = input.checked;
+            } else if (prop.type === 'number') {
+              value = input.value !== '' ? Number(input.value) : null;
+            } else {
+              value = input.value;
+            }
+            
+            // Save the custom property value to the element
+            this.designerState.selectedElement[prop.name] = value;
+          }
+        });
+      }
+
       // Refresh the designer to show the changes
       this.refreshDesigner();
       wc.Prompt.toast({title: 'Properties Updated!'});
@@ -1762,6 +1862,50 @@ if (!customElements.get('wc-page-designer')) {
       }
     }
 
+
+    //
+    // Custom Properties
+    //
+
+    createCustomPropertyInput(property, value) {
+      const row = document.createElement('div');
+      row.className = 'row mb-2';
+      
+      // Create input element based on property type
+      let input;
+      const propId = `prop-custom-${property.name}`;
+      
+      if (property.type === 'boolean') {
+        input = document.createElement('wc-input');
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col');
+        input.setAttribute('type', 'checkbox');
+        input.setAttribute('toggle-switch', '');
+        input.checked = value === true;
+      } else if (property.type === 'number') {
+        input = document.createElement('wc-input');
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('type', 'number');
+        input.value = value !== undefined ? value : '';
+      } else {
+        // Default to string type
+        input = document.createElement('wc-input');
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.value = value !== undefined ? value : '';
+      }
+      
+      // Store a reference to the property name for later retrieval
+      input.dataset.propertyName = property.name;
+      input.dataset.propertyType = property.type;
+      
+      row.appendChild(input);
+      return row;
+    }
 
 
     saveDesignToLocalStorage() {

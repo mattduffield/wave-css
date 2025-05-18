@@ -4024,6 +4024,18 @@ if (!customElements.get("wc-page-designer")) {
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+      this.elementCustomProperties = {
+        "wc-select-lookup": [
+          { name: "lookupName", label: "Collection Name", type: "string" },
+          { name: "lookupCSS", label: "Collection CSS", type: "string" }
+        ],
+        "wc-select-collection": [
+          { name: "collName", label: "Collection Name", type: "string" },
+          { name: "collCSS", label: "Collection CSS", type: "string" },
+          { name: "collDisplayMember", label: "Display Member", type: "string" },
+          { name: "collValueMember", label: "Value Member", type: "string" }
+        ]
+      };
       const compEl = this.querySelector(".wc-page-designer");
       if (compEl) {
         this.componentElement = compEl;
@@ -4220,6 +4232,11 @@ if (!customElements.get("wc-page-designer")) {
               </div>
               <div class="row">
                 <wc-input name="prop-required" lbl-label="Required" class="col" type="checkbox" toggle-switch></wc-input>
+              </div>
+              <!-- Custom properties will be dynamically added here -->
+              <div id="custom-properties-container" class="mt-3">
+                <h6 class="text-muted mb-2 element-type-header">Custom Properties</h6>
+                <div id="custom-properties" class="col-1 gap-2"></div>
               </div>
               <div class="row">
                 <button id="save-properties" class="col-1 btn btn-primary">Apply</button>
@@ -4609,6 +4626,18 @@ if (!customElements.get("wc-page-designer")) {
             rules: [],
             elements: []
           };
+          const customProps = this.elementCustomProperties[elementType];
+          if (customProps && customProps.length > 0) {
+            customProps.forEach((prop) => {
+              if (prop.type === "boolean") {
+                newElement[prop.name] = false;
+              } else if (prop.type === "number") {
+                newElement[prop.name] = null;
+              } else {
+                newElement[prop.name] = "";
+              }
+            });
+          }
           if (parentElementId) {
             const parentElement = this.findElementById(parentElementId);
             if (parentElement) {
@@ -4857,6 +4886,26 @@ if (!customElements.get("wc-page-designer")) {
         scopeElement.textContent = `(${element.scope})`;
         labelElement.appendChild(scopeElement);
       }
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        const hasCustomValues = customProps.some((prop) => {
+          const value = element[prop.name];
+          if (prop.type === "boolean") {
+            return value === true;
+          } else if (prop.type === "number") {
+            return value !== null && value !== void 0;
+          } else {
+            return value && value.trim() !== "";
+          }
+        });
+        if (hasCustomValues) {
+          const customPropsIndicator = document.createElement("small");
+          customPropsIndicator.className = "ms-2 text-primary";
+          customPropsIndicator.textContent = "(*)";
+          customPropsIndicator.title = "Has custom properties";
+          labelElement.appendChild(customPropsIndicator);
+        }
+      }
       const actions = document.createElement("div");
       actions.className = "element-actions";
       const deleteButton = document.createElement("button");
@@ -4940,6 +4989,18 @@ if (!customElements.get("wc-page-designer")) {
       this.propScope.value = element.scope || "";
       this.propCss.value = element.css || "";
       this.propRequired.checked = element.required || false;
+      const customPropertiesContainer = document.getElementById("custom-properties");
+      customPropertiesContainer.innerHTML = "";
+      document.getElementById("custom-properties-container").style.display = "none";
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        document.getElementById("custom-properties-container").style.display = "block";
+        customProps.forEach((prop) => {
+          const value = element[prop.name];
+          const propInput = this.createCustomPropertyInput(prop, value);
+          customPropertiesContainer.appendChild(propInput);
+        });
+      }
     }
     // Update Rules Panel
     updateRulesPanel(element) {
@@ -5166,6 +5227,23 @@ if (!customElements.get("wc-page-designer")) {
       this.designerState.selectedElement.scope = this.propScope.value;
       this.designerState.selectedElement.css = this.propCss.value;
       this.designerState.selectedElement.required = this.propRequired.checked;
+      const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
+      if (customProps && customProps.length > 0) {
+        customProps.forEach((prop) => {
+          const input2 = document.getElementById(`prop-custom-${prop.name}`);
+          if (input2) {
+            let value;
+            if (prop.type === "boolean") {
+              value = input2.checked;
+            } else if (prop.type === "number") {
+              value = input2.value !== "" ? Number(input2.value) : null;
+            } else {
+              value = input2.value;
+            }
+            this.designerState.selectedElement[prop.name] = value;
+          }
+        });
+      }
       this.refreshDesigner();
       wc.Prompt.toast({ title: "Properties Updated!" });
     }
@@ -5418,6 +5496,41 @@ if (!customElements.get("wc-page-designer")) {
         default:
           return type;
       }
+    }
+    //
+    // Custom Properties
+    //
+    createCustomPropertyInput(property, value) {
+      const row = document.createElement("div");
+      row.className = "row mb-2";
+      let input2;
+      const propId = `prop-custom-${property.name}`;
+      if (property.type === "boolean") {
+        input2 = document.createElement("wc-input");
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col");
+        input2.setAttribute("type", "checkbox");
+        input2.setAttribute("toggle-switch", "");
+        input2.checked = value === true;
+      } else if (property.type === "number") {
+        input2 = document.createElement("wc-input");
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("type", "number");
+        input2.value = value !== void 0 ? value : "";
+      } else {
+        input2 = document.createElement("wc-input");
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.value = value !== void 0 ? value : "";
+      }
+      input2.dataset.propertyName = property.name;
+      input2.dataset.propertyType = property.type;
+      row.appendChild(input2);
+      return row;
     }
     saveDesignToLocalStorage() {
       const designName = "layout-ui-design";
