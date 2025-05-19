@@ -4034,6 +4034,9 @@ if (!customElements.get("wc-page-designer")) {
           { name: "collCSS", label: "Collection CSS", type: "string" },
           { name: "collDisplayMember", label: "Display Member", type: "string" },
           { name: "collValueMember", label: "Value Member", type: "string" }
+        ],
+        "wc-textarea": [
+          { name: "rows", label: "Rows", type: "string" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
