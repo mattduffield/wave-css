@@ -4025,6 +4025,9 @@ if (!customElements.get("wc-page-designer")) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
+        "wc-input-checkbox": [
+          { name: "is_toggle", label: "Is Toggle", type: "boolean" }
+        ],
         "wc-select-lookup": [
           { name: "lookupName", label: "Lookup Name", type: "string" },
           { name: "lookupCSS", label: "Lookup CSS", type: "string" }
@@ -4096,26 +4099,27 @@ if (!customElements.get("wc-page-designer")) {
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Containers">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
-            <div class="element-item" data-element-type="wc-tab" draggable="true">WC Tab Container</div>
-            <div class="element-item" data-element-type="wc-tab-item" draggable="true">WC Tab Item</div>
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="array" draggable="true">Array</div>
-            <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
+            <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
+            <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
+            <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
             <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
             <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
             <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
             <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
             <div class="element-item" data-element-type="wc-sidenav-right" draggable="true">WC Sidenav Right</div>
-            <div class="element-item" data-element-type="wc-split-button" draggable="true">WC Split Button</div>
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
-            <div class="element-item" data-element-type="wc-timeline" draggable="true">WC Timeline</div>
+            <div class="element-item" data-element-type="wc-split-button" draggable="true">WC Split Button</div>
+            <div class="element-item" data-element-type="wc-tab" draggable="true">WC Tab Container</div>
+            <div class="element-item" data-element-type="wc-tab-item" draggable="true">WC Tab Item</div>
             <div class="element-item" data-element-type="wc-tabulator" draggable="true">WC Tabulator</div>
-            <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
+            <div class="element-item" data-element-type="wc-timeline" draggable="true">WC Timeline</div>
             <div class="element-item" data-element-type="option" draggable="true">Option</div>
           </div>
         </wc-tab-item>
@@ -4126,10 +4130,16 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
             <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
             <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
+            <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Backgruond Image</div>
+            <div class="element-item" data-element-type="wc-breadcrumb-item" draggable="true">WC Breadcrumb Item</div>
+            <div class="element-item" data-element-type="wc-code-mirror" draggable="true">WC Code Mirror</div>
+            <div class="element-item" data-element-type="wc-contact-card" draggable="true">WC Contact Card</div>
+            <div class="element-item" data-element-type="wc-contact-chip" draggable="true">WC Contact Chip</div>
+            <div class="element-item" data-element-type="wc-hotkey" draggable="true">WC Hotkey</div>
+            <div class="element-item" data-element-type="wc-image" draggable="true">WC Image</div>
             <div class="element-item" data-element-type="wc-input" draggable="true">WC Input</div>
             <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">WC Input Checkbox</div>
-            <div class="element-item" data-element-type="wc-code-mirror" draggable="true">WC Code Mirror</div>
-            <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
+            <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
             <div class="element-item" data-element-type="wc-select-option" draggable="true">WC Select Option</div>
@@ -4137,13 +4147,7 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-tabulator-column" draggable="true">WC Tabulator Column</div>
             <div class="element-item" data-element-type="wc-tabulator-func" draggable="true">WC Tabulator Func</div>
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
-            <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
-            <div class="element-item" data-element-type="wc-image" draggable="true">WC Image</div>
-            <div class="element-item" data-element-type="wc-contact-card" draggable="true">WC Contact Card</div>
-            <div class="element-item" data-element-type="wc-contact-chip" draggable="true">WC Contact Chip</div>
-            <div class="element-item" data-element-type="wc-breadcrumb-item" draggable="true">WC Breadcrumb Item</div>
-            <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Backgruond Image</div>
-            <div class="element-item" data-element-type="wc-hotkey" draggable="true">WC Hotkey</div>
+            <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
