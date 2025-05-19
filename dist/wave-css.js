@@ -4167,6 +4167,9 @@ if (!customElements.get("wc-page-designer")) {
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "rows", label: "Rows", type: "number" }
         ],
+        "wc-save-button": [
+          { name: "saveUrl", label: "Save URL", type: "string" }
+        ],
         "wc-save-split-button": [
           { name: "positionArea", label: "Position Area", type: "string" },
           { name: "saveUrl", label: "Save URL", type: "string" },
