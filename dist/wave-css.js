@@ -4026,8 +4026,8 @@ if (!customElements.get("wc-page-designer")) {
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
         "wc-input": [
-          { name: "minlength", label: "Min Length", type: "number" },
-          { name: "maxlength", label: "Max Length", type: "number" },
+          { name: "minlength", label: "Min Length", type: "string" },
+          { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
@@ -4038,63 +4038,63 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-currency": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-date": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-email": [
-          { name: "minlength", label: "Min Length", type: "number" },
-          { name: "maxlength", label: "Max Length", type: "number" },
+          { name: "minlength", label: "Min Length", type: "string" },
+          { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-month": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-number": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-range": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-tel": [
-          { name: "minlength", label: "Min Length", type: "number" },
-          { name: "maxlength", label: "Max Length", type: "number" },
+          { name: "minlength", label: "Min Length", type: "string" },
+          { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-time": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-input-week": [
-          { name: "min", label: "Min", type: "number" },
-          { name: "max", label: "Max", type: "number" },
+          { name: "min", label: "Min", type: "string" },
+          { name: "max", label: "Max", type: "string" },
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
