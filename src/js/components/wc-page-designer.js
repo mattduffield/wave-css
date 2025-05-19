@@ -1595,6 +1595,9 @@ if (!customElements.get('wc-page-designer')) {
         });
       }
 
+      // Update layout JSON
+      this.generateJson();
+
       // Refresh the designer to show the changes
       this.refreshDesigner();
       wc.Prompt.toast({title: 'Properties Updated!'});

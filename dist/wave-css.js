@@ -5330,6 +5330,7 @@ if (!customElements.get("wc-page-designer")) {
           }
         });
       }
+      this.generateJson();
       this.refreshDesigner();
       wc.Prompt.toast({ title: "Properties Updated!" });
     }
