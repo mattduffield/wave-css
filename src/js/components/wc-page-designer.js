@@ -160,6 +160,9 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
+        'wc-option': [
+          { name: 'value', label: 'Value', type: 'string' }
+        ],
         'wc-select-multiple-collection': [
           { name: 'mode', label: 'Mode', type: 'string' },
           { name: 'collName', label: 'Collection Name', type: 'string' },
@@ -329,6 +332,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
+            <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
             <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
             <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
