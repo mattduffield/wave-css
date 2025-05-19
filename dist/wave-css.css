@@ -5658,7 +5658,7 @@
     resize: vertical;
   }
   fieldset {
-    border: 2px solid var(--component-border-color);
+    border: 2px solid var(--primary-bg-color);
     border-radius: 6px;
   }
   legend {
@@ -5711,7 +5711,7 @@
   }
   hr {
     border: none;
-    height: 1px;
-    background-color: var(--button-disabled-bg-color);
+    height: 2px;
+    background-color: var(--primary-bg-color);
   }
 }
