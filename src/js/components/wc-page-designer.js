@@ -139,6 +139,28 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
+        'wc-input-radio-collection': [
+          { name: 'collName', label: 'Collection Name', type: 'string' },
+          { name: 'collCSS', label: 'Collection CSS', type: 'string' },
+          { name: 'collDisplayMember', label: 'Display Member', type: 'string' },
+          { name: 'collValueMember', label: 'Value Member', type: 'string' },
+          { name: 'group_class', label: 'Radio Group Class', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-radio-lookup': [
+          { name: 'lookupName', label: 'Lookup Name', type: 'string' },
+          { name: 'lookupCSS', label: 'Lookup CSS', type: 'string' },
+          { name: 'group_class', label: 'Radio Group Class', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-radio': [
+          { name: 'group_class', label: 'Radio Group Class', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+
         'wc-select-lookup': [
           { name: 'lookupName', label: 'Lookup Name', type: 'string' },
           { name: 'lookupCSS', label: 'Lookup CSS', type: 'string' }
@@ -230,9 +252,8 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
             <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
+            <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
-            <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
-            <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
             <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
             <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
             <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
@@ -267,6 +288,8 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-input-email" draggable="true">WC Input Email</div>
             <div class="element-item" data-element-type="wc-input-month" draggable="true">WC Input Month</div>
             <div class="element-item" data-element-type="wc-input-number" draggable="true">WC Input Number</div>
+            <div class="element-item" data-element-type="wc-input-radio-collection" draggable="true">WC Input Radio Collection</div>
+            <div class="element-item" data-element-type="wc-input-radio-lookup" draggable="true">WC Input Radio Lookup</div>
             <div class="element-item" data-element-type="wc-input-range" draggable="true">WC Input Range</div>
             <div class="element-item" data-element-type="wc-input-tel" draggable="true">WC Input Phone</div>
             <div class="element-item" data-element-type="wc-input-time" draggable="true">WC Input Time</div>
@@ -274,6 +297,8 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
+            <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
+            <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
             <div class="element-item" data-element-type="wc-select-option" draggable="true">WC Select Option</div>
             <div class="element-item" data-element-type="wc-slideshow-image" draggable="true">WC Slideshow Image</div>
             <div class="element-item" data-element-type="wc-tabulator-column" draggable="true">WC Tabulator Column</div>
@@ -1917,7 +1942,8 @@ if (!customElements.get('wc-page-designer')) {
       return [
         'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card', 'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar-left', 'wc-sidebar-right', 'wc-sidenav-left', 'wc-sidenav-right',
-        'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form', 'wc-breadcrumb'
+        'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form', 'wc-breadcrumb',
+        'wc-input-radio'
 
       ].includes(type);
     }
