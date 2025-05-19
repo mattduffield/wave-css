@@ -517,6 +517,7 @@ if (!customElements.get('wc-code-mirror')) {
         composed: true
       };
       const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
+      this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
       console.log('----> broadcasting event: wc-code-mirror:ready');
 

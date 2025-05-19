@@ -2354,6 +2354,7 @@ if (!customElements.get("wc-code-mirror")) {
         composed: true
       };
       const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
+      this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
       console.log("----> broadcasting event: wc-code-mirror:ready");
       const url = this.getAttribute("fetch");
@@ -4107,6 +4108,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "collValueMember", label: "Value Member", type: "string" }
         ],
         "wc-textarea": [
+          { name: "placeholder", label: "Placeholder", type: "string" },
           { name: "rows", label: "Rows", type: "string" }
         ]
       };
@@ -4124,7 +4126,7 @@ if (!customElements.get("wc-page-designer")) {
       this.wireEvents();
       setTimeout(() => {
         this.setup();
-      }, 500);
+      }, 250);
       console.log("conntectedCallback:wc-page-designer");
     }
     disconnectedCallback() {
@@ -4872,14 +4874,16 @@ if (!customElements.get("wc-page-designer")) {
         };
         wc.Prompt.notifyTemplate(promptPayload);
       });
-      this.jsonOutput.editor.on("change2", async () => {
-        try {
-          const jsonText = this.jsonOutput.editor.getValue().trim();
-          const layoutData = JSON.parse(jsonText);
-          this.loadDesign(layoutData);
-        } catch (e) {
-          alert("Invalid JSON format: " + e.message);
-        }
+      this.jsonOutput.addEventListener("wc-code-mirror:ready", () => {
+        this.jsonOutput.editor.on("change2", async () => {
+          try {
+            const jsonText = this.jsonOutput.editor.getValue().trim();
+            const layoutData = JSON.parse(jsonText);
+            this.loadDesign(layoutData);
+          } catch (e) {
+            alert("Invalid JSON format: " + e.message);
+          }
+        });
       });
       this.jsonOutput.addEventListener("fetch-complete", (e) => {
         const jsonText = this.jsonOutput.editor.getValue().trim();

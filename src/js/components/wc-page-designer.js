@@ -150,6 +150,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'collValueMember', label: 'Value Member', type: 'string' }
         ],
         'wc-textarea': [
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
           { name: 'rows', label: 'Rows', type: 'string' }
         ]
       };
@@ -170,7 +171,7 @@ if (!customElements.get('wc-page-designer')) {
 
       setTimeout(() => {
         this.setup();
-      }, 500);
+      }, 250);
       
       console.log('conntectedCallback:wc-page-designer');
     }
@@ -1000,15 +1001,17 @@ if (!customElements.get('wc-page-designer')) {
         wc.Prompt.notifyTemplate(promptPayload);
       });
       
-      // Load Design Button
-      this.jsonOutput.editor.on('change2', async () => {
-        try {
-          const jsonText = this.jsonOutput.editor.getValue().trim();
-          const layoutData = JSON.parse(jsonText);
-          this.loadDesign(layoutData);
-        } catch (e) {
-          alert('Invalid JSON format: ' + e.message);
-        }
+      this.jsonOutput.addEventListener('wc-code-mirror:ready', () => {
+        // Load Design Button
+        this.jsonOutput.editor.on('change2', async () => {
+          try {
+            const jsonText = this.jsonOutput.editor.getValue().trim();
+            const layoutData = JSON.parse(jsonText);
+            this.loadDesign(layoutData);
+          } catch (e) {
+            alert('Invalid JSON format: ' + e.message);
+          }
+        });
       });
 
       this.jsonOutput.addEventListener('fetch-complete', (e) => {
