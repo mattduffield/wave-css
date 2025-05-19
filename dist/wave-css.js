@@ -4109,7 +4109,7 @@ if (!customElements.get("wc-page-designer")) {
         ],
         "wc-textarea": [
           { name: "placeholder", label: "Placeholder", type: "string" },
-          { name: "rows", label: "Rows", type: "string" }
+          { name: "rows", label: "Rows", type: "number" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
