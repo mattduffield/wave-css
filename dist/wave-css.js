@@ -5614,7 +5614,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
         input2.setAttribute("type", "number");
-        input2.value = value !== void 0 ? value : "";
+        input2.setAttribute("value", value !== void 0 ? value : 0);
       } else {
         input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);

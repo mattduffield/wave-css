@@ -1987,7 +1987,8 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('lbl-label', property.label);
         input.setAttribute('class', 'col-1');
         input.setAttribute('type', 'number');
-        input.value = value !== undefined ? value : '';
+        input.setAttribute('value', value !== undefined ? value : 0);
+        // input.value = value !== undefined ? value : '';
       } else {
         // Default to string type
         input = new (customElements.get('wc-input'))();
