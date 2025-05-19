@@ -69,7 +69,8 @@ if (!customElements.get('wc-page-designer')) {
       // Define custom properties for different element types
       this.elementCustomProperties = {
         'a': [
-          { name: 'href', label: 'Href', type: 'string' }
+          { name: 'href', label: 'Href', type: 'string' },
+          { name: 'target', label: 'Target', type: 'string' }
         ],
         'wc-input': [
           { name: 'minlength', label: 'Min Length', type: 'string' },

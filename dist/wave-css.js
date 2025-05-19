@@ -4027,7 +4027,8 @@ if (!customElements.get("wc-page-designer")) {
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
         "a": [
-          { name: "href", label: "Href", type: "string" }
+          { name: "href", label: "Href", type: "string" },
+          { name: "target", label: "Target", type: "string" }
         ],
         "wc-input": [
           { name: "minlength", label: "Min Length", type: "string" },
