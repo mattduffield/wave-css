@@ -29,11 +29,12 @@ if (!customElements.get('wc-save-button')) {
       } else {
         const id = this.getAttribute('id') || '';
         const saveUrl = this.getAttribute('save-url') || '';
+        const label = this.getAttribute('label') || 'Save';
   
         this.componentElement = document.createElement('button');
         this.componentElement.id = id;
         this.removeAttribute('id');
-        this.componentElement.textContent = "Save";
+        this.componentElement.textContent = label;
         this.componentElement.classList.add('wc-save-button');
         this.componentElement.setAttribute('hx-target', '#viewport');
         this.componentElement.setAttribute('hx-swap', 'innerHTML transition:true');
