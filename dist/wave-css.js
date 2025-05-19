@@ -4131,7 +4131,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_disabled", label: "Is Disabled", type: "boolean" },
           { name: "allow_dynamic", label: "Allow Dynamic", type: "boolean" }
         ],
-        "wc-select-multple-lookup": [
+        "wc-select-multiple-lookup": [
           { name: "mode", label: "Mode", type: "string" },
           { name: "lookupName", label: "Lookup Name", type: "string" },
           { name: "lookupCSS", label: "Lookup CSS", type: "string" },
