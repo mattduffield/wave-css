@@ -299,7 +299,6 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-tab-item" draggable="true">WC Tab Item</div>
             <div class="element-item" data-element-type="wc-tabulator" draggable="true">WC Tabulator</div>
             <div class="element-item" data-element-type="wc-timeline" draggable="true">WC Timeline</div>
-            <div class="element-item" data-element-type="option" draggable="true">Option</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Elements">
@@ -337,7 +336,6 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
             <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
-            <div class="element-item" data-element-type="wc-select-option" draggable="true">WC Select Option</div>
             <div class="element-item" data-element-type="wc-slideshow-image" draggable="true">WC Slideshow Image</div>
             <div class="element-item" data-element-type="wc-tabulator-column" draggable="true">WC Tabulator Column</div>
             <div class="element-item" data-element-type="wc-tabulator-func" draggable="true">WC Tabulator Func</div>
