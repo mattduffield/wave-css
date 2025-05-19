@@ -5613,6 +5613,7 @@ if (!customElements.get("wc-page-designer")) {
         "wc-tabulator",
         "wc-slideshow",
         "wc-select",
+        "wc-select-multiple",
         "wc-form",
         "wc-breadcrumb",
         "wc-input-radio"

@@ -1978,7 +1978,8 @@ if (!customElements.get('wc-page-designer')) {
       return [
         'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card', 'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar-left', 'wc-sidebar-right', 'wc-sidenav-left', 'wc-sidenav-right',
-        'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-form', 'wc-breadcrumb',
+        'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-select-multiple',
+        'wc-form', 'wc-breadcrumb',
         'wc-input-radio'
 
       ].includes(type);
