@@ -84,7 +84,6 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
           { name: 'step', label: 'Step', type: 'string' },
-          { name: 'placeholder', label: 'Placeholder', type: 'string' },
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
@@ -111,7 +110,6 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
           { name: 'step', label: 'Step', type: 'string' },
-          { name: 'placeholder', label: 'Placeholder', type: 'string' },
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
