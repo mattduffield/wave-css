@@ -1293,6 +1293,7 @@ if (!customElements.get('wc-page-designer')) {
         
         // Add custom property inputs
         customProps.forEach(prop => {
+          const propValue = element[prop.name];
           const value = element[prop.name] !== undefined ? element[prop.name] : 
                (prop.type === 'boolean' ? false : 
                 prop.type === 'number' ? null : '');

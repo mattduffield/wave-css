@@ -5084,6 +5084,7 @@ if (!customElements.get("wc-page-designer")) {
       if (customProps && customProps.length > 0) {
         document.getElementById("custom-properties-container").style.display = "block";
         customProps.forEach((prop) => {
+          const propValue = element[prop.name];
           const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : "";
           const propInput = this.createCustomPropertyInput(prop, value);
           customPropertiesContainer.appendChild(propInput);
