@@ -68,8 +68,78 @@ if (!customElements.get('wc-page-designer')) {
       this.loadStyle = loadStyle.bind(this);
       // Define custom properties for different element types
       this.elementCustomProperties = {
+        'wc-input': [
+          { name: 'minlength', label: 'Min Length', type: 'number' },
+          { name: 'maxlength', label: 'Max Length', type: 'number' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
         'wc-input-checkbox': [
-          { name: 'is_toggle', label: 'Is Toggle', type: 'boolean' }
+          { name: 'is_toggle', label: 'Is Toggle', type: 'boolean' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-currency': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'step', label: 'Step', type: 'string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-date': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-email': [
+          { name: 'minlength', label: 'Min Length', type: 'number' },
+          { name: 'maxlength', label: 'Max Length', type: 'number' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-month': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-number': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'step', label: 'Step', type: 'string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-range': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'step', label: 'Step', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-tel': [
+          { name: 'minlength', label: 'Min Length', type: 'number' },
+          { name: 'maxlength', label: 'Max Length', type: 'number' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-time': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+        ],
+        'wc-input-week': [
+          { name: 'min', label: 'Min', type: 'number' },
+          { name: 'max', label: 'Max', type: 'number' },
+          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
         'wc-select-lookup': [
           { name: 'lookupName', label: 'Lookup Name', type: 'string' },
@@ -193,6 +263,15 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-image" draggable="true">WC Image</div>
             <div class="element-item" data-element-type="wc-input" draggable="true">WC Input</div>
             <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">WC Input Checkbox</div>
+            <div class="element-item" data-element-type="wc-input-currency" draggable="true">WC Input Currency</div>
+            <div class="element-item" data-element-type="wc-input-date" draggable="true">WC Input Date</div>
+            <div class="element-item" data-element-type="wc-input-email" draggable="true">WC Input Email</div>
+            <div class="element-item" data-element-type="wc-input-month" draggable="true">WC Input Month</div>
+            <div class="element-item" data-element-type="wc-input-number" draggable="true">WC Input Number</div>
+            <div class="element-item" data-element-type="wc-input-range" draggable="true">WC Input Range</div>
+            <div class="element-item" data-element-type="wc-input-tel" draggable="true">WC Input Phone</div>
+            <div class="element-item" data-element-type="wc-input-time" draggable="true">WC Input Time</div>
+            <div class="element-item" data-element-type="wc-input-week" draggable="true">WC Input Week</div>
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
