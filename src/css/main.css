@@ -827,6 +827,9 @@
   .card-color { color: var(--card-color); }
   .card-border-color { border-color: var(--card-border-color); }
 
+  .primary-bg-color {
+    background-color: var(--primary-bg-color);
+  }
   .primary-border-color {
     border-color: var(--primary-color);
   }
