@@ -170,7 +170,7 @@ if (!customElements.get('wc-page-designer')) {
 
       setTimeout(() => {
         this.setup();
-      }, 250);
+      }, 500);
       
       console.log('conntectedCallback:wc-page-designer');
     }
