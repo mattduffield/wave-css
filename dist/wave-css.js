@@ -4026,6 +4026,9 @@ if (!customElements.get("wc-page-designer")) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
+        "a": [
+          { name: "href", label: "Href", type: "string" }
+        ],
         "wc-input": [
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
@@ -4259,6 +4262,7 @@ if (!customElements.get("wc-page-designer")) {
         </wc-tab-item>
         <wc-tab-item class="" label="Elements">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="form-elements">
+            <div class="element-item" data-element-type="a" draggable="true">Anchor</div>
             <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
             <div class="element-item" data-element-type="wc-article-skeleton" draggable="true">WC Article Skeleton</div>
             <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
