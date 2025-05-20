@@ -4184,7 +4184,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "positionArea", label: "Position Area", type: "string" }
         ],
         "wc-script": [
-          { name: "content", label: "Content", type: "string" }
+          { name: "content", label: "Content", type: "multiline-string" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
