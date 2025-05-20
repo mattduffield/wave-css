@@ -48,7 +48,7 @@ if (!customElements.get('wc-accordion')) {
 
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-accordion');
+      console.log('connectedCallback:wc-accordion', this._items);
     }
 
     disconnectedCallback() {
@@ -157,7 +157,7 @@ if (!customElements.get('wc-accordion')) {
         };
         this._items.push(item);
       });
-      // Array.from(options).forEach(option => option.remove());
+      Array.from(options).forEach(option => option.remove());
     }
 
     _setActive() {
