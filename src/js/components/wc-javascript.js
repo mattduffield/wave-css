@@ -39,7 +39,7 @@ if (!customElements.get('wc-javascript')) {
           window.wc.loadLibrary = loadLibrary;
           window.wc.loadStyle = loadStyle;
 
-          const defer = this.getAttribute('defer') || '';
+          const defer = this.hasAttribute('defer');
           const script = document.createElement('script');
           script.type = 'text/javascript';
           script.textContent = scriptContent; // Set the script content
