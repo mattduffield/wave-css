@@ -226,7 +226,8 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'positionArea', label: 'Position Area', type: 'string' }
         ],
         'wc-javascript': [
-          { name: 'content', label: 'Content', type: 'multiline-string' }
+          { name: 'content', label: 'Content', type: 'multiline-string' },
+          { name: 'has_defer', label: 'Defer?', type: 'boolean' }
         ],
         'wc-script': [
           { name: 'src', label: 'Src', type: 'string' }
