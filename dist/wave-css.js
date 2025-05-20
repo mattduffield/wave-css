@@ -948,7 +948,7 @@ var WcAccordion = class extends WcBaseComponent {
           panel.style.maxHeight = panel.scrollHeight + "px";
         }
       });
-    }, 10);
+    }, 50);
   }
   _applyStyle() {
     const style = `
