@@ -937,7 +937,9 @@ var WcAccordion = class extends WcBaseComponent {
       };
       this._items.push(item);
     });
-    Array.from(options).forEach((option) => option.remove());
+    setTimeout(() => {
+      Array.from(options).forEach((option) => option.remove());
+    }, 50);
   }
   _setActive() {
     setTimeout(() => {

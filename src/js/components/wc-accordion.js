@@ -169,17 +169,17 @@ class WcAccordion extends WcBaseComponent {
       };
       this._items.push(item);
     });
-    Array.from(options).forEach(option => option.remove());
+    setTimeout(() => {
+      Array.from(options).forEach(option => option.remove());
+    }, 50);
   }
 
   _setActive() {
     setTimeout(() => {
       const anchors = this.querySelectorAll('.wc-accordion .accordion-header.active');
       anchors.forEach(anchor => {
-        // if (anchor.classList.contains('active')) {
-          const panel = anchor.nextElementSibling;
-          panel.style.maxHeight = panel.scrollHeight + "px";
-        // }
+        const panel = anchor.nextElementSibling;
+        panel.style.maxHeight = panel.scrollHeight + "px";
       });
     }, 50);
   }
