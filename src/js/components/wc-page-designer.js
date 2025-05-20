@@ -254,6 +254,18 @@ if (!customElements.get('wc-page-designer')) {
         ],
         'wc-accordion': [
           { name: 'allow_many', label: 'Allow Many?', type: 'boolean' }
+        ],
+        'wc-sidenav': [
+          { name: 'width', label: 'Width', type: 'string' },
+          { name: 'open_top', label: 'Open Top', type: 'string' },
+          { name: 'background_color', label: 'Background Color', type: 'string' },
+          { name: 'is_push', label: 'Is Push?', type: 'boolean' },
+          { name: 'push_target', label: 'Push Target', type: 'string' },
+          { name: 'is_open', label: 'Is Open?', type: 'boolean' },
+          { name: 'is_auto_height', label: 'Is Auto Height?', type: 'boolean' },
+          { name: 'has_open_vertical_text', label: 'Has Open Vertical Text?', type: 'boolean' },
+          { name: 'is_right_side', label: 'Is Right Side?', type: 'boolean' },
+          { name: 'is_overlay', label: 'Is Overlay?', type: 'boolean' },
         ]
       };
 
@@ -337,6 +349,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
             <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
             <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
+            <div class="element-item" data-element-type="wc-sidenav" draggable="true">WC Sidenav</div>
             <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
             <div class="element-item" data-element-type="wc-sidenav-right" draggable="true">WC Sidenav Right</div>
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
