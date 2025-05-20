@@ -4123,7 +4123,8 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
         "wc-option": [
-          { name: "value", label: "Value", type: "string" }
+          { name: "value", label: "Value", type: "string" },
+          { name: "is_selected", label: "Is Selected?", type: "boolean" }
         ],
         "wc-select-multiple-collection": [
           { name: "mode", label: "Mode", type: "string" },
@@ -4198,6 +4199,9 @@ if (!customElements.get("wc-page-designer")) {
         "wc-theme-selector": [
           { name: "theme", label: "Theme", type: "string" },
           { name: "mode", label: "Mode", type: "string" }
+        ],
+        "wc-accordion": [
+          { name: "allow_many", label: "Allow Many?", type: "boolean" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
