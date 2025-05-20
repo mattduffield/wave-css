@@ -224,6 +224,9 @@ if (!customElements.get('wc-page-designer')) {
         ],
         'wc-split-button': [
           { name: 'positionArea', label: 'Position Area', type: 'string' }
+        ],
+        'wc-script': [
+          { name: 'content', label: 'Content', type: 'string' }
         ]
       };
 
@@ -349,6 +352,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
             <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
+            <div class="element-item" data-element-type="wc-script" draggable="true">WC Script</div>
             <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
             <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
@@ -2069,6 +2073,12 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('type', 'number');
         input.setAttribute('value', value !== undefined ? value : 0);
         // input.value = value !== undefined ? value : '';
+      } else if (property.type === 'multiline-strng') {
+        input = new (customElements.get('wc-textarea'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
       } else {
         // Default to string type
         input = new (customElements.get('wc-input'))();

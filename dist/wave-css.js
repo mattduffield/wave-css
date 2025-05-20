@@ -4182,6 +4182,9 @@ if (!customElements.get("wc-page-designer")) {
         ],
         "wc-split-button": [
           { name: "positionArea", label: "Position Area", type: "string" }
+        ],
+        "wc-script": [
+          { name: "content", label: "Content", type: "string" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
@@ -4296,6 +4299,7 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
             <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
+            <div class="element-item" data-element-type="wc-script" draggable="true">WC Script</div>
             <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
             <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
@@ -5695,6 +5699,12 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("class", "col-1");
         input2.setAttribute("type", "number");
         input2.setAttribute("value", value !== void 0 ? value : 0);
+      } else if (property.type === "multiline-strng") {
+        input2 = new (customElements.get("wc-textarea"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
       } else {
         input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);
