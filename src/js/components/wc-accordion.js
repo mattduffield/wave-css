@@ -174,12 +174,12 @@ class WcAccordion extends WcBaseComponent {
 
   _setActive() {
     setTimeout(() => {
-      const anchors = this.querySelectorAll('.wc-accordion .accordion-header');
+      const anchors = this.querySelectorAll('.wc-accordion .accordion-header.active');
       anchors.forEach(anchor => {
-        if (anchor.classList.contains('active')) {
+        // if (anchor.classList.contains('active')) {
           const panel = anchor.nextElementSibling;
           panel.style.maxHeight = panel.scrollHeight + "px";
-        }
+        // }
       });
     }, 50);
   }
