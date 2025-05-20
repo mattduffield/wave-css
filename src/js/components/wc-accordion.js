@@ -99,13 +99,12 @@ if (!customElements.get('wc-accordion')) {
       const allowMany = this.hasAttribute('allow-many');
       const el = document.createElement('button');
       el.classList.add('accordion-header');
-      el.classList.add('sample');
       if (selected) {
-        el.classList.add('active2');
+        el.classList.add('accordion-active');
       }
       if (allowMany) {
         el.setAttribute('_', `on click
-          toggle .active on me
+          toggle .accordion-active on me
           set panel to me.nextElementSibling
           if panel.style.maxHeight then
             set panel.style.maxHeight to null
@@ -118,12 +117,12 @@ if (!customElements.get('wc-accordion')) {
           set hdrs to .accordion-header in my parentElement
           repeat for x in hdrs
             if x is not me then
-              remove .active from x
+              remove .accordion-active from x
               set panel to x.nextElementSibling
               set panel.style.maxHeight to null
             end
           end
-          toggle .active on me
+          toggle .accordion-active on me
           set panel to me.nextElementSibling
           if panel.style.maxHeight then
             set panel.style.maxHeight to null
@@ -163,7 +162,7 @@ if (!customElements.get('wc-accordion')) {
 
     _setActive() {
       setTimeout(() => {
-        const anchors = this.querySelectorAll('.wc-accordion .accordion-header.active');
+        const anchors = this.querySelectorAll('.wc-accordion .accordion-header.accordion-active');
         anchors.forEach(anchor => {
           const panel = anchor.nextElementSibling;
           panel.style.maxHeight = panel.scrollHeight + "px";
@@ -191,7 +190,7 @@ if (!customElements.get('wc-accordion')) {
           transition: 0.4s;
         }
 
-        .wc-accordion .active,
+        .wc-accordion .accordion-active,
         .wc-accordion .accordion-header:hover {
           background-color: var(--button-hover-bg-color);
           color: var(--button-hover-color);
@@ -210,7 +209,7 @@ if (!customElements.get('wc-accordion')) {
           height: 20px;
         }
 
-        .wc-accordion .active:after {
+        .wc-accordion .accordion-active:after {
           content: '-';
           color: var(--primary-color);
           font-size: 20px;
@@ -239,13 +238,13 @@ if (!customElements.get('wc-accordion')) {
           if (tgt === this) {
             const btn = tgt?.querySelector(headerSelector);
             if (mode === 'open') {
-              if (btn?.classList.contains('active')) {
+              if (btn?.classList.contains('accordion-active')) {
                 // Do nothing...
               } else {
                 btn?.click();
               }
             } else if (mode === 'close') {
-              if (!btn?.classList.contains('active')) {
+              if (!btn?.classList.contains('accordion-active')) {
                 // Do nothing...
               } else {
                 btn?.click();
