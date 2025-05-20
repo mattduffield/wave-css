@@ -2073,7 +2073,7 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('type', 'number');
         input.setAttribute('value', value !== undefined ? value : 0);
         // input.value = value !== undefined ? value : '';
-      } else if (property.type === 'multiline-strng') {
+      } else if (property.type === 'multiline-string') {
         input = new (customElements.get('wc-textarea'))();
         input.setAttribute('name', propId);
         input.setAttribute('lbl-label', property.label);

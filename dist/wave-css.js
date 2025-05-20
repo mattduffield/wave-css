@@ -5699,7 +5699,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("class", "col-1");
         input2.setAttribute("type", "number");
         input2.setAttribute("value", value !== void 0 ? value : 0);
-      } else if (property.type === "multiline-strng") {
+      } else if (property.type === "multiline-string") {
         input2 = new (customElements.get("wc-textarea"))();
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
