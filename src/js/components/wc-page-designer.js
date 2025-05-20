@@ -236,6 +236,10 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'size', label: 'Size', type: 'string' },
           { name: 'speed', label: 'Speed', type: 'string' },
           { name: 'thickness', label: 'Thickness', type: 'string' }
+        ],
+        'wc-theme-selector': [
+          { name: 'theme', label: 'Theme', type: 'string' },
+          { name: 'mode', label: 'Mode', type: 'string' }
         ]
       };
 
@@ -371,6 +375,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-tabulator-func" draggable="true">WC Tabulator Func</div>
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
+            <div class="element-item" data-element-type="wc-theme-selector" draggable="true">WC Theme Selector</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
