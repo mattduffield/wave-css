@@ -132,7 +132,6 @@ if (!customElements.get('wc-accordion')) {
         el.classList.add('active');
       }
       el.textContent = label;
-      // el.addEventListener('click', this._handleClick.bind(this));
       return el;
     }
 
@@ -144,18 +143,6 @@ if (!customElements.get('wc-accordion')) {
       el.appendChild(p);
       return el;
     }
-
-    // _handleClick(e) {
-    //   const {target} = e;
-    //   const anchors = this.querySelectorAll('.wc-accordion .accordion-header');
-    //   target.classList.toggle('active');
-    //   const panel = target.nextElementSibling;
-    //   if (panel.style.maxHeight) {
-    //     panel.style.maxHeight = null;
-    //   } else {
-    //     panel.style.maxHeight = panel.scrollHeight + "px";
-    //   }
-    // }
 
     _moveDeclarativeOptions() {
       const options = this.querySelectorAll('option');
@@ -170,7 +157,7 @@ if (!customElements.get('wc-accordion')) {
         };
         this._items.push(item);
       });
-      Array.from(options).forEach(option => option.remove());
+      // Array.from(options).forEach(option => option.remove());
     }
 
     _setActive() {
