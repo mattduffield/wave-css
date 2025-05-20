@@ -4030,6 +4030,10 @@ if (!customElements.get("wc-page-designer")) {
           { name: "href", label: "Href", type: "string" },
           { name: "target", label: "Target", type: "string" }
         ],
+        "option": [
+          { name: "value", label: "Value", type: "string" },
+          { name: "content", label: "Content", type: "multiline-string" }
+        ],
         "wc-input": [
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
@@ -4263,6 +4267,7 @@ if (!customElements.get("wc-page-designer")) {
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
+            <div class="element-item" data-element-type="option" draggable="true">Option</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="array" draggable="true">Array</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
