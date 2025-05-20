@@ -10156,10 +10156,14 @@ if (!customElements.get("wc-javascript")) {
           window.wc.loadScript = loadScript;
           window.wc.loadLibrary = loadLibrary;
           window.wc.loadStyle = loadStyle;
+          const defer = this.getAttribute("defer") || "";
           const script = document.createElement("script");
           script.type = "text/javascript";
           script.textContent = scriptContent;
           script.id = scriptId;
+          if (defer) {
+            script.setAttribute("defer", "");
+          }
           document.head.appendChild(script);
         } else {
           console.log("Script already exists, skipping append:", scriptId);

@@ -39,10 +39,14 @@ if (!customElements.get('wc-javascript')) {
           window.wc.loadLibrary = loadLibrary;
           window.wc.loadStyle = loadStyle;
 
+          const defer = this.getAttribute('defer') || '';
           const script = document.createElement('script');
           script.type = 'text/javascript';
           script.textContent = scriptContent; // Set the script content
           script.id = scriptId; // Add an ID to the script to prevent duplication
+          if (defer) {
+            script.setAttribute('defer', '');
+          }
           document.head.appendChild(script); // Append the script to the document head
 
         } else {
