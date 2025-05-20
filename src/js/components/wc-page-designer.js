@@ -225,8 +225,11 @@ if (!customElements.get('wc-page-designer')) {
         'wc-split-button': [
           { name: 'positionArea', label: 'Position Area', type: 'string' }
         ],
-        'wc-script': [
+        'wc-javascript': [
           { name: 'content', label: 'Content', type: 'multiline-string' }
+        ],
+        'wc-script': [
+          { name: 'src', label: 'Src', type: 'string' }
         ]
       };
 
