@@ -6109,7 +6109,6 @@ if (!customElements.get("wc-split-button")) {
           display: contents;
         }
         .wc-split-button {
-          /* anchor-name: --anchor; */
           display: flex;
           flex-direction: row;
         }
@@ -6136,10 +6135,6 @@ if (!customElements.get("wc-split-button")) {
 
           position: absolute;
           position-try-fallbacks: --bottom-right, --bottom-left, --top-right, --top-left, --right, --left;
-          /*
-          position-anchor: --anchor;
-          position-area: bottom span-left;
-          */
         }
 
         @position-try --bottom-left {
@@ -6182,11 +6177,6 @@ if (!customElements.get("wc-split-button")) {
         }
 
         /* Change the background color of the dropdown button when the dropdown content is shown */
-        /*
-        .wc-split-button .btn:hover, .dropdown:hover .btn  {
-          background-color: var(--primary-alt-bg-color);
-        }
-        */
         .wc-split-button .dropdown-content:hover ~ button {
           background-color: var(--button-hover-bg-color);
           color: var(--button-hover-color);
