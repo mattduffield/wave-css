@@ -871,9 +871,7 @@ if (!customElements.get("wc-accordion")) {
       const allowMany = this.hasAttribute("allow-many");
       const el = document.createElement("button");
       el.classList.add("accordion-header");
-      if (selected) {
-        el.classList.add("active");
-      }
+      el.classList.add("active");
       if (allowMany) {
         el.setAttribute("_", `on click
           toggle .active on me
