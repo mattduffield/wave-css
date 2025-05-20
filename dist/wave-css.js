@@ -4032,7 +4032,8 @@ if (!customElements.get("wc-page-designer")) {
         ],
         "option": [
           { name: "value", label: "Value", type: "string" },
-          { name: "content", label: "Content", type: "multiline-string" }
+          { name: "content", label: "Content", type: "multiline-string" },
+          { name: "is_selected", label: "Is Selected?", type: "boolean" }
         ],
         "wc-input": [
           { name: "minlength", label: "Min Length", type: "string" },
@@ -4204,6 +4205,11 @@ if (!customElements.get("wc-page-designer")) {
           { name: "theme", label: "Theme", type: "string" },
           { name: "mode", label: "Mode", type: "string" }
         ],
+        "wc-accordion-option": [
+          { name: "value", label: "Value", type: "string" },
+          { name: "content", label: "Content", type: "multiline-string" },
+          { name: "is_selected", label: "Is Selected?", type: "boolean" }
+        ],
         "wc-accordion": [
           { name: "allow_many", label: "Allow Many?", type: "boolean" }
         ]
@@ -4267,7 +4273,6 @@ if (!customElements.get("wc-page-designer")) {
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
-            <div class="element-item" data-element-type="option" draggable="true">Option</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="array" draggable="true">Array</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
@@ -4332,6 +4337,7 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
             <div class="element-item" data-element-type="wc-theme-selector" draggable="true">WC Theme Selector</div>
+            <div class="element-item" data-element-type="wc-accordion-option" draggable="true">WC Accordion Option</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
