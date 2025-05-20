@@ -101,7 +101,7 @@ if (!customElements.get('wc-accordion')) {
       el.classList.add('accordion-header');
       el.classList.add('sample');
       if (selected) {
-        el.classList.add('active');
+        el.classList.add('active2');
       }
       if (allowMany) {
         el.setAttribute('_', `on click
