@@ -231,6 +231,11 @@ if (!customElements.get('wc-page-designer')) {
         ],
         'wc-script': [
           { name: 'src', label: 'Src', type: 'string' }
+        ],
+        'wc-loader': [
+          { name: 'size', label: 'Size', type: 'string' },
+          { name: 'speed', label: 'Speed', type: 'string' },
+          { name: 'thickness', label: 'Thickness', type: 'string' }
         ]
       };
 
