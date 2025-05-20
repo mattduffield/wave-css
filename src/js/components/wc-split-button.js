@@ -2,11 +2,15 @@
  * 
  *  Name: wc-split-button
  *  Usage:
- *    <wc-split-button
- *      url="/screen/contact/123"
- *      new-url="/screen/contact/create"
- *      return-url="/screen/contact_list/list">
- *    </wc-split-button>
+ *    <wc-split-button id="generate-code" label="Generate Code"
+ *      onclick="console.log('tests');">
+ *      <a id="generate-detail" class="btn">
+ *        Generate Detail
+ *      </a>
+ *      <a id="generate-table" class="btn">
+ *        Generate Table
+ *      </a>
+ *    </wc-split-button>  
  * 
  *  API:
  *    wc.EventHub.broadcast('wc-accordion:open', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
