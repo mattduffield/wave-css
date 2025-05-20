@@ -100,6 +100,7 @@ class WcAccordion extends WcBaseComponent {
     el.classList.add('accordion-header');
     if (allowMany) {
       el.setAttribute('_', `on click
+        log '------->click (allowMany) event'
         toggle .active on me
         set panel to me.nextElementSibling
         if panel.style.maxHeight then
@@ -110,6 +111,7 @@ class WcAccordion extends WcBaseComponent {
       `);
     } else {
       el.setAttribute('_', `on click
+        log '------->click event'
         set hdrs to .accordion-header in my parentElement
         repeat for x in hdrs
           if x is not me then
@@ -165,13 +167,11 @@ class WcAccordion extends WcBaseComponent {
       const item = {
         label: option.value,
         content: option.innerHTML.trim(),
-        selected: option.hasAttribute('selected') || false
+        selected: option.hasAttribute('selected')
       };
       this._items.push(item);
     });
-    setTimeout(() => {
-      Array.from(options).forEach(option => option.remove());
-    }, 50);
+    Array.from(options).forEach(option => option.remove());
   }
 
   _setActive() {
