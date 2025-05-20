@@ -221,6 +221,9 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'saveUrl', label: 'Save URL', type: 'string' },
           { name: 'saveNewUrl', label: 'Save New URL', type: 'string' },
           { name: 'saveReturnUrl', label: 'Save Return URL', type: 'string' },
+        ],
+        'wc-split-button': [
+          { name: 'positionArea', label: 'Position Area', type: 'string' }
         ]
       };
 
