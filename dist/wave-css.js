@@ -4409,7 +4409,7 @@ if (!customElements.get("wc-page-designer")) {
     <div class="right-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab id="right-panel" class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Properties">
-          <div class="col-1 gap-2 py-2 px-4">
+          <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll gap-2 py-2 px-4">
             <div id="no-selection" class="col-1 text-center text-muted py-4">
               <p>Select an element to view and edit its properties</p>
             </div>
