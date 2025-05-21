@@ -360,8 +360,8 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
-            <div class="element-item" data-element-type="data-array" draggable="true">Array</div>
-            <div class="element-item" data-element-type="data-item" draggable="true">WC Data Item</div>
+            <div class="element-item" data-element-type="data-array" draggable="true">Data Array</div>
+            <div class="element-item" data-element-type="data-item" draggable="true">Data Item</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
