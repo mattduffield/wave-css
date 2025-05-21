@@ -72,6 +72,11 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'href', label: 'Href', type: 'string' },
           { name: 'target', label: 'Target', type: 'string' }
         ],
+        'data-array': [
+          { name: 'has_add_new', label: 'Has Add New?', type: 'boolean' },
+        ],
+        'data-item': [
+        ],
         'option': [
           { name: 'value', label: 'Value', type: 'string' },
           { name: 'content', label: 'Content', type: 'multiline-string' },
@@ -355,10 +360,10 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
-            <div class="element-item" data-element-type="array" draggable="true">Array</div>
+            <div class="element-item" data-element-type="data-array" draggable="true">Array</div>
+            <div class="element-item" data-element-type="data-item" draggable="true">WC Data Item</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
-            <div class="element-item" data-element-type="wc-data-item" draggable="true">WC Data Item</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
             <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
@@ -2054,7 +2059,8 @@ if (!customElements.get('wc-page-designer')) {
       return [
         'div', 'column', 'row', 'fieldset', 'array',
         'wc-tab', 'wc-tab-item',
-        'wc-card', 'wc-data-item', 'option',
+        'data-array', 'data-item',
+        'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar', 'wc-sidenav',
         'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-select-multiple',
         'wc-form', 'wc-breadcrumb',
