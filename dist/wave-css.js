@@ -6471,7 +6471,7 @@ if (!customElements.get("wc-sidenav")) {
       closeBtn.innerHTML = "&times;";
       closeBtn.addEventListener("click", this._closeNav.bind(this));
       this.componentElement.appendChild(closeBtn);
-      const openBtn = document.createElement("button");
+      const openBtn = document.createElement("div");
       openBtn.classList.add("openbtn");
       openBtn.style.top = this.getAttribute("open-top") || "0";
       openBtn.addEventListener("click", this._openNav.bind(this));
