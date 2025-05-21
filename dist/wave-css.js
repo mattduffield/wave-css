@@ -4222,6 +4222,12 @@ if (!customElements.get("wc-page-designer")) {
           { name: "has_open_vertical_text", label: "Has Open Vertical Text?", type: "boolean" },
           { name: "is_right_side", label: "Is Right Side?", type: "boolean" },
           { name: "is_overlay", label: "Is Overlay?", type: "boolean" }
+        ],
+        "wc-breadcrumb": [
+          { name: "title", label: "Title", type: "string" }
+        ],
+        "wc-breadcrumb-item": [
+          { name: "link", label: "Link", type: "string" }
         ]
       };
       const compEl = this.querySelector(".wc-page-designer");
