@@ -351,13 +351,13 @@ if (!customElements.get('wc-page-designer')) {
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Containers">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
+            <div class="element-item" data-element-type="div" draggable="true">Div</div>
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="array" draggable="true">Array</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
-            <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
             <div class="element-item" data-element-type="wc-data-item" draggable="true">WC Data Item</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
@@ -2052,7 +2052,8 @@ if (!customElements.get('wc-page-designer')) {
     // Check if element type is a container
     isContainerElement(type) {
       return [
-        'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array',
+        'div', 'column', 'row', 'fieldset', 'array',
+        'wc-tab', 'wc-tab-item',
         'wc-card', 'wc-data-item', 'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar', 'wc-sidenav',
         'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-select-multiple',
