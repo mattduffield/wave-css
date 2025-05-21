@@ -6472,7 +6472,7 @@ if (!customElements.get("wc-sidenav")) {
       closeBtn.addEventListener("click", this._closeNav.bind(this));
       this.componentElement.appendChild(closeBtn);
       const openBtn = document.createElement("div");
-      openBtn.classList.add("openbtn");
+      openBtn.setAttribute("class", "openbtn text-xs px-2 py-3");
       openBtn.style.top = this.getAttribute("open-top") || "0";
       openBtn.addEventListener("click", this._openNav.bind(this));
       const openSpan = document.createElement("span");
@@ -6647,7 +6647,7 @@ if (!customElements.get("wc-sidenav")) {
         wc-sidenav .openbtn span {
           writing-mode: vertical-rl;
           display: inline-block;
-          line-height: 2;
+          /* line-height: 2; */
         }
         wc-sidenav[open-vertical-text] .openbtn span {
           text-orientation: upright;
