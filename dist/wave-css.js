@@ -6632,10 +6632,10 @@ if (!customElements.get("wc-sidenav")) {
           background-color: transparent;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav .closebtn {
-          /* right: 10px; */
+          right: 0;
         }
         wc-sidenav[right-side] .wc-sidenav.sidenav .closebtn {
-          /* left: 10px; */
+          left: 0;
         }
         wc-sidenav .openbtn {
           position: absolute;
