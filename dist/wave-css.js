@@ -6403,10 +6403,10 @@ if (!customElements.get("wc-sidenav")) {
         const isOpen = this.hasAttribute("open");
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-sidenav", "sidenav");
+        this.appendChild(this.componentElement);
         if (isOpen) {
           this._openNav({ target: null });
         }
-        this.appendChild(this.componentElement);
       }
       console.log("ctor:wc-sidenav");
     }
