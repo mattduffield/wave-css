@@ -258,7 +258,8 @@ if (!customElements.get('wc-page-designer')) {
         'wc-sidenav': [
           { name: 'width', label: 'Width', type: 'string' },
           { name: 'open_top', label: 'Open Top', type: 'string' },
-          { name: 'open_btn_class', label: 'Open Button CSS', type: 'string' },
+          { name: 'open_btn_css', label: 'Open Button CSS', type: 'string' },
+          { name: 'close_btn_css', label: 'Close Button CSS', type: 'string' },
           { name: 'background_color', label: 'Background Color', type: 'string' },
           { name: 'is_push', label: 'Is Push?', type: 'boolean' },
           { name: 'push_target', label: 'Push Target', type: 'string' },

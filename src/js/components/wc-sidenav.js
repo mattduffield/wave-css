@@ -140,14 +140,15 @@ if (!customElements.get('wc-sidenav')) {
       }
 
       const lbl = this.getAttribute('label') || 'Sidenav';
-      const closeBtn = document.createElement('button');    
-      closeBtn.classList.add('closebtn');
+      const closeBtn = document.createElement('div');    
+      const closeBtnCss = this.getAttribute('close-btn-css') || 'primary-bg-color text-xs p-2';
+      closeBtn.setAttribute('class', `closebtn cursor-pointer ${closeBtnCss}`);
       closeBtn.innerHTML = '&times;';
       closeBtn.addEventListener('click', this._closeNav.bind(this));
       this.componentElement.appendChild(closeBtn);
       const openBtn = document.createElement('div');
-      const openBtnCls = this.getAttribute('open-btn-class') || 'primary-bg-color text-xs px-2 py-3';
-      openBtn.setAttribute('class', `openbtn cursor-pointer ${openBtnCls}`);
+      const openBtnCss = this.getAttribute('open-btn-css') || 'primary-bg-color text-xs px-2 py-3';
+      openBtn.setAttribute('class', `openbtn cursor-pointer ${openBtnCss}`);
       openBtn.style.top = this.getAttribute('open-top') || '0';
       openBtn.addEventListener('click', this._openNav.bind(this));
       const openSpan = document.createElement('span');
@@ -314,10 +315,10 @@ if (!customElements.get('wc-sidenav')) {
           background-color: transparent;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav .closebtn {
-          right: 10px;
+          /* right: 10px; */
         }
         wc-sidenav[right-side] .wc-sidenav.sidenav .closebtn {
-          left: 10px;
+          /* left: 10px; */
         }
         wc-sidenav .openbtn {
           position: absolute;
