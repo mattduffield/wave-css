@@ -4202,6 +4202,13 @@ if (!customElements.get("wc-page-designer")) {
         "wc-accordion": [
           { name: "allow_many", label: "Allow Many?", type: "boolean" }
         ],
+        "wc-sidebar": [
+          { name: "width", label: "Width", type: "string" },
+          { name: "background_color", label: "Background Color", type: "string" },
+          { name: "push_target", label: "Push Target", type: "string" },
+          { name: "is_auto_height", label: "Is Auto Height?", type: "boolean" },
+          { name: "is_right_side", label: "Is Right Side?", type: "boolean" }
+        ],
         "wc-sidenav": [
           { name: "width", label: "Width", type: "string" },
           { name: "open_top", label: "Open Top", type: "string" },
@@ -4285,8 +4292,7 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
             <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
-            <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
-            <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
+            <div class="element-item" data-element-type="wc-sidebar" draggable="true">WC Sidebar</div>
             <div class="element-item" data-element-type="wc-sidenav" draggable="true">WC Sidenav</div>
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
             <div class="element-item" data-element-type="wc-split-button" draggable="true">WC Split Button</div>
@@ -5657,8 +5663,7 @@ if (!customElements.get("wc-page-designer")) {
         "option",
         "wc-accordion",
         "wc-split-button",
-        "wc-sidebar-left",
-        "wc-sidebar-right",
+        "wc-sidebar",
         "wc-sidenav",
         "wc-timeline",
         "wc-tabulator",
