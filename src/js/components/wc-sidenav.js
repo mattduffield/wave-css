@@ -51,7 +51,7 @@ if (!customElements.get('wc-sidenav')) {
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-sidenav', 'sidenav');
         if (isOpen) {
-          this._openNav(null);
+          this._openNav({target:null});
           // this.componentElement.classList.add('open');
         }
         this.appendChild(this.componentElement);      
