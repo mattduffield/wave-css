@@ -134,8 +134,6 @@ if (!customElements.get('wc-sidenav')) {
       this.appendChild(overlay);
 
       if (this.hasAttribute('background-color')) {
-        // const body = document.body;
-        // const bgColor = getComputedStyle(body).getPropertyValue('--background-color').trim();
         const bgColor = this.getAttribute('background-color');
         this.componentElement.style.setProperty('--background-color', bgColor);
       }
@@ -269,6 +267,7 @@ if (!customElements.get('wc-sidenav')) {
     _applyStyle() {
       const style = `
         wc-sidenav {
+          --background-color: var(--primary-bg-color);
           display: contents;
         }
         wc-sidenav .wc-sidenav.sidenav {
@@ -277,7 +276,7 @@ if (!customElements.get('wc-sidenav')) {
           position: fixed;
           z-index: 2;
           top: 0;
-          background-color: var(--button-bg-color);
+          background-color: var(--background-color);
           overflow-x: hidden;
           padding-top: 60px;
           padding-bottom: 20px;

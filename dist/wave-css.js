@@ -6334,6 +6334,7 @@ var WcSidebar = class extends WcBaseComponent {
   _applyStyle() {
     const style = `
       wc-sidebar {
+        --background-color: var(--primary-bg-color);
         display: contents;
       }
       wc-sidebar .wc-sidebar {
@@ -6341,7 +6342,7 @@ var WcSidebar = class extends WcBaseComponent {
         position: fixed;
         z-index: 1;
         top: 0;
-        background-color: var(--bg-color);
+        background-color: var(--background-color);
         overflow-x: hidden;
         padding-top: 20px;
         padding-bottom: 20px;
@@ -6583,6 +6584,7 @@ if (!customElements.get("wc-sidenav")) {
     _applyStyle() {
       const style = `
         wc-sidenav {
+          --background-color: var(--primary-bg-color);
           display: contents;
         }
         wc-sidenav .wc-sidenav.sidenav {
@@ -6591,7 +6593,7 @@ if (!customElements.get("wc-sidenav")) {
           position: fixed;
           z-index: 2;
           top: 0;
-          background-color: var(--button-bg-color);
+          background-color: var(--background-color);
           overflow-x: hidden;
           padding-top: 60px;
           padding-bottom: 20px;

@@ -112,8 +112,6 @@ class WcSidebar extends WcBaseComponent {
     const isRight = this.hasAttribute('right-side');
     const width = this.getAttribute('width') || '150px';
     if (this.hasAttribute('background-color')) {
-      // const body = document.body;
-      // const bgColor = getComputedStyle(body).getPropertyValue('--background-color').trim();
       const bgColor = this.getAttribute('background-color');
       this.componentElement.style.setProperty('--background-color', bgColor);
     }
@@ -134,6 +132,7 @@ class WcSidebar extends WcBaseComponent {
   _applyStyle() {
     const style = `
       wc-sidebar {
+        --background-color: var(--primary-bg-color);
         display: contents;
       }
       wc-sidebar .wc-sidebar {
@@ -141,7 +140,7 @@ class WcSidebar extends WcBaseComponent {
         position: fixed;
         z-index: 1;
         top: 0;
-        background-color: var(--bg-color);
+        background-color: var(--background-color);
         overflow-x: hidden;
         padding-top: 20px;
         padding-bottom: 20px;
