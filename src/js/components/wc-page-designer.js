@@ -1222,10 +1222,10 @@ if (!customElements.get('wc-page-designer')) {
     // Add Element to Designer
     addElementToDesigner(element, containerElement) {
       // Only remove placeholder if present
-      const placeholder = containerElement.querySelector('.designer-element-placeholder');
-      if (placeholder) {
-        containerElement.removeChild(placeholder);
-      }
+      // const placeholder = containerElement.querySelector('.designer-element-placeholder');
+      // if (placeholder) {
+        // containerElement.removeChild(placeholder);
+      // }
       
       // Create and append the new element node
       const elementNode = this.createElementNode(element);

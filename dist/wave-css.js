@@ -5066,10 +5066,6 @@ if (!customElements.get("wc-page-designer")) {
     }
     // Add Element to Designer
     addElementToDesigner(element, containerElement) {
-      const placeholder = containerElement.querySelector(".designer-element-placeholder");
-      if (placeholder) {
-        containerElement.removeChild(placeholder);
-      }
       const elementNode = this.createElementNode(element);
       containerElement.appendChild(elementNode);
     }
