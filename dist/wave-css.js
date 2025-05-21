@@ -4288,8 +4288,6 @@ if (!customElements.get("wc-page-designer")) {
             <div class="element-item" data-element-type="wc-sidebar-left" draggable="true">WC Sidebar Left</div>
             <div class="element-item" data-element-type="wc-sidebar-right" draggable="true">WC Sidebar Right</div>
             <div class="element-item" data-element-type="wc-sidenav" draggable="true">WC Sidenav</div>
-            <div class="element-item" data-element-type="wc-sidenav-left" draggable="true">WC Sidenav Left</div>
-            <div class="element-item" data-element-type="wc-sidenav-right" draggable="true">WC Sidenav Right</div>
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
             <div class="element-item" data-element-type="wc-split-button" draggable="true">WC Split Button</div>
             <div class="element-item" data-element-type="wc-tab" draggable="true">WC Tab Container</div>
@@ -5661,8 +5659,7 @@ if (!customElements.get("wc-page-designer")) {
         "wc-split-button",
         "wc-sidebar-left",
         "wc-sidebar-right",
-        "wc-sidenav-left",
-        "wc-sidenav-right",
+        "wc-sidenav",
         "wc-timeline",
         "wc-tabulator",
         "wc-slideshow",
