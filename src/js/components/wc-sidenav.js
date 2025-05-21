@@ -35,7 +35,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-sidenav')) {
   class WcSidenav extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'label', 'width', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height'];
+      return ['id', 'class', 'label', 'width', 'open-btn-class', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height'];
     }
 
     constructor() {
@@ -79,6 +79,8 @@ if (!customElements.get('wc-sidenav')) {
       } else if (attrName === 'background-color') {
         // Do nothing...
       } else if (attrName === 'open-vertical-text') {
+        // Do nothing...
+      } else if (attrName === 'open-btn-class') {
         // Do nothing...
       } else if (attrName === 'open-top') {
         // Do nothing...
@@ -143,8 +145,9 @@ if (!customElements.get('wc-sidenav')) {
       closeBtn.innerHTML = '&times;';
       closeBtn.addEventListener('click', this._closeNav.bind(this));
       this.componentElement.appendChild(closeBtn);
-      const openBtn = document.createElement('div');    
-      openBtn.setAttribute('class', 'openbtn text-xs px-2 py-3')
+      const openBtn = document.createElement('div');
+      const openBtnCls = this.getAttribute('open-btn-class') || 'primary-bg-color text-xs px-2 py-3';
+      openBtn.setAttribute('class', `openbtn cursor-pointer ${openBtnCls}`);
       openBtn.style.top = this.getAttribute('open-top') || '0';
       openBtn.addEventListener('click', this._openNav.bind(this));
       const openSpan = document.createElement('span');

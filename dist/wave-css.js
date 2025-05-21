@@ -4205,6 +4205,7 @@ if (!customElements.get("wc-page-designer")) {
         "wc-sidenav": [
           { name: "width", label: "Width", type: "string" },
           { name: "open_top", label: "Open Top", type: "string" },
+          { name: "open_btn_class", label: "Open Button CSS", type: "string" },
           { name: "background_color", label: "Background Color", type: "string" },
           { name: "is_push", label: "Is Push?", type: "boolean" },
           { name: "push_target", label: "Push Target", type: "string" },
@@ -6387,7 +6388,7 @@ customElements.define("wc-sidebar", WcSidebar);
 if (!customElements.get("wc-sidenav")) {
   class WcSidenav extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "label", "width", "open", "open-top", "open-vertical-text", "push", "push-target", "overlay", "background-color", "auto-height"];
+      return ["id", "class", "label", "width", "open-btn-class", "open", "open-top", "open-vertical-text", "push", "push-target", "overlay", "background-color", "auto-height"];
     }
     constructor() {
       super();
@@ -6423,6 +6424,7 @@ if (!customElements.get("wc-sidenav")) {
       } else if (attrName === "auto-height") {
       } else if (attrName === "background-color") {
       } else if (attrName === "open-vertical-text") {
+      } else if (attrName === "open-btn-class") {
       } else if (attrName === "open-top") {
       } else if (attrName === "open") {
       } else if (attrName === "overlay") {
@@ -6472,7 +6474,8 @@ if (!customElements.get("wc-sidenav")) {
       closeBtn.addEventListener("click", this._closeNav.bind(this));
       this.componentElement.appendChild(closeBtn);
       const openBtn = document.createElement("div");
-      openBtn.setAttribute("class", "openbtn text-xs px-2 py-3");
+      const openBtnCls = this.getAttribute("open-btn-class") || "primary-bg-color text-xs px-2 py-3";
+      openBtn.setAttribute("class", `openbtn cursor-pointer ${openBtnCls}`);
       openBtn.style.top = this.getAttribute("open-top") || "0";
       openBtn.addEventListener("click", this._openNav.bind(this));
       const openSpan = document.createElement("span");
