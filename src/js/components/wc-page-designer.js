@@ -358,6 +358,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
             <div class="element-item" data-element-type="wc-card" draggable="true">WC Card</div>
+            <div class="element-item" data-element-type="wc-data-item" draggable="true">WC Data Item</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
             <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
@@ -2051,7 +2052,8 @@ if (!customElements.get('wc-page-designer')) {
     // Check if element type is a container
     isContainerElement(type) {
       return [
-        'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array', 'wc-card', 'option',
+        'wc-tab', 'wc-tab-item', 'column', 'row', 'fieldset', 'array',
+        'wc-card', 'wc-data-item', 'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar', 'wc-sidenav',
         'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-select-multiple',
         'wc-form', 'wc-breadcrumb',
