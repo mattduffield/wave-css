@@ -294,6 +294,8 @@ if (!customElements.get('wc-slideshow')) {
 
     _wireEvents() {
       super._wireEvents();
+      const isWired = this.hasAttribute('data-wired');
+      if (isWired) return;
       setTimeout(() => {
         const prev = this.querySelector('.prev');
         const next = this.querySelector('.next');
@@ -304,6 +306,7 @@ if (!customElements.get('wc-slideshow')) {
       document.body.addEventListener('wc-slideshow:prev', this._handlePrev.bind(this));
       document.body.addEventListener('wc-slideshow:start', this._handleStart.bind(this));
       document.body.addEventListener('wc-slideshow:stop', this._handleStop.bind(this));
+      this.setAttribute('data-wired', true);
     }
 
     _unWireEvents() {
