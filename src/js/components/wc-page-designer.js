@@ -261,7 +261,8 @@ if (!customElements.get('wc-page-designer')) {
         ],
         'wc-slideshow': [
           { name: 'autoplay', label: 'Autoplay?', type: 'boolean' },
-          { name: 'autoplay_interval', label: 'Autoplay Interval', type: 'number' }
+          { name: 'autoplay_interval', label: 'Autoplay Interval', type: 'number' },
+          { name: 'max_image_height', label: 'Max Image Height', type: 'string' }
         ],
         'wc-slideshow-image': [
           { name: 'url', label: 'URL', type: 'string' },
