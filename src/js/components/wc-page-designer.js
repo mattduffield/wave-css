@@ -106,6 +106,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'hover_overlay', label: 'Hover Overlay?', type: 'boolean' },
           { name: 'hover_mode', label: 'Hover Mode', type: 'string' },
           { name: 'modal', label: 'Modal?', type: 'boolean' },
+          { name: 'overlay_content', label: 'Overlay Content', type: 'multiline-string' },
         ],
         'wc-input': [
           { name: 'minlength', label: 'Min Length', type: 'string' },
