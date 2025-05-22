@@ -22,122 +22,124 @@
 
 import { WcBaseComponent } from './wc-base-component.js';
 
-class WcSlideshowImage extends WcBaseComponent {
-  static get observedAttributes() {
-    return ['id', 'class', 'url', 'caption', 'numbertext'];
-  }
-
-  constructor() {
-    super();
-    const compEl = this.querySelector('.wc-slideshow-image');
-    if (compEl) {
-      this.componentElement = compEl;
-    } else {
-      this.componentElement = document.createElement('div');
-      this.componentElement.classList.add('wc-slideshow-image', 'slide', 'fade');
-      this.appendChild(this.componentElement);      
-    }
-    console.log('ctor:wc-slideshow-image');
-  }
-
-  async connectedCallback() {
-    super.connectedCallback();
-
-    this._applyStyle();
-    console.log('connectedCallback:wc-slideshow-image');
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._unWireEvents();
-  }
-
-  _handleAttributeChange(attrName, newValue) {    
-    if (attrName === 'numbertext') {
-      const numTextEl = this.querySelector('.numbertext');
-      if (numTextEl) {
-        numTextEl.textContent = newValue;
-      }
-    } else {
-      super._handleAttributeChange(attrName, newValue);  
-    }
-  }
-
-  _render() {
-    super._render();
-    const innerEl = this.querySelector('.wc-slideshow-image > *');
-    if (innerEl) {
-      // Do nothing...
-    } else {
-      this.componentElement.innerHTML = '';
-
-      this._createInnerElement();
+if (!customElements.get('wc-slideshow-image')) {
+  class WcSlideshowImage extends WcBaseComponent {
+    static get observedAttributes() {
+      return ['id', 'class', 'url', 'caption', 'numbertext'];
     }
 
-    if (typeof htmx !== 'undefined') {
-      htmx.process(this);
+    constructor() {
+      super();
+      const compEl = this.querySelector('.wc-slideshow-image');
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement('div');
+        this.componentElement.classList.add('wc-slideshow-image', 'slide', 'fade');
+        this.appendChild(this.componentElement);      
+      }
+      console.log('ctor:wc-slideshow-image');
     }
-    console.log('_render:wc-slideshow-image');
-  }
 
-  _createInnerElement() {
-    const numTextEl = document.createElement('div');
-    numTextEl.textContent = this.getAttribute('numbertext') || '';
-    numTextEl.classList.add('numbertext');
-    const imgEl = document.createElement('img');
-    imgEl.src = this.getAttribute('url') || '';
-    const captionEl = document.createElement('div');
-    captionEl.textContent = this.getAttribute('caption') || '';
-    captionEl.classList.add('text');
-    this.componentElement.appendChild(numTextEl);
-    this.componentElement.appendChild(imgEl);
-    this.componentElement.appendChild(captionEl);
-  }
+    async connectedCallback() {
+      super.connectedCallback();
 
-  _applyStyle() {
-    const style = `
-      wc-slideshow-image {
-        display: contents;
+      this._applyStyle();
+      console.log('connectedCallback:wc-slideshow-image');
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+
+    _handleAttributeChange(attrName, newValue) {    
+      if (attrName === 'numbertext') {
+        const numTextEl = this.querySelector('.numbertext');
+        if (numTextEl) {
+          numTextEl.textContent = newValue;
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);  
+      }
+    }
+
+    _render() {
+      super._render();
+      const innerEl = this.querySelector('.wc-slideshow-image > *');
+      if (innerEl) {
+        // Do nothing...
+      } else {
+        this.componentElement.innerHTML = '';
+
+        this._createInnerElement();
       }
 
-      .wc-slideshow-image {
-        position: relative;
+      if (typeof htmx !== 'undefined') {
+        htmx.process(this);
       }
+      console.log('_render:wc-slideshow-image');
+    }
 
-      .wc-slideshow-image img {
-        max-height: 300px;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
-      
-      /* Caption text */
-      .wc-slideshow-image .text {
-        color: #f2f2f2;
-        font-size: 15px;
-        padding: 8px 12px;
-        position: absolute;
-        bottom: 8px;
-        width: 100%;
-        text-align: center;
-      }
+    _createInnerElement() {
+      const numTextEl = document.createElement('div');
+      numTextEl.textContent = this.getAttribute('numbertext') || '';
+      numTextEl.classList.add('numbertext');
+      const imgEl = document.createElement('img');
+      imgEl.src = this.getAttribute('url') || '';
+      const captionEl = document.createElement('div');
+      captionEl.textContent = this.getAttribute('caption') || '';
+      captionEl.classList.add('text');
+      this.componentElement.appendChild(numTextEl);
+      this.componentElement.appendChild(imgEl);
+      this.componentElement.appendChild(captionEl);
+    }
 
-      /* Number text (1/3 etc) */
-      .wc-slideshow-image .numbertext {
-        color: #f2f2f2;
-        font-size: 12px;
-        padding: 8px 12px;
-        position: absolute;
-        top: 0;
-      }      
-`.trim();
-    this.loadStyle('wc-slideshow-image-style', style);
+    _applyStyle() {
+      const style = `
+        wc-slideshow-image {
+          display: contents;
+        }
+
+        .wc-slideshow-image {
+          position: relative;
+        }
+
+        .wc-slideshow-image img {
+          max-height: 300px;
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+        }
+        
+        /* Caption text */
+        .wc-slideshow-image .text {
+          color: #f2f2f2;
+          font-size: 15px;
+          padding: 8px 12px;
+          position: absolute;
+          bottom: 8px;
+          width: 100%;
+          text-align: center;
+        }
+
+        /* Number text (1/3 etc) */
+        .wc-slideshow-image .numbertext {
+          color: #f2f2f2;
+          font-size: 12px;
+          padding: 8px 12px;
+          position: absolute;
+          top: 0;
+        }      
+  `.trim();
+      this.loadStyle('wc-slideshow-image-style', style);
+    }
+
+    _unWireEvents() {
+      super._unWireEvents();
+    }
+
   }
 
-  _unWireEvents() {
-    super._unWireEvents();
-  }
-
+  customElements.define('wc-slideshow-image', WcSlideshowImage);
 }
-
-customElements.define('wc-slideshow-image', WcSlideshowImage);

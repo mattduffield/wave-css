@@ -14,7 +14,6 @@
 import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-save-button')) {
-
   class WcSaveButton extends WcBaseComponent {
     static get observedAttributes() {
       return [];

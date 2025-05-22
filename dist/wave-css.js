@@ -6729,204 +6729,224 @@ if (!customElements.get("wc-sidenav")) {
 }
 
 // src/js/components/wc-slideshow-image.js
-var WcSlideshowImage = class extends WcBaseComponent {
-  static get observedAttributes() {
-    return ["id", "class", "url", "caption", "numbertext"];
-  }
-  constructor() {
-    super();
-    const compEl = this.querySelector(".wc-slideshow-image");
-    if (compEl) {
-      this.componentElement = compEl;
-    } else {
-      this.componentElement = document.createElement("div");
-      this.componentElement.classList.add("wc-slideshow-image", "slide", "fade");
-      this.appendChild(this.componentElement);
+if (!customElements.get("wc-slideshow-image")) {
+  class WcSlideshowImage extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class", "url", "caption", "numbertext"];
     }
-    console.log("ctor:wc-slideshow-image");
-  }
-  async connectedCallback() {
-    super.connectedCallback();
-    this._applyStyle();
-    console.log("connectedCallback:wc-slideshow-image");
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._unWireEvents();
-  }
-  _handleAttributeChange(attrName, newValue) {
-    if (attrName === "numbertext") {
-      const numTextEl = this.querySelector(".numbertext");
-      if (numTextEl) {
-        numTextEl.textContent = newValue;
+    constructor() {
+      super();
+      const compEl = this.querySelector(".wc-slideshow-image");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-slideshow-image", "slide", "fade");
+        this.appendChild(this.componentElement);
       }
-    } else {
-      super._handleAttributeChange(attrName, newValue);
+      console.log("ctor:wc-slideshow-image");
     }
-  }
-  _render() {
-    super._render();
-    const innerEl = this.querySelector(".wc-slideshow-image > *");
-    if (innerEl) {
-    } else {
-      this.componentElement.innerHTML = "";
-      this._createInnerElement();
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      console.log("connectedCallback:wc-slideshow-image");
     }
-    if (typeof htmx !== "undefined") {
-      htmx.process(this);
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
     }
-    console.log("_render:wc-slideshow-image");
-  }
-  _createInnerElement() {
-    const numTextEl = document.createElement("div");
-    numTextEl.textContent = this.getAttribute("numbertext") || "";
-    numTextEl.classList.add("numbertext");
-    const imgEl = document.createElement("img");
-    imgEl.src = this.getAttribute("url") || "";
-    const captionEl = document.createElement("div");
-    captionEl.textContent = this.getAttribute("caption") || "";
-    captionEl.classList.add("text");
-    this.componentElement.appendChild(numTextEl);
-    this.componentElement.appendChild(imgEl);
-    this.componentElement.appendChild(captionEl);
-  }
-  _applyStyle() {
-    const style = `
-      wc-slideshow-image {
-        display: contents;
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === "numbertext") {
+        const numTextEl = this.querySelector(".numbertext");
+        if (numTextEl) {
+          numTextEl.textContent = newValue;
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);
       }
+    }
+    _render() {
+      super._render();
+      const innerEl = this.querySelector(".wc-slideshow-image > *");
+      if (innerEl) {
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+      console.log("_render:wc-slideshow-image");
+    }
+    _createInnerElement() {
+      const numTextEl = document.createElement("div");
+      numTextEl.textContent = this.getAttribute("numbertext") || "";
+      numTextEl.classList.add("numbertext");
+      const imgEl = document.createElement("img");
+      imgEl.src = this.getAttribute("url") || "";
+      const captionEl = document.createElement("div");
+      captionEl.textContent = this.getAttribute("caption") || "";
+      captionEl.classList.add("text");
+      this.componentElement.appendChild(numTextEl);
+      this.componentElement.appendChild(imgEl);
+      this.componentElement.appendChild(captionEl);
+    }
+    _applyStyle() {
+      const style = `
+        wc-slideshow-image {
+          display: contents;
+        }
 
-      .wc-slideshow-image {
-        position: relative;
-      }
+        .wc-slideshow-image {
+          position: relative;
+        }
 
-      .wc-slideshow-image img {
-        max-height: 300px;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
-      
-      /* Caption text */
-      .wc-slideshow-image .text {
-        color: #f2f2f2;
-        font-size: 15px;
-        padding: 8px 12px;
-        position: absolute;
-        bottom: 8px;
-        width: 100%;
-        text-align: center;
-      }
+        .wc-slideshow-image img {
+          max-height: 300px;
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+        }
+        
+        /* Caption text */
+        .wc-slideshow-image .text {
+          color: #f2f2f2;
+          font-size: 15px;
+          padding: 8px 12px;
+          position: absolute;
+          bottom: 8px;
+          width: 100%;
+          text-align: center;
+        }
 
-      /* Number text (1/3 etc) */
-      .wc-slideshow-image .numbertext {
-        color: #f2f2f2;
-        font-size: 12px;
-        padding: 8px 12px;
-        position: absolute;
-        top: 0;
-      }      
-`.trim();
-    this.loadStyle("wc-slideshow-image-style", style);
+        /* Number text (1/3 etc) */
+        .wc-slideshow-image .numbertext {
+          color: #f2f2f2;
+          font-size: 12px;
+          padding: 8px 12px;
+          position: absolute;
+          top: 0;
+        }      
+  `.trim();
+      this.loadStyle("wc-slideshow-image-style", style);
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+    }
   }
-  _unWireEvents() {
-    super._unWireEvents();
-  }
-};
-customElements.define("wc-slideshow-image", WcSlideshowImage);
+  customElements.define("wc-slideshow-image", WcSlideshowImage);
+}
 
 // src/js/components/wc-slideshow.js
-var WcSlideshow = class extends WcBaseComponent {
-  static get observedAttributes() {
-    return ["id", "class", "max-image-height", "autoplay", "autoplay-interval"];
-  }
-  constructor() {
-    super();
-    this.slides = [];
-    this.slideshowInterval = null;
-    this.isPaused = false;
-    this.slideIndex = 1;
-    this.childComponentSelector = "wc-slideshow-image";
-    const compEl = this.querySelector(".wc-slideshow");
-    if (compEl) {
-      this.componentElement = compEl;
-    } else {
-      this.componentElement = document.createElement("div");
-      this.componentElement.classList.add("wc-slideshow", "container");
-      this.appendChild(this.componentElement);
+if (!customElements.get("wc-slideshow")) {
+  class WcSlideshow extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class", "max-image-height", "autoplay", "autoplay-interval"];
     }
-    console.log("ctor:wc-slideshow");
-  }
-  async connectedCallback() {
-    super.connectedCallback();
-    this._applyStyle();
-    this._wireEvents();
-    console.log("connectedCallback:wc-slideshow");
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._unWireEvents();
-  }
-  // _handleAttributeChange(attrName, newValue) {    
-  //   if (attrName === 'height') {
-  //     this.height = newValue;
-  //   } else if (attrName === 'width') {
-  //     this.width = newValue;
-  //   } else {
-  //     super._handleAttributeChange(attrName, newValue);  
-  //   }
-  // }
-  _render() {
-    super._render();
-    const wcSlideshowImages = this.querySelectorAll("wc-slideshow-image");
-    wcSlideshowImages.forEach((w, idx) => {
-      w.setAttribute("numbertext", `${idx + 1} / ${wcSlideshowImages.length}`);
-      const imgs = w.querySelectorAll("img");
-      imgs.forEach((i) => i.style.maxHeight = this.getAttribute("max-image-height") || "300px");
-    });
-    this.slides = this.querySelectorAll(".wc-slideshow-image.slide");
-    const innerEl = this.querySelector(".wc-slideshow > *");
-    if (innerEl) {
-      this.slideIndex = parseInt(this.dataset.slideIndex || 1);
-      const prev = this.querySelector(".prev");
-      const next = this.querySelector(".next");
+    constructor() {
+      super();
+      this.slides = [];
+      this.slideshowInterval = null;
+      this.isPaused = false;
+      this.slideIndex = 1;
+      this.childComponentSelector = "wc-slideshow-image";
+      const compEl = this.querySelector(".wc-slideshow");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-slideshow", "container");
+        this.appendChild(this.componentElement);
+      }
+      console.log("ctor:wc-slideshow");
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+      console.log("connectedCallback:wc-slideshow");
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    // _handleAttributeChange(attrName, newValue) {    
+    //   if (attrName === 'height') {
+    //     this.height = newValue;
+    //   } else if (attrName === 'width') {
+    //     this.width = newValue;
+    //   } else {
+    //     super._handleAttributeChange(attrName, newValue);  
+    //   }
+    // }
+    _render() {
+      super._render();
+      const wcSlideshowImages = this.querySelectorAll("wc-slideshow-image");
+      wcSlideshowImages.forEach((w, idx) => {
+        w.setAttribute("numbertext", `${idx + 1} / ${wcSlideshowImages.length}`);
+        const imgs = w.querySelectorAll("img");
+        imgs.forEach((i) => i.style.maxHeight = this.getAttribute("max-image-height") || "300px");
+      });
+      this.slides = this.querySelectorAll(".wc-slideshow-image.slide");
+      const innerEl = this.querySelector(".wc-slideshow > *");
+      if (innerEl) {
+        this.slideIndex = parseInt(this.dataset.slideIndex || 1);
+        const prev = this.querySelector(".prev");
+        const next = this.querySelector(".next");
+        prev.addEventListener("click", this._prevSlide.bind(this));
+        next.addEventListener("click", this._nextSlide.bind(this));
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      this._startSlideshow();
+      document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+      console.log("_render:wc-slideshow");
+    }
+    _createInnerElement() {
+      const els = this.querySelectorAll("wc-slideshow > *:not(.wc-slideshow)");
+      els.forEach((el) => {
+        this.componentElement.appendChild(el);
+      });
+      const prev = document.createElement("a");
+      prev.classList.add("prev");
+      prev.textContent = "\u276E";
       prev.addEventListener("click", this._prevSlide.bind(this));
+      const next = document.createElement("a");
+      next.textContent = "\u276F";
+      next.classList.add("next");
       next.addEventListener("click", this._nextSlide.bind(this));
-    } else {
-      this.componentElement.innerHTML = "";
-      this._createInnerElement();
+      this.componentElement.appendChild(prev);
+      this.componentElement.appendChild(next);
     }
-    this._startSlideshow();
-    document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
-    if (typeof htmx !== "undefined") {
-      htmx.process(this);
-    }
-    console.log("_render:wc-slideshow");
-  }
-  _createInnerElement() {
-    const els = this.querySelectorAll("wc-slideshow > *:not(.wc-slideshow)");
-    els.forEach((el) => {
-      this.componentElement.appendChild(el);
-    });
-    const prev = document.createElement("a");
-    prev.classList.add("prev");
-    prev.textContent = "\u276E";
-    prev.addEventListener("click", this._prevSlide.bind(this));
-    const next = document.createElement("a");
-    next.textContent = "\u276F";
-    next.classList.add("next");
-    next.addEventListener("click", this._nextSlide.bind(this));
-    this.componentElement.appendChild(prev);
-    this.componentElement.appendChild(next);
-  }
-  _handleHelper(event, mode = "next") {
-    const { detail } = event;
-    const { selector } = detail;
-    const isArray = Array.isArray(selector);
-    if (typeof selector === "string" || isArray) {
-      const tgts = document.querySelectorAll(selector);
-      tgts.forEach((tgt) => {
-        if (tgt === this) {
+    _handleHelper(event, mode = "next") {
+      const { detail } = event;
+      const { selector } = detail;
+      const isArray = Array.isArray(selector);
+      if (typeof selector === "string" || isArray) {
+        const tgts = document.querySelectorAll(selector);
+        tgts.forEach((tgt) => {
+          if (tgt === this) {
+            if (mode === "next") {
+              this._nextSlide({ target: this });
+            } else if (mode === "prev") {
+              this._prevSlide({ target: this });
+            } else if (mode === "start") {
+              this.setAttribute("autoplay", "");
+              this.isPaused = false;
+              this._startSlideshow();
+            } else if (mode === "stop") {
+              this.removeAttribute("autoplay");
+              this.isPaused = true;
+              clearInterval(this.slideshowInterval);
+            }
+          }
+        });
+      } else {
+        if (selector === this) {
           if (mode === "next") {
             this._nextSlide({ target: this });
           } else if (mode === "prev") {
@@ -6941,175 +6961,159 @@ var WcSlideshow = class extends WcBaseComponent {
             clearInterval(this.slideshowInterval);
           }
         }
-      });
-    } else {
-      if (selector === this) {
-        if (mode === "next") {
-          this._nextSlide({ target: this });
-        } else if (mode === "prev") {
-          this._prevSlide({ target: this });
-        } else if (mode === "start") {
-          this.setAttribute("autoplay", "");
-          this.isPaused = false;
-          this._startSlideshow();
-        } else if (mode === "stop") {
-          this.removeAttribute("autoplay");
-          this.isPaused = true;
-          clearInterval(this.slideshowInterval);
+      }
+    }
+    _handleNext(event) {
+      this._handleHelper(event, "next");
+    }
+    _handlePrev(event) {
+      this._handleHelper(event, "prev");
+    }
+    _handleStart(event) {
+      this._handleHelper(event, "start");
+    }
+    _handleStop(event) {
+      this._handleHelper(event, "stop");
+    }
+    _prevSlide(event) {
+      if (event?.target) {
+        this.isPaused = true;
+        clearInterval(this.slideshowInterval);
+      }
+      this.slideIndex -= 1;
+      this._showSlide();
+    }
+    _nextSlide(event) {
+      if (event?.target) {
+        this.isPaused = true;
+        clearInterval(this.slideshowInterval);
+      }
+      this.slideIndex += 1;
+      this._showSlide();
+    }
+    _showSlide() {
+      if (this.slideIndex > this.slides.length) {
+        this.slideIndex = 1;
+      }
+      if (this.slideIndex < 1) {
+        this.slideIndex = this.slides.length;
+      }
+      this.slides.forEach((s) => s.style.display = "none");
+      this.slides[this.slideIndex - 1].style.display = "block";
+      this.dataset.slideIndex = this.slideIndex;
+    }
+    _startSlideshow() {
+      if (this.hasAttribute("autoplay") && !this.isPaused) {
+        const interval = parseInt(this.getAttribute("autoplay-interval")) || 5e3;
+        this.slideshowInterval = setInterval(() => this._nextSlide(), interval);
+      }
+      this._showSlide();
+    }
+    _handleVisibilityChange() {
+      if (document.hidden) {
+        this.isPaused = true;
+        clearInterval(this.slideshowInterval);
+      } else {
+        this.isPaused = false;
+        this._startSlideshow();
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-slideshow {
+          display: contents;
         }
-      }
-    }
-  }
-  _handleNext(event) {
-    this._handleHelper(event, "next");
-  }
-  _handlePrev(event) {
-    this._handleHelper(event, "prev");
-  }
-  _handleStart(event) {
-    this._handleHelper(event, "start");
-  }
-  _handleStop(event) {
-    this._handleHelper(event, "stop");
-  }
-  _prevSlide(event) {
-    if (event?.target) {
-      this.isPaused = true;
-      clearInterval(this.slideshowInterval);
-    }
-    this.slideIndex -= 1;
-    this._showSlide();
-  }
-  _nextSlide(event) {
-    if (event?.target) {
-      this.isPaused = true;
-      clearInterval(this.slideshowInterval);
-    }
-    this.slideIndex += 1;
-    this._showSlide();
-  }
-  _showSlide() {
-    if (this.slideIndex > this.slides.length) {
-      this.slideIndex = 1;
-    }
-    if (this.slideIndex < 1) {
-      this.slideIndex = this.slides.length;
-    }
-    this.slides.forEach((s) => s.style.display = "none");
-    this.slides[this.slideIndex - 1].style.display = "block";
-    this.dataset.slideIndex = this.slideIndex;
-  }
-  _startSlideshow() {
-    if (this.hasAttribute("autoplay") && !this.isPaused) {
-      const interval = parseInt(this.getAttribute("autoplay-interval")) || 5e3;
-      this.slideshowInterval = setInterval(() => this._nextSlide(), interval);
-    }
-    this._showSlide();
-  }
-  _handleVisibilityChange() {
-    if (document.hidden) {
-      this.isPaused = true;
-      clearInterval(this.slideshowInterval);
-    } else {
-      this.isPaused = false;
-      this._startSlideshow();
-    }
-  }
-  _applyStyle() {
-    const style = `
-      wc-slideshow {
-        display: contents;
-      }
-      .wc-slideshow {
+        .wc-slideshow {
 
-      }
-      /* Slideshow container */
-      .wc-slideshow.container {
-        max-width: 1000px;
-        position: relative;
-        margin: auto;
-      }
-
-      /* Hide the images by default */
-      .wc-slideshow .slide {
-        display: none;
-      }
-
-      /* Next & previous buttons */
-      .wc-slideshow .prev,
-      .wc-slideshow .next {
-        cursor: pointer;
-        position: absolute;
-        top: 50%;
-        width: auto;
-        margin-top: -22px;
-        padding: 16px;
-        color: white;
-        font-weight: bold;
-        font-size: 18px;
-        transition: 0.6s ease;
-        border-radius: 0 3px 3px 0;
-        user-select: none;
-      }
-
-      /* Position the "next button" to the right */
-      .wc-slideshow .next {
-        right: 0;
-        border-radius: 3px 0 0 3px;
-      }
-
-      /* On hover, add a black background color with a little bit see-through */
-      .wc-slideshow .prev:hover,
-      .wc-slideshow .next:hover {
-        background-color: rgba(0,0,0,0.8);
-      }
-
-      .wc-slideshow .active {
-        background-color: #717171;
-      }
-
-      /* Fading animation */
-      .wc-slideshow .fade {
-        animation-name: slideshow-fade;
-        animation-duration: 1.5s;
-      }
-
-      @keyframes slideshow-fade {
-        from {
-          opacity: .4;
         }
-        to {
-          opacity: 1;
+        /* Slideshow container */
+        .wc-slideshow.container {
+          max-width: 1000px;
+          position: relative;
+          margin: auto;
         }
+
+        /* Hide the images by default */
+        .wc-slideshow .slide {
+          display: none;
+        }
+
+        /* Next & previous buttons */
+        .wc-slideshow .prev,
+        .wc-slideshow .next {
+          cursor: pointer;
+          position: absolute;
+          top: 50%;
+          width: auto;
+          margin-top: -22px;
+          padding: 16px;
+          color: white;
+          font-weight: bold;
+          font-size: 18px;
+          transition: 0.6s ease;
+          border-radius: 0 3px 3px 0;
+          user-select: none;
+        }
+
+        /* Position the "next button" to the right */
+        .wc-slideshow .next {
+          right: 0;
+          border-radius: 3px 0 0 3px;
+        }
+
+        /* On hover, add a black background color with a little bit see-through */
+        .wc-slideshow .prev:hover,
+        .wc-slideshow .next:hover {
+          background-color: rgba(0,0,0,0.8);
+        }
+
+        .wc-slideshow .active {
+          background-color: #717171;
+        }
+
+        /* Fading animation */
+        .wc-slideshow .fade {
+          animation-name: slideshow-fade;
+          animation-duration: 1.5s;
+        }
+
+        @keyframes slideshow-fade {
+          from {
+            opacity: .4;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+  `.trim();
+      this.loadStyle("wc-slideshow-style", style);
+    }
+    _wireEvents() {
+      super._wireEvents();
+      document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
+      document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
+      document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
+      document.body.addEventListener("wc-slideshow:stop", this._handleStop.bind(this));
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+      document.body.removeEventListener("wc-slideshow:next", this._handleNext.bind(this));
+      document.body.removeEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
+      document.body.removeEventListener("wc-slideshow:start", this._handleStart.bind(this));
+      document.body.removeEventListener("wc-slideshow:stop", this._handleStop.bind(this));
+      const prev = this.querySelector(".prev");
+      const next = this.querySelector(".next");
+      if (prev) {
+        prev.removeEventListener("click", this._prevSlide.bind(this));
       }
-`.trim();
-    this.loadStyle("wc-slideshow-style", style);
-  }
-  _wireEvents() {
-    super._wireEvents();
-    document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
-    document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
-    document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
-    document.body.addEventListener("wc-slideshow:stop", this._handleStop.bind(this));
-  }
-  _unWireEvents() {
-    super._unWireEvents();
-    document.body.removeEventListener("wc-slideshow:next", this._handleNext.bind(this));
-    document.body.removeEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
-    document.body.removeEventListener("wc-slideshow:start", this._handleStart.bind(this));
-    document.body.removeEventListener("wc-slideshow:stop", this._handleStop.bind(this));
-    const prev = this.querySelector(".prev");
-    const next = this.querySelector(".next");
-    if (prev) {
-      prev.removeEventListener("click", this._prevSlide.bind(this));
+      if (next) {
+        next.removeEventListener("click", this._nextSlide.bind(this));
+      }
+      document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
     }
-    if (next) {
-      next.removeEventListener("click", this._nextSlide.bind(this));
-    }
-    document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
   }
-};
-customElements.define("wc-slideshow", WcSlideshow);
+  customElements.define("wc-slideshow", WcSlideshow);
+}
 
 // src/js/components/wc-tab-item.js
 var WcTabItem = class extends WcBaseComponent {
