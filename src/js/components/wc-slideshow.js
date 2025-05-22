@@ -183,6 +183,7 @@ if (!customElements.get('wc-slideshow')) {
     _prevSlide(event) {
       if (event?.target) {
         this.isPaused = true;
+        this.componentElement.classList.remove('is-playing');
         clearInterval(this.slideshowInterval);
       }
       this.slideIndex -= 1;
@@ -192,6 +193,7 @@ if (!customElements.get('wc-slideshow')) {
     _nextSlide(event) {
       if (event?.target) {
         this.isPaused = true;
+        this.componentElement.classList.remove('is-playing');
         clearInterval(this.slideshowInterval);
       }
       this.slideIndex += 1;
