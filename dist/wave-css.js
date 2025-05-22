@@ -5785,7 +5785,6 @@ if (!customElements.get("wc-page-designer")) {
         "wc-accordion",
         "wc-breadcrumb",
         "wc-form",
-        "wc-image",
         "wc-input-radio",
         "wc-select",
         "wc-select-multiple",
