@@ -6891,10 +6891,6 @@ if (!customElements.get("wc-slideshow")) {
       const innerEl = this.querySelector(".wc-slideshow > *");
       if (innerEl) {
         this.slideIndex = parseInt(this.dataset.slideIndex || 1);
-        const prev = this.querySelector(".prev");
-        const next = this.querySelector(".next");
-        prev.addEventListener("click", this._prevSlide.bind(this));
-        next.addEventListener("click", this._nextSlide.bind(this));
       } else {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
@@ -6914,11 +6910,9 @@ if (!customElements.get("wc-slideshow")) {
       const prev = document.createElement("a");
       prev.classList.add("prev");
       prev.textContent = "\u276E";
-      prev.addEventListener("click", this._prevSlide.bind(this));
       const next = document.createElement("a");
       next.textContent = "\u276F";
       next.classList.add("next");
-      next.addEventListener("click", this._nextSlide.bind(this));
       this.componentElement.appendChild(prev);
       this.componentElement.appendChild(next);
     }
@@ -7090,6 +7084,10 @@ if (!customElements.get("wc-slideshow")) {
     }
     _wireEvents() {
       super._wireEvents();
+      const prev = this.querySelector(".prev");
+      const next = this.querySelector(".next");
+      prev.addEventListener("click", this._prevSlide.bind(this));
+      next.addEventListener("click", this._nextSlide.bind(this));
       document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
       document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
       document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
