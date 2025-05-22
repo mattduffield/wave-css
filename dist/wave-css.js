@@ -7084,10 +7084,12 @@ if (!customElements.get("wc-slideshow")) {
     }
     _wireEvents() {
       super._wireEvents();
-      const prev = this.querySelector(".prev");
-      const next = this.querySelector(".next");
-      prev.addEventListener("click", this._prevSlide.bind(this));
-      next.addEventListener("click", this._nextSlide.bind(this));
+      setTimeout(() => {
+        const prev = this.querySelector(".prev");
+        const next = this.querySelector(".next");
+        prev.addEventListener("click", this._prevSlide.bind(this));
+        next.addEventListener("click", this._nextSlide.bind(this));
+      }, 50);
       document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
       document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
       document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
