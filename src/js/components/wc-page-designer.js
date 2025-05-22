@@ -259,27 +259,6 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
-        'wc-slideshow': [
-          { name: 'autoplay', label: 'Autoplay?', type: 'boolean' },
-          { name: 'autoplay_interval', label: 'Autoplay Interval', type: 'number' },
-          { name: 'max_image_height', label: 'Max Image Height', type: 'string' }
-        ],
-        'wc-slideshow-image': [
-          { name: 'url', label: 'URL', type: 'string' },
-          { name: 'caption', label: 'Caption', type: 'string' },
-          { name: 'numbertext', label: 'Number Text', type: 'string' }
-        ],
-        'wc-split-button': [
-          { name: 'positionArea', label: 'Position Area', type: 'string' }
-        ],
-        'wc-textarea': [
-          { name: 'placeholder', label: 'Placeholder', type: 'string' },
-          { name: 'rows', label: 'Rows', type: 'number' }
-        ],
-        'wc-theme-selector': [
-          { name: 'theme', label: 'Theme', type: 'string' },
-          { name: 'mode', label: 'Mode', type: 'string' }
-        ],
         'wc-sidebar': [
           { name: 'width', label: 'Width', type: 'string' },
           { name: 'background_color', label: 'Background Color', type: 'string' },
@@ -300,6 +279,57 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'has_open_vertical_text', label: 'Has Open Vertical Text?', type: 'boolean' },
           { name: 'is_right_side', label: 'Is Right Side?', type: 'boolean' },
           { name: 'is_overlay', label: 'Is Overlay?', type: 'boolean' },
+        ],
+        'wc-slideshow': [
+          { name: 'autoplay', label: 'Autoplay?', type: 'boolean' },
+          { name: 'autoplay_interval', label: 'Autoplay Interval', type: 'number' },
+          { name: 'max_image_height', label: 'Max Image Height', type: 'string' }
+        ],
+        'wc-slideshow-image': [
+          { name: 'url', label: 'URL', type: 'string' },
+          { name: 'caption', label: 'Caption', type: 'string' },
+          { name: 'numbertext', label: 'Number Text', type: 'string' }
+        ],
+        'wc-split-button': [
+          { name: 'positionArea', label: 'Position Area', type: 'string' }
+        ],
+        'wc-tabulator': [
+          { name: 'ajax_url', label: 'AJAX URL', type: 'string' },
+          { name: 'initial_sort', label: 'Initial Sort', type: 'multiline-string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'row_height', label: 'Row Height', type: 'number' },
+          { name: 'pagination', label: 'Pagination?', type: 'boolean' },
+          { name: 'pagination_size', label: 'Pagination Size', type: 'number' },
+          { name: 'header_visible', label: 'Header Visible?', type: 'boolean' },
+          { name: 'selectable_rows', label: 'Selectable Rows?', type: 'boolean' },
+          { name: 'layout', label: 'Layout', type: 'string' },
+        ],
+        'wc-tabulator-column': [
+          { name: 'field', label: 'Field', type: 'string' },
+          { name: 'title', label: 'Title', type: 'string' },
+          { name: 'header_filter', label: 'Header Filter', type: 'string' },
+          { name: 'header_filter_placeholder', label: 'Header Filter Placeholder', type: 'string' },
+          { name: 'header_menu', label: 'Header Menu', type: 'string' },
+          { name: 'formatter', label: 'Formatter', type: 'string' },
+          { name: 'formatter_params', label: 'Formatter Params', type: 'multiline-string' },
+          { name: 'visible', label: 'Visible?', type: 'boolean' },
+        ],
+        'wc-tabulator-func': [
+          { name: 'name', label: 'Name', type: 'string' },
+          { name: 'value', label: 'Value', type: 'multiline-string' },
+        ],
+        'wc-tabulator-row-menu': [
+          { name: 'order', label: 'Order', type: 'number' },
+          { name: 'icon', label: 'Icon', type: 'string' },
+          { name: 'value', label: 'Value', type: 'multiline-string' },
+        ],
+        'wc-textarea': [
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'rows', label: 'Rows', type: 'number' }
+        ],
+        'wc-theme-selector': [
+          { name: 'theme', label: 'Theme', type: 'string' },
+          { name: 'mode', label: 'Mode', type: 'string' }
         ],
       };
 
