@@ -528,6 +528,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
             <div class="element-item" data-element-type="wc-theme-selector" draggable="true">WC Theme Selector</div>
+            <div class="element-item" data-element-type="wc-timeline-option" draggable="true">WC Timeline Option</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
