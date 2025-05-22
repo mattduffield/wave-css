@@ -4205,6 +4205,15 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_readonly", label: "Is Readonly", type: "boolean" },
           { name: "is_disabled", label: "Is Disabled", type: "boolean" }
         ],
+        "wc-slideshow": [
+          { name: "autoplay", label: "Autoplay?", type: "boolean" },
+          { name: "autoplay_interval", label: "Autoplay Interval", type: "number" }
+        ],
+        "wc-slideshow-image": [
+          { name: "url", label: "URL", type: "string" },
+          { name: "caption", label: "Caption", type: "string" },
+          { name: "numbertext", label: "Number Text", type: "string" }
+        ],
         "wc-split-button": [
           { name: "positionArea", label: "Position Area", type: "string" }
         ],
@@ -5667,25 +5676,24 @@ if (!customElements.get("wc-page-designer")) {
         "div",
         "column",
         "row",
-        "fieldset",
-        "array",
-        "wc-tab",
-        "wc-tab-item",
         "data-array",
         "data-item",
+        "fieldset",
         "option",
         "wc-accordion",
-        "wc-split-button",
-        "wc-sidebar",
-        "wc-sidenav",
-        "wc-timeline",
-        "wc-tabulator",
-        "wc-slideshow",
+        "wc-breadcrumb",
+        "wc-form",
+        "wc-input-radio",
         "wc-select",
         "wc-select-multiple",
-        "wc-form",
-        "wc-breadcrumb",
-        "wc-input-radio"
+        "wc-sidebar",
+        "wc-sidenav",
+        "wc-slideshow",
+        "wc-split-button",
+        "wc-timeline",
+        "wc-tab",
+        "wc-tab-item",
+        "wc-tabulator"
       ].includes(type);
     }
     // Generate Unique ID
