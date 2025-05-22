@@ -292,12 +292,12 @@ if (!customElements.get('wc-slideshow')) {
       const isWired = this.hasAttribute('data-wired');
       if (isWired) return;
       this.setAttribute('data-wired', true);
-      this._startSlideshow();
       setTimeout(() => {
         const prev = this.querySelector('.prev');
         const next = this.querySelector('.next');
         prev.addEventListener('click', this._prevSlide.bind(this));
         next.addEventListener('click', this._nextSlide.bind(this));  
+        this._startSlideshow();
       }, 50);
       document.addEventListener('visibilitychange', this._handleVisibilityChange.bind(this));
       document.body.addEventListener('wc-slideshow:next', this._handleNext.bind(this));
