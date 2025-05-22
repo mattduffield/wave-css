@@ -389,6 +389,10 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'theme', label: 'Theme', type: 'string' },
           { name: 'mode', label: 'Mode', type: 'string' }
         ],
+        'wc-timeline-option': [
+          { name: 'value', label: 'Value', type: 'string' },
+          { name: 'content', label: 'Content', type: 'multiline-string' },
+        ],
       };
 
       const compEl = this.querySelector('.wc-page-designer');
