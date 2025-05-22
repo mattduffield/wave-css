@@ -82,6 +82,24 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'content', label: 'Content', type: 'multiline-string' },
           { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
         ],
+        'wc-accordion-option': [
+          { name: 'value', label: 'Value', type: 'string' },
+          { name: 'content', label: 'Content', type: 'multiline-string' },
+          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
+        ],
+        'wc-accordion': [
+          { name: 'allow_many', label: 'Allow Many?', type: 'boolean' }
+        ],
+        'wc-breadcrumb': [
+          { name: 'title', label: 'Title', type: 'string' },
+        ],
+        'wc-breadcrumb-item': [
+          { name: 'link', label: 'Link', type: 'string' },
+        ],
+        'wc-form': [
+          { name: 'method', label: 'Method', type: 'string' },
+          { name: 'action', label: 'Action', type: 'string' },
+        ],
         'wc-input': [
           { name: 'minlength', label: 'Min Length', type: 'string' },
           { name: 'maxlength', label: 'Max Length', type: 'string' },
@@ -174,9 +192,30 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
+        'wc-javascript': [
+          { name: 'content', label: 'Content', type: 'multiline-string' },
+          { name: 'has_defer', label: 'Defer?', type: 'boolean' }
+        ],
+        'wc-loader': [
+          { name: 'size', label: 'Size', type: 'string' },
+          { name: 'speed', label: 'Speed', type: 'string' },
+          { name: 'thickness', label: 'Thickness', type: 'string' }
+        ],
         'wc-option': [
           { name: 'value', label: 'Value', type: 'string' },
           { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
+        ],
+        'wc-save-button': [
+          { name: 'saveUrl', label: 'Save URL', type: 'string' }
+        ],
+        'wc-save-split-button': [
+          { name: 'positionArea', label: 'Position Area', type: 'string' },
+          { name: 'saveUrl', label: 'Save URL', type: 'string' },
+          { name: 'saveNewUrl', label: 'Save New URL', type: 'string' },
+          { name: 'saveReturnUrl', label: 'Save Return URL', type: 'string' },
+        ],
+        'wc-script': [
+          { name: 'src', label: 'Src', type: 'string' }
         ],
         'wc-select-multiple-collection': [
           { name: 'mode', label: 'Mode', type: 'string' },
@@ -220,45 +259,16 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
           { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
         ],
+        'wc-split-button': [
+          { name: 'positionArea', label: 'Position Area', type: 'string' }
+        ],
         'wc-textarea': [
           { name: 'placeholder', label: 'Placeholder', type: 'string' },
           { name: 'rows', label: 'Rows', type: 'number' }
         ],
-        'wc-save-button': [
-          { name: 'saveUrl', label: 'Save URL', type: 'string' }
-        ],
-        'wc-save-split-button': [
-          { name: 'positionArea', label: 'Position Area', type: 'string' },
-          { name: 'saveUrl', label: 'Save URL', type: 'string' },
-          { name: 'saveNewUrl', label: 'Save New URL', type: 'string' },
-          { name: 'saveReturnUrl', label: 'Save Return URL', type: 'string' },
-        ],
-        'wc-split-button': [
-          { name: 'positionArea', label: 'Position Area', type: 'string' }
-        ],
-        'wc-javascript': [
-          { name: 'content', label: 'Content', type: 'multiline-string' },
-          { name: 'has_defer', label: 'Defer?', type: 'boolean' }
-        ],
-        'wc-script': [
-          { name: 'src', label: 'Src', type: 'string' }
-        ],
-        'wc-loader': [
-          { name: 'size', label: 'Size', type: 'string' },
-          { name: 'speed', label: 'Speed', type: 'string' },
-          { name: 'thickness', label: 'Thickness', type: 'string' }
-        ],
         'wc-theme-selector': [
           { name: 'theme', label: 'Theme', type: 'string' },
           { name: 'mode', label: 'Mode', type: 'string' }
-        ],
-        'wc-accordion-option': [
-          { name: 'value', label: 'Value', type: 'string' },
-          { name: 'content', label: 'Content', type: 'multiline-string' },
-          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
-        ],
-        'wc-accordion': [
-          { name: 'allow_many', label: 'Allow Many?', type: 'boolean' }
         ],
         'wc-sidebar': [
           { name: 'width', label: 'Width', type: 'string' },
@@ -280,12 +290,6 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'has_open_vertical_text', label: 'Has Open Vertical Text?', type: 'boolean' },
           { name: 'is_right_side', label: 'Is Right Side?', type: 'boolean' },
           { name: 'is_overlay', label: 'Is Overlay?', type: 'boolean' },
-        ],
-        'wc-breadcrumb': [
-          { name: 'title', label: 'Title', type: 'string' },
-        ],
-        'wc-breadcrumb-item': [
-          { name: 'link', label: 'Link', type: 'string' },
         ],
       };
 
@@ -359,11 +363,11 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="div" draggable="true">Div</div>
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
             <div class="element-item" data-element-type="row" draggable="true">Row</div>
-            <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="data-array" draggable="true">Data Array</div>
             <div class="element-item" data-element-type="data-item" draggable="true">Data Item</div>
-            <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
+            <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
+            <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
             <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
@@ -386,6 +390,7 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
             <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
             <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
+            <div class="element-item" data-element-type="wc-accordion-option" draggable="true">WC Accordion Option</div>
             <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Backgruond Image</div>
             <div class="element-item" data-element-type="wc-breadcrumb-item" draggable="true">WC Breadcrumb Item</div>
             <div class="element-item" data-element-type="wc-code-mirror" draggable="true">WC Code Mirror</div>
@@ -407,9 +412,9 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-input-time" draggable="true">WC Input Time</div>
             <div class="element-item" data-element-type="wc-input-week" draggable="true">WC Input Week</div>
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
+            <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
-            <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
             <div class="element-item" data-element-type="wc-script" draggable="true">WC Script</div>
             <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
             <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
@@ -421,7 +426,6 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
             <div class="element-item" data-element-type="wc-theme-selector" draggable="true">WC Theme Selector</div>
-            <div class="element-item" data-element-type="wc-accordion-option" draggable="true">WC Accordion Option</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
@@ -2063,7 +2067,8 @@ if (!customElements.get('wc-page-designer')) {
         'option',
         'wc-accordion', 'wc-split-button', 'wc-sidebar', 'wc-sidenav',
         'wc-timeline', 'wc-tabulator', 'wc-slideshow', 'wc-select', 'wc-select-multiple',
-        'wc-form', 'wc-breadcrumb',
+        'wc-form',
+        'wc-breadcrumb',
         'wc-input-radio'
 
       ].includes(type);
