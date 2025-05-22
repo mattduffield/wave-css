@@ -540,9 +540,11 @@ if (!customElements.get('wc-tabulator')) {
         const tooltip = col.getAttribute('tooltip');
         const cssClass = col.getAttribute('css-class');
         const rowHandle = col.getAttribute('row-handle');
+
         const htmlOutput = col.getAttribute('html-output');
         const print = col.getAttribute('print');
         const clipboard = col.getAttribute('clipboard');
+        
         const titleFormatter = col.getAttribute('title-formatter');
         const formatter = col.getAttribute('formatter');
         const formatterParams = col.getAttribute('formatter-params');
