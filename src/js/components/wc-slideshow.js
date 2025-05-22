@@ -105,8 +105,16 @@ if (!customElements.get('wc-slideshow')) {
       const next = document.createElement('a');
       next.textContent = '\u276F';
       next.classList.add('next');
+      const play = document.createElement('a');
+      play.classList.add('play');
+      play.textContent = '\u25B6';
+      const pause = document.createElement('a');
+      pause.classList.add('pause');
+      pause.textContent = '\u23F8';
       this.componentElement.appendChild(prev);
       this.componentElement.appendChild(next);
+      this.componentElement.appendChild(play);
+      this.componentElement.appendChild(pause);
     }
 
     _handleHelper(event, mode='next') {
@@ -224,6 +232,26 @@ if (!customElements.get('wc-slideshow')) {
         .wc-slideshow {
 
         }
+        .wc-slideshow .play,
+        .wc-slideshow .pause {
+          cursor: pointer;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: auto;
+          padding: 16px;
+          color: white;
+          font-weight: bold;
+          font-size: 36px;
+          transition: 0.6s ease;
+          border-radius: 0 3px 3px 0;
+          user-select: none;
+
+          display: none;
+        }
+        .wc-slideshow:hover .play {
+          display: block;
+        }
         /* Slideshow container */
         .wc-slideshow.container {
           max-width: 1000px;
@@ -295,8 +323,10 @@ if (!customElements.get('wc-slideshow')) {
       setTimeout(() => {
         const prev = this.querySelector('.prev');
         const next = this.querySelector('.next');
+        const play = this.querySelector('.play');
         prev.addEventListener('click', this._prevSlide.bind(this));
         next.addEventListener('click', this._nextSlide.bind(this));  
+        play.addEventListener('click', this._handleStart.bind(this));  
         this._startSlideshow();
       }, 50);
       document.addEventListener('visibilitychange', this._handleVisibilityChange.bind(this));
@@ -315,8 +345,10 @@ if (!customElements.get('wc-slideshow')) {
       document.body.removeEventListener('wc-slideshow:stop', this._handleStop.bind(this));
       const prev = this.querySelector('.prev');
       const next = this.querySelector('.next');
+      const play = this.querySelector('.play');
       prev?.removeEventListener('click', this._prevSlide.bind(this));
       next?.removeEventListener('click', this._nextSlide.bind(this));
+      play?.removeEventListener('click', this._handleStart.bind(this));
     }
 
   }
