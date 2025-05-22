@@ -6921,7 +6921,7 @@ if (!customElements.get("wc-slideshow")) {
     }
     _handleHelper(event, mode = "next") {
       const { detail } = event;
-      const { selector } = detail;
+      const { selector = this } = detail;
       const isArray = Array.isArray(selector);
       if (typeof selector === "string" || isArray) {
         const tgts = document.querySelectorAll(selector);
@@ -7027,8 +7027,8 @@ if (!customElements.get("wc-slideshow")) {
         .wc-slideshow .pause {
           cursor: pointer;
           position: absolute;
-          top: 50%;
-          left: 50%;
+          top: calc(50% - 36px);
+          left: calc(50% - 30px);
           width: auto;
           padding: 16px;
           color: white;
