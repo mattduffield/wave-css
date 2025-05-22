@@ -4046,6 +4046,10 @@ if (!customElements.get("wc-page-designer")) {
           { name: "method", label: "Method", type: "string" },
           { name: "action", label: "Action", type: "string" }
         ],
+        "wc-hotkey": [
+          { name: "keys", label: "Keys", type: "string" },
+          { name: "target", label: "Target", type: "string" }
+        ],
         "wc-image": [
           { name: "url", label: "URL", type: "string" },
           { name: "caption", label: "Caption", type: "string" },
