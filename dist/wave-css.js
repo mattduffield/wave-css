@@ -7085,7 +7085,7 @@ if (!customElements.get("wc-slideshow")) {
 
         /* Position the "next button" to the right */
         .wc-slideshow .next {
-          right: 0;
+          right: 16px;
           border-radius: 3px 0 0 3px;
         }
 
