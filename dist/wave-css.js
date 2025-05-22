@@ -6895,11 +6895,6 @@ if (!customElements.get("wc-slideshow")) {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
-      this._startSlideshow();
-      document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
-      if (typeof htmx !== "undefined") {
-        htmx.process(this);
-      }
       console.log("_render:wc-slideshow");
     }
     _createInnerElement() {
@@ -7086,12 +7081,14 @@ if (!customElements.get("wc-slideshow")) {
       super._wireEvents();
       const isWired = this.hasAttribute("data-wired");
       if (isWired) return;
+      this._startSlideshow();
       setTimeout(() => {
         const prev = this.querySelector(".prev");
         const next = this.querySelector(".next");
         prev.addEventListener("click", this._prevSlide.bind(this));
         next.addEventListener("click", this._nextSlide.bind(this));
       }, 50);
+      document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
       document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
       document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
       document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
@@ -7100,19 +7097,15 @@ if (!customElements.get("wc-slideshow")) {
     }
     _unWireEvents() {
       super._unWireEvents();
+      document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
       document.body.removeEventListener("wc-slideshow:next", this._handleNext.bind(this));
       document.body.removeEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
       document.body.removeEventListener("wc-slideshow:start", this._handleStart.bind(this));
       document.body.removeEventListener("wc-slideshow:stop", this._handleStop.bind(this));
       const prev = this.querySelector(".prev");
       const next = this.querySelector(".next");
-      if (prev) {
-        prev.removeEventListener("click", this._prevSlide.bind(this));
-      }
-      if (next) {
-        next.removeEventListener("click", this._nextSlide.bind(this));
-      }
-      document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
+      prev.removeEventListener("click", this._prevSlide.bind(this));
+      next.removeEventListener("click", this._nextSlide.bind(this));
     }
   }
   customElements.define("wc-slideshow", WcSlideshow);
