@@ -315,8 +315,8 @@ if (!customElements.get('wc-slideshow')) {
       document.body.removeEventListener('wc-slideshow:stop', this._handleStop.bind(this));
       const prev = this.querySelector('.prev');
       const next = this.querySelector('.next');
-      prev.removeEventListener('click', this._prevSlide.bind(this));
-      next.removeEventListener('click', this._nextSlide.bind(this));
+      prev?.removeEventListener('click', this._prevSlide.bind(this));
+      next?.removeEventListener('click', this._nextSlide.bind(this));
     }
 
   }
