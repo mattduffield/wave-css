@@ -4046,6 +4046,13 @@ if (!customElements.get("wc-page-designer")) {
           { name: "method", label: "Method", type: "string" },
           { name: "action", label: "Action", type: "string" }
         ],
+        "wc-image": [
+          { name: "url", label: "URL", type: "string" },
+          { name: "caption", label: "Caption", type: "string" },
+          { name: "hover_overlay", label: "Hover Overlay?", type: "boolean" },
+          { name: "hover_mode", label: "Hover Mode", type: "string" },
+          { name: "modal", label: "Modal?", type: "boolean" }
+        ],
         "wc-input": [
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
@@ -5777,6 +5784,7 @@ if (!customElements.get("wc-page-designer")) {
         "wc-accordion",
         "wc-breadcrumb",
         "wc-form",
+        "wc-image",
         "wc-input-radio",
         "wc-select",
         "wc-select-multiple",
