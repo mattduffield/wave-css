@@ -5898,7 +5898,7 @@ if (!customElements.get("wc-page-designer")) {
           input2.setAttribute("lbl-label", property.label);
           input2.setAttribute("class", "col-1");
           input2.setAttribute("value", value !== void 0 ? value : "");
-          input2.innerHTML = property.enum.map((m) => `<option value="${m}">${m}</option>`);
+          input2.innerHTML = property.enum.map((m) => `<option value="${m}">${m}</option>`).join("");
         } else {
           input2 = new (customElements.get("wc-input"))();
           input2.setAttribute("name", propId);

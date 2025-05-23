@@ -2304,7 +2304,7 @@ if (!customElements.get('wc-page-designer')) {
           input.setAttribute('lbl-label', property.label);
           input.setAttribute('class', 'col-1');
           input.setAttribute('value', value !== undefined ? value : '');
-          input.innerHTML = property.enum.map(m => `<option value="${m}">${m}</option>`);
+          input.innerHTML = property.enum.map(m => `<option value="${m}">${m}</option>`).join('');
         } else {
           // Default to string type
           input = new (customElements.get('wc-input'))();
@@ -2313,7 +2313,7 @@ if (!customElements.get('wc-page-designer')) {
           input.setAttribute('class', 'col-1');
           input.setAttribute('value', value !== undefined ? value : '');
           // input.value = value !== undefined ? value : '';
-      }
+        }
       }
       
       // Store a reference to the property name for later retrieval
