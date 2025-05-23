@@ -109,6 +109,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'indent_unit', label: 'Indent Unit', type: 'number' },
           { name: 'url', label: 'Fetch URL', type: 'string' },
           { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'script', label: 'Hyperscript', type: 'multiline-string' },
         ],
         'wc-contact-card': [
           { name: 'contact_name', label: 'Name', type: 'string' },
