@@ -4278,9 +4278,9 @@ if (!customElements.get("wc-page-designer")) {
         ],
         "wc-tabulator": [
           { name: "ajax_url", label: "AJAX URL", type: "string" },
-          { name: "filter_mode", label: "Filter Mode", type: "string" },
+          { name: "filter_mode", label: "Filter Mode", type: "string-enum", defaultValue: "", enum: ["", "remote"] },
           { name: "initial_filter", label: "Initial Filter", type: "multiline-string" },
-          { name: "sort_mode", label: "Sort Mode", type: "string" },
+          { name: "sort_mode", label: "Sort Mode", type: "string-enum", defaultValue: "", enum: ["", "remote"] },
           { name: "initial_sort", label: "Initial Sort", type: "multiline-string" },
           { name: "data_placeholder", label: "Placeholder", type: "string" },
           { name: "row_context_menu", label: "Row Context Menu", type: "string" },
