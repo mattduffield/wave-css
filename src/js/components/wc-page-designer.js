@@ -336,7 +336,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'initial_filter', label: 'Initial Filter', type: 'multiline-string' },
           { name: 'sort_mode', label: 'Sort Mode', type: 'string' },
           { name: 'initial_sort', label: 'Initial Sort', type: 'multiline-string' },
-          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'data_placeholder', label: 'Placeholder', type: 'string' },
           { name: 'row_context_menu', label: 'Row Context Menu', type: 'string' },
           { name: 'row_header', label: 'Row Header', type: 'multiline-string' },
           { name: 'row_height', label: 'Row Height', type: 'number' },
