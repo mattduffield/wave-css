@@ -4047,6 +4047,10 @@ if (!customElements.get("wc-page-designer")) {
           { name: "contact_title", label: "Title", type: "string" },
           { name: "contact_gender", label: "Gender", type: "string" }
         ],
+        "wc-contact-chip": [
+          { name: "contact_name", label: "Name", type: "string" },
+          { name: "contact_gender", label: "Gender", type: "string" }
+        ],
         "wc-form": [
           { name: "method", label: "Method", type: "string" },
           { name: "action", label: "Action", type: "string" }
