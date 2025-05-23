@@ -4332,7 +4332,6 @@ if (!customElements.get("wc-page-designer")) {
           { name: "frozen", label: "Frozen?", type: "boolean" },
           { name: "responsive", label: "Responsive?", type: "boolean" },
           { name: "tooltip", label: "Tooltip", type: "string" },
-          { name: "css_class", label: "CSS", type: "string" },
           { name: "row_handle", label: "Row Handle?", type: "boolean" },
           { name: "html_output", label: "HTML Output", type: "multiline-string" },
           { name: "print", label: "Print?", type: "boolean" },
