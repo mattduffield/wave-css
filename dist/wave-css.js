@@ -11386,7 +11386,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       wc-input .radio-group .radio-option {
         display: inline-flex;
+        flex: 1 1 0%;
         align-items: center;
+        justify-content: center;
         position: relative;
         outline: none;
       }
