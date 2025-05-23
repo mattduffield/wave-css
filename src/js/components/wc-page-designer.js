@@ -2304,7 +2304,8 @@ if (!customElements.get('wc-page-designer')) {
           input.setAttribute('lbl-label', property.label);
           input.setAttribute('class', 'col-1');
           input.setAttribute('value', value !== undefined ? value : '');
-          input.innerHTML = property.enum.map(m => `<option value="${m}">${m}</option>`).join('');
+          const items = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`).join('');
+          input.setAttribute('items', `[${items}]`);
         } else {
           // Default to string type
           input = new (customElements.get('wc-input'))();
