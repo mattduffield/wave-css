@@ -4053,6 +4053,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "lbl_css", label: "Label Class", type: "string" },
           { name: "tab_size", label: "Tab Size", type: "number" },
           { name: "indent_unit", label: "Indent Unit", type: "number" },
+          { name: "value", label: "Value", type: "multiline-string" },
           { name: "url", label: "Fetch URL", type: "string" },
           { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
           { name: "script", label: "Hyperscript", type: "multiline-string" }
