@@ -4346,7 +4346,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "top_calc_params", label: "Top Calc Params", type: "multiline-string" },
           { name: "bottom_calc", label: "Bottom Calc", type: "string" },
           { name: "bottom_cal_params", label: "Bottom Calc Params", type: "multiline-string" },
-          { name: "editor", label: "Editor", type: "string" },
+          { name: "editor", label: "Editor", type: "string", defaultValue: "", enum: ["", "number", "tickCross", "textarea", "input"] },
           { name: "editor_params", label: "Editor Params", type: "multiline-string" },
           { name: "sorter", label: "Sorter", type: "string" },
           { name: "sorter_params", label: "Sorter Params", type: "multiline-string" },
@@ -5892,11 +5892,20 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("class", "col-1");
         input2.setAttribute("value", value !== void 0 ? value : "");
       } else {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value !== void 0 ? value : "");
+        if (property.enum && property.enum.length > 0) {
+          input2 = new (customElements.get("wc-select"))();
+          input2.setAttribute("name", propId);
+          input2.setAttribute("lbl-label", property.label);
+          input2.setAttribute("class", "col-1");
+          input2.setAttribute("value", value !== void 0 ? value : "");
+          input2.innerHTML = property.enum.map((m) => `<option value="${m}">${m}</option>`);
+        } else {
+          input2 = new (customElements.get("wc-input"))();
+          input2.setAttribute("name", propId);
+          input2.setAttribute("lbl-label", property.label);
+          input2.setAttribute("class", "col-1");
+          input2.setAttribute("value", value !== void 0 ? value : "");
+        }
       }
       input2.dataset.propertyName = property.name;
       input2.dataset.propertyType = property.type;

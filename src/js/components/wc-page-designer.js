@@ -400,7 +400,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'top_calc_params', label: 'Top Calc Params', type: 'multiline-string' },
           { name: 'bottom_calc', label: 'Bottom Calc', type: 'string' },
           { name: 'bottom_cal_params', label: 'Bottom Calc Params', type: 'multiline-string' },
-          { name: 'editor', label: 'Editor', type: 'string' },
+          { name: 'editor', label: 'Editor', type: 'string', defaultValue: '', enum: ['', 'number', 'tickCross', 'textarea', 'input'] },
           { name: 'editor_params', label: 'Editor Params', type: 'multiline-string' },
           { name: 'sorter', label: 'Sorter', type: 'string' },
           { name: 'sorter_params', label: 'Sorter Params', type: 'multiline-string' },
@@ -2298,13 +2298,22 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('class', 'col-1');
         input.setAttribute('value', value !== undefined ? value : '');
       } else {
-        // Default to string type
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('value', value !== undefined ? value : '');
-        // input.value = value !== undefined ? value : '';
+        if (property.enum && property.enum.length > 0) {
+          input = new (customElements.get('wc-select'))();
+          input.setAttribute('name', propId);
+          input.setAttribute('lbl-label', property.label);
+          input.setAttribute('class', 'col-1');
+          input.setAttribute('value', value !== undefined ? value : '');
+          input.innerHTML = property.enum.map(m => `<option value="${m}">${m}</option>`);
+        } else {
+          // Default to string type
+          input = new (customElements.get('wc-input'))();
+          input.setAttribute('name', propId);
+          input.setAttribute('lbl-label', property.label);
+          input.setAttribute('class', 'col-1');
+          input.setAttribute('value', value !== undefined ? value : '');
+          // input.value = value !== undefined ? value : '';
+      }
       }
       
       // Store a reference to the property name for later retrieval
