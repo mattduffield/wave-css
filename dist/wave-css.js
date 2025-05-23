@@ -4318,7 +4318,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "header_filter_params", label: "Header Filter Params", type: "multiline-string" },
           { name: "header_filter_placeholder", label: "Header Filter Placeholder", type: "string" },
           { name: "header_filter_func", label: "Header Filter Func", type: "multiline-string" },
-          { name: "header_hoz_align", label: "Header Horizontal Alignment", type: "string" },
+          { name: "header_hoz_align", label: "Header Horizontal Alignment", type: "string-enum", defaultValue: "", enum: ["", "left", "center", "right"] },
           { name: "header_menu", label: "Header Menu", type: "string" },
           { name: "header_sort", label: "Header Sort?", type: "boolean" },
           { name: "header_sort_starting_dir", label: "Header Sort Starting Dir", type: "string" },
@@ -4346,12 +4346,12 @@ if (!customElements.get("wc-page-designer")) {
           { name: "top_calc_params", label: "Top Calc Params", type: "multiline-string" },
           { name: "bottom_calc", label: "Bottom Calc", type: "string" },
           { name: "bottom_cal_params", label: "Bottom Calc Params", type: "multiline-string" },
-          { name: "editor", label: "Editor", type: "string", defaultValue: "", enum: ["", "number", "tickCross", "textarea", "input"] },
+          { name: "editor", label: "Editor", type: "string-enum", defaultValue: "", enum: ["", "number", "tickCross", "textarea", "input"] },
           { name: "editor_params", label: "Editor Params", type: "multiline-string" },
           { name: "sorter", label: "Sorter", type: "string" },
           { name: "sorter_params", label: "Sorter Params", type: "multiline-string" },
-          { name: "hoz_align", label: "Horizontal Alignment", type: "string" },
-          { name: "vert_align", label: "Vertical Alignment", type: "string" },
+          { name: "hoz_align", label: "Horizontal Alignment", type: "string-radio-modern", defaultValue: "", enum: ["left", "center", "right"] },
+          { name: "vert_align", label: "Vertical Alignment", type: "string-radio", defaultValue: "", enum: ["top", "middle", "bottom"] },
           { name: "cell_click", label: "Cell Click", type: "multiline-string" }
         ],
         "wc-tabulator-func": [
@@ -5891,22 +5891,40 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
         input2.setAttribute("value", value !== void 0 ? value : "");
+      } else if (property.type === "string-enum") {
+        input2 = new (customElements.get("wc-select"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("items", `[${items}]`);
+      } else if (property.type === "string-radio-modern") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("type", "radio");
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("radio-group-class", "row modern");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("options", `[${options}]`);
+      } else if (property.type === "string-radio") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("type", "radio");
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("radio-group-class", "row");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("options", `[${options}]`);
       } else {
-        if (property.enum && property.enum.length > 0) {
-          input2 = new (customElements.get("wc-select"))();
-          input2.setAttribute("name", propId);
-          input2.setAttribute("lbl-label", property.label);
-          input2.setAttribute("class", "col-1");
-          input2.setAttribute("value", value !== void 0 ? value : "");
-          const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
-          input2.setAttribute("items", `[${items}]`);
-        } else {
-          input2 = new (customElements.get("wc-input"))();
-          input2.setAttribute("name", propId);
-          input2.setAttribute("lbl-label", property.label);
-          input2.setAttribute("class", "col-1");
-          input2.setAttribute("value", value !== void 0 ? value : "");
-        }
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
       }
       input2.dataset.propertyName = property.name;
       input2.dataset.propertyType = property.type;
