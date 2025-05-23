@@ -4304,7 +4304,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "selectable_rows", label: "Selectable Rows", type: "string" },
           // Can be bool or number
           { name: "persistence", label: "Persistence?", type: "boolean" },
-          { name: "layout", label: "Layout", type: "string" },
+          { name: "layout", label: "Layout", type: "string-enum", defaultValue: "", enum: ["", "fitData", "fitDataFill", "fitDataStretch", "fitDataTable", "fitColumns"] },
           { name: "col_field_formatter", label: "Col Field Formatter", type: "multiline-string" },
           { name: "group_by", label: "Group By", type: "string" },
           { name: "responsive_layout", label: "Responsive Layout", type: "string" },
