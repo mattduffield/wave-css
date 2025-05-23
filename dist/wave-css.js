@@ -4049,10 +4049,10 @@ if (!customElements.get("wc-page-designer")) {
           { name: "has_line_numbers", label: "Has Line Numbers?", type: "boolean" },
           { name: "has_line_wrapping", label: "Has Line Wrapping?", type: "boolean" },
           { name: "has_fold_gutter", label: "Has Fold Gutter?", type: "boolean" },
-          { name: "lbl_class", label: "Label Class", type: "string" },
+          { name: "lbl_css", label: "Label Class", type: "string" },
           { name: "tab_size", label: "Tab Size", type: "number" },
           { name: "indent_unit", label: "Indent Unit", type: "number" },
-          { name: "fetch", label: "Fetch URL", type: "string" },
+          { name: "url", label: "Fetch URL", type: "string" },
           { name: "is_disabled", label: "Is Disabled?", type: "boolean" }
         ],
         "wc-contact-card": [
