@@ -4043,6 +4043,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "link", label: "Link", type: "string" }
         ],
         "wc-code-mirror": [
+          { name: "name", label: "Name", type: "string" },
           { name: "theme", label: "Theme", type: "string" },
           { name: "mode", label: "Mode", type: "string" },
           { name: "height", label: "Height", type: "string" },
