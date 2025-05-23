@@ -4351,7 +4351,7 @@ if (!customElements.get("wc-page-designer")) {
           { name: "sorter", label: "Sorter", type: "string" },
           { name: "sorter_params", label: "Sorter Params", type: "multiline-string" },
           { name: "hoz_align", label: "Horizontal Alignment", type: "string-radio-modern", defaultValue: "", enum: ["left", "center", "right"] },
-          { name: "vert_align", label: "Vertical Alignment", type: "string-radio", defaultValue: "", enum: ["top", "middle", "bottom"] },
+          { name: "vert_align", label: "Vertical Alignment", type: "string-radio-modern", defaultValue: "", enum: ["top", "middle", "bottom"] },
           { name: "cell_click", label: "Cell Click", type: "multiline-string" }
         ],
         "wc-tabulator-func": [
@@ -11379,7 +11379,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: inline-flex;
-        min-height: 20.5px;
+        min-height: 34.5px;
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.875rem;
@@ -11395,6 +11395,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       wc-input .radio-group:not(.modern) .radio-option {
         padding-left: 12px;
         align-self: center;
+        justify-content: left;
       }
       wc-input .radio-group.col:not(.modern) .radio-option {
         padding-left: 12px;

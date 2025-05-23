@@ -405,7 +405,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'sorter', label: 'Sorter', type: 'string' },
           { name: 'sorter_params', label: 'Sorter Params', type: 'multiline-string' },
           { name: 'hoz_align', label: 'Horizontal Alignment', type: 'string-radio-modern', defaultValue: '', enum: ['left', 'center', 'right'] },
-          { name: 'vert_align', label: 'Vertical Alignment', type: 'string-radio', defaultValue: '', enum: ['top', 'middle', 'bottom'] },
+          { name: 'vert_align', label: 'Vertical Alignment', type: 'string-radio-modern', defaultValue: '', enum: ['top', 'middle', 'bottom'] },
           { name: 'cell_click', label: 'Cell Click', type: 'multiline-string' },
         ],
         'wc-tabulator-func': [

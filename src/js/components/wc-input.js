@@ -491,7 +491,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input .radio-group {
         display: inline-flex;
-        min-height: 20.5px;
+        min-height: 34.5px;
       }
       wc-input .radio-group:not(.modern) {
         gap: 0.875rem;
@@ -507,6 +507,7 @@ class WcInput extends WcBaseFormComponent {
       wc-input .radio-group:not(.modern) .radio-option {
         padding-left: 12px;
         align-self: center;
+        justify-content: left;
       }
       wc-input .radio-group.col:not(.modern) .radio-option {
         padding-left: 12px;
