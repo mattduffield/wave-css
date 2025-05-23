@@ -5898,7 +5898,7 @@ if (!customElements.get("wc-page-designer")) {
           input2.setAttribute("lbl-label", property.label);
           input2.setAttribute("class", "col-1");
           input2.setAttribute("value", value !== void 0 ? value : "");
-          const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`).join("");
+          const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
           input2.setAttribute("items", `[${items}]`);
         } else {
           input2 = new (customElements.get("wc-input"))();
