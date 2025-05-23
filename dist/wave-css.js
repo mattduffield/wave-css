@@ -4042,6 +4042,19 @@ if (!customElements.get("wc-page-designer")) {
         "wc-breadcrumb-item": [
           { name: "link", label: "Link", type: "string" }
         ],
+        "wc-code-mirror": [
+          { name: "theme", label: "Theme", type: "string" },
+          { name: "mode", label: "Mode", type: "string" },
+          { name: "height", label: "Height", type: "string" },
+          { name: "has_line_numbers", label: "Has Line Numbers?", type: "boolean" },
+          { name: "has_line_wrapping", label: "Has Line Wrapping?", type: "boolean" },
+          { name: "has_fold_gutter", label: "Has Fold Gutter?", type: "boolean" },
+          { name: "lbl_class", label: "Label Class", type: "string" },
+          { name: "tab_size", label: "Tab Size", type: "number" },
+          { name: "indent_unit", label: "Indent Unit", type: "number" },
+          { name: "fetch", label: "Fetch URL", type: "string" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" }
+        ],
         "wc-contact-card": [
           { name: "contact_name", label: "Name", type: "string" },
           { name: "contact_title", label: "Title", type: "string" },
