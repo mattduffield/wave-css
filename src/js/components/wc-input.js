@@ -42,7 +42,8 @@ class WcInput extends WcBaseFormComponent {
       'lbl-label', 'lbl-class', 'radio-group-class',
       'checked', 'disabled', 'readonly', 'required', 'autocomplete', 
       'autofocus', 'min', 'max', 'minlength', 'maxlength', 'pattern',
-      'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich'
+      'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich',
+      'list'
     ];
   }
   static get icons() {
@@ -102,7 +103,7 @@ class WcInput extends WcBaseFormComponent {
     super();
     this.passThruAttributes = [
       'autocomplete', 'placeholder', 'min', 'max', 'minlength',
-      'maxlength', 'pattern', 'step', 'multiple'
+      'maxlength', 'pattern', 'step', 'multiple', 'list'
     ];
     this.passThruEmptyAttributes = [
       'autofocus', 'disabled', 'readonly', 'required', 'novalidate'

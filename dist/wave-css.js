@@ -11335,7 +11335,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "multiple",
       "novalidate",
       "elt-class",
-      "toggle-swtich"
+      "toggle-swtich",
+      "list"
     ];
   }
   static get icons() {
@@ -11401,7 +11402,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "maxlength",
       "pattern",
       "step",
-      "multiple"
+      "multiple",
+      "list"
     ];
     this.passThruEmptyAttributes = [
       "autofocus",
