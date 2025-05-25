@@ -6352,9 +6352,9 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
         input2.setAttribute("value", value !== void 0 ? value : "");
-        input2.setAttribute("list", propId);
+        input2.setAttribute("list", `${propId}_list`);
         const datalist = document.createElement("datalist");
-        datalist.id = propId;
+        datalist.id = `${propId}_list`;
         property.enum.forEach((value2) => {
           const option = document.createElement("option");
           option.value = value2;
