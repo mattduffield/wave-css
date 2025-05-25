@@ -70,7 +70,7 @@ if (!customElements.get('wc-page-designer')) {
       this.elementCustomProperties = {
         'a': [
           { name: 'href', label: 'Href', type: 'string' },
-          { name: 'target', label: 'Target', type: 'string' }
+          { name: 'target', label: 'Target', type: 'string-enum', defaultValue: '', enum: ['', '_blank', '_parent', '_self', '_top'] }
         ],
         'data-array': [
           { name: 'has_add_new', label: 'Has Add New?', type: 'boolean' },
@@ -143,14 +143,14 @@ if (!customElements.get('wc-page-designer')) {
         'wc-contact-card': [
           { name: 'contact_name', label: 'Name', type: 'string' },
           { name: 'contact_title', label: 'Title', type: 'string' },
-          { name: 'contact_gender', label: 'Gender', type: 'string' },
+          { name: 'contact_gender', label: 'Gender', type: 'string-radio-modern', defaultValue: '', enum: ['male', 'female'] },
         ],
         'wc-contact-chip': [
           { name: 'contact_name', label: 'Name', type: 'string' },
-          { name: 'contact_gender', label: 'Gender', type: 'string' },
+          { name: 'contact_gender', label: 'Gender', type: 'string-radio-modern', defaultValue: '', enum: ['male', 'female'] },
         ],
         'wc-form': [
-          { name: 'method', label: 'Method', type: 'string' },
+          { name: 'method', label: 'Method', type: 'string-radio-modern', defaultValue: '', enum: ['get', 'post'] },
           { name: 'action', label: 'Action', type: 'string' },
         ],
         'wc-hotkey': [
@@ -161,7 +161,7 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'url', label: 'URL', type: 'string' },
           { name: 'caption', label: 'Caption', type: 'string' },
           { name: 'hover_overlay', label: 'Hover Overlay?', type: 'boolean' },
-          { name: 'hover_mode', label: 'Hover Mode', type: 'string' },
+          { name: 'hover_mode', label: 'Hover Mode', type: 'string-radio-modern', defaultValue: '', enum: ['left', 'top', 'right', 'bottom'] },
           { name: 'modal', label: 'Modal?', type: 'boolean' },
           { name: 'overlay_content', label: 'Overlay Content', type: 'multiline-string' },
         ],
