@@ -442,7 +442,93 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'numbertext', label: 'Number Text', type: 'string' }
         ],
         'wc-split-button': [
-          { name: 'positionArea', label: 'Position Area', type: 'string' }
+          { name: 'positionArea', label: 'Position Area', type: 'string-enum', defaultValue: '', enum: [
+            // Single keyword values
+            "none",
+            "top",
+            "bottom",
+            "left", 
+            "right",
+            "start",
+            "end",
+            "self-start",
+            "self-end",
+            "center",
+            
+            // Two-value combinations (block-axis inline-axis)
+            "top left",
+            "top center", 
+            "top right",
+            "top start",
+            "top end",
+            "top self-start",
+            "top self-end",
+            
+            "center left",
+            "center center",
+            "center right", 
+            "center start",
+            "center end",
+            "center self-start",
+            "center self-end",
+            
+            "bottom left",
+            "bottom center",
+            "bottom right",
+            "bottom start", 
+            "bottom end",
+            "bottom self-start",
+            "bottom self-end",
+            
+            "start left",
+            "start center",
+            "start right",
+            "start start",
+            "start end", 
+            "start self-start",
+            "start self-end",
+            
+            "end left",
+            "end center", 
+            "end right",
+            "end start",
+            "end end",
+            "end self-start",
+            "end self-end",
+            
+            "self-start left",
+            "self-start center",
+            "self-start right", 
+            "self-start start",
+            "self-start end",
+            "self-start self-start",
+            "self-start self-end",
+            
+            "self-end left",
+            "self-end center",
+            "self-end right",
+            "self-end start", 
+            "self-end end",
+            "self-end self-start", 
+            "self-end self-end",
+            
+            // Additional block-axis values with inline-axis
+            "left top",
+            "left center",
+            "left bottom",
+            "left start",
+            "left end",
+            "left self-start", 
+            "left self-end",
+            
+            "right top",
+            "right center",
+            "right bottom", 
+            "right start",
+            "right end",
+            "right self-start",
+            "right self-end"
+          ] }
         ],
         'wc-tabulator': [
           { name: 'ajax_url', label: 'AJAX URL', type: 'string' },
@@ -538,7 +624,49 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'rows', label: 'Rows', type: 'number' }
         ],
         'wc-theme-selector': [
-          { name: 'theme', label: 'Theme', type: 'string' },
+          { name: 'theme', label: 'Theme', type: 'string-datalist', defaultValue: '', enum: [
+            "theme-rose",
+            "theme-petal",
+            "theme-sunset",
+            "theme-peach",
+            "theme-fire",
+            "theme-desert",
+            "theme-golden",
+            "theme-honey",
+            "theme-amber",
+            "theme-olive",
+            "theme-moss",
+            "theme-avocado",
+            "theme-lime",
+            "theme-fern",
+            "theme-yellow",
+            "theme-meadow",
+            "theme-cornsilk",
+            "theme-sage",
+            "theme-forest",
+            "theme-jungle",
+            "theme-emerald",
+            "theme-mint",
+            "theme-turquoise",
+            "theme-aqua",
+            "theme-lagoon",
+            "theme-ice",
+            "theme-ocean",
+            "theme-azure",
+            "theme-sky",
+            "theme-midsky",
+            "theme-deepsky",
+            "theme-royal",
+            "theme-twilight",
+            "theme-lavender",
+            "theme-violet",
+            "theme-grape",
+            "theme-plum",
+            "theme-fuchsia",
+            "theme-cottoncandy",
+            "theme-blush",
+            "theme-bubblegum",
+          ] },
           { name: 'mode', label: 'Mode', type: 'string' }
         ],
         'wc-timeline-option': [
@@ -2413,6 +2541,18 @@ if (!customElements.get('wc-page-designer')) {
         input.setAttribute('lbl-label', property.label);
         input.setAttribute('class', 'col-1');
         input.setAttribute('value', value !== undefined ? value : '');
+      } else if (property.type === 'string-datalist') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
+        input.setAttribute('list', propId);
+        const datalist = document.createElement('datalist');
+        datalist.id = propId;
+        const options = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
+        datalist.setAttribute('options', `[${options}]`);
+        row.appendChild(datalist);
       } else if (property.type === 'string-enum') {
         input = new (customElements.get('wc-select'))();
         input.setAttribute('name', propId);
