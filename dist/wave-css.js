@@ -4684,7 +4684,10 @@ if (!customElements.get("wc-page-designer")) {
             "localdatetime",
             "linklocaldatetime"
           ] },
-          { name: "header_filter", label: "Header Filter", type: "string-datalist", defaultValue: "", enum: [
+          { name: "header_filter", label: "Header Filter", type: "string", defaultValue: "" },
+          { name: "header_filter_params", label: "Header Filter Params", type: "multiline-string" },
+          { name: "header_filter_placeholder", label: "Header Filter Placeholder", type: "string" },
+          { name: "header_filter_func", label: "Header Filter Func", type: "string-datalist", defaultValue: "", enum: [
             "=",
             "!=",
             "like",
@@ -4698,9 +4701,6 @@ if (!customElements.get("wc-page-designer")) {
             "in",
             "regex"
           ] },
-          { name: "header_filter_params", label: "Header Filter Params", type: "multiline-string" },
-          { name: "header_filter_placeholder", label: "Header Filter Placeholder", type: "string" },
-          { name: "header_filter_func", label: "Header Filter Func", type: "multiline-string" },
           { name: "header_hoz_align", label: "Header Horizontal Alignment", type: "string-radio-modern", defaultValue: "", enum: ["left", "center", "right"] },
           { name: "header_menu", label: "Header Menu", type: "string" },
           { name: "header_sort", label: "Header Sort?", type: "boolean" },
