@@ -4751,7 +4751,7 @@ if (!customElements.get("wc-page-designer")) {
             "theme-blush",
             "theme-bubblegum"
           ] },
-          { name: "mode", label: "Mode", type: "string" }
+          { name: "mode", label: "Mode", type: "string-radio-modern", defaultValue: "", enum: ["light", "dark"] }
         ],
         "wc-timeline-option": [
           { name: "value", label: "Value", type: "string" },
