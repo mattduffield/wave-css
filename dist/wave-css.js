@@ -6282,8 +6282,8 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("list", propId);
         const datalist = document.createElement("datalist");
         datalist.id = propId;
-        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
-        datalist.setAttribute("options", `[${options}]`);
+        const options = property.enum.map((m) => ({ key: m, value: m }));
+        input2.setAttribute("options", JSON.stringify(options));
         row.appendChild(datalist);
       } else if (property.type === "string-enum") {
         input2 = new (customElements.get("wc-select"))();
