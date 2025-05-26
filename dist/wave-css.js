@@ -6044,7 +6044,7 @@ if (!customElements.get("wc-page-designer")) {
       if (customProps && customProps.length > 0) {
         customProps.forEach((prop) => {
           let value;
-          const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
+          const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"]:checked`);
           if (chk) {
             value = chk.value;
             this.designerState.selectedElement[prop.name] = value;
