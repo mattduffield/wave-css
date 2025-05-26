@@ -4887,6 +4887,19 @@ if (!customElements.get("wc-page-designer")) {
     <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Containers">
+          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
+            oninput="
+            const query = this.value.trim().toLowerCase();
+            const elements = document.querySelectorAll('.filterable');
+            elements.forEach(el => {
+              const text = el.textContent.trim().toLowerCase();
+              if (query === '' || text.startsWith(query)) {
+                el.classList.remove('hidden');
+              } else {
+                el.classList.add('hidden');
+              }
+            });
+          ">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="container-elements">
             <div class="element-item" data-element-type="div" draggable="true">Div</div>
             <div class="element-item" data-element-type="column" draggable="true">Column</div>
