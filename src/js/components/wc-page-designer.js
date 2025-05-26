@@ -814,7 +814,7 @@ if (!customElements.get('wc-page-designer')) {
     <div class="left-panel flex flex-col min-h-0 overflow-scroll p-2">
       <wc-tab class="flex flex-col flex-1 min-h-0" animate>
         <wc-tab-item class="active" label="Containers">
-          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
+          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Containers..."
             oninput="
             const query = this.value.trim().toLowerCase();
             const elements = this.parentElement.querySelectorAll('.element-list .element-item');
@@ -911,7 +911,7 @@ if (!customElements.get('wc-page-designer')) {
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
-          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
+          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Fields..."
             oninput="
             const query = this.value.trim().toLowerCase();
             const elements = this.parentElement.querySelectorAll('.element-list .element-item');
