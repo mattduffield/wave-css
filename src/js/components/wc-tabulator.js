@@ -767,6 +767,14 @@ if (!customElements.get('wc-tabulator')) {
       return url;
     }
 
+    pageFormatter(cell, formatterParams, onRendered) {
+      const page_id = cell.getColumn().getDefinition().formatterParams.page_id;
+      const data = cell.getData();
+      const id = data._id;
+      const url = `/view/${page_id}?record_id=${id}`;
+      return url;
+    }
+
 
     // Create an extended link formatter
     linkFormatter(cell, formatterParams, onRendered) {
