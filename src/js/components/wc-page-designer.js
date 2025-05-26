@@ -851,6 +851,19 @@ if (!customElements.get('wc-page-designer')) {
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Elements">
+          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
+            oninput="
+            const query = this.value.trim().toLowerCase();
+            const elements = this.parentElement.querySelectorAll('.element-list .element-item');
+            elements.forEach(el => {
+              const text = el.textContent.trim().toLowerCase();
+              if (query === '' || text.startsWith(query)) {
+                el.classList.remove('hidden');
+              } else {
+                el.classList.add('hidden');
+              }
+            });
+          ">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="form-elements">
             <div class="element-item" data-element-type="a" draggable="true">Anchor</div>
             <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
@@ -898,6 +911,19 @@ if (!customElements.get('wc-page-designer')) {
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
+          <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
+            oninput="
+            const query = this.value.trim().toLowerCase();
+            const elements = this.parentElement.querySelectorAll('.element-list .element-item');
+            elements.forEach(el => {
+              const text = el.textContent.trim().toLowerCase();
+              if (query === '' || text.startsWith(query)) {
+                el.classList.remove('hidden');
+              } else {
+                el.classList.add('hidden');
+              }
+            });
+          ">
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="schema-fields">
             <!-- Will be populated dynamically -->
           </div>
