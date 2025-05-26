@@ -320,12 +320,12 @@ function processJSONField(event, selector) {
       let flattenJSON = function(obj, prefix = "") {
         for (const key in obj) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            const value2 = obj[key];
+            const value = obj[key];
             const fieldName = prefix ? `${prefix}.${key}` : key;
-            if (value2 !== null && typeof value2 === "object" && !Array.isArray(value2)) {
-              flattenJSON(value2, fieldName);
-            } else if (Array.isArray(value2)) {
-              value2.forEach((item, index) => {
+            if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+              flattenJSON(value, fieldName);
+            } else if (Array.isArray(value)) {
+              value.forEach((item, index) => {
                 if (typeof item === "object" && item !== null) {
                   flattenJSON(item, `${fieldName}[${index}]`);
                 } else {
@@ -342,7 +342,7 @@ function processJSONField(event, selector) {
               const input2 = document.createElement("input");
               input2.type = "hidden";
               input2.name = fieldName;
-              input2.value = value2;
+              input2.value = value;
               input2.setAttribute("data-json-field", "true");
               form.appendChild(input2);
               console.log("-->Appending primitive:", input2);
@@ -361,43 +361,43 @@ function processJSONField(event, selector) {
     }
   }
 }
-function testSchema(value2, schema) {
-  if (value2 === void 0 || value2 === null) {
+function testSchema(value, schema) {
+  if (value === void 0 || value === null) {
     return false;
   }
   if ("const" in schema) {
-    return value2 === schema.const;
+    return value === schema.const;
   }
   if ("enum" in schema) {
-    return Array.isArray(schema.enum) && schema.enum.includes(value2);
+    return Array.isArray(schema.enum) && schema.enum.includes(value);
   }
   if ("minimum" in schema) {
-    const num = typeof value2 === "number" ? value2 : parseFloat(value2);
+    const num = typeof value === "number" ? value : parseFloat(value);
     if (isNaN(num) || num < schema.minimum) {
       return false;
     }
   }
   if ("maximum" in schema) {
-    const num = typeof value2 === "number" ? value2 : parseFloat(value2);
+    const num = typeof value === "number" ? value : parseFloat(value);
     if (isNaN(num) || num > schema.maximum) {
       return false;
     }
   }
   if ("minLength" in schema) {
-    const str = String(value2);
+    const str = String(value);
     if (str.length < schema.minLength) {
       return false;
     }
   }
   if ("maxLength" in schema) {
-    const str = String(value2);
+    const str = String(value);
     if (str.length > schema.maxLength) {
       return false;
     }
   }
   if ("pattern" in schema) {
     const re = new RegExp(schema.pattern);
-    if (typeof value2 !== "string" || !re.test(value2)) {
+    if (typeof value !== "string" || !re.test(value)) {
       return false;
     }
   }
@@ -429,11 +429,11 @@ function getSourcePropertyValue(srcDataId, srcSelector, srcProperty) {
 function applyRule(rule) {
   const { effect, condition, tgtDataId, tgtSelector, tgtProperty } = rule;
   const { scope, schema, srcDataId, srcSelector, srcProperty, property } = condition;
-  const value2 = getSourcePropertyValue(srcDataId, srcSelector, srcProperty);
-  if (value2 == void 0) return;
+  const value = getSourcePropertyValue(srcDataId, srcSelector, srcProperty);
+  if (value == void 0) return;
   let match = false;
   if (schema) {
-    match = testSchema(value2, schema);
+    match = testSchema(value, schema);
   }
   let selector = "";
   if (tgtDataId) {
@@ -448,13 +448,13 @@ function applyRule(rule) {
   if (!targetEl) return;
   switch (effect) {
     case "COPY":
-      targetEl[tgtProperty] = value2;
+      targetEl[tgtProperty] = value;
       break;
     case "COPY-TOLOWER":
-      targetEl[tgtProperty] = value2.toString().toLowerCase();
+      targetEl[tgtProperty] = value.toString().toLowerCase();
       break;
     case "COPY-TOLOWER-UNDERSCORE":
-      targetEl[tgtProperty] = value2.toString().toLowerCase().replaceAll(" ", "_");
+      targetEl[tgtProperty] = value.toString().toLowerCase().replaceAll(" ", "_");
       break;
     case "HIDE":
       targetEl.style.display = match ? "none" : "";
@@ -579,8 +579,8 @@ var WcBaseComponent = class extends HTMLElement {
   }
   _applyPendingAttributes() {
     Object.keys(this._pendingAttributes).forEach((attrName) => {
-      const value2 = this._pendingAttributes[attrName];
-      this._handleAttributeChange(attrName, value2, null);
+      const value = this._pendingAttributes[attrName];
+      this._handleAttributeChange(attrName, value, null);
     });
     this._pendingAttributes = {};
   }
@@ -1854,7 +1854,7 @@ if (!customElements.get("wc-code-mirror")) {
       }
       if (labelText) {
         const lblEl = document.createElement("label");
-        const value2 = this.getAttribute("value") || "";
+        const value = this.getAttribute("value") || "";
         lblEl.textContent = labelText;
         lblEl.setAttribute("for", name);
         this.componentElement.appendChild(lblEl);
@@ -2332,8 +2332,8 @@ if (!customElements.get("wc-code-mirror")) {
       await this.loadAssets(this.getAttribute("theme"), this.getAttribute("mode"));
       this.addWebComponentsJsHighlighting();
       this.editor.on("change", async () => {
-        const value2 = this.editor.getValue();
-        this._internals.setFormValue(value2);
+        const value = this.editor.getValue();
+        this._internals.setFormValue(value);
         const gutters2 = await this.getGutters();
         this.editor.setOption("gutters", gutters2);
       });
@@ -5701,13 +5701,13 @@ if (!customElements.get("wc-page-designer")) {
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
         const hasCustomValues = customProps.some((prop) => {
-          const value2 = element[prop.name];
+          const value = element[prop.name];
           if (prop.type === "boolean") {
-            return value2 === true;
+            return value === true;
           } else if (prop.type === "number") {
-            return value2 !== null && value2 !== void 0;
+            return value !== null && value !== void 0;
           } else {
-            return value2 && value2.trim() !== "";
+            return value && value.trim() !== "";
           }
         });
         if (hasCustomValues) {
@@ -5809,8 +5809,8 @@ if (!customElements.get("wc-page-designer")) {
         document.getElementById("custom-properties-container").style.display = "block";
         customProps.forEach((prop) => {
           const propValue = element[prop.name];
-          const value2 = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : "";
-          const propInput = this.createCustomPropertyInput(prop, value2);
+          const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : "";
+          const propInput = this.createCustomPropertyInput(prop, value);
           customPropertiesContainer.appendChild(propInput);
         });
       }
@@ -6044,16 +6044,16 @@ if (!customElements.get("wc-page-designer")) {
       if (customProps && customProps.length > 0) {
         customProps.forEach((prop) => {
           const input2 = document.getElementById(`prop-custom-${prop.name}`);
+          let value;
           if (input2) {
-            let value2;
             if (prop.type === "boolean") {
-              value2 = input2.checked;
+              value = input2.checked;
             } else if (prop.type === "number") {
-              value2 = input2.value !== "" ? Number(input2.value) : null;
+              value = input2.value !== "" ? Number(input2.value) : null;
             } else {
-              value2 = input2.value;
+              value = input2.value;
             }
-            this.designerState.selectedElement[prop.name] = value2;
+            this.designerState.selectedElement[prop.name] = value;
           } else {
             const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
             if (chk) {
@@ -6321,7 +6321,7 @@ if (!customElements.get("wc-page-designer")) {
     //
     // Custom Properties
     //
-    createCustomPropertyInput(property, value2) {
+    createCustomPropertyInput(property, value) {
       const row = document.createElement("div");
       row.className = "row mb-2";
       let input2;
@@ -6333,7 +6333,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("class", "col");
         input2.setAttribute("type", "checkbox");
         input2.setAttribute("toggle-switch", "");
-        if (value2 === true) {
+        if (value === true) {
           input2.setAttribute("checked", "");
           setTimeout(() => {
             input2.checked = true;
@@ -6345,26 +6345,26 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
         input2.setAttribute("type", "number");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : 0);
+        input2.setAttribute("value", value !== void 0 ? value : 0);
       } else if (property.type === "multiline-string") {
         input2 = new (customElements.get("wc-textarea"))();
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
       } else if (property.type === "string-datalist") {
         input2 = new (customElements.get("wc-input"))();
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
         input2.setAttribute("list", `${propId}_list`);
         const datalist = document.createElement("datalist");
         datalist.id = `${propId}_list`;
-        property.enum.forEach((value3) => {
+        property.enum.forEach((value2) => {
           const option = document.createElement("option");
-          option.value = value3;
-          option.textContent = value3;
+          option.value = value2;
+          option.textContent = value2;
           datalist.appendChild(option);
         });
         row.appendChild(datalist);
@@ -6373,7 +6373,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
         const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
         input2.setAttribute("items", `[${items}]`);
       } else if (property.type === "string-radio-modern") {
@@ -6383,7 +6383,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("type", "radio");
         input2.setAttribute("class", "col-1");
         input2.setAttribute("radio-group-class", "row modern");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
         const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
         input2.setAttribute("options", `[${options}]`);
       } else if (property.type === "string-radio") {
@@ -6393,7 +6393,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("type", "radio");
         input2.setAttribute("class", "col-1");
         input2.setAttribute("radio-group-class", "row");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
         const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
         input2.setAttribute("options", `[${options}]`);
       } else {
@@ -6401,7 +6401,7 @@ if (!customElements.get("wc-page-designer")) {
         input2.setAttribute("name", propId);
         input2.setAttribute("lbl-label", property.label);
         input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value2 !== void 0 ? value2 : "");
+        input2.setAttribute("value", value !== void 0 ? value : "");
       }
       input2.dataset.propertyName = property.name;
       input2.dataset.propertyType = property.type;
@@ -8552,8 +8552,8 @@ if (!customElements.get("wc-tabulator")) {
       funcElements.forEach((el) => {
         const name = el.getAttribute("name");
         const func = el.textContent;
-        const value2 = new Function(`return (${func})`)();
-        this.funcs[name] = value2;
+        const value = new Function(`return (${func})`)();
+        this.funcs[name] = value;
         el.innerHTML = "";
       });
     }
@@ -8572,10 +8572,10 @@ if (!customElements.get("wc-tabulator")) {
           const label = el.getAttribute("label");
           const icon = el.getAttribute("icon");
           const func = el.textContent;
-          const value2 = new Function(`return (${func})`)();
+          const value = new Function(`return (${func})`)();
           mnu = {
             label: this.createMenuLabel(label, this.icons[icon]),
-            action: value2,
+            action: value,
             order
           };
         }
@@ -8817,7 +8817,7 @@ if (!customElements.get("wc-tabulator")) {
     }
     // Create an extended link formatter
     linkFormatter(cell, formatterParams, onRendered) {
-      var value2 = cell.getValue();
+      var value = cell.getValue();
       var linkElement = document.createElement("a");
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
       const screen = cell.getColumn().getDefinition().formatterParams.screen;
@@ -8835,10 +8835,10 @@ if (!customElements.get("wc-tabulator")) {
       if (formatterParams.target) {
         linkElement.setAttribute("target", formatterParams.target);
       }
-      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value2;
+      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
       if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
-        Object.entries(formatterParams.attributes).forEach(([key, value3]) => {
-          linkElement.setAttribute(key, value3);
+        Object.entries(formatterParams.attributes).forEach(([key, value2]) => {
+          linkElement.setAttribute(key, value2);
         });
       }
       return linkElement;
@@ -8949,8 +8949,8 @@ if (!customElements.get("wc-tabulator")) {
     }
     localdatetime(cell, formatterParams, onRendered) {
       const { format } = formatterParams;
-      let value2 = cell.getValue();
-      if (!value2) return "";
+      let value = cell.getValue();
+      if (!value) return "";
       let dtFormat = luxon.DateTime.DATETIME_MED;
       switch (format) {
         case "DATE_SHORT":
@@ -9006,9 +9006,9 @@ if (!customElements.get("wc-tabulator")) {
           dtFormat = luxon.DateTime.DATETIME_HUGE_WITH_SECONDS;
           break;
       }
-      let date = new Date(value2);
+      let date = new Date(value);
       if (isNaN(date)) return "(Invalid Date)";
-      let formattedDate = luxon.DateTime.fromISO(value2, { zone: "utc" }).setZone("America/New_York").toLocaleString(dtFormat);
+      let formattedDate = luxon.DateTime.fromISO(value, { zone: "utc" }).setZone("America/New_York").toLocaleString(dtFormat);
       return formattedDate;
     }
     linklocaldatetime(cell, formatterParams, onRendered) {
@@ -9058,8 +9058,8 @@ if (!customElements.get("wc-tabulator")) {
     getAjaxURLGenerator(url, config, params) {
       let ajaxParamsParts = [];
       const ajaxParamsMap = JSON.parse(this.getAttribute("ajax-params-map") || "{}");
-      for (const [key, value2] of Object.entries(ajaxParamsMap)) {
-        ajaxParamsParts.push(`${value2}=${params[key]}`);
+      for (const [key, value] of Object.entries(ajaxParamsMap)) {
+        ajaxParamsParts.push(`${value}=${params[key]}`);
       }
       if (ajaxParamsParts.length === 0) {
         const { page, size } = params;
@@ -9074,8 +9074,8 @@ if (!customElements.get("wc-tabulator")) {
         }
       }
       const ajaxParams = JSON.parse(this.getAttribute("ajax-params") || "{}");
-      for (const [key, value2] of Object.entries(ajaxParams)) {
-        ajaxParamsParts.push(`${key}=${value2}`);
+      for (const [key, value] of Object.entries(ajaxParams)) {
+        ajaxParamsParts.push(`${key}=${value}`);
       }
       const { filter } = params;
       if (filter && filter.length > 0) {
@@ -10536,8 +10536,8 @@ if (!customElements.get("wc-visibility-change")) {
     }
     _applyPendingAttributes() {
       Object.keys(this._pendingAttributes).forEach((attrName) => {
-        const value2 = this._pendingAttributes[attrName];
-        this._handleAttributeChange(attrName, value2);
+        const value = this._pendingAttributes[attrName];
+        this._handleAttributeChange(attrName, value);
       });
       this._pendingAttributes = {};
     }
@@ -11585,9 +11585,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     const isToggle = this.hasAttribute("toggle-switch");
     if (labelText) {
       const lblEl = document.createElement("label");
-      const value2 = this.getAttribute("value") || "";
-      if (type === "range" && value2) {
-        lblEl.textContent = `${labelText} (${value2})`;
+      const value = this.getAttribute("value") || "";
+      if (type === "range" && value) {
+        lblEl.textContent = `${labelText} (${value})`;
       } else {
         lblEl.textContent = labelText;
       }
@@ -11602,8 +11602,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       let optionList = this.querySelectorAll("option");
       optionList.forEach((f) => {
         const key = f.textContent.trim();
-        const value2 = f.value.trim();
-        options.push({ "key": key, "value": value2 });
+        const value = f.value.trim();
+        options.push({ "key": key, "value": value });
       });
       optionList.forEach((f) => f.remove());
       if (options.length == 0) {
@@ -12151,7 +12151,7 @@ var WcSelect = class extends WcBaseFormComponent {
   _generateOptionsFromItems() {
     const displayMember = this.getAttribute("display-member") || "key";
     const valueMember = this.getAttribute("value-member") || "value";
-    const value2 = this.getAttribute("value") || null;
+    const value = this.getAttribute("value") || null;
     this.formElement.innerHTML = "";
     this._items.forEach((item) => {
       const opt = document.createElement("option");
@@ -12162,7 +12162,7 @@ var WcSelect = class extends WcBaseFormComponent {
         opt.value = item;
         opt.textContent = item;
       }
-      if (opt.value == value2) {
+      if (opt.value == value) {
         opt.selected = true;
       }
       this.formElement.appendChild(opt);
@@ -12312,8 +12312,8 @@ var WcSelect = class extends WcBaseFormComponent {
         chipContainer?.addEventListener("click", (e) => {
           if (e.target.classList.contains("chip-close")) {
             const chip = e.target.closest(".chip");
-            const value2 = chip.getAttribute("data-value");
-            this.removeChip(value2);
+            const value = chip.getAttribute("data-value");
+            this.removeChip(value);
           }
         });
       }
@@ -12338,8 +12338,8 @@ var WcSelect = class extends WcBaseFormComponent {
       this.resetDropdown();
     } else if (e.key === "Enter" && allowDynamic) {
       e.preventDefault();
-      const value2 = e.target.value;
-      this.addChip(value2, value2);
+      const value = e.target.value;
+      this.addChip(value, value);
       this.resetDropdown();
     } else if (e.key === "Escape") {
       this.resetDropdown();
@@ -12372,19 +12372,19 @@ var WcSelect = class extends WcBaseFormComponent {
     this.highlightedIndex = -1;
     this.updateHighlight([]);
   }
-  addChip(value2, label) {
+  addChip(value, label) {
     const allowDynamic = this.hasAttribute("allow-dynamic");
-    if (this.selectedOptions.includes(value2)) return;
+    if (this.selectedOptions.includes(value)) return;
     setTimeout(() => {
       if (allowDynamic) {
         const selectElement = this.querySelector("select");
-        let exists = Array.from(selectElement.options).some((option) => option.value === value2);
+        let exists = Array.from(selectElement.options).some((option) => option.value === value);
         if (!exists) {
-          const newOption = new Option(label, value2);
+          const newOption = new Option(label, value);
           selectElement.add(newOption);
         }
       }
-      this.selectedOptions.push(value2);
+      this.selectedOptions.push(value);
       this.updateSelect();
       this.updateChips();
       this.updateDropdownOptions();
@@ -12392,8 +12392,8 @@ var WcSelect = class extends WcBaseFormComponent {
       this.dispatchEvent(event);
     }, 10);
   }
-  removeChip(value2) {
-    this.selectedOptions = this.selectedOptions.filter((v) => v !== value2);
+  removeChip(value) {
+    this.selectedOptions = this.selectedOptions.filter((v) => v !== value);
     this.updateSelect();
     this.updateChips();
     this.updateDropdownOptions();
@@ -12404,10 +12404,10 @@ var WcSelect = class extends WcBaseFormComponent {
     const chipContainer = this.querySelector("#chipContainer");
     if (chipContainer) {
       if (this.mode === "chip") {
-        chipContainer.innerHTML = this.selectedOptions.map((value2) => {
-          const option = Array.from(this.querySelectorAll("option")).find((opt) => opt.value === value2);
-          const label = option ? option.textContent : value2;
-          return `<div class="chip" data-value="${value2}">${label}<span class="chip-close">&times;</span></div>`;
+        chipContainer.innerHTML = this.selectedOptions.map((value) => {
+          const option = Array.from(this.querySelectorAll("option")).find((opt) => opt.value === value);
+          const label = option ? option.textContent : value;
+          return `<div class="chip" data-value="${value}">${label}<span class="chip-close">&times;</span></div>`;
         }).join("");
       }
     }
@@ -12503,8 +12503,8 @@ var WcTextarea = class extends WcBaseFormComponent {
     this.formElement = document.createElement("textarea");
     this.formElement.setAttribute("form-element", "");
     this.componentElement.appendChild(this.formElement);
-    const value2 = this.getAttribute("value") || "";
-    if (this.firstContent && !value2) {
+    const value = this.getAttribute("value") || "";
+    if (this.firstContent && !value) {
       this.setAttribute("value", this.firstContent.trim());
     }
   }

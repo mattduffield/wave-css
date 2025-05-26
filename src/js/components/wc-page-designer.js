@@ -2183,8 +2183,8 @@ if (!customElements.get('wc-page-designer')) {
       if (customProps && customProps.length > 0) {
         customProps.forEach(prop => {
           const input = document.getElementById(`prop-custom-${prop.name}`);
+          let value;
           if (input) {
-            let value;
             if (prop.type === 'boolean') {
               value = input.checked;
             } else if (prop.type === 'number') {
