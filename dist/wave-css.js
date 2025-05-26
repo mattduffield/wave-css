@@ -4890,7 +4890,7 @@ if (!customElements.get("wc-page-designer")) {
           <input class="sticky mx-2 mt-2 mb-2" type="search" id="element_filter" placeholder="Elements..."
             oninput="
             const query = this.value.trim().toLowerCase();
-            const elements = document.querySelectorAll('.filterable');
+            const elements = this.parentElement.querySelectorAll('.element-list .element-item');
             elements.forEach(el => {
               const text = el.textContent.trim().toLowerCase();
               if (query === '' || text.startsWith(query)) {
