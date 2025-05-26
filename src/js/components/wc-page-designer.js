@@ -2195,6 +2195,13 @@ if (!customElements.get('wc-page-designer')) {
             
             // Save the custom property value to the element
             this.designerState.selectedElement[prop.name] = value;
+          } else {
+            const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
+            if (chk) {
+              value = chk.value;
+              // Save the custom property value to the element
+              this.designerState.selectedElement[prop.name] = value;
+            }
           }
         });
       }
