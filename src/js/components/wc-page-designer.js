@@ -2182,23 +2182,22 @@ if (!customElements.get('wc-page-designer')) {
       const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
       if (customProps && customProps.length > 0) {
         customProps.forEach(prop => {
-          const input = document.getElementById(`prop-custom-${prop.name}`);
           let value;
-          if (input) {
-            if (prop.type === 'boolean') {
-              value = input.checked;
-            } else if (prop.type === 'number') {
-              value = input.value !== '' ? Number(input.value) : null;
-            } else {
-              value = input.value;
-            }
-            
+          const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
+          if (chk) {
+            value = chk.value;
             // Save the custom property value to the element
             this.designerState.selectedElement[prop.name] = value;
           } else {
-            const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
-            if (chk) {
-              value = chk.value;
+            const input = document.getElementById(`prop-custom-${prop.name}`);
+            if (input) {
+              if (prop.type === 'boolean') {
+                value = input.checked;
+              } else if (prop.type === 'number') {
+                value = input.value !== '' ? Number(input.value) : null;
+              } else {
+                value = input.value;
+              }
               // Save the custom property value to the element
               this.designerState.selectedElement[prop.name] = value;
             }

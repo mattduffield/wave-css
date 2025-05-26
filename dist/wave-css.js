@@ -6043,21 +6043,21 @@ if (!customElements.get("wc-page-designer")) {
       const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
       if (customProps && customProps.length > 0) {
         customProps.forEach((prop) => {
-          const input2 = document.getElementById(`prop-custom-${prop.name}`);
           let value;
-          if (input2) {
-            if (prop.type === "boolean") {
-              value = input2.checked;
-            } else if (prop.type === "number") {
-              value = input2.value !== "" ? Number(input2.value) : null;
-            } else {
-              value = input2.value;
-            }
+          const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
+          if (chk) {
+            value = chk.value;
             this.designerState.selectedElement[prop.name] = value;
           } else {
-            const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"][checked]`);
-            if (chk) {
-              value = chk.value;
+            const input2 = document.getElementById(`prop-custom-${prop.name}`);
+            if (input2) {
+              if (prop.type === "boolean") {
+                value = input2.checked;
+              } else if (prop.type === "number") {
+                value = input2.value !== "" ? Number(input2.value) : null;
+              } else {
+                value = input2.value;
+              }
               this.designerState.selectedElement[prop.name] = value;
             }
           }
