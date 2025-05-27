@@ -4016,6 +4016,10 @@ if (!customElements.get("wc-page-designer")) {
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
         "a": [
+          { name: "id", label: "ID", type: "string" },
+          { name: "type", label: "Type", type: "string" },
+          { name: "label", label: "Label", type: "string" },
+          { name: "css", label: "CSS", type: "string" },
           { name: "href", label: "Href", type: "string" },
           { name: "target", label: "Target", type: "string-enum", defaultValue: "", enum: ["", "_blank", "_parent", "_self", "_top"] }
         ],
@@ -5791,7 +5795,6 @@ if (!customElements.get("wc-page-designer")) {
         new Sortable(container2, {
           group: "elements",
           animation: 150,
-          dragClass: "cursor-grabbing",
           onEnd: (evt) => {
             this.updateElementsOrder(container2, element.id);
           }
