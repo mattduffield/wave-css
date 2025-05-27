@@ -5791,11 +5791,8 @@ if (!customElements.get("wc-page-designer")) {
         new Sortable(container2, {
           group: "elements",
           animation: 150,
-          onStart: (evt) => {
-            evt.item?.classList?.add("cursor-grabbing");
-          },
+          dragClass: "cursor-grabbing",
           onEnd: (evt) => {
-            evt.item?.classList?.add("cursor-pointer");
             this.updateElementsOrder(container2, element.id);
           }
         });
