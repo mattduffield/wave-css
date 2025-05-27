@@ -1847,10 +1847,10 @@ if (!customElements.get('wc-page-designer')) {
           group: 'elements',
           animation: 150,
           onStart: (evt) => {
-            element.classList.add('cursor-grabbing');
+            evt.item?.classList?.add('cursor-grabbing');
           },
           onEnd: (evt) => {
-            element.classList.add('cursor-pointer');
+            evt.item?.classList?.add('cursor-pointer');
             this.updateElementsOrder(container, element.id);
           }
         });
