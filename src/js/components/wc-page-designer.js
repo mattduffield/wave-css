@@ -69,39 +69,100 @@ if (!customElements.get('wc-page-designer')) {
       // Define custom properties for different element types
       this.elementCustomProperties = {
         'a': [
-          { name: 'id', label: 'ID', type: 'string' },
-          { name: 'type', label: 'Type', type: 'string' },
-          { name: 'label', label: 'Label', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
           { name: 'css', label: 'CSS', type: 'string' },
-          { name: 'href', label: 'Href', type: 'string' },
-          { name: 'target', label: 'Target', type: 'string-enum', defaultValue: '', enum: ['', '_blank', '_parent', '_self', '_top'] }
+          { name: 'href', label: 'Href', type: 'string', isSubLabel: true },
+          { name: 'target', label: 'Target', type: 'string-enum', defaultValue: '_self', enum: ['', '_blank', '_parent', '_self', '_top'] },
+        ],
+        'column': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
         ],
         'data-array': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'has_add_new', label: 'Has Add New?', type: 'boolean' },
         ],
         'data-item': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+        ],
+        'div': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
+        'fieldset': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Legend', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
+        'hr': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
         ],
         'option': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'value', label: 'Value', type: 'string' },
           { name: 'content', label: 'Content', type: 'multiline-string' },
-          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
+          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' },
+        ],
+        'row': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
         ],
         'wc-accordion-option': [
-          { name: 'value', label: 'Value', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'value', label: 'Value', type: 'string', isLabel: true },
           { name: 'content', label: 'Content', type: 'multiline-string' },
-          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
+          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' },
         ],
         'wc-accordion': [
-          { name: 'allow_many', label: 'Allow Many?', type: 'boolean' }
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'allow_many', label: 'Allow Many?', type: 'boolean' },
+        ],
+        'wc-article-skeleton': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
         ],
         'wc-breadcrumb': [
-          { name: 'title', label: 'Title', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'title', label: 'Title', type: 'string', isLabel: true },
         ],
         'wc-breadcrumb-item': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Legend', type: 'string', isLabel: true },
           { name: 'link', label: 'Link', type: 'string' },
         ],
+        'wc-background-image': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'caption', label: 'Caption', type: 'string', isLabel: true },
+          { name: 'url', label: 'URL', type: 'string', isSubLabel: true },
+        ],
+        'wc-card-skeleton': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+        ],
         'wc-code-mirror': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'name', label: 'Name', type: 'string' },
+          { name: 'label', label: 'Legend', type: 'string', isLabel: true },
           { name: 'theme', label: 'Theme', type: 'string-enum', defaultValue: '', enum: [
             "", "3024-day", "3024-night", "abcdef", "ambiance", "ayu-dark", "ayu-mirage",
             "base16-dark", "base16-light", "bespin", "blackboard", "cobalt", "colorforth",
@@ -115,7 +176,7 @@ if (!customElements.get('wc-page-designer')) {
             "tomorrow-night-eighties", "ttcn", "twilight", "vibrant-ink", "xq-dark",
             "xq-light", "yeti", "yonce", "zenburn"
           ] },
-          { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: '', enum: [
+          { name: 'mode', label: 'Mode', type: 'string-enum', isSubLabel: true, defaultValue: '', enum: [
             "", "apl", "asciiarmor", "asn.1", "asterisk", "brainfuck", "clike", "clojure",
             "cmake", "cobol", "coffeescript", "commonlisp", "crystal", "css", "cypher",
             "d", "dart", "diff", "django", "dockerfile", "dtd", "dylan", "ebnf", "ecl",
@@ -145,23 +206,34 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'script', label: 'Hyperscript', type: 'multiline-string' },
         ],
         'wc-contact-card': [
-          { name: 'contact_name', label: 'Name', type: 'string' },
-          { name: 'contact_title', label: 'Title', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'contact_name', label: 'Name', type: 'string', isLabel: true },
+          { name: 'contact_title', label: 'Title', type: 'string', isSubLabel: true },
           { name: 'contact_gender', label: 'Gender', type: 'string-radio-modern', defaultValue: '', enum: ['male', 'female'] },
         ],
         'wc-contact-chip': [
-          { name: 'contact_name', label: 'Name', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'contact_name', label: 'Name', type: 'string', isLabel: true },
           { name: 'contact_gender', label: 'Gender', type: 'string-radio-modern', defaultValue: '', enum: ['male', 'female'] },
         ],
         'wc-form': [
-          { name: 'method', label: 'Method', type: 'string-radio-modern', defaultValue: '', enum: ['get', 'post'] },
-          { name: 'action', label: 'Action', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'method', label: 'Method', type: 'string-radio-modern', isLabel: true, defaultValue: '', enum: ['get', 'post'] },
+          { name: 'action', label: 'Action', type: 'string', isSubLabel: true },
         ],
         'wc-hotkey': [
-          { name: 'keys', label: 'Keys', type: 'string' },
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'keys', label: 'Keys', type: 'string', isLabel: true },
           { name: 'target', label: 'Target', type: 'string' },
         ],
         'wc-image': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'url', label: 'URL', type: 'string' },
           { name: 'caption', label: 'Caption', type: 'string' },
           { name: 'hover_overlay', label: 'Hover Overlay?', type: 'boolean' },
@@ -170,114 +242,201 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'overlay_content', label: 'Overlay Content', type: 'multiline-string' },
         ],
         'wc-input': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'minlength', label: 'Min Length', type: 'string' },
           { name: 'maxlength', label: 'Max Length', type: 'string' },
           { name: 'placeholder', label: 'Placeholder', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-checkbox': [
-          { name: 'is_toggle', label: 'Is Toggle', type: 'boolean' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'is_toggle', label: 'Is Toggle?', type: 'boolean' },
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-currency': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
           { name: 'step', label: 'Step', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-date': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-email': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'minlength', label: 'Min Length', type: 'string' },
           { name: 'maxlength', label: 'Max Length', type: 'string' },
           { name: 'placeholder', label: 'Placeholder', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-month': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-number': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
           { name: 'step', label: 'Step', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-range': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
           { name: 'step', label: 'Step', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-tel': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'minlength', label: 'Min Length', type: 'string' },
           { name: 'maxlength', label: 'Max Length', type: 'string' },
           { name: 'placeholder', label: 'Placeholder', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-time': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-week': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'min', label: 'Min', type: 'string' },
           { name: 'max', label: 'Max', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-radio-collection': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'collName', label: 'Collection Name', type: 'string' },
           { name: 'collCSS', label: 'Collection CSS', type: 'string' },
           { name: 'collDisplayMember', label: 'Display Member', type: 'string' },
           { name: 'collValueMember', label: 'Value Member', type: 'string' },
           { name: 'group_class', label: 'Radio Group Class', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-radio-lookup': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'lookupName', label: 'Lookup Name', type: 'string' },
           { name: 'lookupCSS', label: 'Lookup CSS', type: 'string' },
           { name: 'group_class', label: 'Radio Group Class', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-input-radio': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'group_class', label: 'Radio Group Class', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-javascript': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'content', label: 'Content', type: 'multiline-string' },
-          { name: 'has_defer', label: 'Defer?', type: 'boolean' }
+          { name: 'has_defer', label: 'Defer?', type: 'boolean' },
+        ],
+        'wc-list-skeleton': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
         ],
         'wc-loader': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'size', label: 'Size', type: 'string' },
           { name: 'speed', label: 'Speed', type: 'string' },
-          { name: 'thickness', label: 'Thickness', type: 'string' }
+          { name: 'thickness', label: 'Thickness', type: 'string' },
         ],
         'wc-option': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'value', label: 'Value', type: 'string' },
-          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' }
+          { name: 'is_selected', label: 'Is Selected?', type: 'boolean' },
         ],
         'wc-save-button': [
-          { name: 'saveUrl', label: 'Save URL', type: 'string' }
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'saveUrl', label: 'Save URL', type: 'string' },
         ],
         'wc-save-split-button': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'positionArea', label: 'Position Area', type: 'string-enum', defaultValue: '', enum: [
             // Single keyword values
             "none",
@@ -370,51 +529,87 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'saveReturnUrl', label: 'Save Return URL', type: 'string' },
         ],
         'wc-script': [
-          { name: 'src', label: 'Src', type: 'string' }
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'src', label: 'Src', type: 'string' },
         ],
         'wc-select-multiple-collection': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: '', enum: ['', 'chip', 'multiple'] },
           { name: 'collName', label: 'Collection Name', type: 'string' },
           { name: 'collCSS', label: 'Collection CSS', type: 'string' },
           { name: 'collDisplayMember', label: 'Display Member', type: 'string' },
           { name: 'collValueMember', label: 'Value Member', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' },
-          { name: 'allow_dynamic', label: 'Allow Dynamic', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
+          { name: 'allow_dynamic', label: 'Allow Dynamic?', type: 'boolean' },
         ],
         'wc-select-multiple-lookup': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: '', enum: ['', 'chip', 'multiple'] },
           { name: 'lookupName', label: 'Lookup Name', type: 'string' },
           { name: 'lookupCSS', label: 'Lookup CSS', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' },
-          { name: 'allow_dynamic', label: 'Allow Dynamic', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
+          { name: 'allow_dynamic', label: 'Allow Dynamic?', type: 'boolean' },
         ],
         'wc-select-multiple': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: '', enum: ['', 'chip', 'multiple'] },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' },
-          { name: 'allow_dynamic', label: 'Allow Dynamic', type: 'boolean' }
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
+          { name: 'allow_dynamic', label: 'Allow Dynamic?', type: 'boolean' },
         ],
         'wc-select-collection': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'collName', label: 'Collection Name', type: 'string' },
           { name: 'collCSS', label: 'Collection CSS', type: 'string' },
           { name: 'collDisplayMember', label: 'Display Member', type: 'string' },
           { name: 'collValueMember', label: 'Value Member', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' },
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-select-lookup': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'lookupName', label: 'Lookup Name', type: 'string' },
           { name: 'lookupCSS', label: 'Lookup CSS', type: 'string' },
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' },
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-select': [
-          { name: 'is_readonly', label: 'Is Readonly', type: 'boolean' },
-          { name: 'is_disabled', label: 'Is Disabled', type: 'boolean' }
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-sidebar': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'width', label: 'Width', type: 'string' },
           { name: 'background_color', label: 'Background Color', type: 'string' },
           { name: 'push_target', label: 'Push Target', type: 'string' },
@@ -422,6 +617,10 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_right_side', label: 'Is Right Side?', type: 'boolean' },
         ],
         'wc-sidenav': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'width', label: 'Width', type: 'string' },
           { name: 'open_top', label: 'Open Top', type: 'string' },
           { name: 'open_btn_css', label: 'Open Button CSS', type: 'string' },
@@ -436,16 +635,25 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'is_overlay', label: 'Is Overlay?', type: 'boolean' },
         ],
         'wc-slideshow': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'autoplay', label: 'Autoplay?', type: 'boolean' },
           { name: 'autoplay_interval', label: 'Autoplay Interval', type: 'number' },
           { name: 'max_image_height', label: 'Max Image Height', type: 'string' }
         ],
         'wc-slideshow-image': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'url', label: 'URL', type: 'string' },
           { name: 'caption', label: 'Caption', type: 'string' },
           { name: 'numbertext', label: 'Number Text', type: 'string' }
         ],
         'wc-split-button': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'positionArea', label: 'Position Area', type: 'string-enum', defaultValue: '', enum: [
             // Single keyword values
             "none",
@@ -534,7 +742,25 @@ if (!customElements.get('wc-page-designer')) {
             "right self-end"
           ] }
         ],
+        'wc-tab': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
+        'wc-tab-item': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
+        'wc-table-skeleton': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+        ],
         'wc-tabulator': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'ajax_url', label: 'AJAX URL', type: 'string' },
           { name: 'ajax_params', label: 'AJAX Params', type: 'multiline-string' },
           { name: 'ajax_params_map', label: 'AJAX Params Map', type: 'multiline-string' },
@@ -570,6 +796,9 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'record_size', label: 'Record Size', type: 'number' },
         ],
         'wc-tabulator-column': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'field', label: 'Field', type: 'string' },
           { name: 'title', label: 'Title', type: 'string' },
           { name: 'title_formatter', label: 'Title Formatter', type: 'string-datalist', defaultValue: '', enum: [
@@ -688,19 +917,33 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'cell_click', label: 'Cell Click', type: 'multiline-string' },
         ],
         'wc-tabulator-func': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'name', label: 'Name', type: 'string' },
           { name: 'value', label: 'Value', type: 'multiline-string' },
         ],
         'wc-tabulator-row-menu': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
           { name: 'order', label: 'Order', type: 'number' },
           { name: 'icon', label: 'Icon', type: 'string' },
           { name: 'value', label: 'Value', type: 'multiline-string' },
         ],
         'wc-textarea': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'placeholder', label: 'Placeholder', type: 'string' },
-          { name: 'rows', label: 'Rows', type: 'number' }
+          { name: 'rows', label: 'Rows', type: 'number' },
+          { name: 'is_readonly', label: 'Is Readonly?', type: 'boolean' },
+          { name: 'is_disabled', label: 'Is Disabled?', type: 'boolean' },
+          { name: 'is_required', label: 'Is Required?', type: 'boolean' },
         ],
         'wc-theme-selector': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
           { name: 'theme', label: 'Theme', type: 'string-datalist', defaultValue: '', enum: [
             "theme-rose",
             "theme-petal",
@@ -746,7 +989,15 @@ if (!customElements.get('wc-page-designer')) {
           ] },
           { name: 'mode', label: 'Mode', type: 'string-radio-modern', defaultValue: '', enum: ['light', 'dark'] },
         ],
+        'wc-timeline': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
         'wc-timeline-option': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
           { name: 'value', label: 'Value', type: 'string' },
           { name: 'content', label: 'Content', type: 'multiline-string' },
         ],
@@ -999,27 +1250,8 @@ if (!customElements.get('wc-page-designer')) {
               <p>Select an element to view and edit its properties</p>
             </div>
             <div id="element-properties" class="col-1 gap-2 hidden">
-              <div class="row">
-                <wc-input name="prop-id" lbl-label="ID" class="col-1" readonly></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-type" lbl-label="Type" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-label" lbl-label="Label" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-scope" lbl-label="Scope" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-css" lbl-label="CSS" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-required" lbl-label="Required" class="col" type="checkbox" toggle-switch></wc-input>
-              </div>
               <!-- Custom properties will be dynamically added here -->
               <div id="custom-properties-container" class="mt-3">
-                <h6 class="text-muted mb-2 element-type-header">Custom Properties</h6>
                 <div id="custom-properties" class="col-1 gap-2"></div>
               </div>
               <div class="row">
@@ -1405,6 +1637,108 @@ if (!customElements.get('wc-page-designer')) {
       
       element.addEventListener('drop', e => {
         e.preventDefault();
+        e.stopPropagation();
+        
+        element.classList.remove('drag-over');
+        
+        const elementType = e.dataTransfer.getData('element-type');
+        const schemaField = e.dataTransfer.getData('schema-field');
+        
+        if (elementType) {
+          const id = this.generateUniqueId();
+          const newElement = {
+            id: id,
+            "data-id": id,
+            type: elementType,
+            elements: []
+          };
+      
+          // Initialize ALL custom properties with default values
+          const customProps = this.elementCustomProperties[elementType];
+          if (customProps && customProps.length > 0) {
+            customProps.forEach(prop => {
+              if (prop.type === 'boolean') {
+                newElement[prop.name] = false;
+              } else if (prop.type === 'number') {
+                newElement[prop.name] = null;
+              } else {
+                if (prop.name === 'id') {
+                  newElement[prop.name] = id;  
+                } else if (prop.name === 'type') {
+                  newElement[prop.name] = elementType;  
+                } else if (prop.name === 'label' && schemaField) {
+                  // Set label from schema field if available
+                  const parts = schemaField.split('/');
+                  let label = parts[parts.length - 1];
+                  if (schemaField.includes('$defs')) {
+                    const defName = parts[2];
+                    const fieldName = parts[parts.length - 1];
+                    if (defName && fieldName) {
+                      label = defName + '.' + fieldName;
+                    }
+                  }
+                  newElement[prop.name] = label;
+                } else if (prop.name === 'scope' && schemaField) {
+                  newElement[prop.name] = schemaField;
+                } else if (prop.defaultValue !== undefined) {
+                  newElement[prop.name] = prop.defaultValue;
+                } else {
+                  newElement[prop.name] = '';
+                }
+              }
+            });
+          }
+          
+          // Add to parent in the data model
+          if (parentElementId) {
+            const parentElement = this.findElementById(parentElementId);
+            if (parentElement) {
+              if (!parentElement.elements) {
+                parentElement.elements = [];
+              }
+              parentElement.elements.push(newElement);
+            }
+          } else {
+            this.designerState.elements.push(newElement);
+          }
+          
+          // Create the DOM element and continue with existing logic...
+          const placeholder = element.querySelector('.designer-element-placeholder');
+          if (placeholder && placeholder.parentNode === element) {
+            try {
+              element.removeChild(placeholder);
+            } catch (e) {
+              console.log('Could not remove placeholder:', e);
+            }
+          }
+          
+          const elementNode = this.createElementNode(newElement);
+          element.appendChild(elementNode);
+          
+          if (element.classList.contains('designer-element-container')) {
+            setTimeout(() => {
+              if (!element.querySelector('.designer-element-placeholder')) {
+                const newPlaceholder = document.createElement('div');
+                newPlaceholder.className = 'designer-element-placeholder';
+                newPlaceholder.textContent = 'Drop more elements here';
+                element.appendChild(newPlaceholder);
+              }
+            }, 100);
+          }
+          
+          if (this.isContainerElement(elementType)) {
+            const containerElements = document.querySelectorAll('.designer-element-container:not([data-drop-zone])');
+            containerElements.forEach(containerElement => {
+              const containerId = containerElement.getAttribute('data-container-for');
+              if (containerId) {
+                this.initDropZone(containerElement, containerId);
+              }
+            });
+          }
+        }
+      });
+      element.addEventListener('drop2', e => {
+        e.preventDefault();
         e.stopPropagation(); // Stop event propagation to prevent multiple drops
         
         // Remove visual indicator
@@ -1464,7 +1798,21 @@ if (!customElements.get('wc-page-designer')) {
               } else if (prop.type === 'number') {
                 newElement[prop.name] = null;
               } else {
-                newElement[prop.name] = '';
+                if (prop.name === 'id') {
+                  newElement[prop.name] = id;  
+                } else if (prop.name === 'type') {
+                  newElement[prop.name] = elementType;  
+                } else if (prop.name === 'label') {
+                  newElement[prop.name] = label;  
+                } else if (prop.name === 'scope') {
+                  newElement[prop.name] = scope;  
+                } else {
+                  if (prop.defaultValue) {
+                    newElement[prop.name] = prop.defaultValue;  
+                  } else {
+                    newElement[prop.name] = '';                    
+                  }
+                }
               }
             });
           }
@@ -1714,13 +2062,26 @@ if (!customElements.get('wc-page-designer')) {
         id: elementId,
         "data-id": elementId,
         type,
-        label,
-        scope,
-        css,
-        required: false,
-        rules: [],
         elements: []
       };
+      
+      // Initialize ALL custom properties for this element type
+      const customProps = this.elementCustomProperties[type];
+      if (customProps && customProps.length > 0) {
+        customProps.forEach(prop => {
+          if (prop.type === 'boolean') {
+            element[prop.name] = false;
+          } else if (prop.type === 'number') {
+            element[prop.name] = null;
+          } else {
+            if (prop.defaultValue !== undefined) {
+              element[prop.name] = prop.defaultValue;
+            } else {
+              element[prop.name] = '';
+            }
+          }
+        });
+      }
       
       if (parentElement) {
         const parent = this.findElementById(parentElement);
@@ -1759,50 +2120,48 @@ if (!customElements.get('wc-page-designer')) {
       typeHeader.className = 'element-type-header';
       typeHeader.textContent = element.type;
       node.appendChild(typeHeader);
-      
-      // Add label if present
-      // if (element.label) {
-        const labelElement = document.createElement('span');
-        labelElement.className = 'element-label';
-        labelElement.textContent = element.label;
-        node.appendChild(labelElement);
-        
-        // Add scope if present
-        if (element.scope) {
-          const scopeElement = document.createElement('small');
-          scopeElement.className = 'ms-2 text-muted';
-          scopeElement.textContent = `(${element.scope})`;
-          labelElement.appendChild(scopeElement);
-        }
-      // }
-
-
-      // Add indicator for custom properties
+    
+      const labelElement = document.createElement('span');
+      labelElement.className = 'element-label';
+      node.appendChild(labelElement);
+    
+      const subLabelElement = document.createElement('small');
+      subLabelElement.className = 'ms-2 text-muted';
+    
+      // Use ONLY custom properties to determine what to display
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
-        // Check if any custom properties have non-empty values
-        const hasCustomValues = customProps.some(prop => {
-          const value = element[prop.name];
-          if (prop.type === 'boolean') {
-            return value === true;
-          } else if (prop.type === 'number') {
-            return value !== null && value !== undefined;
-          } else {
-            return value && value.trim() !== '';
+        let hasLabel = false;
+        let subLabelText = '';
+        
+        customProps.forEach(prop => {
+          if (prop.isLabel && element[prop.name]) {
+            labelElement.textContent = element[prop.name];
+            hasLabel = true;
+          } else if (prop.isSubLabel) {
+            const subLabelValue = element[prop.name];
+            if (subLabelValue && subLabelValue.trim() !== '') {
+              subLabelText = `(${subLabelValue})`;
+            }
           }
         });
         
-        if (hasCustomValues) {
-          const customPropsIndicator = document.createElement('small');
-          customPropsIndicator.className = 'ms-2 text-primary';
-          customPropsIndicator.textContent = '(*)';
-          customPropsIndicator.title = 'Has custom properties';
-          labelElement.appendChild(customPropsIndicator);
+        // If no custom properties are marked as labels, show element type
+        if (!hasLabel) {
+          labelElement.textContent = element.type;
         }
+        
+        // Only add sub-label if there's actual content
+        if (subLabelText) {
+          subLabelElement.textContent = subLabelText;
+          labelElement.appendChild(subLabelElement);
+        }
+      } else {
+        // Fallback if no custom properties defined
+        labelElement.textContent = element.type;
       }
-
       
-      // Add element actions
+      // Rest of the method remains the same...
       const actions = document.createElement('div');
       actions.className = 'element-actions';
       
@@ -1810,7 +2169,7 @@ if (!customElements.get('wc-page-designer')) {
       deleteButton.className = 'btn btn-sm btn-outline-danger';
       deleteButton.textContent = 'Delete';
       deleteButton.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent selection when deleting
+        e.stopPropagation();
         this.removeElement(element.id);
       });
       actions.appendChild(deleteButton);
@@ -1823,30 +2182,26 @@ if (!customElements.get('wc-page-designer')) {
         this.selectElement(element.id);
       });
       
-      // Add container for child elements if needed
+      // Add container logic if needed...
       if (this.isContainerElement(element.type)) {
         const container = document.createElement('div');
         container.className = 'designer-element-container';
         container.setAttribute('data-container-for', element.id);
         
-        // If empty, add a placeholder
         if (!element.elements || element.elements.length === 0) {
           const placeholder = document.createElement('div');
           placeholder.className = 'designer-element-placeholder';
           placeholder.textContent = 'Drop elements here';
           container.appendChild(placeholder);
         } else {
-          // Add existing child elements
           element.elements.forEach(childElement => {
             const childNode = this.createElementNode(childElement);
             container.appendChild(childNode);
           });
         }
         
-        // Make the container a drop zone
         this.initDropZone(container, element.id);
         
-        // Initialize sortable for the container
         new Sortable(container, {
           group: 'elements',
           animation: 150,
@@ -1860,7 +2215,7 @@ if (!customElements.get('wc-page-designer')) {
       
       return node;
     }
-
+    
     // Update Elements Order
     updateElementsOrder(container, parentId) {
       const parent = this.findElementById(parentId);
@@ -1916,38 +2271,70 @@ if (!customElements.get('wc-page-designer')) {
 
     // Update Properties
     updateProperties(element) {
-      this.propId.value = element.id;
-      this.propType.value = element.type;
-      this.propLabel.value = element.label || '';
-      this.propScope.value = element.scope || '';
-      this.propCss.value = element.css || '';
-      this.propRequired.checked = element.required || false;
-      
-      // Clear existing custom properties
+      // Clear all property inputs first
       const customPropertiesContainer = document.getElementById('custom-properties');
       customPropertiesContainer.innerHTML = '';
       
-      // Hide the custom properties section by default
-      document.getElementById('custom-properties-container').style.display = 'none';
+      // Show custom properties container
+      document.getElementById('custom-properties-container').style.display = 'block';
       
       // Check if this element type has custom properties
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
-        // Show the custom properties section
-        document.getElementById('custom-properties-container').style.display = 'block';
-        
-        // Add custom property inputs
+        // Add all custom property inputs (readonly and editable together)
         customProps.forEach(prop => {
-          const propValue = element[prop.name];
           const value = element[prop.name] !== undefined ? element[prop.name] : 
                (prop.type === 'boolean' ? false : 
-                prop.type === 'number' ? null : '');
+                prop.type === 'number' ? null : 
+                prop.defaultValue || '');
           const propInput = this.createCustomPropertyInput(prop, value);
           customPropertiesContainer.appendChild(propInput);
         });
-      }      
+      } else {
+        // Show message that no properties are available
+        const noPropsMessage = document.createElement('p');
+        noPropsMessage.className = 'text-muted text-center';
+        noPropsMessage.textContent = 'No custom properties defined for this element type';
+        customPropertiesContainer.appendChild(noPropsMessage);
+      }
     }
-
+    updateProperties2(element) {
+      // Clear all property inputs first
+      const customPropertiesContainer = document.getElementById('custom-properties');
+      customPropertiesContainer.innerHTML = '';
+      
+      // Hide the default properties section completely
+      document.getElementById('element-properties').querySelector('.row').style.display = 'none';
+      document.querySelectorAll('#element-properties .row').forEach((row, index) => {
+        if (index < 6) { // Hide the first 6 rows (id, type, label, scope, css, required)
+          row.style.display = 'none';
+        }
+      });
+      
+      // Show custom properties container
+      document.getElementById('custom-properties-container').style.display = 'block';
+      
+      // Check if this element type has custom properties
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        // Add custom property inputs
+        customProps.forEach(prop => {
+          const value = element[prop.name] !== undefined ? element[prop.name] : 
+               (prop.type === 'boolean' ? false : 
+                prop.type === 'number' ? null : 
+                prop.defaultValue || '');
+          const propInput = this.createCustomPropertyInput(prop, value);
+          customPropertiesContainer.appendChild(propInput);
+        });
+      } else {
+        // Show message that no properties are available
+        const noPropsMessage = document.createElement('p');
+        noPropsMessage.className = 'text-muted text-center';
+        noPropsMessage.textContent = 'No custom properties defined for this element type';
+        customPropertiesContainer.appendChild(noPropsMessage);
+      }
+    }
+    
     // Update Rules Panel
     updateRulesPanel(element) {
       this.rulesList.innerHTML = '';
@@ -2214,22 +2601,19 @@ if (!customElements.get('wc-page-designer')) {
     saveProperties() {
       if (!this.designerState.selectedElement) return;
       
-      // Update element properties in the data model
-      this.designerState.selectedElement.type = this.propType.value;
-      this.designerState.selectedElement.label = this.propLabel.value;
-      this.designerState.selectedElement.scope = this.propScope.value;
-      this.designerState.selectedElement.css = this.propCss.value;
-      this.designerState.selectedElement.required = this.propRequired.checked;
-      
-      // Update custom properties
+      // Update only custom properties that are not readonly
       const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
       if (customProps && customProps.length > 0) {
         customProps.forEach(prop => {
+          // Skip readonly properties
+          if (prop.isReadonly) {
+            return;
+          }
+          
           let value;
           const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"]:checked`);
           if (chk) {
             value = chk.value;
-            // Save the custom property value to the element
             this.designerState.selectedElement[prop.name] = value;
           } else {
             const input = document.getElementById(`prop-custom-${prop.name}`);
@@ -2241,16 +2625,15 @@ if (!customElements.get('wc-page-designer')) {
               } else {
                 value = input.value;
               }
-              // Save the custom property value to the element
               this.designerState.selectedElement[prop.name] = value;
             }
           }
         });
       }
-
+    
       // Update layout JSON
       this.generateJson();
-
+    
       // Refresh the designer to show the changes
       this.refreshDesigner();
       wc.Prompt.toast({title: 'Properties Updated!'});
@@ -2629,6 +3012,133 @@ if (!customElements.get('wc-page-designer')) {
     //
 
     createCustomPropertyInput(property, value) {
+      const row = document.createElement('div');
+      row.className = 'row mb-2';
+      
+      // Create input element based on property type
+      let input;
+      const propId = `prop-custom-${property.name}`;
+      
+      if (property.type === 'boolean') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col');
+        input.setAttribute('type', 'checkbox');
+        input.setAttribute('toggle-switch', '');
+        if (value === true) {
+          input.setAttribute('checked', '');
+          setTimeout(() => {
+            input.checked = true;
+          }, 10);
+        }
+        // Apply readonly/disabled for boolean
+        if (property.isReadonly) {
+          input.setAttribute('disabled', '');
+        }
+      } else if (property.type === 'number') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('type', 'number');
+        input.setAttribute('value', value !== undefined ? value : 0);
+        // Apply readonly for number
+        if (property.isReadonly) {
+          input.setAttribute('readonly', '');
+        }
+      } else if (property.type === 'multiline-string') {
+        input = new (customElements.get('wc-textarea'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
+        // Apply readonly for textarea
+        if (property.isReadonly) {
+          input.setAttribute('readonly', '');
+        }
+      } else if (property.type === 'string-datalist') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
+        input.setAttribute('list', `${propId}_list`);
+        // Apply readonly for datalist
+        if (property.isReadonly) {
+          input.setAttribute('readonly', '');
+        }
+        const datalist = document.createElement('datalist');
+        datalist.id = `${propId}_list`;
+        property.enum.forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          datalist.appendChild(option);
+        });
+        row.appendChild(datalist);
+      } else if (property.type === 'string-enum') {
+        input = new (customElements.get('wc-select'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
+        const items = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
+        input.setAttribute('items', `[${items}]`);
+        // Apply disabled for select
+        if (property.isReadonly) {
+          input.setAttribute('disabled', '');
+        }
+      } else if (property.type === 'string-radio-modern') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('type', 'radio');
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('radio-group-class', 'row modern');
+        input.setAttribute('value', value !== undefined ? value : '');
+        const options = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
+        input.setAttribute('options', `[${options}]`);
+        // Apply disabled for radio
+        if (property.isReadonly) {
+          input.setAttribute('disabled', '');
+        }
+      } else if (property.type === 'string-radio') {
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('type', 'radio');
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('radio-group-class', 'row');
+        input.setAttribute('value', value !== undefined ? value : '');
+        const options = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
+        input.setAttribute('options', `[${options}]`);
+        // Apply disabled for radio
+        if (property.isReadonly) {
+          input.setAttribute('disabled', '');
+        }
+      } else {
+        // Default to string type
+        input = new (customElements.get('wc-input'))();
+        input.setAttribute('name', propId);
+        input.setAttribute('lbl-label', property.label);
+        input.setAttribute('class', 'col-1');
+        input.setAttribute('value', value !== undefined ? value : '');
+        // Apply readonly for string inputs
+        if (property.isReadonly) {
+          input.setAttribute('readonly', '');
+        }
+      }
+      
+      // Store a reference to the property configuration for later retrieval
+      input.dataset.propertyName = property.name;
+      input.dataset.propertyType = property.type;
+      input.dataset.isReadonly = property.isReadonly ? 'true' : 'false';
+      
+      row.appendChild(input);
+      return row;
+    }
+    createCustomPropertyInput2(property, value) {
       const row = document.createElement('div');
       row.className = 'row mb-2';
       

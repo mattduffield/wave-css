@@ -4016,38 +4016,100 @@ if (!customElements.get("wc-page-designer")) {
       this.loadStyle = loadStyle.bind(this);
       this.elementCustomProperties = {
         "a": [
-          { name: "id", label: "ID", type: "string" },
-          { name: "type", label: "Type", type: "string" },
-          { name: "label", label: "Label", type: "string" },
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
           { name: "css", label: "CSS", type: "string" },
-          { name: "href", label: "Href", type: "string" },
-          { name: "target", label: "Target", type: "string-enum", defaultValue: "", enum: ["", "_blank", "_parent", "_self", "_top"] }
+          { name: "href", label: "Href", type: "string", isSubLabel: true },
+          { name: "target", label: "Target", type: "string-enum", defaultValue: "_self", enum: ["", "_blank", "_parent", "_self", "_top"] }
+        ],
+        "column": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
         ],
         "data-array": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "has_add_new", label: "Has Add New?", type: "boolean" }
         ],
-        "data-item": [],
+        "data-item": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true }
+        ],
+        "div": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
+        "fieldset": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Legend", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
+        "hr": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
         "option": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "value", label: "Value", type: "string" },
           { name: "content", label: "Content", type: "multiline-string" },
           { name: "is_selected", label: "Is Selected?", type: "boolean" }
         ],
+        "row": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
         "wc-accordion-option": [
-          { name: "value", label: "Value", type: "string" },
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
+          { name: "value", label: "Value", type: "string", isLabel: true },
           { name: "content", label: "Content", type: "multiline-string" },
           { name: "is_selected", label: "Is Selected?", type: "boolean" }
         ],
         "wc-accordion": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "allow_many", label: "Allow Many?", type: "boolean" }
         ],
+        "wc-article-skeleton": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true }
+        ],
         "wc-breadcrumb": [
-          { name: "title", label: "Title", type: "string" }
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "title", label: "Title", type: "string", isLabel: true }
         ],
         "wc-breadcrumb-item": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Legend", type: "string", isLabel: true },
           { name: "link", label: "Link", type: "string" }
         ],
+        "wc-background-image": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "caption", label: "Caption", type: "string", isLabel: true },
+          { name: "url", label: "URL", type: "string", isSubLabel: true }
+        ],
+        "wc-card-skeleton": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true }
+        ],
         "wc-code-mirror": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "name", label: "Name", type: "string" },
+          { name: "label", label: "Legend", type: "string", isLabel: true },
           { name: "theme", label: "Theme", type: "string-enum", defaultValue: "", enum: [
             "",
             "3024-day",
@@ -4114,7 +4176,7 @@ if (!customElements.get("wc-page-designer")) {
             "yonce",
             "zenburn"
           ] },
-          { name: "mode", label: "Mode", type: "string-enum", defaultValue: "", enum: [
+          { name: "mode", label: "Mode", type: "string-enum", isSubLabel: true, defaultValue: "", enum: [
             "",
             "apl",
             "asciiarmor",
@@ -4247,23 +4309,34 @@ if (!customElements.get("wc-page-designer")) {
           { name: "script", label: "Hyperscript", type: "multiline-string" }
         ],
         "wc-contact-card": [
-          { name: "contact_name", label: "Name", type: "string" },
-          { name: "contact_title", label: "Title", type: "string" },
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "contact_name", label: "Name", type: "string", isLabel: true },
+          { name: "contact_title", label: "Title", type: "string", isSubLabel: true },
           { name: "contact_gender", label: "Gender", type: "string-radio-modern", defaultValue: "", enum: ["male", "female"] }
         ],
         "wc-contact-chip": [
-          { name: "contact_name", label: "Name", type: "string" },
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "contact_name", label: "Name", type: "string", isLabel: true },
           { name: "contact_gender", label: "Gender", type: "string-radio-modern", defaultValue: "", enum: ["male", "female"] }
         ],
         "wc-form": [
-          { name: "method", label: "Method", type: "string-radio-modern", defaultValue: "", enum: ["get", "post"] },
-          { name: "action", label: "Action", type: "string" }
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
+          { name: "method", label: "Method", type: "string-radio-modern", isLabel: true, defaultValue: "", enum: ["get", "post"] },
+          { name: "action", label: "Action", type: "string", isSubLabel: true }
         ],
         "wc-hotkey": [
-          { name: "keys", label: "Keys", type: "string" },
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "keys", label: "Keys", type: "string", isLabel: true },
           { name: "target", label: "Target", type: "string" }
         ],
         "wc-image": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "url", label: "URL", type: "string" },
           { name: "caption", label: "Caption", type: "string" },
           { name: "hover_overlay", label: "Hover Overlay?", type: "boolean" },
@@ -4272,114 +4345,201 @@ if (!customElements.get("wc-page-designer")) {
           { name: "overlay_content", label: "Overlay Content", type: "multiline-string" }
         ],
         "wc-input": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-checkbox": [
-          { name: "is_toggle", label: "Is Toggle", type: "boolean" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
+          { name: "is_toggle", label: "Is Toggle?", type: "boolean" },
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-currency": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-date": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-email": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-month": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-number": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-range": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
           { name: "step", label: "Step", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-tel": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "minlength", label: "Min Length", type: "string" },
           { name: "maxlength", label: "Max Length", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-time": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-week": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "min", label: "Min", type: "string" },
           { name: "max", label: "Max", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-radio-collection": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "collName", label: "Collection Name", type: "string" },
           { name: "collCSS", label: "Collection CSS", type: "string" },
           { name: "collDisplayMember", label: "Display Member", type: "string" },
           { name: "collValueMember", label: "Value Member", type: "string" },
           { name: "group_class", label: "Radio Group Class", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-radio-lookup": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "lookupName", label: "Lookup Name", type: "string" },
           { name: "lookupCSS", label: "Lookup CSS", type: "string" },
           { name: "group_class", label: "Radio Group Class", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-input-radio": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "group_class", label: "Radio Group Class", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-javascript": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "content", label: "Content", type: "multiline-string" },
           { name: "has_defer", label: "Defer?", type: "boolean" }
         ],
+        "wc-list-skeleton": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true }
+        ],
         "wc-loader": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "size", label: "Size", type: "string" },
           { name: "speed", label: "Speed", type: "string" },
           { name: "thickness", label: "Thickness", type: "string" }
         ],
         "wc-option": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "value", label: "Value", type: "string" },
           { name: "is_selected", label: "Is Selected?", type: "boolean" }
         ],
         "wc-save-button": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
           { name: "saveUrl", label: "Save URL", type: "string" }
         ],
         "wc-save-split-button": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "positionArea", label: "Position Area", type: "string-enum", defaultValue: "", enum: [
             // Single keyword values
             "none",
@@ -4463,51 +4623,87 @@ if (!customElements.get("wc-page-designer")) {
           { name: "saveReturnUrl", label: "Save Return URL", type: "string" }
         ],
         "wc-script": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "src", label: "Src", type: "string" }
         ],
         "wc-select-multiple-collection": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "mode", label: "Mode", type: "string-enum", defaultValue: "", enum: ["", "chip", "multiple"] },
           { name: "collName", label: "Collection Name", type: "string" },
           { name: "collCSS", label: "Collection CSS", type: "string" },
           { name: "collDisplayMember", label: "Display Member", type: "string" },
           { name: "collValueMember", label: "Value Member", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" },
-          { name: "allow_dynamic", label: "Allow Dynamic", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" },
+          { name: "allow_dynamic", label: "Allow Dynamic?", type: "boolean" }
         ],
         "wc-select-multiple-lookup": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "mode", label: "Mode", type: "string-enum", defaultValue: "", enum: ["", "chip", "multiple"] },
           { name: "lookupName", label: "Lookup Name", type: "string" },
           { name: "lookupCSS", label: "Lookup CSS", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" },
-          { name: "allow_dynamic", label: "Allow Dynamic", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" },
+          { name: "allow_dynamic", label: "Allow Dynamic?", type: "boolean" }
         ],
         "wc-select-multiple": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "mode", label: "Mode", type: "string-enum", defaultValue: "", enum: ["", "chip", "multiple"] },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" },
-          { name: "allow_dynamic", label: "Allow Dynamic", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" },
+          { name: "allow_dynamic", label: "Allow Dynamic?", type: "boolean" }
         ],
         "wc-select-collection": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "collName", label: "Collection Name", type: "string" },
           { name: "collCSS", label: "Collection CSS", type: "string" },
           { name: "collDisplayMember", label: "Display Member", type: "string" },
           { name: "collValueMember", label: "Value Member", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-select-lookup": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "lookupName", label: "Lookup Name", type: "string" },
           { name: "lookupCSS", label: "Lookup CSS", type: "string" },
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-select": [
-          { name: "is_readonly", label: "Is Readonly", type: "boolean" },
-          { name: "is_disabled", label: "Is Disabled", type: "boolean" }
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-sidebar": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "width", label: "Width", type: "string" },
           { name: "background_color", label: "Background Color", type: "string" },
           { name: "push_target", label: "Push Target", type: "string" },
@@ -4515,6 +4711,10 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_right_side", label: "Is Right Side?", type: "boolean" }
         ],
         "wc-sidenav": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "width", label: "Width", type: "string" },
           { name: "open_top", label: "Open Top", type: "string" },
           { name: "open_btn_css", label: "Open Button CSS", type: "string" },
@@ -4529,16 +4729,25 @@ if (!customElements.get("wc-page-designer")) {
           { name: "is_overlay", label: "Is Overlay?", type: "boolean" }
         ],
         "wc-slideshow": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "autoplay", label: "Autoplay?", type: "boolean" },
           { name: "autoplay_interval", label: "Autoplay Interval", type: "number" },
           { name: "max_image_height", label: "Max Image Height", type: "string" }
         ],
         "wc-slideshow-image": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "url", label: "URL", type: "string" },
           { name: "caption", label: "Caption", type: "string" },
           { name: "numbertext", label: "Number Text", type: "string" }
         ],
         "wc-split-button": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "positionArea", label: "Position Area", type: "string-enum", defaultValue: "", enum: [
             // Single keyword values
             "none",
@@ -4618,7 +4827,25 @@ if (!customElements.get("wc-page-designer")) {
             "right self-end"
           ] }
         ],
+        "wc-tab": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
+        "wc-tab-item": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
+        "wc-table-skeleton": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true }
+        ],
         "wc-tabulator": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "ajax_url", label: "AJAX URL", type: "string" },
           { name: "ajax_params", label: "AJAX Params", type: "multiline-string" },
           { name: "ajax_params_map", label: "AJAX Params Map", type: "multiline-string" },
@@ -4655,6 +4882,9 @@ if (!customElements.get("wc-page-designer")) {
           { name: "record_size", label: "Record Size", type: "number" }
         ],
         "wc-tabulator-column": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "field", label: "Field", type: "string" },
           { name: "title", label: "Title", type: "string" },
           { name: "title_formatter", label: "Title Formatter", type: "string-datalist", defaultValue: "", enum: [
@@ -4772,19 +5002,33 @@ if (!customElements.get("wc-page-designer")) {
           { name: "cell_click", label: "Cell Click", type: "multiline-string" }
         ],
         "wc-tabulator-func": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "name", label: "Name", type: "string" },
           { name: "value", label: "Value", type: "multiline-string" }
         ],
         "wc-tabulator-row-menu": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
           { name: "order", label: "Order", type: "number" },
           { name: "icon", label: "Icon", type: "string" },
           { name: "value", label: "Value", type: "multiline-string" }
         ],
         "wc-textarea": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "label", label: "Label", type: "string", isLabel: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "placeholder", label: "Placeholder", type: "string" },
-          { name: "rows", label: "Rows", type: "number" }
+          { name: "rows", label: "Rows", type: "number" },
+          { name: "is_readonly", label: "Is Readonly?", type: "boolean" },
+          { name: "is_disabled", label: "Is Disabled?", type: "boolean" },
+          { name: "is_required", label: "Is Required?", type: "boolean" }
         ],
         "wc-theme-selector": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
           { name: "theme", label: "Theme", type: "string-datalist", defaultValue: "", enum: [
             "theme-rose",
             "theme-petal",
@@ -4830,7 +5074,15 @@ if (!customElements.get("wc-page-designer")) {
           ] },
           { name: "mode", label: "Mode", type: "string-radio-modern", defaultValue: "", enum: ["light", "dark"] }
         ],
+        "wc-timeline": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" }
+        ],
         "wc-timeline-option": [
+          { name: "id", label: "ID", type: "string", isReadonly: true },
+          { name: "type", label: "Type", type: "string", isReadonly: true },
+          { name: "css", label: "CSS", type: "string" },
           { name: "value", label: "Value", type: "string" },
           { name: "content", label: "Content", type: "multiline-string" }
         ]
@@ -5072,27 +5324,8 @@ if (!customElements.get("wc-page-designer")) {
               <p>Select an element to view and edit its properties</p>
             </div>
             <div id="element-properties" class="col-1 gap-2 hidden">
-              <div class="row">
-                <wc-input name="prop-id" lbl-label="ID" class="col-1" readonly></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-type" lbl-label="Type" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-label" lbl-label="Label" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-scope" lbl-label="Scope" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-css" lbl-label="CSS" class="col-1"></wc-input>
-              </div>
-              <div class="row">
-                <wc-input name="prop-required" lbl-label="Required" class="col" type="checkbox" toggle-switch></wc-input>
-              </div>
               <!-- Custom properties will be dynamically added here -->
               <div id="custom-properties-container" class="mt-3">
-                <h6 class="text-muted mb-2 element-type-header">Custom Properties</h6>
                 <div id="custom-properties" class="col-1 gap-2"></div>
               </div>
               <div class="row">
@@ -5453,6 +5686,95 @@ if (!customElements.get("wc-page-designer")) {
         const elementType = e.dataTransfer.getData("element-type");
         const schemaField = e.dataTransfer.getData("schema-field");
         if (elementType) {
+          const id = this.generateUniqueId();
+          const newElement = {
+            id,
+            "data-id": id,
+            type: elementType,
+            elements: []
+          };
+          const customProps = this.elementCustomProperties[elementType];
+          if (customProps && customProps.length > 0) {
+            customProps.forEach((prop) => {
+              if (prop.type === "boolean") {
+                newElement[prop.name] = false;
+              } else if (prop.type === "number") {
+                newElement[prop.name] = null;
+              } else {
+                if (prop.name === "id") {
+                  newElement[prop.name] = id;
+                } else if (prop.name === "type") {
+                  newElement[prop.name] = elementType;
+                } else if (prop.name === "label" && schemaField) {
+                  const parts = schemaField.split("/");
+                  let label = parts[parts.length - 1];
+                  if (schemaField.includes("$defs")) {
+                    const defName = parts[2];
+                    const fieldName = parts[parts.length - 1];
+                    if (defName && fieldName) {
+                      label = defName + "." + fieldName;
+                    }
+                  }
+                  newElement[prop.name] = label;
+                } else if (prop.name === "scope" && schemaField) {
+                  newElement[prop.name] = schemaField;
+                } else if (prop.defaultValue !== void 0) {
+                  newElement[prop.name] = prop.defaultValue;
+                } else {
+                  newElement[prop.name] = "";
+                }
+              }
+            });
+          }
+          if (parentElementId) {
+            const parentElement = this.findElementById(parentElementId);
+            if (parentElement) {
+              if (!parentElement.elements) {
+                parentElement.elements = [];
+              }
+              parentElement.elements.push(newElement);
+            }
+          } else {
+            this.designerState.elements.push(newElement);
+          }
+          const placeholder = element.querySelector(".designer-element-placeholder");
+          if (placeholder && placeholder.parentNode === element) {
+            try {
+              element.removeChild(placeholder);
+            } catch (e2) {
+              console.log("Could not remove placeholder:", e2);
+            }
+          }
+          const elementNode = this.createElementNode(newElement);
+          element.appendChild(elementNode);
+          if (element.classList.contains("designer-element-container")) {
+            setTimeout(() => {
+              if (!element.querySelector(".designer-element-placeholder")) {
+                const newPlaceholder = document.createElement("div");
+                newPlaceholder.className = "designer-element-placeholder";
+                newPlaceholder.textContent = "Drop more elements here";
+                element.appendChild(newPlaceholder);
+              }
+            }, 100);
+          }
+          if (this.isContainerElement(elementType)) {
+            const containerElements = document.querySelectorAll(".designer-element-container:not([data-drop-zone])");
+            containerElements.forEach((containerElement) => {
+              const containerId = containerElement.getAttribute("data-container-for");
+              if (containerId) {
+                this.initDropZone(containerElement, containerId);
+              }
+            });
+          }
+        }
+      });
+      element.addEventListener("drop2", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.remove("drag-over");
+        const elementType = e.dataTransfer.getData("element-type");
+        const schemaField = e.dataTransfer.getData("schema-field");
+        if (elementType) {
           let scope = "";
           let label = "";
           if (schemaField) {
@@ -5491,7 +5813,21 @@ if (!customElements.get("wc-page-designer")) {
               } else if (prop.type === "number") {
                 newElement[prop.name] = null;
               } else {
-                newElement[prop.name] = "";
+                if (prop.name === "id") {
+                  newElement[prop.name] = id;
+                } else if (prop.name === "type") {
+                  newElement[prop.name] = elementType;
+                } else if (prop.name === "label") {
+                  newElement[prop.name] = label;
+                } else if (prop.name === "scope") {
+                  newElement[prop.name] = scope;
+                } else {
+                  if (prop.defaultValue) {
+                    newElement[prop.name] = prop.defaultValue;
+                  } else {
+                    newElement[prop.name] = "";
+                  }
+                }
               }
             });
           }
@@ -5698,13 +6034,24 @@ if (!customElements.get("wc-page-designer")) {
         id: elementId,
         "data-id": elementId,
         type,
-        label,
-        scope,
-        css,
-        required: false,
-        rules: [],
         elements: []
       };
+      const customProps = this.elementCustomProperties[type];
+      if (customProps && customProps.length > 0) {
+        customProps.forEach((prop) => {
+          if (prop.type === "boolean") {
+            element[prop.name] = false;
+          } else if (prop.type === "number") {
+            element[prop.name] = null;
+          } else {
+            if (prop.defaultValue !== void 0) {
+              element[prop.name] = prop.defaultValue;
+            } else {
+              element[prop.name] = "";
+            }
+          }
+        });
+      }
       if (parentElement) {
         const parent = this.findElementById(parentElement);
         if (parent) {
@@ -5733,33 +6080,33 @@ if (!customElements.get("wc-page-designer")) {
       node.appendChild(typeHeader);
       const labelElement = document.createElement("span");
       labelElement.className = "element-label";
-      labelElement.textContent = element.label;
       node.appendChild(labelElement);
-      if (element.scope) {
-        const scopeElement = document.createElement("small");
-        scopeElement.className = "ms-2 text-muted";
-        scopeElement.textContent = `(${element.scope})`;
-        labelElement.appendChild(scopeElement);
-      }
+      const subLabelElement = document.createElement("small");
+      subLabelElement.className = "ms-2 text-muted";
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
-        const hasCustomValues = customProps.some((prop) => {
-          const value = element[prop.name];
-          if (prop.type === "boolean") {
-            return value === true;
-          } else if (prop.type === "number") {
-            return value !== null && value !== void 0;
-          } else {
-            return value && value.trim() !== "";
+        let hasLabel = false;
+        let subLabelText = "";
+        customProps.forEach((prop) => {
+          if (prop.isLabel && element[prop.name]) {
+            labelElement.textContent = element[prop.name];
+            hasLabel = true;
+          } else if (prop.isSubLabel) {
+            const subLabelValue = element[prop.name];
+            if (subLabelValue && subLabelValue.trim() !== "") {
+              subLabelText = `(${subLabelValue})`;
+            }
           }
         });
-        if (hasCustomValues) {
-          const customPropsIndicator = document.createElement("small");
-          customPropsIndicator.className = "ms-2 text-primary";
-          customPropsIndicator.textContent = "(*)";
-          customPropsIndicator.title = "Has custom properties";
-          labelElement.appendChild(customPropsIndicator);
+        if (!hasLabel) {
+          labelElement.textContent = element.type;
         }
+        if (subLabelText) {
+          subLabelElement.textContent = subLabelText;
+          labelElement.appendChild(subLabelElement);
+        }
+      } else {
+        labelElement.textContent = element.type;
       }
       const actions = document.createElement("div");
       actions.className = "element-actions";
@@ -5838,24 +6185,45 @@ if (!customElements.get("wc-page-designer")) {
     }
     // Update Properties
     updateProperties(element) {
-      this.propId.value = element.id;
-      this.propType.value = element.type;
-      this.propLabel.value = element.label || "";
-      this.propScope.value = element.scope || "";
-      this.propCss.value = element.css || "";
-      this.propRequired.checked = element.required || false;
       const customPropertiesContainer = document.getElementById("custom-properties");
       customPropertiesContainer.innerHTML = "";
-      document.getElementById("custom-properties-container").style.display = "none";
+      document.getElementById("custom-properties-container").style.display = "block";
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
-        document.getElementById("custom-properties-container").style.display = "block";
         customProps.forEach((prop) => {
-          const propValue = element[prop.name];
-          const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : "";
+          const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : prop.defaultValue || "";
           const propInput = this.createCustomPropertyInput(prop, value);
           customPropertiesContainer.appendChild(propInput);
         });
+      } else {
+        const noPropsMessage = document.createElement("p");
+        noPropsMessage.className = "text-muted text-center";
+        noPropsMessage.textContent = "No custom properties defined for this element type";
+        customPropertiesContainer.appendChild(noPropsMessage);
+      }
+    }
+    updateProperties2(element) {
+      const customPropertiesContainer = document.getElementById("custom-properties");
+      customPropertiesContainer.innerHTML = "";
+      document.getElementById("element-properties").querySelector(".row").style.display = "none";
+      document.querySelectorAll("#element-properties .row").forEach((row, index) => {
+        if (index < 6) {
+          row.style.display = "none";
+        }
+      });
+      document.getElementById("custom-properties-container").style.display = "block";
+      const customProps = this.elementCustomProperties[element.type];
+      if (customProps && customProps.length > 0) {
+        customProps.forEach((prop) => {
+          const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : prop.defaultValue || "";
+          const propInput = this.createCustomPropertyInput(prop, value);
+          customPropertiesContainer.appendChild(propInput);
+        });
+      } else {
+        const noPropsMessage = document.createElement("p");
+        noPropsMessage.className = "text-muted text-center";
+        noPropsMessage.textContent = "No custom properties defined for this element type";
+        customPropertiesContainer.appendChild(noPropsMessage);
       }
     }
     // Update Rules Panel
@@ -6078,14 +6446,12 @@ if (!customElements.get("wc-page-designer")) {
     // Save Properties - Fixed to apply changes correctly
     saveProperties() {
       if (!this.designerState.selectedElement) return;
-      this.designerState.selectedElement.type = this.propType.value;
-      this.designerState.selectedElement.label = this.propLabel.value;
-      this.designerState.selectedElement.scope = this.propScope.value;
-      this.designerState.selectedElement.css = this.propCss.value;
-      this.designerState.selectedElement.required = this.propRequired.checked;
       const customProps = this.elementCustomProperties[this.designerState.selectedElement.type];
       if (customProps && customProps.length > 0) {
         customProps.forEach((prop) => {
+          if (prop.isReadonly) {
+            return;
+          }
           let value;
           const chk = document.querySelector(`input[type="radio"][name="prop-custom-${prop.name}"]:checked`);
           if (chk) {
@@ -6365,6 +6731,118 @@ if (!customElements.get("wc-page-designer")) {
     // Custom Properties
     //
     createCustomPropertyInput(property, value) {
+      const row = document.createElement("div");
+      row.className = "row mb-2";
+      let input2;
+      const propId = `prop-custom-${property.name}`;
+      if (property.type === "boolean") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col");
+        input2.setAttribute("type", "checkbox");
+        input2.setAttribute("toggle-switch", "");
+        if (value === true) {
+          input2.setAttribute("checked", "");
+          setTimeout(() => {
+            input2.checked = true;
+          }, 10);
+        }
+        if (property.isReadonly) {
+          input2.setAttribute("disabled", "");
+        }
+      } else if (property.type === "number") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("type", "number");
+        input2.setAttribute("value", value !== void 0 ? value : 0);
+        if (property.isReadonly) {
+          input2.setAttribute("readonly", "");
+        }
+      } else if (property.type === "multiline-string") {
+        input2 = new (customElements.get("wc-textarea"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        if (property.isReadonly) {
+          input2.setAttribute("readonly", "");
+        }
+      } else if (property.type === "string-datalist") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        input2.setAttribute("list", `${propId}_list`);
+        if (property.isReadonly) {
+          input2.setAttribute("readonly", "");
+        }
+        const datalist = document.createElement("datalist");
+        datalist.id = `${propId}_list`;
+        property.enum.forEach((value2) => {
+          const option = document.createElement("option");
+          option.value = value2;
+          option.textContent = value2;
+          datalist.appendChild(option);
+        });
+        row.appendChild(datalist);
+      } else if (property.type === "string-enum") {
+        input2 = new (customElements.get("wc-select"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("items", `[${items}]`);
+        if (property.isReadonly) {
+          input2.setAttribute("disabled", "");
+        }
+      } else if (property.type === "string-radio-modern") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("type", "radio");
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("radio-group-class", "row modern");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("options", `[${options}]`);
+        if (property.isReadonly) {
+          input2.setAttribute("disabled", "");
+        }
+      } else if (property.type === "string-radio") {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("type", "radio");
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("radio-group-class", "row");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
+        input2.setAttribute("options", `[${options}]`);
+        if (property.isReadonly) {
+          input2.setAttribute("disabled", "");
+        }
+      } else {
+        input2 = new (customElements.get("wc-input"))();
+        input2.setAttribute("name", propId);
+        input2.setAttribute("lbl-label", property.label);
+        input2.setAttribute("class", "col-1");
+        input2.setAttribute("value", value !== void 0 ? value : "");
+        if (property.isReadonly) {
+          input2.setAttribute("readonly", "");
+        }
+      }
+      input2.dataset.propertyName = property.name;
+      input2.dataset.propertyType = property.type;
+      input2.dataset.isReadonly = property.isReadonly ? "true" : "false";
+      row.appendChild(input2);
+      return row;
+    }
+    createCustomPropertyInput2(property, value) {
       const row = document.createElement("div");
       row.className = "row mb-2";
       let input2;
