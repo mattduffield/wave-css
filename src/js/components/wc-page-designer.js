@@ -1378,6 +1378,10 @@ if (!customElements.get('wc-page-designer')) {
           e.dataTransfer.setData('element-type', item.getAttribute('data-element-type'));
           e.dataTransfer.setData('schema-field', item.getAttribute('data-schema-field') || '');
           e.dataTransfer.effectAllowed = 'copy';
+          item.classList.add('cursor-grabbing');
+        });
+        item.addEventListener('dragend', e => {
+          item.classList.add('cursor-pointer');
         });
       });
     }
