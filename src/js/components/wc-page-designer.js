@@ -1561,6 +1561,15 @@ if (!customElements.get('wc-page-designer')) {
           opacity: 0.5;
           cursor: not-allowed;
         }
+
+        wc-page-designer .floating-element-toolbar .toolbar-btn.clone-element {
+          background: #17a2b8;
+          color: white;
+        }
+
+        wc-page-designer .floating-element-toolbar .toolbar-btn.clone-element:hover {
+          background: #138496;
+        }
         
         /* Dark mode support */
         wc-page-designer .dark .floating-element-toolbar {
@@ -1576,6 +1585,7 @@ if (!customElements.get('wc-page-designer')) {
         wc-page-designer .dark .floating-element-toolbar .toolbar-btn:hover {
           background: var(--surface-4);
         }
+
 
 
 
@@ -2725,41 +2735,6 @@ if (!customElements.get('wc-page-designer')) {
         }, 100); // Slightly longer delay to ensure everything is ready
       }
     }
-    refreshDesigner2() {
-      // Save the current selection and toolbar state
-      const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
-      const wasToolbarVisible = this.toolbarVisible;
-      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
-      
-      // Hide toolbar before clearing (to clean up state)
-      this.hideToolbar();
-      
-      // Clear the designer surface BUT preserve the floating toolbar
-      const elementsToRemove = Array.from(this.designerSurface.children).filter(
-        child => !child.classList.contains('floating-element-toolbar')
-      );
-      elementsToRemove.forEach(element => element.remove());
-      
-      // Re-add all top-level elements
-      this.designerState.elements.forEach(element => {
-        this.addElementToDesigner(element, this.designerSurface);
-      });
-      
-      // Re-select the previously selected element
-      if (selectedId) {
-        this.selectElement(selectedId);
-      }
-      
-      // If toolbar was visible, restore it for the same element
-      if (wasToolbarVisible && currentHoveredElementId) {
-        setTimeout(() => {
-          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
-          if (elementNode) {
-            this.showToolbarForElement(elementNode);
-          }
-        }, 50); // Small delay to ensure DOM is ready
-      }
-    }
 
     // Remove Element
     removeElement(elementId) {
@@ -3328,6 +3303,7 @@ if (!customElements.get('wc-page-designer')) {
         <button class="toolbar-btn move-up" title="Move Up">↑</button>
         <button class="toolbar-btn move-down" title="Move Down">↓</button>
         <button class="toolbar-btn move-out" title="Move Out">←</button>
+        <button class="toolbar-btn clone-element" title="Clone">⧉</button>
         <button class="toolbar-btn delete-element" title="Delete">×</button>
       `;
       
@@ -3347,40 +3323,9 @@ if (!customElements.get('wc-page-designer')) {
         this.moveElementOut();
       });
       
-      toolbar.querySelector('.delete-element').addEventListener('click', (e) => {
+      toolbar.querySelector('.clone-element').addEventListener('click', (e) => {
         e.stopPropagation();
-        this.deleteCurrentElement();
-      });
-      
-      this.designerSurface.appendChild(toolbar);
-      this.floatingToolbar = toolbar;
-    }
-    createFloatingToolbar2() {
-      if (this.floatingToolbar) return;
-      
-      const toolbar = document.createElement('div');
-      toolbar.className = 'floating-element-toolbar';
-      toolbar.innerHTML = `
-        <button class="toolbar-btn move-up" title="Move Up">↑</button>
-        <button class="toolbar-btn move-down" title="Move Down">↓</button>
-        <button class="toolbar-btn move-out" title="Move Out">←</button>
-        <button class="toolbar-btn delete-element" title="Delete">×</button>
-      `;
-      
-      // Add event listeners for toolbar buttons
-      toolbar.querySelector('.move-up').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.moveElementUp();
-      });
-      
-      toolbar.querySelector('.move-down').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.moveElementDown();
-      });
-      
-      toolbar.querySelector('.move-out').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.moveElementOut();
+        this.cloneCurrentElement();
       });
       
       toolbar.querySelector('.delete-element').addEventListener('click', (e) => {
@@ -3461,7 +3406,7 @@ if (!customElements.get('wc-page-designer')) {
       const surfaceRect = this.designerSurface.getBoundingClientRect();
       
       // Position relative to the designer surface
-      const left = elementRect.right - surfaceRect.left - 170; // 170px from right edge
+      const left = elementRect.right - surfaceRect.left - 207; // 170px from right edge
       const top = elementRect.top - surfaceRect.top + 5; // 5px from top edge
       
       this.floatingToolbar.style.left = `${left}px`;
@@ -3566,6 +3511,54 @@ if (!customElements.get('wc-page-designer')) {
       
       this.refreshDesigner();
       this.hideToolbar();
+    }
+
+    cloneCurrentElement() {
+      if (!this.currentHoveredElementData) return;
+      
+      const element = this.currentHoveredElementData;
+      const clonedElement = this.deepCloneElement(element);
+      
+      // Find where to insert the cloned element
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex(e => e.id === element.id);
+      
+      // Insert the cloned element right after the original
+      siblings.splice(currentIndex + 1, 0, clonedElement);
+      
+      // Refresh the designer to show the cloned element
+      this.refreshDesigner();
+      this.hideToolbar();
+      
+      // Optionally select the cloned element
+      setTimeout(() => {
+        this.selectElement(clonedElement.id);
+      }, 100);
+    }
+    
+    deepCloneElement(element) {
+      // Create a deep copy of the element
+      const cloned = JSON.parse(JSON.stringify(element));
+      
+      // Generate new IDs for the cloned element and all its children
+      this.regenerateIds(cloned);
+      
+      return cloned;
+    }
+    
+    regenerateIds(element) {
+      // Generate new ID for this element
+      const newId = this.generateUniqueId();
+      element.id = newId;
+      element['data-id'] = newId;
+      
+      // Recursively regenerate IDs for all child elements
+      if (element.elements && element.elements.length > 0) {
+        element.elements.forEach(child => {
+          this.regenerateIds(child);
+        });
+      }
     }
 
     deleteCurrentElement() {

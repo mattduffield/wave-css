@@ -5636,6 +5636,15 @@ if (!customElements.get("wc-page-designer")) {
           opacity: 0.5;
           cursor: not-allowed;
         }
+
+        wc-page-designer .floating-element-toolbar .toolbar-btn.clone-element {
+          background: #17a2b8;
+          color: white;
+        }
+
+        wc-page-designer .floating-element-toolbar .toolbar-btn.clone-element:hover {
+          background: #138496;
+        }
         
         /* Dark mode support */
         wc-page-designer .dark .floating-element-toolbar {
@@ -5651,6 +5660,7 @@ if (!customElements.get("wc-page-designer")) {
         wc-page-designer .dark .floating-element-toolbar .toolbar-btn:hover {
           background: var(--surface-4);
         }
+
 
 
 
@@ -6562,30 +6572,6 @@ if (!customElements.get("wc-page-designer")) {
         }, 100);
       }
     }
-    refreshDesigner2() {
-      const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
-      const wasToolbarVisible = this.toolbarVisible;
-      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
-      this.hideToolbar();
-      const elementsToRemove = Array.from(this.designerSurface.children).filter(
-        (child) => !child.classList.contains("floating-element-toolbar")
-      );
-      elementsToRemove.forEach((element) => element.remove());
-      this.designerState.elements.forEach((element) => {
-        this.addElementToDesigner(element, this.designerSurface);
-      });
-      if (selectedId) {
-        this.selectElement(selectedId);
-      }
-      if (wasToolbarVisible && currentHoveredElementId) {
-        setTimeout(() => {
-          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
-          if (elementNode) {
-            this.showToolbarForElement(elementNode);
-          }
-        }, 50);
-      }
-    }
     // Remove Element
     removeElement(elementId) {
       if (!confirm("Are you sure you want to delete this element?")) return;
@@ -6998,6 +6984,7 @@ if (!customElements.get("wc-page-designer")) {
         <button class="toolbar-btn move-up" title="Move Up">\u2191</button>
         <button class="toolbar-btn move-down" title="Move Down">\u2193</button>
         <button class="toolbar-btn move-out" title="Move Out">\u2190</button>
+        <button class="toolbar-btn clone-element" title="Clone">\u29C9</button>
         <button class="toolbar-btn delete-element" title="Delete">\xD7</button>
       `;
       toolbar.querySelector(".move-up").addEventListener("click", (e) => {
@@ -7012,34 +6999,9 @@ if (!customElements.get("wc-page-designer")) {
         e.stopPropagation();
         this.moveElementOut();
       });
-      toolbar.querySelector(".delete-element").addEventListener("click", (e) => {
+      toolbar.querySelector(".clone-element").addEventListener("click", (e) => {
         e.stopPropagation();
-        this.deleteCurrentElement();
-      });
-      this.designerSurface.appendChild(toolbar);
-      this.floatingToolbar = toolbar;
-    }
-    createFloatingToolbar2() {
-      if (this.floatingToolbar) return;
-      const toolbar = document.createElement("div");
-      toolbar.className = "floating-element-toolbar";
-      toolbar.innerHTML = `
-        <button class="toolbar-btn move-up" title="Move Up">\u2191</button>
-        <button class="toolbar-btn move-down" title="Move Down">\u2193</button>
-        <button class="toolbar-btn move-out" title="Move Out">\u2190</button>
-        <button class="toolbar-btn delete-element" title="Delete">\xD7</button>
-      `;
-      toolbar.querySelector(".move-up").addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.moveElementUp();
-      });
-      toolbar.querySelector(".move-down").addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.moveElementDown();
-      });
-      toolbar.querySelector(".move-out").addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.moveElementOut();
+        this.cloneCurrentElement();
       });
       toolbar.querySelector(".delete-element").addEventListener("click", (e) => {
         e.stopPropagation();
@@ -7094,7 +7056,7 @@ if (!customElements.get("wc-page-designer")) {
       if (!this.floatingToolbar || !elementNode) return;
       const elementRect = elementNode.getBoundingClientRect();
       const surfaceRect = this.designerSurface.getBoundingClientRect();
-      const left = elementRect.right - surfaceRect.left - 170;
+      const left = elementRect.right - surfaceRect.left - 207;
       const top = elementRect.top - surfaceRect.top + 5;
       this.floatingToolbar.style.left = `${left}px`;
       this.floatingToolbar.style.top = `${top}px`;
@@ -7165,6 +7127,35 @@ if (!customElements.get("wc-page-designer")) {
       parentSiblings.splice(parentIndex + 1, 0, element);
       this.refreshDesigner();
       this.hideToolbar();
+    }
+    cloneCurrentElement() {
+      if (!this.currentHoveredElementData) return;
+      const element = this.currentHoveredElementData;
+      const clonedElement = this.deepCloneElement(element);
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex((e) => e.id === element.id);
+      siblings.splice(currentIndex + 1, 0, clonedElement);
+      this.refreshDesigner();
+      this.hideToolbar();
+      setTimeout(() => {
+        this.selectElement(clonedElement.id);
+      }, 100);
+    }
+    deepCloneElement(element) {
+      const cloned = JSON.parse(JSON.stringify(element));
+      this.regenerateIds(cloned);
+      return cloned;
+    }
+    regenerateIds(element) {
+      const newId = this.generateUniqueId();
+      element.id = newId;
+      element["data-id"] = newId;
+      if (element.elements && element.elements.length > 0) {
+        element.elements.forEach((child) => {
+          this.regenerateIds(child);
+        });
+      }
     }
     deleteCurrentElement() {
       if (!this.currentHoveredElementData) return;
