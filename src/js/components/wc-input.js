@@ -424,6 +424,7 @@ class WcInput extends WcBaseFormComponent {
         width: 50px;
         height: 22px;
         display: inline-block;
+        margin-top: 0.25rem;
       }
 
       wc-input .toggle-checkbox {
