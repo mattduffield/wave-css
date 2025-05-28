@@ -5108,6 +5108,9 @@ if (!customElements.get("wc-page-designer")) {
           { name: "content", label: "Content", type: "multiline-string" }
         ]
       };
+      this.floatingToolbar = null;
+      this.currentHoveredElement = null;
+      this.toolbarVisible = false;
       const compEl = this.querySelector(".wc-page-designer");
       if (compEl) {
         this.componentElement = compEl;
@@ -5576,6 +5579,81 @@ if (!customElements.get("wc-page-designer")) {
         }
 
 
+        /* Floating toolbar styles */
+        wc-page-designer .floating-element-toolbar {
+          position: absolute;
+          background: var(--surface-1, white);
+          border: 1px solid var(--surface-4, #dee2e6);
+          border-radius: 4px;
+          display: flex;
+          gap: 1px;
+          padding: 2px;
+          z-index: 9999;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.2s ease, visibility 0.2s ease;
+          pointer-events: none;
+        }
+        
+        wc-page-designer .floating-element-toolbar.visible {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn {
+          width: 18px;
+          height: 18px;
+          border: none;
+          border-radius: 2px;
+          background: var(--button-bg-color, #f8f9fa);
+          color: var(--button-color, #495057);
+          font-size: 10px;
+          font-weight: bold;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
+          line-height: 1;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn:hover {
+          background: var(--button-hover-bg-color, #e9ecef);
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn.delete-element {
+          background: #dc3545;
+          color: white;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn.delete-element:hover {
+          background: #c82333;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        /* Dark mode support */
+        wc-page-designer .dark .floating-element-toolbar {
+          background: var(--surface-2);
+          border-color: var(--surface-5);
+        }
+        
+        wc-page-designer .dark .floating-element-toolbar .toolbar-btn {
+          background: var(--surface-3);
+          color: var(--text-1);
+        }
+        
+        wc-page-designer .dark .floating-element-toolbar .toolbar-btn:hover {
+          background: var(--surface-4);
+        }
+
+
+
         wc-page-designer .dark .designer-surface {
           background-color: var(--surface-1);
         }
@@ -5650,6 +5728,8 @@ if (!customElements.get("wc-page-designer")) {
       this.copyDesignButton = document.getElementById("copy-design");
       this.downloadDesignButton = document.getElementById("download-design");
       this.init();
+      this.createFloatingToolbar();
+      this.setupFloatingToolbar();
       this.setAttribute("data-wired", true);
     }
     // Initialize Designer
@@ -6129,21 +6209,6 @@ if (!customElements.get("wc-page-designer")) {
       } else {
         labelElement.textContent = element.type;
       }
-      const actions = document.createElement("div");
-      actions.className = "element-actions";
-      const deleteButton = document.createElement("button");
-      deleteButton.className = "btn btn-sm btn-outline-danger";
-      deleteButton.textContent = "Delete";
-      deleteButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.removeElement(element.id);
-      });
-      actions.appendChild(deleteButton);
-      node.appendChild(actions);
-      node.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.selectElement(element.id);
-      });
       if (this.isContainerElement(element.type)) {
         const container2 = document.createElement("div");
         container2.className = "designer-element-container";
@@ -6208,30 +6273,6 @@ if (!customElements.get("wc-page-designer")) {
     updateProperties(element) {
       const customPropertiesContainer = document.getElementById("custom-properties");
       customPropertiesContainer.innerHTML = "";
-      document.getElementById("custom-properties-container").style.display = "block";
-      const customProps = this.elementCustomProperties[element.type];
-      if (customProps && customProps.length > 0) {
-        customProps.forEach((prop) => {
-          const value = element[prop.name] !== void 0 ? element[prop.name] : prop.type === "boolean" ? false : prop.type === "number" ? null : prop.defaultValue || "";
-          const propInput = this.createCustomPropertyInput(prop, value);
-          customPropertiesContainer.appendChild(propInput);
-        });
-      } else {
-        const noPropsMessage = document.createElement("p");
-        noPropsMessage.className = "text-muted text-center";
-        noPropsMessage.textContent = "No custom properties defined for this element type";
-        customPropertiesContainer.appendChild(noPropsMessage);
-      }
-    }
-    updateProperties2(element) {
-      const customPropertiesContainer = document.getElementById("custom-properties");
-      customPropertiesContainer.innerHTML = "";
-      document.getElementById("element-properties").querySelector(".row").style.display = "none";
-      document.querySelectorAll("#element-properties .row").forEach((row, index) => {
-        if (index < 6) {
-          row.style.display = "none";
-        }
-      });
       document.getElementById("custom-properties-container").style.display = "block";
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
@@ -6500,12 +6541,49 @@ if (!customElements.get("wc-page-designer")) {
     // Refresh Designer
     refreshDesigner() {
       const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
+      const wasToolbarVisible = this.toolbarVisible;
+      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
+      this.hideToolbar();
       this.designerSurface.innerHTML = "";
+      this.floatingToolbar = null;
+      this.createFloatingToolbar();
       this.designerState.elements.forEach((element) => {
         this.addElementToDesigner(element, this.designerSurface);
       });
       if (selectedId) {
         this.selectElement(selectedId);
+      }
+      if (wasToolbarVisible && currentHoveredElementId) {
+        setTimeout(() => {
+          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
+          if (elementNode) {
+            this.showToolbarForElement(elementNode);
+          }
+        }, 100);
+      }
+    }
+    refreshDesigner2() {
+      const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
+      const wasToolbarVisible = this.toolbarVisible;
+      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
+      this.hideToolbar();
+      const elementsToRemove = Array.from(this.designerSurface.children).filter(
+        (child) => !child.classList.contains("floating-element-toolbar")
+      );
+      elementsToRemove.forEach((element) => element.remove());
+      this.designerState.elements.forEach((element) => {
+        this.addElementToDesigner(element, this.designerSurface);
+      });
+      if (selectedId) {
+        this.selectElement(selectedId);
+      }
+      if (wasToolbarVisible && currentHoveredElementId) {
+        setTimeout(() => {
+          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
+          if (elementNode) {
+            this.showToolbarForElement(elementNode);
+          }
+        }, 50);
       }
     }
     // Remove Element
@@ -6863,93 +6941,6 @@ if (!customElements.get("wc-page-designer")) {
       row.appendChild(input2);
       return row;
     }
-    createCustomPropertyInput2(property, value) {
-      const row = document.createElement("div");
-      row.className = "row mb-2";
-      let input2;
-      const propId = `prop-custom-${property.name}`;
-      if (property.type === "boolean") {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col");
-        input2.setAttribute("type", "checkbox");
-        input2.setAttribute("toggle-switch", "");
-        if (value === true) {
-          input2.setAttribute("checked", "");
-          setTimeout(() => {
-            input2.checked = true;
-          }, 10);
-        }
-      } else if (property.type === "number") {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("type", "number");
-        input2.setAttribute("value", value !== void 0 ? value : 0);
-      } else if (property.type === "multiline-string") {
-        input2 = new (customElements.get("wc-textarea"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-      } else if (property.type === "string-datalist") {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-        input2.setAttribute("list", `${propId}_list`);
-        const datalist = document.createElement("datalist");
-        datalist.id = `${propId}_list`;
-        property.enum.forEach((value2) => {
-          const option = document.createElement("option");
-          option.value = value2;
-          option.textContent = value2;
-          datalist.appendChild(option);
-        });
-        row.appendChild(datalist);
-      } else if (property.type === "string-enum") {
-        input2 = new (customElements.get("wc-select"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-        const items = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
-        input2.setAttribute("items", `[${items}]`);
-      } else if (property.type === "string-radio-modern") {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("type", "radio");
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("radio-group-class", "row modern");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
-        input2.setAttribute("options", `[${options}]`);
-      } else if (property.type === "string-radio") {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("type", "radio");
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("radio-group-class", "row");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-        const options = property.enum.map((m) => `{"key": "${m}", "value": "${m}"}`);
-        input2.setAttribute("options", `[${options}]`);
-      } else {
-        input2 = new (customElements.get("wc-input"))();
-        input2.setAttribute("name", propId);
-        input2.setAttribute("lbl-label", property.label);
-        input2.setAttribute("class", "col-1");
-        input2.setAttribute("value", value !== void 0 ? value : "");
-      }
-      input2.dataset.propertyName = property.name;
-      input2.dataset.propertyType = property.type;
-      row.appendChild(input2);
-      return row;
-    }
     saveDesignToLocalStorage() {
       const designName = "layout-ui-design";
       const jsonText = this.jsonOutput.editor.getValue();
@@ -6992,6 +6983,193 @@ if (!customElements.get("wc-page-designer")) {
         alert("Failed to load design: " + e.message);
         return false;
       }
+    }
+    //
+    // Floating Toolbar
+    //
+    createFloatingToolbar() {
+      if (this.floatingToolbar) {
+        this.floatingToolbar.remove();
+        this.floatingToolbar = null;
+      }
+      const toolbar = document.createElement("div");
+      toolbar.className = "floating-element-toolbar";
+      toolbar.innerHTML = `
+        <button class="toolbar-btn move-up" title="Move Up">\u2191</button>
+        <button class="toolbar-btn move-down" title="Move Down">\u2193</button>
+        <button class="toolbar-btn move-out" title="Move Out">\u2190</button>
+        <button class="toolbar-btn delete-element" title="Delete">\xD7</button>
+      `;
+      toolbar.querySelector(".move-up").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementUp();
+      });
+      toolbar.querySelector(".move-down").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementDown();
+      });
+      toolbar.querySelector(".move-out").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementOut();
+      });
+      toolbar.querySelector(".delete-element").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.deleteCurrentElement();
+      });
+      this.designerSurface.appendChild(toolbar);
+      this.floatingToolbar = toolbar;
+    }
+    createFloatingToolbar2() {
+      if (this.floatingToolbar) return;
+      const toolbar = document.createElement("div");
+      toolbar.className = "floating-element-toolbar";
+      toolbar.innerHTML = `
+        <button class="toolbar-btn move-up" title="Move Up">\u2191</button>
+        <button class="toolbar-btn move-down" title="Move Down">\u2193</button>
+        <button class="toolbar-btn move-out" title="Move Out">\u2190</button>
+        <button class="toolbar-btn delete-element" title="Delete">\xD7</button>
+      `;
+      toolbar.querySelector(".move-up").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementUp();
+      });
+      toolbar.querySelector(".move-down").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementDown();
+      });
+      toolbar.querySelector(".move-out").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.moveElementOut();
+      });
+      toolbar.querySelector(".delete-element").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.deleteCurrentElement();
+      });
+      this.designerSurface.appendChild(toolbar);
+      this.floatingToolbar = toolbar;
+    }
+    setupFloatingToolbar() {
+      this.designerSurface.addEventListener("click", (e) => {
+        const designerElement = e.target.closest(".designer-element");
+        if (designerElement) {
+          e.stopPropagation();
+          if (this.currentHoveredElement === designerElement && this.toolbarVisible) {
+            this.hideToolbar();
+            return;
+          }
+          this.showToolbarForElement(designerElement);
+          const elementId = designerElement.getAttribute("data-id");
+          this.selectElement(elementId);
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (!this.floatingToolbar?.contains(e.target) && !e.target.closest(".designer-element") && !e.target.closest(".designer-surface")) {
+          this.hideToolbar();
+        }
+      });
+    }
+    // Add method to show toolbar for specific element
+    showToolbarForElement(elementNode) {
+      const elementId = elementNode.getAttribute("data-id");
+      const element = this.findElementById(elementId);
+      if (!element) return;
+      this.currentHoveredElement = elementNode;
+      this.currentHoveredElementData = element;
+      this.updateToolbarButtonStates(element);
+      this.positionToolbarOnElement(elementNode);
+      this.floatingToolbar.classList.add("visible");
+      this.toolbarVisible = true;
+    }
+    // Add method to hide toolbar
+    hideToolbar() {
+      if (this.floatingToolbar) {
+        this.floatingToolbar.classList.remove("visible");
+        this.toolbarVisible = false;
+        this.currentHoveredElement = null;
+        this.currentHoveredElementData = null;
+      }
+    }
+    // Add method to position toolbar on element
+    positionToolbarOnElement(elementNode) {
+      if (!this.floatingToolbar || !elementNode) return;
+      const elementRect = elementNode.getBoundingClientRect();
+      const surfaceRect = this.designerSurface.getBoundingClientRect();
+      const left = elementRect.right - surfaceRect.left - 170;
+      const top = elementRect.top - surfaceRect.top + 5;
+      this.floatingToolbar.style.left = `${left}px`;
+      this.floatingToolbar.style.top = `${top}px`;
+    }
+    // Add method to update button states
+    updateToolbarButtonStates(element) {
+      if (!this.floatingToolbar || !element) return;
+      const moveUpBtn = this.floatingToolbar.querySelector(".move-up");
+      const moveDownBtn = this.floatingToolbar.querySelector(".move-down");
+      const moveOutBtn = this.floatingToolbar.querySelector(".move-out");
+      const canMoveUp = this.canMoveElementUp(element);
+      moveUpBtn.disabled = !canMoveUp;
+      const canMoveDown = this.canMoveElementDown(element);
+      moveDownBtn.disabled = !canMoveDown;
+      const canMoveOut = this.canMoveElementOut(element);
+      moveOutBtn.disabled = !canMoveOut;
+    }
+    // Add helper methods to check movement possibilities
+    canMoveElementUp(element) {
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex((e) => e.id === element.id);
+      return currentIndex > 0;
+    }
+    canMoveElementDown(element) {
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex((e) => e.id === element.id);
+      return currentIndex < siblings.length - 1;
+    }
+    canMoveElementOut(element) {
+      return this.findParentElement(element.id) !== null;
+    }
+    // Add movement methods
+    moveElementUp() {
+      if (!this.currentHoveredElementData) return;
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex((e) => e.id === element.id);
+      if (currentIndex > 0) {
+        [siblings[currentIndex - 1], siblings[currentIndex]] = [siblings[currentIndex], siblings[currentIndex - 1]];
+        this.refreshDesigner();
+        this.hideToolbar();
+      }
+    }
+    moveElementDown() {
+      if (!this.currentHoveredElementData) return;
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex((e) => e.id === element.id);
+      if (currentIndex < siblings.length - 1) {
+        [siblings[currentIndex], siblings[currentIndex + 1]] = [siblings[currentIndex + 1], siblings[currentIndex]];
+        this.refreshDesigner();
+        this.hideToolbar();
+      }
+    }
+    moveElementOut() {
+      if (!this.currentHoveredElementData) return;
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      if (!parent) return;
+      const grandParent = this.findParentElement(parent.id);
+      const parentSiblings = grandParent ? grandParent.elements : this.designerState.elements;
+      const parentIndex = parentSiblings.findIndex((e) => e.id === parent.id);
+      parent.elements = parent.elements.filter((e) => e.id !== element.id);
+      parentSiblings.splice(parentIndex + 1, 0, element);
+      this.refreshDesigner();
+      this.hideToolbar();
+    }
+    deleteCurrentElement() {
+      if (!this.currentHoveredElementData) return;
+      this.removeElement(this.currentHoveredElementData.id);
+      this.hideToolbar();
     }
   }
   customElements.define("wc-page-designer", WcPageDesigner);

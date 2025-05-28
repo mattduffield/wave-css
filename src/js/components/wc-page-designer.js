@@ -1021,6 +1021,9 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'content', label: 'Content', type: 'multiline-string' },
         ],
       };
+      this.floatingToolbar = null;
+      this.currentHoveredElement = null;
+      this.toolbarVisible = false;
 
       const compEl = this.querySelector('.wc-page-designer');
       if (compEl) {
@@ -1501,6 +1504,81 @@ if (!customElements.get('wc-page-designer')) {
         }
 
 
+        /* Floating toolbar styles */
+        wc-page-designer .floating-element-toolbar {
+          position: absolute;
+          background: var(--surface-1, white);
+          border: 1px solid var(--surface-4, #dee2e6);
+          border-radius: 4px;
+          display: flex;
+          gap: 1px;
+          padding: 2px;
+          z-index: 9999;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.2s ease, visibility 0.2s ease;
+          pointer-events: none;
+        }
+        
+        wc-page-designer .floating-element-toolbar.visible {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn {
+          width: 18px;
+          height: 18px;
+          border: none;
+          border-radius: 2px;
+          background: var(--button-bg-color, #f8f9fa);
+          color: var(--button-color, #495057);
+          font-size: 10px;
+          font-weight: bold;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
+          line-height: 1;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn:hover {
+          background: var(--button-hover-bg-color, #e9ecef);
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn.delete-element {
+          background: #dc3545;
+          color: white;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn.delete-element:hover {
+          background: #c82333;
+        }
+        
+        wc-page-designer .floating-element-toolbar .toolbar-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        /* Dark mode support */
+        wc-page-designer .dark .floating-element-toolbar {
+          background: var(--surface-2);
+          border-color: var(--surface-5);
+        }
+        
+        wc-page-designer .dark .floating-element-toolbar .toolbar-btn {
+          background: var(--surface-3);
+          color: var(--text-1);
+        }
+        
+        wc-page-designer .dark .floating-element-toolbar .toolbar-btn:hover {
+          background: var(--surface-4);
+        }
+
+
+
         wc-page-designer .dark .designer-surface {
           background-color: var(--surface-1);
         }
@@ -1584,6 +1662,9 @@ if (!customElements.get('wc-page-designer')) {
       this.downloadDesignButton = document.getElementById('download-design');
       
       this.init();
+
+      this.createFloatingToolbar();  
+      this.setupFloatingToolbar();
 
       this.setAttribute('data-wired', true);
     }
@@ -2180,26 +2261,11 @@ if (!customElements.get('wc-page-designer')) {
         labelElement.textContent = element.type;
       }
       
-      // Rest of the method remains the same...
-      const actions = document.createElement('div');
-      actions.className = 'element-actions';
+      // Remove the inline actions div since we're using floating toolbar
+      // const actions = document.createElement('div');
+      // ... (remove this section)
       
-      const deleteButton = document.createElement('button');
-      deleteButton.className = 'btn btn-sm btn-outline-danger';
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.removeElement(element.id);
-      });
-      actions.appendChild(deleteButton);
-      
-      node.appendChild(actions);
-      
-      // Make the element selectable
-      node.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.selectElement(element.id);
-      });
+      // Don't add click listener here since it's handled by setupFloatingToolbar
       
       // Add container logic if needed...
       if (this.isContainerElement(element.type)) {
@@ -2234,7 +2300,7 @@ if (!customElements.get('wc-page-designer')) {
       
       return node;
     }
-    
+
     // Update Elements Order
     updateElementsOrder(container, parentId) {
       const parent = this.findElementById(parentId);
@@ -2301,42 +2367,6 @@ if (!customElements.get('wc-page-designer')) {
       const customProps = this.elementCustomProperties[element.type];
       if (customProps && customProps.length > 0) {
         // Add all custom property inputs (readonly and editable together)
-        customProps.forEach(prop => {
-          const value = element[prop.name] !== undefined ? element[prop.name] : 
-               (prop.type === 'boolean' ? false : 
-                prop.type === 'number' ? null : 
-                prop.defaultValue || '');
-          const propInput = this.createCustomPropertyInput(prop, value);
-          customPropertiesContainer.appendChild(propInput);
-        });
-      } else {
-        // Show message that no properties are available
-        const noPropsMessage = document.createElement('p');
-        noPropsMessage.className = 'text-muted text-center';
-        noPropsMessage.textContent = 'No custom properties defined for this element type';
-        customPropertiesContainer.appendChild(noPropsMessage);
-      }
-    }
-    updateProperties2(element) {
-      // Clear all property inputs first
-      const customPropertiesContainer = document.getElementById('custom-properties');
-      customPropertiesContainer.innerHTML = '';
-      
-      // Hide the default properties section completely
-      document.getElementById('element-properties').querySelector('.row').style.display = 'none';
-      document.querySelectorAll('#element-properties .row').forEach((row, index) => {
-        if (index < 6) { // Hide the first 6 rows (id, type, label, scope, css, required)
-          row.style.display = 'none';
-        }
-      });
-      
-      // Show custom properties container
-      document.getElementById('custom-properties-container').style.display = 'block';
-      
-      // Check if this element type has custom properties
-      const customProps = this.elementCustomProperties[element.type];
-      if (customProps && customProps.length > 0) {
-        // Add custom property inputs
         customProps.forEach(prop => {
           const value = element[prop.name] !== undefined ? element[prop.name] : 
                (prop.type === 'boolean' ? false : 
@@ -2660,11 +2690,20 @@ if (!customElements.get('wc-page-designer')) {
 
     // Refresh Designer
     refreshDesigner() {
-      // Save the current selection
+      // Save the current selection and toolbar state
       const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
+      const wasToolbarVisible = this.toolbarVisible;
+      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
       
-      // Clear the designer surface
+      // Hide toolbar before clearing
+      this.hideToolbar();
+      
+      // Clear the designer surface completely
       this.designerSurface.innerHTML = '';
+      
+      // Recreate the floating toolbar
+      this.floatingToolbar = null; // Reset reference
+      this.createFloatingToolbar();
       
       // Re-add all top-level elements
       this.designerState.elements.forEach(element => {
@@ -2674,6 +2713,51 @@ if (!customElements.get('wc-page-designer')) {
       // Re-select the previously selected element
       if (selectedId) {
         this.selectElement(selectedId);
+      }
+      
+      // If toolbar was visible, restore it for the same element
+      if (wasToolbarVisible && currentHoveredElementId) {
+        setTimeout(() => {
+          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
+          if (elementNode) {
+            this.showToolbarForElement(elementNode);
+          }
+        }, 100); // Slightly longer delay to ensure everything is ready
+      }
+    }
+    refreshDesigner2() {
+      // Save the current selection and toolbar state
+      const selectedId = this.designerState.selectedElement ? this.designerState.selectedElement.id : null;
+      const wasToolbarVisible = this.toolbarVisible;
+      const currentHoveredElementId = this.currentHoveredElementData ? this.currentHoveredElementData.id : null;
+      
+      // Hide toolbar before clearing (to clean up state)
+      this.hideToolbar();
+      
+      // Clear the designer surface BUT preserve the floating toolbar
+      const elementsToRemove = Array.from(this.designerSurface.children).filter(
+        child => !child.classList.contains('floating-element-toolbar')
+      );
+      elementsToRemove.forEach(element => element.remove());
+      
+      // Re-add all top-level elements
+      this.designerState.elements.forEach(element => {
+        this.addElementToDesigner(element, this.designerSurface);
+      });
+      
+      // Re-select the previously selected element
+      if (selectedId) {
+        this.selectElement(selectedId);
+      }
+      
+      // If toolbar was visible, restore it for the same element
+      if (wasToolbarVisible && currentHoveredElementId) {
+        setTimeout(() => {
+          const elementNode = document.querySelector(`.designer-element[data-id="${currentHoveredElementId}"]`);
+          if (elementNode) {
+            this.showToolbarForElement(elementNode);
+          }
+        }, 50); // Small delay to ensure DOM is ready
       }
     }
 
@@ -3157,102 +3241,6 @@ if (!customElements.get('wc-page-designer')) {
       row.appendChild(input);
       return row;
     }
-    createCustomPropertyInput2(property, value) {
-      const row = document.createElement('div');
-      row.className = 'row mb-2';
-      
-      // Create input element based on property type
-      let input;
-      const propId = `prop-custom-${property.name}`;
-      
-      if (property.type === 'boolean') {
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col');
-        input.setAttribute('type', 'checkbox');
-        input.setAttribute('toggle-switch', '');
-        if (value === true) {
-          input.setAttribute('checked', '');
-          setTimeout(() => {
-            input.checked = true;
-          }, 10);
-        }
-      } else if (property.type === 'number') {
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('type', 'number');
-        input.setAttribute('value', value !== undefined ? value : 0);
-        // input.value = value !== undefined ? value : '';
-      } else if (property.type === 'multiline-string') {
-        input = new (customElements.get('wc-textarea'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('value', value !== undefined ? value : '');
-      } else if (property.type === 'string-datalist') {
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('value', value !== undefined ? value : '');
-        input.setAttribute('list', `${propId}_list`);
-        const datalist = document.createElement('datalist');
-        datalist.id = `${propId}_list`;
-        property.enum.forEach(value => {
-          const option = document.createElement('option');
-          option.value = value;
-          option.textContent = value;
-          datalist.appendChild(option);
-        });
-        row.appendChild(datalist);
-      } else if (property.type === 'string-enum') {
-        input = new (customElements.get('wc-select'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('value', value !== undefined ? value : '');
-        const items = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
-        input.setAttribute('items', `[${items}]`);
-      } else if (property.type === 'string-radio-modern') {
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('type', 'radio');
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('radio-group-class', 'row modern');
-        input.setAttribute('value', value !== undefined ? value : '');
-        const options = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
-        input.setAttribute('options', `[${options}]`);
-      } else if (property.type === 'string-radio') {
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('type', 'radio');
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('radio-group-class', 'row');
-        input.setAttribute('value', value !== undefined ? value : '');
-        const options = property.enum.map(m => `{"key": "${m}", "value": "${m}"}`);
-        input.setAttribute('options', `[${options}]`);
-      } else {
-        // Default to string type
-        input = new (customElements.get('wc-input'))();
-        input.setAttribute('name', propId);
-        input.setAttribute('lbl-label', property.label);
-        input.setAttribute('class', 'col-1');
-        input.setAttribute('value', value !== undefined ? value : '');
-        // input.value = value !== undefined ? value : '';
-      }
-      
-      // Store a reference to the property name for later retrieval
-      input.dataset.propertyName = property.name;
-      input.dataset.propertyType = property.type;
-      
-      row.appendChild(input);
-      return row;
-    }
 
 
     saveDesignToLocalStorage() {
@@ -3321,6 +3309,274 @@ if (!customElements.get('wc-page-designer')) {
         return false;
       }
     }
+
+
+    //
+    // Floating Toolbar
+    //
+
+    createFloatingToolbar() {
+      // Remove existing toolbar if it exists
+      if (this.floatingToolbar) {
+        this.floatingToolbar.remove();
+        this.floatingToolbar = null;
+      }
+      
+      const toolbar = document.createElement('div');
+      toolbar.className = 'floating-element-toolbar';
+      toolbar.innerHTML = `
+        <button class="toolbar-btn move-up" title="Move Up">↑</button>
+        <button class="toolbar-btn move-down" title="Move Down">↓</button>
+        <button class="toolbar-btn move-out" title="Move Out">←</button>
+        <button class="toolbar-btn delete-element" title="Delete">×</button>
+      `;
+      
+      // Add event listeners for toolbar buttons
+      toolbar.querySelector('.move-up').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementUp();
+      });
+      
+      toolbar.querySelector('.move-down').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementDown();
+      });
+      
+      toolbar.querySelector('.move-out').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementOut();
+      });
+      
+      toolbar.querySelector('.delete-element').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteCurrentElement();
+      });
+      
+      this.designerSurface.appendChild(toolbar);
+      this.floatingToolbar = toolbar;
+    }
+    createFloatingToolbar2() {
+      if (this.floatingToolbar) return;
+      
+      const toolbar = document.createElement('div');
+      toolbar.className = 'floating-element-toolbar';
+      toolbar.innerHTML = `
+        <button class="toolbar-btn move-up" title="Move Up">↑</button>
+        <button class="toolbar-btn move-down" title="Move Down">↓</button>
+        <button class="toolbar-btn move-out" title="Move Out">←</button>
+        <button class="toolbar-btn delete-element" title="Delete">×</button>
+      `;
+      
+      // Add event listeners for toolbar buttons
+      toolbar.querySelector('.move-up').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementUp();
+      });
+      
+      toolbar.querySelector('.move-down').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementDown();
+      });
+      
+      toolbar.querySelector('.move-out').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.moveElementOut();
+      });
+      
+      toolbar.querySelector('.delete-element').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteCurrentElement();
+      });
+      
+      this.designerSurface.appendChild(toolbar);
+      this.floatingToolbar = toolbar;
+    }
+
+    setupFloatingToolbar() {
+      // Add click event listener for designer elements
+      this.designerSurface.addEventListener('click', (e) => {
+        const designerElement = e.target.closest('.designer-element');
+        if (designerElement) {
+          e.stopPropagation();
+          
+          // If clicking the same element, hide toolbar
+          if (this.currentHoveredElement === designerElement && this.toolbarVisible) {
+            this.hideToolbar();
+            return;
+          }
+          
+          // Show toolbar for clicked element
+          this.showToolbarForElement(designerElement);
+          
+          // Also select the element for properties panel
+          const elementId = designerElement.getAttribute('data-id');
+          this.selectElement(elementId);
+        }
+      });
+      
+      // Hide toolbar when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        if (!this.floatingToolbar?.contains(e.target) && 
+            !e.target.closest('.designer-element') && 
+            !e.target.closest('.designer-surface')) {
+          this.hideToolbar();
+        }
+      });
+    }
+
+    // Add method to show toolbar for specific element
+    showToolbarForElement(elementNode) {
+      const elementId = elementNode.getAttribute('data-id');
+      const element = this.findElementById(elementId);
+      
+      if (!element) return;
+      
+      this.currentHoveredElement = elementNode;
+      this.currentHoveredElementData = element;
+      
+      // Update button states based on element position
+      this.updateToolbarButtonStates(element);
+      
+      // Position toolbar at top-right of element
+      this.positionToolbarOnElement(elementNode);
+      this.floatingToolbar.classList.add('visible');
+      this.toolbarVisible = true;
+    }
+
+    // Add method to hide toolbar
+    hideToolbar() {
+      if (this.floatingToolbar) {
+        this.floatingToolbar.classList.remove('visible');
+        this.toolbarVisible = false;
+        this.currentHoveredElement = null;
+        this.currentHoveredElementData = null;
+      }
+    }
+
+    // Add method to position toolbar on element
+    positionToolbarOnElement(elementNode) {
+      if (!this.floatingToolbar || !elementNode) return;
+      
+      const elementRect = elementNode.getBoundingClientRect();
+      const surfaceRect = this.designerSurface.getBoundingClientRect();
+      
+      // Position relative to the designer surface
+      const left = elementRect.right - surfaceRect.left - 170; // 170px from right edge
+      const top = elementRect.top - surfaceRect.top + 5; // 5px from top edge
+      
+      this.floatingToolbar.style.left = `${left}px`;
+      this.floatingToolbar.style.top = `${top}px`;
+    }
+
+    // Add method to update button states
+    updateToolbarButtonStates(element) {
+      if (!this.floatingToolbar || !element) return;
+      
+      const moveUpBtn = this.floatingToolbar.querySelector('.move-up');
+      const moveDownBtn = this.floatingToolbar.querySelector('.move-down');
+      const moveOutBtn = this.floatingToolbar.querySelector('.move-out');
+      
+      // Check if element can move up
+      const canMoveUp = this.canMoveElementUp(element);
+      moveUpBtn.disabled = !canMoveUp;
+      
+      // Check if element can move down
+      const canMoveDown = this.canMoveElementDown(element);
+      moveDownBtn.disabled = !canMoveDown;
+      
+      // Check if element can move out
+      const canMoveOut = this.canMoveElementOut(element);
+      moveOutBtn.disabled = !canMoveOut;
+    }
+
+    // Add helper methods to check movement possibilities
+    canMoveElementUp(element) {
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex(e => e.id === element.id);
+      return currentIndex > 0;
+    }
+
+    canMoveElementDown(element) {
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex(e => e.id === element.id);
+      return currentIndex < siblings.length - 1;
+    }
+
+    canMoveElementOut(element) {
+      // Can move out if it has a parent (not at top level)
+      return this.findParentElement(element.id) !== null;
+    }
+
+    // Add movement methods
+    moveElementUp() {
+      if (!this.currentHoveredElementData) return;
+      
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex(e => e.id === element.id);
+      
+      if (currentIndex > 0) {
+        // Swap with previous element
+        [siblings[currentIndex - 1], siblings[currentIndex]] = 
+        [siblings[currentIndex], siblings[currentIndex - 1]];
+        
+        this.refreshDesigner();
+        this.hideToolbar();
+      }
+    }
+
+    moveElementDown() {
+      if (!this.currentHoveredElementData) return;
+      
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      const siblings = parent ? parent.elements : this.designerState.elements;
+      const currentIndex = siblings.findIndex(e => e.id === element.id);
+      
+      if (currentIndex < siblings.length - 1) {
+        // Swap with next element
+        [siblings[currentIndex], siblings[currentIndex + 1]] = 
+        [siblings[currentIndex + 1], siblings[currentIndex]];
+        
+        this.refreshDesigner();
+        this.hideToolbar();
+      }
+    }
+
+    moveElementOut() {
+      if (!this.currentHoveredElementData) return;
+      
+      const element = this.currentHoveredElementData;
+      const parent = this.findParentElement(element.id);
+      
+      if (!parent) return; // Already at top level
+      
+      const grandParent = this.findParentElement(parent.id);
+      const parentSiblings = grandParent ? grandParent.elements : this.designerState.elements;
+      const parentIndex = parentSiblings.findIndex(e => e.id === parent.id);
+      
+      // Remove element from current parent
+      parent.elements = parent.elements.filter(e => e.id !== element.id);
+      
+      // Add element after its former parent
+      parentSiblings.splice(parentIndex + 1, 0, element);
+      
+      this.refreshDesigner();
+      this.hideToolbar();
+    }
+
+    deleteCurrentElement() {
+      if (!this.currentHoveredElementData) return;
+      
+      this.removeElement(this.currentHoveredElementData.id);
+      this.hideToolbar();
+    }
+    
+
+
   }
 
   customElements.define('wc-page-designer', WcPageDesigner);
