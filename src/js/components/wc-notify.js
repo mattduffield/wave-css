@@ -29,7 +29,7 @@ if (!customElements.get('wc-notify')) {
     disconnectedCallback() {      
     }
 
-    async renderPrompt() {
+    async renderNotify() {
       if (!window.wc) {
         window.wc = {};
       }
