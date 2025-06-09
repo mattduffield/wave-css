@@ -2521,6 +2521,13 @@
     font-weight: 900;
   }
 
+  .italic {
+    font-style: italic;
+  }
+  .not-italic {
+    font-style: normal;
+  }
+
   .text-align-right {
     text-align: right;
   }
@@ -2600,6 +2607,9 @@
 
   .underline {
     text-decoration: underline;
+  }
+  .no-underline {
+    text-decoration: none;
   }
 
   .overflow-auto {
