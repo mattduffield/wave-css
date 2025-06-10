@@ -827,6 +827,10 @@
   .card-color { color: var(--card-color); }
   .card-border-color { border-color: var(--card-border-color); }
 
+
+  .primary-color {
+    color: var(--primary-color);
+  }
   .primary-bg-color {
     background-color: var(--primary-bg-color);
   }
