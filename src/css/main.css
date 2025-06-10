@@ -90,19 +90,19 @@
     --swatch-13: oklch(7% .02 240);   /* Almost black */
   }
   .theme-designer-dark {
-    --swatch-1: oklch(98% .01 210);
-    --swatch-2: oklch(92% .02 210);
-    --swatch-3: oklch(84% .03 210);
-    --swatch-4: oklch(74% .04 210);
-    --swatch-5: oklch(64% .05 210);
-    --swatch-6: oklch(54% .06 210);
-    --swatch-7: oklch(44% .07 210);
-    --swatch-8: oklch(34% .08 210);
-    --swatch-9: oklch(26% .09 210);
-    --swatch-10: oklch(20% .08 210);
-    --swatch-11: oklch(15% .06 210);
-    --swatch-12: oklch(11% .04 210);
-    --swatch-13: oklch(7% .02 210);
+    --swatch-1: oklch(96% .02 210);
+    --swatch-2: oklch(88% .03 210);
+    --swatch-3: oklch(78% .04 210);
+    --swatch-4: oklch(68% .05 210);
+    --swatch-5: oklch(58% .06 210);
+    --swatch-6: oklch(48% .07 210);
+    --swatch-7: oklch(38% .08 210);   /* Matches #2c3e50 designer header/sidebar */
+    --swatch-8: oklch(30% .07 210);
+    --swatch-9: oklch(24% .06 210);
+    --swatch-10: oklch(18% .05 210);
+    --swatch-11: oklch(14% .04 210);
+    --swatch-12: oklch(10% .03 210);
+    --swatch-13: oklch(6% .02 210);
   }
   /*
   .theme-yellow {
