@@ -254,7 +254,8 @@
     .theme-fuchsia,
     .theme-cottoncandy,
     .theme-blush,
-    .theme-bubblegum {
+    .theme-bubblegum,
+    .theme-designer-blue {
       --text-1: var(--swatch-13);
       --text-2: var(--swatch-12);
       --text-3: var(--swatch-11);
@@ -365,7 +366,8 @@
     .theme-fuchsia,
     .theme-cottoncandy,
     .theme-blush,
-    .theme-bubblegum {
+    .theme-bubblegum,
+    .theme-designer-blue {
       --text-1: var(--swatch-1);
       --text-2: var(--swatch-2);
       --text-3: var(--swatch-3);
@@ -476,7 +478,8 @@
   .light.theme-fuchsia,
   .light.theme-cottoncandy,
   .light.theme-blush,
-  .light.theme-bubblegum {
+  .light.theme-bubblegum,
+  .light.theme-designer-blue {
     --text-1: var(--swatch-13);
     --text-2: var(--swatch-12);
     --text-3: var(--swatch-11);
@@ -585,7 +588,8 @@
   .dark.theme-fuchsia,
   .dark.theme-cottoncandy,
   .dark.theme-blush,
-  .dark.theme-bubblegum {
+  .dark.theme-bubblegum,
+  .dark.theme-designer-blue {
     --text-1: var(--swatch-1);
     --text-2: var(--swatch-2);
     --text-3: var(--swatch-3);
