@@ -2854,10 +2854,10 @@
     margin: 0;
   }
   
-  small {
+  .small {
     color: var(--text-2);
   }
-  .dark small {
+  .dark .small {
     color: var(--text-8);
   }
   

@@ -5509,10 +5509,10 @@
     height: 100%;
     margin: 0;
   }
-  small {
+  .small {
     color: var(--text-2);
   }
-  .dark small {
+  .dark .small {
     color: var(--text-8);
   }
   .swatch {
