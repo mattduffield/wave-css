@@ -2936,6 +2936,22 @@
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
   }
+  input.text-sm,
+  textarea.text-sm,
+  select.text-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: all 0.2s ease-in-out;
+  }
+  input.text-xs,
+  textarea.text-xs,
+  select.text-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+    transition: all 0.2s ease-in-out;
+  }
   select option {
     background-color: var(--surface-1);
   }
