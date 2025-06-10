@@ -5609,21 +5609,145 @@
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
   }
+  .text-2xs input,
+  .text-2xs textarea,
+  .text-2xs select,
+  input.text-2xs,
+  textarea.text-2xs,
+  select.text-2xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+  }
+  .text-xs input,
+  .text-xs textarea,
+  .text-xs select,
+  input.text-xs,
+  textarea.text-xs,
+  select.text-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  .text-sm input,
+  .text-sm textarea,
+  .text-sm select,
   input.text-sm,
   textarea.text-sm,
   select.text-sm {
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    transition: all 0.2s ease-in-out;
   }
-  input.text-xs,
-  textarea.text-xs,
-  select.text-xs {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.625rem;
-    line-height: 0.875rem;
-    transition: all 0.2s ease-in-out;
+  .text-base input,
+  .text-base textarea,
+  .text-base select,
+  input.text-base,
+  textarea.text-base,
+  select.text-base {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .text-lg input,
+  .text-lg textarea,
+  .text-lg select,
+  input.text-lg,
+  textarea.text-lg,
+  select.text-lg {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  .text-xl input,
+  .text-xl textarea,
+  .text-xl select,
+  input.text-xl,
+  textarea.text-xl,
+  select.text-xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  .text-2xl input,
+  .text-2xl textarea,
+  .text-2xl select,
+  input.text-2xl,
+  textarea.text-2xl,
+  select.text-2xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  .text-3xl input,
+  .text-3xl textarea,
+  .text-3xl select,
+  input.text-3xl,
+  textarea.text-3xl,
+  select.text-3xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  .text-4xl input,
+  .text-4xl textarea,
+  .text-4xl select,
+  input.text-4xl,
+  textarea.text-4xl,
+  select.text-4xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  .text-5xl input,
+  .text-5xl textarea,
+  .text-5xl select,
+  input.text-5xl,
+  textarea.text-5xl,
+  select.text-5xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 3rem;
+    line-height: 1;
+  }
+  .text-6xl input,
+  .text-6xl textarea,
+  .text-6xl select,
+  input.text-6xl,
+  textarea.text-6xl,
+  select.text-6xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+  .text-7xl input,
+  .text-7xl textarea,
+  .text-7xl select,
+  input.text-7xl,
+  textarea.text-7xl,
+  select.text-7xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 4.5rem;
+    line-height: 1;
+  }
+  .text-8xl input,
+  .text-8xl textarea,
+  .text-8xl select,
+  input.text-8xl,
+  textarea.text-8xl,
+  select.text-8xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 6rem;
+    line-height: 1;
+  }
+  .text-9xl input,
+  .text-9xl textarea,
+  .text-9xl select,
+  input.text-9xl,
+  textarea.text-9xl,
+  select.text-9xl {
+    padding: 0.5rem 0.75rem;
+    font-size: 8rem;
+    line-height: 1;
   }
   select option {
     background-color: var(--surface-1);
