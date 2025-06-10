@@ -90,19 +90,19 @@
     --swatch-13: oklch(7% .02 240);   /* Almost black */
   }
   .theme-designer-dark {
-    --swatch-1: oklch(96% .02 210);
-    --swatch-2: oklch(88% .03 210);
-    --swatch-3: oklch(78% .04 210);
-    --swatch-4: oklch(68% .05 210);
-    --swatch-5: oklch(58% .06 210);
-    --swatch-6: oklch(48% .07 210);
-    --swatch-7: oklch(38% .08 210);   /* Matches #2c3e50 designer header/sidebar */
-    --swatch-8: oklch(30% .07 210);
-    --swatch-9: oklch(24% .06 210);
-    --swatch-10: oklch(18% .05 210);
-    --swatch-11: oklch(14% .04 210);
-    --swatch-12: oklch(10% .03 210);
-    --swatch-13: oklch(6% .02 210);
+    --swatch-1: oklch(94% .01 241);
+    --swatch-2: oklch(84% .02 241);
+    --swatch-3: oklch(74% .03 241);
+    --swatch-4: oklch(64% .04 241);
+    --swatch-5: oklch(54% .045 241);
+    --swatch-6: oklch(44% .05 241);
+    --swatch-7: oklch(29.5% .055 241);   /* Exact match for #2c3e50 */
+    --swatch-8: oklch(24% .05 241);
+    --swatch-9: oklch(19% .04 241);
+    --swatch-10: oklch(15% .03 241);
+    --swatch-11: oklch(11% .02 241);
+    --swatch-12: oklch(8% .015 241);
+    --swatch-13: oklch(5% .01 241);
   }
   /*
   .theme-yellow {
