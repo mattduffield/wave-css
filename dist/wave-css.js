@@ -13150,6 +13150,9 @@ var WcSelect = class extends WcBaseFormComponent {
     super();
     this.selectedOptions = [];
     this.mode = this.getAttribute("mode") || "chip";
+    if (!this.hasAttribute("mode")) {
+      this.mode = "standard";
+    }
     this.highlightedIndex = -1;
     this.eventAttributes = [
       "onchange",
@@ -13181,6 +13184,27 @@ var WcSelect = class extends WcBaseFormComponent {
     this._unWireEvents();
   }
   _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        const eventName = attrName.substring(2);
+        if (!this._eventHandlers) {
+          this._eventHandlers = {};
+        }
+        if (this._eventHandlers[eventName]) {
+          this.formElement.removeEventListener(eventName, this._eventHandlers[eventName]);
+        }
+        const eventHandler = new Function("event", `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+        this._eventHandlers[eventName] = eventHandler;
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }
     if (this.eventAttributes.includes(attrName)) {
       if (this.formElement && newValue) {
         const eventHandler = new Function("event", `
@@ -13244,10 +13268,12 @@ var WcSelect = class extends WcBaseFormComponent {
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
-      const options = this.querySelectorAll("option[selected]");
-      options.forEach((opt) => {
-        this.addChip(opt.value, opt.textContent);
-      });
+      if (this.mode === "chip") {
+        const options = this.querySelectorAll("option[selected]");
+        options.forEach((opt) => {
+          this.addChip(opt.value, opt.textContent);
+        });
+      }
     }
     this.eventAttributes.forEach((attr) => {
       const value = this.getAttribute(attr);

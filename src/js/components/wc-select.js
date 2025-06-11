@@ -40,6 +40,10 @@ class WcSelect extends WcBaseFormComponent {
     super();
     this.selectedOptions = [];
     this.mode = this.getAttribute('mode') || 'chip'; // Default to 'chip' mode if not specified
+     // Add this line to fix the mode when not specified
+    if (!this.hasAttribute('mode')) {
+      this.mode = 'standard'; // Use 'standard' for regular select behavior
+    }
     this.highlightedIndex = -1;
     this.eventAttributes = [
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
@@ -70,6 +74,36 @@ class WcSelect extends WcBaseFormComponent {
 
 
   _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        // Remove any existing event listener first
+        const eventName = attrName.substring(2);
+
+        // Store the handler so we can remove it later
+        if (!this._eventHandlers) {
+          this._eventHandlers = {};
+        }
+
+        // Remove previous handler if it exists
+        if (this._eventHandlers[eventName]) {
+          this.formElement.removeEventListener(eventName, this._eventHandlers[eventName]);
+        }
+
+        // Create new handler
+        const eventHandler = new Function('event', `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+
+        // Store and add the new handler
+        this._eventHandlers[eventName] = eventHandler;
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }    
     if (this.eventAttributes.includes(attrName)) {
       if (this.formElement && newValue) {
         // Create a function that properly binds 'this' to the form element
@@ -140,13 +174,15 @@ class WcSelect extends WcBaseFormComponent {
       // Do nothing...
     } else {
       this.componentElement.innerHTML = '';
-
       this._createInnerElement();
 
-      const options = this.querySelectorAll('option[selected]');
-      options.forEach(opt => {
-        this.addChip(opt.value, opt.textContent);
-      });
+      // Only process selected options for chip mode
+      if (this.mode === 'chip') {
+        const options = this.querySelectorAll('option[selected]');
+        options.forEach(opt => {
+          this.addChip(opt.value, opt.textContent);
+        });
+      }
     }
 
     this.eventAttributes.forEach(attr => {
@@ -161,6 +197,7 @@ class WcSelect extends WcBaseFormComponent {
     }
     console.log('_render:wc-select');
   }
+
   _createInnerElement() {
     const labelText = this.getAttribute('lbl-label') || '';
     const name = this.getAttribute('name');
