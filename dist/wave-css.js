@@ -11980,12 +11980,16 @@ if (!customElements.get("wc-prompt")) {
 // src/js/components/wc-notify.js
 if (!customElements.get("wc-notify")) {
   class WcNotify extends HTMLElement {
+    static get observedAttributes() {
+      return ["delay"];
+    }
     constructor() {
       super();
       this.loadCSS = loadCSS.bind(this);
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+      this._defaultDelay = 3e3;
       console.log("ctor:wc-notify");
     }
     async connectedCallback() {
@@ -12000,6 +12004,14 @@ if (!customElements.get("wc-notify")) {
     }
     disconnectedCallback() {
     }
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (name === "delay") {
+        this._defaultDelay = parseInt(newValue) || 3e3;
+      }
+    }
+    get delay() {
+      return this._defaultDelay;
+    }
     async renderNotify() {
       if (!window.wc) {
         window.wc = {};
@@ -12007,16 +12019,17 @@ if (!customElements.get("wc-notify")) {
       window.wc.Notify = this;
       wc.EventHub.broadcast("wc-notify:ready", "", "");
     }
-    showSuccess(message) {
-      this.showNotification(message, "success");
+    showSuccess(message, delay) {
+      this.showNotification(message, "success", delay);
     }
-    showError(message) {
-      this.showNotification(message, "error");
+    showError(message, delay) {
+      this.showNotification(message, "error", delay);
     }
-    showInfo(message) {
-      this.showNotification(message, "info");
+    showInfo(message, delay) {
+      this.showNotification(message, "info", delay);
     }
-    showNotification(message, type = "info") {
+    showNotification(message, type = "info", delay) {
+      const notificationDelay = delay !== void 0 ? delay : this.delay;
       const notification = document.createElement("div");
       notification.className = `notification ${type}`;
       notification.innerHTML = `
@@ -12028,7 +12041,7 @@ if (!customElements.get("wc-notify")) {
       setTimeout(() => {
         notification.classList.remove("show");
         setTimeout(() => notification.remove(), 300);
-      }, 3e3);
+      }, notificationDelay);
     }
     _applyStyle() {
       const style = `

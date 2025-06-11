@@ -10,12 +10,17 @@ import { loadCSS, loadScript, loadLibrary, loadStyle, show } from './helper-func
 
 if (!customElements.get('wc-notify')) {
   class WcNotify extends HTMLElement {
+    static get observedAttributes() {
+      return ['delay'];
+    }
+
     constructor() {
       super();
       this.loadCSS = loadCSS.bind(this);
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+      this._defaultDelay = 3000;
 
       console.log('ctor:wc-notify');
     }
@@ -36,6 +41,16 @@ if (!customElements.get('wc-notify')) {
     disconnectedCallback() {      
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (name === 'delay') {
+        this._defaultDelay = parseInt(newValue) || 3000;
+      }
+    }
+
+    get delay() {
+      return this._defaultDelay;
+    }
+
     async renderNotify() {
       if (!window.wc) {
         window.wc = {};
@@ -44,19 +59,21 @@ if (!customElements.get('wc-notify')) {
       wc.EventHub.broadcast('wc-notify:ready', '', '');
     }
 
-    showSuccess(message) {
-      this.showNotification(message, 'success');
+    showSuccess(message, delay) {
+      this.showNotification(message, 'success', delay);
     }
 
-    showError(message) {
-      this.showNotification(message, 'error');
+    showError(message, delay) {
+      this.showNotification(message, 'error', delay);
     }
 
-    showInfo(message) {
-      this.showNotification(message, 'info');
+    showInfo(message, delay) {
+      this.showNotification(message, 'info', delay);
     }
 
-    showNotification(message, type = 'info') {
+    showNotification(message, type = 'info', delay) {
+      // Use provided delay or fall back to component's default
+      const notificationDelay = delay !== undefined ? delay : this.delay;
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -75,7 +92,7 @@ if (!customElements.get('wc-notify')) {
       setTimeout(() => {
           notification.classList.remove('show');
           setTimeout(() => notification.remove(), 300);
-      }, 3000);
+      }, notificationDelay);
     }
 
     _applyStyle() {
