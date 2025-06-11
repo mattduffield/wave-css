@@ -43,7 +43,9 @@ class WcInput extends WcBaseFormComponent {
       'checked', 'disabled', 'readonly', 'required', 'autocomplete', 
       'autofocus', 'min', 'max', 'minlength', 'maxlength', 'pattern',
       'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich',
-      'list'
+      'list',
+      'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
+      'onkeypress', 'onclick'
     ];
   }
   static get icons() {
@@ -111,6 +113,10 @@ class WcInput extends WcBaseFormComponent {
     this.ignoreAttributes = [
       'lbl-label', 'toggle-switch'
     ];
+    this.eventAttributes = [
+      'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
+      'onkeypress', 'onclick'
+    ];    
     const compEl = this.querySelector('.wc-input');
     if (compEl) {
       this.componentElement = compEl;
@@ -135,6 +141,26 @@ class WcInput extends WcBaseFormComponent {
   }
 
   _handleAttributeChange(attrName, newValue) {
+    // Add this block to handle event attributes
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement) {
+        if (newValue) {
+          // Create a function that properly binds 'this' to the form element
+          const eventHandler = new Function('event', `
+            const element = event.target;
+            const value = element.value;
+            const checked = element.checked;
+            with (element) {
+              ${newValue}
+            }
+          `);
+          // Remove 'on' prefix to get event name
+          const eventName = attrName.substring(2);
+          this.formElement.addEventListener(eventName, eventHandler);
+        }
+      }
+      return;
+    }    
     if (this.passThruAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, newValue);
     }
@@ -195,6 +221,14 @@ class WcInput extends WcBaseFormComponent {
       this._createInnerElement();
     }
 
+    // Add this: wire events after element creation
+    this.eventAttributes.forEach(attr => {
+      const value = this.getAttribute(attr);
+      if (value) {
+        this._handleAttributeChange(attr, value);
+      }
+    });    
+
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
@@ -252,6 +286,23 @@ class WcInput extends WcBaseFormComponent {
         if (option.value === this.getAttribute('value')) {
             radioInput.setAttribute('checked', '');
         }
+
+        // Add event wiring for radio buttons
+        this.eventAttributes.forEach(attr => {
+          const value = this.getAttribute(attr);
+          if (value) {
+            const eventName = attr.substring(2);
+            const eventHandler = new Function('event', `
+              const element = event.target;
+              const value = element.value;
+              const checked = element.checked;
+              with (element) {
+                ${value}
+              }
+            `);
+            radioInput.addEventListener(eventName, eventHandler);
+          }
+        });
 
         radioLabel.prepend(radioInput);
         radioContainer.appendChild(radioLabel);
