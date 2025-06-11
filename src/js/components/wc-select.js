@@ -29,7 +29,10 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
 
 class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
-    return ['name', 'id', 'class', 'multiple', 'value', 'items', 'url', 'display-member', 'value-member', 'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class'];
+    return ['name', 'id', 'class', 'multiple', 'value', 'items', 'url', 'display-member', 'value-member',
+      'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class',
+      'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
+      'onkeypress', 'onclick'];
     // return ['mode']; // Allows switching between "multiple" and "chip" modes
   }
 
@@ -38,6 +41,10 @@ class WcSelect extends WcBaseFormComponent {
     this.selectedOptions = [];
     this.mode = this.getAttribute('mode') || 'chip'; // Default to 'chip' mode if not specified
     this.highlightedIndex = -1;
+    this.eventAttributes = [
+      'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
+      'onkeypress', 'onclick'
+    ];
     const compEl = this.querySelector('.wc-select');
     if (compEl) {
       this.componentElement = compEl;
@@ -63,6 +70,22 @@ class WcSelect extends WcBaseFormComponent {
 
 
   _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        // Create a function that properly binds 'this' to the form element
+        const eventHandler = new Function('event', `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+        // Remove 'on' prefix to get event name
+        const eventName = attrName.substring(2);
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }    
     if (attrName === 'autofocus') {
       this.formElement?.setAttribute('autofocus', '');
     } else if (attrName === 'url') {
@@ -126,6 +149,13 @@ class WcSelect extends WcBaseFormComponent {
       });
     }
 
+    this.eventAttributes.forEach(attr => {
+      const value = this.getAttribute(attr);
+      if (value) {
+        this._handleAttributeChange(attr, value);
+      }
+    });
+
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
@@ -178,6 +208,23 @@ class WcSelect extends WcBaseFormComponent {
       ipt.classList.add('dropdown-input');
       ipt.id = 'dropdownInput';
       ipt.setAttribute('placeholder', 'Add or select...');
+
+      // Add event wiring for the dropdown input
+      this.eventAttributes.forEach(attr => {
+        const value = this.getAttribute(attr);
+        if (value && attr !== 'onchange') { // onchange is handled by select element
+          const eventName = attr.substring(2);
+          const eventHandler = new Function('event', `
+            const element = event.target;
+            const value = element.value;
+            with (element) {
+              ${value}
+            }
+          `);
+          ipt.addEventListener(eventName, eventHandler);
+        }
+      });
+
       if (this.hasAttribute('disabled')) {
         ipt.setAttribute('disabled', '');
       }
