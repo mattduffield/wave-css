@@ -89,7 +89,7 @@
     --swatch-12: oklch(12% .04 240);  /* Nearly black */
     --swatch-13: oklch(7% .02 240);   /* Almost black */
   }
-  .theme-designer-dark {
+  .theme-designer {
     --swatch-1: oklch(94% .01 241);
     --swatch-2: oklch(84% .02 241);
     --swatch-3: oklch(74% .03 241);
@@ -104,6 +104,21 @@
     --swatch-12: oklch(8% .015 241);
     --swatch-13: oklch(5% .01 241);
   }
+  .light.theme-designer {
+    --swatch-1: oklch(98% .01 241);   /* Nearly white for canvas background */
+    --swatch-2: oklch(95% .01 241);   /* Light gray for subtle backgrounds */
+    --swatch-3: oklch(92% .02 241);   /* Light borders */
+    --swatch-4: oklch(88% .02 241);
+    --swatch-5: oklch(78% .03 241);
+    --swatch-6: oklch(68% .04 241);
+    --swatch-7: oklch(58% .045 241);  /* Mid-tone for text/borders */
+    --swatch-8: oklch(48% .05 241);
+    --swatch-9: oklch(38% .055 241);  /* Dark gray for headers */
+    --swatch-10: oklch(29.5% .055 241); /* Matches #2c3e50 for consistency */
+    --swatch-11: oklch(22% .04 241);
+    --swatch-12: oklch(15% .03 241);
+    --swatch-13: oklch(8% .02 241);   /* Very dark for emphasis text */
+  }  
   /*
   .theme-yellow {
     --swatch-1: oklch(99% .1 102);
@@ -227,7 +242,7 @@
     .theme-bubblegum,
     .theme-designer-blue,
     .theme-designer-gray,
-    .theme-designer-dark
+    .theme-designer
     {
       --text-1: var(--swatch-13);
       --text-2: var(--swatch-12);
@@ -349,7 +364,7 @@
     .theme-bubblegum,
     .theme-designer-blue,
     .theme-designer-gray,
-    .theme-designer-dark
+    .theme-designer
     {
       --text-1: var(--swatch-1);
       --text-2: var(--swatch-2);
@@ -532,7 +547,7 @@
   .light.theme-bubblegum,
   .light.theme-designer-blue,
   .light.theme-designer-gray,
-  .light.theme-designer-dark
+  .light.theme-designer
   {
     --text-1: var(--swatch-13);
     --text-2: var(--swatch-12);
@@ -653,7 +668,7 @@
   .dark.theme-designer-blue
   .dark.theme-designer-blue,
   .dark.theme-designer-gray,
-  .dark.theme-designer-dark
+  .dark.theme-designer
   {
     --text-1: var(--swatch-1);
     --text-2: var(--swatch-2);
