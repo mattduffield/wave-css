@@ -105,7 +105,7 @@
     --swatch-13: oklch(5% .01 241);
   }
   .light.theme-designer {
-    --swatch-1: oklch(98% .01 241);   /* Nearly white for canvas background */
+    --swatch-1: oklch(98% .001 241);  /* Nearly white for canvas background */
     --swatch-2: oklch(95% .01 241);   /* Light gray for subtle backgrounds */
     --swatch-3: oklch(92% .02 241);   /* Light borders */
     --swatch-4: oklch(88% .02 241);
