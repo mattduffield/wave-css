@@ -21,6 +21,7 @@ if (!customElements.get('wc-notify')) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
       this._defaultDelay = 3000;
+      this._notifications = [];
 
       console.log('ctor:wc-notify');
     }
@@ -82,6 +83,12 @@ if (!customElements.get('wc-notify')) {
           <span>${message}</span>
       `;
       
+      // Add to tracking array
+      this._notifications.push(notification);
+      
+      // Calculate position based on existing notifications
+      this._updateNotificationPositions();
+      
       // Add to page
       document.body.appendChild(notification);
       
@@ -91,8 +98,33 @@ if (!customElements.get('wc-notify')) {
       // Remove after delay
       setTimeout(() => {
           notification.classList.remove('show');
-          setTimeout(() => notification.remove(), 300);
+          setTimeout(() => {
+            notification.remove();
+            // Remove from tracking array
+            const index = this._notifications.indexOf(notification);
+            if (index > -1) {
+              this._notifications.splice(index, 1);
+              // Update positions of remaining notifications
+              this._updateNotificationPositions();
+            }
+          }, 300);
       }, notificationDelay);
+    }
+
+    _updateNotificationPositions() {
+      const spacing = 10; // Gap between notifications
+      let currentTop = 20; // Initial top position
+      
+      this._notifications.forEach((notification) => {
+        notification.style.top = `${currentTop}px`;
+        // Get the actual height after it's rendered
+        if (notification.offsetHeight) {
+          currentTop += notification.offsetHeight + spacing;
+        } else {
+          // Default height estimate if not yet rendered
+          currentTop += 60 + spacing;
+        }
+      });
     }
 
     _applyStyle() {
@@ -113,7 +145,7 @@ if (!customElements.get('wc-notify')) {
             align-items: center;
             gap: 0.75rem;
             transform: translateX(400px);
-            transition: transform 0.3s;
+            transition: transform 0.3s, top 0.3s ease-out;
             z-index: 2000;
         }
 

@@ -11990,6 +11990,7 @@ if (!customElements.get("wc-notify")) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
       this._defaultDelay = 3e3;
+      this._notifications = [];
       console.log("ctor:wc-notify");
     }
     async connectedCallback() {
@@ -12036,12 +12037,33 @@ if (!customElements.get("wc-notify")) {
           <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"}"></i>
           <span>${message}</span>
       `;
+      this._notifications.push(notification);
+      this._updateNotificationPositions();
       document.body.appendChild(notification);
       setTimeout(() => notification.classList.add("show"), 10);
       setTimeout(() => {
         notification.classList.remove("show");
-        setTimeout(() => notification.remove(), 300);
+        setTimeout(() => {
+          notification.remove();
+          const index = this._notifications.indexOf(notification);
+          if (index > -1) {
+            this._notifications.splice(index, 1);
+            this._updateNotificationPositions();
+          }
+        }, 300);
       }, notificationDelay);
+    }
+    _updateNotificationPositions() {
+      const spacing = 10;
+      let currentTop = 20;
+      this._notifications.forEach((notification) => {
+        notification.style.top = `${currentTop}px`;
+        if (notification.offsetHeight) {
+          currentTop += notification.offsetHeight + spacing;
+        } else {
+          currentTop += 60 + spacing;
+        }
+      });
     }
     _applyStyle() {
       const style = `
@@ -12061,7 +12083,7 @@ if (!customElements.get("wc-notify")) {
             align-items: center;
             gap: 0.75rem;
             transform: translateX(400px);
-            transition: transform 0.3s;
+            transition: transform 0.3s, top 0.3s ease-out;
             z-index: 2000;
         }
 
