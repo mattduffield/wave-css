@@ -12197,7 +12197,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "onkeydown",
       "onkeyup",
       "onkeypress",
-      "onclick"
+      "onclick",
+      "tooltip",
+      "tooltip-position"
     ];
   }
   static get icons() {
@@ -12275,7 +12277,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     ];
     this.ignoreAttributes = [
       "lbl-label",
-      "toggle-switch"
+      "toggle-switch",
+      "tooltip",
+      "tooltip-position"
     ];
     this.eventAttributes = [
       "onchange",
@@ -12340,6 +12344,14 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     }
     if (this.ignoreAttributes.includes(attrName)) {
     }
+    if (attrName === "tooltip" && this.formElement) {
+      this._updateTooltip();
+      return;
+    }
+    if (attrName === "tooltip-position" && this.formElement) {
+      this._updateTooltip();
+      return;
+    }
     if (attrName === "lbl-class") {
       const name = this.getAttribute("name");
       const lbl = this.querySelector(`label[for="${name}"]`);
@@ -12384,6 +12396,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         this._handleAttributeChange(attr, value);
       }
     });
+    this._updateTooltip();
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
@@ -12495,6 +12508,28 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       this.componentElement.appendChild(icon);
     } else {
       this.componentElement.appendChild(this.formElement);
+    }
+  }
+  _updateTooltip() {
+    const tooltipText = this.getAttribute("tooltip");
+    const tooltipPosition = this.getAttribute("tooltip-position") || "top";
+    if (!tooltipText) {
+      if (this.formElement) {
+        this.formElement.removeAttribute("data-tooltip");
+        this.formElement.removeAttribute("data-tooltip-position");
+      }
+      return;
+    }
+    if (this.formElement) {
+      this.formElement.setAttribute("data-tooltip", tooltipText);
+      this.formElement.setAttribute("data-tooltip-position", tooltipPosition);
+    }
+    if (this.getAttribute("type") === "radio") {
+      const radios = this.querySelectorAll('input[type="radio"]');
+      radios.forEach((radio) => {
+        radio.setAttribute("data-tooltip", tooltipText);
+        radio.setAttribute("data-tooltip-position", tooltipPosition);
+      });
     }
   }
   _applyStyle() {
@@ -12812,6 +12847,109 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         left: 5px;
       }
 
+
+      /* Tooltip styles */
+      wc-input [data-tooltip] {
+        position: relative;
+      }
+
+      wc-input [data-tooltip]::before,
+      wc-input [data-tooltip]::after {
+        position: absolute;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      wc-input [data-tooltip]:hover::before,
+      wc-input [data-tooltip]:hover::after,
+      wc-input [data-tooltip]:focus::before,
+      wc-input [data-tooltip]:focus::after {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Tooltip arrow */
+      wc-input [data-tooltip]::before {
+        content: '';
+        border: 6px solid transparent;
+      }
+
+      /* Tooltip content */
+      wc-input [data-tooltip]::after {
+        content: attr(data-tooltip);
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        max-width: 300px;
+      }
+
+      /* Top position (default) */
+      wc-input [data-tooltip][data-tooltip-position="top"]::before,
+      wc-input [data-tooltip]:not([data-tooltip-position])::before {
+        border-top-color: rgba(0, 0, 0, 0.9);
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: -12px;
+      }
+
+      wc-input [data-tooltip][data-tooltip-position="top"]::after,
+      wc-input [data-tooltip]:not([data-tooltip-position])::after {
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Bottom position */
+      wc-input [data-tooltip][data-tooltip-position="bottom"]::before {
+        border-bottom-color: rgba(0, 0, 0, 0.9);
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: -12px;
+      }
+
+      wc-input [data-tooltip][data-tooltip-position="bottom"]::after {
+        top: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Left position */
+      wc-input [data-tooltip][data-tooltip-position="left"]::before {
+        border-left-color: rgba(0, 0, 0, 0.9);
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: -12px;
+      }
+
+      wc-input [data-tooltip][data-tooltip-position="left"]::after {
+        right: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      /* Right position */
+      wc-input [data-tooltip][data-tooltip-position="right"]::before {
+        border-right-color: rgba(0, 0, 0, 0.9);
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: -12px;
+      }
+
+      wc-input [data-tooltip][data-tooltip-position="right"]::after {
+        left: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+      }      
 
     `.trim();
     this.loadStyle("wc-input-style", style);
