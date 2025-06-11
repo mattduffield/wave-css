@@ -12507,7 +12507,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     }
   }
   _createTooltipElement() {
-    const existingTooltip = document.querySelector(`[data-tooltip-for="${this.getAttribute("name")}"]`);
+    const existingTooltip = this.querySelector(".wc-tooltip");
     if (existingTooltip) {
       existingTooltip.remove();
     }
@@ -12516,31 +12516,32 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     const tooltip = document.createElement("div");
     tooltip.className = "wc-tooltip";
     tooltip.textContent = tooltipText;
-    tooltip.setAttribute("data-tooltip-for", this.getAttribute("name"));
+    tooltip.popover = "manual";
     const position = this.getAttribute("tooltip-position") || "top";
     tooltip.setAttribute("data-position", position);
-    document.body.appendChild(tooltip);
-    this._tooltipElement = tooltip;
+    if (this.formElement) {
+      this.formElement.style.anchorName = `--anchor-${this.getAttribute("name")}`;
+      tooltip.style.positionAnchor = `--anchor-${this.getAttribute("name")}`;
+    }
+    this.componentElement.appendChild(tooltip);
     this._wireTooltipEvents();
   }
   _wireTooltipEvents() {
-    if (!this._tooltipElement) return;
+    const tooltip = this.querySelector(".wc-tooltip");
+    if (!tooltip) return;
     const showTooltip = () => {
-      this._tooltipElement.classList.add("show");
-      this._positionTooltip();
-    };
-    const hideTooltip = () => {
-      this._tooltipElement.classList.remove("show");
-    };
-    const repositionTooltip = () => {
-      if (this._tooltipElement.classList.contains("show")) {
-        this._positionTooltip();
+      if (tooltip.popover) {
+        tooltip.showPopover();
+      } else {
+        tooltip.classList.add("show");
       }
     };
-    this._tooltipHandlers = {
-      show: showTooltip,
-      hide: hideTooltip,
-      reposition: repositionTooltip
+    const hideTooltip = () => {
+      if (tooltip.popover) {
+        tooltip.hidePopover();
+      } else {
+        tooltip.classList.remove("show");
+      }
     };
     if (this.formElement) {
       this.formElement.addEventListener("mouseenter", showTooltip);
@@ -12553,74 +12554,10 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       if (radioGroup) {
         radioGroup.addEventListener("mouseenter", showTooltip);
         radioGroup.addEventListener("mouseleave", hideTooltip);
+        radioGroup.style.anchorName = `--anchor-${this.getAttribute("name")}`;
+        tooltip.style.positionAnchor = `--anchor-${this.getAttribute("name")}`;
       }
     }
-    window.addEventListener("scroll", repositionTooltip, true);
-    window.addEventListener("resize", repositionTooltip);
-  }
-  _positionTooltip() {
-    const tooltip = this.querySelector(".wc-tooltip");
-    if (!tooltip) return;
-    const targetElement = this.formElement || this.querySelector(".radio-group");
-    if (!targetElement) return;
-    const targetRect = targetElement.getBoundingClientRect();
-    const position = this.getAttribute("tooltip-position") || "top";
-    let left, top;
-    switch (position) {
-      case "top":
-        left = targetRect.left + targetRect.width / 2;
-        top = targetRect.top - 8;
-        break;
-      case "bottom":
-        left = targetRect.left + targetRect.width / 2;
-        top = targetRect.bottom + 8;
-        break;
-      case "left":
-        left = targetRect.left - 8;
-        top = targetRect.top + targetRect.height / 2;
-        break;
-      case "right":
-        left = targetRect.right + 8;
-        top = targetRect.top + targetRect.height / 2;
-        break;
-    }
-    tooltip.style.position = "fixed";
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    setTimeout(() => {
-      const tooltipRect = tooltip.getBoundingClientRect();
-      switch (position) {
-        case "top":
-          tooltip.style.transform = "translateX(-50%) translateY(-100%)";
-          break;
-        case "bottom":
-          tooltip.style.transform = "translateX(-50%)";
-          break;
-        case "left":
-          tooltip.style.transform = "translateX(-100%) translateY(-50%)";
-          break;
-        case "right":
-          tooltip.style.transform = "translateY(-50%)";
-          break;
-      }
-      const finalRect = tooltip.getBoundingClientRect();
-      if (finalRect.left < 0) {
-        tooltip.style.left = "8px";
-        tooltip.style.transform = "translateY(-50%)";
-      }
-      if (finalRect.right > window.innerWidth) {
-        tooltip.style.left = `${window.innerWidth - finalRect.width - 8}px`;
-        tooltip.style.transform = "translateY(-50%)";
-      }
-      if (finalRect.top < 0) {
-        tooltip.style.top = "8px";
-        tooltip.style.transform = "translateX(-50%)";
-      }
-      if (finalRect.bottom > window.innerHeight) {
-        tooltip.style.top = `${window.innerHeight - finalRect.height - 8}px`;
-        tooltip.style.transform = "translateX(-50%)";
-      }
-    }, 0);
   }
   _applyStyle() {
     const style = `
@@ -12940,9 +12877,11 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
 
 
 
-      /* Tooltip styles */
-      .wc-tooltip {
-        position: fixed;
+
+
+      /* Tooltip styles with Anchor Positioning API */
+      wc-input .wc-tooltip {
+        position: absolute;
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
         padding: 6px 12px;
@@ -12950,20 +12889,119 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         font-size: 0.75rem;
         white-space: nowrap;
         pointer-events: none;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.2s, visibility 0.2s;
-        z-index: 99999;
+        z-index: 10000;
         max-width: 250px;
+        margin: 0;
+        border: 0;
+
+        /* Anchor positioning with auto fallback */
+        position-try-options: flip-block, flip-inline, flip-block flip-inline;
+        position-visibility: anchors-visible;
       }
 
-      .wc-tooltip.show {
+      /* For browsers that don't support anchor positioning */
+      @supports not (anchor-name: --test) {
+        wc-input .wc-tooltip {
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        wc-input .wc-tooltip.show {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+
+      /* Popover API styles */
+      wc-input .wc-tooltip[popover] {
+        margin: 0;
+        border: 0;
+        padding: 6px 12px;
+        overflow: visible;
+      }
+
+      wc-input .wc-tooltip:popover-open {
         opacity: 1;
         visibility: visible;
       }
 
-      /* Arrow styles */
-      .wc-tooltip::before {
+      /* Position variations using anchor positioning */
+      wc-input .wc-tooltip[data-position="top"] {
+        bottom: anchor(top);
+        left: anchor(center);
+        translate: -50% -8px;
+
+        /* Fallback for position-try */
+        position-try-fallbacks:
+          bottom-then-top,
+          snap-to-edge;
+      }
+
+      wc-input .wc-tooltip[data-position="bottom"] {
+        top: anchor(bottom);
+        left: anchor(center);
+        translate: -50% 8px;
+
+        position-try-fallbacks:
+          top-then-bottom,
+          snap-to-edge;
+      }
+
+      wc-input .wc-tooltip[data-position="left"] {
+        right: anchor(left);
+        top: anchor(center);
+        translate: -8px -50%;
+
+        position-try-fallbacks:
+          right-then-left,
+          snap-to-edge;
+      }
+
+      wc-input .wc-tooltip[data-position="right"] {
+        left: anchor(right);
+        top: anchor(center);
+        translate: 8px -50%;
+
+        position-try-fallbacks:
+          left-then-right,
+          snap-to-edge;
+      }
+
+      /* Try to keep tooltip in viewport */
+      @position-try bottom-then-top {
+        bottom: auto;
+        top: anchor(bottom);
+        translate: -50% 8px;
+      }
+
+      @position-try top-then-bottom {
+        top: auto;
+        bottom: anchor(top);
+        translate: -50% -8px;
+      }
+
+      @position-try right-then-left {
+        right: auto;
+        left: anchor(right);
+        translate: 8px -50%;
+      }
+
+      @position-try left-then-right {
+        left: auto;
+        right: anchor(left);
+        translate: -8px -50%;
+      }
+
+      @position-try snap-to-edge {
+        position: absolute;
+        inset: auto;
+        top: 0;
+        left: 0;
+      }
+
+      /* Arrow styles - hidden when position changes */
+      wc-input .wc-tooltip::before {
         content: '';
         position: absolute;
         width: 0;
@@ -12971,32 +13009,67 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         border: 6px solid transparent;
       }
 
-      .wc-tooltip[data-position="top"]::before {
+      wc-input .wc-tooltip[data-position="top"]::before {
         border-top-color: rgba(0, 0, 0, 0.9);
         bottom: -12px;
         left: 50%;
         transform: translateX(-50%);
       }
 
-      .wc-tooltip[data-position="bottom"]::before {
+      wc-input .wc-tooltip[data-position="bottom"]::before {
         border-bottom-color: rgba(0, 0, 0, 0.9);
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
       }
 
-      .wc-tooltip[data-position="left"]::before {
+      wc-input .wc-tooltip[data-position="left"]::before {
         border-left-color: rgba(0, 0, 0, 0.9);
         right: -12px;
         top: 50%;
         transform: translateY(-50%);
       }
 
-      .wc-tooltip[data-position="right"]::before {
+      wc-input .wc-tooltip[data-position="right"]::before {
         border-right-color: rgba(0, 0, 0, 0.9);
         left: -12px;
         top: 50%;
         transform: translateY(-50%);
+      }
+
+      /* Fallback positioning for older browsers */
+      @supports not (anchor-name: --test) {
+        wc-input .wc-tooltip[data-position="top"] {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 8px;
+        }
+
+        wc-input .wc-tooltip[data-position="bottom"] {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 8px;
+        }
+
+        wc-input .wc-tooltip[data-position="left"] {
+          position: absolute;
+          right: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-right: 8px;
+        }
+
+        wc-input .wc-tooltip[data-position="right"] {
+          position: absolute;
+          left: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 8px;
+        }
       }
 
     `.trim();
@@ -13004,13 +13077,19 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
   }
   _unWireEvents() {
     super._unWireEvents();
-    if (this._tooltipElement) {
-      this._tooltipElement.remove();
-      this._tooltipElement = null;
+    const tooltip = this.querySelector(".wc-tooltip");
+    if (tooltip) {
+      if (tooltip.popover && tooltip.matches(":popover-open")) {
+        tooltip.hidePopover();
+      }
+      tooltip.remove();
     }
-    if (this._tooltipHandlers) {
-      window.removeEventListener("scroll", this._tooltipHandlers.reposition, true);
-      window.removeEventListener("resize", this._tooltipHandlers.reposition);
+    if (this.formElement) {
+      this.formElement.style.anchorName = "";
+    }
+    const radioGroup = this.querySelector(".radio-group");
+    if (radioGroup) {
+      radioGroup.style.anchorName = "";
     }
   }
 };
