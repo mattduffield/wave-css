@@ -369,6 +369,47 @@
       --radio-checked-bg: var(--swatch-5);
       --radio-checked-border: var(--swatch-6);
     }
+    .theme-designer {
+      --container-bg-color: var(--surface-3);
+      --container-color: var(--text-2);
+      --container-border-color: var(--surface-4);
+      --card-bg-color: var(--surface-3);
+      --card-color: var(--text-2);
+      --card-border-color: var(--surface-4);
+      --component-bg-color: var(--surface-1);
+      --component-color: var(--text-1);
+      --component-border-color: var(--surface-7);
+      --component-placeholder-color: var(--text-4);
+      --component-focus-border-color: var(--surface-3);
+      --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
+      --component-disabled-bg-color: var(--surface-2);
+      --component-disabled-text-color: var(--text-3);
+      --toggle-off: var(--surface-1);
+      --toggle-on: var(--text-3);
+      --primary-color: var(--swatch-12);
+      --primary-bg-color: var(--swatch-2);
+      --secondary-bg-color: var(--component-bg-color);
+      --checkbox-border: var(--surface-3);
+      --checkbox-bg: var(--surface-1);
+      --checkbox-checked-bg: var(--swatch-5);
+      --slider-track: var(--surface-1);
+      --slider-thumb: var(--primary-bg-color);
+      --button-bg-color: var(--swatch-6);
+      --button-hover-bg-color: var(--swatch-7);
+      --button-hover-color: var(--swatch-1);
+      --button-active-bg-color: var(--swatch-6);
+      --button-color: var(--swatch-12);
+      --button-border-color: var(--swatch-6);
+      --button-focus-border-color: var(--swatch-5);
+      --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
+      --button-disabled-bg-color: var(--swatch-9);
+      --button-disabled-border-color: var(--swatch-10);
+      --button-disabled-color: var(--surface-3);
+      --radio-border: var(--surface-3);
+      --radio-bg: var(--surface-1);
+      --radio-checked-bg: var(--swatch-5);
+      --radio-checked-border: var(--swatch-6);
+    }
   }
 }
 @layer wc.prefers-dark {
@@ -575,6 +616,47 @@
     --toggle-on: var(--text-3);
     --primary-color: var(--text-2);
     --primary-bg-color: var(--swatch-5);
+    --secondary-bg-color: var(--component-bg-color);
+    --checkbox-border: var(--surface-3);
+    --checkbox-bg: var(--surface-1);
+    --checkbox-checked-bg: var(--swatch-5);
+    --slider-track: var(--surface-1);
+    --slider-thumb: var(--primary-bg-color);
+    --button-bg-color: var(--swatch-6);
+    --button-hover-bg-color: var(--swatch-7);
+    --button-hover-color: var(--swatch-1);
+    --button-active-bg-color: var(--swatch-6);
+    --button-color: var(--swatch-12);
+    --button-border-color: var(--swatch-6);
+    --button-focus-border-color: var(--swatch-5);
+    --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
+    --button-disabled-bg-color: var(--swatch-9);
+    --button-disabled-border-color: var(--swatch-10);
+    --button-disabled-color: var(--surface-3);
+    --radio-border: var(--surface-3);
+    --radio-bg: var(--surface-1);
+    --radio-checked-bg: var(--swatch-5);
+    --radio-checked-border: var(--swatch-6);
+  }
+  .light.theme-designer {
+    --container-bg-color: var(--surface-3);
+    --container-color: var(--text-2);
+    --container-border-color: var(--surface-4);
+    --card-bg-color: var(--surface-3);
+    --card-color: var(--text-2);
+    --card-border-color: var(--surface-4);
+    --component-bg-color: var(--surface-1);
+    --component-color: var(--text-1);
+    --component-border-color: var(--surface-7);
+    --component-placeholder-color: var(--text-4);
+    --component-focus-border-color: var(--surface-3);
+    --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
+    --component-disabled-bg-color: var(--surface-2);
+    --component-disabled-text-color: var(--text-3);
+    --toggle-off: var(--surface-1);
+    --toggle-on: var(--text-3);
+    --primary-color: var(--swatch-12);
+    --primary-bg-color: var(--swatch-2);
     --secondary-bg-color: var(--component-bg-color);
     --checkbox-border: var(--surface-3);
     --checkbox-bg: var(--surface-1);
