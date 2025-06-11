@@ -12901,7 +12901,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         padding: 6px 12px;
         border-radius: 4px;
         font-size: 0.75rem;
-        white-space: nowrap;
+        white-space: normal;
+        word-wrap: break-word;
         pointer-events: none;
         z-index: 10000;
         max-width: 250px;
@@ -13589,7 +13590,8 @@ var WcSelect = class extends WcBaseFormComponent {
           padding: 6px 12px;
           border-radius: 4px;
           font-size: 0.75rem;
-          white-space: nowrap;
+          white-space: normal;
+          word-wrap: break-word;
           pointer-events: none;
           z-index: 10000;
           max-width: 250px;
