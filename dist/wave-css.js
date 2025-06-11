@@ -13579,41 +13579,62 @@ var WcSelect = class extends WcBaseFormComponent {
 
 
 
-      /* Tooltip styles */
-      wc-select .wc-tooltip {
-        position: absolute;
-        background-color: rgba(0, 0, 0, 0.9);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        white-space: nowrap;
-        pointer-events: none;
-        z-index: 10000;
-        max-width: 250px;
-        margin: 0;
-        border: 0;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.2s, visibility 0.2s;
-      }
+      
 
-      /* Show states */
-      wc-select .wc-tooltip.show,
-      wc-select .wc-tooltip:popover-open {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      /* Popover specific resets */
-      wc-select .wc-tooltip[popover] {
-        inset: unset;
-      }
-
-      /* Anchor positioning when supported */
-      @supports (anchor-name: --test) {
+      /* Tooltip styles with Anchor Positioning API */
         wc-select .wc-tooltip {
-          position-try-options: flip-block, flip-inline, flip-block flip-inline;
+          position: absolute;
+          background-color: rgba(0, 0, 0, 0.9);
+          color: white;
+          padding: 6px 12px;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          white-space: nowrap;
+          pointer-events: none;
+          z-index: 10000;
+          max-width: 250px;
+          margin: 0;
+          border: 0;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        /* Show states */
+        wc-select .wc-tooltip.show,
+        wc-select .wc-tooltip:popover-open {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        /* Popover specific resets */
+        wc-select .wc-tooltip[popover] {
+          inset: unset;
+        }
+
+        /* Anchor positioning when supported */
+        @supports (anchor-name: --test) {
+          wc-select .wc-tooltip {
+            position-try-options: flip-block, flip-inline, flip-block flip-inline;
+          }
+
+          wc-select .wc-tooltip.show {
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+
+        /* Popover API styles */
+        wc-select .wc-tooltip[popover] {
+          margin: 0;
+          border: 0;
+          padding: 6px 12px;
+          overflow: visible;
+        }
+
+        wc-select .wc-tooltip:popover-open {
+          opacity: 1;
+          visibility: visible;
         }
 
         /* Position variations using anchor positioning */
@@ -13621,98 +13642,146 @@ var WcSelect = class extends WcBaseFormComponent {
           bottom: anchor(top);
           left: anchor(center);
           translate: -50% -8px;
+
+          /* Fallback for position-try */
+          position-try-fallbacks:
+            bottom-then-top,
+            snap-to-edge;
         }
 
         wc-select .wc-tooltip[data-position="bottom"] {
           top: anchor(bottom);
           left: anchor(center);
           translate: -50% 8px;
+
+          position-try-fallbacks:
+            top-then-bottom,
+            snap-to-edge;
         }
 
         wc-select .wc-tooltip[data-position="left"] {
           right: anchor(left);
           top: anchor(center);
           translate: -8px -50%;
+
+          position-try-fallbacks:
+            right-then-left,
+            snap-to-edge;
         }
 
         wc-select .wc-tooltip[data-position="right"] {
           left: anchor(right);
           top: anchor(center);
           translate: 8px -50%;
-        }
-      }
 
-      /* Fallback positioning for browsers without anchor positioning */
-      @supports not (anchor-name: --test) {
-        wc-select .wc-tooltip[data-position="top"] {
+          position-try-fallbacks:
+            left-then-right,
+            snap-to-edge;
+        }
+
+        /* Try to keep tooltip in viewport */
+        @position-try bottom-then-top {
+          bottom: auto;
+          top: anchor(bottom);
+          translate: -50% 8px;
+        }
+
+        @position-try top-then-bottom {
+          top: auto;
+          bottom: anchor(top);
+          translate: -50% -8px;
+        }
+
+        @position-try right-then-left {
+          right: auto;
+          left: anchor(right);
+          translate: 8px -50%;
+        }
+
+        @position-try left-then-right {
+          left: auto;
+          right: anchor(left);
+          translate: -8px -50%;
+        }
+
+        @position-try snap-to-edge {
           position: absolute;
-          bottom: 100%;
+          inset: auto;
+          top: 0;
+          left: 0;
+        }
+
+        /* Arrow styles - hidden when position changes */
+        wc-select .wc-tooltip::before {
+          content: '';
+          position: absolute;
+          width: 0;
+          height: 0;
+          border: 6px solid transparent;
+        }
+
+        wc-select .wc-tooltip[data-position="top"]::before {
+          border-top-color: rgba(0, 0, 0, 0.9);
+          bottom: -12px;
           left: 50%;
           transform: translateX(-50%);
-          margin-bottom: 8px;
         }
 
-        wc-select .wc-tooltip[data-position="bottom"] {
-          position: absolute;
-          top: 100%;
+        wc-select .wc-tooltip[data-position="bottom"]::before {
+          border-bottom-color: rgba(0, 0, 0, 0.9);
+          top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          margin-top: 8px;
         }
 
-        wc-select .wc-tooltip[data-position="left"] {
-          position: absolute;
-          right: 100%;
+        wc-select .wc-tooltip[data-position="left"]::before {
+          border-left-color: rgba(0, 0, 0, 0.9);
+          right: -12px;
           top: 50%;
           transform: translateY(-50%);
-          margin-right: 8px;
         }
 
-        wc-select .wc-tooltip[data-position="right"] {
-          position: absolute;
-          left: 100%;
+        wc-select .wc-tooltip[data-position="right"]::before {
+          border-right-color: rgba(0, 0, 0, 0.9);
+          left: -12px;
           top: 50%;
           transform: translateY(-50%);
-          margin-left: 8px;
         }
-      }
 
-      /* Arrow styles */
-      wc-select .wc-tooltip::before {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 0;
-        border: 6px solid transparent;
-      }
+        /* Fallback positioning for older browsers */
+        @supports not (anchor-name: --test) {
+          wc-select .wc-tooltip[data-position="top"] {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+          }
 
-      wc-select .wc-tooltip[data-position="top"]::before {
-        border-top-color: rgba(0, 0, 0, 0.9);
-        bottom: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
+          wc-select .wc-tooltip[data-position="bottom"] {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+          }
 
-      wc-select .wc-tooltip[data-position="bottom"]::before {
-        border-bottom-color: rgba(0, 0, 0, 0.9);
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
+          wc-select .wc-tooltip[data-position="left"] {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-right: 8px;
+          }
 
-      wc-select .wc-tooltip[data-position="left"]::before {
-        border-left-color: rgba(0, 0, 0, 0.9);
-        right: -12px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      wc-select .wc-tooltip[data-position="right"]::before {
-        border-right-color: rgba(0, 0, 0, 0.9);
-        left: -12px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
+          wc-select .wc-tooltip[data-position="right"] {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 8px;
+          }
+        }
     `.trim();
     this.loadStyle("wc-select-style", style);
   }
