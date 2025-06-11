@@ -656,7 +656,7 @@
     --toggle-off: var(--surface-1);
     --toggle-on: var(--text-3);
     --primary-color: var(--swatch-12);
-    --primary-bg-color: var(--swatch-2);
+    --primary-bg-color: var(--swatch-1);
     --secondary-bg-color: var(--component-bg-color);
     --checkbox-border: var(--surface-3);
     --checkbox-bg: var(--surface-1);
