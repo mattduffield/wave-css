@@ -12516,7 +12516,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     const tooltip = document.createElement("div");
     tooltip.className = "wc-tooltip";
     tooltip.textContent = tooltipText;
-    tooltip.popover = "manual";
     const position = this.getAttribute("tooltip-position") || "top";
     tooltip.setAttribute("data-position", position);
     if (this.formElement) {
@@ -12530,15 +12529,30 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     const tooltip = this.querySelector(".wc-tooltip");
     if (!tooltip) return;
     const showTooltip = () => {
-      if (tooltip.popover) {
-        tooltip.showPopover();
+      if ("showPopover" in HTMLElement.prototype) {
+        if (!tooltip.hasAttribute("popover")) {
+          tooltip.setAttribute("popover", "manual");
+        }
+        try {
+          if (tooltip.isConnected && !tooltip.matches(":popover-open")) {
+            tooltip.showPopover();
+          }
+        } catch (e) {
+          tooltip.classList.add("show");
+        }
       } else {
         tooltip.classList.add("show");
       }
     };
     const hideTooltip = () => {
-      if (tooltip.popover) {
-        tooltip.hidePopover();
+      if ("hidePopover" in HTMLElement.prototype && tooltip.hasAttribute("popover")) {
+        try {
+          if (tooltip.matches(":popover-open")) {
+            tooltip.hidePopover();
+          }
+        } catch (e) {
+          tooltip.classList.remove("show");
+        }
       } else {
         tooltip.classList.remove("show");
       }
@@ -12879,7 +12893,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
 
 
 
-      /* Tooltip styles with Anchor Positioning API */
+    /* Tooltip styles with Anchor Positioning API */
       wc-input .wc-tooltip {
         position: absolute;
         background-color: rgba(0, 0, 0, 0.9);
@@ -12893,18 +12907,27 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         max-width: 250px;
         margin: 0;
         border: 0;
-
-        /* Anchor positioning with auto fallback */
-        position-try-options: flip-block, flip-inline, flip-block flip-inline;
-        position-visibility: anchors-visible;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
       }
 
-      /* For browsers that don't support anchor positioning */
-      @supports not (anchor-name: --test) {
+      /* Show states */
+      wc-input .wc-tooltip.show,
+      wc-input .wc-tooltip:popover-open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Popover specific resets */
+      wc-input .wc-tooltip[popover] {
+        inset: unset;
+      }
+
+      /* Anchor positioning when supported */
+      @supports (anchor-name: --test) {
         wc-input .wc-tooltip {
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.2s, visibility 0.2s;
+          position-try-options: flip-block, flip-inline, flip-block flip-inline;
         }
 
         wc-input .wc-tooltip.show {
