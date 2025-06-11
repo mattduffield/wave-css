@@ -179,14 +179,12 @@ class WcInput extends WcBaseFormComponent {
     if (this.ignoreAttributes.includes(attrName)) {
       // Do nothing...
     }
-    if (attrName === 'tooltip' && this.formElement) {
-      this._updateTooltip();
+
+    if (attrName === 'tooltip' || attrName === 'tooltip-position') {
+      this._createTooltipElement();
       return;
     }
-    if (attrName === 'tooltip-position' && this.formElement) {
-      this._updateTooltip();
-      return;
-    }    
+
     if (attrName === 'lbl-class') {
       const name = this.getAttribute('name');
       const lbl = this.querySelector(`label[for="${name}"]`);
@@ -238,8 +236,8 @@ class WcInput extends WcBaseFormComponent {
       }
     });    
 
-    // Add tooltip after element creation
-    this._updateTooltip();
+    // Create tooltip after element creation
+    this._createTooltipElement();
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
@@ -368,32 +366,96 @@ class WcInput extends WcBaseFormComponent {
     }
   }
 
-  _updateTooltip() {
+  _createTooltipElement() {
+    // Remove any existing tooltip
+    const existingTooltip = this.querySelector('.wc-tooltip');
+    if (existingTooltip) {
+      existingTooltip.remove();
+    }
+
     const tooltipText = this.getAttribute('tooltip');
-    const tooltipPosition = this.getAttribute('tooltip-position') || 'top';
+    if (!tooltipText) return;
 
-    if (!tooltipText) {
-      // Remove tooltip if no text
-      if (this.formElement) {
-        this.formElement.removeAttribute('data-tooltip');
-        this.formElement.removeAttribute('data-tooltip-position');
-      }
-      return;
-    }
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'wc-tooltip';
+    tooltip.textContent = tooltipText;
 
-    // Add tooltip attributes to the form element
+    const position = this.getAttribute('tooltip-position') || 'top';
+    tooltip.setAttribute('data-position', position);
+
+    this.componentElement.appendChild(tooltip);
+
+    // Wire up tooltip events
+    this._wireTooltipEvents();
+  }
+
+  _wireTooltipEvents() {
+    const tooltip = this.querySelector('.wc-tooltip');
+    if (!tooltip) return;
+
+    const showTooltip = () => {
+      tooltip.classList.add('show');
+      this._positionTooltip();
+    };
+
+    const hideTooltip = () => {
+      tooltip.classList.remove('show');
+    };
+
+    // Add events to form element
     if (this.formElement) {
-      this.formElement.setAttribute('data-tooltip', tooltipText);
-      this.formElement.setAttribute('data-tooltip-position', tooltipPosition);
+      this.formElement.addEventListener('mouseenter', showTooltip);
+      this.formElement.addEventListener('mouseleave', hideTooltip);
+      this.formElement.addEventListener('focus', showTooltip);
+      this.formElement.addEventListener('blur', hideTooltip);
     }
 
-    // For radio buttons, add to all radio inputs
+    // For radio buttons, add to container
     if (this.getAttribute('type') === 'radio') {
-      const radios = this.querySelectorAll('input[type="radio"]');
-      radios.forEach(radio => {
-        radio.setAttribute('data-tooltip', tooltipText);
-        radio.setAttribute('data-tooltip-position', tooltipPosition);
-      });
+      const radioGroup = this.querySelector('.radio-group');
+      if (radioGroup) {
+        radioGroup.addEventListener('mouseenter', showTooltip);
+        radioGroup.addEventListener('mouseleave', hideTooltip);
+      }
+    }
+  }
+
+  _positionTooltip() {
+    const tooltip = this.querySelector('.wc-tooltip');
+    if (!tooltip) return;
+
+    const targetElement = this.formElement ||
+  this.querySelector('.radio-group');
+    if (!targetElement) return;
+
+    const targetRect = targetElement.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const position = this.getAttribute('tooltip-position') || 'top';
+
+    // Reset position
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+    tooltip.style.right = '';
+    tooltip.style.bottom = '';
+
+    switch (position) {
+      case 'top':
+        tooltip.style.left = `${targetRect.width / 2}px`;
+        tooltip.style.bottom = `${targetRect.height + 8}px`;
+        break;
+      case 'bottom':
+        tooltip.style.left = `${targetRect.width / 2}px`;
+        tooltip.style.top = `${targetRect.height + 8}px`;
+        break;
+      case 'left':
+        tooltip.style.right = `${targetRect.width + 8}px`;
+        tooltip.style.top = `${targetRect.height / 2}px`;
+        break;
+      case 'right':
+        tooltip.style.left = `${targetRect.width + 8}px`;
+        tooltip.style.top = `${targetRect.height / 2}px`;
+        break;
     }
   }
 
@@ -713,108 +775,83 @@ class WcInput extends WcBaseFormComponent {
       }
 
 
+
+
       /* Tooltip styles */
-      wc-input [data-tooltip] {
-        position: relative;
-      }
-
-      wc-input [data-tooltip]::before,
-      wc-input [data-tooltip]::after {
+      wc-input .wc-tooltip {
         position: absolute;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s, visibility 0.3s;
-        pointer-events: none;
-        z-index: 9999;
-      }
-
-      wc-input [data-tooltip]:hover::before,
-      wc-input [data-tooltip]:hover::after,
-      wc-input [data-tooltip]:focus::before,
-      wc-input [data-tooltip]:focus::after {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      /* Tooltip arrow */
-      wc-input [data-tooltip]::before {
-        content: '';
-        border: 6px solid transparent;
-      }
-
-      /* Tooltip content */
-      wc-input [data-tooltip]::after {
-        content: attr(data-tooltip);
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
         padding: 6px 12px;
         border-radius: 4px;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         white-space: nowrap;
-        max-width: 300px;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
+        z-index: 10000;
+        max-width: 250px;
       }
 
-      /* Top position (default) */
-      wc-input [data-tooltip][data-tooltip-position="top"]::before,
-      wc-input [data-tooltip]:not([data-tooltip-position])::before {
+      wc-input .wc-tooltip.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Position variations */
+      wc-input .wc-tooltip[data-position="top"] {
+        transform: translateX(-50%) translateY(-2px);
+      }
+
+      wc-input .wc-tooltip[data-position="bottom"] {
+        transform: translateX(-50%) translateY(2px);
+      }
+
+      wc-input .wc-tooltip[data-position="left"] {
+        transform: translateY(-50%) translateX(-2px);
+      }
+
+      wc-input .wc-tooltip[data-position="right"] {
+        transform: translateY(-50%) translateX(2px);
+      }
+
+      /* Arrow styles */
+      wc-input .wc-tooltip::before {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 6px solid transparent;
+      }
+
+      wc-input .wc-tooltip[data-position="top"]::before {
         border-top-color: rgba(0, 0, 0, 0.9);
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-bottom: -12px;
-      }
-
-      wc-input [data-tooltip][data-tooltip-position="top"]::after,
-      wc-input [data-tooltip]:not([data-tooltip-position])::after {
-        bottom: calc(100% + 6px);
+        bottom: -12px;
         left: 50%;
         transform: translateX(-50%);
       }
 
-      /* Bottom position */
-      wc-input [data-tooltip][data-tooltip-position="bottom"]::before {
+      wc-input .wc-tooltip[data-position="bottom"]::before {
         border-bottom-color: rgba(0, 0, 0, 0.9);
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-top: -12px;
-      }
-
-      wc-input [data-tooltip][data-tooltip-position="bottom"]::after {
-        top: calc(100% + 6px);
+        top: -12px;
         left: 50%;
         transform: translateX(-50%);
       }
 
-      /* Left position */
-      wc-input [data-tooltip][data-tooltip-position="left"]::before {
+      wc-input .wc-tooltip[data-position="left"]::before {
         border-left-color: rgba(0, 0, 0, 0.9);
-        right: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        margin-right: -12px;
-      }
-
-      wc-input [data-tooltip][data-tooltip-position="left"]::after {
-        right: calc(100% + 6px);
+        right: -12px;
         top: 50%;
         transform: translateY(-50%);
       }
 
-      /* Right position */
-      wc-input [data-tooltip][data-tooltip-position="right"]::before {
+      wc-input .wc-tooltip[data-position="right"]::before {
         border-right-color: rgba(0, 0, 0, 0.9);
-        left: 100%;
+        left: -12px;
         top: 50%;
         transform: translateY(-50%);
-        margin-left: -12px;
-      }
-
-      wc-input [data-tooltip][data-tooltip-position="right"]::after {
-        left: calc(100% + 6px);
-        top: 50%;
-        transform: translateY(-50%);
-      }      
+      }     
 
     `.trim();
     this.loadStyle('wc-input-style', style);
@@ -822,6 +859,12 @@ class WcInput extends WcBaseFormComponent {
 
   _unWireEvents() {
     super._unWireEvents();
+
+     // Remove tooltip element
+    const tooltip = this.querySelector('.wc-tooltip');
+    if (tooltip) {
+      tooltip.remove();
+    }
   }
 
 }
