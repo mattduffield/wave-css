@@ -11981,7 +11981,7 @@ if (!customElements.get("wc-prompt")) {
 if (!customElements.get("wc-notify")) {
   class WcNotify extends HTMLElement {
     static get observedAttributes() {
-      return ["delay"];
+      return ["delay", "position"];
     }
     constructor() {
       super();
@@ -11991,6 +11991,7 @@ if (!customElements.get("wc-notify")) {
       this.loadStyle = loadStyle.bind(this);
       this._defaultDelay = 3e3;
       this._notifications = [];
+      this._position = "top-right";
       console.log("ctor:wc-notify");
     }
     async connectedCallback() {
@@ -12008,10 +12009,18 @@ if (!customElements.get("wc-notify")) {
     attributeChangedCallback(name, oldValue, newValue) {
       if (name === "delay") {
         this._defaultDelay = parseInt(newValue) || 3e3;
+      } else if (name === "position") {
+        const validPositions = ["top-right", "top-left", "bottom-right", "bottom-left"];
+        if (validPositions.includes(newValue)) {
+          this._position = newValue;
+        }
       }
     }
     get delay() {
       return this._defaultDelay;
+    }
+    get position() {
+      return this._position;
     }
     async renderNotify() {
       if (!window.wc) {
@@ -12032,7 +12041,7 @@ if (!customElements.get("wc-notify")) {
     showNotification(message, type = "info", delay) {
       const notificationDelay = delay !== void 0 ? delay : this.delay;
       const notification = document.createElement("div");
-      notification.className = `notification ${type}`;
+      notification.className = `notification ${type} ${this.position}`;
       notification.innerHTML = `
           <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"}"></i>
           <span>${message}</span>
@@ -12055,13 +12064,20 @@ if (!customElements.get("wc-notify")) {
     }
     _updateNotificationPositions() {
       const spacing = 10;
-      let currentTop = 20;
-      this._notifications.forEach((notification) => {
-        notification.style.top = `${currentTop}px`;
-        if (notification.offsetHeight) {
-          currentTop += notification.offsetHeight + spacing;
+      const isBottom = this.position.includes("bottom");
+      let currentPosition = 20;
+      this._notifications.forEach((notification, index) => {
+        if (isBottom) {
+          notification.style.bottom = `${currentPosition}px`;
+          notification.style.top = "auto";
         } else {
-          currentTop += 60 + spacing;
+          notification.style.top = `${currentPosition}px`;
+          notification.style.bottom = "auto";
+        }
+        if (notification.offsetHeight) {
+          currentPosition += notification.offsetHeight + spacing;
+        } else {
+          currentPosition += 60 + spacing;
         }
       });
     }
@@ -12073,8 +12089,6 @@ if (!customElements.get("wc-notify")) {
         /* Notifications */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
             background: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -12082,9 +12096,29 @@ if (!customElements.get("wc-notify")) {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            transform: translateX(400px);
-            transition: transform 0.3s, top 0.3s ease-out;
+            transition: transform 0.3s, top 0.3s ease-out, bottom 0.3s ease-out;
             z-index: 2000;
+        }
+
+        /* Position-specific styles */
+        .notification.top-right {
+            right: 20px;
+            transform: translateX(400px);
+        }
+
+        .notification.top-left {
+            left: 20px;
+            transform: translateX(-400px);
+        }
+
+        .notification.bottom-right {
+            right: 20px;
+            transform: translateX(400px);
+        }
+
+        .notification.bottom-left {
+            left: 20px;
+            transform: translateX(-400px);
         }
 
         .notification.show {

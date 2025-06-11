@@ -11,7 +11,7 @@ import { loadCSS, loadScript, loadLibrary, loadStyle, show } from './helper-func
 if (!customElements.get('wc-notify')) {
   class WcNotify extends HTMLElement {
     static get observedAttributes() {
-      return ['delay'];
+      return ['delay', 'position'];
     }
 
     constructor() {
@@ -22,6 +22,7 @@ if (!customElements.get('wc-notify')) {
       this.loadStyle = loadStyle.bind(this);
       this._defaultDelay = 3000;
       this._notifications = [];
+      this._position = 'top-right';
 
       console.log('ctor:wc-notify');
     }
@@ -45,11 +46,20 @@ if (!customElements.get('wc-notify')) {
     attributeChangedCallback(name, oldValue, newValue) {
       if (name === 'delay') {
         this._defaultDelay = parseInt(newValue) || 3000;
+      } else if (name === 'position') {
+        const validPositions = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
+        if (validPositions.includes(newValue)) {
+          this._position = newValue;
+        }
       }
     }
 
     get delay() {
       return this._defaultDelay;
+    }
+
+    get position() {
+      return this._position;
     }
 
     async renderNotify() {
@@ -77,7 +87,7 @@ if (!customElements.get('wc-notify')) {
       const notificationDelay = delay !== undefined ? delay : this.delay;
       // Create notification element
       const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
+      notification.className = `notification ${type} ${this.position}`;
       notification.innerHTML = `
           <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
           <span>${message}</span>
@@ -113,16 +123,26 @@ if (!customElements.get('wc-notify')) {
 
     _updateNotificationPositions() {
       const spacing = 10; // Gap between notifications
-      let currentTop = 20; // Initial top position
+      const isBottom = this.position.includes('bottom');
+      let currentPosition = 20; // Initial position from edge
       
-      this._notifications.forEach((notification) => {
-        notification.style.top = `${currentTop}px`;
+      this._notifications.forEach((notification, index) => {
+        if (isBottom) {
+          // For bottom positions, stack from bottom to top
+          notification.style.bottom = `${currentPosition}px`;
+          notification.style.top = 'auto';
+        } else {
+          // For top positions, stack from top to bottom
+          notification.style.top = `${currentPosition}px`;
+          notification.style.bottom = 'auto';
+        }
+        
         // Get the actual height after it's rendered
         if (notification.offsetHeight) {
-          currentTop += notification.offsetHeight + spacing;
+          currentPosition += notification.offsetHeight + spacing;
         } else {
           // Default height estimate if not yet rendered
-          currentTop += 60 + spacing;
+          currentPosition += 60 + spacing;
         }
       });
     }
@@ -135,8 +155,6 @@ if (!customElements.get('wc-notify')) {
         /* Notifications */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
             background: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -144,9 +162,29 @@ if (!customElements.get('wc-notify')) {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            transform: translateX(400px);
-            transition: transform 0.3s, top 0.3s ease-out;
+            transition: transform 0.3s, top 0.3s ease-out, bottom 0.3s ease-out;
             z-index: 2000;
+        }
+
+        /* Position-specific styles */
+        .notification.top-right {
+            right: 20px;
+            transform: translateX(400px);
+        }
+
+        .notification.top-left {
+            left: 20px;
+            transform: translateX(-400px);
+        }
+
+        .notification.bottom-right {
+            right: 20px;
+            transform: translateX(400px);
+        }
+
+        .notification.bottom-left {
+            left: 20px;
+            transform: translateX(-400px);
         }
 
         .notification.show {
