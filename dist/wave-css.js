@@ -13143,7 +13143,9 @@ var WcSelect = class extends WcBaseFormComponent {
       "onkeydown",
       "onkeyup",
       "onkeypress",
-      "onclick"
+      "onclick",
+      "tooltip",
+      "tooltip-position"
     ];
   }
   constructor() {
@@ -13184,6 +13186,10 @@ var WcSelect = class extends WcBaseFormComponent {
     this._unWireEvents();
   }
   _handleAttributeChange(attrName, newValue) {
+    if (attrName === "tooltip" || attrName === "tooltip-position") {
+      this._createTooltipElement();
+      return;
+    }
     if (this.eventAttributes.includes(attrName)) {
       if (this.formElement && newValue) {
         const eventName = attrName.substring(2);
@@ -13281,6 +13287,7 @@ var WcSelect = class extends WcBaseFormComponent {
         this._handleAttributeChange(attr, value);
       }
     });
+    this._createTooltipElement();
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
@@ -13387,6 +13394,74 @@ var WcSelect = class extends WcBaseFormComponent {
     if (optionsContainer) {
       const options = this.formElement.querySelectorAll("option");
       optionsContainer.innerHTML = Array.from(options).map((option) => `<div class="option" data-value="${option.value}">${option.textContent}</div>`).join("");
+    }
+  }
+  _createTooltipElement() {
+    const existingTooltip = this.querySelector(".wc-tooltip");
+    if (existingTooltip) {
+      existingTooltip.remove();
+    }
+    const tooltipText = this.getAttribute("tooltip");
+    if (!tooltipText) return;
+    const tooltip = document.createElement("div");
+    tooltip.className = "wc-tooltip";
+    tooltip.textContent = tooltipText;
+    const position = this.getAttribute("tooltip-position") || "top";
+    tooltip.setAttribute("data-position", position);
+    const anchorName = `--anchor-${this.getAttribute("name") || Date.now()}`;
+    if (this.formElement) {
+      this.formElement.style.anchorName = anchorName;
+      tooltip.style.positionAnchor = anchorName;
+    }
+    this.componentElement.appendChild(tooltip);
+    this._wireTooltipEvents();
+  }
+  _wireTooltipEvents() {
+    const tooltip = this.querySelector(".wc-tooltip");
+    if (!tooltip) return;
+    const showTooltip = () => {
+      if ("showPopover" in HTMLElement.prototype) {
+        if (!tooltip.hasAttribute("popover")) {
+          tooltip.setAttribute("popover", "manual");
+        }
+        try {
+          if (tooltip.isConnected && !tooltip.matches(":popover-open")) {
+            tooltip.showPopover();
+          }
+        } catch (e) {
+          tooltip.classList.add("show");
+        }
+      } else {
+        tooltip.classList.add("show");
+      }
+    };
+    const hideTooltip = () => {
+      if ("hidePopover" in HTMLElement.prototype && tooltip.hasAttribute("popover")) {
+        try {
+          if (tooltip.matches(":popover-open")) {
+            tooltip.hidePopover();
+          }
+        } catch (e) {
+          tooltip.classList.remove("show");
+        }
+      } else {
+        tooltip.classList.remove("show");
+      }
+    };
+    if (this.formElement) {
+      this.formElement.addEventListener("mouseenter", showTooltip);
+      this.formElement.addEventListener("mouseleave", hideTooltip);
+      this.formElement.addEventListener("focus", showTooltip);
+      this.formElement.addEventListener("blur", hideTooltip);
+    }
+    if (this.mode === "chip") {
+      const dropdownInput = this.querySelector("#dropdownInput");
+      if (dropdownInput) {
+        dropdownInput.addEventListener("mouseenter", showTooltip);
+        dropdownInput.addEventListener("mouseleave", hideTooltip);
+        dropdownInput.addEventListener("focus", showTooltip);
+        dropdownInput.addEventListener("blur", hideTooltip);
+      }
     }
   }
   _applyStyle() {
@@ -13500,6 +13575,143 @@ var WcSelect = class extends WcBaseFormComponent {
         cursor: not-allowed;
         opacity: 0.7;
         font-style: italic;
+      }
+
+
+
+      /* Tooltip styles */
+      wc-select .wc-tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 10000;
+        max-width: 250px;
+        margin: 0;
+        border: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
+      }
+
+      /* Show states */
+      wc-select .wc-tooltip.show,
+      wc-select .wc-tooltip:popover-open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Popover specific resets */
+      wc-select .wc-tooltip[popover] {
+        inset: unset;
+      }
+
+      /* Anchor positioning when supported */
+      @supports (anchor-name: --test) {
+        wc-select .wc-tooltip {
+          position-try-options: flip-block, flip-inline, flip-block flip-inline;
+        }
+
+        /* Position variations using anchor positioning */
+        wc-select .wc-tooltip[data-position="top"] {
+          bottom: anchor(top);
+          left: anchor(center);
+          translate: -50% -8px;
+        }
+
+        wc-select .wc-tooltip[data-position="bottom"] {
+          top: anchor(bottom);
+          left: anchor(center);
+          translate: -50% 8px;
+        }
+
+        wc-select .wc-tooltip[data-position="left"] {
+          right: anchor(left);
+          top: anchor(center);
+          translate: -8px -50%;
+        }
+
+        wc-select .wc-tooltip[data-position="right"] {
+          left: anchor(right);
+          top: anchor(center);
+          translate: 8px -50%;
+        }
+      }
+
+      /* Fallback positioning for browsers without anchor positioning */
+      @supports not (anchor-name: --test) {
+        wc-select .wc-tooltip[data-position="top"] {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 8px;
+        }
+
+        wc-select .wc-tooltip[data-position="bottom"] {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 8px;
+        }
+
+        wc-select .wc-tooltip[data-position="left"] {
+          position: absolute;
+          right: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-right: 8px;
+        }
+
+        wc-select .wc-tooltip[data-position="right"] {
+          position: absolute;
+          left: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 8px;
+        }
+      }
+
+      /* Arrow styles */
+      wc-select .wc-tooltip::before {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 6px solid transparent;
+      }
+
+      wc-select .wc-tooltip[data-position="top"]::before {
+        border-top-color: rgba(0, 0, 0, 0.9);
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      wc-select .wc-tooltip[data-position="bottom"]::before {
+        border-bottom-color: rgba(0, 0, 0, 0.9);
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      wc-select .wc-tooltip[data-position="left"]::before {
+        border-left-color: rgba(0, 0, 0, 0.9);
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      wc-select .wc-tooltip[data-position="right"]::before {
+        border-right-color: rgba(0, 0, 0, 0.9);
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%);
       }
     `.trim();
     this.loadStyle("wc-select-style", style);
@@ -13638,6 +13850,19 @@ var WcSelect = class extends WcBaseFormComponent {
       Array.from(optionsContainer.querySelectorAll(".option")).forEach((option) => {
         option.style.display = this.selectedOptions.includes(option.getAttribute("data-value")) ? "none" : "block";
       });
+    }
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    const tooltip = this.querySelector(".wc-tooltip");
+    if (tooltip) {
+      if (tooltip.popover && tooltip.matches(":popover-open")) {
+        tooltip.hidePopover();
+      }
+      tooltip.remove();
+    }
+    if (this.formElement) {
+      this.formElement.style.anchorName = "";
     }
   }
 };
