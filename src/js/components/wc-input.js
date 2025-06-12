@@ -531,6 +531,17 @@ class WcInput extends WcBaseFormComponent {
       wc-input {
         display: contents;
       }
+
+      /* Autofill styles to prevent dark background */
+      wc-input input:-webkit-autofill,
+      wc-input input:-webkit-autofill:hover,
+      wc-input input:-webkit-autofill:focus,
+      wc-input input:-webkit-autofill:active {
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: var(--text-1);
+        transition: background-color 5000s ease-in-out 0s;
+        box-shadow: inset 0 0 20px 20px var(--surface-3);
+      }
       /*
       wc-input label {
         margin-bottom: 0.250rem;
