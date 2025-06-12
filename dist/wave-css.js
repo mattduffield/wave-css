@@ -12377,6 +12377,22 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
             <path d="M160 0c17.7 0 32 14.3 32 32l0 35.7c1.6 .2 3.1 .4 4.7 .7c.4 .1 .7 .1 1.1 .2l48 8.8c17.4 3.2 28.9 19.9 25.7 37.2s-19.9 28.9-37.2 25.7l-47.5-8.7c-31.3-4.6-58.9-1.5-78.3 6.2s-27.2 18.3-29 28.1c-2 10.7-.5 16.7 1.2 20.4c1.8 3.9 5.5 8.3 12.8 13.2c16.3 10.7 41.3 17.7 73.7 26.3l2.9 .8c28.6 7.6 63.6 16.8 89.6 33.8c14.2 9.3 27.6 21.9 35.9 39.5c8.5 17.9 10.3 37.9 6.4 59.2c-6.9 38-33.1 63.4-65.6 76.7c-13.7 5.6-28.6 9.2-44.4 11l0 33.4c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-34.9c-.4-.1-.9-.1-1.3-.2l-.2 0s0 0 0 0c-24.4-3.8-64.5-14.3-91.5-26.3c-16.1-7.2-23.4-26.1-16.2-42.2s26.1-23.4 42.2-16.2c20.9 9.3 55.3 18.5 75.2 21.6c31.9 4.7 58.2 2 76-5.3c16.9-6.9 24.6-16.9 26.8-28.9c1.9-10.6 .4-16.7-1.3-20.4c-1.9-4-5.6-8.4-13-13.3c-16.4-10.7-41.5-17.7-74-26.3l-2.8-.7s0 0 0 0C119.4 279.3 84.4 270 58.4 253c-14.2-9.3-27.5-22-35.8-39.6c-8.4-17.9-10.1-37.9-6.1-59.2C23.7 116 52.3 91.2 84.8 78.3c13.3-5.3 27.9-8.9 43.2-11L128 32c0-17.7 14.3-32 32-32z"/>
           </svg>
         `.trim()
+      },
+      {
+        name: "eye",
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
+            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: "eye-slash",
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor">
+            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/>
+          </svg>
+        `.trim()
       }
     ];
   }
@@ -12628,6 +12644,15 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         end`);
       this.componentElement.appendChild(this.formElement);
       this.componentElement.appendChild(icon);
+    } else if (type === "password") {
+      const icon = document.createElement("span");
+      icon.classList.add("icon", "icon-right");
+      const iconItem = _WcInput.icons.find((f) => f.name === "eye");
+      icon.innerHTML = iconItem.icon;
+      icon.style.cursor = "pointer";
+      icon.addEventListener("click", () => this._togglePasswordVisibility());
+      this.componentElement.appendChild(this.formElement);
+      this.componentElement.appendChild(icon);
     } else {
       this.componentElement.appendChild(this.formElement);
     }
@@ -12697,6 +12722,20 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         radioGroup.style.anchorName = `--anchor-${this.getAttribute("name")}`;
         tooltip.style.positionAnchor = `--anchor-${this.getAttribute("name")}`;
       }
+    }
+  }
+  _togglePasswordVisibility() {
+    if (!this.formElement) return;
+    const currentType = this.formElement.getAttribute("type");
+    const icon = this.componentElement.querySelector(".icon-right");
+    if (currentType === "password") {
+      this.formElement.setAttribute("type", "text");
+      const eyeSlashIcon = _WcInput.icons.find((f) => f.name === "eye-slash");
+      icon.innerHTML = eyeSlashIcon.icon;
+    } else {
+      this.formElement.setAttribute("type", "password");
+      const eyeIcon = _WcInput.icons.find((f) => f.name === "eye");
+      icon.innerHTML = eyeIcon.icon;
     }
   }
   _applyStyle() {
@@ -13012,6 +13051,25 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         position: absolute;
         top: 25px;
         left: 5px;
+      }
+
+      wc-input input[type="password"] {
+        padding-right: 30px;
+      }
+      wc-input input[type="password"] + .icon-right {
+        position: absolute;
+        top: 25px;
+        right: 8px;
+      }
+      
+      /* When password is toggled to text, maintain the right padding and icon position */
+      wc-input:has(.icon-right) input[type="text"] {
+        padding-right: 30px;
+      }
+      wc-input input[type="text"] + .icon-right {
+        position: absolute;
+        top: 25px;
+        right: 8px;
       }
 
 
