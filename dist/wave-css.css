@@ -381,7 +381,7 @@
       --component-border-color: var(--surface-7);
       --component-placeholder-color: var(--text-4);
       --component-focus-border-color: var(--surface-3);
-      --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
+      --component-focus-ring-color: var(--surface-8);
       --component-disabled-bg-color: var(--surface-2);
       --component-disabled-text-color: var(--text-3);
       --toggle-off: var(--surface-1);
@@ -401,7 +401,7 @@
       --button-color: var(--swatch-12);
       --button-border-color: var(--swatch-6);
       --button-focus-border-color: var(--swatch-5);
-      --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
+      --button-focus-ring-color: var(--swatch-6);
       --button-disabled-bg-color: var(--swatch-9);
       --button-disabled-border-color: var(--swatch-10);
       --button-disabled-color: var(--surface-3);
@@ -650,7 +650,7 @@
     --component-border-color: var(--surface-7);
     --component-placeholder-color: var(--text-4);
     --component-focus-border-color: var(--surface-3);
-    --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
+    --component-focus-ring-color: var(--surface-8);
     --component-disabled-bg-color: var(--surface-2);
     --component-disabled-text-color: var(--text-3);
     --toggle-off: var(--surface-1);
@@ -670,7 +670,7 @@
     --button-color: var(--swatch-12);
     --button-border-color: var(--swatch-6);
     --button-focus-border-color: var(--swatch-5);
-    --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
+    --button-focus-ring-color: var(--swatch-6);
     --button-disabled-bg-color: var(--swatch-9);
     --button-disabled-border-color: var(--swatch-10);
     --button-disabled-color: var(--surface-3);
