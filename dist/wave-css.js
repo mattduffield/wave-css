@@ -12393,6 +12393,22 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
             <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/>
           </svg>
         `.trim()
+      },
+      {
+        name: "lock",
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor">
+            <path d="M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: "lock-open",
+        icon: `
+          <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
+            <path d="M352 144c0-44.2 35.8-80 80-80s80 35.8 80 80l0 48c0 17.7 14.3 32 32 32s32-14.3 32-32l0-48C576 64.5 511.5 0 432 0S288 64.5 288 144l0 48L64 192c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-32 0 0-48z"/>
+          </svg>
+        `.trim()
       }
     ];
   }
@@ -12645,14 +12661,19 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       this.componentElement.appendChild(this.formElement);
       this.componentElement.appendChild(icon);
     } else if (type === "password") {
-      const icon = document.createElement("span");
-      icon.classList.add("icon", "icon-right");
-      const iconItem = _WcInput.icons.find((f) => f.name === "eye");
-      icon.innerHTML = iconItem.icon;
-      icon.style.cursor = "pointer";
-      icon.addEventListener("click", () => this._togglePasswordVisibility());
+      const lockIcon = document.createElement("span");
+      lockIcon.classList.add("icon");
+      const lockIconItem = _WcInput.icons.find((f) => f.name === "lock");
+      lockIcon.innerHTML = lockIconItem.icon;
+      const eyeIcon = document.createElement("span");
+      eyeIcon.classList.add("icon", "icon-right");
+      const eyeIconItem = _WcInput.icons.find((f) => f.name === "eye");
+      eyeIcon.innerHTML = eyeIconItem.icon;
+      eyeIcon.style.cursor = "pointer";
+      eyeIcon.addEventListener("click", () => this._togglePasswordVisibility());
       this.componentElement.appendChild(this.formElement);
-      this.componentElement.appendChild(icon);
+      this.componentElement.appendChild(lockIcon);
+      this.componentElement.appendChild(eyeIcon);
     } else {
       this.componentElement.appendChild(this.formElement);
     }
@@ -13054,19 +13075,31 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
 
       wc-input input[type="password"] {
+        padding-left: 25px;
         padding-right: 30px;
       }
-      wc-input input[type="password"] + .icon-right {
+      wc-input input[type="password"] + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+      wc-input input[type="password"] ~ .icon-right {
         position: absolute;
         top: 25px;
         right: 8px;
       }
       
-      /* When password is toggled to text, maintain the right padding and icon position */
+      /* When password is toggled to text, maintain the padding and icon positions */
       wc-input:has(.icon-right) input[type="text"] {
+        padding-left: 25px;
         padding-right: 30px;
       }
-      wc-input input[type="text"] + .icon-right {
+      wc-input:has(.icon-right) input[type="text"] + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+      wc-input input[type="text"] ~ .icon-right {
         position: absolute;
         top: 25px;
         right: 8px;
