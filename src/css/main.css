@@ -1480,6 +1480,18 @@
   .gap-8 {
     gap: 2.0rem;
   }
+  .gap-9 {
+    gap: 2.25rem;
+  }
+  .gap-10 {
+    gap: 2.5rem;
+  }
+  .gap-11 {
+    gap: 2.75rem;
+  }
+  .gap-12 {
+    gap: 3.0rem;
+  }
   .gap-x-1 {
     column-gap: 0.25rem;
   }
