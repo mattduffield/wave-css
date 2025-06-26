@@ -144,7 +144,7 @@ class WcInput extends WcBaseFormComponent {
       'autofocus', 'disabled', 'readonly', 'required', 'novalidate'
     ];
     this.ignoreAttributes = [
-      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position'
+      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position', 'select-on-focus'
     ];
     this.eventAttributes = [
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
@@ -413,6 +413,16 @@ class WcInput extends WcBaseFormComponent {
       this.componentElement.appendChild(eyeIcon);
     } else {
       this.componentElement.appendChild(this.formElement);
+    }
+
+    // Add select-on-focus functionality if attribute is present
+    if (this.hasAttribute('select-on-focus') && this.formElement) {
+      this.formElement.addEventListener('focus', (e) => {
+        // Use setTimeout to ensure the cursor is positioned correctly
+        setTimeout(() => {
+          e.target.select();
+        }, 0);
+      });
     }
   }
 

@@ -12437,7 +12437,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "lbl-label",
       "toggle-switch",
       "tooltip",
-      "tooltip-position"
+      "tooltip-position",
+      "select-on-focus"
     ];
     this.eventAttributes = [
       "onchange",
@@ -12676,6 +12677,13 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       this.componentElement.appendChild(eyeIcon);
     } else {
       this.componentElement.appendChild(this.formElement);
+    }
+    if (this.hasAttribute("select-on-focus") && this.formElement) {
+      this.formElement.addEventListener("focus", (e) => {
+        setTimeout(() => {
+          e.target.select();
+        }, 0);
+      });
     }
   }
   _createTooltipElement() {
