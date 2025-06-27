@@ -164,11 +164,18 @@ const STYLES_TO_COPY = [
   'regular',
   'light',
   'thin',
-  'duotone',
+  'duotone', // This is duotone-solid
+  'duotone-regular',
+  'duotone-light',
+  'duotone-thin',
   // 'sharp-solid',
   // 'sharp-regular', 
   // 'sharp-light',
   // 'sharp-thin',
+  // 'sharp-duotone-solid',
+  // 'sharp-duotone-regular',
+  // 'sharp-duotone-light',
+  // 'sharp-duotone-thin',
 ];
 
 // Brand icons to copy (these are in a different directory)
