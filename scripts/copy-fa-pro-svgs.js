@@ -160,6 +160,10 @@ const ICONS_TO_COPY = [
   'input-pipe',
   'pen-field',
   'memo',
+  'rotate',
+  'rotate-reverse',
+  'rotate-right',
+  'retweet',
   // Add more icon names here
 ];
 
