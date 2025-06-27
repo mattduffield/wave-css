@@ -211,6 +211,7 @@ const ICONS_TO_COPY = [
   'chart-line',
   'chart-kanban',
   'dollar-sign',
+  'triangle',
   'triangle-exclamation',
   'database',
   'server',
