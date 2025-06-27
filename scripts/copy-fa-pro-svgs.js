@@ -88,6 +88,8 @@ const ICONS_TO_COPY = [
   'database',
   'server',
   'table',
+  'screwdriver-wrench',
+  'toolbox',
   // Add more icon names here
 ];
 
