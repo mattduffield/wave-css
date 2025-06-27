@@ -4,6 +4,75 @@ const path = require('path');
 // IMPORTANT: Update this path to where you extracted Font Awesome Pro
 const FA_PRO_PATH = '/Users/matthewduffield/Documents/_assets/fontawesome-pro-6.7.2-web'; // <-- UPDATE THIS!
 
+// Font Awesome icon aliases mapping
+const ICON_ALIASES = {
+  // Common aliases
+  'search': 'magnifying-glass',
+  'edit': 'pen-to-square',
+  'save': 'floppy-disk',
+  'undo': 'arrow-rotate-left',
+  'redo': 'arrow-rotate-right',
+  'sign-out': 'right-from-bracket',
+  'sign-in': 'right-to-bracket',
+  'sign-out-alt': 'arrow-right-from-bracket',
+  'sign-in-alt': 'arrow-right-to-bracket',
+  'home': 'house',
+  'settings': 'gear',
+  'cog': 'gear',
+  'cogs': 'gears',
+  'trash-alt': 'trash-can',
+  'remove': 'xmark',
+  'close': 'xmark',
+  'times': 'xmark',
+  'check': 'check',
+  'ok': 'check',
+  'search-plus': 'magnifying-glass-plus',
+  'search-minus': 'magnifying-glass-minus',
+  'zoom-in': 'magnifying-glass-plus',
+  'zoom-out': 'magnifying-glass-minus',
+  'power-off': 'power-off',
+  'sign-out': 'right-from-bracket',
+  'log-out': 'right-from-bracket',
+  'sign-in': 'right-to-bracket',
+  'log-in': 'right-to-bracket',
+  'download': 'download',
+  'upload': 'upload',
+  'shopping-cart': 'cart-shopping',
+  'chart-bar': 'chart-column',
+  'bar-chart': 'chart-column',
+  'line-chart': 'chart-line',
+  'area-chart': 'chart-area',
+  'pie-chart': 'chart-pie',
+  'usd': 'dollar-sign',
+  'eur': 'euro-sign',
+  'gbp': 'sterling-sign',
+  'inr': 'indian-rupee-sign',
+  'jpy': 'yen-sign',
+  'cny': 'yen-sign',
+  'btc': 'bitcoin-sign',
+  'rouble': 'ruble-sign',
+  'rub': 'ruble-sign',
+  'krw': 'won-sign',
+  'refresh': 'arrows-rotate',
+  'sync': 'arrows-rotate',
+  'mail': 'envelope',
+  'email': 'envelope',
+  'warning': 'triangle-exclamation',
+  'exclamation-triangle': 'triangle-exclamation',
+  'error': 'circle-xmark',
+  'times-circle': 'circle-xmark',
+  'info': 'circle-info',
+  'info-circle': 'circle-info',
+  'question-circle': 'circle-question',
+  'help': 'circle-question',
+  'picture': 'image',
+  'photo': 'image',
+  'picture-o': 'image',
+  'photo-o': 'image',
+  'pictures': 'images',
+  'photos': 'images',
+};
+
 // Icons you want to copy (add more as needed)
 const ICONS_TO_COPY = [
   'house',
@@ -18,11 +87,16 @@ const ICONS_TO_COPY = [
   'check',
   'xmark',
   'magnifying-glass',
+  'magnifying-glass-plus',
+  'magnifying-glass-minus',
   'gear',
   'gears',
   'gear-complex',
   'trash',
+  'trash-can',
+  'power-off',
   'pen-to-square',
+  'edit', // Alias for pen-to-square - will copy the same icon
   'phone',
   'chevron-down',
   'chevron-up',
@@ -48,6 +122,8 @@ const ICONS_TO_COPY = [
   'minus',
   'circle-check',
   'circle-xmark',
+  'circle-info',
+  'circle-question',
   'calendar',
   'calendar-days',
   'pen',
@@ -70,7 +146,7 @@ const ICONS_TO_COPY = [
   'comments',
   'share',
   'print',
-  'search',
+  'search', // Alias for magnifying-glass
   'filter',
   'code',
   'code-branch',
@@ -96,6 +172,7 @@ const ICONS_TO_COPY = [
   'eye-slash',
   'sliders',
   'sliders-up',
+  'cart-shopping',
   'clipboard',
   'clipboard-user',
   'clipboard-question',
@@ -107,7 +184,9 @@ const ICONS_TO_COPY = [
   'bars-progress',
   'bars-filter',
   'signal-bars',
+  'chart-area',
   'chart-bar',
+  'chart-column',
   'chart-simple',
   'chart-scatter-bubble',
   'chart-scatter',
@@ -123,6 +202,8 @@ const ICONS_TO_COPY = [
   'chart-line-up',
   'chart-line',
   'chart-kanban',
+  'dollar-sign',
+  'triangle-exclamation',
   'database',
   'server',
   'table',
@@ -201,10 +282,10 @@ const ICONS_TO_COPY = [
   'lock-open',
   'unlock',
   'fingerprint',
-  'sign-out',
-  'sign-out-alt',
-  'sign-in',
-  'sign-in-alt',
+  'right-from-bracket',
+  'arrow-right-from-bracket',
+  'right-to-bracket',
+  'arrow-right-to-bracket',
   // Add more icon names here
 ];
 
@@ -244,8 +325,23 @@ const BRAND_ICONS = [
 ];
 
 function copyIcon(iconName, style, sourceDir, destDir) {
-  const sourcePath = path.join(sourceDir, `${iconName}.svg`);
-  const destPath = path.join(destDir, `${iconName}.svg`);
+  // Check if this icon name is an alias
+  const actualIconName = ICON_ALIASES[iconName] || iconName;
+  
+  // Try the original name first, then the alias
+  let sourcePath = path.join(sourceDir, `${iconName}.svg`);
+  let destPath = path.join(destDir, `${iconName}.svg`);
+  
+  // If original doesn't exist and we have an alias, try the alias
+  if (!fs.existsSync(sourcePath) && actualIconName !== iconName) {
+    sourcePath = path.join(sourceDir, `${actualIconName}.svg`);
+    // Still save with the original requested name for easier use
+    destPath = path.join(destDir, `${iconName}.svg`);
+    
+    if (fs.existsSync(sourcePath)) {
+      console.log(`  → Using alias: ${iconName} → ${actualIconName}`);
+    }
+  }
   
   if (fs.existsSync(sourcePath)) {
     // Ensure destination directory exists
@@ -258,7 +354,7 @@ function copyIcon(iconName, style, sourceDir, destDir) {
     console.log(`✓ Copied: ${style}/${iconName}.svg`);
     return true;
   } else {
-    console.log(`✗ Not found: ${style}/${iconName}.svg`);
+    console.log(`✗ Not found: ${style}/${iconName}.svg${actualIconName !== iconName ? ` (tried alias: ${actualIconName})` : ''}`);
     return false;
   }
 }
