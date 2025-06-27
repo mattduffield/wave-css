@@ -159,6 +159,7 @@ const ICONS_TO_COPY = [
   'file',
   'files',
   'file-lines',
+  'file-invoice',
   'folder',
   'folder-open',
   'image',
