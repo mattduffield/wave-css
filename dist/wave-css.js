@@ -3472,15 +3472,25 @@ customElements.define("wc-flip-box", WcFlipBox);
 // src/js/components/wc-icon.js
 var WcIcon = class _WcIcon extends WcBaseComponent {
   static get observedAttributes() {
-    return ["name", "icon-style", "size", "color", "primary-color", "secondary-color", "secondary-opacity", "swap-opacity", "rotate", "flip"];
+    return ["name", "icon-style", "size", "color", "primary-color", "secondary-color", "secondary-opacity", "swap-opacity", "rotate", "flip", "base-path"];
   }
   constructor() {
     super();
     this._iconRegistry = /* @__PURE__ */ new Map();
     this._loadedIcons = /* @__PURE__ */ new Map();
+    this._basePath = this.getAttribute("base-path") || _WcIcon.defaultBasePath || "/dist/assets/icons";
   }
   static get is() {
     return "wc-icon";
+  }
+  // Static property to set default base path for all icons
+  static defaultBasePath = "/dist/assets/icons";
+  // Static method to configure the base path globally
+  static setBasePath(path) {
+    _WcIcon.defaultBasePath = path;
+    if (window.wc?.iconRegistry) {
+      window.wc.iconRegistry.setBaseUrl(path);
+    }
   }
   async _render() {
     this.classList.add("contents");
@@ -3499,6 +3509,9 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
   }
   _handleAttributeChange(name, oldValue, newValue) {
     if (name === "name" || name === "icon-style") {
+      this._loadIcon();
+    } else if (name === "base-path") {
+      this._basePath = newValue || _WcIcon.defaultBasePath;
       this._loadIcon();
     } else {
       this._applyStyles();
@@ -3539,6 +3552,7 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
   async _loadIcon() {
     const iconName = this.getAttribute("name");
     const iconStyle = this.getAttribute("icon-style") || "solid";
+    const basePath = this.getAttribute("base-path") || this._basePath;
     if (!iconName || !this._group) return;
     const cacheKey = `${iconStyle}/${iconName}`;
     try {
@@ -3546,7 +3560,7 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
       if (!iconData) {
         iconData = this._iconRegistry.get(cacheKey);
         if (!iconData) {
-          const response = await fetch(`/dist/assets/icons/${iconStyle}/${iconName}.svg`);
+          const response = await fetch(`${basePath}/${iconStyle}/${iconName}.svg`);
           if (!response.ok) {
             console.error(`Icon not found: ${cacheKey}`);
             return;

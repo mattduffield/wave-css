@@ -2,17 +2,30 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcIcon extends WcBaseComponent {
   static get observedAttributes() {
-    return ['name', 'icon-style', 'size', 'color', 'primary-color', 'secondary-color', 'secondary-opacity', 'swap-opacity', 'rotate', 'flip'];
+    return ['name', 'icon-style', 'size', 'color', 'primary-color', 'secondary-color', 'secondary-opacity', 'swap-opacity', 'rotate', 'flip', 'base-path'];
   }
 
   constructor() {
     super();
     this._iconRegistry = new Map();
     this._loadedIcons = new Map();
+    this._basePath = this.getAttribute('base-path') || WcIcon.defaultBasePath || '/dist/assets/icons';
   }
 
   static get is() {
     return 'wc-icon';
+  }
+
+  // Static property to set default base path for all icons
+  static defaultBasePath = '/dist/assets/icons';
+
+  // Static method to configure the base path globally
+  static setBasePath(path) {
+    WcIcon.defaultBasePath = path;
+    // Update the icon registry base URL too
+    if (window.wc?.iconRegistry) {
+      window.wc.iconRegistry.setBaseUrl(path);
+    }
   }
 
   async _render() {
@@ -36,6 +49,9 @@ class WcIcon extends WcBaseComponent {
 
   _handleAttributeChange(name, oldValue, newValue) {
     if (name === 'name' || name === 'icon-style') {
+      this._loadIcon();
+    } else if (name === 'base-path') {
+      this._basePath = newValue || WcIcon.defaultBasePath;
       this._loadIcon();
     } else {
       this._applyStyles();
@@ -88,6 +104,7 @@ class WcIcon extends WcBaseComponent {
   async _loadIcon() {
     const iconName = this.getAttribute('name');
     const iconStyle = this.getAttribute('icon-style') || 'solid';
+    const basePath = this.getAttribute('base-path') || this._basePath;
 
     if (!iconName || !this._group) return;
 
@@ -102,7 +119,7 @@ class WcIcon extends WcBaseComponent {
 
         if (!iconData) {
           // Try to load from file
-          const response = await fetch(`/dist/assets/icons/${iconStyle}/${iconName}.svg`);
+          const response = await fetch(`${basePath}/${iconStyle}/${iconName}.svg`);
           if (!response.ok) {
             console.error(`Icon not found: ${cacheKey}`);
             return;
