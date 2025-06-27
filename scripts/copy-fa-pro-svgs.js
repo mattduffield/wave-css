@@ -50,6 +50,7 @@ const ICONS_TO_COPY = [
   'folder',
   'folder-open',
   'image',
+  'images',
   'video',
   'music',
   'comment',
@@ -133,6 +134,13 @@ const ICONS_TO_COPY = [
   'address-card',
   'sitemap',
   'timeline',
+  'users-viewfinder',
+  'crosshairs',
+  'crosshairs-simple',
+  'circle-dot',
+  'bullseye',
+  'bullseye-pointer',
+  'bullseye-arrow',
   // Add more icon names here
 ];
 
