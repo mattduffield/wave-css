@@ -153,6 +153,7 @@ const ICONS_TO_COPY = [
   'comment',
   'comments',
   'share',
+  'share-nodes',
   'print',
   'search', // Alias for magnifying-glass
   'filter',
