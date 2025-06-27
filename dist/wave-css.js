@@ -547,7 +547,6 @@ var WcBaseComponent = class extends HTMLElement {
   }
   connectedCallback() {
     if (this.childComponentSelector) {
-      console.log("connectedCallback:waiting for ", this.childComponentSelector, " to be loaded...");
       this._waitForChildren(this.childComponentSelector).then(() => {
         this._connectedCallback();
       });
@@ -618,7 +617,6 @@ var WcBaseComponent = class extends HTMLElement {
   }
   _render() {
     this.classList.add("contents");
-    console.log("wc-base-component:_render");
   }
   async _waitForChild(childRef) {
     return new Promise((resolve) => {
@@ -12458,12 +12456,10 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-input", "relative");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-input");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-input");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -12555,7 +12551,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-input");
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";
@@ -13411,12 +13406,10 @@ var WcSelect = class extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-select", "relative");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-select");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-select");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -13528,7 +13521,6 @@ var WcSelect = class extends WcBaseFormComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-select");
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";

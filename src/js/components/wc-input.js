@@ -158,14 +158,14 @@ class WcInput extends WcBaseFormComponent {
       this.componentElement.classList.add('wc-input', 'relative');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-input');
+    // console.log('ctor:wc-input');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-input');
+    // console.log('connectedCallback:wc-input');
   }
 
   disconnectedCallback() {
@@ -274,7 +274,7 @@ class WcInput extends WcBaseFormComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-input');
+    // console.log('_render:wc-input');
   }
 
   _createInnerElement() {

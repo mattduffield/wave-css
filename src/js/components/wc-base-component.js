@@ -26,7 +26,7 @@ export class WcBaseComponent extends HTMLElement {
     // The following is used to ensure any child web components render prior to allowing
     // this component to render.
     if (this.childComponentSelector) {
-      console.log('connectedCallback:waiting for ', this.childComponentSelector, ' to be loaded...');
+      // console.log('connectedCallback:waiting for ', this.childComponentSelector, ' to be loaded...');
       this._waitForChildren(this.childComponentSelector).then(() => {
         this._connectedCallback();
       });
@@ -105,7 +105,7 @@ export class WcBaseComponent extends HTMLElement {
 
   _render() {
     this.classList.add('contents');
-    console.log('wc-base-component:_render');
+    // console.log('wc-base-component:_render');
   }
 
   async _waitForChild(childRef) {

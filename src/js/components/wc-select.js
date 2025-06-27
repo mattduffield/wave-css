@@ -58,14 +58,14 @@ class WcSelect extends WcBaseFormComponent {
       this.componentElement.classList.add('wc-select', 'relative');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-select');
+    // console.log('ctor:wc-select');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-select');
+    // console.log('connectedCallback:wc-select');
   }
 
   disconnectedCallback() {
@@ -204,7 +204,7 @@ class WcSelect extends WcBaseFormComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-select');
+    // console.log('_render:wc-select');
   }
 
   _createInnerElement() {
