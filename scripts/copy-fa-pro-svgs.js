@@ -295,6 +295,8 @@ const ICONS_TO_COPY = [
   'right-to-bracket',
   'arrow-right-to-bracket',
   'eraser',
+  'vial',
+  'vials',
   // Add more icon names here
 ];
 
