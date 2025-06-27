@@ -37,6 +37,7 @@ const ICONS_TO_COPY = [
   'calendar',
   'clock',
   'file',
+  'files',
   'folder',
   'image',
   'video',
