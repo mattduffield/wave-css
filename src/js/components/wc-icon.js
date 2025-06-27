@@ -5,6 +5,54 @@ class WcIcon extends WcBaseComponent {
     return ['name', 'icon-style', 'size', 'color', 'primary-color', 'secondary-color', 'secondary-opacity', 'swap-opacity', 'rotate', 'flip', 'base-path'];
   }
 
+  // Font Awesome icon aliases mapping
+  static iconAliases = {
+    'home': 'house',
+    'search': 'magnifying-glass',
+    'edit': 'pen-to-square',
+    'save': 'floppy-disk',
+    'undo': 'arrow-rotate-left',
+    'redo': 'arrow-rotate-right',
+    'sign-out': 'right-from-bracket',
+    'sign-in': 'right-to-bracket',
+    'sign-out-alt': 'arrow-right-from-bracket',
+    'sign-in-alt': 'arrow-right-to-bracket',
+    'settings': 'gear',
+    'cog': 'gear',
+    'cogs': 'gears',
+    'trash-alt': 'trash-can',
+    'remove': 'xmark',
+    'close': 'xmark',
+    'times': 'xmark',
+    'search-plus': 'magnifying-glass-plus',
+    'search-minus': 'magnifying-glass-minus',
+    'zoom-in': 'magnifying-glass-plus',
+    'zoom-out': 'magnifying-glass-minus',
+    'power-off': 'power-off',
+    'log-out': 'right-from-bracket',
+    'log-in': 'right-to-bracket',
+    'shopping-cart': 'cart-shopping',
+    'chart-bar': 'chart-column',
+    'bar-chart': 'chart-column',
+    'line-chart': 'chart-line',
+    'area-chart': 'chart-area',
+    'pie-chart': 'chart-pie',
+    'refresh': 'arrows-rotate',
+    'sync': 'arrows-rotate',
+    'mail': 'envelope',
+    'email': 'envelope',
+    'warning': 'triangle-exclamation',
+    'exclamation-triangle': 'triangle-exclamation',
+    'error': 'circle-xmark',
+    'times-circle': 'circle-xmark',
+    'info': 'circle-info',
+    'info-circle': 'circle-info',
+    'question-circle': 'circle-question',
+    'help': 'circle-question',
+    'picture': 'image',
+    'photo': 'image',
+  };
+
   constructor() {
     super();
     this._iconRegistry = new Map();
@@ -111,11 +159,13 @@ class WcIcon extends WcBaseComponent {
   }
 
   async _loadIcon() {
-    const iconName = this.getAttribute('name');
+    const requestedName = this.getAttribute('name');
+    if (!requestedName || !this._group) return;
+    
+    // Resolve alias to actual icon name
+    const iconName = WcIcon.iconAliases[requestedName] || requestedName;
     const iconStyle = this.getAttribute('icon-style') || 'solid';
     const basePath = this.getAttribute('base-path') || this._basePath;
-
-    if (!iconName || !this._group) return;
 
     const cacheKey = `${iconStyle}/${iconName}`;
 
