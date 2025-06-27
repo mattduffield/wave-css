@@ -160,6 +160,7 @@ const ICONS_TO_COPY = [
   'files',
   'file-lines',
   'file-invoice',
+  'file-invoice-dollar',
   'folder',
   'folder-open',
   'image',
@@ -320,6 +321,17 @@ const ICONS_TO_COPY = [
   'eraser',
   'vial',
   'vials',
+  'ellipsis',
+  'ellipsis-vertical',
+  'ellipsis-stroke',
+  'ellipsis-stroke-vertical',
+  'square-ellipsis',
+  'square-ellipsis-vertical',
+  'circle-ellipsis',
+  'circle-ellipsis-vertical',
+  'circle-notch',
+  'grip-dots',
+  'grip-dots-vertical',
   // Add more icon names here
 ];
 
