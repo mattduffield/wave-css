@@ -21,7 +21,9 @@ const ICON_ALIASES = {
   'cog': 'gear',
   'cogs': 'gears',
   'trash-alt': 'trash-can',
+  'delete': 'trash',
   'remove': 'xmark',
+  'clear': 'eraser',
   'close': 'xmark',
   'times': 'xmark',
   'check': 'check',
@@ -286,6 +288,7 @@ const ICONS_TO_COPY = [
   'arrow-right-from-bracket',
   'right-to-bracket',
   'arrow-right-to-bracket',
+  'eraser',
   // Add more icon names here
 ];
 
