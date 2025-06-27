@@ -1,0 +1,154 @@
+<div id="page-contents">
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Wave CSS Icon Component</h1>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Basic Icons</h2>
+      <p class="text-gray-600 mb-4">Icons automatically inherit the current text color:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="house" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">house</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="user" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">user</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="heart" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">heart</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="star" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">star</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="envelope" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">envelope</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="gear" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">gear</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Icon Styles</h2>
+      <p class="text-gray-600 mb-4">Different icon styles (if available in your Font Awesome package):</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="heart" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">solid</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="heart" icon-style="regular" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">regular</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="heart" icon-style="light" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">light</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="heart" icon-style="thin" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">thin</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Colored Icons</h2>
+      <p class="text-gray-600 mb-4">Icons with custom colors:</p>
+      <div class="flex gap-4 flex-wrap">
+        <wc-icon name="heart" icon-style="solid" size="2rem" color="#ef4444"></wc-icon>
+        <wc-icon name="star" icon-style="solid" size="2rem" color="#f59e0b"></wc-icon>
+        <wc-icon name="check" icon-style="solid" size="2rem" color="#10b981"></wc-icon>
+        <wc-icon name="bell" icon-style="solid" size="2rem" color="#3b82f6"></wc-icon>
+        <wc-icon name="envelope" icon-style="solid" size="2rem" color="#8b5cf6"></wc-icon>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Icon Sizes</h2>
+      <p class="text-gray-600 mb-4">Different icon sizes:</p>
+      <div class="flex items-center gap-4">
+        <wc-icon name="star" icon-style="solid" size="1rem"></wc-icon>
+        <wc-icon name="star" icon-style="solid" size="1.5rem"></wc-icon>
+        <wc-icon name="star" icon-style="solid" size="2rem"></wc-icon>
+        <wc-icon name="star" icon-style="solid" size="3rem"></wc-icon>
+        <wc-icon name="star" icon-style="solid" size="4rem"></wc-icon>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Rotation & Flipping</h2>
+      <p class="text-gray-600 mb-4">Transform icons with rotation and flipping:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="arrow-right" icon-style="solid" size="2rem" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">normal</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="arrow-right" icon-style="solid" size="2rem" rotate="90" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">rotate="90"</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="arrow-right" icon-style="solid" size="2rem" flip="horizontal" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">flip="horizontal"</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="arrow-right" icon-style="solid" size="2rem" flip="vertical" class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">flip="vertical"</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Duotone Icons</h2>
+      <p class="text-gray-600 mb-4">Duotone icons with primary and secondary colors:</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="camera" icon-style="duotone" size="3rem" 
+            primary-color="#3b82f6" 
+            secondary-color="#93c5fd" 
+            class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">Custom colors</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="camera" icon-style="duotone" size="3rem" 
+            color="#10b981" 
+            secondary-opacity="0.2" 
+            class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">Low opacity</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-icon name="camera" icon-style="duotone" size="3rem" 
+            color="#ef4444" 
+            swap-opacity 
+            class="mb-2"></wc-icon>
+          <code class="text-xs text-gray-500">Swapped opacity</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Usage Examples</h2>
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;!-- Basic icon --&gt;
+&lt;wc-icon name="house" icon-style="solid"&gt;&lt;/wc-icon&gt;
+
+&lt;!-- Icon with size and color --&gt;
+&lt;wc-icon name="heart" icon-style="solid" size="2rem" color="#ef4444"&gt;&lt;/wc-icon&gt;
+
+&lt;!-- Rotated icon --&gt;
+&lt;wc-icon name="arrow-right" icon-style="solid" rotate="90"&gt;&lt;/wc-icon&gt;
+
+&lt;!-- Duotone icon --&gt;
+&lt;wc-icon name="camera" icon-style="duotone" 
+  primary-color="#3b82f6" 
+  secondary-color="#93c5fd"&gt;&lt;/wc-icon&gt;</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>

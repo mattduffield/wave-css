@@ -77,6 +77,14 @@ Execute the following to view the components locally.
 python3 -m http.server 3015
 ```
 
+## Downloading SVGs
+Make sure you update the ICONS_TO_COPY array to have all the SVGs you want.
+Next, execute the following command:
+
+```
+ node ./scripts/copy-fa-pro-svgs.js
+ ```
+
 
 ## References
 https://fabricweb.z5.web.core.windows.net/pr-deploy-site/refs/heads/master/theming-designer/

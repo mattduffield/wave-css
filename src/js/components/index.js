@@ -1,4 +1,5 @@
 export * from './helper-function.js';
+export { iconRegistry } from '../utils/icon-registry.js';
 import './wc-base-component.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
@@ -14,6 +15,7 @@ import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';
 import './wc-flip-box.js';
+import './wc-icon.js';
 import './wc-image.js';
 import './wc-menu.js';
 import './wc-page-designer.js';

@@ -526,6 +526,94 @@ function extractSrcElements(nodes) {
   return result;
 }
 
+// src/js/utils/icon-registry.js
+var IconRegistry = class {
+  constructor() {
+    this.icons = /* @__PURE__ */ new Map();
+    this.baseUrl = "/dist/assets/icons";
+  }
+  setBaseUrl(url) {
+    this.baseUrl = url;
+  }
+  // Register a single icon
+  register(name, svgContent, style = "solid") {
+    const key = `${style}/${name}`;
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+    const svgElement = svgDoc.querySelector("svg");
+    const paths = svgDoc.querySelectorAll("path");
+    const iconData = {
+      viewBox: svgElement?.getAttribute("viewBox") || "0 0 512 512",
+      paths: Array.from(paths).map((path) => ({
+        d: path.getAttribute("d"),
+        opacity: path.getAttribute("opacity"),
+        class: path.getAttribute("class"),
+        fill: path.getAttribute("fill")
+      }))
+    };
+    this.icons.set(key, iconData);
+    if (window.customElements.get("wc-icon")) {
+      const WcIcon2 = window.customElements.get("wc-icon");
+      WcIcon2.registerIcon(name, iconData, style);
+    }
+  }
+  // Register multiple icons from an object
+  registerBatch(iconsObj, style = "solid") {
+    Object.entries(iconsObj).forEach(([name, svgContent]) => {
+      this.register(name, svgContent, style);
+    });
+  }
+  // Load icons from a JSON file containing SVG strings
+  async loadFromJson(url, style = "solid") {
+    try {
+      const response = await fetch(url);
+      const icons = await response.json();
+      this.registerBatch(icons, style);
+    } catch (error) {
+      console.error(`Failed to load icons from ${url}:`, error);
+    }
+  }
+  // Preload specific icons
+  async preload(iconNames, style = "solid") {
+    const promises = iconNames.map(async (name) => {
+      const key = `${style}/${name}`;
+      if (!this.icons.has(key)) {
+        try {
+          const response = await fetch(`${this.baseUrl}/${style}/${name}.svg`);
+          if (response.ok) {
+            const svgContent = await response.text();
+            this.register(name, svgContent, style);
+          }
+        } catch (error) {
+          console.error(`Failed to preload icon ${key}:`, error);
+        }
+      }
+    });
+    await Promise.all(promises);
+  }
+  // Get icon data
+  get(name, style = "solid") {
+    return this.icons.get(`${style}/${name}`);
+  }
+  // Check if icon exists
+  has(name, style = "solid") {
+    return this.icons.has(`${style}/${name}`);
+  }
+  // Get all registered icons
+  getAll() {
+    return new Map(this.icons);
+  }
+  // Clear registry
+  clear() {
+    this.icons.clear();
+  }
+};
+var iconRegistry = new IconRegistry();
+if (typeof window !== "undefined") {
+  window.wc = window.wc || {};
+  window.wc.iconRegistry = iconRegistry;
+}
+
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
   constructor() {
@@ -3380,6 +3468,163 @@ var WcFlipBox = class extends WcBaseComponent {
   }
 };
 customElements.define("wc-flip-box", WcFlipBox);
+
+// src/js/components/wc-icon.js
+var WcIcon = class _WcIcon extends WcBaseComponent {
+  static get observedAttributes() {
+    return ["name", "icon-style", "size", "color", "primary-color", "secondary-color", "secondary-opacity", "swap-opacity", "rotate", "flip"];
+  }
+  constructor() {
+    super();
+    this._iconRegistry = /* @__PURE__ */ new Map();
+    this._loadedIcons = /* @__PURE__ */ new Map();
+  }
+  static get is() {
+    return "wc-icon";
+  }
+  async _render() {
+    this.classList.add("contents");
+    const wrapper = document.createElement("span");
+    wrapper.className = "wc-icon-wrapper";
+    wrapper.innerHTML = `
+            <svg class="wc-icon-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <g class="wc-icon-group"></g>
+            </svg>
+        `;
+    this.appendChild(wrapper);
+    this._svg = wrapper.querySelector(".wc-icon-svg");
+    this._group = wrapper.querySelector(".wc-icon-group");
+    this._applyStyles();
+    await this._loadIcon();
+  }
+  _handleAttributeChange(name, oldValue, newValue) {
+    if (name === "name" || name === "icon-style") {
+      this._loadIcon();
+    } else {
+      this._applyStyles();
+    }
+  }
+  _applyStyles() {
+    if (!this._svg) return;
+    const size = this.getAttribute("size") || "1em";
+    const rotate = this.getAttribute("rotate");
+    const flip = this.getAttribute("flip");
+    const iconStyle = this.getAttribute("icon-style") || "solid";
+    this._svg.style.width = size;
+    this._svg.style.height = size;
+    if (rotate) {
+      this._svg.style.transform = `rotate(${rotate}deg)`;
+    }
+    if (flip === "horizontal") {
+      this._svg.style.transform = (this._svg.style.transform || "") + " scaleX(-1)";
+    } else if (flip === "vertical") {
+      this._svg.style.transform = (this._svg.style.transform || "") + " scaleY(-1)";
+    } else if (flip === "both") {
+      this._svg.style.transform = (this._svg.style.transform || "") + " scale(-1)";
+    }
+    if (iconStyle === "duotone") {
+      const primaryColor = this.getAttribute("primary-color") || this.getAttribute("color") || "currentColor";
+      const secondaryColor = this.getAttribute("secondary-color") || this.getAttribute("color") || "currentColor";
+      const secondaryOpacity = this.getAttribute("secondary-opacity") || "0.4";
+      const swapOpacity = this.hasAttribute("swap-opacity");
+      this.style.setProperty("--fa-primary-color", primaryColor);
+      this.style.setProperty("--fa-secondary-color", secondaryColor);
+      this.style.setProperty("--fa-primary-opacity", swapOpacity ? secondaryOpacity : "1");
+      this.style.setProperty("--fa-secondary-opacity", swapOpacity ? "1" : secondaryOpacity);
+    } else {
+      const color = this.getAttribute("color") || "currentColor";
+      this.style.setProperty("--fa-color", color);
+    }
+  }
+  async _loadIcon() {
+    const iconName = this.getAttribute("name");
+    const iconStyle = this.getAttribute("icon-style") || "solid";
+    if (!iconName || !this._group) return;
+    const cacheKey = `${iconStyle}/${iconName}`;
+    try {
+      let iconData = this._loadedIcons.get(cacheKey);
+      if (!iconData) {
+        iconData = this._iconRegistry.get(cacheKey);
+        if (!iconData) {
+          const response = await fetch(`/dist/assets/icons/${iconStyle}/${iconName}.svg`);
+          if (!response.ok) {
+            console.error(`Icon not found: ${cacheKey}`);
+            return;
+          }
+          const svgText = await response.text();
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
+          const svgElement = svgDoc.querySelector("svg");
+          const paths = svgDoc.querySelectorAll("path");
+          const viewBox = svgElement?.getAttribute("viewBox");
+          if (viewBox) {
+            this._svg.setAttribute("viewBox", viewBox);
+          }
+          iconData = {
+            viewBox,
+            paths: Array.from(paths).map((path) => ({
+              d: path.getAttribute("d"),
+              opacity: path.getAttribute("opacity"),
+              class: path.getAttribute("class"),
+              fill: path.getAttribute("fill")
+            }))
+          };
+          this._loadedIcons.set(cacheKey, iconData);
+        }
+      }
+      this._group.innerHTML = "";
+      if (iconData.viewBox) {
+        this._svg.setAttribute("viewBox", iconData.viewBox);
+      }
+      iconData.paths.forEach((pathData) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData.d);
+        if (iconStyle === "duotone") {
+          if (pathData.class && pathData.class.includes("fa-secondary")) {
+            path.classList.add("fa-secondary");
+            path.style.fill = "var(--fa-secondary-color)";
+            path.style.opacity = "var(--fa-secondary-opacity)";
+          } else {
+            path.classList.add("fa-primary");
+            path.style.fill = "var(--fa-primary-color)";
+            path.style.opacity = "var(--fa-primary-opacity)";
+          }
+        } else {
+          path.style.fill = "var(--fa-color, currentColor)";
+          if (pathData.opacity) {
+            path.style.opacity = pathData.opacity;
+          }
+        }
+        this._group.appendChild(path);
+      });
+    } catch (error) {
+      console.error(`Error loading icon ${cacheKey}:`, error);
+    }
+  }
+  // Static method to register icons programmatically
+  static registerIcon(name, pathData, iconStyle = "solid") {
+    if (!_WcIcon._globalRegistry) {
+      _WcIcon._globalRegistry = /* @__PURE__ */ new Map();
+    }
+    const key = `${iconStyle}/${name}`;
+    _WcIcon._globalRegistry.set(key, pathData);
+  }
+  // Static method to register multiple icons
+  static registerIcons(icons, iconStyle = "solid") {
+    Object.entries(icons).forEach(([name, pathData]) => {
+      _WcIcon.registerIcon(name, pathData, iconStyle);
+    });
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    if (_WcIcon._globalRegistry) {
+      _WcIcon._globalRegistry.forEach((value, key) => {
+        this._iconRegistry.set(key, value);
+      });
+    }
+  }
+};
+customElements.define(WcIcon.is, WcIcon);
 
 // src/js/components/wc-image.js
 var WcImage = class extends WcBaseComponent {
@@ -14274,6 +14519,7 @@ export {
   getSourcePropertyValue,
   hide,
   hideAndShow,
+  iconRegistry,
   initRules,
   isCustomElement,
   loadCSS,
