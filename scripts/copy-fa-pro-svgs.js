@@ -196,6 +196,15 @@ const ICONS_TO_COPY = [
   'ruler-horizontal',
   'ruler-triangle',
   'pen-ruler',
+  'credit-card',
+  'lock',
+  'lock-open',
+  'unlock',
+  'fingerprint',
+  'sign-out',
+  'sign-out-alt',
+  'sign-in',
+  'sign-in-alt',
   // Add more icon names here
 ];
 
