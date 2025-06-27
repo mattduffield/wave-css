@@ -80,6 +80,7 @@ const ICONS_TO_COPY = [
   'house',
   'user',
   'users',
+  'user-shield',
   'heart',
   'star',
   'camera',
