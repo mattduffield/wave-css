@@ -132,21 +132,49 @@
     </div>
 
     <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Using Utility Classes</h2>
+      <p class="text-gray-600 mb-4">Icons work with Wave CSS utility classes for sizing and alignment:</p>
+      <div class="space-y-4">
+        <div class="flex items-center gap-4">
+          <wc-icon name="heart" icon-style="solid" class="w-4 h-4"></wc-icon>
+          <code class="text-sm">class="w-4 h-4"</code>
+        </div>
+        <div class="flex items-center gap-4">
+          <wc-icon name="star" icon-style="solid" class="w-6 h-6 text-yellow-500"></wc-icon>
+          <code class="text-sm">class="w-6 h-6 text-yellow-500"</code>
+        </div>
+        <div class="flex items-center gap-4">
+          <wc-icon name="user" icon-style="solid" class="w-8 h-8 text-blue-600"></wc-icon>
+          <code class="text-sm">class="w-8 h-8 text-blue-600"</code>
+        </div>
+        <div class="flex items-center gap-4 p-4 bg-gray-100 rounded">
+          <span>Text with icon:</span>
+          <wc-icon name="check" icon-style="solid" class="w-5 h-5 text-green-500 inline-block align-middle"></wc-icon>
+          <span>Success!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-4">Usage Examples</h2>
       <div class="bg-gray-100 p-4 rounded-lg">
-        <pre class="text-sm"><code>&lt;!-- Basic icon --&gt;
-&lt;wc-icon name="house" icon-style="solid"&gt;&lt;/wc-icon&gt;
+        <pre class="text-sm"><code>&lt;!-- Basic icon with utility classes --&gt;
+&lt;wc-icon name="house" icon-style="solid" class="w-5 h-5"&gt;&lt;/wc-icon&gt;
 
-&lt;!-- Icon with size and color --&gt;
-&lt;wc-icon name="heart" icon-style="solid" size="2rem" color="#ef4444"&gt;&lt;/wc-icon&gt;
+&lt;!-- Icon with color utilities --&gt;
+&lt;wc-icon name="heart" icon-style="solid" class="w-6 h-6 text-red-500"&gt;&lt;/wc-icon&gt;
 
-&lt;!-- Rotated icon --&gt;
-&lt;wc-icon name="arrow-right" icon-style="solid" rotate="90"&gt;&lt;/wc-icon&gt;
+&lt;!-- Inline with text --&gt;
+&lt;span class="flex items-center gap-2"&gt;
+  &lt;wc-icon name="check" icon-style="solid" class="w-4 h-4 text-green-500"&gt;&lt;/wc-icon&gt;
+  Complete
+&lt;/span&gt;
 
-&lt;!-- Duotone icon --&gt;
-&lt;wc-icon name="camera" icon-style="duotone" 
-  primary-color="#3b82f6" 
-  secondary-color="#93c5fd"&gt;&lt;/wc-icon&gt;</code></pre>
+&lt;!-- Centered in a button --&gt;
+&lt;button class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded"&gt;
+  &lt;wc-icon name="download" icon-style="solid" class="w-4 h-4"&gt;&lt;/wc-icon&gt;
+  Download
+&lt;/button&gt;</code></pre>
       </div>
     </div>
 

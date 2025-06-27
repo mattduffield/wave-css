@@ -3493,17 +3493,13 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
     }
   }
   async _render() {
-    this.classList.add("contents");
-    const wrapper = document.createElement("span");
-    wrapper.className = "wc-icon-wrapper";
-    wrapper.innerHTML = `
-            <svg class="wc-icon-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                <g class="wc-icon-group"></g>
-            </svg>
-        `;
-    this.appendChild(wrapper);
-    this._svg = wrapper.querySelector(".wc-icon-svg");
-    this._group = wrapper.querySelector(".wc-icon-group");
+    this.classList.remove("contents");
+    this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this._svg.setAttribute("viewBox", "0 0 512 512");
+    this._svg.setAttribute("fill", "currentColor");
+    this._group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this._svg.appendChild(this._group);
+    this.appendChild(this._svg);
     this._applyStyles();
     await this._loadIcon();
   }
@@ -3519,12 +3515,14 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
   }
   _applyStyles() {
     if (!this._svg) return;
-    const size = this.getAttribute("size") || "1em";
+    const size = this.getAttribute("size");
     const rotate = this.getAttribute("rotate");
     const flip = this.getAttribute("flip");
     const iconStyle = this.getAttribute("icon-style") || "solid";
-    this._svg.style.width = size;
-    this._svg.style.height = size;
+    if (size) {
+      this._svg.style.width = size;
+      this._svg.style.height = size;
+    }
     if (rotate) {
       this._svg.style.transform = `rotate(${rotate}deg)`;
     }
