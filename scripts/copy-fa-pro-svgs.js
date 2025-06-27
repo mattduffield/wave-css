@@ -128,6 +128,8 @@ const ICONS_TO_COPY = [
   'plus',
   'minus',
   'circle',
+  'circle-plus',
+  'circle-minus',
   'circle-check',
   'circle-xmark',
   'circle-info',
