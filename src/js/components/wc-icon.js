@@ -86,7 +86,7 @@ class WcIcon extends WcBaseComponent {
     }
 
     // Handle colors based on icon style
-    if (iconStyle === 'duotone') {
+    if (iconStyle.includes('duotone')) {
       const primaryColor = this.getAttribute('primary-color') || this.getAttribute('color') || 'currentColor';
       const secondaryColor = this.getAttribute('secondary-color') || this.getAttribute('color') || 'currentColor';
       const secondaryOpacity = this.getAttribute('secondary-opacity') || '0.4';
@@ -96,10 +96,17 @@ class WcIcon extends WcBaseComponent {
       this.style.setProperty('--fa-secondary-color', secondaryColor);
       this.style.setProperty('--fa-primary-opacity', swapOpacity ? secondaryOpacity : '1');
       this.style.setProperty('--fa-secondary-opacity', swapOpacity ? '1' : secondaryOpacity);
+      // Remove --fa-color for duotone icons
+      this.style.removeProperty('--fa-color');
     } else {
       // For non-duotone styles, use a single color
       const color = this.getAttribute('color') || 'currentColor';
       this.style.setProperty('--fa-color', color);
+      // Remove duotone properties for non-duotone icons
+      this.style.removeProperty('--fa-primary-color');
+      this.style.removeProperty('--fa-secondary-color');
+      this.style.removeProperty('--fa-primary-opacity');
+      this.style.removeProperty('--fa-secondary-opacity');
     }
   }
 
@@ -166,8 +173,8 @@ class WcIcon extends WcBaseComponent {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', pathData.d);
 
-        if (iconStyle === 'duotone') {
-          // Handle duotone icons
+        if (iconStyle.includes('duotone')) {
+          // Handle all duotone variants (duotone, duotone-regular, duotone-light, duotone-thin)
           if (pathData.class && pathData.class.includes('fa-secondary')) {
             path.classList.add('fa-secondary');
             path.style.fill = 'var(--fa-secondary-color)';

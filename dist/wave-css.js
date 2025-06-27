@@ -3533,7 +3533,7 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
     } else if (flip === "both") {
       this._svg.style.transform = (this._svg.style.transform || "") + " scale(-1)";
     }
-    if (iconStyle === "duotone") {
+    if (iconStyle.includes("duotone")) {
       const primaryColor = this.getAttribute("primary-color") || this.getAttribute("color") || "currentColor";
       const secondaryColor = this.getAttribute("secondary-color") || this.getAttribute("color") || "currentColor";
       const secondaryOpacity = this.getAttribute("secondary-opacity") || "0.4";
@@ -3542,9 +3542,14 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
       this.style.setProperty("--fa-secondary-color", secondaryColor);
       this.style.setProperty("--fa-primary-opacity", swapOpacity ? secondaryOpacity : "1");
       this.style.setProperty("--fa-secondary-opacity", swapOpacity ? "1" : secondaryOpacity);
+      this.style.removeProperty("--fa-color");
     } else {
       const color = this.getAttribute("color") || "currentColor";
       this.style.setProperty("--fa-color", color);
+      this.style.removeProperty("--fa-primary-color");
+      this.style.removeProperty("--fa-secondary-color");
+      this.style.removeProperty("--fa-primary-opacity");
+      this.style.removeProperty("--fa-secondary-opacity");
     }
   }
   async _loadIcon() {
@@ -3591,7 +3596,7 @@ var WcIcon = class _WcIcon extends WcBaseComponent {
       iconData.paths.forEach((pathData) => {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", pathData.d);
-        if (iconStyle === "duotone") {
+        if (iconStyle.includes("duotone")) {
           if (pathData.class && pathData.class.includes("fa-secondary")) {
             path.classList.add("fa-secondary");
             path.style.fill = "var(--fa-secondary-color)";
