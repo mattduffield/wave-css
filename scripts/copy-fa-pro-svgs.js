@@ -53,6 +53,7 @@ const ICONS_TO_COPY = [
   'copy',
   'paste',
   'save',
+  'floppy-disk',
   'undo',
   'redo',
   'magnet',
