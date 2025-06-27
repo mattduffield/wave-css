@@ -63,6 +63,11 @@ const ICONS_TO_COPY = [
   'eye-slash',
   'sliders',
   'sliders-up',
+  'clipboard',
+  'clipboard-user',
+  'clipboard-question',
+  'clipboard-list',
+  'clipboard-check',
   // Add more icon names here
 ];
 
