@@ -130,6 +130,7 @@ const ICONS_TO_COPY = [
   'toolbox',
   'wrench',
   'hammer',
+  'screwdriver',
   'knife-kitchen',
   'shovel',
   'fire',
@@ -190,6 +191,11 @@ const ICONS_TO_COPY = [
   'table-columns',
   'table-rows',
   'line-columns',
+  'ruler',
+  'ruler-vertical',
+  'ruler-horizontal',
+  'ruler-triangle',
+  'pen-ruler',
   // Add more icon names here
 ];
 
