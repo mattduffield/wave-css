@@ -155,6 +155,11 @@ const ICONS_TO_COPY = [
   'horizontal-rule',
   'underline',
   'rectangle',
+  'input-text',
+  'input-numeric',
+  'input-pipe',
+  'pen-field',
+  'memo',
   // Add more icon names here
 ];
 
