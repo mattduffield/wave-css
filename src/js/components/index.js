@@ -15,7 +15,7 @@ import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';
 import './wc-flip-box.js';
-import './wc-icon.js';
+// import './wc-icon.js';
 import './wc-image.js';
 import './wc-menu.js';
 import './wc-page-designer.js';
