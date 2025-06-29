@@ -73,6 +73,36 @@
       </p>
     </div>
 
+<div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Spinner Icons</h2>
+      <p class="text-gray-600 mb-4">Icons can be animated with spin or pulse effects:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="spinner" icon-style="solid" size="2rem" spin class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">spin</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="circle-notch" icon-style="solid" size="2rem" spin class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">circle-notch spin</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="spinner-third" icon-style="solid" size="2rem" spin class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">spinner-third spin</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="solid" size="2rem" pulse class="mb-2 text-red-500"></wc-fa-icon>
+          <code class="text-xs text-gray-500">pulse</code>
+        </div>
+      </div>
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;!-- Spinning loader --&gt;
+&lt;wc-icon name="spinner" icon-style="solid" spin class="w-5 h-5"&gt;&lt;/wc-icon&gt;
+
+&lt;!-- Pulsing heart --&gt;
+&lt;wc-icon name="heart" icon-style="solid" pulse class="w-5 h-5 text-red-500"&gt;&lt;/wc-icon&gt;</code></pre>
+      </div>
+    </div>    
+
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-4">Bundle Loading Strategies</h2>
       <div class="bg-gray-100 p-4 rounded-lg">

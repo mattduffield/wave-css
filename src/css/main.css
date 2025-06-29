@@ -1009,6 +1009,16 @@
     border-color: var(--primary-bg-color);
   }
 
+  .danger-color {
+    color: var(--danger-color);
+  }
+  .danger-bg-color {
+    background-color: var(--danger-color);
+  }
+  .danger-border-color {
+    border-color: var(--danger-color);
+  }
+
   .component-bg-color { background-color: var(--component-bg-color); }
   .component-color { color: var(--component-color); }
   .component-border-color { border-color: var(--component-border-color); }
