@@ -1,0 +1,193 @@
+<div id="page-contents">
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Wave CSS Bundled Icon Component (wc-fa-icon)</h1>
+    
+    <div class="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+      <h2 class="text-lg font-semibold text-green-800 mb-2">Auto-Loading Bundle-Based Icons</h2>
+      <p class="text-green-700 mb-4">
+        This component automatically loads the appropriate icon bundle based on the icon-style attribute. 
+        No manual bundle loading required!
+      </p>
+      <div class="space-y-2">
+        <button id="check-stats" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+          Check Bundle Stats
+        </button>
+      </div>
+      <div id="bundle-status" class="mt-4 text-sm text-gray-600"></div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Basic Icons (Auto-Loaded)</h2>
+      <p class="text-gray-600 mb-4">Icons are automatically loaded from the appropriate bundle:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="home" icon-style="duotone" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">house</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="user" icon-style="solid" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">user</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="solid" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">heart</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="star" icon-style="solid" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">star</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="envelope" icon-style="solid" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">envelope</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="gear" icon-style="solid" size="2rem" class="mb-2"></wc-fa-icon>
+          <code class="text-xs text-gray-500">gear</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Style Switching Demo</h2>
+      <p class="text-gray-600 mb-4">Load different bundles to see icon style variations:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="solid" size="3rem" class="mb-2" id="demo-solid"></wc-fa-icon>
+          <code class="text-xs text-gray-500">solid</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="regular" size="3rem" class="mb-2" id="demo-regular"></wc-fa-icon>
+          <code class="text-xs text-gray-500">regular</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="light" size="3rem" class="mb-2" id="demo-light"></wc-fa-icon>
+          <code class="text-xs text-gray-500">light</code>
+        </div>
+        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+          <wc-fa-icon name="heart" icon-style="thin" size="3rem" class="mb-2" id="demo-thin"></wc-fa-icon>
+          <code class="text-xs text-gray-500">thin</code>
+        </div>
+      </div>
+      <p class="text-sm text-gray-600 mt-4">
+        Icons are automatically loaded based on their style attribute. Each style triggers loading of its respective bundle.
+      </p>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Bundle Loading Strategies</h2>
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Load a single bundle
+await WcFaIcon.loadBundle('/dist/assets/icon-bundles/common-icons.json');
+
+// Load multiple bundles
+await WcFaIcon.loadBundles([
+  '/dist/assets/icon-bundles/solid-icons.json',
+  '/dist/assets/icon-bundles/regular-icons.json'
+]);
+
+// Load on demand based on usage
+if (!WcFaIcon.isIconLoaded('user', 'solid')) {
+  await WcFaIcon.loadBundle('/dist/assets/icon-bundles/solid-icons.json');
+}
+
+// Register custom icons programmatically
+WcFaIcon.registerIcon('custom-icon', {
+  viewBox: '0 0 512 512',
+  paths: [{ d: 'M256 8C119 8 8 119 8 256s111 248 248 248...' }]
+}, 'solid');</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Comparison: wc-icon vs wc-fa-icon</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-blue-800 mb-2">wc-icon (Individual SVGs)</h3>
+          <ul class="text-sm text-blue-700 space-y-1">
+            <li>✓ Lazy loads individual SVG files</li>
+            <li>✓ No initial bundle size</li>
+            <li>✓ Perfect for apps using few icons</li>
+            <li>✗ Multiple HTTP requests</li>
+            <li>✗ Network latency for each icon</li>
+          </ul>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-green-800 mb-2">wc-fa-icon (Bundled)</h3>
+          <ul class="text-sm text-green-700 space-y-1">
+            <li>✓ Single HTTP request per bundle</li>
+            <li>✓ Instant icon rendering</li>
+            <li>✓ Better for apps using many icons</li>
+            <li>✗ Larger initial download</li>
+            <li>✗ May load unused icons</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Bundling Scripts</h2>
+      <div class="space-y-4">
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="font-semibold mb-2">Create Icon Bundles</h3>
+          <code class="text-sm bg-gray-100 px-2 py-1 rounded">node scripts/bundle-icons.js</code>
+          <p class="text-sm text-gray-600 mt-2">Creates bundles for each icon style and a common icons bundle</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="font-semibold mb-2">Analyze Icon Usage</h3>
+          <code class="text-sm bg-gray-100 px-2 py-1 rounded">node scripts/analyze-icon-usage.js</code>
+          <p class="text-sm text-gray-600 mt-2">Scans codebase and creates optimized bundle with only used icons</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Initialize the page when loaded -->
+<script>
+(function() {
+  console.log('Icon bundled page initializing...');
+  
+  function setupIconBundledPage() {
+    // Check if button exists
+    const checkStatsBtn = document.getElementById('check-stats');
+    
+    if (!checkStatsBtn) {
+      console.error('Check stats button not found, page may not be fully loaded');
+      return;
+    }
+
+    checkStatsBtn.addEventListener('click', () => {
+      const stats = WcFaIcon.getBundleStats();
+      const status = document.getElementById('bundle-status');
+      status.innerHTML = `<strong>Bundle Stats:</strong> ${stats.loadedIcons} icons loaded<br>
+        <details class="mt-2">
+          <summary class="cursor-pointer text-blue-600">Show loaded icons</summary>
+          <div class="mt-2 text-xs max-h-40 overflow-y-auto">
+            ${stats.iconKeys.map(key => `<div>${key}</div>`).join('')}
+          </div>
+        </details>`;
+    });
+
+    // Display initial status
+    const status = document.getElementById('bundle-status');
+    status.textContent = 'Icons will auto-load as they are rendered based on their style attribute.';
+  }
+
+  // Execute immediately if not loaded via HTMX
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupIconBundledPage);
+  } else {
+    setupIconBundledPage();
+  }
+
+  // Also listen for HTMX load events
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    // Check if this page was just loaded
+    if (document.getElementById('load-common')) {
+      console.log('Icon bundled page loaded via HTMX');
+      setupIconBundledPage();
+    }
+  });
+})();
+</script>

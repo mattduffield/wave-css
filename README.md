@@ -68,6 +68,7 @@ Execute the following command to build the bundler for both `css` and `javascrip
 
 ```bash
 npm run build
+node scripts/bundle-icons.js
 ```
 
 ## Viewing Components
