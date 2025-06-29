@@ -614,6 +614,30 @@ if (typeof window !== "undefined") {
   window.wc.iconRegistry = iconRegistry;
 }
 
+// src/js/components/wc-icon-config.js
+var WcIconConfig = {
+  // Base URL for icon assets - can be overridden by applications
+  iconBaseUrl: "/dist/assets/icons",
+  bundleBaseUrl: "/dist/assets/icon-bundles",
+  // CDN example:
+  // iconBaseUrl: 'https://cdn.example.com/wave-css/icons',
+  // bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',
+  // Configure icon base URLs
+  setIconBaseUrl(url) {
+    this.iconBaseUrl = url.replace(/\/$/, "");
+  },
+  setBundleBaseUrl(url) {
+    this.bundleBaseUrl = url.replace(/\/$/, "");
+  },
+  // Configure both at once
+  setBaseUrl(url) {
+    const baseUrl = url.replace(/\/$/, "");
+    this.iconBaseUrl = `${baseUrl}/icons`;
+    this.bundleBaseUrl = `${baseUrl}/icon-bundles`;
+  }
+};
+window.WcIconConfig = WcIconConfig;
+
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
   constructor() {
@@ -3945,7 +3969,7 @@ if (!customElements.get("wc-fa-icon")) {
       const iconName = WcFaIcon.iconAliases[requestedName] || requestedName;
       const iconStyle = this.getAttribute("icon-style") || "solid";
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
-        const bundlePath = `/dist/assets/icon-bundles/${iconStyle}-icons.json`;
+        const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
         console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle}`);
         const loadPromise = WcFaIcon.loadBundle(bundlePath).then((count) => {
           loadedBundles.add(iconStyle);
@@ -14955,6 +14979,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 };
 customElements.define("wc-textarea", WcTextarea);
 export {
+  WcIconConfig,
   applyRule,
   checkResources,
   countElements,

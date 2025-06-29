@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "esbuild.config.js",
   "scripts": {
-    "build": "node esbuild.config.js",
+    "build": "node esbuild.config.js && npm run build:icons",
+    "build:icons": "node scripts/bundle-icons.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,4 +1,5 @@
 import { WcBaseComponent } from './wc-base-component.js';
+import { WcIconConfig } from './wc-icon-config.js';
 
 if (!customElements.get('wc-fa-icon')) {
   // Global icon bundle storage
@@ -197,7 +198,7 @@ if (!customElements.get('wc-fa-icon')) {
       // Check if we need to load the bundle for this style
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
         // Auto-load the appropriate bundle
-        const bundlePath = `/dist/assets/icon-bundles/${iconStyle}-icons.json`;
+        const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
         console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle}`);
         
         const loadPromise = WcFaIcon.loadBundle(bundlePath)
