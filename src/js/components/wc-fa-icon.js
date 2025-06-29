@@ -199,7 +199,7 @@ if (!customElements.get('wc-fa-icon')) {
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
         // Auto-load the appropriate bundle
         const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
-        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle}`);
+        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle} from: ${bundlePath}`);
         
         const loadPromise = WcFaIcon.loadBundle(bundlePath)
           .then(count => {
@@ -232,6 +232,8 @@ if (!customElements.get('wc-fa-icon')) {
         if (!iconData) {
           // Icon not found in bundles
           console.warn(`Icon not found in loaded bundles: ${iconName} (style: ${iconStyle})`);
+          console.warn(`Available icons:`, iconBundles.size > 0 ? Array.from(iconBundles.keys()).slice(0, 10) : 'No icons loaded');
+          console.warn(`Bundle URL was: ${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`);
           
           // Optional: Show a placeholder or error icon
           this._group.innerHTML = '';

@@ -615,10 +615,11 @@ if (typeof window !== "undefined") {
 }
 
 // src/js/components/wc-icon-config.js
+var existingConfig = window.WcIconConfig || {};
 var WcIconConfig = {
   // Base URL for icon assets - can be overridden by applications
-  iconBaseUrl: "/dist/assets/icons",
-  bundleBaseUrl: "/dist/assets/icon-bundles",
+  iconBaseUrl: existingConfig.iconBaseUrl || "/dist/assets/icons",
+  bundleBaseUrl: existingConfig.bundleBaseUrl || "/dist/assets/icon-bundles",
   // CDN example:
   // iconBaseUrl: 'https://cdn.example.com/wave-css/icons',
   // bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',
@@ -636,7 +637,9 @@ var WcIconConfig = {
     this.bundleBaseUrl = `${baseUrl}/icon-bundles`;
   }
 };
-window.WcIconConfig = WcIconConfig;
+if (!window.WcIconConfig) {
+  window.WcIconConfig = WcIconConfig;
+}
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
@@ -3970,7 +3973,7 @@ if (!customElements.get("wc-fa-icon")) {
       const iconStyle = this.getAttribute("icon-style") || "solid";
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
         const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
-        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle}`);
+        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle} from: ${bundlePath}`);
         const loadPromise = WcFaIcon.loadBundle(bundlePath).then((count) => {
           loadedBundles.add(iconStyle);
           loadingBundles.delete(iconStyle);
@@ -3992,6 +3995,8 @@ if (!customElements.get("wc-fa-icon")) {
         let iconData = iconBundles.get(bundleKey2) || iconBundles.get(iconName);
         if (!iconData) {
           console.warn(`Icon not found in loaded bundles: ${iconName} (style: ${iconStyle})`);
+          console.warn(`Available icons:`, iconBundles.size > 0 ? Array.from(iconBundles.keys()).slice(0, 10) : "No icons loaded");
+          console.warn(`Bundle URL was: ${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`);
           this._group.innerHTML = "";
           const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", "256");

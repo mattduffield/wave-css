@@ -1,8 +1,11 @@
 // Global configuration for Wave CSS icon components
+// Check if already configured via window
+const existingConfig = window.WcIconConfig || {};
+
 export const WcIconConfig = {
   // Base URL for icon assets - can be overridden by applications
-  iconBaseUrl: '/dist/assets/icons',
-  bundleBaseUrl: '/dist/assets/icon-bundles',
+  iconBaseUrl: existingConfig.iconBaseUrl || '/dist/assets/icons',
+  bundleBaseUrl: existingConfig.bundleBaseUrl || '/dist/assets/icon-bundles',
   
   // CDN example:
   // iconBaseUrl: 'https://cdn.example.com/wave-css/icons',
@@ -25,5 +28,7 @@ export const WcIconConfig = {
   }
 };
 
-// Allow global configuration
-window.WcIconConfig = WcIconConfig;
+// Make it available globally (only if not already set)
+if (!window.WcIconConfig) {
+  window.WcIconConfig = WcIconConfig;
+}
