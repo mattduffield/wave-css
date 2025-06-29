@@ -34,8 +34,8 @@ if (!customElements.get('wc-visibility-change')) {
 
     async connectedCallback() {
       if (!this._isConnected) {
-        console.log('Initial visibility state:', document.visibilityState);
-        console.log('Is document hidden?', document.hidden);
+        // console.log('Initial visibility state:', document.visibilityState);
+        // console.log('Is document hidden?', document.hidden);
 
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
       }
@@ -51,7 +51,7 @@ if (!customElements.get('wc-visibility-change')) {
 
     handleVisibilityChange() {
       if (document.hidden) {
-        console.log('Tab is in the background');
+        // console.log('Tab is in the background');
       } else {
         const verb = this.getAttribute('hx-verb') || 'GET';
         const url = this.getAttribute('hx-url') || '';
@@ -67,7 +67,7 @@ if (!customElements.get('wc-visibility-change')) {
           }
         }          
 
-        console.log('Tab is in the foreground');
+        // console.log('Tab is in the foreground');
       }    
     }
 

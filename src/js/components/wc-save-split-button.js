@@ -40,13 +40,13 @@ if (!customElements.get('wc-save-split-button')) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log('ctor:wc-save-split-button');
+      // console.log('ctor:wc-save-split-button');
     }
 
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-save-split-button');
+      // console.log('connectedCallback:wc-save-split-button');
     }
 
     disconnectedCallback() {

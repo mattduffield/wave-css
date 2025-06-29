@@ -199,13 +199,13 @@ if (!customElements.get('wc-fa-icon')) {
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
         // Auto-load the appropriate bundle
         const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
-        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle} from: ${bundlePath}`);
+        // console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle} from: ${bundlePath}`);
         
         const loadPromise = WcFaIcon.loadBundle(bundlePath)
           .then(count => {
             loadedBundles.add(iconStyle);
             loadingBundles.delete(iconStyle);
-            console.log(`[wc-fa-icon] Auto-loaded ${count} ${iconStyle} icons`);
+            // console.log(`[wc-fa-icon] Auto-loaded ${count} ${iconStyle} icons`);
             return count;
           })
           .catch(err => {
@@ -305,7 +305,7 @@ if (!customElements.get('wc-fa-icon')) {
           loadedCount++;
         }
         
-        console.log(`[wc-fa-icon] Loaded ${loadedCount} icons from ${bundleUrl}`);
+        // console.log(`[wc-fa-icon] Loaded ${loadedCount} icons from ${bundleUrl}`);
         
         // Try to determine the style from the URL and mark it as loaded
         const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
@@ -333,7 +333,7 @@ if (!customElements.get('wc-fa-icon')) {
       
       const failed = results.filter(r => r.status === 'rejected').length;
       
-      console.log(`[wc-fa-icon] Bundles loaded: ${totalLoaded} icons total${failed ? `, ${failed} bundles failed` : ''}`);
+      // console.log(`[wc-fa-icon] Bundles loaded: ${totalLoaded} icons total${failed ? `, ${failed} bundles failed` : ''}`);
       return { totalLoaded, failed };
     }
 

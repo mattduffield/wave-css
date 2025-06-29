@@ -104,7 +104,7 @@ if (!customElements.get('wc-tabulator')) {
         label: this.createMenuLabel('Delete Row', this.icons.remove),
         action: (e, row) => {
           // row.delete();
-          console.log("Deleting row...");
+          // console.log("Deleting row...");
           wc.Prompt.question({title: 'Are you sure?', 
             text: 'This record will be deleted. Are you sure?',
             callback: (result) => {
@@ -166,7 +166,7 @@ if (!customElements.get('wc-tabulator')) {
       {
         label: this.createMenuLabel('Download Table', this.icons.download),
         action: (e, row) => {
-          console.log('Download row...');
+          // console.log('Download row...');
           // wc.Prompt.banner({text: 'hello world 2', type: 'success'});
           // wc.Prompt.toast({title: 'Save successful!', type: 'success'});
           // wc.Prompt.success({title: 'Save successful!', text: 'The records have been saved successfuly!'});
@@ -216,14 +216,14 @@ if (!customElements.get('wc-tabulator')) {
         this.componentElement.id = this.getAttribute('id') || 'wc-tabulator';
         this.appendChild(this.componentElement);      
       }
-      console.log('ctor:wc-tabulator');
+      // console.log('ctor:wc-tabulator');
     }
 
     async connectedCallback() {
       super.connectedCallback();
 
       this._applyStyle();
-      console.log('conntectedCallback:wc-tabulator');
+      // console.log('conntectedCallback:wc-tabulator');
     }
 
     disconnectedCallback() {
@@ -245,7 +245,7 @@ if (!customElements.get('wc-tabulator')) {
         this._createInnerElement();
       }
 
-      console.log('_render:wc-tabulator');
+      // console.log('_render:wc-tabulator');
     }
 
     async _createInnerElement() {
@@ -379,7 +379,7 @@ if (!customElements.get('wc-tabulator')) {
 
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
-        console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
+        // console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
         if ("onInit" in this.funcs) {
           this.funcs["onInit"](this.table);
         }  
@@ -429,7 +429,7 @@ if (!customElements.get('wc-tabulator')) {
 
       // Handle dataFiltering event
       this.table.on("dataFiltering", (filters) => {
-        console.log('dataFiltering', filters);
+        // console.log('dataFiltering', filters);
         // // Skip if this is an internal change we're making
         // if (isInternalFilterChange) {
         //   return;

@@ -81,7 +81,7 @@ class WcTab extends WcBaseComponent {
       this.componentElement.classList.add('wc-tab');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-tab');
+    // console.log('ctor:wc-tab');
   }
 
   async connectedCallback() {
@@ -89,7 +89,7 @@ class WcTab extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('connectedCallback:wc-tab');
+    // console.log('connectedCallback:wc-tab');
   }
 
   disconnectedCallback() {
@@ -130,7 +130,7 @@ class WcTab extends WcBaseComponent {
       });
     }, 100);
 
-    console.log('_render:wc-tab');
+    // console.log('_render:wc-tab');
   }
 
   _createInnerElement() {

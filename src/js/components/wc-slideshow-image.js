@@ -38,14 +38,14 @@ if (!customElements.get('wc-slideshow-image')) {
         this.componentElement.classList.add('wc-slideshow-image', 'slide', 'fade');
         this.appendChild(this.componentElement);      
       }
-      console.log('ctor:wc-slideshow-image');
+      // console.log('ctor:wc-slideshow-image');
     }
 
     async connectedCallback() {
       super.connectedCallback();
 
       this._applyStyle();
-      console.log('connectedCallback:wc-slideshow-image');
+      // console.log('connectedCallback:wc-slideshow-image');
     }
 
     disconnectedCallback() {
@@ -78,7 +78,7 @@ if (!customElements.get('wc-slideshow-image')) {
       if (typeof htmx !== 'undefined') {
         htmx.process(this);
       }
-      console.log('_render:wc-slideshow-image');
+      // console.log('_render:wc-slideshow-image');
     }
 
     _createInnerElement() {

@@ -47,7 +47,7 @@ class WcImage extends WcBaseComponent {
       this.componentElement.classList.add('wc-image');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-image');
+    // console.log('ctor:wc-image');
   }
 
   async connectedCallback() {
@@ -55,7 +55,7 @@ class WcImage extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('connectedCallback:wc-image');
+    // console.log('connectedCallback:wc-image');
   }
 
   disconnectedCallback() {
@@ -95,7 +95,7 @@ class WcImage extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-image');
+    // console.log('_render:wc-image');
   }
 
   _createInnerElement() {

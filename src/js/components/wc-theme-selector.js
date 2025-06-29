@@ -46,13 +46,13 @@ class WcThemeSelector extends WcBaseComponent {
       this.componentElement.classList.add('wc-theme-selector');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-theme-selector');
+    // console.log('ctor:wc-theme-selector');
   }
 
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log('connectedCallback:wc-theme-selector');
+    // console.log('connectedCallback:wc-theme-selector');
   }
 
   disconnectedCallback() {
@@ -84,7 +84,7 @@ class WcThemeSelector extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-theme-selector');
+    // console.log('_render:wc-theme-selector');
   }
 
   _createInnerElement() {
@@ -184,7 +184,7 @@ class WcThemeSelector extends WcBaseComponent {
 
   _handleThemeClick(event) {
     const {target} = event;
-    console.log('target', target);
+    // console.log('target', target);
     const selectedTheme = target.getAttribute('data-theme');
     this._setTheme(target, selectedTheme);
     localStorage.setItem("theme", selectedTheme.replace('theme-', ''));

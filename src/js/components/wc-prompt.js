@@ -21,7 +21,7 @@ if (!customElements.get('wc-prompt')) {
       this.loadStyle = loadStyle.bind(this);
       this.table = null;
 
-      console.log('ctor:wc-prompt');
+      // console.log('ctor:wc-prompt');
     }
 
     async connectedCallback() {
@@ -34,7 +34,7 @@ if (!customElements.get('wc-prompt')) {
   
       this._applyStyle();
       this.wireEvents();
-      console.log('conntectedCallback:wc-prompt');
+      // console.log('conntectedCallback:wc-prompt');
     }
 
     disconnectedCallback() {      

@@ -21,7 +21,7 @@ if (!customElements.get('wc-event-hub')) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
 
-      console.log('ctor:wc-event-hub');
+      // console.log('ctor:wc-event-hub');
     }
 
     connectedCallback() {
@@ -35,7 +35,7 @@ if (!customElements.get('wc-event-hub')) {
         window.wc.EventHub = this;
         this._applyStyle();
       }
-      console.log('conntectedCallback:wc-event-hub');
+      // console.log('conntectedCallback:wc-event-hub');
     }
     disconnectedCallback() {
     }

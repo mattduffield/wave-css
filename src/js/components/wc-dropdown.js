@@ -41,7 +41,7 @@ class WcDropdown extends WcBaseComponent {
       this.componentElement.classList.add('wc-dropdown', this.mode);
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-dropdown');
+    // console.log('ctor:wc-dropdown');
   }
 
   async connectedCallback() {
@@ -52,7 +52,7 @@ class WcDropdown extends WcBaseComponent {
     this.classList.remove('hidden');
     this.componentElement.classList.remove('hidden');
     this._wireEvents();
-    console.log('connectedCallback:wc-dropdown');
+    // console.log('connectedCallback:wc-dropdown');
   }
 
   disconnectedCallback() {
@@ -89,7 +89,7 @@ class WcDropdown extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-dropdown');
+    // console.log('_render:wc-dropdown');
   }
 
   _createInnerElement() {

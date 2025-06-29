@@ -51,7 +51,7 @@ class WcEventHandler extends HTMLElement {
         // Do nothing...
       }      
     }
-    console.log('_handleEvent:target', target, 'detail:', detail, 'actionTarget:', actionTarget);
+    // console.log('_handleEvent:target', target, 'detail:', detail, 'actionTarget:', actionTarget);
     // const custom = new CustomEvent("custom-event", { detail: { action: "add-class", cls: "open" }});
     // document.body.dispatchEvent(custom);
     // const custom = new CustomEvent("custom-event", { detail: { action: "remove-class", cls: "open" }});
@@ -73,7 +73,7 @@ class WcEventHandler extends HTMLElement {
     document.body.addEventListener('open-nav-only', (event) => {
       const {detail} = event;
       const {selector} = detail;
-      console.log(detail);
+      // console.log(detail);
       const tgt = document.querySelector(selector);
       const tagName = tgt?.tagName;
       const tags = document.querySelectorAll(tagName);

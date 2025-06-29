@@ -52,14 +52,14 @@ if (!customElements.get('wc-code-mirror')) {
         this.componentElement.classList.add('wc-code-mirror');
         this.appendChild(this.componentElement);      
       }
-      console.log('ctor:wc-code-mirror');
+      // console.log('ctor:wc-code-mirror');
     }
 
     async connectedCallback() {
       super.connectedCallback();
 
       this._applyStyle();
-      console.log('conntectedCallback:wc-code-mirror');
+      // console.log('conntectedCallback:wc-code-mirror');
     }
 
     disconnectedCallback() {
@@ -140,7 +140,7 @@ if (!customElements.get('wc-code-mirror')) {
       if (typeof htmx !== 'undefined') {
         htmx.process(this);
       }
-      console.log('_render:wc-code-mirror');
+      // console.log('_render:wc-code-mirror');
     }
 
     async _createInnerElement() {
@@ -519,7 +519,7 @@ if (!customElements.get('wc-code-mirror')) {
       const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
       this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
-      console.log('----> broadcasting event: wc-code-mirror:ready');
+      // console.log('----> broadcasting event: wc-code-mirror:ready');
 
       const url = this.getAttribute('fetch');
       this.handleFetch(url);
@@ -533,7 +533,7 @@ if (!customElements.get('wc-code-mirror')) {
     handleFetch(url) {
       try {
         if (url) {
-          console.log('----> wc-code-mirror - fetching from: ', url);
+          // console.log('----> wc-code-mirror - fetching from: ', url);
           fetch(url, {
             method: 'GET'
           })
@@ -717,11 +717,11 @@ if (!customElements.get('wc-code-mirror')) {
      * This approach directly scans the document for web component content
      */
     addWebComponentsJsHighlighting() {
-      console.log("Adding JS highlighting to web components");
+      // console.log("Adding JS highlighting to web components");
       
       // Function to apply the highlighting
       const applyHighlighting = () => {
-        console.log("Applying highlighting to editor content");
+        // console.log("Applying highlighting to editor content");
         
         // Get all content lines
         const lines = this.editor.getValue().split('\n');
@@ -744,7 +744,7 @@ if (!customElements.get('wc-code-mirror')) {
               componentName = openMatch[1];
               inComponent = true;
               startLine = i;
-              console.log(`Found opening tag at line ${i}: ${componentName}`);
+              // console.log(`Found opening tag at line ${i}: ${componentName}`);
             }
           } 
           // Look for closing tag
@@ -753,12 +753,12 @@ if (!customElements.get('wc-code-mirror')) {
             if (closeMatch) {
               endLine = i;
               inComponent = false;
-              console.log(`Found closing tag at line ${i}: ${componentName}`);
+              // console.log(`Found closing tag at line ${i}: ${componentName}`);
               
               // Process content between tags
               if (startLine !== -1 && endLine !== -1) {
                 const jsContent = lines.slice(startLine + 1, endLine).join('\n');
-                console.log(`Processing JS content between lines ${startLine+1} and ${endLine}`);
+                // console.log(`Processing JS content between lines ${startLine+1} and ${endLine}`);
                 
                 // Add code highlighting manually using markers
                 this.highlightJavaScript(jsContent, startLine + 1, endLine);
@@ -786,7 +786,7 @@ if (!customElements.get('wc-code-mirror')) {
           }, 500);
         });
         
-        console.log("Added change listener for highlighting");
+        // console.log("Added change listener for highlighting");
       }, 100);
     }
 
@@ -794,7 +794,7 @@ if (!customElements.get('wc-code-mirror')) {
      * Highlight JavaScript content using markers
      */
     highlightJavaScript(jsContent, startLine, endLine) {
-      console.log("Highlighting JavaScript content");
+      // console.log("Highlighting JavaScript content");
       
       // Clear any existing markers in this range
       const doc = this.editor.getDoc();

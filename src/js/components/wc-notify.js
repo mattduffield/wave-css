@@ -24,7 +24,7 @@ if (!customElements.get('wc-notify')) {
       this._notifications = [];
       this._position = 'top-right';
 
-      console.log('ctor:wc-notify');
+      // console.log('ctor:wc-notify');
     }
 
     async connectedCallback() {
@@ -37,7 +37,7 @@ if (!customElements.get('wc-notify')) {
   
       this._applyStyle();
 
-      console.log('conntectedCallback:wc-notify');
+      // console.log('conntectedCallback:wc-notify');
     }
 
     disconnectedCallback() {      

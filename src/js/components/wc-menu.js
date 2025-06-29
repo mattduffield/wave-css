@@ -38,7 +38,7 @@ class WcMenu extends WcBaseComponent {
       this.componentElement.classList.add('wc-menu');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-menu');
+    // console.log('ctor:wc-menu');
   }
 
   async connectedCallback() {
@@ -46,7 +46,7 @@ class WcMenu extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('connectedCallback:wc-menu');
+    // console.log('connectedCallback:wc-menu');
   }
 
   disconnectedCallback() {
@@ -88,7 +88,7 @@ class WcMenu extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-menu');
+    // console.log('_render:wc-menu');
   }
 
   _createInnerElement() {

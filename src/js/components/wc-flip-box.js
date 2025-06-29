@@ -34,14 +34,14 @@ class WcFlipBox extends WcBaseComponent {
       this.componentElement.classList.add('wc-flip-box');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-flip-box');
+    // console.log('ctor:wc-flip-box');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-flip-box');
+    // console.log('connectedCallback:wc-flip-box');
   }
 
   disconnectedCallback() {
@@ -74,7 +74,7 @@ class WcFlipBox extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-flip-box');
+    // console.log('_render:wc-flip-box');
   }
 
   _createInnerElement() {

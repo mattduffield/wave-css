@@ -37,14 +37,14 @@ class WcForm extends WcBaseComponent {
       this.componentElement.classList.add('wc-form');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-form');
+    // console.log('ctor:wc-form');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-form');
+    // console.log('connectedCallback:wc-form');
   }
 
   disconnectedCallback() {
@@ -84,7 +84,7 @@ class WcForm extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-form');
+    // console.log('_render:wc-form');
   }
 
   _moveDeclarativeInner() {

@@ -44,14 +44,14 @@ class WcTextarea extends WcBaseFormComponent {
       this.componentElement.classList.add('wc-textarea', 'relative');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-textarea');
+    // console.log('ctor:wc-textarea');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-textarea');
+    // console.log('connectedCallback:wc-textarea');
   }
 
   disconnectedCallback() {
@@ -95,7 +95,7 @@ class WcTextarea extends WcBaseFormComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-textarea');
+    // console.log('_render:wc-textarea');
   }
 
   _createInnerElement() {

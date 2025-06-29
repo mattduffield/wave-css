@@ -56,7 +56,7 @@ if (!customElements.get('wc-sidenav')) {
           // this.componentElement.classList.add('open');
         }
       }
-      console.log('ctor:wc-sidenav');
+      // console.log('ctor:wc-sidenav');
     }
 
     async connectedCallback() {
@@ -64,7 +64,7 @@ if (!customElements.get('wc-sidenav')) {
 
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-sidenav');
+      // console.log('connectedCallback:wc-sidenav');
     }
 
     disconnectedCallback() {
@@ -116,7 +116,7 @@ if (!customElements.get('wc-sidenav')) {
       if (typeof htmx !== 'undefined') {
         htmx.process(this);
       }
-      console.log('_render:wc-sidenav');
+      // console.log('_render:wc-sidenav');
     }
 
     _createInnerElement() {

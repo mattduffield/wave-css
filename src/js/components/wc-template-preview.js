@@ -36,18 +36,18 @@ if (!customElements.get('wc-template-preview')) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log('ctor:wc-template-preview');
+      // console.log('ctor:wc-template-preview');
     }
 
     async _connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-template-preview');
+      // console.log('connectedCallback:wc-template-preview');
     }
 
     _disconnectedCallback() {
       this._unWireEvents();
-      console.log('disconnectedCallback:wc-template-preview');
+      // console.log('disconnectedCallback:wc-template-preview');
     }
 
     _createElement() {

@@ -30,14 +30,14 @@ class WcBackgroundImage extends WcBaseComponent {
       this.componentElement.classList.add('wc-background-image');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-background-image');
+    // console.log('ctor:wc-background-image');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-background-image');
+    // console.log('connectedCallback:wc-background-image');
   }
 
   disconnectedCallback() {
@@ -81,7 +81,7 @@ class WcBackgroundImage extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-background-image');
+    // console.log('_render:wc-background-image');
   }
 
   _createElement() {

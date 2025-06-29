@@ -37,7 +37,7 @@ if (!customElements.get('wc-link')) {
 
           // Listen for the load and error events
           link.onload = () => {
-            console.log(`Link loaded: ${url}`);
+            // console.log(`Link loaded: ${url}`);
             window.wc.linksLoaded[url] = true;
             document.body.dispatchEvent(new CustomEvent('link-loaded', {
               detail: { url },
@@ -47,7 +47,7 @@ if (!customElements.get('wc-link')) {
           };
 
           link.onerror = () => {
-            console.error(`Failed to load link: ${url}`);
+            // console.error(`Failed to load link: ${url}`);
             document.body.dispatchEvent(new CustomEvent('link-error', {
               detail: { url },
               bubbles: true,
@@ -56,9 +56,9 @@ if (!customElements.get('wc-link')) {
           };
 
           document.head.appendChild(link); // Append the link to the document head
-          console.log(`Added link: ${url}`);
+          // console.log(`Added link: ${url}`);
         } else {
-          console.log(`Link already exists, skipping append: ${url}`);
+          // console.log(`Link already exists, skipping append: ${url}`);
           document.body.dispatchEvent(new CustomEvent('link-loaded', {
             detail: { url },
             bubbles: true,

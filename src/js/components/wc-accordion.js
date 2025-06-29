@@ -40,7 +40,7 @@ if (!customElements.get('wc-accordion')) {
         this.componentElement.classList.add('wc-accordion');
         this.appendChild(this.componentElement);      
       }
-      console.log('ctor:wc-accordion');
+      // console.log('ctor:wc-accordion');
     }
 
     async connectedCallback() {
@@ -48,7 +48,7 @@ if (!customElements.get('wc-accordion')) {
 
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-accordion', this._items);
+      // console.log('connectedCallback:wc-accordion', this._items);
     }
 
     disconnectedCallback() {
@@ -92,7 +92,7 @@ if (!customElements.get('wc-accordion')) {
       if (typeof htmx !== 'undefined') {
         htmx.process(this);
       }
-      console.log('_render:wc-accordion');
+      // console.log('_render:wc-accordion');
     }
 
     _createHeader(label, selected) {

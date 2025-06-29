@@ -36,14 +36,14 @@ class WcContactChip extends WcBaseComponent {
       this.componentElement.classList.add('wc-contact-chip');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-contact-chip');
+    // console.log('ctor:wc-contact-chip');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-contact-chip');
+    // console.log('connectedCallback:wc-contact-chip');
   }
 
   disconnectedCallback() {
@@ -80,7 +80,7 @@ class WcContactChip extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-contact-chip');
+    // console.log('_render:wc-contact-chip');
   }
 
   _createInnerElement() {

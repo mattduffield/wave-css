@@ -37,7 +37,7 @@ if (!customElements.get('wc-script')) {
 
           // Listen for the load and error events
           script.onload = () => {
-            console.log(`Script loaded: ${src}`);
+            // console.log(`Script loaded: ${src}`);
             window.wc.scriptsLoaded[src] = true;
             document.body.dispatchEvent(new CustomEvent('script-loaded', {
               detail: { src },
@@ -56,9 +56,9 @@ if (!customElements.get('wc-script')) {
           };
 
           document.head.appendChild(script); // Append the script to the document head
-          console.log(`Added script: ${src}`);
+          // console.log(`Added script: ${src}`);
         } else {
-          console.log(`Script already exists, skipping append: ${src}`);
+          // console.log(`Script already exists, skipping append: ${src}`);
           document.body.dispatchEvent(new CustomEvent('script-loaded', {
             detail: { src },
             bubbles: true,

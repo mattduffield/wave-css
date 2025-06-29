@@ -23,7 +23,7 @@ if (!customElements.get('wc-mask-hub')) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
 
-      console.log('ctor:wc-mask-hub');
+      // console.log('ctor:wc-mask-hub');
     }
 
     async connectedCallback() {
@@ -34,7 +34,7 @@ if (!customElements.get('wc-mask-hub')) {
         await this.renderMask();
         this._applyStyle();
       }
-      console.log('conntectedCallback:wc-mask-hub');
+      // console.log('conntectedCallback:wc-mask-hub');
     }
     disconnectedCallback() {
     }

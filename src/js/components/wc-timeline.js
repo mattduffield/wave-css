@@ -41,14 +41,14 @@ class WcTimeline extends WcBaseComponent {
       this.componentElement.classList.add('wc-timeline');
       this.appendChild(this.componentElement);
     }
-    console.log('ctor:wc-timeline');
+    // console.log('ctor:wc-timeline');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-timeline');
+    // console.log('connectedCallback:wc-timeline');
   }
 
   disconnectedCallback() {
@@ -85,7 +85,7 @@ class WcTimeline extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-timeline');
+    // console.log('_render:wc-timeline');
   }
 
   _createElement(itemLabel, itemContent, idx) {

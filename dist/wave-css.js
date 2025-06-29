@@ -935,13 +935,11 @@ if (!customElements.get("wc-accordion")) {
         this.componentElement.classList.add("wc-accordion");
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-accordion");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-accordion", this._items);
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -978,7 +976,6 @@ if (!customElements.get("wc-accordion")) {
       if (typeof htmx !== "undefined") {
         htmx.process(this);
       }
-      console.log("_render:wc-accordion");
     }
     _createHeader(label, selected) {
       const allowMany = this.hasAttribute("allow-many");
@@ -1328,12 +1325,10 @@ var WcBackgroundImage = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-background-image");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-background-image");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-background-image");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -1370,7 +1365,6 @@ var WcBackgroundImage = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-background-image");
   }
   _createElement() {
     const captionText = this.getAttribute("caption") || "";
@@ -1876,12 +1870,10 @@ if (!customElements.get("wc-code-mirror")) {
         this.componentElement.classList.add("wc-code-mirror");
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-code-mirror");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      console.log("conntectedCallback:wc-code-mirror");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -1957,7 +1949,6 @@ if (!customElements.get("wc-code-mirror")) {
       if (typeof htmx !== "undefined") {
         htmx.process(this);
       }
-      console.log("_render:wc-code-mirror");
     }
     async _createInnerElement() {
       const labelText = this.getAttribute("lbl-label") || "";
@@ -2458,7 +2449,6 @@ if (!customElements.get("wc-code-mirror")) {
       const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
       this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
-      console.log("----> broadcasting event: wc-code-mirror:ready");
       const url = this.getAttribute("fetch");
       this.handleFetch(url);
     }
@@ -2469,7 +2459,6 @@ if (!customElements.get("wc-code-mirror")) {
     handleFetch(url) {
       try {
         if (url) {
-          console.log("----> wc-code-mirror - fetching from: ", url);
           fetch(url, {
             method: "GET"
           }).then((response) => response.json()).then((json) => {
@@ -2608,9 +2597,7 @@ if (!customElements.get("wc-code-mirror")) {
      * This approach directly scans the document for web component content
      */
     addWebComponentsJsHighlighting() {
-      console.log("Adding JS highlighting to web components");
       const applyHighlighting = () => {
-        console.log("Applying highlighting to editor content");
         const lines = this.editor.getValue().split("\n");
         let inComponent = false;
         let componentName = "";
@@ -2625,17 +2612,14 @@ if (!customElements.get("wc-code-mirror")) {
               componentName = openMatch[1];
               inComponent = true;
               startLine = i;
-              console.log(`Found opening tag at line ${i}: ${componentName}`);
             }
           } else {
             const closeMatch = line.match(new RegExp(`</${componentName}>`));
             if (closeMatch) {
               endLine = i;
               inComponent = false;
-              console.log(`Found closing tag at line ${i}: ${componentName}`);
               if (startLine !== -1 && endLine !== -1) {
                 const jsContent = lines.slice(startLine + 1, endLine).join("\n");
-                console.log(`Processing JS content between lines ${startLine + 1} and ${endLine}`);
                 this.highlightJavaScript(jsContent, startLine + 1, endLine);
               }
               startLine = -1;
@@ -2653,14 +2637,12 @@ if (!customElements.get("wc-code-mirror")) {
             applyHighlighting();
           }, 500);
         });
-        console.log("Added change listener for highlighting");
       }, 100);
     }
     /**
      * Highlight JavaScript content using markers
      */
     highlightJavaScript(jsContent, startLine, endLine) {
-      console.log("Highlighting JavaScript content");
       const doc = this.editor.getDoc();
       const existingMarks = doc.findMarks(
         { line: startLine, ch: 0 },
@@ -2719,12 +2701,10 @@ var WcContactCard = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-contact-card");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-contact-card");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-contact-card");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -2759,7 +2739,6 @@ var WcContactCard = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-contact-card");
   }
   _createInnerElement() {
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-contact-card") && !p.matches(".wc-contact-card"));
@@ -2828,12 +2807,10 @@ var WcContactChip = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-contact-chip");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-contact-chip");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-contact-chip");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -2865,7 +2842,6 @@ var WcContactChip = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-contact-chip");
   }
   _createInnerElement() {
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-contact-chip") && !p.matches(".wc-contact-chip"));
@@ -3042,7 +3018,6 @@ var WcDropdown = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-dropdown", this.mode);
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-dropdown");
   }
   async connectedCallback() {
     super.connectedCallback();
@@ -3051,7 +3026,6 @@ var WcDropdown = class extends WcBaseComponent {
     this.classList.remove("hidden");
     this.componentElement.classList.remove("hidden");
     this._wireEvents();
-    console.log("connectedCallback:wc-dropdown");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -3083,7 +3057,6 @@ var WcDropdown = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-dropdown");
   }
   _createInnerElement() {
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-dropdown") && !p.matches(".wc-dropdown"));
@@ -3384,12 +3357,10 @@ var WcFlipBox = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-flip-box");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-flip-box");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-flip-box");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -3416,7 +3387,6 @@ var WcFlipBox = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-flip-box");
   }
   _createInnerElement() {
     const flipBoxInner = document.createElement("div");
@@ -3973,11 +3943,9 @@ if (!customElements.get("wc-fa-icon")) {
       const iconStyle = this.getAttribute("icon-style") || "solid";
       if (!loadedBundles.has(iconStyle) && !loadingBundles.has(iconStyle)) {
         const bundlePath = `${WcIconConfig.bundleBaseUrl}/${iconStyle}-icons.json`;
-        console.log(`[wc-fa-icon] Auto-loading bundle for style: ${iconStyle} from: ${bundlePath}`);
         const loadPromise = WcFaIcon.loadBundle(bundlePath).then((count) => {
           loadedBundles.add(iconStyle);
           loadingBundles.delete(iconStyle);
-          console.log(`[wc-fa-icon] Auto-loaded ${count} ${iconStyle} icons`);
           return count;
         }).catch((err) => {
           console.error(`[wc-fa-icon] Failed to auto-load ${iconStyle} bundle:`, err);
@@ -4050,7 +4018,6 @@ if (!customElements.get("wc-fa-icon")) {
           iconBundles.set(key, iconData);
           loadedCount++;
         }
-        console.log(`[wc-fa-icon] Loaded ${loadedCount} icons from ${bundleUrl}`);
         const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
         if (match) {
           const style = match[1];
@@ -4069,7 +4036,6 @@ if (!customElements.get("wc-fa-icon")) {
       );
       const totalLoaded = results.filter((r) => r.status === "fulfilled").reduce((sum, r) => sum + r.value, 0);
       const failed = results.filter((r) => r.status === "rejected").length;
-      console.log(`[wc-fa-icon] Bundles loaded: ${totalLoaded} icons total${failed ? `, ${failed} bundles failed` : ""}`);
       return { totalLoaded, failed };
     }
     // Static method to register icons programmatically
@@ -4118,13 +4084,11 @@ var WcImage = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-image");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-image");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
-    console.log("connectedCallback:wc-image");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -4155,7 +4119,6 @@ var WcImage = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-image");
   }
   _createInnerElement() {
     const caption = this.getAttribute("caption") || "";
@@ -4423,13 +4386,11 @@ var WcMenu = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-menu");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-menu");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
-    console.log("connectedCallback:wc-menu");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -4463,7 +4424,6 @@ var WcMenu = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-menu");
   }
   _createInnerElement() {
     this._moveDeclarativeOptions();
@@ -5837,7 +5797,6 @@ if (!customElements.get("wc-page-designer")) {
       } else {
         this.createElement();
       }
-      console.log("ctor:wc-page-designer");
     }
     async connectedCallback() {
       await this.render();
@@ -5846,7 +5805,6 @@ if (!customElements.get("wc-page-designer")) {
       setTimeout(() => {
         this.setup();
       }, 250);
-      console.log("conntectedCallback:wc-page-designer");
     }
     disconnectedCallback() {
       this.unWireEvents();
@@ -5857,20 +5815,16 @@ if (!customElements.get("wc-page-designer")) {
         this.theme = newValue;
         const designer = this.querySelector(".wc-page-designer");
         designer.className = designer.className.replace(oldTheme, newValue);
-        console.log("wc-page-designer:attributeChangedCallback - designer", designer.className);
       } else if (attrName === "json-layout") {
         this.jsonLayout = newValue;
-        console.log("wc-page-designer:attributeChangedCallback - json-layout", this.jsonLayout);
       } else if (attrName === "json-layout-fetch-url") {
         this.jsonLayoutFetchUrl = newValue;
         const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
         layoutEditor.setAttribute("fetch", this.jsonLayoutFetchUrl);
-        console.log("wc-page-designer:attributeChangedCallback - json-layout-fetch-url", this.jsonLayoutFetchUrl);
       } else if (attrName === "json-schema-fetch-url") {
         this.jsonSchemaFetchUrl = newValue;
         const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
         schemaJson.setAttribute("fetch", this.jsonSchemaFetchUrl);
-        console.log("wc-page-designer:attributeChangedCallback - json-schema-fetch-url", this.jsonSchemaFetchUrl);
       }
     }
     async render() {
@@ -6426,7 +6380,6 @@ if (!customElements.get("wc-page-designer")) {
     wireEvents() {
     }
     unWireEvents() {
-      console.log("unWireEvents:wc-page-designer");
     }
     setup() {
       const isWired = this.hasAttribute("data-wired");
@@ -6573,7 +6526,7 @@ if (!customElements.get("wc-page-designer")) {
             try {
               element.removeChild(placeholder);
             } catch (e2) {
-              console.log("Could not remove placeholder:", e2);
+              console.warn("Could not remove placeholder:", e2);
             }
           }
           const elementNode = this.createElementNode(newElement);
@@ -6678,7 +6631,7 @@ if (!customElements.get("wc-page-designer")) {
             try {
               element.removeChild(placeholder);
             } catch (e2) {
-              console.log("Could not remove placeholder:", e2);
+              console.warn("Could not remove placeholder:", e2);
             }
           }
           const elementNode = this.createElementNode(newElement);
@@ -6723,7 +6676,6 @@ if (!customElements.get("wc-page-designer")) {
         try {
           const schema = JSON.parse(this.schemaJson.editor.getValue());
           this.loadSchema(schema);
-          console.log("wc-page-designer:schemaJson - fetch-complete");
         } catch (e2) {
           alert("Invalid JSON schema");
         }
@@ -6806,7 +6758,6 @@ if (!customElements.get("wc-page-designer")) {
             return rule;
           },
           callback: (result) => {
-            console.log("rule-template - result:", result);
             this.saveRule(result);
           }
         };
@@ -7190,7 +7141,6 @@ if (!customElements.get("wc-page-designer")) {
           return rule2;
         },
         callback: (result) => {
-          console.log("rule-template - result:", result);
           this.saveRule(result);
         }
       };
@@ -7915,12 +7865,10 @@ if (!customElements.get("wc-save-button")) {
         this.componentElement.setAttribute("hx-push-url", "true");
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-save-button");
     }
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-save-button");
     }
     disconnectedCallback() {
       this._unWireEvents();
@@ -7973,12 +7921,10 @@ if (!customElements.get("wc-save-split-button")) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log("ctor:wc-save-split-button");
     }
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-save-split-button");
     }
     disconnectedCallback() {
       this._unWireEvents();
@@ -8185,12 +8131,10 @@ if (!customElements.get("wc-split-button")) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log("ctor:wc-split-button");
     }
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-split-button");
     }
     disconnectedCallback() {
       this._unWireEvents();
@@ -8347,12 +8291,10 @@ var WcSidebar = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-sidebar");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-sidebar");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-sidebar");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -8391,7 +8333,6 @@ var WcSidebar = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-sidebar");
   }
   _createInnerElement() {
     const parts = this.querySelectorAll("wc-sidebar > *:not(.wc-sidebar");
@@ -8498,13 +8439,11 @@ if (!customElements.get("wc-sidenav")) {
           this._openNav({ target: null });
         }
       }
-      console.log("ctor:wc-sidenav");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-sidenav");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -8541,7 +8480,6 @@ if (!customElements.get("wc-sidenav")) {
       if (typeof htmx !== "undefined") {
         htmx.process(this);
       }
-      console.log("_render:wc-sidenav");
     }
     _createInnerElement() {
       const parts = this.querySelectorAll("wc-sidenav > *:not(.wc-sidenav");
@@ -8809,12 +8747,10 @@ if (!customElements.get("wc-slideshow-image")) {
         this.componentElement.classList.add("wc-slideshow-image", "slide", "fade");
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-slideshow-image");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      console.log("connectedCallback:wc-slideshow-image");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -8841,7 +8777,6 @@ if (!customElements.get("wc-slideshow-image")) {
       if (typeof htmx !== "undefined") {
         htmx.process(this);
       }
-      console.log("_render:wc-slideshow-image");
     }
     _createInnerElement() {
       const numTextEl = document.createElement("div");
@@ -8923,13 +8858,11 @@ if (!customElements.get("wc-slideshow")) {
         this.componentElement.classList.add("wc-slideshow", "container");
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-slideshow");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-slideshow");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -8960,7 +8893,6 @@ if (!customElements.get("wc-slideshow")) {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
-      console.log("_render:wc-slideshow");
     }
     _createInnerElement() {
       const els = this.querySelectorAll("wc-slideshow > *:not(.wc-slideshow)");
@@ -9238,12 +9170,10 @@ var WcTabItem = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-tab-item");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-tab-item");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-tab-item");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -9266,7 +9196,6 @@ var WcTabItem = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-tab-item");
   }
   _createInnerElement() {
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-tab-item") && !p.matches(".wc-tab-item"));
@@ -9313,13 +9242,11 @@ var WcTab = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-tab");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-tab");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
-    console.log("connectedCallback:wc-tab");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -9352,7 +9279,6 @@ var WcTab = class extends WcBaseComponent {
         btn?.click();
       });
     }, 100);
-    console.log("_render:wc-tab");
   }
   _createInnerElement() {
     const tabNav = document.createElement("div");
@@ -9685,7 +9611,6 @@ if (!customElements.get("wc-tabulator")) {
       {
         label: this.createMenuLabel("Delete Row", this.icons.remove),
         action: (e, row) => {
-          console.log("Deleting row...");
           wc.Prompt.question({
             title: "Are you sure?",
             text: "This record will be deleted. Are you sure?",
@@ -9745,7 +9670,6 @@ if (!customElements.get("wc-tabulator")) {
       {
         label: this.createMenuLabel("Download Table", this.icons.download),
         action: (e, row) => {
-          console.log("Download row...");
           wc.Prompt.notify({
             icon: "info",
             title: "Download Format?",
@@ -9791,12 +9715,10 @@ if (!customElements.get("wc-tabulator")) {
         this.componentElement.id = this.getAttribute("id") || "wc-tabulator";
         this.appendChild(this.componentElement);
       }
-      console.log("ctor:wc-tabulator");
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      console.log("conntectedCallback:wc-tabulator");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -9813,7 +9735,6 @@ if (!customElements.get("wc-tabulator")) {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
-      console.log("_render:wc-tabulator");
     }
     async _createInnerElement() {
       const pagination = this.hasAttribute("pagination");
@@ -9940,7 +9861,6 @@ if (!customElements.get("wc-tabulator")) {
       ]);
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
-        console.log("wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready");
         if ("onInit" in this.funcs) {
           this.funcs["onInit"](this.table);
         }
@@ -9975,7 +9895,6 @@ if (!customElements.get("wc-tabulator")) {
       });
       let isInternalFilterChange = false;
       this.table.on("dataFiltering", (filters) => {
-        console.log("dataFiltering", filters);
       });
     }
     getFuncs() {
@@ -10783,16 +10702,13 @@ if (!customElements.get("wc-template-preview")) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log("ctor:wc-template-preview");
     }
     async _connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log("connectedCallback:wc-template-preview");
     }
     _disconnectedCallback() {
       this._unWireEvents();
-      console.log("disconnectedCallback:wc-template-preview");
     }
     _createElement() {
       const record_id = this.getAttribute("record-id") || "";
@@ -10936,12 +10852,10 @@ var WcThemeSelector = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-theme-selector");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-theme-selector");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-theme-selector");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -10967,7 +10881,6 @@ var WcThemeSelector = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-theme-selector");
   }
   _createInnerElement() {
     const themes = [
@@ -11064,7 +10977,6 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   _handleThemeClick(event) {
     const { target } = event;
-    console.log("target", target);
     const selectedTheme = target.getAttribute("data-theme");
     this._setTheme(target, selectedTheme);
     localStorage.setItem("theme", selectedTheme.replace("theme-", ""));
@@ -11122,12 +11034,10 @@ var WcTimeline = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-timeline");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-timeline");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-timeline");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -11158,7 +11068,6 @@ var WcTimeline = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-timeline");
   }
   _createElement(itemLabel, itemContent, idx) {
     let position = "left";
@@ -11748,7 +11657,6 @@ var WcLoader = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
-    console.log("connectedCallback:wc-loader");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -11934,8 +11842,6 @@ if (!customElements.get("wc-visibility-change")) {
     }
     async connectedCallback() {
       if (!this._isConnected) {
-        console.log("Initial visibility state:", document.visibilityState);
-        console.log("Is document hidden?", document.hidden);
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
       }
       this._isConnected = true;
@@ -11948,7 +11854,6 @@ if (!customElements.get("wc-visibility-change")) {
     }
     handleVisibilityChange() {
       if (document.hidden) {
-        console.log("Tab is in the background");
       } else {
         const verb = this.getAttribute("hx-verb") || "GET";
         const url = this.getAttribute("hx-url") || "";
@@ -11962,7 +11867,6 @@ if (!customElements.get("wc-visibility-change")) {
             htmx.ajax(verb, url, { target, swap, indicator, pushUrl, select });
           }
         }
-        console.log("Tab is in the foreground");
       }
     }
     attributeChangedCallback(attrName, oldValue, newValue) {
@@ -12037,7 +11941,6 @@ var WcEventHandler = class extends HTMLElement {
       } else {
       }
     }
-    console.log("_handleEvent:target", target, "detail:", detail, "actionTarget:", actionTarget);
   }
 };
 customElements.define("wc-event-handler", WcEventHandler);
@@ -12052,7 +11955,6 @@ if (!customElements.get("wc-event-hub")) {
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
-      console.log("ctor:wc-event-hub");
     }
     connectedCallback() {
       if (document.querySelector(this.tagName) !== this) {
@@ -12065,7 +11967,6 @@ if (!customElements.get("wc-event-hub")) {
         window.wc.EventHub = this;
         this._applyStyle();
       }
-      console.log("conntectedCallback:wc-event-hub");
     }
     disconnectedCallback() {
     }
@@ -12101,7 +12002,6 @@ if (!customElements.get("wc-mask-hub")) {
       this.loadScript = loadScript.bind(this);
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
-      console.log("ctor:wc-mask-hub");
     }
     async connectedCallback() {
       if (document.querySelector(this.tagName) !== this) {
@@ -12111,7 +12011,6 @@ if (!customElements.get("wc-mask-hub")) {
         await this.renderMask();
         this._applyStyle();
       }
-      console.log("conntectedCallback:wc-mask-hub");
     }
     disconnectedCallback() {
     }
@@ -12221,7 +12120,6 @@ if (!customElements.get("wc-link")) {
           link.href = url;
           link.id = linkId;
           link.onload = () => {
-            console.log(`Link loaded: ${url}`);
             window.wc.linksLoaded[url] = true;
             document.body.dispatchEvent(new CustomEvent("link-loaded", {
               detail: { url },
@@ -12230,7 +12128,6 @@ if (!customElements.get("wc-link")) {
             }));
           };
           link.onerror = () => {
-            console.error(`Failed to load link: ${url}`);
             document.body.dispatchEvent(new CustomEvent("link-error", {
               detail: { url },
               bubbles: true,
@@ -12238,9 +12135,7 @@ if (!customElements.get("wc-link")) {
             }));
           };
           document.head.appendChild(link);
-          console.log(`Added link: ${url}`);
         } else {
-          console.log(`Link already exists, skipping append: ${url}`);
           document.body.dispatchEvent(new CustomEvent("link-loaded", {
             detail: { url },
             bubbles: true,
@@ -12279,7 +12174,6 @@ if (!customElements.get("wc-script")) {
           script.src = src;
           script.id = scriptId;
           script.onload = () => {
-            console.log(`Script loaded: ${src}`);
             window.wc.scriptsLoaded[src] = true;
             document.body.dispatchEvent(new CustomEvent("script-loaded", {
               detail: { src },
@@ -12296,9 +12190,7 @@ if (!customElements.get("wc-script")) {
             }));
           };
           document.head.appendChild(script);
-          console.log(`Added script: ${src}`);
         } else {
-          console.log(`Script already exists, skipping append: ${src}`);
           document.body.dispatchEvent(new CustomEvent("script-loaded", {
             detail: { src },
             bubbles: true,
@@ -12346,10 +12238,8 @@ if (!customElements.get("wc-javascript")) {
           }
           document.head.appendChild(script);
         } else {
-          console.log("Script already exists, skipping append:", scriptId);
           const fn = window.wc.scripts[scriptId];
           if (fn) {
-            console.log("Calling script function...");
             fn();
           }
         }
@@ -12370,7 +12260,6 @@ if (!customElements.get("wc-prompt")) {
       this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
       this.table = null;
-      console.log("ctor:wc-prompt");
     }
     async connectedCallback() {
       if (document.querySelector(this.tagName) !== this) {
@@ -12381,7 +12270,6 @@ if (!customElements.get("wc-prompt")) {
       }
       this._applyStyle();
       this.wireEvents();
-      console.log("conntectedCallback:wc-prompt");
     }
     disconnectedCallback() {
       this.unWireEvents();
@@ -12712,7 +12600,6 @@ if (!customElements.get("wc-notify")) {
       this._defaultDelay = 3e3;
       this._notifications = [];
       this._position = "top-right";
-      console.log("ctor:wc-notify");
     }
     async connectedCallback() {
       if (document.querySelector(this.tagName) !== this) {
@@ -12722,7 +12609,6 @@ if (!customElements.get("wc-notify")) {
         await this.renderNotify();
       }
       this._applyStyle();
-      console.log("conntectedCallback:wc-notify");
     }
     disconnectedCallback() {
     }
@@ -12927,12 +12813,10 @@ var WcForm = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-form");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-form");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-form");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -12965,7 +12849,6 @@ var WcForm = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-form");
   }
   _moveDeclarativeInner() {
     const innerParts = this.querySelectorAll("wc-form > *:not(.wc-form)");
@@ -14909,12 +14792,10 @@ var WcTextarea = class extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-textarea", "relative");
       this.appendChild(this.componentElement);
     }
-    console.log("ctor:wc-textarea");
   }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    console.log("connectedCallback:wc-textarea");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -14951,7 +14832,6 @@ var WcTextarea = class extends WcBaseFormComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    console.log("_render:wc-textarea");
   }
   _createInnerElement() {
     const labelText = this.getAttribute("lbl-label") || "";

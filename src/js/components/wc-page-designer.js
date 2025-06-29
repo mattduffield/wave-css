@@ -1031,7 +1031,7 @@ if (!customElements.get('wc-page-designer')) {
       } else {
         this.createElement();
       }
-      console.log('ctor:wc-page-designer');
+      // console.log('ctor:wc-page-designer');
     }
 
     async connectedCallback() {
@@ -1043,7 +1043,7 @@ if (!customElements.get('wc-page-designer')) {
         this.setup();
       }, 250);
       
-      console.log('conntectedCallback:wc-page-designer');
+      // console.log('conntectedCallback:wc-page-designer');
     }
 
     disconnectedCallback() {      
@@ -1056,20 +1056,20 @@ if (!customElements.get('wc-page-designer')) {
         this.theme = newValue;
         const designer = this.querySelector('.wc-page-designer');
         designer.className = designer.className.replace(oldTheme, newValue);
-        console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
+        // console.log('wc-page-designer:attributeChangedCallback - designer', designer.className);
       } else if (attrName === 'json-layout') {
         this.jsonLayout = newValue;
-        console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
+        // console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
       } else if (attrName === 'json-layout-fetch-url') {
         this.jsonLayoutFetchUrl = newValue;
         const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
         layoutEditor.setAttribute('fetch', this.jsonLayoutFetchUrl);
-        console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
+        // console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
       } else if (attrName === 'json-schema-fetch-url') {
         this.jsonSchemaFetchUrl = newValue;
         const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
         schemaJson.setAttribute('fetch', this.jsonSchemaFetchUrl);
-        console.log('wc-page-designer:attributeChangedCallback - json-schema-fetch-url', this.jsonSchemaFetchUrl);
+        // console.log('wc-page-designer:attributeChangedCallback - json-schema-fetch-url', this.jsonSchemaFetchUrl);
       }
     }
   
@@ -1632,7 +1632,7 @@ if (!customElements.get('wc-page-designer')) {
     wireEvents() {
     }
     unWireEvents() {
-      console.log('unWireEvents:wc-page-designer');
+      // console.log('unWireEvents:wc-page-designer');
     }
 
 
@@ -1818,7 +1818,7 @@ if (!customElements.get('wc-page-designer')) {
             try {
               element.removeChild(placeholder);
             } catch (e) {
-              console.log('Could not remove placeholder:', e);
+              console.warn('Could not remove placeholder:', e);
             }
           }
           
@@ -1946,7 +1946,7 @@ if (!customElements.get('wc-page-designer')) {
             try {
               element.removeChild(placeholder);
             } catch (e) {
-              console.log('Could not remove placeholder:', e);
+              console.warn('Could not remove placeholder:', e);
             }
           }
           
@@ -2009,7 +2009,7 @@ if (!customElements.get('wc-page-designer')) {
         try {
           const schema = JSON.parse(this.schemaJson.editor.getValue());
           this.loadSchema(schema);
-          console.log('wc-page-designer:schemaJson - fetch-complete');
+          // console.log('wc-page-designer:schemaJson - fetch-complete');
         } catch (e) {
           alert('Invalid JSON schema');
         }
@@ -2097,7 +2097,7 @@ if (!customElements.get('wc-page-designer')) {
             return rule;
           },
           callback: (result) => {
-            console.log('rule-template - result:', result);
+            // console.log('rule-template - result:', result);
             this.saveRule(result);
           }
         };
@@ -2602,7 +2602,7 @@ if (!customElements.get('wc-page-designer')) {
           return rule;
         },
         callback: (result) => {
-          console.log('rule-template - result:', result);
+          // console.log('rule-template - result:', result);
           this.saveRule(result);
         }
       };

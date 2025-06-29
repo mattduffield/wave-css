@@ -46,13 +46,13 @@ if (!customElements.get('wc-split-button')) {
         this.appendChild(this.componentElement);
         this._createElement();
       }
-      console.log('ctor:wc-split-button');
+      // console.log('ctor:wc-split-button');
     }
 
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-split-button');
+      // console.log('connectedCallback:wc-split-button');
     }
 
     disconnectedCallback() {

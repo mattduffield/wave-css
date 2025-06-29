@@ -39,14 +39,14 @@ class WcTabItem extends WcBaseComponent {
       this.componentElement.classList.add('wc-tab-item');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-tab-item');
+    // console.log('ctor:wc-tab-item');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-tab-item');
+    // console.log('connectedCallback:wc-tab-item');
   }
 
   disconnectedCallback() {
@@ -76,7 +76,7 @@ class WcTabItem extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-tab-item');
+    // console.log('_render:wc-tab-item');
   }
 
   _createInnerElement() {

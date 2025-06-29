@@ -50,10 +50,10 @@ if (!customElements.get('wc-javascript')) {
           document.head.appendChild(script); // Append the script to the document head
 
         } else {
-          console.log('Script already exists, skipping append:', scriptId);
+          // console.log('Script already exists, skipping append:', scriptId);
           const fn = window.wc.scripts[scriptId];
           if (fn) {
-            console.log("Calling script function...");
+            // console.log("Calling script function...");
             fn();
           }
         }

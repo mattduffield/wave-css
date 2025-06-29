@@ -38,7 +38,7 @@ class WcLoader extends WcBaseComponent {
 
     this._applyStyle();
     this._wireEvents();
-    console.log('connectedCallback:wc-loader');
+    // console.log('connectedCallback:wc-loader');
   }
 
   disconnectedCallback() {

@@ -43,13 +43,13 @@ if (!customElements.get('wc-save-button')) {
         this.componentElement.setAttribute('hx-push-url', 'true');
         this.appendChild(this.componentElement);
       }
-      console.log('ctor:wc-save-button');
+      // console.log('ctor:wc-save-button');
     }
 
     async connectedCallback() {
       this._applyStyle();
       this._wireEvents();
-      console.log('connectedCallback:wc-save-button');
+      // console.log('connectedCallback:wc-save-button');
     }
 
     disconnectedCallback() {

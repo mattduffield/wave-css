@@ -28,14 +28,14 @@ class WcContactCard extends WcBaseComponent {
       this.componentElement.classList.add('wc-contact-card');
       this.appendChild(this.componentElement);      
     }
-    console.log('ctor:wc-contact-card');
+    // console.log('ctor:wc-contact-card');
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
     this._applyStyle();
-    console.log('connectedCallback:wc-contact-card');
+    // console.log('connectedCallback:wc-contact-card');
   }
 
   disconnectedCallback() {
@@ -75,7 +75,7 @@ class WcContactCard extends WcBaseComponent {
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
     }
-    console.log('_render:wc-contact-card');
+    // console.log('_render:wc-contact-card');
   }
 
   _createInnerElement() {
