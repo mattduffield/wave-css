@@ -1,9 +1,13 @@
 import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-icon')) {
+  // Global icon cache shared across all instances
+  const globalIconCache = new Map();
+  const pendingRequests = new Map();
+  
   class WcIcon extends WcBaseComponent {
     static get observedAttributes() {
-      return ['name', 'icon-style', 'size', 'color', 'primary-color', 'secondary-color', 'secondary-opacity', 'swap-opacity', 'rotate', 'flip', 'base-path'];
+      return ['name', 'icon-style', 'size', 'color', 'primary-color', 'secondary-color', 'secondary-opacity', 'swap-opacity', 'rotate', 'flip', 'base-path', 'spin', 'pulse'];
     }
 
     // Font Awesome icon aliases mapping
@@ -58,8 +62,6 @@ if (!customElements.get('wc-icon')) {
 
     constructor() {
       super();
-      this._iconRegistry = new Map();
-      this._loadedIcons = new Map();
       this._basePath = this.getAttribute('base-path') || WcIcon.defaultBasePath || '/dist/assets/icons';
     }
 
@@ -83,6 +85,29 @@ if (!customElements.get('wc-icon')) {
       // Remove contents class to allow utility classes to control display
       this.classList.remove('contents');
       
+      // Add CSS animations for spinners
+      if (!document.getElementById('wc-icon-animations')) {
+        const style = document.createElement('style');
+        style.id = 'wc-icon-animations';
+        style.textContent = `
+          @keyframes wc-icon-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes wc-icon-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          wc-icon[spin] svg {
+            animation: wc-icon-spin 1s linear infinite;
+          }
+          wc-icon[pulse] svg {
+            animation: wc-icon-pulse 2s ease-in-out infinite;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
       // Create the SVG directly without wrapper to allow better control
       this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       this._svg.setAttribute('viewBox', '0 0 512 512');
@@ -103,6 +128,9 @@ if (!customElements.get('wc-icon')) {
       } else if (name === 'base-path') {
         this._basePath = newValue || WcIcon.defaultBasePath;
         this._loadIcon();
+      } else if (name === 'spin' || name === 'pulse') {
+        // Animation attributes are handled by CSS, no JS needed
+        return;
       } else {
         this._applyStyles();
       }
@@ -122,18 +150,28 @@ if (!customElements.get('wc-icon')) {
         this._svg.style.height = size;
       }
 
-      // Handle rotation
-      if (rotate) {
-        this._svg.style.transform = `rotate(${rotate}deg)`;
+      // Handle rotation and flipping
+      let transform = '';
+      
+      // Note: When spin is active, the CSS animation handles rotation
+      // Only apply static rotation if spin is not active
+      if (rotate && !this.hasAttribute('spin')) {
+        transform += `rotate(${rotate}deg)`;
       }
 
       // Handle flipping
       if (flip === 'horizontal') {
-        this._svg.style.transform = (this._svg.style.transform || '') + ' scaleX(-1)';
+        transform += ' scaleX(-1)';
       } else if (flip === 'vertical') {
-        this._svg.style.transform = (this._svg.style.transform || '') + ' scaleY(-1)';
+        transform += ' scaleY(-1)';
       } else if (flip === 'both') {
-        this._svg.style.transform = (this._svg.style.transform || '') + ' scale(-1)';
+        transform += ' scale(-1)';
+      }
+      
+      if (transform) {
+        this._svg.style.transform = transform.trim();
+      } else {
+        this._svg.style.removeProperty('transform');
       }
 
       // Handle colors based on icon style
@@ -170,48 +208,71 @@ if (!customElements.get('wc-icon')) {
       const iconStyle = this.getAttribute('icon-style') || 'solid';
       const basePath = this.getAttribute('base-path') || this._basePath;
 
-      const cacheKey = `${iconStyle}/${iconName}`;
+      const cacheKey = `${basePath}/${iconStyle}/${iconName}`;
 
       try {
-        let iconData = this._loadedIcons.get(cacheKey);
+        // Check global cache first
+        let iconData = globalIconCache.get(cacheKey);
 
         if (!iconData) {
-          // Try to fetch from the icon registry first
-          iconData = this._iconRegistry.get(cacheKey);
+          // Check if there's already a pending request for this icon
+          let pendingRequest = pendingRequests.get(cacheKey);
+          
+          if (pendingRequest) {
+            // Wait for the existing request to complete
+            iconData = await pendingRequest;
+          } else {
+            // Create and immediately store the pending request to prevent race conditions
+            const requestPromise = (async () => {
+              // Check static registry first
+              if (WcIcon._globalRegistry?.has(`${iconStyle}/${iconName}`)) {
+                const data = WcIcon._globalRegistry.get(`${iconStyle}/${iconName}`);
+                globalIconCache.set(cacheKey, data);
+                return data;
+              }
 
-          if (!iconData) {
-            // Try to load from file
-            const response = await fetch(`${basePath}/${iconStyle}/${iconName}.svg`);
-            if (!response.ok) {
-              console.error(`Icon not found: ${cacheKey}`);
-              return;
+              // Fetch from network
+              const response = await fetch(`${basePath}/${iconStyle}/${iconName}.svg`);
+              if (!response.ok) {
+                console.error(`Icon not found: ${iconStyle}/${iconName}`);
+                return null;
+              }
+
+              const svgText = await response.text();
+              const parser = new DOMParser();
+              const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+              const svgElement = svgDoc.querySelector('svg');
+              const paths = svgDoc.querySelectorAll('path');
+
+              const iconData = {
+                viewBox: svgElement?.getAttribute('viewBox'),
+                paths: Array.from(paths).map(path => ({
+                  d: path.getAttribute('d'),
+                  opacity: path.getAttribute('opacity'),
+                  class: path.getAttribute('class'),
+                  fill: path.getAttribute('fill')
+                }))
+              };
+
+              // Store in global cache
+              globalIconCache.set(cacheKey, iconData);
+              return iconData;
+            })();
+
+            // Store the pending request IMMEDIATELY to prevent race conditions
+            pendingRequests.set(cacheKey, requestPromise);
+
+            try {
+              iconData = await requestPromise;
+            } finally {
+              // Clean up the pending request
+              pendingRequests.delete(cacheKey);
             }
-
-            const svgText = await response.text();
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-            const svgElement = svgDoc.querySelector('svg');
-            const paths = svgDoc.querySelectorAll('path');
-
-            // Update viewBox if present in the loaded SVG
-            const viewBox = svgElement?.getAttribute('viewBox');
-            if (viewBox) {
-              this._svg.setAttribute('viewBox', viewBox);
-            }
-
-            iconData = {
-              viewBox: viewBox,
-              paths: Array.from(paths).map(path => ({
-                d: path.getAttribute('d'),
-                opacity: path.getAttribute('opacity'),
-                class: path.getAttribute('class'),
-                fill: path.getAttribute('fill')
-              }))
-            };
-
-            this._loadedIcons.set(cacheKey, iconData);
           }
         }
+
+        // If icon data couldn't be loaded, exit
+        if (!iconData) return;
 
         // Clear existing paths
         this._group.innerHTML = '';
@@ -269,16 +330,89 @@ if (!customElements.get('wc-icon')) {
       });
     }
 
-    connectedCallback() {
-      super.connectedCallback();
+    // Static method to preload icons
+    static async preloadIcons(iconList) {
+      const promises = iconList.map(async (iconConfig) => {
+        const { name, style = 'solid', basePath = WcIcon.defaultBasePath } = 
+          typeof iconConfig === 'string' ? { name: iconConfig } : iconConfig;
+        
+        const iconName = WcIcon.iconAliases[name] || name;
+        const cacheKey = `${basePath}/${style}/${iconName}`;
+        
+        // Skip if already cached
+        if (globalIconCache.has(cacheKey)) return;
+        
+        // Skip if there's already a pending request
+        if (pendingRequests.has(cacheKey)) {
+          return pendingRequests.get(cacheKey);
+        }
+        
+        // Create the request directly without creating a component
+        const requestPromise = (async () => {
+          // Check static registry first
+          if (WcIcon._globalRegistry?.has(`${style}/${iconName}`)) {
+            const data = WcIcon._globalRegistry.get(`${style}/${iconName}`);
+            globalIconCache.set(cacheKey, data);
+            return data;
+          }
 
-      // Copy global registry to instance registry
-      if (WcIcon._globalRegistry) {
-        WcIcon._globalRegistry.forEach((value, key) => {
-          this._iconRegistry.set(key, value);
-        });
-      }
+          // Fetch from network
+          const response = await fetch(`${basePath}/${style}/${iconName}.svg`);
+          if (!response.ok) {
+            console.error(`Icon not found: ${style}/${iconName}`);
+            return null;
+          }
+
+          const svgText = await response.text();
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.querySelector('svg');
+          const paths = svgDoc.querySelectorAll('path');
+
+          const iconData = {
+            viewBox: svgElement?.getAttribute('viewBox'),
+            paths: Array.from(paths).map(path => ({
+              d: path.getAttribute('d'),
+              opacity: path.getAttribute('opacity'),
+              class: path.getAttribute('class'),
+              fill: path.getAttribute('fill')
+            }))
+          };
+
+          // Store in global cache
+          globalIconCache.set(cacheKey, iconData);
+          return iconData;
+        })();
+
+        // Store the pending request
+        pendingRequests.set(cacheKey, requestPromise);
+
+        try {
+          return await requestPromise;
+        } finally {
+          // Clean up the pending request
+          pendingRequests.delete(cacheKey);
+        }
+      });
+      
+      await Promise.all(promises);
     }
+
+    // Static method to clear cache (useful for testing or memory management)
+    static clearCache() {
+      globalIconCache.clear();
+      pendingRequests.clear();
+    }
+
+    // Static method to get cache stats
+    static getCacheStats() {
+      return {
+        cachedIcons: globalIconCache.size,
+        pendingRequests: pendingRequests.size,
+        cacheKeys: Array.from(globalIconCache.keys())
+      };
+    }
+
   }
   
   customElements.define(WcIcon.is, WcIcon);
