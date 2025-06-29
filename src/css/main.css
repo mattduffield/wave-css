@@ -999,6 +999,12 @@
   .primary-color {
     color: var(--primary-color);
   }
+  .primary-light-color {
+    color: var(--primary-light);
+  }
+  .primary-hover-color {
+    color: var(--primary-hover-color);
+  }
   .primary-bg-color {
     background-color: var(--primary-bg-color);
   }
@@ -1009,8 +1015,31 @@
     border-color: var(--primary-bg-color);
   }
 
+
+  .success-color {
+    color: var(--success-color);
+  }
+  .success-light-color {
+    color: var(--success-light);
+  }
+  .success-hover-color {
+    color: var(--success-hover-color);
+  }
+  .success-bg-color {
+    background-color: var(--success-color);
+  }
+  .success-border-color {
+    border-color: var(--success-color);
+  }
+
   .danger-color {
     color: var(--danger-color);
+  }
+  .danger-light-color {
+    color: var(--danger-light);
+  }
+  .danger-hover-color {
+    color: var(--danger-hover-color);
   }
   .danger-bg-color {
     background-color: var(--danger-color);
