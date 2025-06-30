@@ -89,8 +89,9 @@ if (!customElements.get('wc-notify')) {
       const notification = document.createElement('div');
       notification.className = `notification ${type} ${this.position}`;
       notification.innerHTML = `
-          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-          <span>${message}</span>
+        <wc-fa-icon name="${type === 'success' ? 'circle-check' : type === 'error' ? 'circle-exclamation' : 'circle-info'}" icon-style="duotone" size="1rem" class="flex">
+        </wc-fa-icon>
+        <span>${message}</span>
       `;
       
       // Add to tracking array
