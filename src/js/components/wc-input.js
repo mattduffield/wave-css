@@ -863,8 +863,13 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input input[type="search"] + .icon {
         position: absolute;
-        top: 25px;
         left: 5px;
+      }
+      wc-input label + input[type="search"] + .icon {
+        top: 25px;
+      }
+      wc-input input[type="search"] + .icon {
+        top: 10px;
       }
 
       wc-input input[type="tel"] {
