@@ -4028,6 +4028,7 @@ if (!customElements.get("wc-fa-icon")) {
         if (match) {
           const style = match[1];
           loadedBundles.add(style);
+          loadingBundles.delete(style);
         }
         return loadedCount;
       } catch (error) {
@@ -4074,12 +4075,28 @@ if (!customElements.get("wc-fa-icon")) {
     static async preloadConfiguredBundles() {
       if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
         console.log("[wc-fa-icon] Preloading configured bundles:", WcIconConfig.preloadBundles);
-        const bundleUrls = WcIconConfig.preloadBundles.map(
-          (style) => `${WcIconConfig.bundleBaseUrl}/${style}-icons.json`
-        );
-        const results = await WcFaIcon.loadBundles(bundleUrls);
-        console.log(`[wc-fa-icon] Preloaded ${results.totalLoaded} icons from ${WcIconConfig.preloadBundles.length} bundles`);
-        return results;
+        const loadPromises = [];
+        for (const style of WcIconConfig.preloadBundles) {
+          if (!loadedBundles.has(style) && !loadingBundles.has(style)) {
+            const bundleUrl = `${WcIconConfig.bundleBaseUrl}/${style}-icons.json`;
+            const loadPromise = WcFaIcon.loadBundle(bundleUrl).then((count) => {
+              loadedBundles.add(style);
+              loadingBundles.delete(style);
+              return count;
+            }).catch((err) => {
+              console.error(`[wc-fa-icon] Failed to preload ${style} bundle:`, err);
+              loadingBundles.delete(style);
+              loadedBundles.add(style);
+              return 0;
+            });
+            loadingBundles.set(style, loadPromise);
+            loadPromises.push(loadPromise);
+          }
+        }
+        const results = await Promise.all(loadPromises);
+        const totalLoaded = results.reduce((sum, count) => sum + count, 0);
+        console.log(`[wc-fa-icon] Preloaded ${totalLoaded} icons from ${loadPromises.length} bundles`);
+        return { totalLoaded, failed: results.filter((c) => c === 0).length };
       }
       return { totalLoaded: 0, failed: 0 };
     }
@@ -4087,9 +4104,7 @@ if (!customElements.get("wc-fa-icon")) {
   customElements.define(WcFaIcon.is, WcFaIcon);
   window.WcFaIcon = WcFaIcon;
   if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
-    customElements.whenDefined("wc-fa-icon").then(() => {
-      WcFaIcon.preloadConfiguredBundles();
-    });
+    WcFaIcon.preloadConfiguredBundles();
   }
 }
 
