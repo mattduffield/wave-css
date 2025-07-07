@@ -7,6 +7,9 @@ export const WcIconConfig = {
   iconBaseUrl: existingConfig.iconBaseUrl || '/dist/assets/icons',
   bundleBaseUrl: existingConfig.bundleBaseUrl || '/dist/assets/icon-bundles',
   
+  // Bundles to preload on initialization
+  preloadBundles: existingConfig.preloadBundles || [],
+  
   // CDN example:
   // iconBaseUrl: 'https://cdn.example.com/wave-css/icons',
   // bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',
@@ -25,6 +28,11 @@ export const WcIconConfig = {
     const baseUrl = url.replace(/\/$/, '');
     this.iconBaseUrl = `${baseUrl}/icons`;
     this.bundleBaseUrl = `${baseUrl}/icon-bundles`;
+  },
+  
+  // Set bundles to preload
+  setPreloadBundles(bundles) {
+    this.preloadBundles = bundles;
   }
 };
 

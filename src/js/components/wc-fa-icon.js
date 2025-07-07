@@ -369,10 +369,34 @@ if (!customElements.get('wc-fa-icon')) {
       // Check without style prefix to match bundle format
       return iconBundles.has(iconName);
     }
+    
+    // Static method to preload configured bundles
+    static async preloadConfiguredBundles() {
+      if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
+        console.log('[wc-fa-icon] Preloading configured bundles:', WcIconConfig.preloadBundles);
+        
+        const bundleUrls = WcIconConfig.preloadBundles.map(style => 
+          `${WcIconConfig.bundleBaseUrl}/${style}-icons.json`
+        );
+        
+        const results = await WcFaIcon.loadBundles(bundleUrls);
+        console.log(`[wc-fa-icon] Preloaded ${results.totalLoaded} icons from ${WcIconConfig.preloadBundles.length} bundles`);
+        return results;
+      }
+      return { totalLoaded: 0, failed: 0 };
+    }
   }
   
   customElements.define(WcFaIcon.is, WcFaIcon);
   
   // Export for easier access
   window.WcFaIcon = WcFaIcon;
+  
+  // Auto-preload bundles if configured
+  if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
+    // Use customElements.whenDefined to ensure component is ready
+    customElements.whenDefined('wc-fa-icon').then(() => {
+      WcFaIcon.preloadConfiguredBundles();
+    });
+  }
 }

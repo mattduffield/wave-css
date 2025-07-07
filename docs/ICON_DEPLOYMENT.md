@@ -10,6 +10,32 @@ Wave CSS provides two icon components:
 
 Both components need access to icon assets, which can be configured for different deployment scenarios.
 
+## Preloading Bundles (Recommended for HTMX/SPA)
+
+To prevent icons from flashing or changing styles during navigation, preload the bundles you need:
+
+```html
+<!-- Configure with preloading -->
+<script>
+  window.WcIconConfig = {
+    bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',
+    // Preload these bundles on initialization
+    preloadBundles: ['solid', 'duotone', 'regular']
+  };
+</script>
+<script type="module" src="/dist/wave-css.min.js"></script>
+```
+
+Or programmatically:
+
+```javascript
+// After Wave CSS loads
+await WcFaIcon.loadBundles([
+  '/assets/icon-bundles/solid-icons.json',
+  '/assets/icon-bundles/duotone-icons.json'
+]);
+```
+
 ## Deployment Options
 
 ### 1. Local Assets (Default)

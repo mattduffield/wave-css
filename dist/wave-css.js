@@ -620,6 +620,8 @@ var WcIconConfig = {
   // Base URL for icon assets - can be overridden by applications
   iconBaseUrl: existingConfig.iconBaseUrl || "/dist/assets/icons",
   bundleBaseUrl: existingConfig.bundleBaseUrl || "/dist/assets/icon-bundles",
+  // Bundles to preload on initialization
+  preloadBundles: existingConfig.preloadBundles || [],
   // CDN example:
   // iconBaseUrl: 'https://cdn.example.com/wave-css/icons',
   // bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',
@@ -635,6 +637,10 @@ var WcIconConfig = {
     const baseUrl = url.replace(/\/$/, "");
     this.iconBaseUrl = `${baseUrl}/icons`;
     this.bundleBaseUrl = `${baseUrl}/icon-bundles`;
+  },
+  // Set bundles to preload
+  setPreloadBundles(bundles) {
+    this.preloadBundles = bundles;
   }
 };
 if (!window.WcIconConfig) {
@@ -4064,9 +4070,27 @@ if (!customElements.get("wc-fa-icon")) {
       const iconName = WcFaIcon.iconAliases[name] || name;
       return iconBundles.has(iconName);
     }
+    // Static method to preload configured bundles
+    static async preloadConfiguredBundles() {
+      if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
+        console.log("[wc-fa-icon] Preloading configured bundles:", WcIconConfig.preloadBundles);
+        const bundleUrls = WcIconConfig.preloadBundles.map(
+          (style) => `${WcIconConfig.bundleBaseUrl}/${style}-icons.json`
+        );
+        const results = await WcFaIcon.loadBundles(bundleUrls);
+        console.log(`[wc-fa-icon] Preloaded ${results.totalLoaded} icons from ${WcIconConfig.preloadBundles.length} bundles`);
+        return results;
+      }
+      return { totalLoaded: 0, failed: 0 };
+    }
   }
   customElements.define(WcFaIcon.is, WcFaIcon);
   window.WcFaIcon = WcFaIcon;
+  if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
+    customElements.whenDefined("wc-fa-icon").then(() => {
+      WcFaIcon.preloadConfiguredBundles();
+    });
+  }
 }
 
 // src/js/components/wc-image.js

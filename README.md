@@ -67,6 +67,7 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 Execute the following command to build the bundler for both `css` and `javascript`.
 
 ```bash
+node scripts/copy-fa-pro-svgs.js
 npm run build
 node scripts/bundle-icons.js
 ```
@@ -82,9 +83,9 @@ python3 -m http.server 3015
 Make sure you update the ICONS_TO_COPY array to have all the SVGs you want.
 Next, execute the following command:
 
+```bash
+node ./scripts/copy-fa-pro-svgs.js
 ```
- node ./scripts/copy-fa-pro-svgs.js
- ```
 
 
 ## References

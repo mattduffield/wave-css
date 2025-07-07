@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Icon Preloading Demo</title>
+  
+  <!-- Method 1: Configure preloading before Wave CSS loads -->
+  <script>
+    console.log('Configuring icon preloading...');
+    window.WcIconConfig = {
+      bundleBaseUrl: '/dist/assets/icon-bundles',
+      // Preload these bundles automatically
+      preloadBundles: ['solid', 'duotone', 'regular']
+    };
+  </script>
+  
+  <!-- Load Wave CSS -->
+  <link rel="stylesheet" href="/dist/wave-css.min.css">
+  <script type="module" src="/dist/wave-css.min.js"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="p-8">
+    <h1 class="text-3xl font-bold mb-6">Icon Preloading Demo</h1>
+    
+    <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <h2 class="text-lg font-semibold text-blue-800 mb-2">HTMX Navigation Fix</h2>
+      <p class="text-blue-700 mb-4">
+        Icons are preloaded on page load, preventing style changes during HTMX navigation.
+      </p>
+      <div id="preload-status" class="text-sm text-blue-600"></div>
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Preloaded Icons</h2>
+      <p class="text-gray-600 mb-4">These icons render instantly without network requests:</p>
+      
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="font-semibold mb-2">Solid Icons</h3>
+          <div class="flex gap-2">
+            <wc-fa-icon name="house" icon-style="solid" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="user" icon-style="solid" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="gear" icon-style="solid" size="2rem"></wc-fa-icon>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="font-semibold mb-2">Duotone Icons</h3>
+          <div class="flex gap-2">
+            <wc-fa-icon name="house" icon-style="duotone" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="user" icon-style="duotone" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="gear" icon-style="duotone" size="2rem"></wc-fa-icon>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="font-semibold mb-2">Regular Icons</h3>
+          <div class="flex gap-2">
+            <wc-fa-icon name="house" icon-style="regular" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="user" icon-style="regular" size="2rem"></wc-fa-icon>
+            <wc-fa-icon name="gear" icon-style="regular" size="2rem"></wc-fa-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Simulated HTMX Content</h2>
+      <p class="text-gray-600 mb-4">Click to load new content with icons:</p>
+      
+      <button id="load-content" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-4">
+        Load New Content
+      </button>
+      
+      <div id="dynamic-content" class="bg-white p-4 rounded-lg shadow min-h-[100px]">
+        <p class="text-gray-500">Click button to load content...</p>
+      </div>
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Alternative: Manual Preloading</h2>
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Method 2: Manually preload after page loads
+document.addEventListener('DOMContentLoaded', async () => {
+  // Preload specific bundles
+  await WcFaIcon.loadBundles([
+    '/dist/assets/icon-bundles/solid-icons.json',
+    '/dist/assets/icon-bundles/duotone-icons.json',
+    '/dist/assets/icon-bundles/regular-icons.json'
+  ]);
+  
+  console.log('Icon bundles preloaded!');
+});
+
+// Method 3: Preload before HTMX navigation
+document.body.addEventListener('htmx:beforeRequest', async (event) => {
+  // Ensure bundles are loaded before new content arrives
+  if (!WcFaIcon.isIconLoaded('house', 'duotone')) {
+    await WcFaIcon.loadBundle('/dist/assets/icon-bundles/duotone-icons.json');
+  }
+});</code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Check preload status
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const stats = WcFaIcon.getBundleStats();
+        document.getElementById('preload-status').textContent = 
+          `✓ Preloaded ${stats.loadedIcons} icons automatically on page load`;
+      }, 500);
+    });
+    
+    // Simulate HTMX content loading
+    document.getElementById('load-content').addEventListener('click', () => {
+      const content = document.getElementById('dynamic-content');
+      
+      // Simulate HTMX replacing content
+      content.innerHTML = `
+        <h3 class="font-semibold mb-2">Dynamically Loaded Content</h3>
+        <p class="text-sm text-gray-600 mb-3">Icons render instantly because bundles are preloaded:</p>
+        <div class="flex gap-4">
+          <div class="text-center">
+            <wc-fa-icon name="file" icon-style="duotone" size="3rem" class="text-blue-500"></wc-fa-icon>
+            <p class="text-xs mt-1">duotone/file</p>
+          </div>
+          <div class="text-center">
+            <wc-fa-icon name="folder" icon-style="duotone" size="3rem" class="text-yellow-500"></wc-fa-icon>
+            <p class="text-xs mt-1">duotone/folder</p>
+          </div>
+          <div class="text-center">
+            <wc-fa-icon name="database" icon-style="duotone" size="3rem" class="text-green-500"></wc-fa-icon>
+            <p class="text-xs mt-1">duotone/database</p>
+          </div>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
