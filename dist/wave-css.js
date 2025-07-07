@@ -3966,7 +3966,13 @@ if (!customElements.get("wc-fa-icon")) {
       }
       try {
         const bundleKey2 = `${iconStyle}/${iconName}`;
-        let iconData = iconBundles.get(bundleKey2) || iconBundles.get(iconName);
+        let iconData = iconBundles.get(bundleKey2);
+        if (!iconData && iconStyle === "duotone") {
+          console.log(`[wc-fa-icon] Looking for duotone icon: ${iconName}`);
+          console.log(`[wc-fa-icon] Loaded bundles:`, Array.from(loadedBundles));
+          console.log(`[wc-fa-icon] Total icons in cache:`, iconBundles.size);
+          console.log(`[wc-fa-icon] Sample keys:`, Array.from(iconBundles.keys()).slice(0, 5));
+        }
         if (!iconData) {
           console.warn(`Icon not found in loaded bundles: ${iconName} (style: ${iconStyle})`);
           console.warn(`Available icons:`, iconBundles.size > 0 ? Array.from(iconBundles.keys()).slice(0, 10) : "No icons loaded");
@@ -4020,13 +4026,14 @@ if (!customElements.get("wc-fa-icon")) {
         }
         const bundle = await response.json();
         let loadedCount = 0;
+        const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
+        const style = match ? match[1] : "unknown";
         for (const [key, iconData] of Object.entries(bundle)) {
-          iconBundles.set(key, iconData);
+          const storeKey = `${style}/${key}`;
+          iconBundles.set(storeKey, iconData);
           loadedCount++;
         }
-        const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
-        if (match) {
-          const style = match[1];
+        if (style !== "unknown") {
           loadedBundles.add(style);
           loadingBundles.delete(style);
         }
@@ -4069,7 +4076,7 @@ if (!customElements.get("wc-fa-icon")) {
     // Static method to check if an icon is loaded
     static isIconLoaded(name, style = "solid") {
       const iconName = WcFaIcon.iconAliases[name] || name;
-      return iconBundles.has(iconName);
+      return iconBundles.has(`${style}/${iconName}`);
     }
     // Static method to preload configured bundles
     static async preloadConfiguredBundles() {

@@ -225,9 +225,17 @@ if (!customElements.get('wc-fa-icon')) {
       }
 
       try {
-        // Try both with and without style prefix for compatibility
+        // Look for icon with style prefix
         const bundleKey = `${iconStyle}/${iconName}`;
-        let iconData = iconBundles.get(bundleKey) || iconBundles.get(iconName);
+        let iconData = iconBundles.get(bundleKey);
+        
+        // Debug: Log what we're looking for
+        if (!iconData && iconStyle === 'duotone') {
+          console.log(`[wc-fa-icon] Looking for duotone icon: ${iconName}`);
+          console.log(`[wc-fa-icon] Loaded bundles:`, Array.from(loadedBundles));
+          console.log(`[wc-fa-icon] Total icons in cache:`, iconBundles.size);
+          console.log(`[wc-fa-icon] Sample keys:`, Array.from(iconBundles.keys()).slice(0, 5));
+        }
 
         if (!iconData) {
           // Icon not found in bundles
@@ -299,18 +307,22 @@ if (!customElements.get('wc-fa-icon')) {
         const bundle = await response.json();
         let loadedCount = 0;
         
-        // Store each icon in the bundle - keys are already just icon names
+        // Store each icon in the bundle
+        // Determine the style from the URL
+        const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
+        const style = match ? match[1] : 'unknown';
+        
         for (const [key, iconData] of Object.entries(bundle)) {
-          iconBundles.set(key, iconData);
+          // Store with style prefix to avoid conflicts between styles
+          const storeKey = `${style}/${key}`;
+          iconBundles.set(storeKey, iconData);
           loadedCount++;
         }
         
         // console.log(`[wc-fa-icon] Loaded ${loadedCount} icons from ${bundleUrl}`);
         
-        // Try to determine the style from the URL and mark it as loaded
-        const match = bundleUrl.match(/\/([^\/]+)-icons\.json$/);
-        if (match) {
-          const style = match[1];
+        // Mark the style as loaded (already determined above)
+        if (style !== 'unknown') {
           loadedBundles.add(style);
           // Also remove from loading if it was there
           loadingBundles.delete(style);
@@ -368,8 +380,8 @@ if (!customElements.get('wc-fa-icon')) {
     // Static method to check if an icon is loaded
     static isIconLoaded(name, style = 'solid') {
       const iconName = WcFaIcon.iconAliases[name] || name;
-      // Check without style prefix to match bundle format
-      return iconBundles.has(iconName);
+      // Check with style prefix
+      return iconBundles.has(`${style}/${iconName}`);
     }
     
     // Static method to preload configured bundles
