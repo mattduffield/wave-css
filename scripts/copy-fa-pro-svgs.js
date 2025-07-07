@@ -175,6 +175,7 @@ const ICONS_TO_COPY = [
   'file-lines',
   'file-invoice',
   'file-invoice-dollar',
+  'file-pdf',
   'folder',
   'folder-open',
   'image',
