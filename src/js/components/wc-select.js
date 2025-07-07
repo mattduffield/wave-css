@@ -437,7 +437,7 @@ class WcSelect extends WcBaseFormComponent {
       wc-select .chip { 
         display: flex; 
         align-items: center; 
-        padding: 0.45rem 0.75rem; 
+        padding: 5px; 
         background-color: var(--primary-bg-color); 
         color: var(--primary-color);
         border-radius: 15px; 
@@ -510,7 +510,7 @@ class WcSelect extends WcBaseFormComponent {
       wc-select select { 
         display: block; 
         width: 100%; 
-        padding: 5px; 
+        padding: 0.45rem 0.75rem;  
       }
       wc-select[mode="multiple"] select { 
         display: block;
