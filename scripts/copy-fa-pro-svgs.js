@@ -92,6 +92,7 @@ const ICONS_TO_COPY = [
   'envelope',
   'envelopes',
   'bell',
+  'ban',
   'check',
   'xmark',
   'magnifying-glass',
