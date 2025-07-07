@@ -387,7 +387,7 @@ if (!customElements.get('wc-fa-icon')) {
     // Static method to preload configured bundles
     static async preloadConfiguredBundles() {
       if (WcIconConfig.preloadBundles && WcIconConfig.preloadBundles.length > 0) {
-        console.log('[wc-fa-icon] Preloading configured bundles:', WcIconConfig.preloadBundles);
+        // console.log('[wc-fa-icon] Preloading configured bundles:', WcIconConfig.preloadBundles);
         
         // Mark bundles as loading to prevent duplicate loads
         const loadPromises = [];
@@ -415,7 +415,7 @@ if (!customElements.get('wc-fa-icon')) {
         
         const results = await Promise.all(loadPromises);
         const totalLoaded = results.reduce((sum, count) => sum + count, 0);
-        console.log(`[wc-fa-icon] Preloaded ${totalLoaded} icons from ${loadPromises.length} bundles`);
+        // console.log(`[wc-fa-icon] Preloaded ${totalLoaded} icons from ${loadPromises.length} bundles`);
         return { totalLoaded, failed: results.filter(c => c === 0).length };
       }
       return { totalLoaded: 0, failed: 0 };
