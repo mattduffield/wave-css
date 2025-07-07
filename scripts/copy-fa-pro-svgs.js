@@ -100,6 +100,7 @@ const ICONS_TO_COPY = [
   'gear',
   'gears',
   'gear-complex',
+  'gift',
   'trash',
   'trash-can',
   'power-off',
