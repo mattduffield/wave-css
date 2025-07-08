@@ -1,0 +1,257 @@
+<div id="page-contents">
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Wave CSS AI Bot Component</h1>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Overview</h2>
+      <p class="text-gray-600 mb-4">
+        The AI Bot component provides an interactive chat interface powered by WebLLM, running AI models directly in the browser. 
+        It supports multiple themes, customizable models, and seamless integration with your application.
+      </p>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>Note:</strong> The first time a model loads, WebLLM will download it (typically 1-2GB). The model is cached in the browser for subsequent uses.</p>
+        <p class="text-sm mt-2"><strong>Download Tips:</strong></p>
+        <ul class="text-sm list-disc list-inside ml-2">
+          <li>Downloads may take 5-15 minutes depending on your connection</li>
+          <li>If download stalls, try refreshing the page</li>
+          <li>Chrome/Edge typically work best for large downloads</li>
+          <li>Keep the browser tab active during download</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Basic Usage</h2>
+      <p class="text-gray-600 mb-4">Click the chat bubble in the bottom-right corner to interact with the AI assistant:</p>
+      
+      <!-- Basic bot example -->
+      <wc-ai-bot 
+        bot-id="demo-basic"
+        title="AI Assistant"
+        placeholder="Ask me anything..."
+        system-prompt="You are a helpful AI assistant. Be concise and friendly in your responses.">
+      </wc-ai-bot>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;wc-ai-bot 
+  bot-id="demo-basic"
+  title="AI Assistant"
+  placeholder="Ask me anything..."
+  system-prompt="You are a helpful AI assistant. Be concise and friendly in your responses."&gt;
+&lt;/wc-ai-bot&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Embedded Bot (Minimal Theme)</h2>
+      <p class="text-gray-600 mb-4">The minimal theme is perfect for embedding the chat interface inline:</p>
+      
+      <div class="border border-gray-300 rounded-lg overflow-hidden" style="height: 500px;">
+        <wc-ai-bot 
+          bot-id="demo-minimal"
+          theme="minimal"
+          title="Embedded Chat"
+          model="Llama-3.2-1B-Instruct-q4f32_1-MLC"
+          system-prompt="You are a helpful assistant embedded in a webpage. Help users understand the Wave CSS framework.">
+        </wc-ai-bot>
+      </div>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;div style="height: 500px;"&gt;
+  &lt;wc-ai-bot 
+    bot-id="demo-minimal"
+    theme="minimal"
+    title="Embedded Chat"
+    model="Llama-3.2-1B-Instruct-q4f32_1-MLC"&gt;
+  &lt;/wc-ai-bot&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Available Models</h2>
+      <p class="text-gray-600 mb-4">WebLLM supports various models. Here are some popular options:</p>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>Tip:</strong> You can check all available models by running <code class="bg-blue-100 px-1 rounded">WcAiBot.getAvailableModels()</code> in the console.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">Llama-3.2-1B-Instruct</h4>
+          <p class="text-sm text-gray-600">Fast, lightweight model (~1GB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Llama-3.2-1B-Instruct-q4f32_1-MLC"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">Llama-3.2-3B-Instruct</h4>
+          <p class="text-sm text-gray-600">Balanced performance (~2GB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Llama-3.2-3B-Instruct-q4f32_1-MLC"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">Phi-3.5-mini</h4>
+          <p class="text-sm text-gray-600">Microsoft's efficient model</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Phi-3.5-mini-instruct-q4f16_1-MLC"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">Gemma-2-2b</h4>
+          <p class="text-sm text-gray-600">Google's Gemma model</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="gemma-2-2b-it-q4f32_1-MLC"</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Customization Options</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-lg font-medium mb-3">Position (Bubble Theme)</h3>
+          <div class="space-y-2">
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+              onclick="document.querySelector('[bot-id=demo-basic]').setAttribute('position', 'bottom-right')">
+              Bottom Right
+            </button>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+              onclick="document.querySelector('[bot-id=demo-basic]').setAttribute('position', 'bottom-left')">
+              Bottom Left
+            </button>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+              onclick="document.querySelector('[bot-id=demo-basic]').setAttribute('position', 'top-right')">
+              Top Right
+            </button>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium mb-3">Model Parameters</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm font-medium">Temperature (0-1):</label>
+              <input type="range" min="0" max="1" step="0.1" value="0.7" class="w-full"
+                onchange="document.querySelector('[bot-id=demo-basic]').setAttribute('temperature', this.value)">
+            </div>
+            <div>
+              <label class="text-sm font-medium">Max Tokens:</label>
+              <input type="number" value="1000" min="100" max="4000" class="px-3 py-1 border rounded"
+                onchange="document.querySelector('[bot-id=demo-basic]').setAttribute('max-tokens', this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">JavaScript API</h2>
+      <p class="text-gray-600 mb-4">Control the bot programmatically:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          onclick="document.querySelector('[bot-id=demo-basic]').sendMessage('Hello! What is Wave CSS?')">
+          Send Test Message
+        </button>
+        <button class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          onclick="document.querySelector('[bot-id=demo-basic]').clearConversation()">
+          Clear Conversation
+        </button>
+        <button class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+          onclick="console.log(document.querySelector('[bot-id=demo-basic]').exportConversation())">
+          Export to Console
+        </button>
+        <button class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+          onclick="document.querySelector('[bot-id=demo-basic]').setContext('You are an expert in web development and CSS.')">
+          Update Context
+        </button>
+      </div>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Get bot reference
+const bot = document.querySelector('[bot-id="demo-basic"]');
+
+// Send a message
+bot.sendMessage("Hello!");
+
+// Clear conversation
+bot.clearConversation();
+
+// Export conversation
+const history = bot.exportConversation();
+
+// Update system context
+bot.setContext("You are an expert in JavaScript.");
+
+// Toggle minimize (bubble theme)
+bot.toggleMinimize();</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Events</h2>
+      <p class="text-gray-600 mb-4">Listen to bot events:</p>
+      
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Bot ready
+document.addEventListener('bot:ready', (e) => {
+  console.log('Bot ready:', e.detail.botId, e.detail.model);
+});
+
+// Message sent
+document.addEventListener('bot:message-sent', (e) => {
+  console.log('User:', e.detail.message);
+});
+
+// Response received
+document.addEventListener('bot:response-received', (e) => {
+  console.log('Bot:', e.detail.response);
+});
+
+// Error handling
+document.addEventListener('bot:error', (e) => {
+  console.error('Error:', e.detail.error);
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Complete Example</h2>
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;!-- Auto-opening support bot with custom styling --&gt;
+&lt;wc-ai-bot 
+  bot-id="support"
+  title="Support Assistant"
+  theme="bubble"
+  position="bottom-right"
+  auto-open="true"
+  model="Llama-3.2-3B-Instruct-q4f32_1-MLC"
+  temperature="0.5"
+  max-tokens="2000"
+  placeholder="How can I help you today?"
+  system-prompt="You are a helpful support agent for a software company. 
+    Be professional, concise, and friendly. Focus on solving user problems."&gt;
+&lt;/wc-ai-bot&gt;
+
+&lt;script&gt;
+  // Listen for when bot is ready
+  document.addEventListener('bot:ready', (e) => {
+    if (e.detail.botId === 'support') {
+      console.log('Support bot is ready!');
+      
+      // Send a welcome message after a delay
+      setTimeout(() => {
+        const bot = document.querySelector('[bot-id="support"]');
+        bot.sendMessage('Welcome! How can I assist you today?');
+      }, 2000);
+    }
+  });
+  
+  // Track user interactions
+  document.addEventListener('bot:message-sent', (e) => {
+    if (e.detail.botId === 'support') {
+      // Analytics tracking
+      console.log('User query:', e.detail.message);
+    }
+  });
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -38,6 +38,7 @@ import './wc-template-preview.js';
 import './wc-theme-selector.js';
 import './wc-timeline.js';
 // import './wc-top-nav.js';
+import './wc-ai-bot.js';
 // Loaders
 import './wc-article-skeleton.js';
 import './wc-card-skeleton.js';

@@ -1,0 +1,245 @@
+<div id="page-contents">
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Company Support Bot Example</h1>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Custom Bot with Company Data</h2>
+      <p class="text-gray-600 mb-4">
+        This example shows how to create a support bot that knows about your company's specific information.
+      </p>
+    </div>
+
+    <!-- Example 1: Basic Company Bot -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Method 1: Using System Prompt</h3>
+      <div class="border border-gray-300 rounded-lg overflow-hidden" style="height: 500px;">
+        <wc-ai-bot 
+          bot-id="company-support"
+          theme="bubble"
+          title="Acme Corp Support"
+          model="Llama-3.2-1B-Instruct-q4f32_1-MLC"
+          placeholder="Ask about our hours, location, services..."
+          system-prompt="You are a helpful support assistant for Acme Corporation. Here is important company information you should know:
+
+COMPANY INFORMATION:
+- Company Name: Acme Corporation
+- Address: 123 Business Blvd, Suite 100, San Francisco, CA 94105
+- Phone: (415) 555-0123
+- Email: support@acmecorp.com
+- Website: www.acmecorp.com
+
+HOURS OF OPERATION:
+- Monday-Friday: 9:00 AM - 6:00 PM PST
+- Saturday: 10:00 AM - 4:00 PM PST
+- Sunday: Closed
+- Holidays: Closed on major US holidays
+
+SERVICES:
+- Web Development
+- Mobile App Development
+- Cloud Solutions
+- IT Consulting
+- 24/7 Emergency Support (for premium clients)
+
+PRICING:
+- Web Development: Starting at $5,000
+- Mobile Apps: Starting at $10,000
+- Consulting: $150/hour
+- Emergency Support: $250/hour
+
+POLICIES:
+- Free consultations for new clients
+- 30-day money-back guarantee
+- 6-month warranty on all development work
+- Response time: 24 hours for standard support, 1 hour for emergency
+
+When answering questions:
+1. Be friendly and professional
+2. Provide accurate information based on the data above
+3. If asked about something not in the data, politely say you'll need to check with the team
+4. Always offer to help with additional questions">
+        </wc-ai-bot>
+      </div>
+    </div>
+
+    <!-- Code Example -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Implementation Code</h3>
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm overflow-x-auto"><code>&lt;wc-ai-bot 
+  bot-id="company-support"
+  title="Acme Corp Support"
+  system-prompt="You are a helpful support assistant for Acme Corporation. 
+Here is important company information you should know:
+
+COMPANY INFORMATION:
+- Company Name: Acme Corporation
+- Address: 123 Business Blvd, Suite 100, San Francisco, CA 94105
+- Phone: (415) 555-0123
+- Email: support@acmecorp.com
+..."&gt;
+&lt;/wc-ai-bot&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- Method 2: Dynamic Data Loading -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Method 2: Dynamic Data Loading</h3>
+      <p class="text-gray-600 mb-4">
+        For more complex scenarios, you can dynamically load company data from JSON or an API:
+      </p>
+      
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm overflow-x-auto"><code>// Example: Loading company data from JSON
+const companyData = {
+  name: "Acme Corporation",
+  address: "123 Business Blvd, Suite 100, San Francisco, CA 94105",
+  phone: "(415) 555-0123",
+  hours: {
+    monday: "9:00 AM - 6:00 PM PST",
+    tuesday: "9:00 AM - 6:00 PM PST",
+    // ... etc
+  },
+  services: [
+    { name: "Web Development", startingPrice: "$5,000" },
+    { name: "Mobile App Development", startingPrice: "$10,000" }
+  ],
+  faqs: [
+    {
+      question: "What are your payment terms?",
+      answer: "We require 50% upfront and 50% on completion."
+    },
+    {
+      question: "Do you offer support after project completion?",
+      answer: "Yes, we offer 6 months of free support and warranty."
+    }
+  ]
+};
+
+// Convert to system prompt
+const systemPrompt = `You are a support assistant for ${companyData.name}.
+Company Details:
+- Address: ${companyData.address}
+- Phone: ${companyData.phone}
+
+Hours of Operation:
+${Object.entries(companyData.hours).map(([day, hours]) => 
+  `- ${day}: ${hours}`
+).join('\n')}
+
+Services:
+${companyData.services.map(s => 
+  `- ${s.name}: Starting at ${s.startingPrice}`
+).join('\n')}
+
+FAQs:
+${companyData.faqs.map(faq => 
+  `Q: ${faq.question}\nA: ${faq.answer}`
+).join('\n\n')}
+
+Answer questions based on this information. Be helpful and professional.`;
+
+// Apply to bot
+const bot = document.querySelector('[bot-id="company-support"]');
+bot.setContext(systemPrompt);</code></pre>
+      </div>
+    </div>
+
+    <!-- Method 3: Database Integration -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Method 3: Real-time Database Integration</h3>
+      <p class="text-gray-600 mb-4">
+        For real-time data, you can update the bot's context periodically or on-demand:
+      </p>
+      
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm overflow-x-auto"><code>// Example: Updating bot with fresh data
+async function updateBotWithLatestData() {
+  // Fetch latest data from your API
+  const response = await fetch('/api/company-info');
+  const data = await response.json();
+  
+  // Build context with current data
+  const context = `You are a support assistant with access to real-time company data.
+  
+Current Inventory:
+${data.inventory.map(item => 
+  `- ${item.name}: ${item.inStock} units available`
+).join('\n')}
+
+Today's Special Offers:
+${data.offers.map(offer => 
+  `- ${offer.description}: ${offer.discount}% off`
+).join('\n')}
+
+Current Wait Time: ${data.supportWaitTime} minutes
+
+Always provide the most current information to customers.`;
+  
+  // Update bot context
+  const bot = document.querySelector('[bot-id="company-support"]');
+  bot.setContext(context);
+}
+
+// Update every 5 minutes
+setInterval(updateBotWithLatestData, 5 * 60 * 1000);
+
+// Update when bot opens
+document.addEventListener('bot:ready', (e) => {
+  if (e.detail.botId === 'company-support') {
+    updateBotWithLatestData();
+  }
+});</code></pre>
+      </div>
+    </div>
+
+    <!-- Best Practices -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Best Practices</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Structure Your Data</h4>
+          <p class="text-sm text-gray-600">
+            Organize information in clear sections (Contact, Hours, Services, Policies) 
+            for better bot comprehension.
+          </p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Include Examples</h4>
+          <p class="text-sm text-gray-600">
+            Add example Q&As in your prompt to guide the bot's response style and accuracy.
+          </p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Set Boundaries</h4>
+          <p class="text-sm text-gray-600">
+            Tell the bot what it should and shouldn't answer, and when to defer to human support.
+          </p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Keep It Updated</h4>
+          <p class="text-sm text-gray-600">
+            For dynamic data like inventory or pricing, implement periodic updates to the context.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Example -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">Try It Out</h3>
+      <p class="text-gray-600 mb-4">
+        Test the company bot above with questions like:
+      </p>
+      <ul class="list-disc list-inside text-gray-600 space-y-1">
+        <li>"What are your business hours?"</li>
+        <li>"Where are you located?"</li>
+        <li>"How much does web development cost?"</li>
+        <li>"Do you offer emergency support?"</li>
+        <li>"What's your refund policy?"</li>
+        <li>"Can I schedule a consultation?"</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
