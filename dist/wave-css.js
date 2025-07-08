@@ -11356,7 +11356,7 @@ if (!customElements.get("wc-ai-bot")) {
       this._input = document.createElement("textarea");
       this._input.className = "wc-ai-bot-input";
       this._input.placeholder = placeholder;
-      this._input.rows = 1;
+      this._input.rows = 2;
       this._sendButton = document.createElement("button");
       this._sendButton.className = "wc-ai-bot-send";
       this._sendButton.innerHTML = '<wc-fa-icon name="paper-plane" icon-style="solid" size="1rem"></wc-fa-icon>';
@@ -11509,8 +11509,9 @@ if (!customElements.get("wc-ai-bot")) {
         /* Input container */
         .wc-ai-bot-input-container {
           display: flex;
+          align-items: center;
           gap: 0.5rem;
-          padding: 1rem;
+          padding: 1rem 0 1rem 1rem;
           border-top: 1px solid var(--border-color);
           background: var(--component-bg-color);
         }
@@ -11526,7 +11527,7 @@ if (!customElements.get("wc-ai-bot")) {
           font-family: inherit;
           font-size: 0.875rem;
           line-height: 1.25rem;
-          min-height: 2.5rem;
+          min-height: 3.5rem;
           max-height: 120px;
         }
 
@@ -11549,6 +11550,9 @@ if (!customElements.get("wc-ai-bot")) {
           display: flex;
           align-items: center;
           justify-content: center;
+          align-self: center;
+          flex-shrink: 0;
+          height: 2.5rem;
         }
 
         .wc-ai-bot-send:hover:not(:disabled) {
