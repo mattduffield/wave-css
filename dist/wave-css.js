@@ -11312,9 +11312,31 @@ if (!customElements.get("wc-ai-bot")) {
         "debug",
         "min-memory-gb",
         "auto-detect-memory",
-        "required-performance"
+        "required-performance",
+        "force-enable"
       ];
     }
+    // Known hardware configurations
+    static KNOWN_CAPABLE_CONFIGS = [
+      // Apple Silicon - excellent WebLLM support
+      { gpu: /Apple M[1-4]/, capability: "high", name: "Apple Silicon" },
+      // High-end NVIDIA GPUs (RTX 30/40 series)
+      { gpu: /RTX [34]0[6-9]0/, capability: "high", name: "NVIDIA RTX High-end" },
+      { gpu: /RTX [34]0[7-8]0/, capability: "high", name: "NVIDIA RTX High-end" },
+      // Mid-range NVIDIA GPUs
+      { gpu: /RTX [34]0[5-6]0/, capability: "medium", name: "NVIDIA RTX Mid-range" },
+      { gpu: /RTX 20[7-8]0/, capability: "medium", name: "NVIDIA RTX 20 Series" },
+      { gpu: /GTX 16[6-8]0/, capability: "low", name: "NVIDIA GTX 16 Series" },
+      // AMD GPUs (limited WebGPU support)
+      { gpu: /Radeon RX 6[7-9]00/, capability: "medium", name: "AMD Radeon RX 6000" },
+      { gpu: /Radeon RX 7[7-9]00/, capability: "medium", name: "AMD Radeon RX 7000" },
+      // Known problematic hardware
+      { gpu: /Intel.*HD Graphics/, capability: "none", name: "Intel HD Graphics" },
+      { gpu: /Intel.*UHD Graphics/, capability: "none", name: "Intel UHD Graphics" },
+      { gpu: /Intel.*Iris/, capability: "low", name: "Intel Iris" },
+      { gpu: /Radeon Vega/, capability: "low", name: "AMD Radeon Vega" },
+      { gpu: /GeForce MX/, capability: "none", name: "NVIDIA GeForce MX" }
+    ];
     constructor() {
       super();
       this._messages = [];
@@ -11837,7 +11859,20 @@ if (!customElements.get("wc-ai-bot")) {
       }
     }
     async _initializeModel() {
-      const modelName = this.getAttribute("model") || "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+      let modelName = this.getAttribute("model");
+      if (!modelName && this._detectedCapability) {
+        if (this._detectedCapability === "high" || this._detectedCapability === "medium") {
+          modelName = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
+        } else {
+          modelName = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+        }
+        if (this.getAttribute("debug") === "true") {
+          console.log(`[wc-ai-bot] Auto-selected model ${modelName} based on ${this._detectedCapability} capability`);
+        }
+      }
+      if (!modelName) {
+        modelName = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+      }
       const botId = this.getAttribute("bot-id") || "default";
       try {
         this._updateStatus("Initializing AI model...");
@@ -11871,11 +11906,15 @@ if (!customElements.get("wc-ai-bot")) {
         this._sendButton.disabled = false;
         this._updateStatus("");
         this._emitEvent("bot:ready", { botId, model: modelName });
+        localStorage.setItem("wc-ai-bot-success", "true");
       } catch (error) {
         console.error("[wc-ai-bot] Failed to initialize model:", error);
         this._error = error.message;
         this._updateStatus(`Error: ${error.message}`, "error");
         this._emitEvent("bot:error", { botId, error: error.message });
+        if (this.getAttribute("force-enable") !== "true") {
+          localStorage.setItem("wc-ai-bot-failure", "true");
+        }
       }
     }
     async _loadModel(modelName) {
@@ -12137,7 +12176,16 @@ if (!customElements.get("wc-ai-bot")) {
     }
     async _checkSystemCapabilities() {
       try {
-        const startTime = performance.now();
+        if (this.getAttribute("force-enable") === "true") {
+          console.warn("[wc-ai-bot] Force-enabled, skipping capability checks");
+          return true;
+        }
+        const previousSuccess = localStorage.getItem("wc-ai-bot-success");
+        const previousFailure = localStorage.getItem("wc-ai-bot-failure");
+        if (previousFailure === "true" && previousSuccess !== "true") {
+          this._unsupportedReason = 'AI models previously failed to load on this device. Use force-enable="true" to retry.';
+          return false;
+        }
         const hasWebGPU = "gpu" in navigator;
         const canvas = document.createElement("canvas");
         const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
@@ -12146,113 +12194,55 @@ if (!customElements.get("wc-ai-bot")) {
           this._unsupportedReason = "WebGPU and WebGL are not available. A modern browser with GPU support is required.";
           return false;
         }
-        const performanceScore = await this._runPerformanceTest();
-        const requiredPerformance = this.getAttribute("required-performance") || "medium";
-        const thresholds = {
-          low: 50,
-          // Basic models only
-          medium: 100,
-          // Standard models
-          high: 200
-          // Large models
-        };
-        const threshold = thresholds[requiredPerformance] || thresholds.medium;
-        if (performanceScore < threshold) {
-          this._unsupportedReason = `Your system's performance score (${performanceScore}) is below the required threshold (${threshold}). This may result in slow performance or browser crashes.`;
-          return false;
+        let renderer = "unknown";
+        if (gl) {
+          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+          if (debugInfo) {
+            renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          }
+        }
+        let detectedConfig = null;
+        for (const config of WcAiBot.KNOWN_CAPABLE_CONFIGS) {
+          if (config.gpu.test(renderer)) {
+            detectedConfig = config;
+            break;
+          }
         }
         if (this.getAttribute("debug") === "true") {
-          console.log("[wc-ai-bot] System capabilities:", {
+          console.log("[wc-ai-bot] Hardware detection:", {
+            renderer,
+            detectedConfig,
             hasWebGPU,
             hasWebGL,
-            performanceScore,
-            requiredThreshold: threshold,
-            testDuration: performance.now() - startTime
+            previousSuccess,
+            previousFailure
           });
         }
-        return true;
+        if (detectedConfig) {
+          if (detectedConfig.capability === "none") {
+            this._unsupportedReason = `${detectedConfig.name} is not capable of running AI models efficiently. This would cause your browser to freeze.`;
+            return false;
+          }
+          if (detectedConfig.capability === "low") {
+            const requiredPerformance = this.getAttribute("required-performance") || "low";
+            if (requiredPerformance !== "low") {
+              this._unsupportedReason = `${detectedConfig.name} can only run small AI models. Set required-performance="low" to proceed.`;
+              return false;
+            }
+          }
+          this._detectedCapability = detectedConfig.capability;
+          return true;
+        }
+        if (previousSuccess === "true") {
+          return true;
+        }
+        this._unsupportedReason = `Unable to verify GPU compatibility (${renderer}). To protect your browsing experience, AI models are disabled. Add force-enable="true" to try anyway.`;
+        return false;
       } catch (error) {
         console.error("[wc-ai-bot] Error checking system capabilities:", error);
-        const deviceMemory = navigator.deviceMemory || 0;
-        const minMemoryGB = parseFloat(this.getAttribute("min-memory-gb") || "4");
-        if (deviceMemory > 0 && deviceMemory < Math.min(minMemoryGB, 8)) {
-          this._unsupportedReason = `Your device reports ${deviceMemory}GB of memory. At least ${minMemoryGB}GB is recommended.`;
-          return false;
-        }
-        return true;
+        this._unsupportedReason = "Error detecting system capabilities. AI models are disabled for safety.";
+        return false;
       }
-    }
-    async _runPerformanceTest() {
-      const scores = [];
-      try {
-        const memStart = performance.now();
-        const testSize = 10 * 1024 * 1024;
-        const arr = new Float32Array(testSize);
-        for (let i = 0; i < testSize; i += 1e3) {
-          arr[i] = Math.sin(i) * Math.cos(i);
-        }
-        const memTime = performance.now() - memStart;
-        scores.push(Math.max(0, 200 - memTime));
-      } catch (e) {
-        scores.push(0);
-      }
-      const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-      if (gl) {
-        try {
-          const glStart = performance.now();
-          canvas.width = 1024;
-          canvas.height = 1024;
-          const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-          gl.shaderSource(vertexShader, `
-            attribute vec2 position;
-            void main() {
-              gl_Position = vec4(position, 0.0, 1.0);
-            }
-          `);
-          gl.compileShader(vertexShader);
-          const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-          gl.shaderSource(fragmentShader, `
-            precision mediump float;
-            void main() {
-              gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-            }
-          `);
-          gl.compileShader(fragmentShader);
-          const program = gl.createProgram();
-          gl.attachShader(program, vertexShader);
-          gl.attachShader(program, fragmentShader);
-          gl.linkProgram(program);
-          gl.useProgram(program);
-          for (let i = 0; i < 10; i++) {
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.drawArrays(gl.TRIANGLES, 0, 3);
-          }
-          const glTime = performance.now() - glStart;
-          scores.push(Math.max(0, 200 - glTime));
-        } catch (e) {
-          scores.push(50);
-        }
-      } else {
-        scores.push(50);
-      }
-      const cpuStart = performance.now();
-      let result = 0;
-      for (let i = 0; i < 1e6; i++) {
-        result += Math.sqrt(i) * Math.sin(i);
-      }
-      const cpuTime = performance.now() - cpuStart;
-      scores.push(Math.max(0, 200 - cpuTime));
-      const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-      if (this.getAttribute("debug") === "true") {
-        console.log("[wc-ai-bot] Performance test scores:", {
-          memory: scores[0],
-          webgl: scores[1],
-          cpu: scores[2],
-          average: avgScore
-        });
-      }
-      return avgScore;
     }
     _renderUnsupportedUI() {
       this._isUnsupported = true;
@@ -12288,8 +12278,10 @@ if (!customElements.get("wc-ai-bot")) {
         reason: this._unsupportedReason
       });
     }
-    static async checkSystemSupport(requiredPerformance = "medium") {
+    static async checkSystemSupport() {
       try {
+        const previousSuccess = localStorage.getItem("wc-ai-bot-success") === "true";
+        const previousFailure = localStorage.getItem("wc-ai-bot-failure") === "true";
         const hasWebGPU = "gpu" in navigator;
         const canvas = document.createElement("canvas");
         const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
@@ -12302,29 +12294,62 @@ if (!customElements.get("wc-ai-bot")) {
             hasWebGL
           };
         }
-        const tempBot = new WcAiBot();
-        const performanceScore = await tempBot._runPerformanceTest();
-        const thresholds = {
-          low: 50,
-          medium: 100,
-          high: 200
-        };
-        const threshold = thresholds[requiredPerformance] || thresholds.medium;
-        const supported = performanceScore >= threshold;
-        return {
-          supported,
-          performanceScore,
-          requiredThreshold: threshold,
+        let renderer = "unknown";
+        if (gl) {
+          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+          if (debugInfo) {
+            renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          }
+        }
+        let detectedConfig = null;
+        for (const config of WcAiBot.KNOWN_CAPABLE_CONFIGS) {
+          if (config.gpu.test(renderer)) {
+            detectedConfig = config;
+            break;
+          }
+        }
+        const result = {
+          renderer,
           hasWebGPU,
           hasWebGL,
-          recommendation: performanceScore < 50 ? "This device may struggle with AI models" : performanceScore < 100 ? "Suitable for small AI models only" : performanceScore < 200 ? "Suitable for most AI models" : "Excellent performance for AI models"
+          previousSuccess,
+          previousFailure
         };
+        if (detectedConfig) {
+          result.hardware = detectedConfig.name;
+          result.capability = detectedConfig.capability;
+          result.supported = detectedConfig.capability !== "none";
+          if (detectedConfig.capability === "high") {
+            result.recommendation = "Excellent hardware for AI models. Can run large models smoothly.";
+            result.suggestedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
+          } else if (detectedConfig.capability === "medium") {
+            result.recommendation = "Good hardware for AI models. Suitable for medium-sized models.";
+            result.suggestedModel = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
+          } else if (detectedConfig.capability === "low") {
+            result.recommendation = "Limited hardware. Only small AI models recommended.";
+            result.suggestedModel = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+          } else {
+            result.recommendation = "This hardware cannot run AI models efficiently.";
+            result.suggestedModel = null;
+          }
+        } else {
+          result.hardware = "Unknown";
+          result.capability = "unknown";
+          result.supported = previousSuccess && !previousFailure;
+          result.recommendation = previousSuccess ? "This hardware has successfully run AI models before." : 'Unknown hardware. Use force-enable="true" to try at your own risk.';
+        }
+        return result;
       } catch (error) {
         return {
-          supported: true,
-          error: error.message
+          supported: false,
+          error: error.message,
+          recommendation: "Error detecting hardware capabilities."
         };
       }
+    }
+    static clearStoredPreferences() {
+      localStorage.removeItem("wc-ai-bot-success");
+      localStorage.removeItem("wc-ai-bot-failure");
     }
   }
   customElements.define(WcAiBot.is, WcAiBot);
