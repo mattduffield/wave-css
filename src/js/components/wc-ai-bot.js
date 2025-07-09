@@ -21,7 +21,10 @@ if (!customElements.get('wc-ai-bot')) {
         'max-height',
         'temperature',
         'max-tokens',
-        'debug'
+        'debug',
+        'min-memory-gb',
+        'auto-detect-memory',
+        'required-performance'
       ];
     }
 
@@ -36,6 +39,8 @@ if (!customElements.get('wc-ai-bot')) {
       this._error = null;
       this._engine = null;
       this._modelProgress = 0;
+      this._isUnsupported = false;
+      this._unsupportedReason = '';
       
       // Bind methods
       this._handleSend = this._handleSend.bind(this);
@@ -50,6 +55,14 @@ if (!customElements.get('wc-ai-bot')) {
 
     async _render() {
       this.classList.add('contents');
+      
+      // Check system capabilities before rendering
+      const autoDetect = this.getAttribute('auto-detect-memory') !== 'false';
+      if (autoDetect && !(await this._checkSystemCapabilities())) {
+        // System doesn't meet requirements - render minimal fallback UI
+        this._renderUnsupportedUI();
+        return;
+      }
       
       const title = this.getAttribute('title') || 'AI Assistant';
       const placeholder = this.getAttribute('placeholder') || 'Type your message...';
@@ -515,6 +528,42 @@ if (!customElements.get('wc-ai-bot')) {
             max-height: 500px;
           }
         }
+
+        /* Unsupported UI */
+        .wc-ai-bot-container--unsupported {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 300px;
+        }
+
+        .wc-ai-bot-unsupported {
+          text-align: center;
+          padding: 2rem;
+          max-width: 400px;
+        }
+
+        .wc-ai-bot-unsupported-icon {
+          color: var(--warning-color, #f59e0b);
+          margin-bottom: 1rem;
+        }
+
+        .wc-ai-bot-unsupported-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+          color: var(--color);
+        }
+
+        .wc-ai-bot-unsupported-message {
+          color: var(--muted-color);
+          margin-bottom: 1rem;
+        }
+
+        .wc-ai-bot-unsupported-help {
+          font-size: 0.875rem;
+          color: var(--muted-color);
+        }
       `.trim();
       
       this.loadStyle('wc-ai-bot-style', style);
@@ -946,6 +995,252 @@ if (!customElements.get('wc-ai-bot')) {
     toggleMinimize() {
       if (this.getAttribute('theme') === 'bubble') {
         this._handleToggle();
+      }
+    }
+
+    async _checkSystemCapabilities() {
+      try {
+        const startTime = performance.now();
+        
+        // Check if WebGPU is available (preferred for WebLLM)
+        const hasWebGPU = 'gpu' in navigator;
+        
+        // Check WebGL as fallback
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        const hasWebGL = !!gl;
+        
+        if (!hasWebGPU && !hasWebGL) {
+          this._unsupportedReason = 'WebGPU and WebGL are not available. A modern browser with GPU support is required.';
+          return false;
+        }
+        
+        // Perform actual performance tests
+        const performanceScore = await this._runPerformanceTest();
+        
+        // Get performance threshold (default: medium)
+        const requiredPerformance = this.getAttribute('required-performance') || 'medium';
+        const thresholds = {
+          low: 50,     // Basic models only
+          medium: 100, // Standard models
+          high: 200    // Large models
+        };
+        
+        const threshold = thresholds[requiredPerformance] || thresholds.medium;
+        
+        if (performanceScore < threshold) {
+          this._unsupportedReason = `Your system's performance score (${performanceScore}) is below the required threshold (${threshold}). This may result in slow performance or browser crashes.`;
+          return false;
+        }
+        
+        // Log capabilities
+        if (this.getAttribute('debug') === 'true') {
+          console.log('[wc-ai-bot] System capabilities:', {
+            hasWebGPU,
+            hasWebGL,
+            performanceScore,
+            requiredThreshold: threshold,
+            testDuration: performance.now() - startTime
+          });
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('[wc-ai-bot] Error checking system capabilities:', error);
+        // If performance test fails, check basic memory as fallback
+        const deviceMemory = navigator.deviceMemory || 0;
+        const minMemoryGB = parseFloat(this.getAttribute('min-memory-gb') || '4');
+        
+        if (deviceMemory > 0 && deviceMemory < Math.min(minMemoryGB, 8)) {
+          this._unsupportedReason = `Your device reports ${deviceMemory}GB of memory. At least ${minMemoryGB}GB is recommended.`;
+          return false;
+        }
+        
+        return true; // Allow to proceed if detection fails
+      }
+    }
+
+    async _runPerformanceTest() {
+      const scores = [];
+      
+      // Test 1: Array allocation and manipulation (tests available memory)
+      try {
+        const memStart = performance.now();
+        const testSize = 10 * 1024 * 1024; // 10MB of numbers
+        const arr = new Float32Array(testSize);
+        
+        // Fill array with calculations
+        for (let i = 0; i < testSize; i += 1000) {
+          arr[i] = Math.sin(i) * Math.cos(i);
+        }
+        
+        const memTime = performance.now() - memStart;
+        scores.push(Math.max(0, 200 - memTime)); // Lower time = higher score
+      } catch (e) {
+        scores.push(0); // Out of memory
+      }
+      
+      // Test 2: WebGL performance (if available)
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      
+      if (gl) {
+        try {
+          const glStart = performance.now();
+          canvas.width = 1024;
+          canvas.height = 1024;
+          
+          // Create a simple shader program
+          const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+          gl.shaderSource(vertexShader, `
+            attribute vec2 position;
+            void main() {
+              gl_Position = vec4(position, 0.0, 1.0);
+            }
+          `);
+          gl.compileShader(vertexShader);
+          
+          const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+          gl.shaderSource(fragmentShader, `
+            precision mediump float;
+            void main() {
+              gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            }
+          `);
+          gl.compileShader(fragmentShader);
+          
+          const program = gl.createProgram();
+          gl.attachShader(program, vertexShader);
+          gl.attachShader(program, fragmentShader);
+          gl.linkProgram(program);
+          gl.useProgram(program);
+          
+          // Render a few frames
+          for (let i = 0; i < 10; i++) {
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+          }
+          
+          const glTime = performance.now() - glStart;
+          scores.push(Math.max(0, 200 - glTime));
+        } catch (e) {
+          scores.push(50); // WebGL error but not critical
+        }
+      } else {
+        scores.push(50); // No WebGL
+      }
+      
+      // Test 3: CPU performance
+      const cpuStart = performance.now();
+      let result = 0;
+      for (let i = 0; i < 1000000; i++) {
+        result += Math.sqrt(i) * Math.sin(i);
+      }
+      const cpuTime = performance.now() - cpuStart;
+      scores.push(Math.max(0, 200 - cpuTime));
+      
+      // Return average score
+      const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      
+      if (this.getAttribute('debug') === 'true') {
+        console.log('[wc-ai-bot] Performance test scores:', {
+          memory: scores[0],
+          webgl: scores[1],
+          cpu: scores[2],
+          average: avgScore
+        });
+      }
+      
+      return avgScore;
+    }
+
+    _renderUnsupportedUI() {
+      this._isUnsupported = true;
+      
+      const theme = this.getAttribute('theme') || 'bubble';
+      const title = this.getAttribute('title') || 'AI Assistant';
+      
+      // For bubble theme, don't show anything
+      if (theme === 'bubble') {
+        this.style.display = 'none';
+        this._emitEvent('bot:unsupported', { 
+          botId: this.getAttribute('bot-id'),
+          reason: this._unsupportedReason
+        });
+        return;
+      }
+      
+      // For embedded themes, show a message
+      this._container = document.createElement('div');
+      this._container.className = 'wc-ai-bot-container wc-ai-bot-container--unsupported';
+      this._container.innerHTML = `
+        <div class="wc-ai-bot-unsupported">
+          <div class="wc-ai-bot-unsupported-icon">
+            <wc-fa-icon name="triangle-exclamation" icon-style="solid" size="2rem"></wc-fa-icon>
+          </div>
+          <h3 class="wc-ai-bot-unsupported-title">${title} Unavailable</h3>
+          <p class="wc-ai-bot-unsupported-message">${this._unsupportedReason}</p>
+          <p class="wc-ai-bot-unsupported-help">
+            For the best experience, please use a modern browser on a device with at least 
+            ${this.getAttribute('min-memory-gb') || '4'}GB of memory.
+          </p>
+        </div>
+      `;
+      
+      this.appendChild(this._container);
+      this._applyStyles();
+      
+      this._emitEvent('bot:unsupported', { 
+        botId: this.getAttribute('bot-id'),
+        reason: this._unsupportedReason
+      });
+    }
+
+    static async checkSystemSupport(requiredPerformance = 'medium') {
+      try {
+        const hasWebGPU = 'gpu' in navigator;
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        const hasWebGL = !!gl;
+        
+        if (!hasWebGPU && !hasWebGL) {
+          return {
+            supported: false,
+            reason: 'No WebGPU or WebGL support',
+            hasWebGPU,
+            hasWebGL
+          };
+        }
+        
+        // Create temporary instance to use performance test
+        const tempBot = new WcAiBot();
+        const performanceScore = await tempBot._runPerformanceTest();
+        
+        const thresholds = {
+          low: 50,
+          medium: 100,
+          high: 200
+        };
+        
+        const threshold = thresholds[requiredPerformance] || thresholds.medium;
+        const supported = performanceScore >= threshold;
+        
+        return {
+          supported,
+          performanceScore,
+          requiredThreshold: threshold,
+          hasWebGPU,
+          hasWebGL,
+          recommendation: performanceScore < 50 ? 'This device may struggle with AI models' :
+                         performanceScore < 100 ? 'Suitable for small AI models only' :
+                         performanceScore < 200 ? 'Suitable for most AI models' :
+                         'Excellent performance for AI models'
+        };
+      } catch (error) {
+        return {
+          supported: true,
+          error: error.message
+        };
       }
     }
   }

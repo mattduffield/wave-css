@@ -18,6 +18,9 @@
           <li>Keep the browser tab active during download</li>
         </ul>
       </div>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>System Requirements:</strong> AI models require at least 4GB of RAM and WebGPU/WebGL support. The component automatically detects system capabilities and will not load on unsupported devices.</p>
+      </div>
     </div>
 
     <div class="mb-8">
@@ -29,7 +32,9 @@
         bot-id="demo-basic"
         title="AI Assistant"
         placeholder="Ask me anything..."
-        system-prompt="You are a helpful AI assistant. Be concise and friendly in your responses.">
+        system-prompt="You are a helpful AI assistant. Be concise and friendly in your responses."
+        auto-detect-memory="true"
+        required-performance="medium">
       </wc-ai-bot>
 
       <div class="mt-4 bg-gray-100 p-4 rounded-lg">
@@ -52,7 +57,9 @@
           theme="minimal"
           title="Embedded Chat"
           model="Llama-3.2-1B-Instruct-q4f32_1-MLC"
-          system-prompt="You are a helpful assistant embedded in a webpage. Help users understand the Wave CSS framework.">
+          system-prompt="You are a helpful assistant embedded in a webpage. Help users understand the Wave CSS framework."
+          auto-detect-memory="true"
+          required-performance="low">
         </wc-ai-bot>
       </div>
 
@@ -184,6 +191,66 @@ bot.toggleMinimize();</code></pre>
     </div>
 
     <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">System Requirements & Performance Detection</h2>
+      <p class="text-gray-600 mb-4">The AI Bot component performs real-time performance tests to ensure the user's system can handle AI models without degrading their experience:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Performance Levels</h4>
+          <ul class="text-sm text-gray-600">
+            <li><code class="bg-gray-100 px-1 rounded">low</code> - Basic models (1B params)</li>
+            <li><code class="bg-gray-100 px-1 rounded">medium</code> - Standard models (3B params)</li>
+            <li><code class="bg-gray-100 px-1 rounded">high</code> - Large models (7B+ params)</li>
+          </ul>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Auto-Detection (Default)</h4>
+          <p class="text-sm text-gray-600 mb-2">Runs performance tests on load</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">auto-detect-memory="true"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2">Performance Requirement</h4>
+          <p class="text-sm text-gray-600 mb-2">Set required performance level</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">required-performance="medium"</code>
+        </div>
+      </div>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>How it works:</strong> The component runs quick performance tests that measure:</p>
+        <ul class="text-sm list-disc list-inside ml-2">
+          <li>Memory allocation capability (can the browser allocate large arrays?)</li>
+          <li>WebGL/GPU performance (shader compilation and rendering speed)</li>
+          <li>CPU performance (mathematical computations)</li>
+        </ul>
+        <p class="text-sm mt-2">These tests complete in under 500ms and provide a reliable performance score.</p>
+      </div>
+      
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Check system support before showing bot
+const support = await WcAiBot.checkSystemSupport('medium'); // medium performance required
+console.log('Performance score:', support.performanceScore);
+console.log('Recommendation:', support.recommendation);
+
+if (support.supported) {
+  // Show bot with appropriate model based on performance
+  const model = support.performanceScore > 150 ? 
+    'Llama-3.2-3B-Instruct-q4f32_1-MLC' : 
+    'Llama-3.2-1B-Instruct-q4f32_1-MLC';
+    
+  document.querySelector('#bot-container').innerHTML = `
+    &lt;wc-ai-bot 
+      bot-id="my-bot"
+      model="${model}"
+      required-performance="${support.performanceScore > 150 ? 'medium' : 'low'}"&gt;
+    &lt;/wc-ai-bot&gt;`;
+} else {
+  // Show alternative UI or fallback to server-based chat
+  console.log('System performance too low:', support);
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-4">Events</h2>
       <p class="text-gray-600 mb-4">Listen to bot events:</p>
       
@@ -201,6 +268,11 @@ document.addEventListener('bot:message-sent', (e) => {
 // Response received
 document.addEventListener('bot:response-received', (e) => {
   console.log('Bot:', e.detail.response);
+});
+
+// System unsupported
+document.addEventListener('bot:unsupported', (e) => {
+  console.log('Bot unsupported:', e.detail.reason);
 });
 
 // Error handling
