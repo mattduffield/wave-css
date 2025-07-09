@@ -3,6 +3,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-ai-bot')) {
   // Global WebLLM management
   let webllmModule = null;
+  let markedModule = null;
   const loadedModels = new Map(); // Share models between bot instances
   const modelLoadingPromises = new Map(); // Prevent duplicate model loads
   
@@ -19,7 +20,8 @@ if (!customElements.get('wc-ai-bot')) {
         'auto-open',
         'max-height',
         'temperature',
-        'max-tokens'
+        'max-tokens',
+        'debug'
       ];
     }
 
@@ -139,6 +141,17 @@ if (!customElements.get('wc-ai-bot')) {
       // Initialize model
       await this._initializeModel();
       
+      // Load marked for markdown parsing
+      if (!markedModule) {
+        try {
+          const module = await import('https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js');
+          markedModule = module;
+          console.log('[wc-ai-bot] Marked module loaded successfully');
+        } catch (error) {
+          console.error('[wc-ai-bot] Failed to load marked module:', error);
+        }
+      }
+      
       // Auto-open if specified
       if (this.getAttribute('auto-open') === 'true') {
         this._isMinimized = false;
@@ -233,6 +246,7 @@ if (!customElements.get('wc-ai-bot')) {
           padding: 0.75rem;
           border-radius: 0.5rem;
           word-wrap: break-word;
+          white-space: pre-wrap;
         }
 
         .wc-ai-bot-message--user .wc-ai-bot-message-bubble {
@@ -243,6 +257,45 @@ if (!customElements.get('wc-ai-bot')) {
         .wc-ai-bot-message--bot .wc-ai-bot-message-bubble {
           background: var(--primary-bg-color);
           color: var(--primary-color);
+        }
+
+        /* Markdown content styling */
+        .wc-ai-bot-message-bubble p {
+          margin: 0 0 0.5rem 0;
+        }
+        
+        .wc-ai-bot-message-bubble p:last-child {
+          margin-bottom: 0;
+        }
+        
+        .wc-ai-bot-message-bubble ul,
+        .wc-ai-bot-message-bubble ol {
+          margin: 0 0 0.5rem 0;
+          padding-left: 1.5rem;
+        }
+        
+        .wc-ai-bot-message-bubble li {
+          margin-bottom: 0.25rem;
+        }
+        
+        .wc-ai-bot-message-bubble pre {
+          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          padding: 0.5rem;
+          border-radius: 0.25rem;
+          overflow-x: auto;
+          margin: 0.5rem 0;
+        }
+        
+        .wc-ai-bot-message-bubble code {
+          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.125rem;
+          font-size: 0.875em;
+        }
+        
+        .wc-ai-bot-message-bubble pre code {
+          background: none;
+          padding: 0;
         }
 
         /* Transparent background for loading bubbles */
@@ -693,6 +746,11 @@ if (!customElements.get('wc-ai-bot')) {
           this._updateMessage(loadingId, response);
         }
         
+        // Log raw response to console if debug mode is enabled
+        if (this.getAttribute('debug') === 'true') {
+          console.log('[wc-ai-bot] Raw LLM response:', response);
+        }
+        
         // Emit response received event
         this._emitEvent('bot:response-received', { botId, response });
         
@@ -748,7 +806,16 @@ if (!customElements.get('wc-ai-bot')) {
         bubbleEl.classList.add('wc-ai-bot-message-bubble--loading');
         bubbleEl.innerHTML = '<wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>';
       } else {
-        bubbleEl.textContent = content;
+        // Use markdown for bot messages, plain text for user messages
+        if (role === 'bot' && markedModule && markedModule.marked) {
+          const html = markedModule.marked.parse(content);
+          bubbleEl.innerHTML = html;
+          if (this.getAttribute('debug') === 'true') {
+            console.log('[wc-ai-bot] Parsed HTML:', html);
+          }
+        } else {
+          bubbleEl.textContent = content;
+        }
       }
       
       messageEl.appendChild(bubbleEl);
@@ -765,7 +832,19 @@ if (!customElements.get('wc-ai-bot')) {
       if (messageEl) {
         const bubbleEl = messageEl.querySelector('.wc-ai-bot-message-bubble');
         if (bubbleEl) {
-          bubbleEl.textContent = content;
+          // Remove loading class when updating content
+          bubbleEl.classList.remove('wc-ai-bot-message-bubble--loading');
+          
+          // Use markdown parser for bot messages
+          if (markedModule && markedModule.marked) {
+            const html = markedModule.marked.parse(content);
+            bubbleEl.innerHTML = html;
+            if (this.getAttribute('debug') === 'true') {
+              console.log('[wc-ai-bot] Updated HTML:', html);
+            }
+          } else {
+            bubbleEl.textContent = content;
+          }
         }
       }
       
@@ -792,6 +871,7 @@ if (!customElements.get('wc-ai-bot')) {
       this._input.style.height = 'auto';
       this._input.style.height = Math.min(this._input.scrollHeight, 120) + 'px';
     }
+
 
     _getWelcomeMessage() {
       const title = this.getAttribute('title') || 'AI Assistant';

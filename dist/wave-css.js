@@ -11292,6 +11292,7 @@ customElements.define("wc-timeline", WcTimeline);
 // src/js/components/wc-ai-bot.js
 if (!customElements.get("wc-ai-bot")) {
   let webllmModule = null;
+  let markedModule = null;
   const loadedModels = /* @__PURE__ */ new Map();
   const modelLoadingPromises = /* @__PURE__ */ new Map();
   class WcAiBot extends WcBaseComponent {
@@ -11307,7 +11308,8 @@ if (!customElements.get("wc-ai-bot")) {
         "auto-open",
         "max-height",
         "temperature",
-        "max-tokens"
+        "max-tokens",
+        "debug"
       ];
     }
     constructor() {
@@ -11392,6 +11394,15 @@ if (!customElements.get("wc-ai-bot")) {
       const closeBtn = this._container.querySelector(".wc-ai-bot-close");
       if (closeBtn) closeBtn.addEventListener("click", this._handleClose);
       await this._initializeModel();
+      if (!markedModule) {
+        try {
+          const module = await import("https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js");
+          markedModule = module;
+          console.log("[wc-ai-bot] Marked module loaded successfully");
+        } catch (error) {
+          console.error("[wc-ai-bot] Failed to load marked module:", error);
+        }
+      }
       if (this.getAttribute("auto-open") === "true") {
         this._isMinimized = false;
         this.classList.add("wc-ai-bot--open");
@@ -11482,6 +11493,7 @@ if (!customElements.get("wc-ai-bot")) {
           padding: 0.75rem;
           border-radius: 0.5rem;
           word-wrap: break-word;
+          white-space: pre-wrap;
         }
 
         .wc-ai-bot-message--user .wc-ai-bot-message-bubble {
@@ -11492,6 +11504,45 @@ if (!customElements.get("wc-ai-bot")) {
         .wc-ai-bot-message--bot .wc-ai-bot-message-bubble {
           background: var(--primary-bg-color);
           color: var(--primary-color);
+        }
+
+        /* Markdown content styling */
+        .wc-ai-bot-message-bubble p {
+          margin: 0 0 0.5rem 0;
+        }
+        
+        .wc-ai-bot-message-bubble p:last-child {
+          margin-bottom: 0;
+        }
+        
+        .wc-ai-bot-message-bubble ul,
+        .wc-ai-bot-message-bubble ol {
+          margin: 0 0 0.5rem 0;
+          padding-left: 1.5rem;
+        }
+        
+        .wc-ai-bot-message-bubble li {
+          margin-bottom: 0.25rem;
+        }
+        
+        .wc-ai-bot-message-bubble pre {
+          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          padding: 0.5rem;
+          border-radius: 0.25rem;
+          overflow-x: auto;
+          margin: 0.5rem 0;
+        }
+        
+        .wc-ai-bot-message-bubble code {
+          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.125rem;
+          font-size: 0.875em;
+        }
+        
+        .wc-ai-bot-message-bubble pre code {
+          background: none;
+          padding: 0;
         }
 
         /* Transparent background for loading bubbles */
@@ -11882,6 +11933,9 @@ if (!customElements.get("wc-ai-bot")) {
           response += delta;
           this._updateMessage(loadingId, response);
         }
+        if (this.getAttribute("debug") === "true") {
+          console.log("[wc-ai-bot] Raw LLM response:", response);
+        }
         this._emitEvent("bot:response-received", { botId, response });
       } catch (error) {
         console.error("[wc-ai-bot] Failed to get response:", error);
@@ -11923,7 +11977,15 @@ if (!customElements.get("wc-ai-bot")) {
         bubbleEl.classList.add("wc-ai-bot-message-bubble--loading");
         bubbleEl.innerHTML = '<wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>';
       } else {
-        bubbleEl.textContent = content;
+        if (role === "bot" && markedModule && markedModule.marked) {
+          const html = markedModule.marked.parse(content);
+          bubbleEl.innerHTML = html;
+          if (this.getAttribute("debug") === "true") {
+            console.log("[wc-ai-bot] Parsed HTML:", html);
+          }
+        } else {
+          bubbleEl.textContent = content;
+        }
       }
       messageEl.appendChild(bubbleEl);
       this._messagesContainer.appendChild(messageEl);
@@ -11935,7 +11997,16 @@ if (!customElements.get("wc-ai-bot")) {
       if (messageEl) {
         const bubbleEl = messageEl.querySelector(".wc-ai-bot-message-bubble");
         if (bubbleEl) {
-          bubbleEl.textContent = content;
+          bubbleEl.classList.remove("wc-ai-bot-message-bubble--loading");
+          if (markedModule && markedModule.marked) {
+            const html = markedModule.marked.parse(content);
+            bubbleEl.innerHTML = html;
+            if (this.getAttribute("debug") === "true") {
+              console.log("[wc-ai-bot] Updated HTML:", html);
+            }
+          } else {
+            bubbleEl.textContent = content;
+          }
         }
       }
       const message = this._messages.find((m) => m.id === messageId);
