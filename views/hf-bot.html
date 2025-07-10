@@ -1,0 +1,255 @@
+<div id="page-contents">
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Wave CSS Hugging Face Bot Component</h1>
+    
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Overview</h2>
+      <p class="text-gray-600 mb-4">
+        The HF Bot component provides an interactive chat interface powered by Hugging Face's Transformers.js, 
+        running AI models directly in the browser using WebGPU acceleration.
+      </p>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>Note:</strong> Like WebLLM, models are downloaded to the browser (1-2GB) and cached for subsequent use.</p>
+        <p class="text-sm mt-2"><strong>Key Differences from wc-ai-bot:</strong></p>
+        <ul class="text-sm list-disc list-inside ml-2">
+          <li>Uses Hugging Face ecosystem and model hub</li>
+          <li>Different model format (ONNX/GGUF vs MLC)</li>
+          <li>Simpler API but similar performance</li>
+          <li>Same GPU requirements and limitations</li>
+        </ul>
+      </div>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <p class="text-sm"><strong>System Requirements:</strong> Same as wc-ai-bot - requires capable GPU and 4GB+ available RAM.</p>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Basic Usage</h2>
+      <p class="text-gray-600 mb-4">Click the chat bubble in the bottom-right corner to interact with the Hugging Face assistant:</p>
+      
+      <!-- Basic bot example -->
+      <wc-hf-bot 
+        bot-id="demo-hf-basic"
+        title="HF Assistant"
+        placeholder="Ask me anything..."
+        system-prompt="You are a helpful AI assistant powered by Hugging Face. Be concise and friendly in your responses."
+        check-gpu-compatibility="true">
+      </wc-hf-bot>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;wc-hf-bot 
+  bot-id="demo-hf-basic"
+  title="HF Assistant"
+  placeholder="Ask me anything..."
+  system-prompt="You are a helpful AI assistant powered by Hugging Face."&gt;
+&lt;/wc-hf-bot&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Embedded Bot (Minimal Theme)</h2>
+      <p class="text-gray-600 mb-4">The minimal theme for inline chat interfaces:</p>
+      
+      <div class="border border-gray-300 rounded-lg overflow-hidden" style="height: 500px;">
+        <wc-hf-bot 
+          bot-id="demo-hf-minimal"
+          theme="minimal"
+          title="HF Chat"
+          model="onnx-community/Llama-3.2-1B-Instruct-q4f16"
+          system-prompt="You are a helpful support assistant for Pegram Insurance. Here is important company information you should know:
+
+COMPANY INFORMATION:
+- Company Name: Pegram Insurance
+- Address: 8228 Misty Eve Ln, Charlotte, NC 28213
+- Toll-free: (888) 563-4343
+- Phone: (704) 563-4343
+- Email: support@pegramins.com
+- Website: www.pegramins.com
+
+HOURS OF OPERATION:
+- Monday-Friday: 7:00 AM - 7:00 PM EST
+- Saturday: 10:00 AM - 4:00 PM EST
+- Sunday: Closed
+- Holidays: Closed on major US holidays
+
+SERVICES:
+- Auto insurance
+- Motorycycle insurance
+- Non-owners insurance
+- Renter's insurance
+
+When answering questions:
+1. Be friendly and professional
+2. Provide accurate information based on the data above
+3. If asked about something not in the data, politely say you'll need to check with the team
+4. Always offer to help with additional questions"
+          check-gpu-compatibility="true">
+        </wc-hf-bot>
+      </div>
+
+      <div class="mt-4 bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>&lt;div style="height: 500px;"&gt;
+  &lt;wc-hf-bot 
+    bot-id="demo-hf-minimal"
+    theme="minimal"
+    title="HF Chat"
+    model="onnx-community/Llama-3.2-1B-Instruct-q4f16_1_gguf"&gt;
+  &lt;/wc-hf-bot&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Available Models</h2>
+      <p class="text-gray-600 mb-4">Transformers.js supports various ONNX and GGUF format models:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">TinyLlama 1.1B</h4>
+          <p class="text-sm text-gray-600">Very small and fast (~550MB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Xenova/TinyLlama-1.1B-Chat-v1.0"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">Phi-3 Mini</h4>
+          <p class="text-sm text-gray-600">Microsoft's efficient model (~2.5GB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Xenova/Phi-3-mini-4k-instruct"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">DistilGPT2</h4>
+          <p class="text-sm text-gray-600">Tiny model for testing (~250MB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Xenova/distilgpt2"</code>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold">GPT-2</h4>
+          <p class="text-sm text-gray-600">Classic model (~500MB)</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded">model="Xenova/gpt2"</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Comparison: wc-ai-bot vs wc-hf-bot</h2>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">wc-ai-bot (WebLLM)</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">wc-hf-bot (Transformers.js)</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Library</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">WebLLM (MLC)</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Transformers.js (Hugging Face)</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Model Format</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">MLC compiled</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ONNX/GGUF</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Model Hub</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Limited selection</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Hugging Face Hub</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Performance</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Slightly faster</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Similar</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Library Size</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~1MB</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~500KB</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">GPU Requirements</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Same</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Same</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">JavaScript API</h2>
+      <p class="text-gray-600 mb-4">Same API as wc-ai-bot for consistency:</p>
+      
+      <div class="bg-gray-100 p-4 rounded-lg">
+        <pre class="text-sm"><code>// Get bot reference
+const bot = document.querySelector('[bot-id="demo-hf-basic"]');
+
+// Send a message
+bot.sendMessage("Hello!");
+
+// Clear conversation
+bot.clearConversation();
+
+// Export conversation
+const history = bot.exportConversation();
+
+// Update system context
+bot.setContext("You are an expert in JavaScript.");
+
+// Check system support
+const support = await WcHfBot.checkSystemSupport();
+console.log('GPU:', support.renderer);
+console.log('Supported:', support.supported);
+
+// Get available models
+const models = await WcHfBot.getAvailableModels();
+console.table(models);</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">All Available Attributes</h2>
+      <p class="text-gray-600 mb-4">Same attributes as wc-ai-bot for consistency:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Core Attributes -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-blue-600">Core Attributes</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>bot-id</code></dt>
+              <dd class="text-gray-600">Unique identifier for the bot instance</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>model</code></dt>
+              <dd class="text-gray-600">Hugging Face model ID to use</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>system-prompt</code></dt>
+              <dd class="text-gray-600">Instructions for the AI's behavior</dd>
+            </div>
+          </dl>
+        </div>
+        
+        <!-- UI & Safety -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-green-600">UI & Safety</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>theme</code></dt>
+              <dd class="text-gray-600">"bubble" (default), "minimal", or "sidebar"</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>check-gpu-compatibility</code></dt>
+              <dd class="text-gray-600">"true" (default) or "false"</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>force-enable</code></dt>
+              <dd class="text-gray-600">"true" to bypass GPU checks</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

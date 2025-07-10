@@ -33,7 +33,7 @@
         title="AI Assistant"
         placeholder="Ask me anything..."
         system-prompt="You are a helpful AI assistant. Be concise and friendly in your responses."
-        auto-detect-memory="true">
+        check-gpu-compatibility="true">
       </wc-ai-bot>
 
       <div class="mt-4 bg-gray-100 p-4 rounded-lg">
@@ -57,7 +57,7 @@
           title="Embedded Chat"
           model="Llama-3.2-1B-Instruct-q4f32_1-MLC"
           system-prompt="You are a helpful assistant embedded in a webpage. Help users understand the Wave CSS framework."
-          auto-detect-memory="true">
+          check-gpu-compatibility="true">
         </wc-ai-bot>
       </div>
 
@@ -281,6 +281,97 @@ document.addEventListener('bot:unsupported', (e) => {
 document.addEventListener('bot:error', (e) => {
   console.error('Error:', e.detail.error);
 });</code></pre>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">All Available Attributes</h2>
+      <p class="text-gray-600 mb-4">Complete reference of all configuration options:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Core Attributes -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-blue-600">Core Attributes</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>bot-id</code></dt>
+              <dd class="text-gray-600">Unique identifier for the bot instance</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>model</code></dt>
+              <dd class="text-gray-600">WebLLM model to use (e.g., "Llama-3.2-1B-Instruct-q4f32_1-MLC")</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>system-prompt</code></dt>
+              <dd class="text-gray-600">Instructions for the AI's behavior and knowledge</dd>
+            </div>
+          </dl>
+        </div>
+        
+        <!-- UI Attributes -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-green-600">UI Attributes</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>title</code></dt>
+              <dd class="text-gray-600">Display name in header (default: "AI Assistant")</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>placeholder</code></dt>
+              <dd class="text-gray-600">Input field placeholder text</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>theme</code></dt>
+              <dd class="text-gray-600">"bubble" (default), "minimal", or "sidebar"</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>position</code></dt>
+              <dd class="text-gray-600">For bubble theme: "bottom-right" (default), "bottom-left", "top-right", "top-left"</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>max-height</code></dt>
+              <dd class="text-gray-600">Maximum height for embedded themes (e.g., "600px")</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>auto-open</code></dt>
+              <dd class="text-gray-600">"true" to open chat automatically on load</dd>
+            </div>
+          </dl>
+        </div>
+        
+        <!-- Model Parameters -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-purple-600">Model Parameters</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>temperature</code></dt>
+              <dd class="text-gray-600">Creativity level 0-1 (default: 0.7)</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>max-tokens</code></dt>
+              <dd class="text-gray-600">Maximum response length (default: 1000)</dd>
+            </div>
+          </dl>
+        </div>
+        
+        <!-- Safety & Debug -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold mb-2 text-red-600">Safety & Debug</h4>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="font-medium"><code>check-gpu-compatibility</code></dt>
+              <dd class="text-gray-600">"true" (default) or "false" - Checks GPU allowlist</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>force-enable</code></dt>
+              <dd class="text-gray-600">"true" to bypass GPU compatibility checks</dd>
+            </div>
+            <div>
+              <dt class="font-medium"><code>debug</code></dt>
+              <dd class="text-gray-600">"true" to log detailed information to console</dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
 
