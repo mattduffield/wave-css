@@ -12939,7 +12939,7 @@ if (!customElements.get("wc-hf-bot")) {
         this._updateStatus("Initializing AI model...");
         if (!transformersModule) {
           this._updateStatus("Loading Transformers.js...");
-          transformersModule = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2");
+          transformersModule = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.0");
         }
         if (loadedModels.has(modelName)) {
           const cached = loadedModels.get(modelName);
@@ -13088,21 +13088,30 @@ if (!customElements.get("wc-hf-bot")) {
       this._currentResponse = "";
       try {
         const messages = this._prepareMessages(message);
-        const recentMessages = messages.slice(-5);
-        const text = recentMessages.map((m) => {
-          if (m.role === "system") return m.content;
-          if (m.role === "user") return `User: ${m.content}`;
-          return `Assistant: ${m.content}`;
-        }).join("\n") + "\nAssistant:";
-        const inputs = await this._tokenizer(text);
+        let inputs;
+        if (this._tokenizer.apply_chat_template) {
+          const text = this._tokenizer.apply_chat_template(messages, {
+            tokenize: false,
+            add_generation_prompt: true
+          });
+          inputs = await this._tokenizer(text);
+        } else {
+          const recentMessages = messages.slice(-5);
+          const text = recentMessages.map((m) => {
+            if (m.role === "system") return m.content;
+            if (m.role === "user") return `User: ${m.content}`;
+            return `Assistant: ${m.content}`;
+          }).join("\n") + "\nAssistant:";
+          inputs = await this._tokenizer(text);
+        }
         const temperature = parseFloat(this.getAttribute("temperature") || "0.7");
         const maxTokens = parseInt(this.getAttribute("max-tokens") || "1000");
         const { TextStreamer } = transformersModule;
         const streamer = new TextStreamer(this._tokenizer, {
           skip_prompt: true,
           skip_special_tokens: true,
-          callback_function: (text2) => {
-            this._currentResponse += text2;
+          callback_function: (text) => {
+            this._currentResponse += text;
             this._updateMessage(this._currentMessageId, this._currentResponse);
           }
         });
