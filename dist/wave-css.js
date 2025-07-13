@@ -3849,7 +3849,9 @@ if (!customElements.get("wc-fa-icon")) {
       "check-circle": "circle-check",
       "help": "circle-question",
       "picture": "image",
-      "photo": "image"
+      "photo": "image",
+      "play-circle": "circle-play",
+      "pause-circle": "circle-pause"
     };
     constructor() {
       super();

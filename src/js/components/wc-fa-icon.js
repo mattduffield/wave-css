@@ -63,6 +63,8 @@ if (!customElements.get('wc-fa-icon')) {
       'help': 'circle-question',
       'picture': 'image',
       'photo': 'image',
+      'play-circle': 'circle-play',
+      'pause-circle': 'circle-pause'
     };
 
     constructor() {
