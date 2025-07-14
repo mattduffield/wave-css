@@ -210,6 +210,8 @@ const ICONS_TO_COPY = [
   'page',
   'file',
   'files',
+  'file-arrow-down',
+  'file-arrow-up',
   'file-lines',
   'file-invoice',
   'file-invoice-dollar',

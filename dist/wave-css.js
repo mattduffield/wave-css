@@ -3851,7 +3851,8 @@ if (!customElements.get("wc-fa-icon")) {
       "picture": "image",
       "photo": "image",
       "play-circle": "circle-play",
-      "pause-circle": "circle-pause"
+      "pause-circle": "circle-pause",
+      "file-download": "file-arrow-down"
     };
     constructor() {
       super();
