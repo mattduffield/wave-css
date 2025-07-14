@@ -87,6 +87,8 @@ const ICONS_TO_COPY = [
   'user-plus',
   'user-shield',
   'user-unlock',
+  'user-group',
+  'user-group-simple',
   'heart',
   'star',
   'camera',
