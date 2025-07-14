@@ -155,6 +155,8 @@ const ICONS_TO_COPY = [
   'play',
   'play-pause',
   'pause',
+  'palette',
+  'swatchbook',
   'circle',
   'circle-play',
   'circle-pause',
