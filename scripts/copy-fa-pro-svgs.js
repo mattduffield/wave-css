@@ -212,6 +212,7 @@ const ICONS_TO_COPY = [
   'file-invoice',
   'file-invoice-dollar',
   'file-pdf',
+  'receipt',
   'folder',
   'folder-open',
   'image',
