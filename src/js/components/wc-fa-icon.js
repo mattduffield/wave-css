@@ -103,15 +103,18 @@ if (!customElements.get('wc-fa-icon')) {
         document.head.appendChild(style);
       }
       
-      // Create the SVG directly without wrapper to allow better control
-      this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      this._svg.setAttribute('viewBox', '0 0 512 512');
-      this._svg.setAttribute('fill', 'currentColor');
-      
-      this._group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      
-      this._svg.appendChild(this._group);
-      this.appendChild(this._svg);
+      // Check if SVG already exists
+      if (!this._svg) {
+        // Create the SVG directly without wrapper to allow better control
+        this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        this._svg.setAttribute('viewBox', '0 0 512 512');
+        this._svg.setAttribute('fill', 'currentColor');
+        
+        this._group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        this._svg.appendChild(this._group);
+        this.appendChild(this._svg);
+      }
 
       this._applyStyles();
       await this._loadIcon();
