@@ -3883,14 +3883,13 @@ if (!customElements.get("wc-fa-icon")) {
         `;
         document.head.appendChild(style);
       }
-      if (!this._svg) {
-        this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this._svg.setAttribute("viewBox", "0 0 512 512");
-        this._svg.setAttribute("fill", "currentColor");
-        this._group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        this._svg.appendChild(this._group);
-        this.appendChild(this._svg);
-      }
+      this.innerHTML = "";
+      this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      this._svg.setAttribute("viewBox", "0 0 512 512");
+      this._svg.setAttribute("fill", "currentColor");
+      this._group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      this._svg.appendChild(this._group);
+      this.appendChild(this._svg);
       this._applyStyles();
       await this._loadIcon();
     }
