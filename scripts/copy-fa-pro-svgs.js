@@ -79,6 +79,7 @@ const ICON_ALIASES = {
 // Icons you want to copy (add more as needed)
 const ICONS_TO_COPY = [
   'house',
+  'house-user',
   'user',
   'users',
   'user-check',
@@ -189,6 +190,7 @@ const ICONS_TO_COPY = [
   'square-user',
   'calendar',
   'calendars',
+  'calendar-check',
   'calendar-clock',
   'calendar-days',
   'calendar-week',
@@ -444,6 +446,9 @@ const ICONS_TO_COPY = [
   'ring',
   'life-ring',
   'hurricane',
+  'children',
+  'child',
+
 
   // Add more icon names here
 ];
