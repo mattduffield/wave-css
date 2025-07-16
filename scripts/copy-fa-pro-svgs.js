@@ -92,6 +92,7 @@ const ICONS_TO_COPY = [
   'user-group',
   'user-group-simple',
   'heart',
+  'heart-pulse',
   'star',
   'camera',
   'envelope',
