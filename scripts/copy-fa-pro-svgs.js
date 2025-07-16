@@ -250,6 +250,8 @@ const ICONS_TO_COPY = [
   'floppy-disk',
   'undo',
   'redo',
+  'gauge',
+  'list',
   'magnet',
   'toggle-on',
   'toggle-off',
