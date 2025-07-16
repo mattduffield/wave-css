@@ -68,6 +68,7 @@ const ICON_ALIASES = {
   'question-circle': 'circle-question',
   'help': 'circle-question',
   'check-circle': 'circle-check',
+  'user-circle': 'circle-user',
   'picture': 'image',
   'photo': 'image',
   'picture-o': 'image',
