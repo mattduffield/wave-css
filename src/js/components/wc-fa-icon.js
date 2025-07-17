@@ -69,7 +69,8 @@ if (!customElements.get('wc-fa-icon')) {
       'user-circle': 'circle-user',
       'allergies': 'hand-dots',
       'heartbeat': 'heart-pulse',
-      'chalkboard-teacher': 'chalkboard-user'
+      'chalkboard-teacher': 'chalkboard-user',
+      'phone-alt': 'phone-flip'
     };
 
     constructor() {

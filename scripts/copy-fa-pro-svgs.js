@@ -129,6 +129,7 @@ const ICONS_TO_COPY = [
   'pen-to-square',
   'edit', // Alias for pen-to-square - will copy the same icon
   'phone',
+  'phone-flip',
   'phone-volume',
   'chevron-down',
   'chevron-up',
