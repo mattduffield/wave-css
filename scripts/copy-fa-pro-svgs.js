@@ -92,6 +92,7 @@ const ICONS_TO_COPY = [
   'user-group',
   'user-group-simple',
   'heart',
+  'heartbeat',
   'heart-pulse',
   'star',
   'camera',
@@ -459,7 +460,8 @@ const ICONS_TO_COPY = [
   'hurricane',
   'children',
   'child',
-
+  'allergies',
+  'notes-medical',
 
   // Add more icon names here
 ];
