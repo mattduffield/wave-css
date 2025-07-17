@@ -67,6 +67,7 @@ if (!customElements.get('wc-fa-icon')) {
       'pause-circle': 'circle-pause',
       'file-download': 'file-arrow-down',
       'user-circle': 'circle-user',
+      'allergies': 'hand-dots'
     };
 
     constructor() {

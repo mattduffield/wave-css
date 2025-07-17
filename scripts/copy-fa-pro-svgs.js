@@ -91,6 +91,7 @@ const ICONS_TO_COPY = [
   'user-unlock',
   'user-group',
   'user-group-simple',
+  'hand-dots',
   'heart',
   'heartbeat',
   'heart-pulse',
