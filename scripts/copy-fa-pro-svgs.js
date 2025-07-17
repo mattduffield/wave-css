@@ -93,7 +93,6 @@ const ICONS_TO_COPY = [
   'user-group-simple',
   'hand-dots',
   'heart',
-  'heartbeat',
   'heart-pulse',
   'star',
   'camera',
@@ -461,9 +460,11 @@ const ICONS_TO_COPY = [
   'hurricane',
   'children',
   'child',
-  'allergies',
   'notes-medical',
-
+  'chalkboard',
+  'chalkboard-user',
+  'person-chalkboard',
+  'screen-users'
   // Add more icon names here
 ];
 
