@@ -498,7 +498,10 @@ const ICONS_TO_COPY = [
   'chalkboard',
   'chalkboard-user',
   'person-chalkboard',
-  'screen-users'
+  'screen-users',
+  'church',
+  'cross',
+  'place-of-worship'
   // Add more icon names here
 ];
 
