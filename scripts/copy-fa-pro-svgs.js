@@ -417,6 +417,7 @@ const ICONS_TO_COPY = [
   'lock-keyhole-open',
   'unlock',
   'unlock-keyhole',
+  'key',
   'key-skeleton',
   'fingerprint',
   'right-from-bracket',
