@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS Complete Example</title>
+  
+  <!-- External Dependencies -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  
+  <!-- Wave CSS Styles -->
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  
+  <!-- For development, use source CSS instead:
+  <link rel="stylesheet" href="../src/css/main.css">
+  -->
+</head>
+
+<body class="col-1 h-full">
+  <!-- Theme Selector -->
+  <div class="p-4 border-b">
+    <wc-theme-selector></wc-theme-selector>
+  </div>
+
+  <div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Wave CSS Complete Example</h1>
+    
+    <!-- Form Example -->
+    <wc-form id="exampleForm" class="col gap-4 mb-8">
+      <h2 class="text-2xl font-semibold">Form Components</h2>
+      
+      <!-- Text Input -->
+      <wc-input 
+        name="username"
+        type="text"
+        lbl-label="Username"
+        placeholder="Enter username"
+        required
+        pattern="[a-zA-Z0-9]{3,20}"
+        autocomplete="username">
+      </wc-input>
+      
+      <!-- Password Input -->
+      <wc-input 
+        name="password"
+        type="password"
+        lbl-label="Password"
+        placeholder="Enter password"
+        required
+        minlength="8"
+        autocomplete="current-password">
+      </wc-input>
+      
+      <!-- Email Input -->
+      <wc-input 
+        name="email"
+        type="email"
+        lbl-label="Email"
+        placeholder="user@example.com"
+        required>
+      </wc-input>
+      
+      <!-- Select Dropdown -->
+      <wc-select 
+        name="country"
+        lbl-label="Country"
+        required
+        display-member="label"
+        value-member="code"
+        items='[
+          {"label": "United States", "code": "US"},
+          {"label": "United Kingdom", "code": "UK"},
+          {"label": "Canada", "code": "CA"}
+        ]'>
+      </wc-select>
+      
+      <!-- Alternative Select with Options -->
+      <wc-select name="language" lbl-label="Preferred Language">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+      </wc-select>
+      
+      <!-- Textarea -->
+      <wc-textarea 
+        name="bio"
+        lbl-label="Bio"
+        rows="4"
+        placeholder="Tell us about yourself..."
+        maxlength="500">
+      </wc-textarea>
+      
+      <!-- Note: For checkboxes and radio buttons, use standard HTML elements with Wave CSS styling -->
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="terms" required class="form-checkbox">
+        <span>I agree to the terms and conditions</span>
+      </label>
+      
+      <!-- Radio Buttons -->
+      <div class="col gap-2">
+        <label class="font-medium">Subscription Type</label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="subscription" value="free" checked class="form-radio">
+          <span>Free</span>
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="subscription" value="pro" class="form-radio">
+          <span>Pro</span>
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="subscription" value="enterprise" class="form-radio">
+          <span>Enterprise</span>
+        </label>
+      </div>
+      
+      <!-- Form Buttons -->
+      <div class="row gap-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+      </div>
+    </wc-form>
+
+    <!-- Icons Section -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Icons</h2>
+      
+      <div class="row gap-4 flex-wrap">
+        <!-- Basic Icons -->
+        <wc-fa-icon name="home"></wc-fa-icon>
+        <wc-fa-icon name="user" size="lg"></wc-fa-icon>
+        <wc-fa-icon name="settings" size="2x" color="blue"></wc-fa-icon>
+        
+        <!-- Animated Icons -->
+        <wc-fa-icon name="spinner" spin></wc-fa-icon>
+        <wc-fa-icon name="heart" pulse color="red"></wc-fa-icon>
+        
+        <!-- Rotated/Flipped Icons -->
+        <wc-fa-icon name="shield" rotate="90"></wc-fa-icon>
+        <wc-fa-icon name="arrow-right" flip="horizontal"></wc-fa-icon>
+        
+        <!-- Duotone Icons -->
+        <wc-fa-icon 
+          name="camera" 
+          icon-style="duotone"
+          primary-color="#007bff"
+          secondary-color="#6c757d"
+          size="2x">
+        </wc-fa-icon>
+      </div>
+    </section>
+
+    <!-- Dropdown Example -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Dropdown</h2>
+      
+      <wc-dropdown label="Options">
+        <wc-dropdown-item>Option 1</wc-dropdown-item>
+        <wc-dropdown-item>Option 2</wc-dropdown-item>
+        <wc-dropdown-item>Option 3</wc-dropdown-item>
+      </wc-dropdown>
+    </section>
+
+    <!-- Tabs -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Tabs</h2>
+      
+      <wc-tab>
+        <wc-tab-item label="Tab 1" active>
+          <p>Content for tab 1</p>
+        </wc-tab-item>
+        <wc-tab-item label="Tab 2">
+          <p>Content for tab 2</p>
+        </wc-tab-item>
+        <wc-tab-item label="Tab 3">
+          <p>Content for tab 3</p>
+        </wc-tab-item>
+      </wc-tab>
+    </section>
+
+    <!-- Accordion -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Accordion</h2>
+      
+      <wc-accordion>
+        <div slot="header">Section 1</div>
+        <div slot="content">
+          <p>Content for section 1</p>
+        </div>
+      </wc-accordion>
+      
+      <wc-accordion>
+        <div slot="header">Section 2</div>
+        <div slot="content">
+          <p>Content for section 2</p>
+        </div>
+      </wc-accordion>
+    </section>
+
+    <!-- Data Table -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Data Table</h2>
+      
+      <wc-tabulator
+        id="dataTable"
+        height="400px"
+        data='[
+          {"id": 1, "name": "John Doe", "email": "john@example.com", "role": "Admin"},
+          {"id": 2, "name": "Jane Smith", "email": "jane@example.com", "role": "User"},
+          {"id": 3, "name": "Bob Johnson", "email": "bob@example.com", "role": "User"}
+        ]'>
+        <wc-tabulator-column 
+          field="id" 
+          title="ID" 
+          width="60">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="name" 
+          title="Name" 
+          editor="input">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="email" 
+          title="Email">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="role" 
+          title="Role"
+          editor="select"
+          editor-params='{"values": ["Admin", "User", "Guest"]}'>
+        </wc-tabulator-column>
+      </wc-tabulator>
+    </section>
+
+    <!-- Loaders -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Loaders</h2>
+      
+      <div class="row gap-4">
+        <wc-loader type="spinner"></wc-loader>
+        <wc-loader type="dots"></wc-loader>
+        <wc-loader type="bars"></wc-loader>
+      </div>
+    </section>
+
+    <!-- Event Communication Example -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Event Communication</h2>
+      
+      <button class="btn btn-primary mb-4" onclick="
+        wc.EventHub.broadcast('demo:message', null, { 
+          message: 'Hello from button!',
+          timestamp: new Date().toISOString()
+        })
+      ">
+        Broadcast Event
+      </button>
+      
+      <div id="eventOutput" class="p-4 bg-gray-100 rounded">
+        Waiting for events...
+      </div>
+    </section>
+  </div>
+
+  <!-- Required Components -->
+  <wc-event-hub></wc-event-hub>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+  <wc-theme></wc-theme>
+  
+  <!-- Wave CSS Scripts -->
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  
+  <!-- For development, use source modules instead:
+  <script type="module" src="../src/js/components/index.js"></script>
+  -->
+  
+  <!-- Example JavaScript -->
+  <script type="module">
+    // Wait for components to load
+    await customElements.whenDefined('wc-form');
+    
+    // Form submission handler
+    document.getElementById('exampleForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = e.detail;
+      console.log('Form submitted with data:', formData);
+      alert('Form submitted! Check console for data.');
+    });
+    
+    // Event listener example
+    wc.EventHub.subscribe('demo:message', (data) => {
+      document.getElementById('eventOutput').innerHTML = `
+        <strong>Event Received!</strong><br>
+        Message: ${data.message}<br>
+        Time: ${data.timestamp}
+      `;
+    });
+    
+    // Programmatic component creation example
+    const createDynamicDropdown = () => {
+      const dropdown = document.createElement('wc-dropdown');
+      dropdown.setAttribute('label', 'Dynamic Dropdown');
+      dropdown.innerHTML = `
+        <wc-dropdown-item>Dynamic Option 1</wc-dropdown-item>
+        <wc-dropdown-item>Dynamic Option 2</wc-dropdown-item>
+        <wc-dropdown-item>Dynamic Option 3</wc-dropdown-item>
+      `;
+      document.querySelector('#eventOutput').appendChild(dropdown);
+    };
+    
+    // Expose for demo
+    window.createDynamicDropdown = createDynamicDropdown;
+  </script>
+</body>
+</html>
