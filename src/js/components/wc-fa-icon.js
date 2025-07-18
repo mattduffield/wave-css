@@ -70,7 +70,8 @@ if (!customElements.get('wc-fa-icon')) {
       'allergies': 'hand-dots',
       'heartbeat': 'heart-pulse',
       'chalkboard-teacher': 'chalkboard-user',
-      'phone-alt': 'phone-flip'
+      'phone-alt': 'phone-flip',
+      'users-cog': 'users-gear'
     };
 
     constructor() {

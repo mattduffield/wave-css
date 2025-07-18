@@ -399,6 +399,8 @@ const ICONS_TO_COPY = [
   'sitemap',
   'timeline',
   'users-viewfinder',
+  'user-gear',
+  'users-gear',
   'crosshairs',
   'crosshairs-simple',
   'location-dot',
