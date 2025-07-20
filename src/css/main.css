@@ -3421,6 +3421,14 @@
   }
 
   /* Button Styling */
+  a {
+    color: var(--text-1);
+  }
+  a:hover {
+    color: var(--text-3);
+  }
+
+  a.btn,
   input[type="button"].btn,
   button.btn {
     background: var(--button-bg-color);
@@ -3433,21 +3441,25 @@
     cursor: pointer;
     transition: all 0.2s ease-in-out;
   }
+  a.btn:focus,
   input[type="button"].btn:focus,
   button:focus {
     outline: none;
     border-color: var(--button-focus-border-color);
     box-shadow: 0 0 4px var(--button-focus-ring-color);
   }
+  a.btn:hover,
   input[type="button"].btn:hover,
   button.btn:hover {
     background: var(--button-hover-bg-color);
     color: var(--button-hover-color);
   }
+  a.btn:active,
   input[type="button"].btn:active,
   button.btn:active {
     background: var(--button-active-bg-color);
   }
+  a.btn:disabled,
   input[type="button"].btn:disabled,
   button.btn:disabled {
     background: var(--button-disabled-bg-color);
@@ -3456,12 +3468,6 @@
     cursor: not-allowed;
   }
 
-  a {
-    color: var(--text-1);
-  }
-  a:hover {
-    color: var(--text-3);
-  }
 
   hr {
     border: none;
