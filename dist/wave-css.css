@@ -2075,16 +2075,16 @@
     justify-content: flex-end;
   }
   .justify-self-start {
-    justify-content: flex-start;
+    justify-self: flex-start;
   }
   .justify-self-center {
-    justify-content: center;
+    justify-self: center;
   }
   .justify-self-end {
-    justify-content: flex-end;
+    justify-self: flex-end;
   }
   .justify-self-stretch {
-    justify-content: stretch;
+    justify-self: stretch;
   }
   .content-start {
     align-content: flex-start;
