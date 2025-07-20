@@ -3512,7 +3512,7 @@
   }
   a.btn:focus,
   input[type="button"].btn:focus,
-  button:focus {
+  button.btn:focus {
     outline: none;
     border-color: var(--button-focus-border-color);
     box-shadow: 0 0 4px var(--button-focus-ring-color);
@@ -3537,6 +3537,45 @@
     cursor: not-allowed;
   }
 
+  a.btn-outline,
+  input[type="button"].btn-outline,
+  button.btn-outline {
+    background: var(--button-bg-color);
+    color: var(--button-color);
+    padding: 0.6rem 1.2rem;
+    /* font-size: 1rem; */
+    border: none;
+    border: 1px solid var(--button-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  a.btn-outline:focus,
+  input[type="button"].btn-outline:focus,
+  button.btn-outline:focus {
+    outline: none;
+    border-color: var(--button-focus-border-color);
+    box-shadow: 0 0 4px var(--button-focus-ring-color);
+  }
+  a.btn-outline:hover,
+  input[type="button"].btn-outline:hover,
+  button.btn-outline:hover {
+    background: var(--button-hover-bg-color);
+    color: var(--button-hover-color);
+  }
+  a.btn-outline:active,
+  input[type="button"].btn-outline:active,
+  button.btn-outline:active {
+    background: var(--button-active-bg-color);
+  }
+  a.btn-outline:disabled,
+  input[type="button"].btn-outline:disabled,
+  button.btn-outline:disabled {
+    background: var(--button-disabled-bg-color);
+    border: 1px solid var(--button-disabled-border-color);
+    color: var(--button-disabled-color);
+    cursor: not-allowed;
+  }
 
   hr {
     border: none;
