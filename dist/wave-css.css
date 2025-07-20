@@ -332,9 +332,9 @@
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-4);
-      --card-bg-color: var(--surface-3);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
-      --card-border-color: var(--surface-4);
+      --card-border-color: var(--surface-5);
       --component-bg-color: var(--surface-1);
       --component-color: var(--text-1);
       --component-border-color: var(--surface-2);
@@ -373,9 +373,9 @@
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-4);
-      --card-bg-color: var(--surface-3);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
-      --card-border-color: var(--surface-4);
+      --card-border-color: var(--surface-6);
       --component-bg-color: var(--surface-1);
       --component-color: var(--text-1);
       --component-border-color: var(--surface-7);
@@ -487,7 +487,7 @@
       --container-bg-color: var(--surface-4);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-5);
-      --card-bg-color: var(--surface-4);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
       --card-border-color: var(--surface-5);
       --component-bg-color: var(--surface-1);
@@ -601,9 +601,9 @@
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-4);
-    --card-bg-color: var(--surface-3);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
-    --card-border-color: var(--surface-4);
+    --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);
     --component-color: var(--text-1);
     --component-border-color: var(--surface-2);
@@ -642,9 +642,9 @@
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-4);
-    --card-bg-color: var(--surface-3);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
-    --card-border-color: var(--surface-4);
+    --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);
     --component-color: var(--text-1);
     --component-border-color: var(--surface-7);
@@ -754,7 +754,7 @@
     --container-bg-color: var(--surface-4);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-5);
-    --card-bg-color: var(--surface-4);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
     --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);

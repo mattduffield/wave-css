@@ -274,9 +274,9 @@
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-4);
-      --card-bg-color: var(--surface-3);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
-      --card-border-color: var(--surface-4);
+      --card-border-color: var(--surface-5);
       --component-bg-color: var(--surface-1);
       --component-color: var(--text-1);
       --component-border-color: var(--surface-2);
@@ -321,9 +321,9 @@
       --container-bg-color: var(--surface-3);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-4);
-      --card-bg-color: var(--surface-3);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
-      --card-border-color: var(--surface-4);
+      --card-border-color: var(--surface-6);
       --component-bg-color: var(--surface-1);
       --component-color: var(--text-1);
       --component-border-color: var(--surface-7);
@@ -443,7 +443,7 @@
       --container-bg-color: var(--surface-4);
       --container-color: var(--text-2);
       --container-border-color: var(--surface-5);
-      --card-bg-color: var(--surface-4);
+      --card-bg-color: var(--surface-6);
       --card-color: var(--text-2);
       --card-border-color: var(--surface-5);
       --component-bg-color: var(--surface-1);
@@ -486,67 +486,6 @@
       --radio-checked-bg: var(--swatch-6);
       --radio-checked-border: var(--swatch-5);
     }
-    /*
-    .theme-yellow
-    {
-      --text-1: var(--swatch-1);
-      --text-2: var(--swatch-2);
-      --text-3: var(--swatch-3);
-      --text-4: var(--swatch-4);
-      --text-5: var(--swatch-5);
-      --surface-1: var(--swatch-12);
-      --surface-2: var(--swatch-11);
-      --surface-3: var(--swatch-10);
-      --surface-4: var(--swatch-9);
-      --surface-5: var(--swatch-8);
-
-      --container-bg-color: var(--swatch-7);
-      --container-color: var(--swatch-12);
-      --container-border-color: var(--swatch-8);
-      --card-bg-color: var(--swatch-7);
-      --card-color: var(--swatch-12);
-      --card-border-color: var(--swatch-8);
-      --component-bg-color: var(--surface-1);
-      --component-color: var(--text-1);
-      --component-border-color: var(--surface-2);
-      --component-placeholder-color: var(--text-3);
-      --component-focus-border-color: var(--surface-3);
-      --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
-      --component-disabled-bg-color: var(--surface-2);
-      --component-disabled-text-color: var(--text-3);
-      --toggle-off: var(--text-3);
-      --toggle-on: var(--surface-1);
-
-      --primary-color: var(--text-2);
-      --primary-bg-color: var(--swatch-7);
-      --secondary-bg-color: var(--component-bg-color);
-
-      --checkbox-border: var(--surface-4);
-      --checkbox-bg: var(--surface-1);
-      --checkbox-checked-bg: var(--swatch-6);
-      --checkbox-checked-border: var(--swatch-5);
-
-      --slider-track: var(--surface-1);
-      --slider-thumb: var(--primary-bg-color);
-
-      --button-bg-color: var(--swatch-4);
-      --button-hover-bg-color: var(--swatch-5);
-      --button-hover-color: var(--swatch-10);
-      --button-active-bg-color: var(--swatch-6);
-      --button-color: var(--swatch-12);
-      --button-border-color: var(--swatch-6);
-      --button-focus-border-color: var(--swatch-6);
-      --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
-      --button-disabled-bg-color: var(--swatch-3);
-      --button-disabled-border-color: var(--swatch-4);
-      --button-disabled-color: var(--swatch-9);
-      
-      --radio-border: var(--surface-4);
-      --radio-bg: var(--surface-1);
-      --radio-checked-bg: var(--swatch-6);
-      --radio-checked-border: var(--swatch-5);
-    }
-    */
   }
 }
 
@@ -626,9 +565,9 @@
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-4);
-    --card-bg-color: var(--surface-3);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
-    --card-border-color: var(--surface-4);
+    --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);
     --component-color: var(--text-1);
     --component-border-color: var(--surface-2);
@@ -674,9 +613,9 @@
     --container-bg-color: var(--surface-3);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-4);
-    --card-bg-color: var(--surface-3);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
-    --card-border-color: var(--surface-4);
+    --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);
     --component-color: var(--text-1);
     --component-border-color: var(--surface-7);
@@ -795,7 +734,7 @@
     --container-bg-color: var(--surface-4);
     --container-color: var(--text-2);
     --container-border-color: var(--surface-5);
-    --card-bg-color: var(--surface-4);
+    --card-bg-color: var(--surface-6);
     --card-color: var(--text-2);
     --card-border-color: var(--surface-5);
     --component-bg-color: var(--surface-1);
@@ -838,67 +777,6 @@
     --radio-checked-bg: var(--swatch-6);
     --radio-checked-border: var(--swatch-5);
   }
-  /*
-  .dark.theme-yellow
-  {
-    --text-1: var(--swatch-1);
-    --text-2: var(--swatch-2);
-    --text-3: var(--swatch-3);
-    --text-4: var(--swatch-4);
-    --text-5: var(--swatch-5);
-    --surface-1: var(--swatch-12);
-    --surface-2: var(--swatch-11);
-    --surface-3: var(--swatch-10);
-    --surface-4: var(--swatch-9);
-    --surface-5: var(--swatch-8);
-
-    --container-bg-color: var(--swatch-7);
-    --container-color: var(--swatch-12);
-    --container-border-color: var(--swatch-8);
-    --card-bg-color: var(--swatch-7);
-    --card-color: var(--swatch-12);
-    --card-border-color: var(--swatch-8);
-    --component-bg-color: var(--surface-1);
-    --component-color: var(--text-1);
-    --component-border-color: var(--surface-2);
-    --component-placeholder-color: var(--text-3);
-    --component-focus-border-color: var(--surface-3);
-    --component-focus-ring-color: oklch(90% .5 var(--hue) / 30%);
-    --component-disabled-bg-color: var(--surface-2);
-    --component-disabled-text-color: var(--text-3);
-    --toggle-off: var(--text-3);
-    --toggle-on: var(--surface-1);
-
-    --primary-color: var(--text-2);
-    --primary-bg-color: var(--swatch-7);
-    --secondary-bg-color: var(--component-bg-color);
-
-    --checkbox-border: var(--surface-4);
-    --checkbox-bg: var(--surface-1);
-    --checkbox-checked-bg: var(--swatch-6);
-    --checkbox-checked-border: var(--swatch-5);
-
-    --slider-track: var(--surface-1);
-    --slider-thumb: var(--primary-bg-color);
-
-    --button-bg-color: var(--swatch-4);
-    --button-hover-bg-color: var(--swatch-5);
-    --button-hover-color: var(--swatch-10);
-    --button-active-bg-color: var(--swatch-6);
-    --button-color: var(--swatch-12);
-    --button-border-color: var(--swatch-6);
-    --button-focus-border-color: var(--swatch-6);
-    --button-focus-ring-color: oklch(80% .6 var(--hue) / 30%);
-    --button-disabled-bg-color: var(--swatch-3);
-    --button-disabled-border-color: var(--swatch-4);
-    --button-disabled-color: var(--swatch-9);
-    
-    --radio-border: var(--surface-4);
-    --radio-bg: var(--surface-1);
-    --radio-checked-bg: var(--swatch-6);
-    --radio-checked-border: var(--swatch-5);
-  }
-  */
 }
 
 
