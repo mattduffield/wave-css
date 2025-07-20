@@ -6317,7 +6317,6 @@
   a.btn-outline,
   input[type=button].btn-outline,
   button.btn-outline {
-    background: var(--button-bg-color);
     color: var(--button-color);
     padding: 0.6rem 1.2rem;
     border: none;

@@ -3503,7 +3503,6 @@
     background: var(--button-bg-color);
     color: var(--button-color);
     padding: 0.6rem 1.2rem;
-    /* font-size: 1rem; */
     border: none;
     border: 1px solid var(--button-border-color);
     border-radius: 6px;
@@ -3540,10 +3539,8 @@
   a.btn-outline,
   input[type="button"].btn-outline,
   button.btn-outline {
-    background: var(--button-bg-color);
     color: var(--button-color);
     padding: 0.6rem 1.2rem;
-    /* font-size: 1rem; */
     border: none;
     border: 1px solid var(--button-border-color);
     border-radius: 6px;
