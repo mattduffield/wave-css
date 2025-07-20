@@ -911,6 +911,45 @@
   .surface-13 {
     background-color: var(--surface-13);
   }
+  .surface-1:hover {
+    background-color: var(--surface-2);
+  }
+  .surface-2:hover {
+    background-color: var(--surface-3);
+  }
+  .surface-3:hover {
+    background-color: var(--surface-4);
+  }
+  .surface-4:hover {
+    background-color: var(--surface-5);
+  }
+  .surface-5:hover {
+    background-color: var(--surface-6);
+  }
+  .surface-6:hover {
+    background-color: var(--surface-7);
+  }
+  .surface-7:hover {
+    background-color: var(--surface-8);
+  }
+  .surface-8:hover {
+    background-color: var(--surface-9);
+  }
+  .surface-9:hover {
+    background-color: var(--surface-10);
+  }
+  .surface-10:hover {
+    background-color: var(--surface-11);
+  }
+  .surface-11:hover {
+    background-color: var(--surface-12);
+  }
+  .surface-12:hover {
+    background-color: var(--surface-13);
+  }
+  .surface-13:hover {
+    background-color: var(--surface-12);
+  }
   .surface-color-1 {
     color: var(--surface-1);
   }
@@ -949,6 +988,45 @@
   }
   .surface-color-13 {
     color: var(--surface-13);
+  }
+  .surface-color-1:hover {
+    color: var(--surface-2);
+  }
+  .surface-color-2:hover {
+    color: var(--surface-3);
+  }
+  .surface-color-3:hover {
+    color: var(--surface-4);
+  }
+  .surface-color-4:hover {
+    color: var(--surface-5);
+  }
+  .surface-color-5:hover {
+    color: var(--surface-6);
+  }
+  .surface-color-6:hover {
+    color: var(--surface-7);
+  }
+  .surface-color-7:hover {
+    color: var(--surface-8);
+  }
+  .surface-color-8:hover {
+    color: var(--surface-9);
+  }
+  .surface-color-9:hover {
+    color: var(--surface-10);
+  }
+  .surface-color-10:hover {
+    color: var(--surface-11);
+  }
+  .surface-color-11:hover {
+    color: var(--surface-12);
+  }
+  .surface-color-12:hover {
+    color: var(--surface-13);
+  }
+  .surface-color-13:hover {
+    color: var(--surface-12);
   }
   .text-1 {
     color: var(--text-1);
@@ -989,6 +1067,45 @@
   .text-13 {
     color: var(--text-13);
   }
+  .text-1:hover {
+    color: var(--text-2);
+  }
+  .text-2:hover {
+    color: var(--text-3);
+  }
+  .text-3:hover {
+    color: var(--text-4);
+  }
+  .text-4:hover {
+    color: var(--text-5);
+  }
+  .text-5:hover {
+    color: var(--text-6);
+  }
+  .text-6:hover {
+    color: var(--text-7);
+  }
+  .text-7:hover {
+    color: var(--text-8);
+  }
+  .text-8:hover {
+    color: var(--text-9);
+  }
+  .text-9:hover {
+    color: var(--text-10);
+  }
+  .text-10:hover {
+    color: var(--text-11);
+  }
+  .text-11:hover {
+    color: var(--text-12);
+  }
+  .text-12:hover {
+    color: var(--text-13);
+  }
+  .text-13:hover {
+    color: var(--text-12);
+  }
   .text-bg-color-1 {
     background-color: var(--text-1);
   }
@@ -1027,6 +1144,45 @@
   }
   .text-bg-color-13 {
     background-color: var(--text-13);
+  }
+  .text-bg-color-1:hover {
+    background-color: var(--text-2);
+  }
+  .text-bg-color-2:hover {
+    background-color: var(--text-3);
+  }
+  .text-bg-color-3:hover {
+    background-color: var(--text-4);
+  }
+  .text-bg-color-4:hover {
+    background-color: var(--text-5);
+  }
+  .text-bg-color-5:hover {
+    background-color: var(--text-6);
+  }
+  .text-bg-color-6:hover {
+    background-color: var(--text-7);
+  }
+  .text-bg-color-7:hover {
+    background-color: var(--text-8);
+  }
+  .text-bg-color-8:hover {
+    background-color: var(--text-9);
+  }
+  .text-bg-color-9:hover {
+    background-color: var(--text-10);
+  }
+  .text-bg-color-10:hover {
+    background-color: var(--text-11);
+  }
+  .text-bg-color-11:hover {
+    background-color: var(--text-12);
+  }
+  .text-bg-color-12:hover {
+    background-color: var(--text-13);
+  }
+  .text-bg-color-13:hover {
+    background-color: var(--text-12);
   }
   .container-bg-color {
     background-color: var(--container-bg-color);
