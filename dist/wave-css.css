@@ -911,43 +911,43 @@
   .surface-13 {
     background-color: var(--surface-13);
   }
-  .surface-1:hover {
+  .surface-1-hover:hover {
     background-color: var(--surface-2);
   }
-  .surface-2:hover {
+  .surface-2-hover:hover {
     background-color: var(--surface-3);
   }
-  .surface-3:hover {
+  .surface-3-hover:hover {
     background-color: var(--surface-4);
   }
-  .surface-4:hover {
+  .surface-4-hover:hover {
     background-color: var(--surface-5);
   }
-  .surface-5:hover {
+  .surface-5-hover:hover {
     background-color: var(--surface-6);
   }
-  .surface-6:hover {
+  .surface-6-hover:hover {
     background-color: var(--surface-7);
   }
-  .surface-7:hover {
+  .surface-7-hover:hover {
     background-color: var(--surface-8);
   }
-  .surface-8:hover {
+  .surface-8-hover:hover {
     background-color: var(--surface-9);
   }
-  .surface-9:hover {
+  .surface-9-hover:hover {
     background-color: var(--surface-10);
   }
-  .surface-10:hover {
+  .surface-10-hover:hover {
     background-color: var(--surface-11);
   }
-  .surface-11:hover {
+  .surface-11-hover:hover {
     background-color: var(--surface-12);
   }
-  .surface-12:hover {
+  .surface-12-hover:hover {
     background-color: var(--surface-13);
   }
-  .surface-13:hover {
+  .surface-13-hover:hover {
     background-color: var(--surface-12);
   }
   .surface-color-1 {
@@ -989,43 +989,43 @@
   .surface-color-13 {
     color: var(--surface-13);
   }
-  .surface-color-1:hover {
+  .surface-color-1-hover:hover {
     color: var(--surface-2);
   }
-  .surface-color-2:hover {
+  .surface-color-2-hover:hover {
     color: var(--surface-3);
   }
-  .surface-color-3:hover {
+  .surface-color-3-hover:hover {
     color: var(--surface-4);
   }
-  .surface-color-4:hover {
+  .surface-color-4-hover:hover {
     color: var(--surface-5);
   }
-  .surface-color-5:hover {
+  .surface-color-5-hover:hover {
     color: var(--surface-6);
   }
-  .surface-color-6:hover {
+  .surface-color-6-hover:hover {
     color: var(--surface-7);
   }
-  .surface-color-7:hover {
+  .surface-color-7-hover:hover {
     color: var(--surface-8);
   }
-  .surface-color-8:hover {
+  .surface-color-8-hover:hover {
     color: var(--surface-9);
   }
-  .surface-color-9:hover {
+  .surface-color-9-hover:hover {
     color: var(--surface-10);
   }
-  .surface-color-10:hover {
+  .surface-color-10-hover:hover {
     color: var(--surface-11);
   }
-  .surface-color-11:hover {
+  .surface-color-11-hover:hover {
     color: var(--surface-12);
   }
-  .surface-color-12:hover {
+  .surface-color-12-hover:hover {
     color: var(--surface-13);
   }
-  .surface-color-13:hover {
+  .surface-color-13-hover:hover {
     color: var(--surface-12);
   }
   .text-1 {
@@ -1067,43 +1067,43 @@
   .text-13 {
     color: var(--text-13);
   }
-  .text-1:hover {
+  .text-1-hover:hover {
     color: var(--text-2);
   }
-  .text-2:hover {
+  .text-2-hover:hover {
     color: var(--text-3);
   }
-  .text-3:hover {
+  .text-3-hover:hover {
     color: var(--text-4);
   }
-  .text-4:hover {
+  .text-4-hover:hover {
     color: var(--text-5);
   }
-  .text-5:hover {
+  .text-5-hover:hover {
     color: var(--text-6);
   }
-  .text-6:hover {
+  .text-6-hover:hover {
     color: var(--text-7);
   }
-  .text-7:hover {
+  .text-7-hover:hover {
     color: var(--text-8);
   }
-  .text-8:hover {
+  .text-8-hover:hover {
     color: var(--text-9);
   }
-  .text-9:hover {
+  .text-9-hover:hover {
     color: var(--text-10);
   }
-  .text-10:hover {
+  .text-10-hover:hover {
     color: var(--text-11);
   }
-  .text-11:hover {
+  .text-11-hover:hover {
     color: var(--text-12);
   }
-  .text-12:hover {
+  .text-12-hover:hover {
     color: var(--text-13);
   }
-  .text-13:hover {
+  .text-13-hover:hover {
     color: var(--text-12);
   }
   .text-bg-color-1 {
@@ -1145,43 +1145,43 @@
   .text-bg-color-13 {
     background-color: var(--text-13);
   }
-  .text-bg-color-1:hover {
+  .text-bg-color-1-hover:hover {
     background-color: var(--text-2);
   }
-  .text-bg-color-2:hover {
+  .text-bg-color-2-hover:hover {
     background-color: var(--text-3);
   }
-  .text-bg-color-3:hover {
+  .text-bg-color-3-hover:hover {
     background-color: var(--text-4);
   }
-  .text-bg-color-4:hover {
+  .text-bg-color-4-hover:hover {
     background-color: var(--text-5);
   }
-  .text-bg-color-5:hover {
+  .text-bg-color-5-hover:hover {
     background-color: var(--text-6);
   }
-  .text-bg-color-6:hover {
+  .text-bg-color-6-hover:hover {
     background-color: var(--text-7);
   }
-  .text-bg-color-7:hover {
+  .text-bg-color-7-hover:hover {
     background-color: var(--text-8);
   }
-  .text-bg-color-8:hover {
+  .text-bg-color-8-hover:hover {
     background-color: var(--text-9);
   }
-  .text-bg-color-9:hover {
+  .text-bg-color-9-hover:hover {
     background-color: var(--text-10);
   }
-  .text-bg-color-10:hover {
+  .text-bg-color-10-hover:hover {
     background-color: var(--text-11);
   }
-  .text-bg-color-11:hover {
+  .text-bg-color-11-hover:hover {
     background-color: var(--text-12);
   }
-  .text-bg-color-12:hover {
+  .text-bg-color-12-hover:hover {
     background-color: var(--text-13);
   }
-  .text-bg-color-13:hover {
+  .text-bg-color-13-hover:hover {
     background-color: var(--text-12);
   }
   .container-bg-color {
