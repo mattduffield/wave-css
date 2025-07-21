@@ -6073,9 +6073,8 @@
     border: 1px solid var(--container-border-color);
   }
   .card {
-    display: grid;
-    gap: 1ch;
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
     background-color: var(--card-bg-color);
     color: var(--card-color);
     border: 1px solid var(--card-border-color);
