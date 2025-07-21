@@ -71,7 +71,8 @@ if (!customElements.get('wc-fa-icon')) {
       'heartbeat': 'heart-pulse',
       'chalkboard-teacher': 'chalkboard-user',
       'phone-alt': 'phone-flip',
-      'users-cog': 'users-gear'
+      'users-cog': 'users-gear',
+      'user-friends': 'user-group'
     };
 
     constructor() {
