@@ -921,6 +921,35 @@
   .text-bg-color-12-hover:hover { background-color: var(--text-12); }
   .text-bg-color-13-hover:hover { background-color: var(--text-13); }
 
+
+  .surface-1-border-color { border-color: var(--surface-1); }
+  .surface-2-border-color { border-color: var(--surface-2); }
+  .surface-3-border-color { border-color: var(--surface-3); }
+  .surface-4-border-color { border-color: var(--surface-4); }
+  .surface-5-border-color { border-color: var(--surface-5); }
+  .surface-6-border-color { border-color: var(--surface-6); }
+  .surface-7-border-color { border-color: var(--surface-7); }
+  .surface-8-border-color { border-color: var(--surface-8); }
+  .surface-9-border-color { border-color: var(--surface-9); }
+  .surface-10-border-color { border-color: var(--surface-10); }
+  .surface-11-border-color { border-color: var(--surface-11); }
+  .surface-12-border-color { border-color: var(--surface-12); }
+  .surface-13-border-color { border-color: var(--surface-13); }
+
+  .text-1-border-color { border-color: var(--text-1); }
+  .text-2-border-color { border-color: var(--text-2); }
+  .text-3-border-color { border-color: var(--text-3); }
+  .text-4-border-color { border-color: var(--text-4); }
+  .text-5-border-color { border-color: var(--text-5); }
+  .text-6-border-color { border-color: var(--text-6); }
+  .text-7-border-color { border-color: var(--text-7); }
+  .text-8-border-color { border-color: var(--text-8); }
+  .text-9-border-color { border-color: var(--text-9); }
+  .text-10-border-color { border-color: var(--text-10); }
+  .text-11-border-color { border-color: var(--text-11); }
+  .text-12-border-color { border-color: var(--text-12); }
+  .text-13-border-color { border-color: var(--text-13); }
+
   .container-bg-color { background-color: var(--container-bg-color); }
   .container-color { color: var(--container-color); }
   .container-border-color { border-color: var(--container-border-color); }
