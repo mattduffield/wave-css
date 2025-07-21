@@ -65,6 +65,7 @@ if (!customElements.get('wc-fa-icon')) {
       'photo': 'image',
       'play-circle': 'circle-play',
       'pause-circle': 'circle-pause',
+      'plus-circle': 'circle-plus',
       'file-download': 'file-arrow-down',
       'user-circle': 'circle-user',
       'allergies': 'hand-dots',
