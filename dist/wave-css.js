@@ -3861,7 +3861,9 @@ if (!customElements.get("wc-fa-icon")) {
       "users-cog": "users-gear",
       "user-friends": "user-group",
       "calendar-times": "calendar-xmark",
-      "calendar-time": "calendar-clock"
+      "calendar-time": "calendar-clock",
+      "calendar-alt": "calendar-days",
+      "map-marker-alt": "location-dot"
     };
     constructor() {
       super();

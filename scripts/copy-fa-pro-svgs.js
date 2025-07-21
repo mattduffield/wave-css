@@ -404,6 +404,8 @@ const ICONS_TO_COPY = [
   'crosshairs',
   'crosshairs-simple',
   'location-dot',
+  'location-dot-slash',
+  'map-location-dot',
   'circle-dot',
   'circle-small',
   'scrubber',
@@ -503,7 +505,8 @@ const ICONS_TO_COPY = [
   'screen-users',
   'church',
   'cross',
-  'place-of-worship'
+  'place-of-worship',
+  'crown'
   // Add more icon names here
 ];
 
