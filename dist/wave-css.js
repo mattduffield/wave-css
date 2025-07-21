@@ -3859,7 +3859,9 @@ if (!customElements.get("wc-fa-icon")) {
       "chalkboard-teacher": "chalkboard-user",
       "phone-alt": "phone-flip",
       "users-cog": "users-gear",
-      "user-friends": "user-group"
+      "user-friends": "user-group",
+      "calendar-times": "calendar-xmark",
+      "calendar-time": "calendar-clock"
     };
     constructor() {
       super();
