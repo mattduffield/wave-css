@@ -198,6 +198,7 @@ const ICONS_TO_COPY = [
   'calendars',
   'calendar-check',
   'calendar-clock',
+  'calendar-day',
   'calendar-days',
   'calendar-week',
   'calendar-xmark',
