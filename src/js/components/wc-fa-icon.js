@@ -76,7 +76,8 @@ if (!customElements.get('wc-fa-icon')) {
       'calendar-times': 'calendar-xmark',
       'calendar-time': 'calendar-clock',
       'calendar-alt': 'calendar-days',
-      'map-marker-alt': 'location-dot'
+      'map-marker-alt': 'location-dot',
+      'exchange-alt': 'right-left'
     };
 
     constructor() {

@@ -158,6 +158,7 @@ const ICONS_TO_COPY = [
   'arrows-rotate-reverse',
   'arrow-rotate-right',
   'arrow-rotate-left',
+  'right-left',
   'download',
   'upload',
   'plus',
