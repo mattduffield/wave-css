@@ -508,7 +508,8 @@ const ICONS_TO_COPY = [
   'church',
   'cross',
   'place-of-worship',
-  'crown'
+  'crown',
+  'shield-check'
   // Add more icon names here
 ];
 
