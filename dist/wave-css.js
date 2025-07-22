@@ -3847,6 +3847,7 @@ if (!customElements.get("wc-fa-icon")) {
       "info-circle": "circle-info",
       "question-circle": "circle-question",
       "check-circle": "circle-check",
+      "check-square": "square-check",
       "help": "circle-question",
       "picture": "image",
       "photo": "image",
