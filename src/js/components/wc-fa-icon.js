@@ -79,7 +79,11 @@ if (!customElements.get('wc-fa-icon')) {
       'calendar-time': 'calendar-clock',
       'calendar-alt': 'calendar-days',
       'map-marker-alt': 'location-dot',
-      'exchange-alt': 'right-left'
+      'exchange-alt': 'right-left',
+      'sticky-note': 'note-sticky',
+      'phone-square': 'square-phone',
+      'phone-square-alt': 'square-phone-flip',
+      'phone-square-down': 'square-phone-hangup',
     };
 
     constructor() {
