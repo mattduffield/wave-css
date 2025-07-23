@@ -53,6 +53,7 @@ if (!customElements.get('wc-fa-icon')) {
       'mail': 'envelope',
       'email': 'envelope',
       'warning': 'triangle-exclamation',
+      'exclamation-circle': 'circle-exclamation',
       'exclamation-triangle': 'triangle-exclamation',
       'error': 'circle-xmark',
       'times-circle': 'circle-xmark',
