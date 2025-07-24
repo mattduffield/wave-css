@@ -523,7 +523,12 @@ const ICONS_TO_COPY = [
   'cross',
   'place-of-worship',
   'crown',
-  'shield-check'
+  'shield-check',
+  'pills',
+  'prescription-bottle-pill',
+  'tablets',
+  'capsule',
+  'capsules',
   // Add more icon names here
 ];
 
