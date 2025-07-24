@@ -3009,7 +3009,7 @@ if (!customElements.get("wc-dropdown-item")) {
 // src/js/components/wc-dropdown.js
 var WcDropdown = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "label", "mode", "format"];
+    return ["id", "class", "label", "mode", "format", "dropdown-class"];
   }
   constructor() {
     super();
@@ -3039,6 +3039,8 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "label") {
+    } else if (attrName === "dropdown-class") {
+      this._updateDropdownClass(newValue);
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -3099,6 +3101,10 @@ var WcDropdown = class extends WcBaseComponent {
     }
     const dropdown = document.createElement("div");
     dropdown.classList.add("dropdown");
+    const dropdownClass = this.getAttribute("dropdown-class");
+    if (dropdownClass) {
+      dropdown.classList.add(...dropdownClass.split(" ").filter((c) => c));
+    }
     const dropdownContent = document.createElement("div");
     dropdownContent.classList.add("dropdown-content", "text-sm");
     if (this.mode === "search") {
@@ -3206,6 +3212,14 @@ var WcDropdown = class extends WcBaseComponent {
         p.style.display = "none";
       }
     });
+  }
+  _updateDropdownClass(newValue) {
+    const dropdown = this.querySelector(".dropdown");
+    if (!dropdown) return;
+    dropdown.className = "dropdown";
+    if (newValue) {
+      dropdown.classList.add(...newValue.split(" ").filter((c) => c));
+    }
   }
   async _applyStyle() {
     const style = `

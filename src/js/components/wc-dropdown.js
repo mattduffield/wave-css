@@ -25,7 +25,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcDropdown extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'label', 'mode', 'format'];
+    return ['id', 'class', 'label', 'mode', 'format', 'dropdown-class'];
   }
 
   constructor() {
@@ -63,6 +63,8 @@ class WcDropdown extends WcBaseComponent {
   _handleAttributeChange(attrName, newValue) {    
     if (attrName === 'label') {
       // Do nothing...
+    } else if (attrName === 'dropdown-class') {
+      this._updateDropdownClass(newValue);
     } else {
       super._handleAttributeChange(attrName, newValue);  
     }
@@ -128,6 +130,10 @@ class WcDropdown extends WcBaseComponent {
     }
     const dropdown = document.createElement('div');
     dropdown.classList.add('dropdown');
+    const dropdownClass = this.getAttribute('dropdown-class');
+    if (dropdownClass) {
+      dropdown.classList.add(...dropdownClass.split(' ').filter(c => c));
+    }
     const dropdownContent = document.createElement('div');
     dropdownContent.classList.add('dropdown-content', 'text-sm');
     if (this.mode === 'search') {
@@ -243,6 +249,19 @@ class WcDropdown extends WcBaseComponent {
         p.style.display = "none";
       }
     });
+  }
+
+  _updateDropdownClass(newValue) {
+    const dropdown = this.querySelector('.dropdown');
+    if (!dropdown) return;
+    
+    // Remove all classes except 'dropdown'
+    dropdown.className = 'dropdown';
+    
+    // Add new classes if provided
+    if (newValue) {
+      dropdown.classList.add(...newValue.split(' ').filter(c => c));
+    }
   }
 
   async _applyStyle() {
