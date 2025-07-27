@@ -803,7 +803,7 @@ class WcInput extends WcBaseFormComponent {
         color: var(--primary-color);
       }
       wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
-        background-color: var(--primary-bg-color);
+        background-color: var(--radio-checked-bg);
         color: var(--secondary-alt-color);
       }
       wc-input .radio-group.modern:has(:focus-within) {
