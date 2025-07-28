@@ -70,29 +70,50 @@ if (!customElements.get('wc-notify')) {
       wc.EventHub.broadcast('wc-notify:ready', '', '');
     }
 
-    showSuccess(message, delay) {
-      this.showNotification(message, 'success', delay);
+    showSuccess(message, delay, persist = false) {
+      this.showNotification(message, 'success', delay, persist);
     }
 
-    showError(message, delay) {
-      this.showNotification(message, 'error', delay);
+    showError(message, delay, persist = false) {
+      this.showNotification(message, 'error', delay, persist);
     }
 
-    showInfo(message, delay) {
-      this.showNotification(message, 'info', delay);
+    showInfo(message, delay, persist = false) {
+      this.showNotification(message, 'info', delay, persist);
     }
 
-    showNotification(message, type = 'info', delay) {
+    showNotification(message, type = 'info', delay, persist = false) {
       // Use provided delay or fall back to component's default
       const notificationDelay = delay !== undefined ? delay : this.delay;
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `notification ${type} ${this.position}`;
-      notification.innerHTML = `
+      
+      // Build notification content
+      let notificationContent = `
         <wc-fa-icon name="${type === 'success' ? 'circle-check' : type === 'error' ? 'circle-exclamation' : 'circle-info'}" icon-style="duotone" size="1rem" class="flex">
         </wc-fa-icon>
-        <span>${message}</span>
+        <span class="notification-message">${message}</span>
       `;
+      
+      // Add close button if persist is true
+      if (persist) {
+        notificationContent += `
+          <button class="notification-close" aria-label="Close notification">
+            <wc-fa-icon name="xmark" size="1rem"></wc-fa-icon>
+          </button>
+        `;
+      }
+      
+      notification.innerHTML = notificationContent;
+      
+      // Add close button functionality if persist is true
+      if (persist) {
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', () => {
+          this._removeNotification(notification);
+        });
+      }
       
       // Add to tracking array
       this._notifications.push(notification);
@@ -106,20 +127,26 @@ if (!customElements.get('wc-notify')) {
       // Animate in
       setTimeout(() => notification.classList.add('show'), 10);
       
-      // Remove after delay
+      // Only auto-remove if not persistent
+      if (!persist) {
+        setTimeout(() => {
+          this._removeNotification(notification);
+        }, notificationDelay);
+      }
+    }
+
+    _removeNotification(notification) {
+      notification.classList.remove('show');
       setTimeout(() => {
-          notification.classList.remove('show');
-          setTimeout(() => {
-            notification.remove();
-            // Remove from tracking array
-            const index = this._notifications.indexOf(notification);
-            if (index > -1) {
-              this._notifications.splice(index, 1);
-              // Update positions of remaining notifications
-              this._updateNotificationPositions();
-            }
-          }, 300);
-      }, notificationDelay);
+        notification.remove();
+        // Remove from tracking array
+        const index = this._notifications.indexOf(notification);
+        if (index > -1) {
+          this._notifications.splice(index, 1);
+          // Update positions of remaining notifications
+          this._updateNotificationPositions();
+        }
+      }, 300);
     }
 
     _updateNotificationPositions() {
@@ -165,6 +192,28 @@ if (!customElements.get('wc-notify')) {
             gap: 0.75rem;
             transition: transform 0.3s, top 0.3s ease-out, bottom 0.3s ease-out;
             z-index: 2000;
+            max-width: 400px;
+        }
+
+        .notification-message {
+            flex: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            margin-left: 0.5rem;
+            color: #666;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-close:hover {
+            color: #333;
         }
 
         /* Position-specific styles */
