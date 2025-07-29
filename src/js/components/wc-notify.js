@@ -200,16 +200,18 @@ if (!customElements.get('wc-notify')) {
         }
 
         .notification-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.25rem;
-            margin-left: 0.5rem;
-            color: #666;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+          position: absolute;
+          top: 0.25rem;
+          right: 0.25rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.25rem;
+          color: #666;
+          transition: color 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .notification-close:hover {
