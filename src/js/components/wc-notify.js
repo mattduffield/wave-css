@@ -243,11 +243,11 @@ if (!customElements.get('wc-notify')) {
 
         .notification.success {
           border-left: 4px solid #2ecc71;
-          background-color: #b4ecccff;
+          background-color: #c6edd7ff;
           color: #063218ff;
         }
 
-        .notification.success i {
+        .notification.success svg {
             color: #2ecc71;
         }
 
