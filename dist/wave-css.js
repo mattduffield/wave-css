@@ -15028,23 +15028,27 @@ if (!customElements.get("wc-notify")) {
         }
 
         .notification.success svg {
-            color: #2ecc71;
+          color: #149048ff;
         }
 
         .notification.error {
-            border-left: 4px solid #e74c3c;
+          border-left: 4px solid #e74c3c;
+          background-color: #ecd3d1ff;
+          color: #44140fff;
         }
 
-        .notification.error i {
-            color: #e74c3c;
+        .notification.error svg {
+          color: #c03020ff;
         }
 
         .notification.info {
-            border-left: 4px solid #3498db;
+          border-left: 4px solid #3498db;
+          background-color: #bad5e7ff;
+          color: #0b4973ff;
         }
 
-        .notification.info i {
-            color: #3498db;
+        .notification.info svg {
+          color: #1c85cbff;
         }
       `;
       this.loadStyle("wc-notify-style", style);
