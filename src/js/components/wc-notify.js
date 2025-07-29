@@ -242,7 +242,9 @@ if (!customElements.get('wc-notify')) {
         }
 
         .notification.success {
-            border-left: 4px solid #2ecc71;
+          border-left: 4px solid #2ecc71;
+          background-color: #b4ecccff;
+          color: #063218ff;
         }
 
         .notification.success i {
