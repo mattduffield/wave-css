@@ -2276,19 +2276,13 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
   }
-  @media (min-width: 768px) {
-    .md\:grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .md\:grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-    }
-    .md\:grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-    }
+  .grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .grid-6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
   }
   .border-solid {
     border-style: solid;
@@ -6566,6 +6560,30 @@
     .sm\:flex-nowrap {
       flex-wrap: nowrap;
     }
+    .sm\:grid-1 {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .sm\:grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .sm\:grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .sm\:grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .sm\:grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .sm\:grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
     .sm\:grid-cols-1 {
       grid-template-columns: repeat(1, minmax(0, 1fr));
     }
@@ -6830,6 +6848,30 @@
     }
     .md\:flex-nowrap {
       flex-wrap: nowrap;
+    }
+    .md\:grid-1 {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .md\:grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .md\:grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .md\:grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .md\:grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .md\:grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
     }
     .md\:grid-cols-1 {
       grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -7096,6 +7138,30 @@
     .lg\:flex-nowrap {
       flex-wrap: nowrap;
     }
+    .lg\:grid-1 {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .lg\:grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .lg\:grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .lg\:grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .lg\:grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .lg\:grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
     .lg\:grid-cols-1 {
       grid-template-columns: repeat(1, minmax(0, 1fr));
     }
@@ -7361,6 +7427,30 @@
     .xl\:flex-nowrap {
       flex-wrap: nowrap;
     }
+    .xl\:grid-1 {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .xl\:grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .xl\:grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .xl\:grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .xl\:grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .xl\:grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
     .xl\:grid-cols-1 {
       grid-template-columns: repeat(1, minmax(0, 1fr));
     }
@@ -7485,6 +7575,30 @@
     }
     .\32xl\:flex-col-reverse {
       flex-direction: column-reverse;
+    }
+    .\32xl\:grid-1 {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+    }
+    .\32xl\:grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .\32xl\:grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .\32xl\:grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .\32xl\:grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .\32xl\:grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
     }
     .\32xl\:grid-cols-1 {
       grid-template-columns: repeat(1, minmax(0, 1fr));
