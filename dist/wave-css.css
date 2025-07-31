@@ -5888,6 +5888,9 @@
   .hidden {
     display: none !important;
   }
+  .table-hidden {
+    display: none;
+  }
   .block {
     display: block;
   }
