@@ -529,6 +529,7 @@ const ICONS_TO_COPY = [
   'tablets',
   'capsule',
   'capsules',
+  'percent',
   // Add more icon names here
 ];
 
