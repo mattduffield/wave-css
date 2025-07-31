@@ -7029,6 +7029,9 @@
       padding-top: 1rem;
       padding-bottom: 1rem;
     }
+    .sm\:table-cell {
+      display: table-cell !important;
+    }
   }
   @media (min-width: 768px) {
     .md\:block {
@@ -7541,6 +7544,9 @@
     .md\:py-4 {
       padding-top: 1rem;
       padding-bottom: 1rem;
+    }
+    .md\:table-cell {
+      display: table-cell !important;
     }
   }
   @media (min-width: 1024px) {
@@ -8055,6 +8061,9 @@
       padding-top: 1rem;
       padding-bottom: 1rem;
     }
+    .lg\:table-cell {
+      display: table-cell !important;
+    }
   }
   @media (min-width: 1280px) {
     .xl\:block {
@@ -8449,6 +8458,9 @@
       font-size: 8rem;
       line-height: 1;
     }
+    .xl\:table-cell {
+      display: table-cell !important;
+    }
   }
   @media (min-width: 1536px) {
     .\32xl\:block {
@@ -8776,6 +8788,9 @@
     .\32xl\:text-9xl {
       font-size: 8rem;
       line-height: 1;
+    }
+    .\32xl\:table-cell {
+      display: table-cell !important;
     }
   }
 }
