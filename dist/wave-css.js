@@ -16530,8 +16530,20 @@ var WcSelect = class extends WcBaseFormComponent {
       const optionsContainer = document.createElement("div");
       optionsContainer.classList.add("options-container");
       optionsContainer.id = "optionsContainer";
-      const allOptions = this.querySelectorAll("option");
-      optionsContainer.innerHTML = Array.from(allOptions).map((option) => `<div class="option" data-value="${option.value}">${option.textContent}</div>`).join("");
+      let optionsHTML = "";
+      children.forEach((child) => {
+        if (child.tagName === "OPTION") {
+          optionsHTML += `<div class="option" data-value="${child.value}">${child.textContent}</div>`;
+        } else if (child.tagName === "OPTGROUP") {
+          const label = child.getAttribute("label") || "";
+          optionsHTML += `<div class="optgroup-label">${label}</div>`;
+          const groupOptions = child.querySelectorAll("option");
+          groupOptions.forEach((opt) => {
+            optionsHTML += `<div class="option optgroup-option" data-value="${opt.value}">${opt.textContent}</div>`;
+          });
+        }
+      });
+      optionsContainer.innerHTML = optionsHTML;
       dropdown.appendChild(optionsContainer);
       dropdown.appendChild(select);
       hostContainer.appendChild(dropdown);
@@ -16550,9 +16562,12 @@ var WcSelect = class extends WcBaseFormComponent {
     this.formElement.innerHTML = "";
     let optionsHTML = "";
     this._items.forEach((item) => {
-      if (!isChipMode && item.optgroup && Array.isArray(item.options)) {
+      if (item.optgroup && Array.isArray(item.options)) {
         const optgroup = document.createElement("optgroup");
         optgroup.label = item.label || item.optgroup;
+        if (isChipMode) {
+          optionsHTML += `<div class="optgroup-label">${optgroup.label}</div>`;
+        }
         item.options.forEach((opt) => {
           const option = document.createElement("option");
           if (typeof opt === "object") {
@@ -16566,24 +16581,11 @@ var WcSelect = class extends WcBaseFormComponent {
             option.selected = true;
           }
           optgroup.appendChild(option);
+          if (isChipMode) {
+            optionsHTML += `<div class="option optgroup-option" data-value="${option.value}">${option.textContent}</div>`;
+          }
         });
         this.formElement.appendChild(optgroup);
-      } else if (item.optgroup && Array.isArray(item.options) && isChipMode) {
-        item.options.forEach((opt) => {
-          const option = document.createElement("option");
-          if (typeof opt === "object") {
-            option.value = opt[valueMember];
-            option.textContent = opt[displayMember];
-          } else {
-            option.value = opt;
-            option.textContent = opt;
-          }
-          if (option.value == value) {
-            option.selected = true;
-          }
-          this.formElement.appendChild(option);
-          optionsHTML += `<div class="option" data-value="${option.value}">${option.textContent}</div>`;
-        });
       } else {
         const opt = document.createElement("option");
         if (typeof item === "object") {
@@ -16597,7 +16599,9 @@ var WcSelect = class extends WcBaseFormComponent {
           opt.selected = true;
         }
         this.formElement.appendChild(opt);
-        optionsHTML += `<div class="option" data-value="${opt.value}">${opt.textContent}</div>`;
+        if (isChipMode) {
+          optionsHTML += `<div class="option" data-value="${opt.value}">${opt.textContent}</div>`;
+        }
       }
     });
     const optionsContainer = this.querySelector(".options-container");
@@ -16760,6 +16764,21 @@ var WcSelect = class extends WcBaseFormComponent {
       wc-select .option:hover { 
         background-color: var(--primary-bg-color);
         color: var(--primary-color);
+      }
+      wc-select .optgroup-label {
+        padding: 8px 5px 5px 5px;
+        font-weight: bold;
+        font-size: 0.875rem;
+        color: var(--component-alt-color);
+        background-color: var(--accent-bg-color);
+        cursor: default;
+        border-bottom: 1px solid var(--border-color);
+      }
+      wc-select .optgroup-option {
+        padding-left: 20px;
+      }
+      wc-select .optgroup-label:not(:first-child) {
+        margin-top: 4px;
       }
       wc-select select { 
         display: block; 
@@ -17028,7 +17047,9 @@ var WcSelect = class extends WcBaseFormComponent {
   }
   handleKeyboardNavigation(e) {
     const optionsContainer = this.querySelector("#optionsContainer");
-    const options = Array.from(optionsContainer.querySelectorAll(".option")).filter((option) => option.style.display !== "none");
+    const options = Array.from(optionsContainer.querySelectorAll(".option")).filter(
+      (option) => option.style.display !== "none" && !option.classList.contains("optgroup-label")
+    );
     const allowDynamic = this.hasAttribute("allow-dynamic");
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -17069,12 +17090,25 @@ var WcSelect = class extends WcBaseFormComponent {
   filterOptions(query) {
     const optionsContainer = this.querySelector("#optionsContainer");
     const options = optionsContainer.querySelectorAll(".option");
+    const optgroupLabels = optionsContainer.querySelectorAll(".optgroup-label");
     options.forEach((option) => {
       if (option.textContent.toLowerCase().includes(query.toLowerCase()) && !this.selectedOptions.includes(option.getAttribute("data-value"))) {
         option.style.display = "block";
       } else {
         option.style.display = "none";
       }
+    });
+    optgroupLabels.forEach((label) => {
+      let hasVisibleOption = false;
+      let sibling = label.nextElementSibling;
+      while (sibling && sibling.classList.contains("optgroup-option")) {
+        if (sibling.style.display !== "none") {
+          hasVisibleOption = true;
+          break;
+        }
+        sibling = sibling.nextElementSibling;
+      }
+      label.style.display = hasVisibleOption ? "block" : "none";
     });
     this.highlightedIndex = -1;
     this.updateHighlight([]);
