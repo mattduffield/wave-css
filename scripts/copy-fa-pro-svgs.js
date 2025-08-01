@@ -532,6 +532,13 @@ const ICONS_TO_COPY = [
   'capsule',
   'capsules',
   'percent',
+  'utensils',
+  'utensils-slash',
+  'fork',
+  'fork-knife',
+  'knife',
+  'spoon',
+  'chopsticks',
   // Add more icon names here
 ];
 
