@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Optgroup Support</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="h-full">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl mb-6">Test Optgroup Support</h1>
+    
+    <div class="row gap-6">
+      <!-- Standard mode with optgroups -->
+      <div class="col">
+        <h2 class="text-xl mb-4">Standard Mode with Optgroups</h2>
+        <wc-select name="car" lbl-label="Select a Car">
+          <optgroup label="German Cars">
+            <option value="mercedes">Mercedes</option>
+            <option value="bmw">BMW</option>
+            <option value="audi">Audi</option>
+          </optgroup>
+          <optgroup label="Japanese Cars">
+            <option value="toyota">Toyota</option>
+            <option value="honda">Honda</option>
+            <option value="nissan">Nissan</option>
+          </optgroup>
+          <optgroup label="American Cars">
+            <option value="ford">Ford</option>
+            <option value="chevrolet">Chevrolet</option>
+            <option value="dodge">Dodge</option>
+          </optgroup>
+        </wc-select>
+      </div>
+      
+      <!-- Chip mode with optgroups (should show flat list) -->
+      <div class="col">
+        <h2 class="text-xl mb-4">Chip Mode with Optgroups (Flattened)</h2>
+        <wc-select name="cars" mode="chip" multiple lbl-label="Select Cars">
+          <optgroup label="German Cars">
+            <option value="mercedes">Mercedes</option>
+            <option value="bmw">BMW</option>
+            <option value="audi" selected>Audi</option>
+          </optgroup>
+          <optgroup label="Japanese Cars">
+            <option value="toyota" selected>Toyota</option>
+            <option value="honda">Honda</option>
+            <option value="nissan">Nissan</option>
+          </optgroup>
+          <optgroup label="American Cars">
+            <option value="ford">Ford</option>
+            <option value="chevrolet">Chevrolet</option>
+            <option value="dodge">Dodge</option>
+          </optgroup>
+        </wc-select>
+      </div>
+    </div>
+    
+    <div class="row gap-6 mt-8">
+      <!-- Standard mode with items attribute -->
+      <div class="col">
+        <h2 class="text-xl mb-4">Standard Mode with Items (Optgroups)</h2>
+        <wc-select name="framework" 
+          lbl-label="Select Framework"
+          display-member="label"
+          value-member="value"
+          items='[
+            {
+              "optgroup": "Frontend",
+              "label": "Frontend Frameworks",
+              "options": [
+                {"label": "React", "value": "react"},
+                {"label": "Vue", "value": "vue"},
+                {"label": "Angular", "value": "angular"}
+              ]
+            },
+            {
+              "optgroup": "Backend",
+              "label": "Backend Frameworks",
+              "options": [
+                {"label": "Express", "value": "express"},
+                {"label": "Django", "value": "django"},
+                {"label": "Rails", "value": "rails"}
+              ]
+            },
+            {"label": "Vanilla JS", "value": "vanilla"}
+          ]'>
+        </wc-select>
+      </div>
+      
+      <!-- Regular select without optgroups -->
+      <div class="col">
+        <h2 class="text-xl mb-4">Standard Mode without Optgroups</h2>
+        <wc-select name="color" lbl-label="Select Color">
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+          <option value="yellow">Yellow</option>
+        </wc-select>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

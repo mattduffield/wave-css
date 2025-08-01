@@ -210,7 +210,7 @@ class WcSelect extends WcBaseFormComponent {
   _createInnerElement() {
     const labelText = this.getAttribute('lbl-label') || '';
     const name = this.getAttribute('name');
-    const options = this.querySelectorAll('option');
+    
     if (this.hasAttribute('lbl-label')) {
       const lbl = document.createElement('label');
       lbl.textContent = labelText;
@@ -233,9 +233,22 @@ class WcSelect extends WcBaseFormComponent {
     if (size) {
       select.setAttribute('size', size);
     }
-    options.forEach(opt => {
-      select.appendChild(opt)
+    
+    // Process children maintaining optgroup structure
+    const children = Array.from(this.children);
+    children.forEach(child => {
+      if (child.tagName === 'OPTION') {
+        select.appendChild(child.cloneNode(true));
+      } else if (child.tagName === 'OPTGROUP') {
+        const optgroup = child.cloneNode(false);
+        const groupOptions = child.querySelectorAll('option');
+        groupOptions.forEach(opt => {
+          optgroup.appendChild(opt.cloneNode(true));
+        });
+        select.appendChild(optgroup);
+      }
     });
+    
     this.formElement = select;
 
     if (this.getAttribute('mode') === 'chip') {
@@ -282,7 +295,10 @@ class WcSelect extends WcBaseFormComponent {
       const optionsContainer = document.createElement('div');
       optionsContainer.classList.add('options-container');
       optionsContainer.id = 'optionsContainer';
-      optionsContainer.innerHTML = Array.from(options)
+      
+      // For chip mode, only show flat list of options (no optgroup support)
+      const allOptions = this.querySelectorAll('option');
+      optionsContainer.innerHTML = Array.from(allOptions)
         .map(option => `<div class="option" data-value="${option.value}">${option.textContent}</div>`)
         .join('');
       dropdown.appendChild(optionsContainer);
@@ -302,28 +318,73 @@ class WcSelect extends WcBaseFormComponent {
     const displayMember = this.getAttribute('display-member') || 'key';
     const valueMember = this.getAttribute('value-member') || 'value';
     const value = this.getAttribute('value') || null;
+    const isChipMode = this.getAttribute('mode') === 'chip';
+    
     // Clear existing options
     this.formElement.innerHTML = '';
+    
+    let optionsHTML = '';
+    
     this._items.forEach((item) => {
-      const opt = document.createElement('option');
-      if (typeof item === 'object') {
-        opt.value = item[valueMember];
-        opt.textContent = item[displayMember];
+      // Check if item is an optgroup and we're not in chip mode
+      if (!isChipMode && item.optgroup && Array.isArray(item.options)) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = item.label || item.optgroup;
+        
+        item.options.forEach(opt => {
+          const option = document.createElement('option');
+          if (typeof opt === 'object') {
+            option.value = opt[valueMember];
+            option.textContent = opt[displayMember];
+          } else {
+            option.value = opt;
+            option.textContent = opt;
+          }
+          if (option.value == value) {
+            option.selected = true;
+          }
+          optgroup.appendChild(option);
+        });
+        
+        this.formElement.appendChild(optgroup);
+      } else if (item.optgroup && Array.isArray(item.options) && isChipMode) {
+        // For chip mode, flatten optgroup options
+        item.options.forEach(opt => {
+          const option = document.createElement('option');
+          if (typeof opt === 'object') {
+            option.value = opt[valueMember];
+            option.textContent = opt[displayMember];
+          } else {
+            option.value = opt;
+            option.textContent = opt;
+          }
+          if (option.value == value) {
+            option.selected = true;
+          }
+          this.formElement.appendChild(option);
+          optionsHTML += `<div class="option" data-value="${option.value}">${option.textContent}</div>`;
+        });
       } else {
-        opt.value = item;
-        opt.textContent = item;
+        // Regular option
+        const opt = document.createElement('option');
+        if (typeof item === 'object') {
+          opt.value = item[valueMember];
+          opt.textContent = item[displayMember];
+        } else {
+          opt.value = item;
+          opt.textContent = item;
+        }
+        if (opt.value == value) {
+          opt.selected = true;
+        }
+        this.formElement.appendChild(opt);
+        optionsHTML += `<div class="option" data-value="${opt.value}">${opt.textContent}</div>`;
       }
-      if (opt.value == value) {
-        opt.selected = true;
-      }
-      this.formElement.appendChild(opt);
     });
+    
     const optionsContainer = this.querySelector('.options-container');
-    if (optionsContainer) {
-      const options = this.formElement.querySelectorAll('option');
-      optionsContainer.innerHTML = Array.from(options)
-        .map(option => `<div class="option" data-value="${option.value}">${option.textContent}</div>`)
-        .join('');      
+    if (optionsContainer && isChipMode) {
+      optionsContainer.innerHTML = optionsHTML;
     }
   }
 
@@ -826,6 +887,7 @@ class WcSelect extends WcBaseFormComponent {
   filterOptions(query) {
     const optionsContainer = this.querySelector('#optionsContainer');
     const options = optionsContainer.querySelectorAll('.option');
+    
     options.forEach(option => {
       if (option.textContent.toLowerCase().includes(query.toLowerCase()) && !this.selectedOptions.includes(option.getAttribute('data-value'))) {
         option.style.display = 'block';
@@ -833,6 +895,7 @@ class WcSelect extends WcBaseFormComponent {
         option.style.display = 'none';
       }
     });
+    
     this.highlightedIndex = -1;
     this.updateHighlight([]);
   }
@@ -885,9 +948,26 @@ class WcSelect extends WcBaseFormComponent {
 
   updateSelect() {
     const selectElement = this.querySelector('select');
-    selectElement.innerHTML = Array.from(this.querySelectorAll('option'))
-      .map(option => `<option value="${option.value}" ${this.selectedOptions.includes(option.value) ? 'selected' : ''}>${option.textContent}</option>`)
-      .join('');
+    selectElement.innerHTML = '';
+    
+    // Rebuild select maintaining optgroup structure
+    const children = Array.from(this.children);
+    children.forEach(child => {
+      if (child.tagName === 'OPTION') {
+        const opt = child.cloneNode(true);
+        opt.selected = this.selectedOptions.includes(opt.value);
+        selectElement.appendChild(opt);
+      } else if (child.tagName === 'OPTGROUP') {
+        const optgroup = child.cloneNode(false);
+        const groupOptions = child.querySelectorAll('option');
+        groupOptions.forEach(opt => {
+          const option = opt.cloneNode(true);
+          option.selected = this.selectedOptions.includes(option.value);
+          optgroup.appendChild(option);
+        });
+        selectElement.appendChild(optgroup);
+      }
+    });
   }
 
   updateDropdownOptions() {
