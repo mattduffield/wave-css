@@ -92,6 +92,8 @@ const ICONS_TO_COPY = [
   'user-group',
   'user-group-simple',
   'user-slash',
+  'user-doctor',
+  'user-nurse',
   'users-slash',
   'hand-dots',
   'heart',
