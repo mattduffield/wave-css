@@ -16682,6 +16682,10 @@ var WcSelect = class extends WcBaseFormComponent {
       wc-select {
         display: contents;
       }
+      wc-select > option,
+      wc-select > optgroup {
+        display: none;
+      }
       wc-select .chip-container { 
         display: none;
         flex-wrap: wrap; 
