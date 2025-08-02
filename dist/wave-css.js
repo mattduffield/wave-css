@@ -3885,7 +3885,8 @@ if (!customElements.get("wc-fa-icon")) {
       "sticky-note": "note-sticky",
       "phone-square": "square-phone",
       "phone-square-alt": "square-phone-flip",
-      "phone-square-down": "square-phone-hangup"
+      "phone-square-down": "square-phone-hangup",
+      "history": "rectangle-history"
     };
     constructor() {
       super();
