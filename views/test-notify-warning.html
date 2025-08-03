@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Notify Warning</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="h-full">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl mb-6">Test Notification Types</h1>
+    
+    <div class="flex gap-4 flex-wrap">
+      <button onclick="wc.Notify.showSuccess('Operation completed successfully!')" class="btn btn-success">
+        Show Success
+      </button>
+      
+      <button onclick="wc.Notify.showError('An error occurred!')" class="btn btn-danger">
+        Show Error
+      </button>
+      
+      <button onclick="wc.Notify.showInfo('This is an informational message.')" class="btn btn-info">
+        Show Info
+      </button>
+      
+      <button onclick="wc.Notify.showWarning('Warning: This action may have consequences!')" class="btn btn-warning">
+        Show Warning
+      </button>
+    </div>
+    
+    <h2 class="text-2xl mt-8 mb-4">Persistent Notifications</h2>
+    
+    <div class="flex gap-4 flex-wrap">
+      <button onclick="wc.Notify.showSuccess('Success with close button', undefined, true)" class="btn btn-success">
+        Persistent Success
+      </button>
+      
+      <button onclick="wc.Notify.showError('Error with close button', undefined, true)" class="btn btn-danger">
+        Persistent Error
+      </button>
+      
+      <button onclick="wc.Notify.showInfo('Info with close button', undefined, true)" class="btn btn-info">
+        Persistent Info
+      </button>
+      
+      <button onclick="wc.Notify.showWarning('Warning with close button', undefined, true)" class="btn btn-warning">
+        Persistent Warning
+      </button>
+    </div>
+    
+    <h2 class="text-2xl mt-8 mb-4">Custom Delays</h2>
+    
+    <div class="flex gap-4 flex-wrap">
+      <button onclick="wc.Notify.showWarning('This warning will disappear quickly!', 1000)" class="btn btn-warning">
+        1 Second Warning
+      </button>
+      
+      <button onclick="wc.Notify.showWarning('This warning will stay longer!', 5000)" class="btn btn-warning">
+        5 Second Warning
+      </button>
+    </div>
+  </div>
+  
+  <!-- Notify component -->
+  <wc-notify position="top-right" delay="3000"></wc-notify>
+  
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

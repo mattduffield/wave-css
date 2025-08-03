@@ -82,6 +82,10 @@ if (!customElements.get('wc-notify')) {
       this.showNotification(message, 'info', delay, persist);
     }
 
+    showWarning(message, delay, persist = false) {
+      this.showNotification(message, 'warning', delay, persist);
+    }
+
     showNotification(message, type = 'info', delay, persist = false) {
       // Use provided delay or fall back to component's default
       const notificationDelay = delay !== undefined ? delay : this.delay;
@@ -91,7 +95,7 @@ if (!customElements.get('wc-notify')) {
       
       // Build notification content
       let notificationContent = `
-        <wc-fa-icon name="${type === 'success' ? 'circle-check' : type === 'error' ? 'circle-exclamation' : 'circle-info'}" icon-style="duotone" size="1rem" class="flex">
+        <wc-fa-icon name="${type === 'success' ? 'circle-check' : type === 'error' ? 'circle-exclamation' : type === 'warning' ? 'triangle-exclamation' : 'circle-info'}" icon-style="duotone" size="1rem" class="flex">
         </wc-fa-icon>
         <span class="notification-message">${message}</span>
       `;
@@ -154,7 +158,7 @@ if (!customElements.get('wc-notify')) {
       const isBottom = this.position.includes('bottom');
       let currentPosition = 20; // Initial position from edge
       
-      this._notifications.forEach((notification, index) => {
+      this._notifications.forEach((notification) => {
         if (isBottom) {
           // For bottom positions, stack from bottom to top
           notification.style.bottom = `${currentPosition}px`;
@@ -271,6 +275,16 @@ if (!customElements.get('wc-notify')) {
 
         .notification.info svg {
           color: #1c85cbff;
+        }
+
+        .notification.warning {
+          border-left: 4px solid #f39c12;
+          background-color: #ffeaa7;
+          color: #7d4f00;
+        }
+
+        .notification.warning svg {
+          color: #f39c12;
         }
       `;
       this.loadStyle('wc-notify-style', style);

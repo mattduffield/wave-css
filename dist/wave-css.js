@@ -14894,12 +14894,15 @@ if (!customElements.get("wc-notify")) {
     showInfo(message, delay, persist = false) {
       this.showNotification(message, "info", delay, persist);
     }
+    showWarning(message, delay, persist = false) {
+      this.showNotification(message, "warning", delay, persist);
+    }
     showNotification(message, type = "info", delay, persist = false) {
       const notificationDelay = delay !== void 0 ? delay : this.delay;
       const notification = document.createElement("div");
       notification.className = `notification ${type} ${this.position}`;
       let notificationContent = `
-        <wc-fa-icon name="${type === "success" ? "circle-check" : type === "error" ? "circle-exclamation" : "circle-info"}" icon-style="duotone" size="1rem" class="flex">
+        <wc-fa-icon name="${type === "success" ? "circle-check" : type === "error" ? "circle-exclamation" : type === "warning" ? "triangle-exclamation" : "circle-info"}" icon-style="duotone" size="1rem" class="flex">
         </wc-fa-icon>
         <span class="notification-message">${message}</span>
       `;
@@ -14942,7 +14945,7 @@ if (!customElements.get("wc-notify")) {
       const spacing = 10;
       const isBottom = this.position.includes("bottom");
       let currentPosition = 20;
-      this._notifications.forEach((notification, index) => {
+      this._notifications.forEach((notification) => {
         if (isBottom) {
           notification.style.bottom = `${currentPosition}px`;
           notification.style.top = "auto";
@@ -15053,6 +15056,16 @@ if (!customElements.get("wc-notify")) {
 
         .notification.info svg {
           color: #1c85cbff;
+        }
+
+        .notification.warning {
+          border-left: 4px solid #f39c12;
+          background-color: #ffeaa7;
+          color: #7d4f00;
+        }
+
+        .notification.warning svg {
+          color: #f39c12;
         }
       `;
       this.loadStyle("wc-notify-style", style);
