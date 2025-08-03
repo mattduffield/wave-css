@@ -539,6 +539,11 @@ const ICONS_TO_COPY = [
   'knife',
   'spoon',
   'chopsticks',
+  'cake-candles',
+  'cake-slice',
+  'balloons',
+  'balloon',
+  'cupcake',
   // Add more icon names here
 ];
 

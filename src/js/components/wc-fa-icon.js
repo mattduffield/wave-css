@@ -85,7 +85,8 @@ if (!customElements.get('wc-fa-icon')) {
       'phone-square': 'square-phone',
       'phone-square-alt': 'square-phone-flip',
       'phone-square-down': 'square-phone-hangup',
-      'history': 'rectangle-history'
+      'history': 'rectangle-history',
+      'birthday-cake': 'cake-candles'
     };
 
     constructor() {
