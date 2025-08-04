@@ -256,6 +256,8 @@ const ICONS_TO_COPY = [
   'file-invoice-dollar',
   'file-jpg',
   'file-lock',
+  'file-medical',
+  'files-medical',
   'file-pdf',
   'file-ppt',
   'file-powerpoint',
