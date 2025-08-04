@@ -524,6 +524,7 @@ const ICONS_TO_COPY = [
   'notes-sticky',
   'note-medical',
   'notes-medical',
+  'suitcase-medical',
   'chalkboard',
   'chalkboard-user',
   'person-chalkboard',

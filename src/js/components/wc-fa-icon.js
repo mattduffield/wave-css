@@ -86,7 +86,8 @@ if (!customElements.get('wc-fa-icon')) {
       'phone-square-alt': 'square-phone-flip',
       'phone-square-down': 'square-phone-hangup',
       'history': 'rectangle-history',
-      'birthday-cake': 'cake-candles'
+      'birthday-cake': 'cake-candles',
+      'medkit': 'suitcase-medical',
     };
 
     constructor() {
