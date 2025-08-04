@@ -3016,6 +3016,9 @@ var WcDropdown = class extends WcBaseComponent {
     this.childComponentSelector = "a,hr,wc-input";
     this.clickModes = ["search", "click"];
     this.mode = this.getAttribute("mode") || "click";
+    this._boundReposition = null;
+    this._isOpen = false;
+    this._isMobile = false;
     const compEl = this.querySelector(".wc-dropdown");
     if (compEl) {
       this.componentElement = compEl;
@@ -3161,10 +3164,17 @@ var WcDropdown = class extends WcBaseComponent {
           const elt = tgt?.querySelector(triggerSelector);
           if (mode === "open") {
             elt?.classList.add("show");
+            this._applyPositioningIfNeeded();
           } else if (mode === "close") {
             elt?.classList.remove("show");
+            this._isOpen = false;
           } else if (mode === "toggle") {
             elt?.classList.toggle("show");
+            if (elt?.classList.contains("show")) {
+              this._applyPositioningIfNeeded();
+            } else {
+              this._isOpen = false;
+            }
           }
         }
       });
@@ -3172,11 +3182,28 @@ var WcDropdown = class extends WcBaseComponent {
       const elt = selector?.querySelector(triggerSelector);
       if (mode === "open") {
         elt?.classList.add("show");
+        this._applyPositioningIfNeeded();
       } else if (mode === "close") {
         elt?.classList.remove("show");
+        this._isOpen = false;
       } else if (mode === "toggle") {
         elt?.classList.toggle("show");
+        if (elt?.classList.contains("show")) {
+          this._applyPositioningIfNeeded();
+        } else {
+          this._isOpen = false;
+        }
       }
+    }
+  }
+  _applyPositioningIfNeeded() {
+    const dropdownContent = this.querySelector(".dropdown-content");
+    const button = this.querySelector(".dropbtn");
+    if (dropdownContent && button) {
+      requestAnimationFrame(() => {
+        this._positionDropdown(dropdownContent, button);
+        this._isOpen = true;
+      });
     }
   }
   _handleOpen(event) {
@@ -3191,7 +3218,20 @@ var WcDropdown = class extends WcBaseComponent {
   _handleClick(event) {
     const { target } = event;
     const parent = target.closest(".wc-dropdown");
+    const wasShown = parent.classList.contains("show");
     parent.classList.toggle("show");
+    if (!wasShown) {
+      const dropdownContent = this.querySelector(".dropdown-content");
+      const button = this.querySelector(".dropbtn");
+      if (dropdownContent && button) {
+        requestAnimationFrame(() => {
+          this._positionDropdown(dropdownContent, button);
+          this._isOpen = true;
+        });
+      }
+    } else {
+      this._isOpen = false;
+    }
   }
   _handleWindowClick(event) {
     const { target } = event;
@@ -3199,7 +3239,10 @@ var WcDropdown = class extends WcBaseComponent {
     const haltElt = target.closest(".halt-event");
     if (haltElt) return;
     const parts = this.querySelectorAll(".wc-dropdown");
-    parts.forEach((p) => p.classList.remove("show"));
+    parts.forEach((p) => {
+      p.classList.remove("show");
+      this._isOpen = false;
+    });
   }
   _handleInput(event) {
     const { target } = event;
@@ -3219,6 +3262,64 @@ var WcDropdown = class extends WcBaseComponent {
     dropdown.className = "dropdown";
     if (newValue) {
       dropdown.classList.add(...newValue.split(" ").filter((c) => c));
+    }
+  }
+  _detectMobile() {
+    return window.innerWidth <= 768 || "ontouchstart" in window;
+  }
+  _checkAnchorPositioningSupport() {
+    return CSS.supports("anchor-name", "--test");
+  }
+  _positionDropdown(dropdownContent, button) {
+    if (!this._detectMobile() && this._checkAnchorPositioningSupport()) {
+      return;
+    }
+    const buttonRect = button.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    dropdownContent.style.position = "fixed";
+    dropdownContent.style.width = "auto";
+    dropdownContent.style.maxWidth = "";
+    dropdownContent.style.left = "";
+    dropdownContent.style.right = "";
+    dropdownContent.style.top = "";
+    dropdownContent.style.bottom = "";
+    const originalDisplay = dropdownContent.style.display;
+    dropdownContent.style.display = "block";
+    const dropdownRect = dropdownContent.getBoundingClientRect();
+    const dropdownWidth = Math.min(dropdownRect.width, viewportWidth - 20);
+    const dropdownHeight = dropdownRect.height;
+    dropdownContent.style.display = originalDisplay;
+    if (this._detectMobile()) {
+      dropdownContent.style.maxWidth = `${Math.min(dropdownWidth, viewportWidth - 20)}px`;
+    }
+    let top = buttonRect.bottom;
+    if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+      top = buttonRect.top - dropdownHeight;
+    }
+    let left = buttonRect.left;
+    if (left + dropdownWidth > viewportWidth - 10) {
+      left = Math.max(10, Math.min(buttonRect.right - dropdownWidth, viewportWidth - dropdownWidth - 10));
+    }
+    if (left < 10) {
+      left = 10;
+    }
+    dropdownContent.style.position = "fixed";
+    dropdownContent.style.left = `${left}px`;
+    dropdownContent.style.top = `${top}px`;
+    dropdownContent.style.width = `${dropdownWidth}px`;
+    if (top + dropdownHeight > viewportHeight - 10) {
+      dropdownContent.style.maxHeight = `${viewportHeight - top - 10}px`;
+      dropdownContent.style.overflowY = "auto";
+    }
+  }
+  _repositionOnScroll() {
+    const dropdownContent = this.querySelector(".dropdown-content");
+    const button = this.querySelector(".dropbtn");
+    if (dropdownContent && button && dropdownContent.style.display === "block") {
+      this._positionDropdown(dropdownContent, button);
     }
   }
   async _applyStyle() {
@@ -3333,6 +3434,20 @@ var WcDropdown = class extends WcBaseComponent {
       @position-try --left {
         position-area: left;
       }
+      
+      /* Mobile-specific styles */
+      @media (max-width: 768px) {
+        .wc-dropdown .dropdown-content {
+          max-width: calc(100vw - 20px) !important;
+        }
+      }
+      
+      /* Fallback for browsers without anchor positioning */
+      @supports not (anchor-name: --test) {
+        .wc-dropdown .dropdown-content {
+          position: fixed !important;
+        }
+      }
     `.trim();
     await this.loadStyle("wc-dropdown-style", style);
   }
@@ -3343,6 +3458,9 @@ var WcDropdown = class extends WcBaseComponent {
       document.body.addEventListener("wc-dropdown:close", this._handleClose.bind(this));
       document.body.addEventListener("wc-dropdown:toggle", this._handleToggle.bind(this));
     }
+    this._boundReposition = this._repositionOnScroll.bind(this);
+    window.addEventListener("scroll", this._boundReposition, { passive: true });
+    window.addEventListener("resize", this._boundReposition, { passive: true });
   }
   _unWireEvents() {
     super._unWireEvents();
@@ -3357,6 +3475,11 @@ var WcDropdown = class extends WcBaseComponent {
       if (ipt) {
         ipt.removeEventListener("input", this._handleInput.bind(this));
       }
+    }
+    if (this._boundReposition) {
+      window.removeEventListener("scroll", this._boundReposition);
+      window.removeEventListener("resize", this._boundReposition);
+      this._boundReposition = null;
     }
   }
 };

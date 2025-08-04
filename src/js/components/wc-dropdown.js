@@ -33,6 +33,9 @@ class WcDropdown extends WcBaseComponent {
     this.childComponentSelector = 'a,hr,wc-input';
     this.clickModes = ['search', 'click'];
     this.mode = this.getAttribute('mode') || 'click';
+    this._boundReposition = null;
+    this._isOpen = false;
+    this._isMobile = false;
     const compEl = this.querySelector('.wc-dropdown');
     if (compEl) {
       this.componentElement = compEl;
@@ -192,10 +195,17 @@ class WcDropdown extends WcBaseComponent {
           const elt = tgt?.querySelector(triggerSelector);
           if (mode === 'open') {
             elt?.classList.add('show');
+            this._applyPositioningIfNeeded();
           } else if (mode === 'close') {
             elt?.classList.remove('show');
+            this._isOpen = false;
           } else if (mode === 'toggle') {
             elt?.classList.toggle('show');
+            if (elt?.classList.contains('show')) {
+              this._applyPositioningIfNeeded();
+            } else {
+              this._isOpen = false;
+            }
           }
         }
       });
@@ -203,11 +213,29 @@ class WcDropdown extends WcBaseComponent {
       const elt = selector?.querySelector(triggerSelector);
       if (mode === 'open') {
         elt?.classList.add('show');
+        this._applyPositioningIfNeeded();
       } else if (mode === 'close') {
         elt?.classList.remove('show');
+        this._isOpen = false;
       } else if (mode === 'toggle') {
         elt?.classList.toggle('show');
+        if (elt?.classList.contains('show')) {
+          this._applyPositioningIfNeeded();
+        } else {
+          this._isOpen = false;
+        }
       }
+    }
+  }
+  
+  _applyPositioningIfNeeded() {
+    const dropdownContent = this.querySelector('.dropdown-content');
+    const button = this.querySelector('.dropbtn');
+    if (dropdownContent && button) {
+      requestAnimationFrame(() => {
+        this._positionDropdown(dropdownContent, button);
+        this._isOpen = true;
+      });
     }
   }
 
@@ -226,7 +254,23 @@ class WcDropdown extends WcBaseComponent {
   _handleClick(event) {
     const {target} = event;
     const parent = target.closest('.wc-dropdown');
-    parent.classList.toggle('show');  
+    const wasShown = parent.classList.contains('show');
+    parent.classList.toggle('show');
+    
+    // Apply positioning for mobile or non-supported browsers
+    if (!wasShown) {
+      const dropdownContent = this.querySelector('.dropdown-content');
+      const button = this.querySelector('.dropbtn');
+      if (dropdownContent && button) {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(() => {
+          this._positionDropdown(dropdownContent, button);
+          this._isOpen = true;
+        });
+      }
+    } else {
+      this._isOpen = false;
+    }
   }
 
   _handleWindowClick(event) {
@@ -235,7 +279,10 @@ class WcDropdown extends WcBaseComponent {
     const haltElt = target.closest('.halt-event');
     if (haltElt) return;
     const parts = this.querySelectorAll('.wc-dropdown');
-    parts.forEach(p => p.classList.remove('show'));
+    parts.forEach(p => {
+      p.classList.remove('show');
+      this._isOpen = false;
+    });
   }
 
   _handleInput(event) {
@@ -261,6 +308,96 @@ class WcDropdown extends WcBaseComponent {
     // Add new classes if provided
     if (newValue) {
       dropdown.classList.add(...newValue.split(' ').filter(c => c));
+    }
+  }
+
+  _detectMobile() {
+    // Check for mobile device based on viewport width and touch capability
+    return window.innerWidth <= 768 || 'ontouchstart' in window;
+  }
+
+  _checkAnchorPositioningSupport() {
+    // Check if CSS Anchor Positioning is supported
+    return CSS.supports('anchor-name', '--test');
+  }
+
+  _positionDropdown(dropdownContent, button) {
+    // Only apply JS positioning if on mobile or anchor positioning not supported
+    if (!this._detectMobile() && this._checkAnchorPositioningSupport()) {
+      return; // Let CSS handle positioning
+    }
+
+    // Get button and viewport dimensions
+    const buttonRect = button.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate available space
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    
+    // Reset inline styles for fresh calculation
+    dropdownContent.style.position = 'fixed';
+    dropdownContent.style.width = 'auto';
+    dropdownContent.style.maxWidth = '';
+    dropdownContent.style.left = '';
+    dropdownContent.style.right = '';
+    dropdownContent.style.top = '';
+    dropdownContent.style.bottom = '';
+    
+    // Temporarily show to get dimensions
+    const originalDisplay = dropdownContent.style.display;
+    dropdownContent.style.display = 'block';
+    const dropdownRect = dropdownContent.getBoundingClientRect();
+    const dropdownWidth = Math.min(dropdownRect.width, viewportWidth - 20); // Leave 10px margin on each side
+    const dropdownHeight = dropdownRect.height;
+    dropdownContent.style.display = originalDisplay;
+    
+    // Set max width for mobile
+    if (this._detectMobile()) {
+      dropdownContent.style.maxWidth = `${Math.min(dropdownWidth, viewportWidth - 20)}px`;
+    }
+    
+    // Determine vertical position
+    let top = buttonRect.bottom;
+    if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+      // Position above if more space
+      top = buttonRect.top - dropdownHeight;
+    }
+    
+    // Determine horizontal position
+    let left = buttonRect.left;
+    
+    // Check if dropdown would overflow right edge
+    if (left + dropdownWidth > viewportWidth - 10) {
+      // Align to right edge of button or viewport
+      left = Math.max(10, Math.min(buttonRect.right - dropdownWidth, viewportWidth - dropdownWidth - 10));
+    }
+    
+    // Check if dropdown would overflow left edge
+    if (left < 10) {
+      left = 10;
+    }
+    
+    // Apply calculated position
+    dropdownContent.style.position = 'fixed';
+    dropdownContent.style.left = `${left}px`;
+    dropdownContent.style.top = `${top}px`;
+    dropdownContent.style.width = `${dropdownWidth}px`;
+    
+    // Ensure dropdown doesn't extend beyond viewport bottom
+    if (top + dropdownHeight > viewportHeight - 10) {
+      dropdownContent.style.maxHeight = `${viewportHeight - top - 10}px`;
+      dropdownContent.style.overflowY = 'auto';
+    }
+  }
+
+  _repositionOnScroll() {
+    const dropdownContent = this.querySelector('.dropdown-content');
+    const button = this.querySelector('.dropbtn');
+    
+    if (dropdownContent && button && dropdownContent.style.display === 'block') {
+      this._positionDropdown(dropdownContent, button);
     }
   }
 
@@ -376,6 +513,20 @@ class WcDropdown extends WcBaseComponent {
       @position-try --left {
         position-area: left;
       }
+      
+      /* Mobile-specific styles */
+      @media (max-width: 768px) {
+        .wc-dropdown .dropdown-content {
+          max-width: calc(100vw - 20px) !important;
+        }
+      }
+      
+      /* Fallback for browsers without anchor positioning */
+      @supports not (anchor-name: --test) {
+        .wc-dropdown .dropdown-content {
+          position: fixed !important;
+        }
+      }
     `.trim();
     await this.loadStyle('wc-dropdown-style', style);
   }
@@ -388,6 +539,11 @@ class WcDropdown extends WcBaseComponent {
       document.body.addEventListener('wc-dropdown:close', this._handleClose.bind(this));
       document.body.addEventListener('wc-dropdown:toggle', this._handleToggle.bind(this));
     }
+    
+    // Add scroll and resize listeners for mobile positioning
+    this._boundReposition = this._repositionOnScroll.bind(this);
+    window.addEventListener('scroll', this._boundReposition, { passive: true });
+    window.addEventListener('resize', this._boundReposition, { passive: true });
   }
 
   _unWireEvents() {
@@ -405,6 +561,13 @@ class WcDropdown extends WcBaseComponent {
       if (ipt) {
         ipt.removeEventListener('input', this._handleInput.bind(this));
       }
+    }
+    
+    // Remove scroll and resize listeners
+    if (this._boundReposition) {
+      window.removeEventListener('scroll', this._boundReposition);
+      window.removeEventListener('resize', this._boundReposition);
+      this._boundReposition = null;
     }
   }
 

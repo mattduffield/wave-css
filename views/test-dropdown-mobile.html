@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Dropdown Mobile</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    /* Additional test styles */
+    .test-container {
+      min-height: 200vh; /* Make page scrollable */
+    }
+    .position-test {
+      margin: 20px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      background: var(--secondary-bg-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 class="text-2xl p-4">Dropdown Mobile Test</h1>
+    
+    <!-- Top left corner -->
+    <div class="position-test" style="position: absolute; top: 80px; left: 10px;">
+      <h3 class="mb-2">Top Left Corner</h3>
+      <wc-dropdown label="Options" mode="click">
+        <a href="#">First Option</a>
+        <a href="#">Second Option</a>
+        <a href="#">Third Option</a>
+        <a href="#">Fourth Option with longer text</a>
+        <a href="#">Fifth Option</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Top right corner -->
+    <div class="position-test" style="position: absolute; top: 80px; right: 10px;">
+      <h3 class="mb-2">Top Right Corner</h3>
+      <wc-dropdown label="Menu" mode="click">
+        <a href="#">Profile Settings</a>
+        <a href="#">Account Preferences</a>
+        <a href="#">Notifications</a>
+        <hr />
+        <a href="#">Sign Out</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Bottom left corner -->
+    <div class="position-test" style="position: fixed; bottom: 100px; left: 10px;">
+      <h3 class="mb-2">Bottom Left Corner</h3>
+      <wc-dropdown label="Actions" mode="click">
+        <a href="#">Edit</a>
+        <a href="#">Copy</a>
+        <a href="#">Delete</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Bottom right corner -->
+    <div class="position-test" style="position: fixed; bottom: 100px; right: 10px;">
+      <h3 class="mb-2">Bottom Right Corner</h3>
+      <wc-dropdown label="More" mode="click">
+        <a href="#">Download</a>
+        <a href="#">Share</a>
+        <a href="#">Export as PDF</a>
+        <a href="#">Print</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Center of page -->
+    <div class="position-test mx-auto" style="max-width: 300px; margin-top: 400px;">
+      <h3 class="mb-2">Center with Search</h3>
+      <wc-dropdown label="Search Items" mode="search">
+        <a href="#">Apple</a>
+        <a href="#">Banana</a>
+        <a href="#">Cherry</a>
+        <a href="#">Date</a>
+        <a href="#">Elderberry</a>
+        <a href="#">Fig</a>
+        <a href="#">Grape</a>
+        <a href="#">Honeydew</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Long dropdown content -->
+    <div class="position-test mx-auto" style="max-width: 300px; margin-top: 100px;">
+      <h3 class="mb-2">Long Content</h3>
+      <wc-dropdown label="Many Options" mode="click">
+        <a href="#">Option 1</a>
+        <a href="#">Option 2</a>
+        <a href="#">Option 3</a>
+        <a href="#">Option 4</a>
+        <a href="#">Option 5</a>
+        <a href="#">Option 6</a>
+        <a href="#">Option 7</a>
+        <a href="#">Option 8</a>
+        <a href="#">Option 9</a>
+        <a href="#">Option 10</a>
+        <a href="#">Option 11</a>
+        <a href="#">Option 12</a>
+        <a href="#">Option 13</a>
+        <a href="#">Option 14</a>
+        <a href="#">Option 15</a>
+      </wc-dropdown>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="p-4 m-4 bg-info text-info-content rounded">
+      <h2 class="text-xl mb-2">Mobile Testing Instructions:</h2>
+      <ul class="list-disc ml-6">
+        <li>Test on various mobile devices or use browser dev tools mobile view</li>
+        <li>Click dropdowns near screen edges to test boundary detection</li>
+        <li>Scroll while dropdown is open to test repositioning</li>
+        <li>Rotate device to test orientation changes</li>
+        <li>Test dropdowns at different scroll positions</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>
