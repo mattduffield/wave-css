@@ -1,0 +1,237 @@
+  <style>
+    .chart-container {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      /* background: white; */
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+    }
+  </style>  
+  <div id="page-contents">
+    <div class="flex flex-col flex-1 p-6 gap-4">
+      <header class="mb-8">
+        <h1 class="text-4xl font-bold mb-2">Chart Component Examples</h1>
+        <p class="text-gray-600">Interactive charts powered by Chart.js with Wave CSS theming</p>
+      </header>
+
+      <wc-theme-selector class="mb-4"></wc-theme-selector>
+
+      <!-- Simple Bar Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Simple Bar Chart</h2>
+        <wc-chart 
+          type="bar"
+          labels='["January", "February", "March", "April", "May", "June"]'
+          data='[65, 59, 80, 81, 56, 55]'
+          label="Monthly Sales"
+          title="Sales Performance 2024"
+          height="300"
+          show-data-labels="true">
+        </wc-chart>
+      </section>
+
+      <!-- Line Chart with Multiple Datasets -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Multi-Dataset Line Chart</h2>
+        <wc-chart
+          type="line"
+          labels='["Q1", "Q2", "Q3", "Q4"]'
+          datasets='[
+            {"label": "2023", "data": [120, 150, 180, 220]},
+            {"label": "2024", "data": [180, 220, 260, 320]}
+          ]'
+          title="Quarterly Revenue Comparison"
+          x-axis-title="Quarter"
+          y-axis-title="Revenue (in thousands)"
+          height="350"
+          tension="0.3">
+        </wc-chart>
+      </section>
+
+      <!-- Pie and Doughnut Charts -->
+      <div class="chart-grid">
+        <section class="container p-4 rounded-md">
+          <h3 class="text-xl font-semibold mb-3">Pie Chart - Market Share</h3>
+          <wc-chart
+            type="pie"
+            labels='["Product A", "Product B", "Product C", "Product D", "Product E"]'
+            data='[30, 25, 20, 15, 10]'
+            title="Market Share Distribution"
+            height="300">
+          </wc-chart>
+        </section>
+
+        <section class="container p-4 rounded-md">
+          <h3 class="text-xl font-semibold mb-3">Doughnut Chart - Budget Allocation</h3>
+          <wc-chart
+            type="doughnut"
+            labels='["Marketing", "Development", "Operations", "Sales", "Support"]'
+            data='[25000, 45000, 20000, 30000, 15000]'
+            title="Budget Allocation 2024"
+            height="300">
+          </wc-chart>
+        </section>
+      </div>
+
+      <!-- Stacked Bar Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Stacked Bar Chart</h2>
+        <wc-chart
+          type="bar"
+          labels='["Jan", "Feb", "Mar", "Apr", "May"]'
+          datasets='[
+            {"label": "Desktop", "data": [65, 59, 80, 81, 56]},
+            {"label": "Mobile", "data": [28, 48, 40, 39, 46]},
+            {"label": "Tablet", "data": [12, 18, 15, 17, 20]}
+          ]'
+          title="Device Usage Statistics"
+          stacked="true"
+          height="350">
+        </wc-chart>
+      </section>
+
+      <!-- Radar Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Radar Chart - Skills Assessment</h2>
+        <wc-chart
+          type="radar"
+          labels='["HTML/CSS", "JavaScript", "Python", "Database", "DevOps", "UI/UX"]'
+          datasets='[
+            {"label": "Required Skills", "data": [85, 90, 75, 80, 70, 60]},
+            {"label": "Current Skills", "data": [95, 85, 60, 75, 85, 70]}
+          ]'
+          title="Technical Skills Assessment"
+          height="400">
+        </wc-chart>
+      </section>
+
+      <!-- Polar Area Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Polar Area Chart</h2>
+        <wc-chart
+          type="polarArea"
+          labels='["Red", "Green", "Yellow", "Grey", "Blue"]'
+          data='[11, 16, 7, 3, 14]'
+          title="Color Preference Survey"
+          height="350">
+        </wc-chart>
+      </section>
+
+      <!-- Dynamic Chart Example -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Dynamic Chart with Controls</h2>
+        <div class="mb-4">
+          <button id="updateBtn" class="btn btn-primary mr-2">Update Data</button>
+          <button id="addDataBtn" class="btn btn-secondary mr-2">Add Data Point</button>
+          <button id="removeDataBtn" class="btn btn-danger mr-2">Remove Data Point</button>
+          <button id="exportBtn" class="btn btn-info">Export as Image</button>
+        </div>
+        <wc-chart
+          id="dynamicChart"
+          type="bar"
+          labels='["A", "B", "C", "D", "E"]'
+          data='[12, 19, 3, 5, 2]'
+          label="Dynamic Dataset"
+          title="Interactive Chart Example"
+          height="300"
+          show-data-labels="true">
+        </wc-chart>
+      </section>
+
+      <!-- Empty/Loading State Example -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Empty State</h2>
+        <wc-chart
+          type="bar"
+          labels='[]'
+          data='[]'
+          title="No Data Available"
+          height="200">
+        </wc-chart>
+      </section>
+
+      <!-- Theme Integration Example -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Theme Integration</h2>
+        <p class="mb-4">Charts automatically adapt to the current theme's color palette:</p>
+        <wc-chart
+          type="bar"
+          labels='["Primary", "Success", "Warning", "Danger", "Info"]'
+          data='[85, 70, 60, 45, 75]'
+          label="Theme Colors"
+          title="Theme Color Values"
+          height="250">
+        </wc-chart>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Wait for component to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const dynamicChart = document.getElementById('dynamicChart');
+      const updateBtn = document.getElementById('updateBtn');
+      const addDataBtn = document.getElementById('addDataBtn');
+      const removeDataBtn = document.getElementById('removeDataBtn');
+      const exportBtn = document.getElementById('exportBtn');
+
+      // Update data
+      updateBtn?.addEventListener('click', () => {
+        const newData = Array.from({length: 5}, () => Math.floor(Math.random() * 50));
+        dynamicChart.updateData(newData);
+      });
+
+      // Add data point
+      addDataBtn?.addEventListener('click', () => {
+        const currentLabels = JSON.parse(dynamicChart.getAttribute('labels'));
+        const currentData = JSON.parse(dynamicChart.getAttribute('data'));
+        
+        currentLabels.push(String.fromCharCode(65 + currentLabels.length));
+        currentData.push(Math.floor(Math.random() * 50));
+        
+        dynamicChart.setAttribute('labels', JSON.stringify(currentLabels));
+        dynamicChart.setAttribute('data', JSON.stringify(currentData));
+      });
+
+      // Remove data point
+      removeDataBtn?.addEventListener('click', () => {
+        const currentLabels = JSON.parse(dynamicChart.getAttribute('labels'));
+        const currentData = JSON.parse(dynamicChart.getAttribute('data'));
+        
+        if (currentLabels.length > 0) {
+          currentLabels.pop();
+          currentData.pop();
+          
+          dynamicChart.setAttribute('labels', JSON.stringify(currentLabels));
+          dynamicChart.setAttribute('data', JSON.stringify(currentData));
+        }
+      });
+
+      // Export as image
+      exportBtn?.addEventListener('click', () => {
+        const imageData = dynamicChart.toImage();
+        if (imageData) {
+          const link = document.createElement('a');
+          link.download = 'chart.png';
+          link.href = imageData;
+          link.click();
+        }
+      });
+
+      // Listen for chart events
+      document.addEventListener('chart-click', (e) => {
+        console.log('Chart clicked:', e.detail);
+      });
+
+      document.addEventListener('chart-created', (e) => {
+        console.log('Chart created:', e.detail);
+      });
+    });
+  </script>
+</body>
+</html>

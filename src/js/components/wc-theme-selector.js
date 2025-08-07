@@ -152,9 +152,11 @@ class WcThemeSelector extends WcBaseComponent {
           if me.value
             remove .light from document.documentElement
             add .dark to document.documentElement
+            send theme:change to <body/>
           else
             remove .dark from document.documentElement
             add .light to document.documentElement
+            send theme:change to <body/>
           end
         end"
         >
@@ -172,6 +174,7 @@ class WcThemeSelector extends WcBaseComponent {
 
       }
       wc-theme-selector .wc-theme-selector .theme-button {
+        background-color: var(--primary-bg-color);
         padding: 0;
       }
       wc-theme-selector .wc-theme-selector .selectmark {
@@ -210,6 +213,11 @@ class WcThemeSelector extends WcBaseComponent {
     });
     // Add the selected theme class to the documentElement
     document.documentElement.classList.add(theme);
+    
+    // Broadcast theme change event
+    if (window.wc && window.wc.EventHub) {
+      window.wc.EventHub.broadcast('theme:change', '', { theme });
+    }
   }
 
   _handleLoadTheme() {

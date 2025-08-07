@@ -59,6 +59,7 @@ import './wc-javascript.js';
 import './wc-prompt.js';
 import './wc-notify.js';
 import './wc-theme.js';
+import './wc-chart.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';
