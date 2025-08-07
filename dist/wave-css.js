@@ -15269,12 +15269,12 @@ var WcChart = class _WcChart extends WcBaseComponent {
     this.isLibraryLoaded = false;
     this.pendingChartConfig = null;
     this.defaultColors = [
-      "--chart-primary",
-      "--chart-success",
-      "--chart-warning",
-      "--chart-danger",
-      "--chart-info",
-      "--chart-secondary"
+      "--primary-bg-color",
+      "--success-bg-color",
+      "--warning-bg-color",
+      "--danger-bg-color",
+      "--info-bg-color",
+      "--secondary-bg-color"
     ];
     this.componentElement = document.createElement("div");
     this.componentElement.classList.add("wc-chart", "relative", "w-full");
@@ -15604,7 +15604,10 @@ var WcChart = class _WcChart extends WcBaseComponent {
     if (!varName.startsWith("--")) {
       varName = `--${color}`;
     }
-    const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    let resolved = getComputedStyle(this).getPropertyValue(varName).trim();
+    if (!resolved) {
+      resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
     if (resolved) {
       return resolved;
     }
@@ -15631,8 +15634,13 @@ var WcChart = class _WcChart extends WcBaseComponent {
   _getThemeColor(attrName, cssVar) {
     const attrValue = this.getAttribute(attrName);
     if (attrValue) return attrValue;
-    const computedStyle = getComputedStyle(document.documentElement);
-    const value = computedStyle.getPropertyValue(cssVar).trim();
+    let computedStyle = getComputedStyle(this);
+    let value = computedStyle.getPropertyValue(cssVar).trim();
+    if (value) {
+      return value;
+    }
+    computedStyle = getComputedStyle(document.documentElement);
+    value = computedStyle.getPropertyValue(cssVar).trim();
     if (value) {
       return value;
     }
@@ -15688,21 +15696,6 @@ var WcChart = class _WcChart extends WcBaseComponent {
     }
   }
   _applyStyle() {
-    const style = document.createElement("style");
-    style.textContent = `
-      :root {
-        --chart-primary: var(--primary-bg-color, #3498db);
-        --chart-success: var(--success-bg-color, #2ecc71);
-        --chart-warning: var(--warning-bg-color, #f39c12);
-        --chart-danger: var(--danger-bg-color, #e74c3c);
-        --chart-info: var(--info-bg-color, #9b59b6);
-        --chart-secondary: var(--secondary-bg-color, #95a5a6);
-      }
-    `;
-    if (!document.querySelector("style[data-wc-chart-colors]")) {
-      style.setAttribute("data-wc-chart-colors", "true");
-      document.head.appendChild(style);
-    }
   }
   // Public methods
   refresh() {

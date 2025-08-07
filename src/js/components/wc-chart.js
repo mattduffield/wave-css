@@ -56,12 +56,12 @@ class WcChart extends WcBaseComponent {
     
     // Default color palette - will be resolved from CSS variables
     this.defaultColors = [
-      '--chart-primary',
-      '--chart-success', 
-      '--chart-warning',
-      '--chart-danger',
-      '--chart-info',
-      '--chart-secondary'
+      '--primary-bg-color',
+      '--success-bg-color', 
+      '--warning-bg-color',
+      '--danger-bg-color',
+      '--info-bg-color',
+      '--secondary-bg-color'
     ];
 
     // Create the component structure
@@ -476,8 +476,11 @@ class WcChart extends WcBaseComponent {
       varName = `--${color}`;
     }
     
-    // Try to resolve from CSS variable
-    const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    // Try to resolve from CSS variable - first from element, then from document
+    let resolved = getComputedStyle(this).getPropertyValue(varName).trim();
+    if (!resolved) {
+      resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
     if (resolved) {
       return resolved;
     }
@@ -513,9 +516,18 @@ class WcChart extends WcBaseComponent {
     const attrValue = this.getAttribute(attrName);
     if (attrValue) return attrValue;
     
-    // Get the CSS variable value directly
-    const computedStyle = getComputedStyle(document.documentElement);
-    const value = computedStyle.getPropertyValue(cssVar).trim();
+    // Try to get the CSS variable from the component itself first
+    // This allows setting theme classes directly on the chart
+    let computedStyle = getComputedStyle(this);
+    let value = computedStyle.getPropertyValue(cssVar).trim();
+    
+    if (value) {
+      return value;
+    }
+    
+    // Fall back to document element if not found on component
+    computedStyle = getComputedStyle(document.documentElement);
+    value = computedStyle.getPropertyValue(cssVar).trim();
     
     if (value) {
       return value;
@@ -590,24 +602,7 @@ class WcChart extends WcBaseComponent {
 
   _applyStyle() {
     // Apply any custom styles if needed
-    // Define chart color CSS variables that inherit from theme colors
-    const style = document.createElement('style');
-    style.textContent = `
-      :root {
-        --chart-primary: var(--primary-bg-color, #3498db);
-        --chart-success: var(--success-bg-color, #2ecc71);
-        --chart-warning: var(--warning-bg-color, #f39c12);
-        --chart-danger: var(--danger-bg-color, #e74c3c);
-        --chart-info: var(--info-bg-color, #9b59b6);
-        --chart-secondary: var(--secondary-bg-color, #95a5a6);
-      }
-    `;
-    
-    // Only add if not already present
-    if (!document.querySelector('style[data-wc-chart-colors]')) {
-      style.setAttribute('data-wc-chart-colors', 'true');
-      document.head.appendChild(style);
-    }
+    // No need to inject styles - we use theme colors directly
   }
 
   // Public methods
