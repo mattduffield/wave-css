@@ -4011,7 +4011,8 @@ if (!customElements.get("wc-fa-icon")) {
       "phone-square-down": "square-phone-hangup",
       "history": "rectangle-history",
       "birthday-cake": "cake-candles",
-      "medkit": "suitcase-medical"
+      "medkit": "suitcase-medical",
+      "shield-alt": "shield-halved"
     };
     constructor() {
       super();

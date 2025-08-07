@@ -534,6 +534,7 @@ const ICONS_TO_COPY = [
   'place-of-worship',
   'crown',
   'shield-check',
+  'shield-halved',
   'pills',
   'prescription-bottle-pill',
   'tablets',
