@@ -553,6 +553,7 @@ const ICONS_TO_COPY = [
   'balloons',
   'balloon',
   'cupcake',
+  'user-injured'
   // Add more icon names here
 ];
 

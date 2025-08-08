@@ -2,6 +2,7 @@
 @layer wc.vars {
   :root {
     --hue: 0;
+    --success-color: #cc0000;
   }
   :root,
   .theme-rose,
