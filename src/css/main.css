@@ -2925,7 +2925,7 @@
   }
 
   .hidden {
-    display: none !important;
+    display: none;
   }
   .table-hidden { display: none }
   .block {
