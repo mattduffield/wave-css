@@ -1373,7 +1373,7 @@
     flex: 1 1 0%;
   }
   .flex {
-    display: flex !important;
+    display: flex;
   }
   .flex-1 {
     flex: 1 1 0%;
@@ -2924,9 +2924,6 @@
     overflow: visible;
   }
 
-  .hidden {
-    display: none;
-  }
   .table-hidden { display: none }
   .block {
     display: block;
@@ -3549,6 +3546,9 @@
     background-color: var(--primary-bg-color);
   }
 
+  .hidden {
+    display: none;
+  }
 }
 
 @layer wc.responsive {

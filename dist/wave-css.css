@@ -2103,7 +2103,7 @@
     flex: 1 1 0%;
   }
   .flex {
-    display: flex !important;
+    display: flex;
   }
   .flex-1 {
     flex: 1 1 0%;
@@ -5886,9 +5886,6 @@
   .overflow-visible {
     overflow: visible;
   }
-  .hidden {
-    display: none;
-  }
   .table-hidden {
     display: none;
   }
@@ -6512,6 +6509,9 @@
     border: none;
     height: 1px;
     background-color: var(--primary-bg-color);
+  }
+  .hidden {
+    display: none;
   }
 }
 @layer wc.responsive {
