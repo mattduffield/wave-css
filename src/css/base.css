@@ -1785,7 +1785,7 @@ div[class^="wc-"] :user-invalid[data-error]:hover::after {
   flex: 1 1 0%;
 }
 .flex {
-  display: flex !important;
+  display: flex;
 }
 .flex-1 {
   flex: 1 1 0%;
