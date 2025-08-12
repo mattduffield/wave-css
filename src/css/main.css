@@ -1578,6 +1578,106 @@
     grid-template-columns: repeat(6, 1fr);
   }
 
+  .grid-auto-2 {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+  }
+
+  .grid-auto-3 {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+  }
+
+  .grid-auto-4 {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+  }
+
+  .grid-auto-5 {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+  }
+
+  .grid-auto-6 {
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+  }
+
+  .grid-max-2 {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+  }
+
+  .grid-max-3 {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+  }
+
+  .grid-max-4 {
+    display: grid;
+    grid-template-columns: repeat(4, max-content);
+  }
+
+  .grid-max-5 {
+    display: grid;
+    grid-template-columns: repeat(5, max-content);
+  }
+
+  .grid-max-6 {
+    display: grid;
+    grid-template-columns: repeat(6, max-content);
+  }
+
+  .grid-flex-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, max-content));
+  }
+
+  .grid-flex-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, max-content));
+  }
+
+  .grid-flex-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, max-content));
+  }
+
+  .grid-flex-5 {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, max-content));
+  }
+
+  .grid-flex-6 {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, max-content));
+  }
+
+  .grid-fit-2 {
+    display: grid;
+    grid-template-columns: repeat(2, fit-content(300px));
+  }
+
+  .grid-fit-3 {
+    display: grid;
+    grid-template-columns: repeat(3, fit-content(300px));
+  }
+
+  .grid-fit-4 {
+    display: grid;
+    grid-template-columns: repeat(4, fit-content(250px));
+  }
+
+  .grid-fit-5 {
+    display: grid;
+    grid-template-columns: repeat(5, fit-content(200px));
+  }
+
+  .grid-fit-6 {
+    display: grid;
+    grid-template-columns: repeat(6, fit-content(150px));
+  }
+
 
   /* Border Style */
   .border-solid { border-style: solid; }
