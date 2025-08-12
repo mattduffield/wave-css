@@ -5871,6 +5871,18 @@
   .not-italic {
     font-style: normal;
   }
+  .text-right {
+    text-align: right;
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-left {
+    text-align: left;
+  }
+  .text-justify {
+    text-align: justify;
+  }
   .text-align-right {
     text-align: right;
   }
