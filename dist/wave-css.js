@@ -4012,7 +4012,9 @@ if (!customElements.get("wc-fa-icon")) {
       "history": "rectangle-history",
       "birthday-cake": "cake-candles",
       "medkit": "suitcase-medical",
-      "shield-alt": "shield-halved"
+      "shield-alt": "shield-halved",
+      "volume-up": "volume-high",
+      "volume-down": "volume-low"
     };
     constructor() {
       super();

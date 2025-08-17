@@ -553,7 +553,13 @@ const ICONS_TO_COPY = [
   'balloons',
   'balloon',
   'cupcake',
-  'user-injured'
+  'user-injured',
+  'volume',
+  'volume-high',
+  'volume-low',
+  'volume-off',
+  'volume-slash',
+  'volume-xmark'
   // Add more icon names here
 ];
 
