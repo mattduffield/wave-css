@@ -100,6 +100,7 @@ const ICONS_TO_COPY = [
   'user-nurse',
   'user-tie',
   'users-slash',
+  'user-music',
   'hand-dots',
   'heart',
   'heart-pulse',
