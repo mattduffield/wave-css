@@ -569,6 +569,8 @@ const ICONS_TO_COPY = [
   'book-bookmark',
   'gamepad',
   'gamepad-modern',
+  'waveform',
+  'waveform-lines'
   // Add more icon names here
 ];
 
