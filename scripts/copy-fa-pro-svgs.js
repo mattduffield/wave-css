@@ -175,6 +175,7 @@ const ICONS_TO_COPY = [
   'play',
   'play-pause',
   'pause',
+  'stop',
   'palette',
   'swatchbook',
   'circle',
@@ -559,7 +560,15 @@ const ICONS_TO_COPY = [
   'volume-low',
   'volume-off',
   'volume-slash',
-  'volume-xmark'
+  'volume-xmark',
+  'book',
+  'bookmark',
+  'books',
+  'book-bible',
+  'book-blank',
+  'book-bookmark',
+  'gamepad',
+  'gamepad-modern',
   // Add more icon names here
 ];
 
