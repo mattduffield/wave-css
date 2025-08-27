@@ -5747,6 +5747,10 @@
 
   }
 
+}
+
+@layer wc.override {
+
   .hidden {
     display: none;
   }

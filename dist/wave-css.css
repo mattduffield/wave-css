@@ -12071,6 +12071,8 @@
       display: table-cell !important;
     }
   }
+}
+@layer wc.override {
   .hidden {
     display: none;
   }
