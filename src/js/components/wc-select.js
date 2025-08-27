@@ -953,6 +953,9 @@ class WcSelect extends WcBaseFormComponent {
     const allowDynamic = this.hasAttribute('allow-dynamic');
     if (this.selectedOptions.includes(value)) return;
 
+    // Add to selectedOptions immediately to prevent duplicates
+    this.selectedOptions.push(value);
+
     setTimeout(() => {
       if (allowDynamic) {
         const selectElement = this.querySelector('select');
@@ -962,7 +965,6 @@ class WcSelect extends WcBaseFormComponent {
           selectElement.add(newOption);
         }
       }
-      this.selectedOptions.push(value);
       this.updateSelect();
       this.updateChips();
       this.updateDropdownOptions();
