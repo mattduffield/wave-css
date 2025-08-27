@@ -17061,7 +17061,9 @@ var WcSelect = class extends WcBaseFormComponent {
             if (item.selected) {
               const displayMember = this.getAttribute("display-member") || "key";
               const valueMember = this.getAttribute("value-member") || "value";
-              this.addChip(item[valueMember], item[displayMember]);
+              if (!this.selectedOptions.includes(item[valueMember])) {
+                this.addChip(item[valueMember], item[displayMember]);
+              }
             }
           });
         });
@@ -17102,7 +17104,9 @@ var WcSelect = class extends WcBaseFormComponent {
       if (this.mode === "chip") {
         const options = this.querySelectorAll("option[selected]");
         options.forEach((opt) => {
-          this.addChip(opt.value, opt.textContent);
+          if (!this.selectedOptions.includes(opt.value)) {
+            this.addChip(opt.value, opt.textContent);
+          }
         });
       }
     }

@@ -138,7 +138,10 @@ class WcSelect extends WcBaseFormComponent {
               if (item.selected) {
                 const displayMember = this.getAttribute('display-member') || 'key';
                 const valueMember = this.getAttribute('value-member') || 'value';
-                this.addChip(item[valueMember], item[displayMember]);
+                // Check if chip already exists to prevent duplicates
+                if (!this.selectedOptions.includes(item[valueMember])) {
+                  this.addChip(item[valueMember], item[displayMember]);
+                }
               }
             });
           });
@@ -186,7 +189,10 @@ class WcSelect extends WcBaseFormComponent {
       if (this.mode === 'chip') {
         const options = this.querySelectorAll('option[selected]');
         options.forEach(opt => {
-          this.addChip(opt.value, opt.textContent);
+          // Check if chip already exists to prevent duplicates
+          if (!this.selectedOptions.includes(opt.value)) {
+            this.addChip(opt.value, opt.textContent);
+          }
         });
       }
     }
