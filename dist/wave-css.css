@@ -9786,9 +9786,6 @@
     height: 1px;
     background-color: var(--primary-bg-color);
   }
-  .hidden {
-    display: none;
-  }
 }
 @layer wc.responsive {
   :root {
@@ -12073,5 +12070,8 @@
     .\32xl\:table-cell {
       display: table-cell !important;
     }
+  }
+  .hidden {
+    display: none;
   }
 }

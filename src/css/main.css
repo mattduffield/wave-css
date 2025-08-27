@@ -4899,9 +4899,6 @@
     background-color: var(--primary-bg-color);
   }
 
-  .hidden {
-    display: none;
-  }
 }
 
 @layer wc.responsive {
@@ -5749,4 +5746,9 @@
     }
 
   }
+
+  .hidden {
+    display: none;
+  }
+
 }
