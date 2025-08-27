@@ -4929,6 +4929,13 @@
     .sm\:flex-wrap-reverse { flex-wrap: wrap-reverse; }
     .sm\:flex-nowrap { flex-wrap: nowrap; }
 
+    .sm\:flex-1 { flex: 1 1 0%; }
+    .sm\:flex-1\.5 { flex: 1.5 1.5 0%; }
+    .sm\:flex-2 { flex: 2 2 0%; }
+    .sm\:flex-auto { flex: 1 1 auto; }
+    .sm\:flex-initial { flex: 0 1 auto; }
+    .sm\:flex-none { flex: none; }
+
 
     /* Grid columns */
     .sm\:grid-1 { display: grid; grid-template-columns: repeat(1, 1fr); }
@@ -5119,6 +5126,14 @@
     .md\:flex-wrap-reverse { flex-wrap: wrap-reverse; }
     .md\:flex-nowrap { flex-wrap: nowrap; }
 
+    .md\:flex-1 { flex: 1 1 0%; }
+    .md\:flex-1\.5 { flex: 1.5 1.5 0%; }
+    .md\:flex-2 { flex: 2 2 0%; }
+    .md\:flex-auto { flex: 1 1 auto; }
+    .md\:flex-initial { flex: 0 1 auto; }
+    .md\:flex-none { flex: none; }
+
+
     /* Grid columns */
     .md\:grid-1 { display: grid; grid-template-columns: repeat(1, 1fr); }
     .md\:grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); }
@@ -5306,6 +5321,13 @@
     .lg\:flex-wrap { flex-wrap: wrap; }
     .lg\:flex-wrap-reverse { flex-wrap: wrap-reverse; }
     .lg\:flex-nowrap { flex-wrap: nowrap; }
+
+    .lg\:flex-1 { flex: 1 1 0%; }
+    .lg\:flex-1\.5 { flex: 1.5 1.5 0%; }
+    .lg\:flex-2 { flex: 2 2 0%; }
+    .lg\:flex-auto { flex: 1 1 auto; }
+    .lg\:flex-initial { flex: 0 1 auto; }
+    .lg\:flex-none { flex: none; }
 
     /* Grid columns */
     .lg\:grid-1 { display: grid; grid-template-columns: repeat(1, 1fr); }
@@ -5495,6 +5517,13 @@
     .xl\:flex-wrap-reverse { flex-wrap: wrap-reverse; }
     .xl\:flex-nowrap { flex-wrap: nowrap; }
 
+    .xl\:flex-1 { flex: 1 1 0%; }
+    .xl\:flex-1\.5 { flex: 1.5 1.5 0%; }
+    .xl\:flex-2 { flex: 2 2 0%; }
+    .xl\:flex-auto { flex: 1 1 auto; }
+    .xl\:flex-initial { flex: 0 1 auto; }
+    .xl\:flex-none { flex: none; }
+
     /* Grid columns */
     .xl\:grid-1 { display: grid; grid-template-columns: repeat(1, 1fr); }
     .xl\:grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); }
@@ -5638,6 +5667,13 @@
     .\32xl\:flex-row-reverse { flex-direction: row-reverse; }
     .\32xl\:flex-col { flex-direction: column; }
     .\32xl\:flex-col-reverse { flex-direction: column-reverse; }
+
+    .\32xl\:flex-1 { flex: 1 1 0%; }
+    .\32xl\:flex-1\.5 { flex: 1.5 1.5 0%; }
+    .\32xl\:flex-2 { flex: 2 2 0%; }
+    .\32xl\:flex-auto { flex: 1 1 auto; }
+    .\32xl\:flex-initial { flex: 0 1 auto; }
+    .\32xl\:flex-none { flex: none; }
 
     /* Grid columns */
     .\32xl\:grid-1 { display: grid; grid-template-columns: repeat(1, 1fr); }
