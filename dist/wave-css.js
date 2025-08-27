@@ -17826,6 +17826,23 @@ var WcSelect = class extends WcBaseFormComponent {
   }
   updateSelect() {
     const selectElement = this.querySelector("select");
+    const allowDynamic = this.hasAttribute("allow-dynamic");
+    const existingDynamicOptions = [];
+    if (allowDynamic) {
+      Array.from(selectElement.options).forEach((opt) => {
+        const isOriginal = Array.from(this.children).some((child) => {
+          if (child.tagName === "OPTION") {
+            return child.value === opt.value;
+          } else if (child.tagName === "OPTGROUP") {
+            return Array.from(child.querySelectorAll("option")).some((groupOpt) => groupOpt.value === opt.value);
+          }
+          return false;
+        });
+        if (!isOriginal) {
+          existingDynamicOptions.push({ value: opt.value, label: opt.textContent });
+        }
+      });
+    }
     selectElement.innerHTML = "";
     const children = Array.from(this.children);
     children.forEach((child) => {
@@ -17844,6 +17861,13 @@ var WcSelect = class extends WcBaseFormComponent {
         selectElement.appendChild(optgroup);
       }
     });
+    if (allowDynamic) {
+      existingDynamicOptions.forEach(({ value, label }) => {
+        const newOption = new Option(label, value);
+        newOption.selected = this.selectedOptions.includes(value);
+        selectElement.add(newOption);
+      });
+    }
   }
   updateDropdownOptions() {
     const optionsContainer = this.querySelector("#optionsContainer");
