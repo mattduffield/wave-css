@@ -274,7 +274,9 @@ var WaveHelpers = (() => {
     el.classList.remove("hidden");
   }
   function hideAndShow(hideSelector, showSelector) {
+    console.log("hiding", hideSelector);
     hide(hideSelector);
+    console.log("showing", showSelector);
     show(showSelector);
   }
   async function waitForThenHideAndShow(hideSelector, showSelector, timeout = 3e3, delay = 500) {
