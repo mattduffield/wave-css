@@ -1038,7 +1038,7 @@
     --radio-checked-border: var(--swatch-5);
   }
 }
-@layer colors {
+@layer wc.colors {
   .bg-white {
     background-color: var(--wc-white);
   }
@@ -12072,7 +12072,7 @@
     }
   }
 }
-@layer wc.override {
+@layer wc.main {
   .hidden {
     display: none;
   }

@@ -1025,8 +1025,7 @@
   }
 }
 
-
-@layer colors {
+@layer wc.colors {
   /* Background Color */
   .bg-white { background-color: var(--wc-white); }
   .bg-black { background-color: var(--wc-black); }
@@ -2010,7 +2009,6 @@
   .dark\:text-rose-950 { color: var(--wc-rose-950); }
 
 }
-
 
 @layer wc.classes {
   .swatch-color-1 { color: var(--swatch-1); }
@@ -5749,7 +5747,7 @@
 
 }
 
-@layer wc.override {
+@layer wc.main {
 
   .hidden {
     display: none;
