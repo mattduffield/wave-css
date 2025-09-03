@@ -353,6 +353,8 @@ const ICONS_TO_COPY = [
   'dollar-sign',
   'triangle',
   'triangle-exclamation',
+  'hexagon',
+  'hexagon-exclamation',
   'database',
   'server',
   'table',
