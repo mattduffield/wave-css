@@ -182,6 +182,7 @@ const ICONS_TO_COPY = [
   'circle',
   'circle-play',
   'circle-pause',
+  'circle-stop',
   'circle-plus',
   'circle-minus',
   'circle-check',
