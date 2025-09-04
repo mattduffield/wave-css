@@ -9588,6 +9588,71 @@
     font-size: 8rem;
     line-height: 1;
   }
+  input.text-1,
+  textarea.text-1,
+  select.text-1 {
+    color: var(--text-1);
+  }
+  input.text-2,
+  textarea.text-2,
+  select.text-2 {
+    color: var(--text-2);
+  }
+  input.text-3,
+  textarea.text-3,
+  select.text-3 {
+    color: var(--text-3);
+  }
+  input.text-4,
+  textarea.text-4,
+  select.text-4 {
+    color: var(--text-4);
+  }
+  input.text-5,
+  textarea.text-5,
+  select.text-5 {
+    color: var(--text-5);
+  }
+  input.text-6,
+  textarea.text-6,
+  select.text-6 {
+    color: var(--text-6);
+  }
+  input.text-7,
+  textarea.text-7,
+  select.text-7 {
+    color: var(--text-7);
+  }
+  input.text-8,
+  textarea.text-8,
+  select.text-8 {
+    color: var(--text-8);
+  }
+  input.text-9,
+  textarea.text-9,
+  select.text-9 {
+    color: var(--text-9);
+  }
+  input.text-10,
+  textarea.text-10,
+  select.text-10 {
+    color: var(--text-10);
+  }
+  input.text-11,
+  textarea.text-11,
+  select.text-11 {
+    color: var(--text-11);
+  }
+  input.text-12,
+  textarea.text-12,
+  select.text-12 {
+    color: var(--text-12);
+  }
+  input.text-13,
+  textarea.text-13,
+  select.text-13 {
+    color: var(--text-13);
+  }
   select option {
     background-color: var(--surface-1);
   }
