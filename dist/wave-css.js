@@ -8879,7 +8879,7 @@ if (!customElements.get("wc-sidenav")) {
         }
         wc-sidenav .openbtn {
           position: absolute;
-          z-index: 1;
+          z-index: 2;
         }
         wc-sidenav[left-side] .openbtn {
           left: 0;
