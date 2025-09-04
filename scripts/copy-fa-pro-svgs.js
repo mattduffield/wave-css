@@ -236,6 +236,7 @@ const ICONS_TO_COPY = [
   'files',
   'file-arrow-down',
   'file-arrow-up',
+  'file-brackets-curly',
   'file-plus',
   'file-minus',
   'file-plus-minus',
