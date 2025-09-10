@@ -291,7 +291,6 @@ if (!customElements.get('wc-sidenav')) {
         }
         wc-sidenav .wc-sidenav.sidenav a {
           text-decoration: none;
-          font-size: 25px;
           color: var(--button-color);
           display: block;
           transition: 0.3s;
