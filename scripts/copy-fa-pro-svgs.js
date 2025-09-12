@@ -98,6 +98,7 @@ const ICONS_TO_COPY = [
   'user-doctor-hair-long',
   'user-doctor-hair',
   'user-nurse',
+  'user-secret',
   'user-tie',
   'users-slash',
   'user-music',
@@ -575,8 +576,7 @@ const ICONS_TO_COPY = [
   'gamepad',
   'gamepad-modern',
   'waveform',
-  'waveform-lines',
-  'spy'
+  'waveform-lines'
   // Add more icon names here
 ];
 
