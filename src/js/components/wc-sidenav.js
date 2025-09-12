@@ -293,6 +293,7 @@ if (!customElements.get('wc-sidenav')) {
           display: block;
           transition: 0.3s;
         }
+        /*
         wc-sidenav[left-side] .wc-sidenav.sidenav a {
           padding: 8px 8px 8px 32px;
         }
@@ -302,6 +303,7 @@ if (!customElements.get('wc-sidenav')) {
         wc-sidenav .wc-sidenav.sidenav.open a {
           padding: 8px 8px;
         }
+        */
         wc-sidenav .wc-sidenav.sidenav a:hover {
           color: var(--button-hover-color);
         }
