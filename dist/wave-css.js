@@ -8835,8 +8835,6 @@ if (!customElements.get("wc-sidenav")) {
           top: 0;
           background-color: var(--background-color);
           overflow-x: hidden;
-          padding-top: 60px;
-          padding-bottom: 20px;
           text-align: center;
           transition: 0.5s;
         }
@@ -8869,6 +8867,7 @@ if (!customElements.get("wc-sidenav")) {
           top: 0;
           font-size: 36px;
           background-color: transparent;
+          z-index: 3;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav .closebtn {
           right: 0;
