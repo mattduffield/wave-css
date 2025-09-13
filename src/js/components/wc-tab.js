@@ -258,31 +258,44 @@ class WcTab extends WcBaseComponent {
     return activeTabString;
   }
 
-  _restoreTabsWhenReady() {
-    const maxAttempts = 20; // 1 seconds max wait (20 * 50ms)
-    let attempts = 0;
-
-    const checkAndRestore = () => {
-      attempts++;
+  async _restoreTabsWhenReady() {
+    try {
+      // Wait for all wc-* components within this tab to be ready
+      const allComponents = Array.from(this.querySelectorAll('wc-*'));
       
-      // Check if all child wc-tab-item components are ready
-      const tabItems = this.querySelectorAll('wc-tab-item');
-      const allReady = Array.from(tabItems).every(item => {
-        // Check if component is initialized (from WcBaseComponent)
-        return item._isInitialized === true;
-      });
-
-      if (allReady || attempts >= maxAttempts) {
-        // All components ready or max time reached, restore tabs
-        this._restoreTabsFromHash();
-      } else {
-        // Check again in 50ms
-        setTimeout(checkAndRestore, 50);
-      }
-    };
-
-    // Start checking after a minimal delay to ensure DOM is ready
-    setTimeout(checkAndRestore, 50);
+      // Wait for each component to be connected
+      await Promise.all(
+        allComponents.map((component) => {
+          return new Promise((resolve) => {
+            // Check if component is already connected
+            if (component._isConnected || component.isConnected) {
+              resolve();
+            } else {
+              // Wait for the component to be connected
+              const checkConnected = setInterval(() => {
+                if (component._isConnected || component.isConnected) {
+                  clearInterval(checkConnected);
+                  resolve();
+                }
+              }, 50);
+              
+              // Timeout after 1 second for this component
+              setTimeout(() => {
+                clearInterval(checkConnected);
+                resolve(); // Resolve anyway after timeout
+              }, 1000);
+            }
+          });
+        })
+      );
+      
+      // All components ready or timed out, restore tabs
+      this._restoreTabsFromHash();
+    } catch (error) {
+      console.warn('Error waiting for components:', error);
+      // Fallback: restore tabs anyway
+      this._restoreTabsFromHash();
+    }
   }
 
   _restoreTabsFromHash() {

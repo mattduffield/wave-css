@@ -9594,22 +9594,34 @@ var WcTab = class extends WcBaseComponent {
     const activeTabString = traverseTabs(rootTab).join("+");
     return activeTabString;
   }
-  _restoreTabsWhenReady() {
-    const maxAttempts = 20;
-    let attempts = 0;
-    const checkAndRestore = () => {
-      attempts++;
-      const tabItems = this.querySelectorAll("wc-tab-item");
-      const allReady = Array.from(tabItems).every((item) => {
-        return item._isInitialized === true;
-      });
-      if (allReady || attempts >= maxAttempts) {
-        this._restoreTabsFromHash();
-      } else {
-        setTimeout(checkAndRestore, 50);
-      }
-    };
-    setTimeout(checkAndRestore, 50);
+  async _restoreTabsWhenReady() {
+    try {
+      const allComponents = Array.from(this.querySelectorAll("wc-*"));
+      await Promise.all(
+        allComponents.map((component) => {
+          return new Promise((resolve) => {
+            if (component._isConnected || component.isConnected) {
+              resolve();
+            } else {
+              const checkConnected = setInterval(() => {
+                if (component._isConnected || component.isConnected) {
+                  clearInterval(checkConnected);
+                  resolve();
+                }
+              }, 50);
+              setTimeout(() => {
+                clearInterval(checkConnected);
+                resolve();
+              }, 1e3);
+            }
+          });
+        })
+      );
+      this._restoreTabsFromHash();
+    } catch (error) {
+      console.warn("Error waiting for components:", error);
+      this._restoreTabsFromHash();
+    }
   }
   _restoreTabsFromHash() {
     const hashParts = location.hash.slice(1).split("+");
