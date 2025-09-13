@@ -294,7 +294,7 @@ class WcTab extends WcBaseComponent {
       // All components ready or timed out, add small delay then restore tabs
       setTimeout(() => {
         this._restoreTabsFromHash();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.warn('Error waiting for components:', error);
       // Fallback: restore tabs anyway

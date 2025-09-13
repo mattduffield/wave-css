@@ -9620,7 +9620,7 @@ var WcTab = class extends WcBaseComponent {
       );
       setTimeout(() => {
         this._restoreTabsFromHash();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.warn("Error waiting for components:", error);
       this._restoreTabsFromHash();
