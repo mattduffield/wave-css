@@ -9595,7 +9595,7 @@ var WcTab = class extends WcBaseComponent {
     return activeTabString;
   }
   _restoreTabsWhenReady() {
-    const maxAttempts = 40;
+    const maxAttempts = 20;
     let attempts = 0;
     const checkAndRestore = () => {
       attempts++;

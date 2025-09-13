@@ -259,7 +259,7 @@ class WcTab extends WcBaseComponent {
   }
 
   _restoreTabsWhenReady() {
-    const maxAttempts = 40; // 2 seconds max wait (40 * 50ms)
+    const maxAttempts = 20; // 1 seconds max wait (20 * 50ms)
     let attempts = 0;
 
     const checkAndRestore = () => {
