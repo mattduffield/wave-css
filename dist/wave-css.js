@@ -9489,7 +9489,7 @@ var WcTab = class extends WcBaseComponent {
         const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
         btn?.click();
       });
-    }, 100);
+    }, 200);
   }
   _createInnerElement() {
     const tabNav = document.createElement("div");
