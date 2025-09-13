@@ -9613,14 +9613,14 @@ var WcTab = class extends WcBaseComponent {
               setTimeout(() => {
                 clearInterval(checkConnected);
                 resolve();
-              }, 1e3);
+              }, 500);
             }
           });
         })
       );
       setTimeout(() => {
         this._restoreTabsFromHash();
-      }, 200);
+      }, 250);
     } catch (error) {
       console.warn("Error waiting for components:", error);
       this._restoreTabsFromHash();
