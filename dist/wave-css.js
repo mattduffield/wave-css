@@ -9596,7 +9596,8 @@ var WcTab = class extends WcBaseComponent {
   }
   async _restoreTabsWhenReady() {
     try {
-      const allComponents = Array.from(this.querySelectorAll("wc-*"));
+      const allElements = Array.from(this.querySelectorAll("*"));
+      const allComponents = allElements.filter((el) => el.tagName.toLowerCase().startsWith("wc-"));
       await Promise.all(
         allComponents.map((component) => {
           return new Promise((resolve) => {

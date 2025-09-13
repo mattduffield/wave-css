@@ -260,8 +260,10 @@ class WcTab extends WcBaseComponent {
 
   async _restoreTabsWhenReady() {
     try {
-      // Wait for all wc-* components within this tab to be ready
-      const allComponents = Array.from(this.querySelectorAll('wc-*'));
+      // Wait for all wc- components within this tab to be ready
+      // Find all elements whose tag name starts with 'wc-'
+      const allElements = Array.from(this.querySelectorAll('*'));
+      const allComponents = allElements.filter(el => el.tagName.toLowerCase().startsWith('wc-'));
       
       // Wait for each component to be connected
       await Promise.all(
