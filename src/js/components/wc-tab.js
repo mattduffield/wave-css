@@ -122,13 +122,7 @@ class WcTab extends WcBaseComponent {
       htmx.process(this);
     }
 
-    setTimeout(() => {
-      const hashParts = location.hash.slice(1).split('+');
-      hashParts.forEach(part => {
-        const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
-        btn?.click();  
-      });
-    }, 200);
+    this._restoreTabsWhenReady();
 
     // console.log('_render:wc-tab');
   }
@@ -262,6 +256,41 @@ class WcTab extends WcBaseComponent {
     // Traverse from the root-most tab and join the results with '+'
     const activeTabString = traverseTabs(rootTab).join('+');
     return activeTabString;
+  }
+
+  _restoreTabsWhenReady() {
+    const maxAttempts = 40; // 2 seconds max wait (40 * 50ms)
+    let attempts = 0;
+
+    const checkAndRestore = () => {
+      attempts++;
+      
+      // Check if all child wc-tab-item components are ready
+      const tabItems = this.querySelectorAll('wc-tab-item');
+      const allReady = Array.from(tabItems).every(item => {
+        // Check if component is initialized (from WcBaseComponent)
+        return item._isInitialized === true;
+      });
+
+      if (allReady || attempts >= maxAttempts) {
+        // All components ready or max time reached, restore tabs
+        this._restoreTabsFromHash();
+      } else {
+        // Check again in 50ms
+        setTimeout(checkAndRestore, 50);
+      }
+    };
+
+    // Start checking after a minimal delay to ensure DOM is ready
+    setTimeout(checkAndRestore, 50);
+  }
+
+  _restoreTabsFromHash() {
+    const hashParts = location.hash.slice(1).split('+');
+    hashParts.forEach(part => {
+      const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
+      btn?.click();  
+    });
   }
 
   _applyStyle() {

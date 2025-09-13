@@ -9483,13 +9483,7 @@ var WcTab = class extends WcBaseComponent {
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
-    setTimeout(() => {
-      const hashParts = location.hash.slice(1).split("+");
-      hashParts.forEach((part) => {
-        const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
-        btn?.click();
-      });
-    }, 200);
+    this._restoreTabsWhenReady();
   }
   _createInnerElement() {
     const tabNav = document.createElement("div");
@@ -9599,6 +9593,30 @@ var WcTab = class extends WcBaseComponent {
     }
     const activeTabString = traverseTabs(rootTab).join("+");
     return activeTabString;
+  }
+  _restoreTabsWhenReady() {
+    const maxAttempts = 40;
+    let attempts = 0;
+    const checkAndRestore = () => {
+      attempts++;
+      const tabItems = this.querySelectorAll("wc-tab-item");
+      const allReady = Array.from(tabItems).every((item) => {
+        return item._isInitialized === true;
+      });
+      if (allReady || attempts >= maxAttempts) {
+        this._restoreTabsFromHash();
+      } else {
+        setTimeout(checkAndRestore, 50);
+      }
+    };
+    setTimeout(checkAndRestore, 50);
+  }
+  _restoreTabsFromHash() {
+    const hashParts = location.hash.slice(1).split("+");
+    hashParts.forEach((part) => {
+      const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
+      btn?.click();
+    });
   }
   _applyStyle() {
     const style = `
