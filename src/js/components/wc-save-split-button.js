@@ -20,7 +20,7 @@ if (!customElements.get('wc-save-split-button')) {
 
   class WcSaveSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return [];
+      return ['hx-include'];
     }
 
     constructor() {
@@ -65,20 +65,22 @@ if (!customElements.get('wc-save-split-button')) {
       if (beforeSend) {
         beforeSend = `hx-on::before-send="${beforeSend}"`;
       }
+      const hxInclude = this.getAttribute('hx-include') || '';
+      const hxIncludeAttr = hxInclude ? `hx-include="${hxInclude}"` : '';
       
       const markup = `
         <button type="button" class="save-btn btn"
-          hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''}
+          hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
           <div class="dropdown-content text-sm">
             <a class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''}
+              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
               data-url="${saveNewUrl}">
               Save and Add New
             </a>
             <a class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''}
+              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
               data-url="${saveReturnUrl}">
               Save and Return
             </a>
@@ -102,8 +104,20 @@ if (!customElements.get('wc-save-split-button')) {
       drpContent.style.minWidth = `${saveBtn.offsetWidth}px`;
     }
 
-    _handleAttributeChange(attrName, newValue) {    
-      super._handleAttributeChange(attrName, newValue);  
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === 'hx-include') {
+        // Update all buttons with the new hx-include value
+        const buttons = this.querySelectorAll('.save-btn, .save-new-btn, .save-return-btn');
+        buttons.forEach(btn => {
+          if (newValue) {
+            btn.setAttribute('hx-include', newValue);
+          } else {
+            btn.removeAttribute('hx-include');
+          }
+        });
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
     }
 
     _handleClick(event) {
