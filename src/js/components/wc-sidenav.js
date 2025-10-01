@@ -204,7 +204,7 @@ if (!customElements.get('wc-sidenav')) {
 
     _toggleNav(event) {
       const side = this.querySelector('.wc-sidenav');
-      if (side.classList.contains('open')) {
+      if (side && side.classList.contains('open')) {
         this._closeNav(event);
       } else {
         this._openNav(event);
@@ -212,7 +212,6 @@ if (!customElements.get('wc-sidenav')) {
     }
 
     _openNav(event) {
-      const {target} = event;
       const width = this.getAttribute('width') || '250px';
       const pushSelector = this.getAttribute('push-target') || '#viewport';
       const side = this.querySelector('.wc-sidenav');
@@ -243,7 +242,6 @@ if (!customElements.get('wc-sidenav')) {
     }
 
     _closeNav(event) {
-      const {target} = event;
       const pushSelector = this.getAttribute('push-target') || '#viewport';
       const side = this.querySelector('.wc-sidenav');
       side.classList.remove('open');
