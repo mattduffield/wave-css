@@ -8818,7 +8818,7 @@ if (!customElements.get("wc-sidenav")) {
     _closeNav(event) {
       const { target } = event;
       const pushSelector = this.getAttribute("push-target") || "#viewport";
-      const side = target.closest(".wc-sidenav");
+      const side = this.querySelector(".wc-sidenav");
       side.classList.remove("open");
       side.style.width = "0";
       if (this.hasAttribute("overlay")) {
