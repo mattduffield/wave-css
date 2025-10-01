@@ -8648,6 +8648,11 @@ if (!customElements.get("wc-sidenav")) {
     }
     constructor() {
       super();
+      this._boundCloseNav = this._closeNav.bind(this);
+      this._boundToggleNav = this._toggleNav.bind(this);
+      this._boundHandleOpen = this._handleOpen.bind(this);
+      this._boundHandleClose = this._handleClose.bind(this);
+      this._boundHandleToggle = this._handleToggle.bind(this);
       if (!this.hasAttribute("right-side")) {
         this.setAttribute("left-side", "");
       }
@@ -8694,9 +8699,9 @@ if (!customElements.get("wc-sidenav")) {
       const innerEl = this.querySelector(".wc-sidenav > *");
       if (innerEl) {
         const closeBtn = this.querySelector(".closebtn");
-        closeBtn.addEventListener("click", this._closeNav.bind(this));
+        closeBtn.addEventListener("click", this._boundCloseNav);
         const openBtn = this.querySelector(".openbtn");
-        openBtn.addEventListener("click", this._toggleNav.bind(this));
+        openBtn.addEventListener("click", this._boundToggleNav);
       } else {
         this.componentElement.innerHTML = "";
         this._createInnerElement();
@@ -8725,13 +8730,13 @@ if (!customElements.get("wc-sidenav")) {
       const closeBtnCss = this.getAttribute("close-btn-css") || "primary-bg-color text-xs p-2";
       closeBtn.setAttribute("class", `closebtn cursor-pointer ${closeBtnCss}`);
       closeBtn.innerHTML = "&times;";
-      closeBtn.addEventListener("click", this._closeNav.bind(this));
+      closeBtn.addEventListener("click", this._boundCloseNav);
       this.componentElement.appendChild(closeBtn);
       const openBtn = document.createElement("div");
       const openBtnCss = this.getAttribute("open-btn-css") || "primary-bg-color text-xs px-2 py-3";
       openBtn.setAttribute("class", `openbtn cursor-pointer ${openBtnCss}`);
       openBtn.style.top = this.getAttribute("open-top") || "0";
-      openBtn.addEventListener("click", this._toggleNav.bind(this));
+      openBtn.addEventListener("click", this._boundToggleNav);
       const openSpan = document.createElement("span");
       openSpan.textContent = lbl;
       openBtn.appendChild(openSpan);
@@ -8943,19 +8948,23 @@ if (!customElements.get("wc-sidenav")) {
     }
     _wireEvents() {
       super._wireEvents();
-      document.body.addEventListener("wc-sidenav:open", this._handleOpen.bind(this));
-      document.body.addEventListener("wc-sidenav:close", this._handleClose.bind(this));
-      document.body.addEventListener("wc-sidenav:toggle", this._handleToggle.bind(this));
+      document.body.addEventListener("wc-sidenav:open", this._boundHandleOpen);
+      document.body.addEventListener("wc-sidenav:close", this._boundHandleClose);
+      document.body.addEventListener("wc-sidenav:toggle", this._boundHandleToggle);
     }
     _unWireEvents() {
       super._unWireEvents();
       const closeBtn = this.querySelector(".closebtn");
-      closeBtn.removeEventListener("click", this._closeNav.bind(this));
+      if (closeBtn) {
+        closeBtn.removeEventListener("click", this._boundCloseNav);
+      }
       const openBtn = this.querySelector(".openbtn");
-      openBtn.removeEventListener("click", this._toggleNav.bind(this));
-      document.body.removeEventListener("wc-sidenav-open", this._handleOpen.bind(this));
-      document.body.removeEventListener("wc-sidenav-close", this._handleClose.bind(this));
-      document.body.removeEventListener("wc-sidenav:toggle", this._handleToggle.bind(this));
+      if (openBtn) {
+        openBtn.removeEventListener("click", this._boundToggleNav);
+      }
+      document.body.removeEventListener("wc-sidenav:open", this._boundHandleOpen);
+      document.body.removeEventListener("wc-sidenav:close", this._boundHandleClose);
+      document.body.removeEventListener("wc-sidenav:toggle", this._boundHandleToggle);
     }
   }
   customElements.define("wc-sidenav", WcSidenav);
