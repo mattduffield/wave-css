@@ -107,7 +107,7 @@ if (!customElements.get('wc-sidenav')) {
         const closeBtn = this.querySelector('.closebtn');
         closeBtn.addEventListener('click', this._closeNav.bind(this));
         const openBtn = this.querySelector('.openbtn');
-        openBtn.addEventListener('click', this._openNav.bind(this));
+        openBtn.addEventListener('click', this._toggleNav.bind(this));
       } else {
         this.componentElement.innerHTML = '';
         this._createInnerElement();
@@ -149,7 +149,7 @@ if (!customElements.get('wc-sidenav')) {
       const openBtnCss = this.getAttribute('open-btn-css') || 'primary-bg-color text-xs px-2 py-3';
       openBtn.setAttribute('class', `openbtn cursor-pointer ${openBtnCss}`);
       openBtn.style.top = this.getAttribute('open-top') || '0';
-      openBtn.addEventListener('click', this._openNav.bind(this));
+      openBtn.addEventListener('click', this._toggleNav.bind(this));
       const openSpan = document.createElement('span');
       openSpan.textContent = lbl;
       openBtn.appendChild(openSpan);
@@ -200,6 +200,15 @@ if (!customElements.get('wc-sidenav')) {
 
     _handleToggle(event) {
       this._handleHelper(event, 'toggle');
+    }
+
+    _toggleNav(event) {
+      const side = this.querySelector('.wc-sidenav');
+      if (side.classList.contains('open')) {
+        this._closeNav(event);
+      } else {
+        this._openNav(event);
+      }
     }
 
     _openNav(event) {
@@ -379,7 +388,7 @@ if (!customElements.get('wc-sidenav')) {
       const closeBtn = this.querySelector('.closebtn');
       closeBtn.removeEventListener('click', this._closeNav.bind(this));
       const openBtn = this.querySelector('.openbtn');
-      openBtn.removeEventListener('click', this._openNav.bind(this));
+      openBtn.removeEventListener('click', this._toggleNav.bind(this));
       document.body.removeEventListener('wc-sidenav-open', this._handleOpen.bind(this));
       document.body.removeEventListener('wc-sidenav-close', this._handleClose.bind(this));
       document.body.removeEventListener('wc-sidenav:toggle', this._handleToggle.bind(this));
