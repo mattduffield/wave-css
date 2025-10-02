@@ -148,7 +148,7 @@ if (!customElements.get('wc-sidenav')) {
 
       const lbl = this.getAttribute('label') || 'Sidenav';
       const closeBtn = document.createElement('div');
-      const closeBtnCss = this.getAttribute('close-btn-css') || 'bg-gray-100 dark:bg-gray-800 xprimary-bg-color text-sm p-1 rounded-full';
+      const closeBtnCss = this.getAttribute('close-btn-css') || 'bg-gray-100 dark:bg-gray-800 text-sm w-5 h-5 rounded-full';
       closeBtn.setAttribute('class', `closebtn cursor-pointer ${closeBtnCss}`);
       closeBtn.innerHTML = '&times;';
       closeBtn.addEventListener('click', this._boundCloseNav);
