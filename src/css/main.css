@@ -2907,6 +2907,27 @@
     grid-template-columns: repeat(6, fit-content(150px));
   }
 
+  .grid-col-span-2 {
+    grid-column: span 2;
+  }
+
+  .grid-col-span-3 {
+    grid-column: span 3;
+  }
+
+  .grid-col-span-4 {
+    grid-column: span 4;
+  }
+
+  .grid-col-span-5 {
+    grid-column: span 5;
+  }
+
+  .grid-col-span-6 {
+    grid-column: span 6;
+  }
+
+
 
   /* Border Style */
   .border-solid { border-style: solid; }
