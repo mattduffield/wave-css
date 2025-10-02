@@ -8727,7 +8727,7 @@ if (!customElements.get("wc-sidenav")) {
       }
       const lbl = this.getAttribute("label") || "Sidenav";
       const closeBtn = document.createElement("div");
-      const closeBtnCss = this.getAttribute("close-btn-css") || "primary-bg-color text-xs p-2";
+      const closeBtnCss = this.getAttribute("close-btn-css") || "bg-gray-100 dark:bg-gray-800 xprimary-bg-color text-sm p-1 rounded-full";
       closeBtn.setAttribute("class", `closebtn cursor-pointer ${closeBtnCss}`);
       closeBtn.innerHTML = "&times;";
       closeBtn.addEventListener("click", this._boundCloseNav);
@@ -8890,16 +8890,14 @@ if (!customElements.get("wc-sidenav")) {
         }
         wc-sidenav .wc-sidenav.sidenav .closebtn {
           position: absolute;
-          top: 0;
-          font-size: 36px;
-          background-color: transparent;
+          top: 5px;
           z-index: 3;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav .closebtn {
-          right: 0;
+          right: 5px;
         }
         wc-sidenav[right-side] .wc-sidenav.sidenav .closebtn {
-          left: 0;
+          left: 5px;
         }
         wc-sidenav .openbtn {
           position: absolute;
