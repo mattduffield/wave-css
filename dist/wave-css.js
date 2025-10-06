@@ -16210,7 +16210,12 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       optionList.forEach((f) => {
         const key = f.textContent.trim();
         const value = f.value.trim();
-        options.push({ "key": key, "value": value });
+        const flex = f.getAttribute("data-flex");
+        const option = { "key": key, "value": value };
+        if (flex) {
+          option.flex = flex;
+        }
+        options.push(option);
       });
       optionList.forEach((f) => f.remove());
       if (options.length == 0) {
@@ -16222,6 +16227,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         const radioLabel = document.createElement("label");
         radioLabel.classList.add("radio-option");
         radioLabel.textContent = option.key;
+        if (option.flex) {
+          radioLabel.style.flex = option.flex;
+        }
         const radioInput = document.createElement("input");
         radioInput.setAttribute("type", "radio");
         radioInput.setAttribute("name", name);
