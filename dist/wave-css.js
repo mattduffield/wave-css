@@ -16655,7 +16655,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         border-radius: 5px;
       }
       wc-input .radio-group.modern .radio-option {
-        padding: 0.5rem;
+        padding: 0 0.5rem;
         background-color: var(--component-bg-color);
         color: var(--primary-color);
         border-right: 1px solid var(--component-bg-color);
