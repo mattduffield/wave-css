@@ -4555,6 +4555,9 @@
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
   }
+  input[type="date"] {
+    padding: 0.435rem 0.75rem;
+  }
   .text-2xs input,
   .text-2xs textarea,
   .text-2xs select,
@@ -4574,6 +4577,9 @@
     padding: 0.5rem 0.5rem;
     font-size: 0.75rem;
     line-height: 1rem;
+  }
+  .text-xs input[type="date"] {
+    padding: 0.435rem 0.5rem;
   }
   .text-sm input,
   .text-sm textarea,
