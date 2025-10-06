@@ -16659,7 +16659,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         background-color: var(--component-bg-color);
         color: var(--primary-color);
         border-right: 1px solid var(--component-bg-color);
-        align-items: flex-start;
       }
       wc-input .radio-group.modern .radio-option:first-child {
         border-top-left-radius: 5px;
