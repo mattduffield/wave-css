@@ -40,10 +40,10 @@ class WcInput extends WcBaseFormComponent {
     return [
       'name', 'id', 'class', 'type', 'value', 'placeholder',
       'lbl-label', 'lbl-class', 'radio-group-class',
-      'checked', 'disabled', 'readonly', 'required', 'autocomplete', 
+      'checked', 'disabled', 'readonly', 'required', 'autocomplete',
       'autofocus', 'min', 'max', 'minlength', 'maxlength', 'pattern',
       'step', 'multiple', 'novalidate', 'elt-class', 'toggle-swtich',
-      'list',
+      'list', 'auto-flex',
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
       'onkeypress', 'onclick',
       'tooltip', 'tooltip-position'
@@ -152,7 +152,7 @@ class WcInput extends WcBaseFormComponent {
       'autofocus', 'disabled', 'readonly', 'required', 'novalidate'
     ];
     this.ignoreAttributes = [
-      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position', 'select-on-focus'
+      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position', 'select-on-focus', 'auto-flex'
     ];
     this.eventAttributes = [
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
@@ -324,7 +324,25 @@ class WcInput extends WcBaseFormComponent {
       });
       optionList.forEach(f => f.remove());
       if (options.length == 0) {
-        options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];    
+        options = this.getAttribute('options') ? JSON.parse(this.getAttribute('options')) : [];
+      }
+
+      // Auto-calculate flex values based on text length if not explicitly set
+      if (this.hasAttribute('auto-flex') && options.length > 0) {
+        const lengths = options.map(opt => opt.key.length);
+        const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+
+        options.forEach((opt, idx) => {
+          if (!opt.flex) {
+            // If this option is significantly longer than average, give it more flex
+            const ratio = lengths[idx] / avgLength;
+            if (ratio > 1.5) {
+              opt.flex = '2';
+            } else {
+              opt.flex = '1';
+            }
+          }
+        });
       }
       const radioContainer = document.createElement('div');
       radioContainer.classList.add('radio-group');

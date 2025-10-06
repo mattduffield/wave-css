@@ -15939,6 +15939,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "elt-class",
       "toggle-swtich",
       "list",
+      "auto-flex",
       "onchange",
       "oninput",
       "onblur",
@@ -16069,7 +16070,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "toggle-switch",
       "tooltip",
       "tooltip-position",
-      "select-on-focus"
+      "select-on-focus",
+      "auto-flex"
     ];
     this.eventAttributes = [
       "onchange",
@@ -16220,6 +16222,20 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       optionList.forEach((f) => f.remove());
       if (options.length == 0) {
         options = this.getAttribute("options") ? JSON.parse(this.getAttribute("options")) : [];
+      }
+      if (this.hasAttribute("auto-flex") && options.length > 0) {
+        const lengths = options.map((opt) => opt.key.length);
+        const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+        options.forEach((opt, idx) => {
+          if (!opt.flex) {
+            const ratio = lengths[idx] / avgLength;
+            if (ratio > 1.5) {
+              opt.flex = "2";
+            } else {
+              opt.flex = "1";
+            }
+          }
+        });
       }
       const radioContainer = document.createElement("div");
       radioContainer.classList.add("radio-group");
