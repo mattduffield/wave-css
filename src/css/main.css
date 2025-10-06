@@ -4571,7 +4571,7 @@
   input.text-xs,
   textarea.text-xs,
   select.text-xs {
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     font-size: 0.75rem;
     line-height: 1rem;
   }
@@ -4581,7 +4581,7 @@
   input.text-sm,
   textarea.text-sm,
   select.text-sm {
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
   }
