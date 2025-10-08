@@ -4536,10 +4536,24 @@
     background-image:
       linear-gradient(
         to top,
+        var(--swatch-4),
+        var(--swatch-7));
+  }
+  .dark .sunrise-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-7),
+        var(--swatch-9));
+  }
+  .midsky-gradient {
+    background-image:
+      linear-gradient(
+        to top,
         var(--swatch-8),
         var(--swatch-4));
   }
-  .dark .sunrise-gradient {
+  .dark .midsky-gradient {
     background-image:
       linear-gradient(
         to top,
@@ -4579,9 +4593,23 @@
       linear-gradient(
         to bottom,
         var(--swatch-4),
-        var(--swatch-8));
+        var(--swatch-7));
   }
   .dark .sunset-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-7),
+        var(--swatch-9));
+  }
+  .fall-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-4),
+        var(--swatch-8));
+  }
+  .dark .fall-gradient {
     background-image:
       linear-gradient(
         to bottom,

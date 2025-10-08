@@ -2260,9 +2260,16 @@
 
   /* Vertical gradients - bottom to top */
   .sunrise-gradient {
-    background-image: linear-gradient(to top, var(--swatch-8), var(--swatch-4));
+    background-image: linear-gradient(to top, var(--swatch-4), var(--swatch-7));
   }
   .dark .sunrise-gradient {
+    background-image: linear-gradient(to top, var(--swatch-7), var(--swatch-9));
+  }
+
+  .midsky-gradient {
+    background-image: linear-gradient(to top, var(--swatch-8), var(--swatch-4));
+  }
+  .dark .midsky-gradient {
     background-image: linear-gradient(to top, var(--swatch-9), var(--swatch-5));
   }
 
@@ -2282,9 +2289,16 @@
 
   /* Vertical gradients - top to bottom */
   .sunset-gradient {
-    background-image: linear-gradient(to bottom, var(--swatch-4), var(--swatch-8));
+    background-image: linear-gradient(to bottom, var(--swatch-4), var(--swatch-7));
   }
   .dark .sunset-gradient {
+    background-image: linear-gradient(to bottom, var(--swatch-7), var(--swatch-9));
+  }
+
+  .fall-gradient {
+    background-image: linear-gradient(to bottom, var(--swatch-4), var(--swatch-8));
+  }
+  .dark .fall-gradient {
     background-image: linear-gradient(to bottom, var(--swatch-5), var(--swatch-9));
   }
 
