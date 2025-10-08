@@ -9471,6 +9471,17 @@ var WcTab = class extends WcBaseComponent {
   constructor() {
     super();
     this.childComponentSelector = "wc-tab-item";
+    this.nestingLevel = 0;
+    let parent = this.parentElement;
+    while (parent) {
+      const parentTab = parent.closest("wc-tab");
+      if (parentTab) {
+        this.nestingLevel++;
+        parent = parentTab.parentElement;
+      } else {
+        break;
+      }
+    }
     const compEl = this.querySelector(".wc-tab");
     if (compEl) {
       this.componentElement = compEl;
@@ -9478,6 +9489,9 @@ var WcTab = class extends WcBaseComponent {
       this.componentElement = document.createElement("div");
       this.componentElement.classList.add("wc-tab");
       this.appendChild(this.componentElement);
+    }
+    if (this.nestingLevel > 0) {
+      this.setAttribute("data-nesting-level", this.nestingLevel);
     }
   }
   async connectedCallback() {
@@ -9726,7 +9740,33 @@ var WcTab = class extends WcBaseComponent {
       wc-tab .wc-tab .tab-body wc-tab {
         margin-top: 1rem;
       }
-      
+
+      /* Nested tab color variations - automatically adjust colors based on nesting level */
+      /* Darken background for contrast without borders */
+      wc-tab[data-nesting-level="1"] .wc-tab .tab-body {
+        background-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
+      }
+      wc-tab[data-nesting-level="1"] .wc-tab .tab-nav .tab-link {
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
+      }
+      wc-tab[data-nesting-level="1"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-nesting-level="1"] .wc-tab .tab-nav .tab-link:hover {
+        background-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
+      }
+
+      wc-tab[data-nesting-level="2"] .wc-tab .tab-body {
+        background-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
+      }
+      wc-tab[data-nesting-level="2"] .wc-tab .tab-nav .tab-link {
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
+      }
+      wc-tab[data-nesting-level="2"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-nesting-level="2"] .wc-tab .tab-nav .tab-link:hover {
+        background-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
+      }
+
       @keyframes tab-fade {
         from {
           opacity: 0;
