@@ -4532,6 +4532,160 @@
         var(--swatch-6),
         var(--swatch-9));
   }
+  .sunrise-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-8),
+        var(--swatch-4));
+  }
+  .dark .sunrise-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-9),
+        var(--swatch-5));
+  }
+  .horizon-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-8),
+        var(--swatch-5));
+  }
+  .dark .horizon-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-9),
+        var(--swatch-6));
+  }
+  .ocean-depth-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-9),
+        var(--swatch-5));
+  }
+  .dark .ocean-depth-gradient {
+    background-image:
+      linear-gradient(
+        to top,
+        var(--swatch-10),
+        var(--swatch-6));
+  }
+  .sunset-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-4),
+        var(--swatch-8));
+  }
+  .dark .sunset-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-5),
+        var(--swatch-9));
+  }
+  .sky-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-5),
+        var(--swatch-8));
+  }
+  .dark .sky-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-4),
+        var(--swatch-8));
+  }
+  .dusk-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-5),
+        var(--swatch-9));
+  }
+  .dark .dusk-gradient {
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--swatch-6),
+        var(--swatch-10));
+  }
+  .dawn-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-5),
+        var(--swatch-8));
+  }
+  .dark .dawn-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-5),
+        var(--swatch-9));
+  }
+  .twilight-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-4),
+        var(--swatch-9));
+  }
+  .dark .twilight-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-5),
+        var(--swatch-10));
+  }
+  .aurora-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-6),
+        var(--swatch-9));
+  }
+  .dark .aurora-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to bottom right,
+        var(--swatch-6),
+        var(--swatch-10));
+  }
+  .cascade-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to top right,
+        var(--swatch-8),
+        var(--swatch-5));
+  }
+  .dark .cascade-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to top right,
+        var(--swatch-9),
+        var(--swatch-6));
+  }
+  .ember-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to top right,
+        var(--swatch-8),
+        var(--swatch-4));
+  }
+  .dark .ember-diagonal-gradient {
+    background-image:
+      linear-gradient(
+        to top right,
+        var(--swatch-9),
+        var(--swatch-5));
+  }
 }
 @layer wc.utility {
   .pointer-events-none {
