@@ -603,7 +603,7 @@ class WcSelect extends WcBaseFormComponent {
       wc-select select { 
         display: block; 
         width: 100%; 
-        padding: 0.45rem 0.75rem 0.45rem 0.325rem;  
+        padding: 0.45rem 0.75rem 0.45rem 0.25rem;  
       }
       wc-select[mode="multiple"] select { 
         display: block;
