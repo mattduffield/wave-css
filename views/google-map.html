@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - Google Map</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .map-wrapper {
+      height: 400px;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid var(--surface-4);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .map-wrapper-small {
+      height: 300px;
+    }
+    .note {
+      padding: 1rem;
+      background: var(--surface-2);
+      border-left: 4px solid var(--warning-color);
+      border-radius: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .controls {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-contents">
+    <div class="my-2 px-4">
+      <h2 class="mb-4">Google Map Component</h2>
+
+      <div class="note">
+        <strong>⚠️ Important:</strong> Replace <code>YOUR_API_KEY</code> below with your actual Google Maps API key.
+        <br>Get one at: <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">Google Maps Platform</a>
+      </div>
+
+      <!-- Example 1: Single Pin -->
+      <div class="mb-6">
+        <h3 class="mb-2">Single Pin Example</h3>
+        <p class="mb-4">Display a single location using lat/lng/address attributes.</p>
+
+        <div class="map-wrapper" style="height: 400px;">
+          <wc-google-map
+            id="map1"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            lat="40.7128"
+            lng="-74.0060"
+            address="New York, NY 10007, USA"
+            zoom="13"
+            map-type="roadmap">
+          </wc-google-map>
+        </div>
+      </div>
+
+      <!-- Example 2: Multiple Pins -->
+      <div class="mb-6">
+        <h3 class="mb-2">Multiple Pins Example</h3>
+        <p class="mb-4">Display multiple locations using option elements. Map auto-fits bounds.</p>
+
+        <div class="map-wrapper" style="height: 400px;">
+          <wc-google-map
+            id="map2"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            zoom="4"
+            map-type="roadmap">
+            <option data-lat="40.7128" data-lng="-74.0060" data-address="New York, NY" data-title="New York City"></option>
+            <option data-lat="34.0522" data-lng="-118.2437" data-address="Los Angeles, CA" data-title="Los Angeles"></option>
+            <option data-lat="41.8781" data-lng="-87.6298" data-address="Chicago, IL" data-title="Chicago"></option>
+            <option data-lat="29.7604" data-lng="-95.3698" data-address="Houston, TX" data-title="Houston"></option>
+            <option data-lat="33.4484" data-lng="-112.0740" data-address="Phoenix, AZ" data-title="Phoenix"></option>
+          </wc-google-map>
+        </div>
+      </div>
+
+      <!-- Example 3: Different Map Types -->
+      <div class="mb-6">
+        <h3 class="mb-2">Map Type Variations</h3>
+        <p class="mb-4">Different map types: roadmap, satellite, hybrid, terrain.</p>
+
+        <div class="row">
+          <div class="col">
+            <h4 class="text-sm mb-2">Roadmap</h4>
+            <div class="map-wrapper map-wrapper-small">
+              <wc-google-map
+                api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+                lat="36.1699"
+                lng="-115.1398"
+                address="Las Vegas, NV"
+                zoom="12"
+                map-type="roadmap">
+              </wc-google-map>
+            </div>
+          </div>
+
+          <div class="col">
+            <h4 class="text-sm mb-2">Satellite</h4>
+            <div class="map-wrapper map-wrapper-small">
+              <wc-google-map
+                api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+                lat="36.1699"
+                lng="-115.1398"
+                address="Las Vegas, NV"
+                zoom="12"
+                map-type="satellite">
+              </wc-google-map>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 4: Dynamic Controls -->
+      <div class="mb-6">
+        <h3 class="mb-2">Dynamic Controls</h3>
+        <p class="mb-4">Use the public API to dynamically add/remove pins and change settings.</p>
+
+        <div class="controls">
+          <button class="btn btn-primary" onclick="addRandomPin()">Add Random Pin</button>
+          <button class="btn btn-secondary" onclick="clearAllPins()">Clear All Pins</button>
+          <button class="btn btn-secondary" onclick="changeZoom(8)">Zoom Out</button>
+          <button class="btn btn-secondary" onclick="changeZoom(15)">Zoom In</button>
+        </div>
+
+        <div class="map-wrapper">
+          <wc-google-map
+            id="map4"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            lat="37.7749"
+            lng="-122.4194"
+            address="San Francisco, CA"
+            zoom="12"
+            map-type="roadmap">
+          </wc-google-map>
+        </div>
+      </div>
+
+      <!-- Example 5: Configuration Options -->
+      <div class="mb-6">
+        <h3 class="mb-2">Configuration Options</h3>
+        <p class="mb-4">Different map configurations.</p>
+
+        <div class="row">
+          <div class="col">
+            <h4 class="text-sm mb-2">Default (Interactive)</h4>
+            <div class="map-wrapper map-wrapper-small">
+              <wc-google-map
+                api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+                lat="51.5074"
+                lng="-0.1278"
+                address="London, UK"
+                zoom="11">
+              </wc-google-map>
+            </div>
+          </div>
+
+          <div class="col">
+            <h4 class="text-sm mb-2">No Dragging</h4>
+            <div class="map-wrapper map-wrapper-small">
+              <wc-google-map
+                api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+                lat="51.5074"
+                lng="-0.1278"
+                address="London, UK"
+                zoom="11"
+                draggable="false">
+              </wc-google-map>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+
+  <script type="module" src="./index.js"></script>
+  <script>
+    // Dynamic control functions
+    const cities = [
+      { lat: 48.8566, lng: 2.3522, address: 'Paris, France', title: 'Paris' },
+      { lat: 35.6762, lng: 139.6503, address: 'Tokyo, Japan', title: 'Tokyo' },
+      { lat: -33.8688, lng: 151.2093, address: 'Sydney, Australia', title: 'Sydney' },
+      { lat: 55.7558, lng: 37.6173, address: 'Moscow, Russia', title: 'Moscow' }
+    ];
+
+    function addRandomPin() {
+      const map = document.getElementById('map4');
+      if (map) {
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        map.addPin(city.lat, city.lng, city.address, city.title);
+        console.log('Added pin:', city.title);
+      }
+    }
+
+    function clearAllPins() {
+      const map = document.getElementById('map4');
+      if (map) {
+        map.clearPins();
+        console.log('Cleared all pins');
+      }
+    }
+
+    function changeZoom(zoom) {
+      const map = document.getElementById('map4');
+      if (map) {
+        map.setAttribute('zoom', zoom);
+        console.log('Changed zoom to:', zoom);
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const map1 = document.getElementById('map1');
+        const map2 = document.getElementById('map2');
+        const map4 = document.getElementById('map4');
+
+        if (map1) {
+          map1.addEventListener('pin-clicked', (e) => {
+            console.log('Pin clicked on map1:', e.detail);
+          });
+          map1.addEventListener('map-loaded', () => {
+            console.log('Map 1 loaded');
+          });
+        }
+
+        if (map2) {
+          map2.addEventListener('pin-clicked', (e) => {
+            console.log('Pin clicked on map2:', e.detail);
+          });
+          map2.addEventListener('map-loaded', () => {
+            console.log('Map 2 loaded');
+          });
+        }
+
+        if (map4) {
+          map4.addEventListener('pin-clicked', (e) => {
+            console.log('Pin clicked on map4:', e.detail);
+          });
+          map4.addEventListener('map-loaded', () => {
+            console.log('Map 4 loaded and ready');
+          });
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

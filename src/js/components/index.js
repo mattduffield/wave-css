@@ -16,6 +16,7 @@ import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';
 import './wc-flip-box.js';
+import './wc-google-map.js';
 import './wc-icon.js';
 import './wc-fa-icon.js';
 import './wc-image.js';

@@ -91,6 +91,7 @@ The build process (esbuild.config.js) generates:
 - `wc-contact-card`: Contact information card
 - `wc-contact-chip`: Compact contact display
 - `wc-flip-box`: Flippable content box
+- `wc-google-map`: Google Maps integration with single/multiple pins
 - `wc-image`: Enhanced image component
 - `wc-background-image`: Background image container
 

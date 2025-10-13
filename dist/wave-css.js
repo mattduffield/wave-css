@@ -3609,6 +3609,518 @@ var WcFlipBox = class extends WcBaseComponent {
 };
 customElements.define("wc-flip-box", WcFlipBox);
 
+// src/js/components/wc-google-map.js
+console.log("\u{1F5FA}\uFE0F wc-google-map.js loaded - Version 2.0 with HTMX fix");
+var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
+  static get observedAttributes() {
+    return [
+      "api-key",
+      "lat",
+      "lng",
+      "address",
+      "title",
+      "zoom",
+      "map-type",
+      "center-lat",
+      "center-lng",
+      "draggable",
+      "scrollwheel",
+      "disable-default-ui",
+      "class",
+      "elt-class"
+    ];
+  }
+  // Track if Google Maps API is loaded globally
+  static isGoogleMapsLoaded = false;
+  static googleMapsLoadPromise = null;
+  constructor() {
+    super();
+    this.map = null;
+    this.markers = [];
+    this.infoWindows = [];
+    this.mapElement = null;
+    this.initRetries = 0;
+    this.maxInitRetries = 10;
+    const compEl = this.querySelector(".wc-google-map");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-google-map");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    try {
+      await this._ensureGoogleMapsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await this._initializeMap();
+      this._setupResizeHandling();
+    } catch (error) {
+      console.error("wc-google-map: Error initializing map:", error);
+      this._showError("Failed to load Google Maps. Please check your API key.");
+    }
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanup();
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (attrName === "api-key") {
+      if (this.map) {
+        this._initializeMap();
+      }
+    } else if (["lat", "lng", "address", "title"].includes(attrName)) {
+      if (this.map) {
+        this._updateSinglePin();
+      }
+    } else if (["zoom", "map-type", "center-lat", "center-lng"].includes(attrName)) {
+      if (this.map) {
+        this._updateMapConfig();
+      }
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _render() {
+    super._render();
+    if (!this.mapElement) {
+      this.mapElement = document.createElement("div");
+      this.mapElement.classList.add("map-container");
+      this.componentElement.innerHTML = "";
+      this.componentElement.appendChild(this.mapElement);
+    }
+  }
+  /**
+   * Ensures Google Maps API is loaded only once across all instances
+   */
+  async _ensureGoogleMapsLoaded() {
+    if (window.google && window.google.maps) {
+      _WcGoogleMap.isGoogleMapsLoaded = true;
+      return Promise.resolve();
+    }
+    if (_WcGoogleMap.googleMapsLoadPromise) {
+      return _WcGoogleMap.googleMapsLoadPromise;
+    }
+    const apiKey = this.getAttribute("api-key");
+    if (!apiKey) {
+      console.error("wc-google-map: api-key attribute is required");
+      return Promise.reject("API key is required");
+    }
+    _WcGoogleMap.googleMapsLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&v=weekly`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        _WcGoogleMap.isGoogleMapsLoaded = true;
+        resolve();
+      };
+      script.onerror = () => {
+        reject(new Error("Failed to load Google Maps API"));
+      };
+      document.head.appendChild(script);
+    });
+    return _WcGoogleMap.googleMapsLoadPromise;
+  }
+  /**
+   * Initialize the Google Map
+   */
+  async _initializeMap() {
+    if (!window.google || !window.google.maps) {
+      console.error("wc-google-map: Google Maps API not loaded");
+      return;
+    }
+    if (!this.mapElement) {
+      console.error("wc-google-map: Map container element not found");
+      return;
+    }
+    const dimensions = {
+      width: this.mapElement.offsetWidth,
+      height: this.mapElement.offsetHeight,
+      clientWidth: this.mapElement.clientWidth,
+      clientHeight: this.mapElement.clientHeight
+    };
+    console.log("wc-google-map: Initializing map...");
+    console.log("wc-google-map: Container dimensions:", dimensions);
+    if (dimensions.width === 0 || dimensions.height === 0) {
+      if (this.initRetries < this.maxInitRetries) {
+        this.initRetries++;
+        console.warn(`wc-google-map: Container has no dimensions, retrying in 200ms... (attempt ${this.initRetries}/${this.maxInitRetries})`);
+        setTimeout(() => this._initializeMap(), 200);
+        return;
+      } else {
+        console.error("wc-google-map: Max retries reached, container still has no dimensions");
+        this._showError("Map container has no dimensions. Please check your layout.");
+        return;
+      }
+    }
+    this.initRetries = 0;
+    const zoom = parseInt(this.getAttribute("zoom")) || 12;
+    const mapType = this.getAttribute("map-type") || "roadmap";
+    const draggable = this.hasAttribute("draggable") ? this.getAttribute("draggable") !== "false" : true;
+    const scrollwheel = this.hasAttribute("scrollwheel") ? this.getAttribute("scrollwheel") !== "false" : true;
+    const disableDefaultUI = this.hasAttribute("disable-default-ui");
+    let center = { lat: 0, lng: 0 };
+    const centerLat = this.getAttribute("center-lat");
+    const centerLng = this.getAttribute("center-lng");
+    if (centerLat && centerLng) {
+      center = { lat: parseFloat(centerLat), lng: parseFloat(centerLng) };
+    } else {
+      const pins = this._getPins();
+      if (pins.length > 0) {
+        center = { lat: pins[0].lat, lng: pins[0].lng };
+      }
+    }
+    const mapOptions = {
+      center,
+      zoom,
+      mapTypeId: mapType,
+      draggable,
+      scrollwheel,
+      disableDefaultUI
+    };
+    try {
+      this.map = new google.maps.Map(this.mapElement, mapOptions);
+      console.log("wc-google-map: Map created successfully", this.map);
+      this.dispatchEvent(new CustomEvent("map-loaded", {
+        detail: { map: this.map },
+        bubbles: true
+      }));
+      this._addMapEventListeners();
+      this._addPins();
+      console.log("wc-google-map: Initialization complete");
+    } catch (error) {
+      console.error("wc-google-map: Error creating map:", error);
+      this._showError("Error creating map: " + error.message);
+    }
+  }
+  /**
+   * Get pins from attributes or child option elements
+   */
+  _getPins() {
+    const pins = [];
+    const lat = this.getAttribute("lat");
+    const lng = this.getAttribute("lng");
+    if (lat && lng) {
+      pins.push({
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        address: this.getAttribute("address") || "",
+        title: this.getAttribute("title") || this.getAttribute("address") || "Location"
+      });
+    }
+    const options = this.querySelectorAll("option");
+    options.forEach((option) => {
+      const optLat = option.getAttribute("data-lat");
+      const optLng = option.getAttribute("data-lng");
+      if (optLat && optLng) {
+        pins.push({
+          lat: parseFloat(optLat),
+          lng: parseFloat(optLng),
+          address: option.getAttribute("data-address") || "",
+          title: option.getAttribute("data-title") || option.getAttribute("data-address") || "Location"
+        });
+      }
+    });
+    return pins;
+  }
+  /**
+   * Add pins to the map
+   */
+  _addPins() {
+    if (!this.map) return;
+    this._clearMarkers();
+    const pins = this._getPins();
+    console.log("wc-google-map: Adding pins:", pins.length, pins);
+    if (pins.length === 0) {
+      console.warn("wc-google-map: No pins to add");
+      return;
+    }
+    pins.forEach((pin, index) => {
+      const marker = new google.maps.Marker({
+        position: { lat: pin.lat, lng: pin.lng },
+        map: this.map,
+        title: pin.title
+      });
+      this.markers.push(marker);
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div class="map-info-window">
+          ${pin.title ? `<strong>${pin.title}</strong><br>` : ""}
+          ${pin.address || ""}
+        </div>`
+      });
+      this.infoWindows.push(infoWindow);
+      marker.addListener("click", () => {
+        this.infoWindows.forEach((iw) => iw.close());
+        infoWindow.open(this.map, marker);
+        this.dispatchEvent(new CustomEvent("pin-clicked", {
+          detail: {
+            pin,
+            marker,
+            index
+          },
+          bubbles: true
+        }));
+      });
+    });
+    if (pins.length > 1) {
+      const bounds = new google.maps.LatLngBounds();
+      pins.forEach((pin) => {
+        bounds.extend({ lat: pin.lat, lng: pin.lng });
+      });
+      this.map.fitBounds(bounds);
+    }
+  }
+  /**
+   * Clear all markers from the map
+   */
+  _clearMarkers() {
+    this.markers.forEach((marker) => marker.setMap(null));
+    this.markers = [];
+    this.infoWindows.forEach((iw) => iw.close());
+    this.infoWindows = [];
+  }
+  /**
+   * Update single pin (when attributes change)
+   */
+  _updateSinglePin() {
+    this._addPins();
+  }
+  /**
+   * Update map configuration
+   */
+  _updateMapConfig() {
+    if (!this.map) return;
+    const zoom = parseInt(this.getAttribute("zoom"));
+    const mapType = this.getAttribute("map-type");
+    const centerLat = this.getAttribute("center-lat");
+    const centerLng = this.getAttribute("center-lng");
+    if (zoom && !isNaN(zoom)) {
+      this.map.setZoom(zoom);
+    }
+    if (mapType) {
+      this.map.setMapTypeId(mapType);
+    }
+    if (centerLat && centerLng) {
+      this.map.setCenter({
+        lat: parseFloat(centerLat),
+        lng: parseFloat(centerLng)
+      });
+    }
+  }
+  /**
+   * Add event listeners for map interactions
+   */
+  _addMapEventListeners() {
+    if (!this.map) return;
+    this.map.addListener("click", (e) => {
+      this.dispatchEvent(new CustomEvent("map-clicked", {
+        detail: {
+          lat: e.latLng.lat(),
+          lng: e.latLng.lng(),
+          event: e
+        },
+        bubbles: true
+      }));
+    });
+    this.map.addListener("center_changed", () => {
+      const center = this.map.getCenter();
+      this.dispatchEvent(new CustomEvent("center-changed", {
+        detail: {
+          lat: center.lat(),
+          lng: center.lng()
+        },
+        bubbles: true
+      }));
+    });
+    this.map.addListener("zoom_changed", () => {
+      this.dispatchEvent(new CustomEvent("zoom-changed", {
+        detail: {
+          zoom: this.map.getZoom()
+        },
+        bubbles: true
+      }));
+    });
+    this.map.addListener("bounds_changed", () => {
+      const bounds = this.map.getBounds();
+      if (bounds) {
+        this.dispatchEvent(new CustomEvent("bounds-changed", {
+          detail: {
+            bounds
+          },
+          bubbles: true
+        }));
+      }
+    });
+    this.map.addListener("dragstart", () => {
+      this.dispatchEvent(new CustomEvent("drag-start", {
+        bubbles: true
+      }));
+    });
+    this.map.addListener("drag", () => {
+      this.dispatchEvent(new CustomEvent("dragging", {
+        bubbles: true
+      }));
+    });
+    this.map.addListener("dragend", () => {
+      this.dispatchEvent(new CustomEvent("drag-end", {
+        bubbles: true
+      }));
+    });
+  }
+  /**
+   * Public API: Add a pin dynamically
+   */
+  addPin(lat, lng, address, title) {
+    const option = document.createElement("option");
+    option.setAttribute("data-lat", lat);
+    option.setAttribute("data-lng", lng);
+    option.setAttribute("data-address", address || "");
+    option.setAttribute("data-title", title || address || "Location");
+    this.appendChild(option);
+    if (this.map) {
+      this._addPins();
+    }
+  }
+  /**
+   * Public API: Clear all pins
+   */
+  clearPins() {
+    this.querySelectorAll("option").forEach((opt) => opt.remove());
+    this.removeAttribute("lat");
+    this.removeAttribute("lng");
+    this.removeAttribute("address");
+    this.removeAttribute("title");
+    this._clearMarkers();
+  }
+  /**
+   * Public API: Get current map instance
+   */
+  getMap() {
+    return this.map;
+  }
+  /**
+   * Public API: Get all markers
+   */
+  getMarkers() {
+    return this.markers;
+  }
+  /**
+   * Cleanup
+   */
+  _cleanup() {
+    this._clearMarkers();
+    this.map = null;
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+  }
+  /**
+   * Setup resize handling for HTMX and dynamic content
+   */
+  _setupResizeHandling() {
+    if (!this.map) return;
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this._handleResize();
+      });
+      this.resizeObserver.observe(this.mapElement);
+    }
+    document.body.addEventListener("htmx:afterSettle", () => {
+      setTimeout(() => this._handleResize(), 50);
+    });
+    if (typeof IntersectionObserver !== "undefined") {
+      const visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            this._handleResize();
+          }
+        });
+      });
+      visibilityObserver.observe(this);
+    }
+  }
+  /**
+   * Handle map resize
+   */
+  _handleResize() {
+    if (!this.map) return;
+    const width = this.mapElement.offsetWidth;
+    const height = this.mapElement.offsetHeight;
+    if (width > 0 && height > 0) {
+      google.maps.event.trigger(this.map, "resize");
+      const center = this.map.getCenter();
+      if (center) {
+        this.map.setCenter(center);
+      }
+      console.log("wc-google-map: Map resized", { width, height });
+    }
+  }
+  /**
+   * Show error message in map container
+   */
+  _showError(message) {
+    if (this.mapElement) {
+      this.mapElement.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; background: var(--surface-2); color: var(--text-1);">
+          <div>
+            <p style="font-weight: bold; margin-bottom: 0.5rem;">\u26A0\uFE0F Map Error</p>
+            <p>${message}</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-google-map {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+      }
+
+      wc-google-map .wc-google-map {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        position: relative;
+      }
+
+      wc-google-map .map-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0.375rem;
+        overflow: hidden;
+      }
+
+      /* Info window styling */
+      .map-info-window {
+        padding: 0.5rem;
+        font-family: inherit;
+        color: var(--text-1);
+      }
+
+      .map-info-window strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-1);
+      }
+
+      /* Hide option elements */
+      wc-google-map option {
+        display: none;
+      }
+    `.trim();
+    this.loadStyle("wc-google-map-style", style);
+  }
+};
+customElements.define("wc-google-map", WcGoogleMap);
+
 // src/js/components/wc-icon.js
 if (!customElements.get("wc-icon")) {
   const globalIconCache = /* @__PURE__ */ new Map();

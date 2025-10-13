@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Map Debug Test</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body {
+      padding: 2rem;
+      font-family: Arial, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 0.5rem;
+    }
+    .map-wrapper {
+      height: 400px;
+      width: 100%;
+      border: 3px solid red; /* Red border to see if container exists */
+      margin-top: 1rem;
+      background: #f0f0f0; /* Gray background to see container */
+    }
+    .debug-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #e8f4f8;
+      border-left: 4px solid #0066cc;
+      font-family: monospace;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Google Map Component - Debug Test</h1>
+
+  <div class="test-section">
+    <h2>Test 1: Simple Single Pin</h2>
+    <p>Red border shows the container, gray background shows it has dimensions.</p>
+
+    <div class="map-wrapper">
+      <wc-google-map
+        id="debug-map"
+        api-key="YOUR_API_KEY"
+        lat="40.7128"
+        lng="-74.0060"
+        address="New York, NY"
+        zoom="13">
+      </wc-google-map>
+    </div>
+
+    <div class="debug-info" id="debug-log">
+Waiting for component to load...
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Capture console logs
+    const debugLog = document.getElementById('debug-log');
+    const originalLog = console.log;
+    const originalError = console.error;
+
+    function addToLog(type, ...args) {
+      const message = args.map(arg =>
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+      ).join(' ');
+      debugLog.textContent += `\n[${type}] ${message}`;
+    }
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addToLog('LOG', ...args);
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addToLog('ERROR', ...args);
+    };
+
+    // Wait for component
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const map = document.getElementById('debug-map');
+        console.log('=== Component Element ===');
+        console.log('Component found:', !!map);
+        console.log('Component tagName:', map?.tagName);
+        console.log('Component innerHTML length:', map?.innerHTML?.length);
+
+        if (map) {
+          console.log('=== Map Container ===');
+          const container = map.querySelector('.map-container');
+          console.log('Container found:', !!container);
+          console.log('Container dimensions:', {
+            width: container?.offsetWidth,
+            height: container?.offsetHeight
+          });
+
+          console.log('=== Google Maps API ===');
+          console.log('window.google exists:', !!window.google);
+          console.log('window.google.maps exists:', !!window.google?.maps);
+
+          console.log('=== Map Instance ===');
+          const mapInstance = map.getMap?.();
+          console.log('Map instance exists:', !!mapInstance);
+          console.log('Map instance type:', mapInstance?.constructor?.name);
+
+          // Try to manually create a map to test API
+          if (window.google && window.google.maps && container) {
+            try {
+              console.log('=== Manual Map Test ===');
+              const testMap = new google.maps.Map(container, {
+                center: { lat: 40.7128, lng: -74.0060 },
+                zoom: 13
+              });
+              console.log('Manual map created successfully!');
+
+              // Add a marker
+              const testMarker = new google.maps.Marker({
+                position: { lat: 40.7128, lng: -74.0060 },
+                map: testMap,
+                title: 'Test Marker'
+              });
+              console.log('Manual marker created successfully!');
+            } catch (error) {
+              console.error('Manual map creation failed:', error.message);
+            }
+          }
+
+          // Listen for events
+          map.addEventListener('map-loaded', (e) => {
+            console.log('=== Event: map-loaded ===');
+            console.log('Event detail:', e.detail);
+          });
+
+          map.addEventListener('pin-clicked', (e) => {
+            console.log('=== Event: pin-clicked ===');
+            console.log('Event detail:', e.detail);
+          });
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
