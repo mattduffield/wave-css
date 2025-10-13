@@ -104,12 +104,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
     await this._loadGooglePlacesAPI(apiKey);
     this._initializeAutocomplete();
-
-    // Check if we have initial coordinates to update the map
-    // Wait a bit for the map to initialize
-    setTimeout(() => {
-      this._updateMapFromInitialData();
-    }, 500);
+    this._updateMapFromInitialData();
   }
 
   disconnectedCallback() {
@@ -536,80 +531,31 @@ class WcGoogleAddress extends WcBaseFormComponent {
   }
 
   _updateMapFromInitialData() {
-    try {
-      // Check if we have initial lat/lng data
-      const lat = this.getAttribute('data-lat');
-      const lng = this.getAttribute('data-lng');
-      const targetMap = this.getAttribute('target-map');
+    const lat = this.getAttribute('data-lat');
+    const lng = this.getAttribute('data-lng');
+    const targetMap = this.getAttribute('target-map');
 
-      console.log('wc-google-address: _updateMapFromInitialData called', { lat, lng, targetMap });
-
-      if (!lat || !lng || !targetMap) {
-        console.log('wc-google-address: Missing required data for map update', { lat, lng, targetMap });
-        return;
-      }
-
-      // Create address data from initial attributes
-      const addressData = {
-        lat: parseFloat(lat),
-        lng: parseFloat(lng),
-        formatted_address: this.getAttribute('data-address') || this.getAttribute('value') || ''
-      };
-
-      // Update the map
-      const mapElement = document.getElementById(targetMap);
-      if (!mapElement) {
-        // Map not found yet, retry after a delay
-        setTimeout(() => this._updateMapFromInitialData(), 200);
-        return;
-      }
-
-      // Check if map is loaded by listening for map-loaded event or checking if it's ready
-      const updateMap = () => {
-        console.log('wc-google-address: updateMap called with', addressData);
-        const pins = [{
-          lat: addressData.lat,
-          lng: addressData.lng,
-          title: addressData.formatted_address
-        }];
-
-        // Use updatePins method if available
-        if (mapElement.updatePins) {
-          console.log('wc-google-address: Calling updatePins with', pins);
-          mapElement.updatePins(pins);
-        } else {
-          console.log('wc-google-address: updatePins not available, setting attributes');
-          // Fallback to setting attributes
-          mapElement.setAttribute('lat', addressData.lat);
-          mapElement.setAttribute('lng', addressData.lng);
-          if (addressData.formatted_address) {
-            mapElement.setAttribute('address', addressData.formatted_address);
-          }
-        }
-      };
-
-      // If map has a getMap method and it returns a map, it's ready
-      if (mapElement.getMap && mapElement.getMap()) {
-        updateMap();
-      } else {
-        // Listen for map-loaded event
-        const handleMapLoaded = () => {
-          updateMap();
-          mapElement.removeEventListener('map-loaded', handleMapLoaded);
-        };
-        mapElement.addEventListener('map-loaded', handleMapLoaded);
-
-        // Also set a timeout as fallback
-        setTimeout(() => {
-          if (mapElement.getMap && mapElement.getMap()) {
-            updateMap();
-          }
-        }, 1000);
-      }
-    } catch (error) {
-      // Silently fail if map update fails - component should still work
-      console.error('wc-google-address: Error updating map from initial data:', error);
+    if (!lat || !lng || !targetMap) {
+      return;
     }
+
+    const mapElement = document.getElementById(targetMap);
+    if (!mapElement) {
+      return;
+    }
+
+    const pins = [{
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      title: this.getAttribute('data-address') || this.getAttribute('value') || ''
+    }];
+
+    // Listen for map-loaded event
+    mapElement.addEventListener('map-loaded', () => {
+      if (mapElement.updatePins) {
+        mapElement.updatePins(pins);
+      }
+    }, { once: true });
   }
 
   _handleAttributeChange(attrName, newValue) {

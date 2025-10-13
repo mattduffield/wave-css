@@ -4237,9 +4237,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     }
     await this._loadGooglePlacesAPI(apiKey);
     this._initializeAutocomplete();
-    setTimeout(() => {
-      this._updateMapFromInitialData();
-    }, 500);
+    this._updateMapFromInitialData();
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -4544,61 +4542,26 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     mapElement.setAttribute("address", addressData.formatted_address);
   }
   _updateMapFromInitialData() {
-    try {
-      const lat = this.getAttribute("data-lat");
-      const lng = this.getAttribute("data-lng");
-      const targetMap = this.getAttribute("target-map");
-      console.log("wc-google-address: _updateMapFromInitialData called", { lat, lng, targetMap });
-      if (!lat || !lng || !targetMap) {
-        console.log("wc-google-address: Missing required data for map update", { lat, lng, targetMap });
-        return;
-      }
-      const addressData = {
-        lat: parseFloat(lat),
-        lng: parseFloat(lng),
-        formatted_address: this.getAttribute("data-address") || this.getAttribute("value") || ""
-      };
-      const mapElement = document.getElementById(targetMap);
-      if (!mapElement) {
-        setTimeout(() => this._updateMapFromInitialData(), 200);
-        return;
-      }
-      const updateMap = () => {
-        console.log("wc-google-address: updateMap called with", addressData);
-        const pins = [{
-          lat: addressData.lat,
-          lng: addressData.lng,
-          title: addressData.formatted_address
-        }];
-        if (mapElement.updatePins) {
-          console.log("wc-google-address: Calling updatePins with", pins);
-          mapElement.updatePins(pins);
-        } else {
-          console.log("wc-google-address: updatePins not available, setting attributes");
-          mapElement.setAttribute("lat", addressData.lat);
-          mapElement.setAttribute("lng", addressData.lng);
-          if (addressData.formatted_address) {
-            mapElement.setAttribute("address", addressData.formatted_address);
-          }
-        }
-      };
-      if (mapElement.getMap && mapElement.getMap()) {
-        updateMap();
-      } else {
-        const handleMapLoaded = () => {
-          updateMap();
-          mapElement.removeEventListener("map-loaded", handleMapLoaded);
-        };
-        mapElement.addEventListener("map-loaded", handleMapLoaded);
-        setTimeout(() => {
-          if (mapElement.getMap && mapElement.getMap()) {
-            updateMap();
-          }
-        }, 1e3);
-      }
-    } catch (error) {
-      console.error("wc-google-address: Error updating map from initial data:", error);
+    const lat = this.getAttribute("data-lat");
+    const lng = this.getAttribute("data-lng");
+    const targetMap = this.getAttribute("target-map");
+    if (!lat || !lng || !targetMap) {
+      return;
     }
+    const mapElement = document.getElementById(targetMap);
+    if (!mapElement) {
+      return;
+    }
+    const pins = [{
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      title: this.getAttribute("data-address") || this.getAttribute("value") || ""
+    }];
+    mapElement.addEventListener("map-loaded", () => {
+      if (mapElement.updatePins) {
+        mapElement.updatePins(pins);
+      }
+    }, { once: true });
   }
   _handleAttributeChange(attrName, newValue) {
     if (this.eventAttributes.includes(attrName)) {
