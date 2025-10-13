@@ -106,7 +106,10 @@ class WcGoogleAddress extends WcBaseFormComponent {
     this._initializeAutocomplete();
 
     // Check if we have initial coordinates to update the map
-    this._updateMapFromInitialData();
+    // Wait a bit for the map to initialize
+    setTimeout(() => {
+      this._updateMapFromInitialData();
+    }, 500);
   }
 
   disconnectedCallback() {
@@ -533,44 +536,73 @@ class WcGoogleAddress extends WcBaseFormComponent {
   }
 
   _updateMapFromInitialData() {
-    // Check if we have initial lat/lng data
-    const lat = this.getAttribute('data-lat');
-    const lng = this.getAttribute('data-lng');
-    const targetMap = this.getAttribute('target-map');
+    try {
+      // Check if we have initial lat/lng data
+      const lat = this.getAttribute('data-lat');
+      const lng = this.getAttribute('data-lng');
+      const targetMap = this.getAttribute('target-map');
 
-    if (!lat || !lng || !targetMap) {
-      return;
-    }
-
-    // Create address data from initial attributes
-    const addressData = {
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
-      formatted_address: this.getAttribute('data-address') || this.getAttribute('value') || ''
-    };
-
-    // Update the map
-    const mapElement = document.getElementById(targetMap);
-    if (!mapElement) {
-      return;
-    }
-
-    const pins = [{
-      lat: addressData.lat,
-      lng: addressData.lng,
-      title: addressData.formatted_address
-    }];
-
-    // Use updatePins method if available
-    if (mapElement.updatePins) {
-      mapElement.updatePins(pins);
-    } else {
-      // Fallback to setting attributes
-      mapElement.setAttribute('lat', addressData.lat);
-      mapElement.setAttribute('lng', addressData.lng);
-      if (addressData.formatted_address) {
-        mapElement.setAttribute('address', addressData.formatted_address);
+      if (!lat || !lng || !targetMap) {
+        return;
       }
+
+      // Create address data from initial attributes
+      const addressData = {
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        formatted_address: this.getAttribute('data-address') || this.getAttribute('value') || ''
+      };
+
+      // Update the map
+      const mapElement = document.getElementById(targetMap);
+      if (!mapElement) {
+        // Map not found yet, retry after a delay
+        setTimeout(() => this._updateMapFromInitialData(), 200);
+        return;
+      }
+
+      // Check if map is loaded by listening for map-loaded event or checking if it's ready
+      const updateMap = () => {
+        const pins = [{
+          lat: addressData.lat,
+          lng: addressData.lng,
+          title: addressData.formatted_address
+        }];
+
+        // Use updatePins method if available
+        if (mapElement.updatePins) {
+          mapElement.updatePins(pins);
+        } else {
+          // Fallback to setting attributes
+          mapElement.setAttribute('lat', addressData.lat);
+          mapElement.setAttribute('lng', addressData.lng);
+          if (addressData.formatted_address) {
+            mapElement.setAttribute('address', addressData.formatted_address);
+          }
+        }
+      };
+
+      // If map has a getMap method and it returns a map, it's ready
+      if (mapElement.getMap && mapElement.getMap()) {
+        updateMap();
+      } else {
+        // Listen for map-loaded event
+        const handleMapLoaded = () => {
+          updateMap();
+          mapElement.removeEventListener('map-loaded', handleMapLoaded);
+        };
+        mapElement.addEventListener('map-loaded', handleMapLoaded);
+
+        // Also set a timeout as fallback
+        setTimeout(() => {
+          if (mapElement.getMap && mapElement.getMap()) {
+            updateMap();
+          }
+        }, 1000);
+      }
+    } catch (error) {
+      // Silently fail if map update fails - component should still work
+      console.error('wc-google-address: Error updating map from initial data:', error);
     }
   }
 
