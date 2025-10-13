@@ -208,10 +208,20 @@ class WcInput extends WcBaseFormComponent {
     if (this.passThruEmptyAttributes.includes(attrName)) {
       const type = this.getAttribute('type') || 'text';
       if (type === 'radio') {
-        const radios = this.querySelectorAll('input[type="radio"]');
-        radios.forEach(radio => {
-          radio.setAttribute(attrName, '');
-        });
+        // For radio buttons, only apply 'required' to the first radio
+        // This ensures proper HTML5 validation without showing asterisks on all options
+        if (attrName === 'required') {
+          const radios = this.querySelectorAll('input[type="radio"]');
+          if (radios.length > 0) {
+            radios[0].setAttribute(attrName, '');
+          }
+        } else {
+          // For other attributes like disabled, readonly, apply to all radios
+          const radios = this.querySelectorAll('input[type="radio"]');
+          radios.forEach(radio => {
+            radio.setAttribute(attrName, '');
+          });
+        }
       } else {
         this.formElement?.setAttribute(attrName, '');
       }
@@ -681,7 +691,7 @@ class WcInput extends WcBaseFormComponent {
         opacity: 0.7;
         font-style: italic;
       }
-      div.wc-input:has(:required) label,
+      div.wc-input:has(:required) > label,
       div.wc-textarea:has(:required) label,
       div.wc-select:has(:required) label,
       /*div.wc-code-mirror:has(:required) label*/
@@ -689,7 +699,7 @@ class WcInput extends WcBaseFormComponent {
       {
         font-weight: bold;
       }
-      div.wc-input:has(:required) label::after,
+      div.wc-input:has(:required) > label::after,
       div.wc-textarea:has(:required) label::after,
       div.wc-select:has(:required) label::after,
       /*div.wc-code-mirror:has(:required) label::after*/

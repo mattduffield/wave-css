@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Required Test - Wave CSS</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      border: 1px solid var(--surface-4);
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Radio Button Required Attribute Test</h1>
+
+  <div class="test-section">
+    <h2>Test 1: Required Radio Group (Modern Style)</h2>
+    <p>The main label "Home Owner" should show an asterisk (*), but individual radio options should NOT.</p>
+
+    <wc-form>
+      <wc-input name="address.home_owner"
+                lbl-label="Home Owner"
+                type="radio"
+                radio-group-class="row modern"
+                value="yes"
+                required>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+        <option value="unknown">Unknown</option>
+      </wc-input>
+
+      <button type="submit" class="btn btn-primary mt-4">Submit</button>
+    </wc-form>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Required Radio Group (Traditional Style)</h2>
+    <p>The main label should show an asterisk (*), but individual radio options should NOT.</p>
+
+    <wc-form>
+      <wc-input name="marital_status"
+                lbl-label="Marital Status"
+                type="radio"
+                radio-group-class="col"
+                value="single"
+                required>
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+        <option value="divorced">Divorced</option>
+        <option value="widowed">Widowed</option>
+      </wc-input>
+
+      <button type="submit" class="btn btn-primary mt-4">Submit</button>
+    </wc-form>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Optional Radio Group (No Required)</h2>
+    <p>No asterisk should appear anywhere since this field is not required.</p>
+
+    <wc-form>
+      <wc-input name="preference"
+                lbl-label="Preference"
+                type="radio"
+                radio-group-class="row modern"
+                value="option1">
+        <option value="option1">Option 1</option>
+        <option value="option2">Option 2</option>
+        <option value="option3">Option 3</option>
+      </wc-input>
+
+      <button type="submit" class="btn btn-primary mt-4">Submit</button>
+    </wc-form>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Validation Test</h2>
+    <p>Try to submit without selecting anything - it should show a validation error.</p>
+
+    <wc-form>
+      <wc-input name="important_choice"
+                lbl-label="Important Choice"
+                type="radio"
+                radio-group-class="row modern"
+                required>
+        <option value="accept">Accept</option>
+        <option value="decline">Decline</option>
+      </wc-input>
+
+      <button type="submit" class="btn btn-primary mt-4">Submit (Try without selection)</button>
+    </wc-form>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>
