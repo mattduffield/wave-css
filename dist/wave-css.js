@@ -3638,8 +3638,6 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     this.markers = [];
     this.infoWindows = [];
     this.mapElement = null;
-    this.initRetries = 0;
-    this.maxInitRetries = 10;
     const compEl = this.querySelector(".wc-google-map");
     if (compEl) {
       this.componentElement = compEl;
@@ -3751,22 +3749,11 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
     const dimensions = {
       width: this.mapElement.offsetWidth,
-      height: this.mapElement.offsetHeight,
-      clientWidth: this.mapElement.clientWidth,
-      clientHeight: this.mapElement.clientHeight
+      height: this.mapElement.offsetHeight
     };
     if (dimensions.width === 0 || dimensions.height === 0) {
-      if (this.initRetries < this.maxInitRetries) {
-        this.initRetries++;
-        setTimeout(() => this._initializeMap(), 200);
-        return;
-      } else {
-        console.error("wc-google-map: Max retries reached, container still has no dimensions");
-        this._showError("Map container has no dimensions. Please check your layout.");
-        return;
-      }
+      return;
     }
-    this.initRetries = 0;
     const zoom = parseInt(this.getAttribute("zoom")) || 12;
     const mapType = this.getAttribute("map-type") || "roadmap";
     const draggable = this.hasAttribute("draggable") ? this.getAttribute("draggable") !== "false" : true;
@@ -4305,7 +4292,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   }
   _initializeAutocomplete() {
     if (!window.google?.maps?.places) {
-      console.error("wc-google-address: Google Places API not loaded");
+      setTimeout(() => this._initializeAutocomplete(), 100);
       return;
     }
     this.sessionToken = new google.maps.places.AutocompleteSessionToken();

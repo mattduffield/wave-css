@@ -198,7 +198,8 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
   _initializeAutocomplete() {
     if (!window.google?.maps?.places) {
-      console.error('wc-google-address: Google Places API not loaded');
+      // Places API not ready yet, wait and retry
+      setTimeout(() => this._initializeAutocomplete(), 100);
       return;
     }
 

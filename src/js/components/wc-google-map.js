@@ -49,8 +49,6 @@ class WcGoogleMap extends WcBaseComponent {
     this.markers = [];
     this.infoWindows = [];
     this.mapElement = null;
-    this.initRetries = 0;
-    this.maxInitRetries = 10;
 
     const compEl = this.querySelector('.wc-google-map');
     if (compEl) {
@@ -193,32 +191,16 @@ class WcGoogleMap extends WcBaseComponent {
       return;
     }
 
+    // If container has no dimensions, just return silently
+    // The component will be reconnected when moved by parent components (like wc-form)
     const dimensions = {
       width: this.mapElement.offsetWidth,
-      height: this.mapElement.offsetHeight,
-      clientWidth: this.mapElement.clientWidth,
-      clientHeight: this.mapElement.clientHeight
+      height: this.mapElement.offsetHeight
     };
 
-    // console.log('wc-google-map: Initializing map...');
-    // console.log('wc-google-map: Container dimensions:', dimensions);
-
-    // If container has no dimensions, wait and retry
     if (dimensions.width === 0 || dimensions.height === 0) {
-      if (this.initRetries < this.maxInitRetries) {
-        this.initRetries++;
-        // console.warn(`wc-google-map: Container has no dimensions, retrying in 200ms... (attempt ${this.initRetries}/${this.maxInitRetries})`);
-        setTimeout(() => this._initializeMap(), 200);
-        return;
-      } else {
-        console.error('wc-google-map: Max retries reached, container still has no dimensions');
-        this._showError('Map container has no dimensions. Please check your layout.');
-        return;
-      }
+      return;
     }
-
-    // Reset retry counter on successful initialization
-    this.initRetries = 0;
 
     // Get map configuration
     const zoom = parseInt(this.getAttribute('zoom')) || 12;
