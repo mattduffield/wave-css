@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Input Types Test - Wave CSS</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      border: 1px solid var(--surface-4);
+      border-radius: 0.5rem;
+      background: var(--surface-1);
+    }
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+    .debug-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface-2);
+      border-left: 4px solid var(--primary-bg-color);
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Input Types Test</h1>
+  <p>Testing custom input types: auto, auto-dualtone, motorcycle, motorcycle-dualtone</p>
+
+  <div class="test-section">
+    <h2>Test 1: Auto Input (Regular)</h2>
+    <wc-form id="form1">
+      <div class="input-group">
+        <wc-input
+          name="vehicle_auto"
+          lbl-label="Vehicle (Auto)"
+          type="auto"
+          placeholder="Enter vehicle details"
+          value="Toyota Camry 2024">
+        </wc-input>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> Car icon (solid) on the left, type="text" on actual input element
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Auto Dualtone Input</h2>
+    <wc-form id="form2">
+      <div class="input-group">
+        <wc-input
+          name="vehicle_auto_dualtone"
+          lbl-label="Vehicle (Auto Dualtone)"
+          type="auto-dualtone"
+          placeholder="Enter vehicle details"
+          value="Honda Accord 2024">
+        </wc-input>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> Car icon (dualtone) on the left, type="text" on actual input element
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Motorcycle Input (Regular)</h2>
+    <wc-form id="form3">
+      <div class="input-group">
+        <wc-input
+          name="vehicle_motorcycle"
+          lbl-label="Motorcycle"
+          type="motorcycle"
+          placeholder="Enter motorcycle details"
+          value="Harley Davidson">
+        </wc-input>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> Motorcycle icon (solid) on the left, type="text" on actual input element
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Motorcycle Dualtone Input</h2>
+    <wc-form id="form4">
+      <div class="input-group">
+        <wc-input
+          name="vehicle_motorcycle_dualtone"
+          lbl-label="Motorcycle (Dualtone)"
+          type="motorcycle-dualtone"
+          placeholder="Enter motorcycle details"
+          value="Kawasaki Ninja">
+        </wc-input>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> Motorcycle icon (dualtone) on the left, type="text" on actual input element
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 5: All Custom Types Together</h2>
+    <wc-form id="form5">
+      <div class="row">
+        <div class="col">
+          <wc-input
+            name="auto_test"
+            lbl-label="Auto"
+            type="auto"
+            placeholder="Car"
+            required>
+          </wc-input>
+        </div>
+        <div class="col">
+          <wc-input
+            name="auto_dualtone_test"
+            lbl-label="Auto Dualtone"
+            type="auto-dualtone"
+            placeholder="Car (Dualtone)"
+            required>
+          </wc-input>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <wc-input
+            name="motorcycle_test"
+            lbl-label="Motorcycle"
+            type="motorcycle"
+            placeholder="Motorcycle"
+            required>
+          </wc-input>
+        </div>
+        <div class="col">
+          <wc-input
+            name="motorcycle_dualtone_test"
+            lbl-label="Motorcycle Dualtone"
+            type="motorcycle-dualtone"
+            placeholder="Motorcycle (Dualtone)"
+            required>
+          </wc-input>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-4">Submit All</button>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> All fields should show their respective icons and use type="text" internally.
+      Try submitting without filling - validation should work correctly.
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 6: Dynamic Type Change</h2>
+    <p>Click buttons to dynamically change input type:</p>
+
+    <wc-form id="form6">
+      <div class="input-group">
+        <wc-input
+          id="dynamic-input"
+          name="dynamic_vehicle"
+          lbl-label="Dynamic Vehicle Type"
+          type="auto"
+          placeholder="Enter vehicle details"
+          value="Test Vehicle">
+        </wc-input>
+      </div>
+
+      <div class="row gap-2">
+        <button type="button" class="btn btn-secondary" onclick="changeType('auto')">Auto</button>
+        <button type="button" class="btn btn-secondary" onclick="changeType('auto-dualtone')">Auto Dualtone</button>
+        <button type="button" class="btn btn-secondary" onclick="changeType('motorcycle')">Motorcycle</button>
+        <button type="button" class="btn btn-secondary" onclick="changeType('motorcycle-dualtone')">Motorcycle Dualtone</button>
+        <button type="button" class="btn btn-secondary" onclick="changeType('email')">Email (Built-in)</button>
+      </div>
+    </wc-form>
+
+    <div class="debug-info">
+      <strong>Expected:</strong> Icon should change when you click different type buttons.
+      The actual input element should always use the correct underlying HTML type (text for custom types, email for email type).
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Test dynamic type changes
+    function changeType(newType) {
+      const input = document.getElementById('dynamic-input');
+      input.setAttribute('type', newType);
+
+      // Log the actual input element type for debugging
+      const actualInput = input.querySelector('input[form-element]');
+      console.log(`Changed to type="${newType}", actual input type="${actualInput.type}"`);
+    }
+
+    // Add form submit handlers to log values
+    document.querySelectorAll('wc-form').forEach((form, index) => {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        console.log(`Form ${index + 1} submitted:`, Object.fromEntries(formData));
+
+        // Also check actual input types
+        const inputs = e.target.querySelectorAll('input[form-element]');
+        inputs.forEach(input => {
+          console.log(`  ${input.name}: type="${input.type}", value="${input.value}"`);
+        });
+      });
+    });
+
+    // Log initial state on page load
+    window.addEventListener('load', () => {
+      console.log('Page loaded. Checking all custom type inputs:');
+      document.querySelectorAll('wc-input[type="auto"], wc-input[type="auto-dualtone"], wc-input[type="motorcycle"], wc-input[type="motorcycle-dualtone"]').forEach(wcInput => {
+        const actualInput = wcInput.querySelector('input[form-element]');
+        const wcType = wcInput.getAttribute('type');
+        const actualType = actualInput ? actualInput.type : 'not found';
+        console.log(`  wc-input type="${wcType}" -> actual input type="${actualType}"`);
+      });
+    });
+  </script>
+</body>
+</html>

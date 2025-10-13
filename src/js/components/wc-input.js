@@ -285,7 +285,18 @@ class WcInput extends WcBaseFormComponent {
       elt?.classList.add('text-2xs');
       // elt?.classList.add(newValue);
     } else if (attrName === 'type') {
-      this.formElement?.setAttribute('type', newValue);
+      // Map custom types to their underlying HTML input types
+      const customTypeMap = {
+        'currency': 'number',
+        'auto': 'text',
+        'auto-dualtone': 'text',
+        'motorcycle': 'text',
+        'motorcycle-dualtone': 'text'
+      };
+
+      const actualType = customTypeMap[newValue] || newValue;
+      this.formElement?.setAttribute('type', actualType);
+
       if (newValue === 'checkbox') {
         if (this.hasAttribute('checked')) {
           this.formElement?.setAttribute('checked', '');
@@ -294,11 +305,9 @@ class WcInput extends WcBaseFormComponent {
           this.formElement?.removeAttribute('checked');
           this.formElement?.setAttribute('value', 'bool:False');
         }
-      } else if (newValue === 'currency') {
-        this.formElement?.setAttribute('type', 'number');
       }
     } else {
-      super._handleAttributeChange(attrName, newValue);  
+      super._handleAttributeChange(attrName, newValue);
     }
   }
 

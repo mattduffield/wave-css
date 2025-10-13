@@ -16234,7 +16234,15 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       });
       elt?.classList.add("text-2xs");
     } else if (attrName === "type") {
-      this.formElement?.setAttribute("type", newValue);
+      const customTypeMap = {
+        "currency": "number",
+        "auto": "text",
+        "auto-dualtone": "text",
+        "motorcycle": "text",
+        "motorcycle-dualtone": "text"
+      };
+      const actualType = customTypeMap[newValue] || newValue;
+      this.formElement?.setAttribute("type", actualType);
       if (newValue === "checkbox") {
         if (this.hasAttribute("checked")) {
           this.formElement?.setAttribute("checked", "");
@@ -16243,8 +16251,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
           this.formElement?.removeAttribute("checked");
           this.formElement?.setAttribute("value", "bool:False");
         }
-      } else if (newValue === "currency") {
-        this.formElement?.setAttribute("type", "number");
       }
     } else {
       super._handleAttributeChange(attrName, newValue);
