@@ -71,7 +71,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
     this.passThruAttributes = ['name', 'id', 'value', 'placeholder', 'autocomplete'];
     this.passThruEmptyAttributes = ['disabled', 'readonly', 'required'];
-    this.ignoreAttributes = ['class', 'lbl-class', 'lbl-label',
+    this.ignoreAttributes = ['lbl-class', 'lbl-label',
                              'api-key', 'address-group', 'target-map',
                              'countries', 'types', 'fields'];
     this.eventAttributes = ['onchange', 'oninput', 'onblur', 'onfocus'];
@@ -547,14 +547,17 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Handle pass-through attributes
     if (this.passThruAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, newValue);
+      return;
     }
 
     if (this.passThruEmptyAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, '');
+      return;
     }
 
     if (this.ignoreAttributes.includes(attrName)) {
       // Do nothing...
+      return;
     }
 
     // Handle tooltip
@@ -568,16 +571,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
       const name = this.getAttribute('name');
       const lbl = this.querySelector(`label[for="${name}"]`);
       lbl?.classList.add(newValue);
-    }
-
-    // Handle element class
-    if (attrName === 'elt-class') {
-      const parts = newValue.split(' ');
-      parts.forEach(p => {
-        if (p) {
-          this.formElement?.classList.add(p.trim());
-        }
-      });
+      return;
     }
 
     // Handle API configuration changes
@@ -586,7 +580,11 @@ class WcGoogleAddress extends WcBaseFormComponent {
       this._loadGooglePlacesAPI(newValue).then(() => {
         this._initializeAutocomplete();
       });
+      return;
     }
+
+    // Let base component handle everything else (including 'class' and 'elt-class')
+    super._handleAttributeChange(attrName, newValue);
   }
 
   _render() {
@@ -644,7 +642,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
   _applyStyle() {
     const style = `
       wc-google-address {
-        display: block;
+        display: contents;
       }
 
       /* Match wc-input styling with icon */

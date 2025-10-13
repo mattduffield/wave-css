@@ -4200,7 +4200,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     this.passThruAttributes = ["name", "id", "value", "placeholder", "autocomplete"];
     this.passThruEmptyAttributes = ["disabled", "readonly", "required"];
     this.ignoreAttributes = [
-      "class",
       "lbl-class",
       "lbl-label",
       "api-key",
@@ -4552,11 +4551,14 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     }
     if (this.passThruAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, newValue);
+      return;
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {
       this.formElement?.setAttribute(attrName, "");
+      return;
     }
     if (this.ignoreAttributes.includes(attrName)) {
+      return;
     }
     if (attrName === "tooltip" || attrName === "tooltip-position") {
       this._createTooltipElement();
@@ -4566,20 +4568,15 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       const name = this.getAttribute("name");
       const lbl = this.querySelector(`label[for="${name}"]`);
       lbl?.classList.add(newValue);
-    }
-    if (attrName === "elt-class") {
-      const parts = newValue.split(" ");
-      parts.forEach((p) => {
-        if (p) {
-          this.formElement?.classList.add(p.trim());
-        }
-      });
+      return;
     }
     if (attrName === "api-key") {
       this._loadGooglePlacesAPI(newValue).then(() => {
         this._initializeAutocomplete();
       });
+      return;
     }
+    super._handleAttributeChange(attrName, newValue);
   }
   _render() {
     const name = this.getAttribute("name") || "address";
@@ -4622,7 +4619,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   _applyStyle() {
     const style = `
       wc-google-address {
-        display: block;
+        display: contents;
       }
 
       /* Match wc-input styling with icon */
