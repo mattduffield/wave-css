@@ -134,6 +134,22 @@ class WcGoogleMap extends WcBaseComponent {
       return WcGoogleMap.googleMapsLoadPromise;
     }
 
+    // Check if script tag already exists (loaded by wc-google-address)
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      console.log('wc-google-map: Google Maps script already exists, waiting for it to load...');
+      WcGoogleMap.googleMapsLoadPromise = new Promise((resolve) => {
+        const checkLoaded = setInterval(() => {
+          if (window.google?.maps) {
+            clearInterval(checkLoaded);
+            WcGoogleMap.isGoogleMapsLoaded = true;
+            resolve();
+          }
+        }, 100);
+      });
+      return WcGoogleMap.googleMapsLoadPromise;
+    }
+
     // Start loading
     const apiKey = this.getAttribute('api-key');
     if (!apiKey) {
@@ -143,8 +159,8 @@ class WcGoogleMap extends WcBaseComponent {
 
     WcGoogleMap.googleMapsLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      // Load with marker library for AdvancedMarkerElement (removes deprecation warning)
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&v=weekly`;
+      // Load with both marker and places libraries for compatibility with wc-google-address
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&v=weekly`;
       script.async = true;
       script.defer = true;
 
@@ -623,13 +639,13 @@ class WcGoogleMap extends WcBaseComponent {
         display: block;
         width: 100%;
         height: 100%;
-        min-height: 300px;
+        min-height: 150px;
       }
 
       wc-google-map .wc-google-map {
         width: 100%;
         height: 100%;
-        min-height: 300px;
+        min-height: 150px;
         position: relative;
       }
 

@@ -3704,6 +3704,20 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     if (_WcGoogleMap.googleMapsLoadPromise) {
       return _WcGoogleMap.googleMapsLoadPromise;
     }
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      console.log("wc-google-map: Google Maps script already exists, waiting for it to load...");
+      _WcGoogleMap.googleMapsLoadPromise = new Promise((resolve) => {
+        const checkLoaded = setInterval(() => {
+          if (window.google?.maps) {
+            clearInterval(checkLoaded);
+            _WcGoogleMap.isGoogleMapsLoaded = true;
+            resolve();
+          }
+        }, 100);
+      });
+      return _WcGoogleMap.googleMapsLoadPromise;
+    }
     const apiKey = this.getAttribute("api-key");
     if (!apiKey) {
       console.error("wc-google-map: api-key attribute is required");
@@ -3711,7 +3725,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
     _WcGoogleMap.googleMapsLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&v=weekly`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -4081,13 +4095,13 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
         display: block;
         width: 100%;
         height: 100%;
-        min-height: 300px;
+        min-height: 150px;
       }
 
       wc-google-map .wc-google-map {
         width: 100%;
         height: 100%;
-        min-height: 300px;
+        min-height: 150px;
         position: relative;
       }
 
@@ -4120,6 +4134,691 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
   }
 };
 customElements.define("wc-google-map", WcGoogleMap);
+
+// src/js/components/wc-google-address.js
+var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
+  static get is() {
+    return "wc-google-address";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "placeholder",
+      "lbl-label",
+      "lbl-class",
+      "elt-class",
+      "disabled",
+      "readonly",
+      "required",
+      "autocomplete",
+      "api-key",
+      "address-group",
+      "target-map",
+      "countries",
+      "types",
+      "fields",
+      "onchange",
+      "oninput",
+      "onblur",
+      "onfocus",
+      "tooltip",
+      "tooltip-position"
+    ];
+  }
+  // Static property to track if Google Places API is loaded
+  static isGooglePlacesLoaded = false;
+  static googlePlacesLoadPromise = null;
+  constructor() {
+    super();
+    this.passThruAttributes = ["name", "id", "value", "placeholder", "autocomplete"];
+    this.passThruEmptyAttributes = ["disabled", "readonly", "required"];
+    this.ignoreAttributes = [
+      "class",
+      "lbl-class",
+      "lbl-label",
+      "elt-class",
+      "api-key",
+      "address-group",
+      "target-map",
+      "countries",
+      "types",
+      "fields"
+    ];
+    this.eventAttributes = ["onchange", "oninput", "onblur", "onfocus"];
+    const compEl = this.querySelector(".wc-google-address");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-google-address", "relative");
+      this.appendChild(this.componentElement);
+    }
+    this.autocompleteService = null;
+    this.placesService = null;
+    this.sessionToken = null;
+    this.selectedPlace = null;
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    const apiKey = this.getAttribute("api-key");
+    if (!apiKey) {
+      console.error("wc-google-address: api-key attribute is required");
+      return;
+    }
+    await this._loadGooglePlacesAPI(apiKey);
+    this._initializeAutocomplete();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+    if (this.autocompleteService) {
+      this.autocompleteService = null;
+    }
+    if (this.placesService) {
+      this.placesService = null;
+    }
+  }
+  async _loadGooglePlacesAPI(apiKey) {
+    if (window.google?.maps) {
+      if (window.google.maps.places) {
+        _WcGoogleAddress.isGooglePlacesLoaded = true;
+        return Promise.resolve();
+      }
+      console.warn("wc-google-address: Google Maps API is loaded but places library is missing. You may need to include libraries=places in the initial load.");
+      return Promise.resolve();
+    }
+    if (_WcGoogleAddress.isGooglePlacesLoaded) {
+      return Promise.resolve();
+    }
+    if (_WcGoogleAddress.googlePlacesLoadPromise) {
+      return _WcGoogleAddress.googlePlacesLoadPromise;
+    }
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      console.log("wc-google-address: Google Maps script already exists, waiting for it to load...");
+      _WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve) => {
+        const checkLoaded = setInterval(() => {
+          if (window.google?.maps) {
+            clearInterval(checkLoaded);
+            _WcGoogleAddress.isGooglePlacesLoaded = true;
+            resolve();
+          }
+        }, 100);
+      });
+      return _WcGoogleAddress.googlePlacesLoadPromise;
+    }
+    _WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        _WcGoogleAddress.isGooglePlacesLoaded = true;
+        console.log("\u2705 Google Places API loaded successfully");
+        resolve();
+      };
+      script.onerror = () => {
+        const error = new Error("Failed to load Google Places API");
+        console.error("\u274C", error);
+        reject(error);
+      };
+      document.head.appendChild(script);
+    });
+    return _WcGoogleAddress.googlePlacesLoadPromise;
+  }
+  _initializeAutocomplete() {
+    if (!window.google?.maps?.places) {
+      console.error("wc-google-address: Google Places API not loaded");
+      return;
+    }
+    this.sessionToken = new google.maps.places.AutocompleteSessionToken();
+    this.autocompleteService = new google.maps.places.AutocompleteService();
+    const attributionDiv = document.createElement("div");
+    this.placesService = new google.maps.places.PlacesService(attributionDiv);
+    this._wireAutocompleteEvents();
+  }
+  _wireAutocompleteEvents() {
+    if (!this.formElement) return;
+    let suggestionsContainer = this.querySelector(".address-suggestions");
+    if (!suggestionsContainer) {
+      suggestionsContainer = document.createElement("div");
+      suggestionsContainer.classList.add("address-suggestions");
+      this.componentElement.appendChild(suggestionsContainer);
+    }
+    let debounceTimer;
+    const debounce = (func, delay) => {
+      return (...args) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+      };
+    };
+    const handleInput = debounce((e) => {
+      const input2 = e.target.value.trim();
+      console.log(`\u{1F50D} wc-google-address: Input value="${input2}", length=${input2.length}`);
+      if (input2.length < 3) {
+        this._hideSuggestions(suggestionsContainer);
+        return;
+      }
+      console.log(`\u{1F4E1} wc-google-address: Fetching suggestions for "${input2}"`);
+      this._fetchSuggestions(input2, suggestionsContainer);
+    }, 300);
+    this.formElement.addEventListener("input", handleInput);
+    console.log("\u2705 wc-google-address: Input event listener attached to", this.formElement);
+    this.formElement.addEventListener("keydown", (e) => {
+      const suggestions = suggestionsContainer.querySelectorAll(".address-suggestion-item");
+      if (suggestions.length === 0) return;
+      const currentIndex = Array.from(suggestions).findIndex(
+        (item) => item.classList.contains("highlighted")
+      );
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          const nextIndex = currentIndex < suggestions.length - 1 ? currentIndex + 1 : 0;
+          this._highlightSuggestion(suggestions, nextIndex);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          const prevIndex = currentIndex > 0 ? currentIndex - 1 : suggestions.length - 1;
+          this._highlightSuggestion(suggestions, prevIndex);
+          break;
+        case "Enter":
+          if (currentIndex >= 0) {
+            e.preventDefault();
+            const placeId = suggestions[currentIndex].dataset.placeId;
+            console.log(`\u2328\uFE0F wc-google-address: Enter key pressed on suggestion index ${currentIndex}, placeId=${placeId}`);
+            this._selectPlace(placeId);
+            this._hideSuggestions(suggestionsContainer);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          this._hideSuggestions(suggestionsContainer);
+          break;
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (!this.contains(e.target)) {
+        this._hideSuggestions(suggestionsContainer);
+      }
+    });
+    this.formElement.addEventListener("blur", () => {
+      setTimeout(() => {
+        if (!this.querySelector(".address-suggestions:hover")) {
+          this._hideSuggestions(suggestionsContainer);
+        }
+      }, 200);
+    });
+  }
+  _fetchSuggestions(input2, container2) {
+    if (!this.autocompleteService) {
+      console.error("\u274C wc-google-address: autocompleteService not initialized!");
+      return;
+    }
+    const request = {
+      input: input2,
+      sessionToken: this.sessionToken
+    };
+    const countries = this.getAttribute("countries");
+    if (countries) {
+      request.componentRestrictions = {
+        country: countries.split(",").map((c) => c.trim())
+      };
+    }
+    const types = this.getAttribute("types");
+    if (types) {
+      request.types = types.split(",").map((t) => t.trim());
+    }
+    console.log("\u{1F4E4} wc-google-address: Sending request to Google Places API:", request);
+    this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
+      console.log(`\u{1F4E5} wc-google-address: Received response - status=${status}, predictions=`, predictions);
+      if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+        console.warn(`\u26A0\uFE0F wc-google-address: No predictions (status=${status})`);
+        this._hideSuggestions(container2);
+        return;
+      }
+      console.log(`\u2705 wc-google-address: Displaying ${predictions.length} suggestions`);
+      this._displaySuggestions(predictions, container2);
+    });
+  }
+  _displaySuggestions(predictions, container2) {
+    container2.innerHTML = "";
+    container2.classList.remove("hidden");
+    predictions.forEach((prediction) => {
+      const item = document.createElement("div");
+      item.classList.add("address-suggestion-item");
+      item.textContent = prediction.description;
+      item.dataset.placeId = prediction.place_id;
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`\u{1F446} wc-google-address: Mousedown on suggestion: ${prediction.description}, placeId=${prediction.place_id}`);
+        this._selectPlace(prediction.place_id);
+        this._hideSuggestions(container2);
+      });
+      container2.appendChild(item);
+    });
+  }
+  _hideSuggestions(container2) {
+    container2.classList.add("hidden");
+    container2.innerHTML = "";
+  }
+  _highlightSuggestion(suggestions, index) {
+    suggestions.forEach((item) => item.classList.remove("highlighted"));
+    if (suggestions[index]) {
+      suggestions[index].classList.add("highlighted");
+      suggestions[index].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }
+  _selectPlace(placeId) {
+    console.log(`\u{1F50D} wc-google-address: _selectPlace called with placeId=${placeId}`);
+    if (!this.placesService) {
+      console.error("\u274C wc-google-address: placesService not initialized!");
+      return;
+    }
+    const fields = this.getAttribute("fields") || "address_components,formatted_address,geometry,name";
+    console.log(`\u{1F4CB} wc-google-address: Requesting fields: ${fields}`);
+    const request = {
+      placeId,
+      fields: fields.split(",").map((f) => f.trim()),
+      sessionToken: this.sessionToken
+    };
+    console.log(`\u{1F4E4} wc-google-address: Fetching place details...`);
+    this.placesService.getDetails(request, (place, status) => {
+      console.log(`\u{1F4E5} wc-google-address: getDetails response - status=${status}`, place);
+      if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
+        console.error("\u274C wc-google-address: Failed to get place details", status);
+        return;
+      }
+      this.sessionToken = new google.maps.places.AutocompleteSessionToken();
+      console.log(`\u2705 wc-google-address: Processing place result...`);
+      this._processPlaceResult(place);
+    });
+  }
+  _processPlaceResult(place) {
+    const addressData = this._parseAddressComponents(place);
+    if (this.formElement) {
+      this.formElement.value = addressData.street;
+    }
+    this.selectedPlace = addressData;
+    this._broadcastAddressChange(addressData);
+    const targetMap = this.getAttribute("target-map");
+    if (targetMap) {
+      this._updateMap(targetMap, addressData);
+    }
+    if (this.formElement) {
+      this.formElement.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+  _parseAddressComponents(place) {
+    const components = place.address_components || [];
+    const geometry = place.geometry?.location;
+    const addressData = {
+      addressGroup: this.getAttribute("address-group") || "address",
+      street: "",
+      apt_suite: "",
+      city: "",
+      state: "",
+      postal_code: "",
+      county: "",
+      country: "",
+      lat: geometry ? geometry.lat() : null,
+      lng: geometry ? geometry.lng() : null,
+      formatted_address: place.formatted_address || "",
+      place_id: place.place_id || ""
+    };
+    let streetNumber = "";
+    let route = "";
+    components.forEach((component) => {
+      const types = component.types;
+      if (types.includes("street_number")) {
+        streetNumber = component.long_name;
+      }
+      if (types.includes("route")) {
+        route = component.long_name;
+      }
+      if (types.includes("locality")) {
+        addressData.city = component.long_name;
+      }
+      if (types.includes("administrative_area_level_1")) {
+        addressData.state = component.short_name;
+      }
+      if (types.includes("administrative_area_level_2")) {
+        addressData.county = component.long_name;
+      }
+      if (types.includes("postal_code")) {
+        addressData.postal_code = component.long_name;
+      }
+      if (types.includes("country")) {
+        addressData.country = component.short_name;
+      }
+    });
+    addressData.street = [streetNumber, route].filter(Boolean).join(" ");
+    return addressData;
+  }
+  _broadcastAddressChange(addressData) {
+    const event = "google-address:change";
+    console.log(`\u{1F4CD} wc-google-address: Broadcasting ${event} with data:`, addressData);
+    const customEvent = new CustomEvent(event, {
+      detail: addressData,
+      bubbles: true,
+      composed: true
+    });
+    document.dispatchEvent(customEvent);
+    if (window.wc?.EventHub) {
+      wc.EventHub.broadcast(event, [], addressData);
+      console.log(`\u{1F4E1} wc-google-address: Also broadcast via EventHub`);
+    }
+  }
+  _updateMap(targetMapId, addressData) {
+    if (!addressData.lat || !addressData.lng) return;
+    const mapElement = document.getElementById(targetMapId);
+    if (!mapElement || mapElement.tagName.toLowerCase() !== "wc-google-map") {
+      console.warn(`wc-google-address: Map element with id "${targetMapId}" not found`);
+      return;
+    }
+    mapElement.setAttribute("lat", addressData.lat);
+    mapElement.setAttribute("lng", addressData.lng);
+    mapElement.setAttribute("address", addressData.formatted_address);
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        const eventHandler = new Function("event", `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+        const eventName = attrName.substring(2);
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }
+    if (this.passThruAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, newValue);
+    }
+    if (this.passThruEmptyAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, "");
+    }
+    if (this.ignoreAttributes.includes(attrName)) {
+    }
+    if (attrName === "tooltip" || attrName === "tooltip-position") {
+      this._createTooltipElement();
+      return;
+    }
+    if (attrName === "lbl-class") {
+      const name = this.getAttribute("name");
+      const lbl = this.querySelector(`label[for="${name}"]`);
+      lbl?.classList.add(newValue);
+    }
+    if (attrName === "elt-class") {
+      const parts = newValue.split(" ");
+      parts.forEach((p) => {
+        if (p) {
+          this.formElement?.classList.add(p.trim());
+        }
+      });
+    }
+    if (attrName === "api-key") {
+      this._loadGooglePlacesAPI(newValue).then(() => {
+        this._initializeAutocomplete();
+      });
+    }
+  }
+  _render() {
+    const name = this.getAttribute("name") || "address";
+    const lblLabel = this.getAttribute("lbl-label") || "";
+    const placeholder = this.getAttribute("placeholder") || "Start typing an address...";
+    const value = this.getAttribute("value") || "";
+    this.componentElement.innerHTML = "";
+    if (lblLabel) {
+      const label = document.createElement("label");
+      label.setAttribute("for", name);
+      label.textContent = lblLabel;
+      this.componentElement.appendChild(label);
+    }
+    this.formElement = document.createElement("input");
+    this.formElement.setAttribute("type", "text");
+    this.formElement.setAttribute("name", name);
+    this.formElement.setAttribute("id", name);
+    this.formElement.setAttribute("class", "form-control");
+    this.formElement.setAttribute("placeholder", placeholder);
+    this.formElement.setAttribute("autocomplete", "off");
+    if (value) {
+      this.formElement.value = value;
+    }
+    this.componentElement.appendChild(this.formElement);
+    const icon = document.createElement("span");
+    icon.classList.add("icon");
+    icon.innerHTML = `
+      <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
+        <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
+      </svg>
+    `.trim();
+    this.componentElement.appendChild(icon);
+    this.labelElement = this.componentElement.querySelector("label");
+  }
+  _applyStyle() {
+    const style = `
+      wc-google-address {
+        display: block;
+      }
+
+      /* Match wc-input styling with icon */
+      wc-google-address input[type="text"] {
+        padding-left: 25px;
+        min-width: 130px;
+      }
+
+      wc-google-address input[type="text"] + .icon {
+        position: absolute;
+        left: 5px;
+        color: var(--icon-color, #6b7280);
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+
+      /* Position icon with label */
+      wc-google-address label + input[type="text"] + .icon {
+        top: 10px;
+      }
+
+      /* Position icon without label */
+      wc-google-address input[type="text"]:first-child + .icon {
+        top: 0;
+      }
+
+      /* Match wc-input focus styling exactly */
+      wc-google-address input:focus {
+        outline: none;
+        border-color: var(--focus-border-color, #3b82f6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Dropdown suggestions - improved visibility */
+      .address-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 2px;
+        background: white;
+        border: 2px solid var(--focus-border-color, #3b82f6);
+        border-radius: 0.375rem;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .address-suggestions.hidden {
+        display: none;
+      }
+
+      /* Suggestion items - improved contrast */
+      .address-suggestion-item {
+        padding: 0.875rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color, #e5e7eb);
+        transition: all 0.15s ease;
+        font-size: 0.95rem;
+        color: #1f2937;
+      }
+
+      .address-suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .address-suggestion-item:hover {
+        background-color: var(--hover-bg-color, #f3f4f6);
+      }
+
+      /* Highlighted state for keyboard navigation - more prominent */
+      .address-suggestion-item.highlighted {
+        background-color: var(--highlight-bg-color, #3b82f6);
+        color: white;
+        font-weight: 500;
+      }
+    `.trim();
+    this.loadStyle("wc-google-address-style", style);
+  }
+  // Getter for form value
+  get value() {
+    return this.formElement?.value || "";
+  }
+  // Setter for form value
+  set value(val) {
+    if (this.formElement) {
+      this.formElement.value = val;
+    }
+  }
+  // Get full selected place data
+  getPlaceData() {
+    return this.selectedPlace;
+  }
+};
+customElements.define(WcGoogleAddress.is, WcGoogleAddress);
+
+// src/js/components/wc-address-listener.js
+var WcAddressListener = class extends WcBaseComponent {
+  static get is() {
+    return "wc-address-listener";
+  }
+  static get observedAttributes() {
+    return ["address-group"];
+  }
+  constructor() {
+    super();
+    this.boundHandleAddressChange = this._handleAddressChange.bind(this);
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener("google-address:change", this.boundHandleAddressChange);
+    this._setupDirectListeners();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener("google-address:change", this.boundHandleAddressChange);
+  }
+  _setupDirectListeners() {
+    const listenableElements = this.querySelectorAll("[address-listener]");
+    listenableElements.forEach((element) => {
+      if (!element._addressListenerSetup) {
+        element._addressListenerSetup = true;
+        element._handleDirectAddressChange = (event) => {
+          const listenerGroup = element.getAttribute("address-listener");
+          const addressData = event.detail;
+          if (addressData.addressGroup === listenerGroup) {
+            this._updateFieldValue(element, addressData);
+          }
+        };
+        document.addEventListener("google-address:change", element._handleDirectAddressChange);
+      }
+    });
+  }
+  _handleAddressChange(event) {
+    const addressData = event.detail;
+    const targetGroup = this.getAttribute("address-group");
+    if (!targetGroup || addressData.addressGroup !== targetGroup) {
+      return;
+    }
+    console.log(`\u{1F3AF} wc-address-listener: Received address data for group "${targetGroup}":`, addressData);
+    this._updateChildFields(addressData);
+  }
+  _updateChildFields(addressData) {
+    const formFields = this.querySelectorAll("wc-input, wc-select, input, select");
+    formFields.forEach((field) => {
+      this._updateFieldValue(field, addressData);
+    });
+  }
+  _updateFieldValue(field, addressData) {
+    const fieldName = field.getAttribute("name");
+    if (!fieldName) return;
+    const fieldMapping = this._getFieldMapping(fieldName);
+    if (!fieldMapping) return;
+    const newValue = addressData[fieldMapping];
+    if (newValue === void 0 || newValue === null) return;
+    if (field.tagName.toLowerCase() === "wc-input" || field.tagName.toLowerCase() === "wc-select") {
+      field.value = newValue;
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+      console.log(`  \u2713 Updated ${fieldName} = "${newValue}"`);
+    } else if (field.tagName.toLowerCase() === "input" || field.tagName.toLowerCase() === "select") {
+      field.value = newValue;
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+      console.log(`  \u2713 Updated ${fieldName} = "${newValue}"`);
+    }
+  }
+  _getFieldMapping(fieldName) {
+    const parts = fieldName.split(".");
+    const fieldKey = parts[parts.length - 1];
+    const mappings = {
+      "street": "street",
+      "address": "street",
+      "address1": "street",
+      "address_1": "street",
+      "apt": "apt_suite",
+      "apt_suite": "apt_suite",
+      "suite": "apt_suite",
+      "address2": "apt_suite",
+      "address_2": "apt_suite",
+      "city": "city",
+      "state": "state",
+      "province": "state",
+      "postal_code": "postal_code",
+      "postalcode": "postal_code",
+      "zip": "postal_code",
+      "zipcode": "postal_code",
+      "zip_code": "postal_code",
+      "county": "county",
+      "country": "country",
+      "lat": "lat",
+      "latitude": "lat",
+      "lng": "lng",
+      "lon": "lng",
+      "longitude": "lng"
+    };
+    return mappings[fieldKey.toLowerCase()] || null;
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (attrName === "address-group") {
+      console.log(`wc-address-listener: Now listening for address group "${newValue}"`);
+    }
+  }
+  _render() {
+    if (!this.querySelector("slot")) {
+      const slot = document.createElement("slot");
+      this.appendChild(slot);
+    }
+  }
+};
+customElements.define(WcAddressListener.is, WcAddressListener);
 
 // src/js/components/wc-icon.js
 if (!customElements.get("wc-icon")) {

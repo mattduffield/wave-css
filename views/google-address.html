@@ -1,0 +1,403 @@
+<div id="page-contents">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Google Address Autocomplete Examples</h1>
+    <p class="mb-8 text-gray-600">
+      These examples demonstrate the <code>wc-google-address</code> component with automatic field population
+      using the <code>wc-address-listener</code> utility component.
+    </p>
+
+    <!-- Example 1: Basic Address Form with Auto-population -->
+    <div class="card mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Example 1: Basic Address Form with Auto-population</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        Start typing an address in the street field. When you select an address from the dropdown,
+        all other fields will automatically populate.
+      </p>
+
+      <wc-form id="form1" class="col gap-4">
+        <div class="row gap-2">
+          <wc-google-address
+            name="address.street"
+            lbl-label="Street"
+            class="col-1"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            address-group="address"
+            target-map="map1"
+            countries="us"
+            types="address"
+            placeholder="Street address..."
+            required>
+          </wc-google-address>
+        </div>
+
+        <wc-address-listener address-group="address">
+          <div class="row gap-2">
+            <wc-input
+              name="address.apt_suite"
+              lbl-label="Apt/Suite"
+              class="col w-17"
+              placeholder="Optional">
+            </wc-input>
+            <wc-input
+              name="address.city"
+              lbl-label="City"
+              class="col-1"
+              required>
+            </wc-input>
+            <wc-select
+              name="address.state"
+              lbl-label="State"
+              class="col w-18"
+              required>
+              <option value="">Choose...</option>
+              <option value="AL">AL</option>
+              <option value="AK">AK</option>
+              <option value="AZ">AZ</option>
+              <option value="AR">AR</option>
+              <option value="CA">CA</option>
+              <option value="CO">CO</option>
+              <option value="CT">CT</option>
+              <option value="DE">DE</option>
+              <option value="FL">FL</option>
+              <option value="GA">GA</option>
+              <option value="HI">HI</option>
+              <option value="ID">ID</option>
+              <option value="IL">IL</option>
+              <option value="IN">IN</option>
+              <option value="IA">IA</option>
+              <option value="KS">KS</option>
+              <option value="KY">KY</option>
+              <option value="LA">LA</option>
+              <option value="ME">ME</option>
+              <option value="MD">MD</option>
+              <option value="MA">MA</option>
+              <option value="MI">MI</option>
+              <option value="MN">MN</option>
+              <option value="MS">MS</option>
+              <option value="MO">MO</option>
+              <option value="MT">MT</option>
+              <option value="NE">NE</option>
+              <option value="NV">NV</option>
+              <option value="NH">NH</option>
+              <option value="NJ">NJ</option>
+              <option value="NM">NM</option>
+              <option value="NY">NY</option>
+              <option value="NC">NC</option>
+              <option value="ND">ND</option>
+              <option value="OH">OH</option>
+              <option value="OK">OK</option>
+              <option value="OR">OR</option>
+              <option value="PA">PA</option>
+              <option value="RI">RI</option>
+              <option value="SC">SC</option>
+              <option value="SD">SD</option>
+              <option value="TN">TN</option>
+              <option value="TX">TX</option>
+              <option value="UT">UT</option>
+              <option value="VT">VT</option>
+              <option value="VA">VA</option>
+              <option value="WA">WA</option>
+              <option value="WV">WV</option>
+              <option value="WI">WI</option>
+              <option value="WY">WY</option>
+            </wc-select>
+          </div>
+
+          <div class="row gap-2">
+            <wc-input
+              name="address.postal_code"
+              lbl-label="ZIP Code"
+              class="col-1"
+              required>
+            </wc-input>
+            <wc-input
+              name="address.county"
+              lbl-label="County"
+              class="col-1">
+            </wc-input>
+          </div>
+        </wc-address-listener>
+
+        <div class="row gap-2">
+          <button type="submit" class="btn btn-primary">Submit Form</button>
+          <button type="reset" class="btn btn-secondary">Reset</button>
+        </div>
+      </wc-form>
+
+      <!-- Map for Example 1 -->
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold mb-2">Selected Location</h3>
+        <div class="map-wrapper" style="height: 400px;">
+          <wc-google-map
+            id="map1"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            lat="37.7749"
+            lng="-122.4194"
+            zoom="10"
+            map-type="roadmap">
+          </wc-google-map>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2: Multiple Address Forms (Billing & Shipping) -->
+    <div class="card mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Example 2: Multiple Address Forms (Billing & Shipping)</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        This example shows how to have multiple independent address forms on the same page using
+        different <code>address-group</code> values.
+      </p>
+
+      <div class="row gap-6">
+        <!-- Billing Address -->
+        <div class="col-1">
+          <h3 class="text-xl font-semibold mb-3 text-blue-600">Billing Address</h3>
+          <wc-form id="form-billing" class="col gap-3">
+            <wc-google-address
+              name="billing.street"
+              lbl-label="Street Address"
+              api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+              address-group="billing"
+              target-map="map-billing"
+              countries="us"
+              types="address"
+              placeholder="Billing street address..."
+              required>
+            </wc-google-address>
+
+            <wc-address-listener address-group="billing">
+              <wc-input name="billing.city" lbl-label="City" required></wc-input>
+              <div class="row gap-2">
+                <wc-select name="billing.state" lbl-label="State" class="col-1" required>
+                  <option value="">Choose...</option>
+                  <option value="CA">CA</option>
+                  <option value="NY">NY</option>
+                  <option value="TX">TX</option>
+                  <option value="FL">FL</option>
+                </wc-select>
+                <wc-input name="billing.postal_code" lbl-label="ZIP" class="col-1" required></wc-input>
+              </div>
+            </wc-address-listener>
+          </wc-form>
+
+          <div class="mt-4" style="height: 300px;">
+            <wc-google-map
+              id="map-billing"
+              api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+              lat="37.7749"
+              lng="-122.4194"
+              zoom="10">
+            </wc-google-map>
+          </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="col-1">
+          <h3 class="text-xl font-semibold mb-3 text-green-600">Shipping Address</h3>
+          <wc-form id="form-shipping" class="col gap-3">
+            <wc-google-address
+              name="shipping.street"
+              lbl-label="Street Address"
+              api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+              address-group="shipping"
+              target-map="map-shipping"
+              countries="us"
+              types="address"
+              placeholder="Shipping street address..."
+              required>
+            </wc-google-address>
+
+            <wc-address-listener address-group="shipping">
+              <wc-input name="shipping.city" lbl-label="City" required></wc-input>
+              <div class="row gap-2">
+                <wc-select name="shipping.state" lbl-label="State" class="col-1" required>
+                  <option value="">Choose...</option>
+                  <option value="CA">CA</option>
+                  <option value="NY">NY</option>
+                  <option value="TX">TX</option>
+                  <option value="FL">FL</option>
+                </wc-select>
+                <wc-input name="shipping.postal_code" lbl-label="ZIP" class="col-1" required></wc-input>
+              </div>
+            </wc-address-listener>
+          </wc-form>
+
+          <div class="mt-4" style="height: 300px;">
+            <wc-google-map
+              id="map-shipping"
+              api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+              lat="40.7128"
+              lng="-74.0060"
+              zoom="10">
+            </wc-google-map>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 3: Direct Field Listeners (Alternative Approach) -->
+    <div class="card mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Example 3: Direct Field Listeners (Alternative)</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        This example shows an alternative approach where individual fields listen for address changes
+        using the <code>address-listener</code> attribute directly on each field.
+      </p>
+
+      <wc-form id="form3" class="col gap-4">
+        <wc-google-address
+          name="location.street"
+          lbl-label="Street Address"
+          api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+          address-group="location"
+          countries="us"
+          placeholder="Enter an address..."
+          required>
+        </wc-google-address>
+
+        <div class="row gap-2">
+          <wc-input
+            name="location.city"
+            lbl-label="City"
+            class="col-1"
+            address-listener="location"
+            required>
+          </wc-input>
+          <wc-input
+            name="location.state"
+            lbl-label="State"
+            class="col w-18"
+            address-listener="location"
+            required>
+          </wc-input>
+        </div>
+
+        <wc-input
+          name="location.postal_code"
+          lbl-label="ZIP Code"
+          address-listener="location"
+          required>
+        </wc-input>
+      </wc-form>
+    </div>
+
+    <!-- Example 4: Configuration Options -->
+    <div class="card mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Example 4: Configuration Options</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        Demonstrates different configuration options for restricting search results.
+      </p>
+
+      <div class="row-wrap gap-6">
+        <!-- US Only -->
+        <div class="col-1">
+          <h3 class="text-lg font-semibold mb-2">US Addresses Only</h3>
+          <wc-google-address
+            name="us.street"
+            lbl-label="US Street Address"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            address-group="us"
+            countries="us"
+            types="address"
+            placeholder="US addresses only...">
+          </wc-google-address>
+        </div>
+
+        <!-- Multiple Countries -->
+        <div class="col-1">
+          <h3 class="text-lg font-semibold mb-2">US, Canada, Mexico</h3>
+          <wc-google-address
+            name="multi.street"
+            lbl-label="Street Address"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            address-group="multi"
+            countries="us,ca,mx"
+            types="address"
+            placeholder="North America addresses...">
+          </wc-google-address>
+        </div>
+
+        <!-- Geocode (includes approximate locations) -->
+        <div class="col-1">
+          <h3 class="text-lg font-semibold mb-2">Geocode (Approximate OK)</h3>
+          <wc-google-address
+            name="geo.street"
+            lbl-label="Location"
+            api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+            address-group="geo"
+            countries="us"
+            types="geocode"
+            placeholder="Addresses & approximate locations...">
+          </wc-google-address>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 5: Form Submission Test -->
+    <div class="card mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Example 5: Form Submission Test</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        Test form submission to see the data being captured.
+      </p>
+
+      <wc-form id="form-test" class="col gap-4">
+        <wc-google-address
+          name="test.street"
+          lbl-label="Street Address"
+          api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+          address-group="test"
+          countries="us"
+          placeholder="Start typing..."
+          required>
+        </wc-google-address>
+
+        <wc-address-listener address-group="test">
+          <div class="row gap-2">
+            <wc-input name="test.city" lbl-label="City" class="col-1" required></wc-input>
+            <wc-input name="test.state" lbl-label="State" class="col w-18" required></wc-input>
+            <wc-input name="test.postal_code" lbl-label="ZIP" class="col w-20" required></wc-input>
+          </div>
+        </wc-address-listener>
+
+        <div class="row gap-2">
+          <button type="submit" class="btn btn-primary">Submit & Log Data</button>
+        </div>
+      </wc-form>
+
+      <div id="form-output" class="mt-4 p-4 bg-gray-100 rounded hidden">
+        <h3 class="font-semibold mb-2">Form Data:</h3>
+        <pre id="form-data" class="text-xs overflow-auto"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Handle form submission test
+    document.getElementById('form-test')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = {};
+
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+
+      const outputDiv = document.getElementById('form-output');
+      const dataDiv = document.getElementById('form-data');
+
+      if (outputDiv && dataDiv) {
+        outputDiv.classList.remove('hidden');
+        dataDiv.textContent = JSON.stringify(data, null, 2);
+      }
+
+      console.log('Form submitted with data:', data);
+    });
+
+    // Log all address change events for debugging
+    document.addEventListener('google-address:change', (e) => {
+      console.log('📍 Address changed:', e.detail);
+    });
+  </script>
+</div>
