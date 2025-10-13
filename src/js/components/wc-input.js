@@ -954,6 +954,44 @@ class WcInput extends WcBaseFormComponent {
 
 
 
+      wc-input[type="auto"] input {
+        padding-left: 25px;
+        min-width: 130px;
+      }
+      wc-input[type="auto"] input + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+      wc-input[type="auto-dualtone"] input {
+        padding-left: 25px;
+        min-width: 130px;
+      }
+      wc-input[type="auto-dualtone"] input + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+
+      wc-input[type="motorcycle"] input {
+        padding-left: 25px;
+        min-width: 130px;
+      }
+      wc-input[type="motorcycle"] input + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+      wc-input[type="motorcycle-dualtone"] input {
+        padding-left: 25px;
+        min-width: 130px;
+      }
+      wc-input[type="motorcycle-dualtone"] input + .icon {
+        position: absolute;
+        top: 25px;
+        left: 5px;
+      }
+
 
       wc-input input[type="email"] {
         padding-left: 25px;
