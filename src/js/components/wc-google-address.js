@@ -57,6 +57,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
       'disabled', 'readonly', 'required', 'autocomplete',
       'api-key', 'address-group', 'target-map',
       'countries', 'types', 'fields',
+      'data-lat', 'data-lng', 'data-address',
       'onchange', 'oninput', 'onblur', 'onfocus',
       'tooltip', 'tooltip-position'
     ];
@@ -73,7 +74,8 @@ class WcGoogleAddress extends WcBaseFormComponent {
     this.passThruEmptyAttributes = ['disabled', 'readonly', 'required'];
     this.ignoreAttributes = ['lbl-class', 'lbl-label',
                              'api-key', 'address-group', 'target-map',
-                             'countries', 'types', 'fields'];
+                             'countries', 'types', 'fields',
+                             'data-lat', 'data-lng', 'data-address'];
     this.eventAttributes = ['onchange', 'oninput', 'onblur', 'onfocus'];
 
     const compEl = this.querySelector('.wc-google-address');
@@ -102,6 +104,9 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
     await this._loadGooglePlacesAPI(apiKey);
     this._initializeAutocomplete();
+
+    // Check if we have initial coordinates to update the map
+    this._updateMapFromInitialData();
   }
 
   disconnectedCallback() {
@@ -525,6 +530,48 @@ class WcGoogleAddress extends WcBaseFormComponent {
     mapElement.setAttribute('lat', addressData.lat);
     mapElement.setAttribute('lng', addressData.lng);
     mapElement.setAttribute('address', addressData.formatted_address);
+  }
+
+  _updateMapFromInitialData() {
+    // Check if we have initial lat/lng data
+    const lat = this.getAttribute('data-lat');
+    const lng = this.getAttribute('data-lng');
+    const targetMap = this.getAttribute('target-map');
+
+    if (!lat || !lng || !targetMap) {
+      return;
+    }
+
+    // Create address data from initial attributes
+    const addressData = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      formatted_address: this.getAttribute('data-address') || this.getAttribute('value') || ''
+    };
+
+    // Update the map
+    const mapElement = document.getElementById(targetMap);
+    if (!mapElement) {
+      return;
+    }
+
+    const pins = [{
+      lat: addressData.lat,
+      lng: addressData.lng,
+      title: addressData.formatted_address
+    }];
+
+    // Use updatePins method if available
+    if (mapElement.updatePins) {
+      mapElement.updatePins(pins);
+    } else {
+      // Fallback to setting attributes
+      mapElement.setAttribute('lat', addressData.lat);
+      mapElement.setAttribute('lng', addressData.lng);
+      if (addressData.formatted_address) {
+        mapElement.setAttribute('address', addressData.formatted_address);
+      }
+    }
   }
 
   _handleAttributeChange(attrName, newValue) {
