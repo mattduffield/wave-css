@@ -4548,7 +4548,9 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       const lat = this.getAttribute("data-lat");
       const lng = this.getAttribute("data-lng");
       const targetMap = this.getAttribute("target-map");
+      console.log("wc-google-address: _updateMapFromInitialData called", { lat, lng, targetMap });
       if (!lat || !lng || !targetMap) {
+        console.log("wc-google-address: Missing required data for map update", { lat, lng, targetMap });
         return;
       }
       const addressData = {
@@ -4562,14 +4564,17 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
         return;
       }
       const updateMap = () => {
+        console.log("wc-google-address: updateMap called with", addressData);
         const pins = [{
           lat: addressData.lat,
           lng: addressData.lng,
           title: addressData.formatted_address
         }];
         if (mapElement.updatePins) {
+          console.log("wc-google-address: Calling updatePins with", pins);
           mapElement.updatePins(pins);
         } else {
+          console.log("wc-google-address: updatePins not available, setting attributes");
           mapElement.setAttribute("lat", addressData.lat);
           mapElement.setAttribute("lng", addressData.lng);
           if (addressData.formatted_address) {
