@@ -3648,21 +3648,35 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
   }
   async connectedCallback() {
+    console.log("\u{1F5FA}\uFE0F connectedCallback called, map exists:", !!this.map);
     super.connectedCallback();
     this._applyStyle();
+    if (this._disconnectTimeout) {
+      console.log("\u{1F5FA}\uFE0F Clearing disconnect timeout - component reconnected");
+      clearTimeout(this._disconnectTimeout);
+      this._disconnectTimeout = null;
+    }
+    this._setupResizeHandling();
+    if (this.map) {
+      console.log("\u{1F5FA}\uFE0F Map already exists, skipping initialization");
+      return;
+    }
     try {
       await this._ensureGoogleMapsLoaded();
       await new Promise((resolve) => setTimeout(resolve, 100));
       await this._initializeMap();
-      this._setupResizeHandling();
     } catch (error) {
       console.error("wc-google-map: Error initializing map:", error);
       this._showError("Failed to load Google Maps. Please check your API key.");
     }
   }
   disconnectedCallback() {
+    console.log("\u{1F5FA}\uFE0F disconnectedCallback called");
     super.disconnectedCallback();
-    this._cleanup();
+    this._disconnectTimeout = setTimeout(() => {
+      console.log("\u{1F5FA}\uFE0F Cleanup timeout fired - component not reconnected");
+      this._cleanup();
+    }, 1e3);
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "api-key") {
@@ -3739,6 +3753,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
    * Initialize the Google Map
    */
   async _initializeMap() {
+    console.log("\u{1F5FA}\uFE0F _initializeMap called");
     if (!window.google || !window.google.maps) {
       console.error("wc-google-map: Google Maps API not loaded");
       return;
@@ -3751,7 +3766,9 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       width: this.mapElement.offsetWidth,
       height: this.mapElement.offsetHeight
     };
+    console.log("\u{1F5FA}\uFE0F Container dimensions:", dimensions);
     if (dimensions.width === 0 || dimensions.height === 0) {
+      console.log("\u{1F5FA}\uFE0F No dimensions yet, will wait for ResizeObserver");
       return;
     }
     const zoom = parseInt(this.getAttribute("zoom")) || 12;
@@ -4049,8 +4066,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
    * Setup resize handling for HTMX and dynamic content
    */
   _setupResizeHandling() {
-    if (!this.map) return;
-    if (typeof ResizeObserver !== "undefined") {
+    if (typeof ResizeObserver !== "undefined" && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(() => {
         this._handleResize();
       });
@@ -4074,15 +4090,21 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
    * Handle map resize
    */
   _handleResize() {
-    if (!this.map) return;
     const width = this.mapElement.offsetWidth;
     const height = this.mapElement.offsetHeight;
-    if (width > 0 && height > 0) {
+    console.log("\u{1F5FA}\uFE0F _handleResize called, dimensions:", { width, height }, "map exists:", !!this.map);
+    if (!this.map && width > 0 && height > 0) {
+      console.log("\u{1F5FA}\uFE0F Container now has dimensions, initializing map");
+      this._initializeMap();
+      return;
+    }
+    if (this.map && width > 0 && height > 0) {
       google.maps.event.trigger(this.map, "resize");
       const center = this.map.getCenter();
       if (center) {
         this.map.setCenter(center);
       }
+      console.log("\u{1F5FA}\uFE0F Map resized", { width, height });
     }
   }
   /**

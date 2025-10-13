@@ -61,18 +61,34 @@ class WcGoogleMap extends WcBaseComponent {
   }
 
   async connectedCallback() {
+    console.log('🗺️ connectedCallback called, map exists:', !!this.map);
     super.connectedCallback();
     this._applyStyle();
 
-    // Load Google Maps API if needed, then initialize map
+    // Cancel any pending cleanup - component is reconnecting
+    if (this._disconnectTimeout) {
+      console.log('🗺️ Clearing disconnect timeout - component reconnected');
+      clearTimeout(this._disconnectTimeout);
+      this._disconnectTimeout = null;
+    }
+
+    // Setup resize observer first - it will handle initialization when dimensions are available
+    this._setupResizeHandling();
+
+    // If map already exists (was just moved), we're done
+    if (this.map) {
+      console.log('🗺️ Map already exists, skipping initialization');
+      return;
+    }
+
+    // Load Google Maps API if needed, then try to initialize map
     try {
       await this._ensureGoogleMapsLoaded();
-      // Wait longer for HTMX-loaded content to settle
+      // Wait for HTMX-loaded content to settle
       await new Promise(resolve => setTimeout(resolve, 100));
-      await this._initializeMap();
 
-      // Setup resize observer to handle dynamic content
-      this._setupResizeHandling();
+      // Try to initialize - if no dimensions, ResizeObserver will handle it later
+      await this._initializeMap();
     } catch (error) {
       console.error('wc-google-map: Error initializing map:', error);
       this._showError('Failed to load Google Maps. Please check your API key.');
@@ -80,8 +96,15 @@ class WcGoogleMap extends WcBaseComponent {
   }
 
   disconnectedCallback() {
+    console.log('🗺️ disconnectedCallback called');
     super.disconnectedCallback();
-    this._cleanup();
+
+    // Don't destroy the map immediately - it might just be getting moved
+    // Schedule cleanup only if component isn't reconnected quickly
+    this._disconnectTimeout = setTimeout(() => {
+      console.log('🗺️ Cleanup timeout fired - component not reconnected');
+      this._cleanup();
+    }, 1000);
   }
 
   _handleAttributeChange(attrName, newValue) {
@@ -181,6 +204,8 @@ class WcGoogleMap extends WcBaseComponent {
    * Initialize the Google Map
    */
   async _initializeMap() {
+    console.log('🗺️ _initializeMap called');
+
     if (!window.google || !window.google.maps) {
       console.error('wc-google-map: Google Maps API not loaded');
       return;
@@ -191,14 +216,16 @@ class WcGoogleMap extends WcBaseComponent {
       return;
     }
 
-    // If container has no dimensions, just return silently
-    // The component will be reconnected when moved by parent components (like wc-form)
+    // Check dimensions before initializing
     const dimensions = {
       width: this.mapElement.offsetWidth,
       height: this.mapElement.offsetHeight
     };
 
+    console.log('🗺️ Container dimensions:', dimensions);
+
     if (dimensions.width === 0 || dimensions.height === 0) {
+      console.log('🗺️ No dimensions yet, will wait for ResizeObserver');
       return;
     }
 
@@ -589,10 +616,9 @@ class WcGoogleMap extends WcBaseComponent {
    * Setup resize handling for HTMX and dynamic content
    */
   _setupResizeHandling() {
-    if (!this.map) return;
-
-    // Use ResizeObserver to detect when container size changes
-    if (typeof ResizeObserver !== 'undefined') {
+    // Set up ResizeObserver even if map doesn't exist yet
+    // It will help initialize the map when dimensions become available
+    if (typeof ResizeObserver !== 'undefined' && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(() => {
         this._handleResize();
       });
@@ -622,13 +648,20 @@ class WcGoogleMap extends WcBaseComponent {
    * Handle map resize
    */
   _handleResize() {
-    if (!this.map) return;
-
     const width = this.mapElement.offsetWidth;
     const height = this.mapElement.offsetHeight;
 
-    // Only resize if container has dimensions
-    if (width > 0 && height > 0) {
+    console.log('🗺️ _handleResize called, dimensions:', { width, height }, 'map exists:', !!this.map);
+
+    // If map doesn't exist yet but container now has dimensions, initialize it
+    if (!this.map && width > 0 && height > 0) {
+      console.log('🗺️ Container now has dimensions, initializing map');
+      this._initializeMap();
+      return;
+    }
+
+    // Only resize if map exists and container has dimensions
+    if (this.map && width > 0 && height > 0) {
       google.maps.event.trigger(this.map, 'resize');
 
       // Re-center the map if it was centered before
@@ -637,7 +670,7 @@ class WcGoogleMap extends WcBaseComponent {
         this.map.setCenter(center);
       }
 
-      // console.log('wc-google-map: Map resized', { width, height });
+      console.log('🗺️ Map resized', { width, height });
     }
   }
 
