@@ -3648,17 +3648,14 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
   }
   async connectedCallback() {
-    console.log("\u{1F5FA}\uFE0F connectedCallback called, map exists:", !!this.map);
     super.connectedCallback();
     this._applyStyle();
     if (this._disconnectTimeout) {
-      console.log("\u{1F5FA}\uFE0F Clearing disconnect timeout - component reconnected");
       clearTimeout(this._disconnectTimeout);
       this._disconnectTimeout = null;
     }
     this._setupResizeHandling();
     if (this.map) {
-      console.log("\u{1F5FA}\uFE0F Map already exists, skipping initialization");
       return;
     }
     try {
@@ -3671,10 +3668,8 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
   }
   disconnectedCallback() {
-    console.log("\u{1F5FA}\uFE0F disconnectedCallback called");
     super.disconnectedCallback();
     this._disconnectTimeout = setTimeout(() => {
-      console.log("\u{1F5FA}\uFE0F Cleanup timeout fired - component not reconnected");
       this._cleanup();
     }, 1e3);
   }
@@ -3753,7 +3748,6 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
    * Initialize the Google Map
    */
   async _initializeMap() {
-    console.log("\u{1F5FA}\uFE0F _initializeMap called");
     if (!window.google || !window.google.maps) {
       console.error("wc-google-map: Google Maps API not loaded");
       return;
@@ -3766,9 +3760,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       width: this.mapElement.offsetWidth,
       height: this.mapElement.offsetHeight
     };
-    console.log("\u{1F5FA}\uFE0F Container dimensions:", dimensions);
     if (dimensions.width === 0 || dimensions.height === 0) {
-      console.log("\u{1F5FA}\uFE0F No dimensions yet, will wait for ResizeObserver");
       return;
     }
     const zoom = parseInt(this.getAttribute("zoom")) || 12;
@@ -4092,9 +4084,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
   _handleResize() {
     const width = this.mapElement.offsetWidth;
     const height = this.mapElement.offsetHeight;
-    console.log("\u{1F5FA}\uFE0F _handleResize called, dimensions:", { width, height }, "map exists:", !!this.map);
     if (!this.map && width > 0 && height > 0) {
-      console.log("\u{1F5FA}\uFE0F Container now has dimensions, initializing map");
       this._initializeMap();
       return;
     }
@@ -4104,7 +4094,6 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       if (center) {
         this.map.setCenter(center);
       }
-      console.log("\u{1F5FA}\uFE0F Map resized", { width, height });
     }
   }
   /**
