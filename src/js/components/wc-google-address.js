@@ -85,8 +85,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
       this.appendChild(this.componentElement);
     }
 
-    this.autocompleteService = null;
-    this.placesService = null;
+    // Using new API - no service objects needed
     this.sessionToken = null;
     this.selectedPlace = null;
   }
@@ -109,13 +108,9 @@ class WcGoogleAddress extends WcBaseFormComponent {
     super.disconnectedCallback();
     this._unWireEvents();
 
-    // Clean up autocomplete
-    if (this.autocompleteService) {
-      this.autocompleteService = null;
-    }
-    if (this.placesService) {
-      this.placesService = null;
-    }
+    // Clean up session token
+    this.sessionToken = null;
+    this.selectedPlace = null;
   }
 
   async _loadGooglePlacesAPI(apiKey) {
@@ -162,14 +157,28 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Start loading (no existing script found)
     WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&loading=async&v=weekly`;
       script.async = true;
       script.defer = true;
 
       script.onload = () => {
-        WcGoogleAddress.isGooglePlacesLoaded = true;
-        console.log('✅ Google Places API loaded successfully');
-        resolve();
+        // With loading=async, we need to wait for the places library to be fully available
+        const checkPlacesReady = setInterval(() => {
+          if (window.google?.maps?.places) {
+            clearInterval(checkPlacesReady);
+            WcGoogleAddress.isGooglePlacesLoaded = true;
+            //console.log('✅ Google Places API loaded successfully');
+            resolve();
+          }
+        }, 50);
+
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          clearInterval(checkPlacesReady);
+          if (!WcGoogleAddress.isGooglePlacesLoaded) {
+            reject(new Error('Timeout waiting for Google Places API'));
+          }
+        }, 10000);
       };
 
       script.onerror = () => {
@@ -193,12 +202,9 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Create a new session token for billing optimization
     this.sessionToken = new google.maps.places.AutocompleteSessionToken();
 
-    // Initialize Autocomplete Service
-    this.autocompleteService = new google.maps.places.AutocompleteService();
-
-    // Initialize Places Service (needs a div element)
-    const attributionDiv = document.createElement('div');
-    this.placesService = new google.maps.places.PlacesService(attributionDiv);
+    // Note: Using new API - no service initialization needed
+    // - AutocompleteSuggestion.fetchAutocompleteSuggestions() for suggestions
+    // - Place.fetchFields() for place details
 
     // Wire up input events
     this._wireAutocompleteEvents();
@@ -226,19 +232,16 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Input handler
     const handleInput = debounce((e) => {
       const input = e.target.value.trim();
-      console.log(`🔍 wc-google-address: Input value="${input}", length=${input.length}`);
 
       if (input.length < 3) {
         this._hideSuggestions(suggestionsContainer);
         return;
       }
 
-      console.log(`📡 wc-google-address: Fetching suggestions for "${input}"`);
       this._fetchSuggestions(input, suggestionsContainer);
     }, 300);
 
     this.formElement.addEventListener('input', handleInput);
-    console.log('✅ wc-google-address: Input event listener attached to', this.formElement);
 
     // Keyboard navigation for suggestions
     this.formElement.addEventListener('keydown', (e) => {
@@ -266,7 +269,6 @@ class WcGoogleAddress extends WcBaseFormComponent {
           if (currentIndex >= 0) {
             e.preventDefault();
             const placeId = suggestions[currentIndex].dataset.placeId;
-            console.log(`⌨️ wc-google-address: Enter key pressed on suggestion index ${currentIndex}, placeId=${placeId}`);
             this._selectPlace(placeId);
             this._hideSuggestions(suggestionsContainer);
           }
@@ -296,12 +298,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
     });
   }
 
-  _fetchSuggestions(input, container) {
-    if (!this.autocompleteService) {
-      console.error('❌ wc-google-address: autocompleteService not initialized!');
-      return;
-    }
-
+  async _fetchSuggestions(input, container) {
     const request = {
       input: input,
       sessionToken: this.sessionToken
@@ -310,49 +307,54 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Add country restrictions if specified
     const countries = this.getAttribute('countries');
     if (countries) {
-      request.componentRestrictions = {
-        country: countries.split(',').map(c => c.trim())
-      };
+      request.includedRegionCodes = countries.split(',').map(c => c.trim());
     }
 
     // Add types if specified
+    // Note: The new API doesn't support 'address' type. For addresses, omit the type.
+    // Valid types: https://developers.google.com/maps/documentation/places/web-service/place-types
     const types = this.getAttribute('types');
-    if (types) {
-      request.types = types.split(',').map(t => t.trim());
+    if (types && types !== 'address') {
+      request.includedPrimaryTypes = types.split(',').map(t => t.trim()).filter(t => t !== 'address');
+      // Only add if there are valid types after filtering
+      if (request.includedPrimaryTypes.length === 0) {
+        delete request.includedPrimaryTypes;
+      }
     }
 
-    console.log('📤 wc-google-address: Sending request to Google Places API:', request);
+    try {
+      // Use new API: AutocompleteSuggestion.fetchAutocompleteSuggestions()
+      const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
 
-    this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-      console.log(`📥 wc-google-address: Received response - status=${status}, predictions=`, predictions);
-
-      if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-        console.warn(`⚠️ wc-google-address: No predictions (status=${status})`);
+      if (!suggestions || suggestions.length === 0) {
         this._hideSuggestions(container);
         return;
       }
 
-      console.log(`✅ wc-google-address: Displaying ${predictions.length} suggestions`);
-      this._displaySuggestions(predictions, container);
-    });
+      this._displaySuggestions(suggestions, container);
+    } catch (error) {
+      console.error('wc-google-address: Error fetching suggestions:', error);
+      this._hideSuggestions(container);
+    }
   }
 
-  _displaySuggestions(predictions, container) {
+  _displaySuggestions(suggestions, container) {
     container.innerHTML = '';
     container.classList.remove('hidden');
 
-    predictions.forEach(prediction => {
+    suggestions.forEach(suggestion => {
       const item = document.createElement('div');
       item.classList.add('address-suggestion-item');
-      item.textContent = prediction.description;
-      item.dataset.placeId = prediction.place_id;
+      // New API uses placePrediction.text instead of description
+      item.textContent = suggestion.placePrediction.text;
+      // Store the place ID
+      item.dataset.placeId = suggestion.placePrediction.placeId;
 
       // Use mousedown instead of click to fire before blur event
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(`👆 wc-google-address: Mousedown on suggestion: ${prediction.description}, placeId=${prediction.place_id}`);
-        this._selectPlace(prediction.place_id);
+        this._selectPlace(suggestion.placePrediction.placeId);
         this._hideSuggestions(container);
       });
 
@@ -377,39 +379,35 @@ class WcGoogleAddress extends WcBaseFormComponent {
     }
   }
 
-  _selectPlace(placeId) {
-    console.log(`🔍 wc-google-address: _selectPlace called with placeId=${placeId}`);
+  async _selectPlace(placeId) {
+    const fields = this.getAttribute('fields') || 'addressComponents,formattedAddress,location,displayName';
 
-    if (!this.placesService) {
-      console.error('❌ wc-google-address: placesService not initialized!');
-      return;
-    }
+    try {
+      // Use new API: Create Place instance first, then fetch fields
+      const place = new google.maps.places.Place({
+        id: placeId,
+        requestedLanguage: 'en',
+        requestedRegion: 'US'
+      });
 
-    const fields = this.getAttribute('fields') || 'address_components,formatted_address,geometry,name';
-    console.log(`📋 wc-google-address: Requesting fields: ${fields}`);
+      // Fetch the fields we need
+      const fieldsList = fields.split(',').map(f => f.trim());
+      await place.fetchFields({
+        fields: fieldsList
+      });
 
-    const request = {
-      placeId: placeId,
-      fields: fields.split(',').map(f => f.trim()),
-      sessionToken: this.sessionToken
-    };
-
-    console.log(`📤 wc-google-address: Fetching place details...`);
-
-    this.placesService.getDetails(request, (place, status) => {
-      console.log(`📥 wc-google-address: getDetails response - status=${status}`, place);
-
-      if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
-        console.error('❌ wc-google-address: Failed to get place details', status);
+      if (!place) {
+        console.error('wc-google-address: Failed to get place details');
         return;
       }
 
       // Reset session token after place selection
       this.sessionToken = new google.maps.places.AutocompleteSessionToken();
 
-      console.log(`✅ wc-google-address: Processing place result...`);
       this._processPlaceResult(place);
-    });
+    } catch (error) {
+      console.error('wc-google-address: Error fetching place details:', error);
+    }
   }
 
   _processPlaceResult(place) {
@@ -440,8 +438,9 @@ class WcGoogleAddress extends WcBaseFormComponent {
   }
 
   _parseAddressComponents(place) {
-    const components = place.address_components || [];
-    const geometry = place.geometry?.location;
+    // New API uses addressComponents array (camelCase)
+    const components = place.addressComponents || [];
+    const location = place.location;
 
     const addressData = {
       addressGroup: this.getAttribute('address-group') || 'address',
@@ -452,10 +451,10 @@ class WcGoogleAddress extends WcBaseFormComponent {
       postal_code: '',
       county: '',
       country: '',
-      lat: geometry ? geometry.lat() : null,
-      lng: geometry ? geometry.lng() : null,
-      formatted_address: place.formatted_address || '',
-      place_id: place.place_id || ''
+      lat: location ? location.lat() : null,
+      lng: location ? location.lng() : null,
+      formatted_address: place.formattedAddress || '',
+      place_id: place.id || ''
     };
 
     // Build street address from street number and route
@@ -466,25 +465,25 @@ class WcGoogleAddress extends WcBaseFormComponent {
       const types = component.types;
 
       if (types.includes('street_number')) {
-        streetNumber = component.long_name;
+        streetNumber = component.longText;
       }
       if (types.includes('route')) {
-        route = component.long_name;
+        route = component.longText;
       }
       if (types.includes('locality')) {
-        addressData.city = component.long_name;
+        addressData.city = component.longText;
       }
       if (types.includes('administrative_area_level_1')) {
-        addressData.state = component.short_name;
+        addressData.state = component.shortText;
       }
       if (types.includes('administrative_area_level_2')) {
-        addressData.county = component.long_name;
+        addressData.county = component.longText;
       }
       if (types.includes('postal_code')) {
-        addressData.postal_code = component.long_name;
+        addressData.postal_code = component.longText;
       }
       if (types.includes('country')) {
-        addressData.country = component.short_name;
+        addressData.country = component.shortText;
       }
     });
 
@@ -496,8 +495,6 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
   _broadcastAddressChange(addressData) {
     const event = 'google-address:change';
-
-    console.log(`📍 wc-google-address: Broadcasting ${event} with data:`, addressData);
 
     // Create custom event with detail
     const customEvent = new CustomEvent(event, {
@@ -512,7 +509,6 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Also use EventHub if available
     if (window.wc?.EventHub) {
       wc.EventHub.broadcast(event, [], addressData);
-      console.log(`📡 wc-google-address: Also broadcast via EventHub`);
     }
   }
 

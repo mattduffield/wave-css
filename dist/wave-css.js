@@ -3610,7 +3610,6 @@ var WcFlipBox = class extends WcBaseComponent {
 customElements.define("wc-flip-box", WcFlipBox);
 
 // src/js/components/wc-google-map.js
-console.log("\u{1F5FA}\uFE0F wc-google-map.js loaded - Version 2.0 with HTMX fix");
 var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
   static get observedAttributes() {
     return [
@@ -3706,7 +3705,6 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
-      console.log("wc-google-map: Google Maps script already exists, waiting for it to load...");
       _WcGoogleMap.googleMapsLoadPromise = new Promise((resolve) => {
         const checkLoaded = setInterval(() => {
           if (window.google?.maps) {
@@ -3725,7 +3723,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     }
     _WcGoogleMap.googleMapsLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&loading=async&v=weekly`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -3757,12 +3755,9 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       clientWidth: this.mapElement.clientWidth,
       clientHeight: this.mapElement.clientHeight
     };
-    console.log("wc-google-map: Initializing map...");
-    console.log("wc-google-map: Container dimensions:", dimensions);
     if (dimensions.width === 0 || dimensions.height === 0) {
       if (this.initRetries < this.maxInitRetries) {
         this.initRetries++;
-        console.warn(`wc-google-map: Container has no dimensions, retrying in 200ms... (attempt ${this.initRetries}/${this.maxInitRetries})`);
         setTimeout(() => this._initializeMap(), 200);
         return;
       } else {
@@ -3794,18 +3789,18 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       mapTypeId: mapType,
       draggable,
       scrollwheel,
-      disableDefaultUI
+      disableDefaultUI,
+      mapId: "WAVE_CSS_MAP"
+      // Required for AdvancedMarkerElement
     };
     try {
       this.map = new google.maps.Map(this.mapElement, mapOptions);
-      console.log("wc-google-map: Map created successfully", this.map);
       this.dispatchEvent(new CustomEvent("map-loaded", {
         detail: { map: this.map },
         bubbles: true
       }));
       this._addMapEventListeners();
       this._addPins();
-      console.log("wc-google-map: Initialization complete");
     } catch (error) {
       console.error("wc-google-map: Error creating map:", error);
       this._showError("Error creating map: " + error.message);
@@ -3848,13 +3843,11 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     if (!this.map) return;
     this._clearMarkers();
     const pins = this._getPins();
-    console.log("wc-google-map: Adding pins:", pins.length, pins);
     if (pins.length === 0) {
-      console.warn("wc-google-map: No pins to add");
       return;
     }
     pins.forEach((pin, index) => {
-      const marker = new google.maps.Marker({
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: pin.lat, lng: pin.lng },
         map: this.map,
         title: pin.title
@@ -3886,6 +3879,8 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
         bounds.extend({ lat: pin.lat, lng: pin.lng });
       });
       this.map.fitBounds(bounds);
+    } else if (pins.length === 1) {
+      this.map.setCenter({ lat: pins[0].lat, lng: pins[0].lng });
     }
   }
   /**
@@ -4011,6 +4006,36 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     this._clearMarkers();
   }
   /**
+   * Public API: Update pins programmatically
+   * @param {Array} pins - Array of pin objects with lat, lng, title, address properties
+   */
+  updatePins(pins) {
+    if (!Array.isArray(pins)) {
+      console.error("wc-google-map: updatePins expects an array of pin objects");
+      return;
+    }
+    this.clearPins();
+    if (pins.length === 1) {
+      const pin = pins[0];
+      this.setAttribute("lat", pin.lat);
+      this.setAttribute("lng", pin.lng);
+      if (pin.title) this.setAttribute("title", pin.title);
+      if (pin.address) this.setAttribute("address", pin.address);
+    } else if (pins.length > 1) {
+      pins.forEach((pin) => {
+        const option = document.createElement("option");
+        option.setAttribute("data-lat", pin.lat);
+        option.setAttribute("data-lng", pin.lng);
+        if (pin.title) option.setAttribute("data-title", pin.title);
+        if (pin.address) option.setAttribute("data-address", pin.address);
+        this.appendChild(option);
+      });
+    }
+    if (this.map) {
+      this._addPins();
+    }
+  }
+  /**
    * Public API: Get current map instance
    */
   getMap() {
@@ -4071,7 +4096,6 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       if (center) {
         this.map.setCenter(center);
       }
-      console.log("wc-google-map: Map resized", { width, height });
     }
   }
   /**
@@ -4196,8 +4220,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-google-address", "relative");
       this.appendChild(this.componentElement);
     }
-    this.autocompleteService = null;
-    this.placesService = null;
     this.sessionToken = null;
     this.selectedPlace = null;
   }
@@ -4215,12 +4237,8 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
-    if (this.autocompleteService) {
-      this.autocompleteService = null;
-    }
-    if (this.placesService) {
-      this.placesService = null;
-    }
+    this.sessionToken = null;
+    this.selectedPlace = null;
   }
   async _loadGooglePlacesAPI(apiKey) {
     if (window.google?.maps) {
@@ -4253,13 +4271,23 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     }
     _WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&loading=async&v=weekly`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        _WcGoogleAddress.isGooglePlacesLoaded = true;
-        console.log("\u2705 Google Places API loaded successfully");
-        resolve();
+        const checkPlacesReady = setInterval(() => {
+          if (window.google?.maps?.places) {
+            clearInterval(checkPlacesReady);
+            _WcGoogleAddress.isGooglePlacesLoaded = true;
+            resolve();
+          }
+        }, 50);
+        setTimeout(() => {
+          clearInterval(checkPlacesReady);
+          if (!_WcGoogleAddress.isGooglePlacesLoaded) {
+            reject(new Error("Timeout waiting for Google Places API"));
+          }
+        }, 1e4);
       };
       script.onerror = () => {
         const error = new Error("Failed to load Google Places API");
@@ -4276,9 +4304,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       return;
     }
     this.sessionToken = new google.maps.places.AutocompleteSessionToken();
-    this.autocompleteService = new google.maps.places.AutocompleteService();
-    const attributionDiv = document.createElement("div");
-    this.placesService = new google.maps.places.PlacesService(attributionDiv);
     this._wireAutocompleteEvents();
   }
   _wireAutocompleteEvents() {
@@ -4298,16 +4323,13 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     };
     const handleInput = debounce((e) => {
       const input2 = e.target.value.trim();
-      console.log(`\u{1F50D} wc-google-address: Input value="${input2}", length=${input2.length}`);
       if (input2.length < 3) {
         this._hideSuggestions(suggestionsContainer);
         return;
       }
-      console.log(`\u{1F4E1} wc-google-address: Fetching suggestions for "${input2}"`);
       this._fetchSuggestions(input2, suggestionsContainer);
     }, 300);
     this.formElement.addEventListener("input", handleInput);
-    console.log("\u2705 wc-google-address: Input event listener attached to", this.formElement);
     this.formElement.addEventListener("keydown", (e) => {
       const suggestions = suggestionsContainer.querySelectorAll(".address-suggestion-item");
       if (suggestions.length === 0) return;
@@ -4329,7 +4351,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
           if (currentIndex >= 0) {
             e.preventDefault();
             const placeId = suggestions[currentIndex].dataset.placeId;
-            console.log(`\u2328\uFE0F wc-google-address: Enter key pressed on suggestion index ${currentIndex}, placeId=${placeId}`);
             this._selectPlace(placeId);
             this._hideSuggestions(suggestionsContainer);
           }
@@ -4353,50 +4374,46 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       }, 200);
     });
   }
-  _fetchSuggestions(input2, container2) {
-    if (!this.autocompleteService) {
-      console.error("\u274C wc-google-address: autocompleteService not initialized!");
-      return;
-    }
+  async _fetchSuggestions(input2, container2) {
     const request = {
       input: input2,
       sessionToken: this.sessionToken
     };
     const countries = this.getAttribute("countries");
     if (countries) {
-      request.componentRestrictions = {
-        country: countries.split(",").map((c) => c.trim())
-      };
+      request.includedRegionCodes = countries.split(",").map((c) => c.trim());
     }
     const types = this.getAttribute("types");
-    if (types) {
-      request.types = types.split(",").map((t) => t.trim());
+    if (types && types !== "address") {
+      request.includedPrimaryTypes = types.split(",").map((t) => t.trim()).filter((t) => t !== "address");
+      if (request.includedPrimaryTypes.length === 0) {
+        delete request.includedPrimaryTypes;
+      }
     }
-    console.log("\u{1F4E4} wc-google-address: Sending request to Google Places API:", request);
-    this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-      console.log(`\u{1F4E5} wc-google-address: Received response - status=${status}, predictions=`, predictions);
-      if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-        console.warn(`\u26A0\uFE0F wc-google-address: No predictions (status=${status})`);
+    try {
+      const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+      if (!suggestions || suggestions.length === 0) {
         this._hideSuggestions(container2);
         return;
       }
-      console.log(`\u2705 wc-google-address: Displaying ${predictions.length} suggestions`);
-      this._displaySuggestions(predictions, container2);
-    });
+      this._displaySuggestions(suggestions, container2);
+    } catch (error) {
+      console.error("wc-google-address: Error fetching suggestions:", error);
+      this._hideSuggestions(container2);
+    }
   }
-  _displaySuggestions(predictions, container2) {
+  _displaySuggestions(suggestions, container2) {
     container2.innerHTML = "";
     container2.classList.remove("hidden");
-    predictions.forEach((prediction) => {
+    suggestions.forEach((suggestion) => {
       const item = document.createElement("div");
       item.classList.add("address-suggestion-item");
-      item.textContent = prediction.description;
-      item.dataset.placeId = prediction.place_id;
+      item.textContent = suggestion.placePrediction.text;
+      item.dataset.placeId = suggestion.placePrediction.placeId;
       item.addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(`\u{1F446} wc-google-address: Mousedown on suggestion: ${prediction.description}, placeId=${prediction.place_id}`);
-        this._selectPlace(prediction.place_id);
+        this._selectPlace(suggestion.placePrediction.placeId);
         this._hideSuggestions(container2);
       });
       container2.appendChild(item);
@@ -4413,30 +4430,27 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       suggestions[index].scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
   }
-  _selectPlace(placeId) {
-    console.log(`\u{1F50D} wc-google-address: _selectPlace called with placeId=${placeId}`);
-    if (!this.placesService) {
-      console.error("\u274C wc-google-address: placesService not initialized!");
-      return;
-    }
-    const fields = this.getAttribute("fields") || "address_components,formatted_address,geometry,name";
-    console.log(`\u{1F4CB} wc-google-address: Requesting fields: ${fields}`);
-    const request = {
-      placeId,
-      fields: fields.split(",").map((f) => f.trim()),
-      sessionToken: this.sessionToken
-    };
-    console.log(`\u{1F4E4} wc-google-address: Fetching place details...`);
-    this.placesService.getDetails(request, (place, status) => {
-      console.log(`\u{1F4E5} wc-google-address: getDetails response - status=${status}`, place);
-      if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
-        console.error("\u274C wc-google-address: Failed to get place details", status);
+  async _selectPlace(placeId) {
+    const fields = this.getAttribute("fields") || "addressComponents,formattedAddress,location,displayName";
+    try {
+      const place = new google.maps.places.Place({
+        id: placeId,
+        requestedLanguage: "en",
+        requestedRegion: "US"
+      });
+      const fieldsList = fields.split(",").map((f) => f.trim());
+      await place.fetchFields({
+        fields: fieldsList
+      });
+      if (!place) {
+        console.error("wc-google-address: Failed to get place details");
         return;
       }
       this.sessionToken = new google.maps.places.AutocompleteSessionToken();
-      console.log(`\u2705 wc-google-address: Processing place result...`);
       this._processPlaceResult(place);
-    });
+    } catch (error) {
+      console.error("wc-google-address: Error fetching place details:", error);
+    }
   }
   _processPlaceResult(place) {
     const addressData = this._parseAddressComponents(place);
@@ -4454,8 +4468,8 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     }
   }
   _parseAddressComponents(place) {
-    const components = place.address_components || [];
-    const geometry = place.geometry?.location;
+    const components = place.addressComponents || [];
+    const location2 = place.location;
     const addressData = {
       addressGroup: this.getAttribute("address-group") || "address",
       street: "",
@@ -4465,35 +4479,35 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       postal_code: "",
       county: "",
       country: "",
-      lat: geometry ? geometry.lat() : null,
-      lng: geometry ? geometry.lng() : null,
-      formatted_address: place.formatted_address || "",
-      place_id: place.place_id || ""
+      lat: location2 ? location2.lat() : null,
+      lng: location2 ? location2.lng() : null,
+      formatted_address: place.formattedAddress || "",
+      place_id: place.id || ""
     };
     let streetNumber = "";
     let route = "";
     components.forEach((component) => {
       const types = component.types;
       if (types.includes("street_number")) {
-        streetNumber = component.long_name;
+        streetNumber = component.longText;
       }
       if (types.includes("route")) {
-        route = component.long_name;
+        route = component.longText;
       }
       if (types.includes("locality")) {
-        addressData.city = component.long_name;
+        addressData.city = component.longText;
       }
       if (types.includes("administrative_area_level_1")) {
-        addressData.state = component.short_name;
+        addressData.state = component.shortText;
       }
       if (types.includes("administrative_area_level_2")) {
-        addressData.county = component.long_name;
+        addressData.county = component.longText;
       }
       if (types.includes("postal_code")) {
-        addressData.postal_code = component.long_name;
+        addressData.postal_code = component.longText;
       }
       if (types.includes("country")) {
-        addressData.country = component.short_name;
+        addressData.country = component.shortText;
       }
     });
     addressData.street = [streetNumber, route].filter(Boolean).join(" ");
@@ -4501,7 +4515,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   }
   _broadcastAddressChange(addressData) {
     const event = "google-address:change";
-    console.log(`\u{1F4CD} wc-google-address: Broadcasting ${event} with data:`, addressData);
     const customEvent = new CustomEvent(event, {
       detail: addressData,
       bubbles: true,
@@ -4510,7 +4523,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     document.dispatchEvent(customEvent);
     if (window.wc?.EventHub) {
       wc.EventHub.broadcast(event, [], addressData);
-      console.log(`\u{1F4E1} wc-google-address: Also broadcast via EventHub`);
     }
   }
   _updateMap(targetMapId, addressData) {
@@ -4749,7 +4761,6 @@ var WcAddressListener = class extends WcBaseComponent {
     if (!targetGroup || addressData.addressGroup !== targetGroup) {
       return;
     }
-    console.log(`\u{1F3AF} wc-address-listener: Received address data for group "${targetGroup}":`, addressData);
     this._updateChildFields(addressData);
   }
   _updateChildFields(addressData) {
@@ -4768,11 +4779,9 @@ var WcAddressListener = class extends WcBaseComponent {
     if (field.tagName.toLowerCase() === "wc-input" || field.tagName.toLowerCase() === "wc-select") {
       field.value = newValue;
       field.dispatchEvent(new Event("change", { bubbles: true }));
-      console.log(`  \u2713 Updated ${fieldName} = "${newValue}"`);
     } else if (field.tagName.toLowerCase() === "input" || field.tagName.toLowerCase() === "select") {
       field.value = newValue;
       field.dispatchEvent(new Event("change", { bubbles: true }));
-      console.log(`  \u2713 Updated ${fieldName} = "${newValue}"`);
     }
   }
   _getFieldMapping(fieldName) {
@@ -4808,7 +4817,6 @@ var WcAddressListener = class extends WcBaseComponent {
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "address-group") {
-      console.log(`wc-address-listener: Now listening for address group "${newValue}"`);
     }
   }
   _render() {

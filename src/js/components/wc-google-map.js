@@ -26,7 +26,7 @@
 
 import { WcBaseComponent } from './wc-base-component.js';
 
-console.log('🗺️ wc-google-map.js loaded - Version 2.0 with HTMX fix');
+// console.log('🗺️ wc-google-map.js loaded - Version 2.0 with HTMX fix');
 
 class WcGoogleMap extends WcBaseComponent {
   static get observedAttributes() {
@@ -137,7 +137,7 @@ class WcGoogleMap extends WcBaseComponent {
     // Check if script tag already exists (loaded by wc-google-address)
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
-      console.log('wc-google-map: Google Maps script already exists, waiting for it to load...');
+      // console.log('wc-google-map: Google Maps script already exists, waiting for it to load...');
       WcGoogleMap.googleMapsLoadPromise = new Promise((resolve) => {
         const checkLoaded = setInterval(() => {
           if (window.google?.maps) {
@@ -160,7 +160,7 @@ class WcGoogleMap extends WcBaseComponent {
     WcGoogleMap.googleMapsLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
       // Load with both marker and places libraries for compatibility with wc-google-address
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places&loading=async&v=weekly`;
       script.async = true;
       script.defer = true;
 
@@ -200,14 +200,14 @@ class WcGoogleMap extends WcBaseComponent {
       clientHeight: this.mapElement.clientHeight
     };
 
-    console.log('wc-google-map: Initializing map...');
-    console.log('wc-google-map: Container dimensions:', dimensions);
+    // console.log('wc-google-map: Initializing map...');
+    // console.log('wc-google-map: Container dimensions:', dimensions);
 
     // If container has no dimensions, wait and retry
     if (dimensions.width === 0 || dimensions.height === 0) {
       if (this.initRetries < this.maxInitRetries) {
         this.initRetries++;
-        console.warn(`wc-google-map: Container has no dimensions, retrying in 200ms... (attempt ${this.initRetries}/${this.maxInitRetries})`);
+        // console.warn(`wc-google-map: Container has no dimensions, retrying in 200ms... (attempt ${this.initRetries}/${this.maxInitRetries})`);
         setTimeout(() => this._initializeMap(), 200);
         return;
       } else {
@@ -244,19 +244,20 @@ class WcGoogleMap extends WcBaseComponent {
       }
     }
 
-    // Create map
+    // Create map with mapId for AdvancedMarkerElement support
     const mapOptions = {
       center: center,
       zoom: zoom,
       mapTypeId: mapType,
       draggable: draggable,
       scrollwheel: scrollwheel,
-      disableDefaultUI: disableDefaultUI
+      disableDefaultUI: disableDefaultUI,
+      mapId: 'WAVE_CSS_MAP' // Required for AdvancedMarkerElement
     };
 
     try {
       this.map = new google.maps.Map(this.mapElement, mapOptions);
-      console.log('wc-google-map: Map created successfully', this.map);
+      // console.log('wc-google-map: Map created successfully', this.map);
 
       // Emit map-loaded event
       this.dispatchEvent(new CustomEvent('map-loaded', {
@@ -270,7 +271,7 @@ class WcGoogleMap extends WcBaseComponent {
       // Add pins
       this._addPins();
 
-      console.log('wc-google-map: Initialization complete');
+      // console.log('wc-google-map: Initialization complete');
     } catch (error) {
       console.error('wc-google-map: Error creating map:', error);
       this._showError('Error creating map: ' + error.message);
@@ -326,16 +327,16 @@ class WcGoogleMap extends WcBaseComponent {
 
     const pins = this._getPins();
 
-    console.log('wc-google-map: Adding pins:', pins.length, pins);
+    // console.log('wc-google-map: Adding pins:', pins.length, pins);
 
     if (pins.length === 0) {
-      console.warn('wc-google-map: No pins to add');
+      // console.warn('wc-google-map: No pins to add');
       return;
     }
 
     pins.forEach((pin, index) => {
-      // Create marker
-      const marker = new google.maps.Marker({
+      // Create marker using new AdvancedMarkerElement
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: pin.lat, lng: pin.lng },
         map: this.map,
         title: pin.title
@@ -380,6 +381,9 @@ class WcGoogleMap extends WcBaseComponent {
         bounds.extend({ lat: pin.lat, lng: pin.lng });
       });
       this.map.fitBounds(bounds);
+    } else if (pins.length === 1) {
+      // Center on single pin
+      this.map.setCenter({ lat: pins[0].lat, lng: pins[0].lng });
     }
   }
 
@@ -534,6 +538,44 @@ class WcGoogleMap extends WcBaseComponent {
   }
 
   /**
+   * Public API: Update pins programmatically
+   * @param {Array} pins - Array of pin objects with lat, lng, title, address properties
+   */
+  updatePins(pins) {
+    if (!Array.isArray(pins)) {
+      console.error('wc-google-map: updatePins expects an array of pin objects');
+      return;
+    }
+
+    // Clear existing pins
+    this.clearPins();
+
+    // If single pin, set as attributes
+    if (pins.length === 1) {
+      const pin = pins[0];
+      this.setAttribute('lat', pin.lat);
+      this.setAttribute('lng', pin.lng);
+      if (pin.title) this.setAttribute('title', pin.title);
+      if (pin.address) this.setAttribute('address', pin.address);
+    } else if (pins.length > 1) {
+      // Multiple pins, create option elements
+      pins.forEach(pin => {
+        const option = document.createElement('option');
+        option.setAttribute('data-lat', pin.lat);
+        option.setAttribute('data-lng', pin.lng);
+        if (pin.title) option.setAttribute('data-title', pin.title);
+        if (pin.address) option.setAttribute('data-address', pin.address);
+        this.appendChild(option);
+      });
+    }
+
+    // Re-render pins
+    if (this.map) {
+      this._addPins();
+    }
+  }
+
+  /**
    * Public API: Get current map instance
    */
   getMap() {
@@ -613,7 +655,7 @@ class WcGoogleMap extends WcBaseComponent {
         this.map.setCenter(center);
       }
 
-      console.log('wc-google-map: Map resized', { width, height });
+      // console.log('wc-google-map: Map resized', { width, height });
     }
   }
 

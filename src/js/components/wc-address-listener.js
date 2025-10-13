@@ -104,7 +104,7 @@ class WcAddressListener extends WcBaseComponent {
       return;
     }
 
-    console.log(`🎯 wc-address-listener: Received address data for group "${targetGroup}":`, addressData);
+    // console.log(`🎯 wc-address-listener: Received address data for group "${targetGroup}":`, addressData);
 
     // Find and update all child form fields
     this._updateChildFields(addressData);
@@ -138,7 +138,7 @@ class WcAddressListener extends WcBaseComponent {
       // Also trigger change event
       field.dispatchEvent(new Event('change', { bubbles: true }));
 
-      console.log(`  ✓ Updated ${fieldName} = "${newValue}"`);
+      // console.log(`  ✓ Updated ${fieldName} = "${newValue}"`);
     } else if (field.tagName.toLowerCase() === 'input' || field.tagName.toLowerCase() === 'select') {
       // Native HTML element
       field.value = newValue;
@@ -146,7 +146,7 @@ class WcAddressListener extends WcBaseComponent {
       // Trigger change event
       field.dispatchEvent(new Event('change', { bubbles: true }));
 
-      console.log(`  ✓ Updated ${fieldName} = "${newValue}"`);
+      // console.log(`  ✓ Updated ${fieldName} = "${newValue}"`);
     }
   }
 
@@ -190,7 +190,7 @@ class WcAddressListener extends WcBaseComponent {
   _handleAttributeChange(attrName, newValue) {
     // If address-group changes, we'll just rely on the next event to use the new group
     if (attrName === 'address-group') {
-      console.log(`wc-address-listener: Now listening for address group "${newValue}"`);
+      // console.log(`wc-address-listener: Now listening for address group "${newValue}"`);
     }
   }
 
