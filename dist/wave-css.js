@@ -4203,7 +4203,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       "class",
       "lbl-class",
       "lbl-label",
-      "elt-class",
       "api-key",
       "address-group",
       "target-map",
@@ -4598,11 +4597,16 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     this.formElement.setAttribute("type", "text");
     this.formElement.setAttribute("name", name);
     this.formElement.setAttribute("id", name);
+    this.formElement.setAttribute("form-element", "");
     this.formElement.setAttribute("class", "form-control");
     this.formElement.setAttribute("placeholder", placeholder);
     this.formElement.setAttribute("autocomplete", "off");
     if (value) {
       this.formElement.value = value;
+    }
+    const eltClass = this.getAttribute("elt-class");
+    if (eltClass) {
+      this.formElement.setAttribute("class", eltClass);
     }
     this.componentElement.appendChild(this.formElement);
     const icon = document.createElement("span");

@@ -71,7 +71,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
 
     this.passThruAttributes = ['name', 'id', 'value', 'placeholder', 'autocomplete'];
     this.passThruEmptyAttributes = ['disabled', 'readonly', 'required'];
-    this.ignoreAttributes = ['class', 'lbl-class', 'lbl-label', 'elt-class',
+    this.ignoreAttributes = ['class', 'lbl-class', 'lbl-label',
                              'api-key', 'address-group', 'target-map',
                              'countries', 'types', 'fields'];
     this.eventAttributes = ['onchange', 'oninput', 'onblur', 'onfocus'];
@@ -611,12 +611,20 @@ class WcGoogleAddress extends WcBaseFormComponent {
     this.formElement.setAttribute('type', 'text');
     this.formElement.setAttribute('name', name);
     this.formElement.setAttribute('id', name);
+    this.formElement.setAttribute('form-element', '');
     this.formElement.setAttribute('class', 'form-control');
     this.formElement.setAttribute('placeholder', placeholder);
     this.formElement.setAttribute('autocomplete', 'off');
     if (value) {
       this.formElement.value = value;
     }
+
+    // Apply elt-class if provided
+    const eltClass = this.getAttribute('elt-class');
+    if (eltClass) {
+      this.formElement.setAttribute('class', eltClass);
+    }
+
     this.componentElement.appendChild(this.formElement);
 
     // Add address icon (similar to wc-input email/tel icons)
