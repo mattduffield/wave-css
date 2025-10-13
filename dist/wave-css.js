@@ -4260,7 +4260,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     }
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
-      console.log("wc-google-address: Google Maps script already exists, waiting for it to load...");
       _WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve) => {
         const checkLoaded = setInterval(() => {
           if (window.google?.maps) {

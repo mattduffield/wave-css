@@ -144,7 +144,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // Check if script tag already exists (loaded by another component)
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
-      console.log('wc-google-address: Google Maps script already exists, waiting for it to load...');
+      //console.log('wc-google-address: Google Maps script already exists, waiting for it to load...');
       WcGoogleAddress.googlePlacesLoadPromise = new Promise((resolve) => {
         const checkLoaded = setInterval(() => {
           if (window.google?.maps) {
