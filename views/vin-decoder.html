@@ -27,7 +27,7 @@
       <h2 class="text-xl font-semibold mb-4">Example 1: VIN Decoder with Auto-fill</h2>
       <p class="mb-4 text-gray-600">Enter a VIN to automatically decode and populate vehicle information.</p>
 
-      <wc-form id="vinForm1">
+      <form id="vinForm1">
         <div class="grid grid-cols-1 gap-4">
           <!-- VIN Input -->
           <wc-vin-decoder
@@ -53,7 +53,7 @@
 
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
-      </wc-form>
+      </form>
 
       <!-- Debug Output -->
       <div id="debugOutput1" class="debug-output hidden">
@@ -70,7 +70,7 @@
         The <code>database-endpoint</code> attribute is optional.
       </p>
 
-      <wc-form id="vinForm2">
+      <form id="vinForm2">
         <div class="grid grid-cols-1 gap-4">
           <!-- VIN Input with database endpoint -->
           <wc-vin-decoder
@@ -100,7 +100,7 @@
 
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
-      </wc-form>
+      </form>
     </div>
 
     <!-- Example 3: Direct Field Listener -->
@@ -143,7 +143,7 @@
     </div>
   </div>
 
-  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module" src="../dist/wave-css.min.js?v=8"></script>
   <script>
     // Listen for VIN decoder events to show debug output
     document.addEventListener('vin-decoder:change', (event) => {

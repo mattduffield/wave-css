@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIN Decoder - Wave CSS</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .debug-output {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">VIN Decoder Example</h1>
+
+    <!-- Example 1: Basic VIN Decoder with Listener -->
+    <div class="card p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Example 1: VIN Decoder with Auto-fill</h2>
+      <p class="mb-4 text-gray-600">Enter a VIN to automatically decode and populate vehicle information.</p>
+
+      <form id="vinForm1">
+        <div class="grid grid-cols-1 gap-4">
+          <!-- VIN Input -->
+          <wc-vin-decoder
+            name="vin"
+            lbl-label="VIN Number"
+            placeholder="Enter 17-character VIN"
+            class="w-full"
+            elt-class="input"
+            required>
+          </wc-vin-decoder>
+
+          <!-- Vehicle fields that will be auto-filled -->
+          <wc-vin-listener vin-group="default">
+            <div class="grid grid-cols-2 gap-4">
+              <wc-input name="year" lbl-label="Year" class="col-span-1" elt-class="input" readonly></wc-input>
+              <wc-input name="make" lbl-label="Make" class="col-span-1" elt-class="input" readonly></wc-input>
+              <wc-input name="model" lbl-label="Model" class="col-span-1" elt-class="input" readonly></wc-input>
+              <wc-input name="trim" lbl-label="Trim" class="col-span-1" elt-class="input" readonly></wc-input>
+              <wc-input name="msrp" lbl-label="MSRP" class="col-span-1" elt-class="input" readonly></wc-input>
+              <wc-input name="fuelType" lbl-label="Fuel Type" class="col-span-1" elt-class="input" readonly></wc-input>
+            </div>
+          </wc-vin-listener>
+
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+
+      <!-- Debug Output -->
+      <div id="debugOutput1" class="debug-output hidden">
+        <strong>Decoded VIN Data:</strong>
+        <div id="debugContent1"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="./index.js"></script>
+  <script>
+    // Listen for VIN decoder events to show debug output
+    document.addEventListener('vin-decoder:change', (event) => {
+      console.log('VIN Decoded:', event.detail);
+
+      // Show debug output for Example 1
+      const debugOutput = document.getElementById('debugOutput1');
+      const debugContent = document.getElementById('debugContent1');
+      debugOutput.classList.remove('hidden');
+      debugContent.textContent = JSON.stringify(event.detail.data, null, 2);
+    });
+
+    document.addEventListener('vin-decoder:error', (event) => {
+      console.error('VIN Decode Error:', event.detail);
+      alert(`Error: ${event.detail.error}`);
+    });
+
+    // Handle form submissions
+    document.getElementById('vinForm1').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Form 1 submitted! Check console for form data.');
+      console.log('Form 1 Data:', new FormData(e.target));
+    });
+  </script>
+</body>
+</html>

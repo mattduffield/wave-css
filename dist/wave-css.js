@@ -4856,7 +4856,7 @@ var WcAddressListener = class extends WcBaseComponent {
 customElements.define(WcAddressListener.is, WcAddressListener);
 
 // src/js/components/wc-vin-decoder.js
-var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
+var WcVinDecoder = class extends WcBaseFormComponent {
   static get is() {
     return "wc-vin-decoder";
   }
@@ -4876,24 +4876,6 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       "tooltip-position",
       "class",
       "elt-class",
-      ...this.eventAttributes
-    ];
-  }
-  static get eventAttributes() {
-    return ["onchange", "oninput", "onblur", "onfocus"];
-  }
-  constructor() {
-    super();
-    this.classList.add("contents");
-    this.apiUrl = "https://vin-decoder-ligipcg4jq-uc.a.run.app";
-    this.databaseEndpoint = null;
-    this.isDecoding = false;
-    this.lastDecodedVin = null;
-    this.cachedData = null;
-  }
-  get passThruAttributes() {
-    return [
-      "placeholder",
       "autocomplete",
       "autocapitalize",
       "spellcheck",
@@ -4901,18 +4883,187 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       "pattern",
       "minlength",
       "maxlength",
-      "size",
-      "form",
-      "list",
-      "data-lpignore",
-      "data-form-type"
+      "onchange",
+      "oninput",
+      "onblur",
+      "onfocus"
     ];
   }
-  get passThruEmptyAttributes() {
-    return ["required", "disabled", "readonly", "autofocus"];
+  constructor() {
+    super();
+    this.passThruAttributes = [
+      "placeholder",
+      "autocomplete",
+      "autocapitalize",
+      "spellcheck",
+      "inputmode",
+      "pattern",
+      "minlength",
+      "maxlength"
+    ];
+    this.passThruEmptyAttributes = [
+      "required",
+      "disabled",
+      "readonly",
+      "autofocus"
+    ];
+    this.ignoreAttributes = [
+      "api-url",
+      "database-endpoint",
+      "tooltip",
+      "tooltip-position",
+      "lbl-label",
+      "lbl-class",
+      "elt-class"
+    ];
+    this.eventAttributes = [
+      "onchange",
+      "oninput",
+      "onblur",
+      "onfocus"
+    ];
+    const compEl = this.querySelector(".wc-vin-decoder");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-vin-decoder", "relative");
+      this.appendChild(this.componentElement);
+    }
+    this.apiUrl = "https://vin-decoder-ligipcg4jq-uc.a.run.app";
+    this.databaseEndpoint = null;
+    this.isDecoding = false;
+    this.lastDecodedVin = null;
+    this.cachedData = null;
+    this.formElement = null;
+    this.spinnerIcon = null;
+    this.labelElement = null;
   }
-  get ignoreAttributes() {
-    return ["api-url", "database-endpoint", "tooltip", "tooltip-position", "lbl-label", "lbl-class", "elt-class"];
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  _render() {
+    super._render();
+    const innerEl = this.querySelector(".wc-vin-decoder > *");
+    if (innerEl) {
+    } else {
+      this.componentElement.innerHTML = "";
+      this._createInnerElement();
+    }
+    this.eventAttributes.forEach((attr) => {
+      const value = this.getAttribute(attr);
+      if (value) {
+        this._handleAttributeChange(attr, value);
+      }
+    });
+    this._createTooltipElement();
+    if (typeof htmx !== "undefined") {
+      htmx.process(this);
+    }
+  }
+  _createInnerElement() {
+    const labelText = this.getAttribute("lbl-label");
+    const name = this.getAttribute("name");
+    if (labelText) {
+      const label = document.createElement("label");
+      label.setAttribute("for", name);
+      label.textContent = labelText;
+      const lblClass = this.getAttribute("lbl-class");
+      if (lblClass) {
+        lblClass.split(" ").forEach((cls) => {
+          if (cls.trim()) {
+            label.classList.add(cls.trim());
+          }
+        });
+      }
+      this.componentElement.appendChild(label);
+    }
+    const inputWrapper = document.createElement("div");
+    inputWrapper.classList.add("relative", "flex", "items-center");
+    this.formElement = document.createElement("input");
+    this.formElement.setAttribute("type", "text");
+    this.formElement.setAttribute("form-element", "");
+    this.formElement.setAttribute("name", name);
+    this.formElement.setAttribute("id", name);
+    const eltClass = this.getAttribute("elt-class");
+    if (eltClass) {
+      eltClass.split(" ").forEach((cls) => {
+        if (cls.trim()) {
+          this.formElement.classList.add(cls.trim());
+        }
+      });
+    }
+    this.passThruAttributes.forEach((attr) => {
+      const value = this.getAttribute(attr);
+      if (value !== null) {
+        this.formElement.setAttribute(attr, value);
+      }
+    });
+    this.passThruEmptyAttributes.forEach((attr) => {
+      if (this.hasAttribute(attr)) {
+        this.formElement.setAttribute(attr, "");
+      }
+    });
+    this.spinnerIcon = document.createElement("wc-fa-icon");
+    this.spinnerIcon.setAttribute("name", "circle-notch");
+    this.spinnerIcon.setAttribute("icon-style", "solid");
+    this.spinnerIcon.setAttribute("size", "1.25rem");
+    this.spinnerIcon.classList.add("absolute", "right-3", "text-primary", "animate-spin", "hidden");
+    this.formElement.addEventListener("change", (e) => {
+      this._handleVinChange(e);
+    });
+    inputWrapper.appendChild(this.formElement);
+    inputWrapper.appendChild(this.spinnerIcon);
+    this.componentElement.appendChild(inputWrapper);
+    this.labelElement = this.componentElement.querySelector("label");
+  }
+  _unWireEvents() {
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        const eventHandler = new Function("event", `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+        const eventName = attrName.substring(2);
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }
+    if (this.passThruAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, newValue);
+    }
+    if (this.passThruEmptyAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, "");
+    }
+    if (this.ignoreAttributes.includes(attrName)) {
+      if (attrName === "api-url") {
+        this.apiUrl = newValue || this.apiUrl;
+      } else if (attrName === "database-endpoint") {
+        this.databaseEndpoint = newValue;
+      }
+      return;
+    }
+    if (attrName === "tooltip" || attrName === "tooltip-position") {
+      this._createTooltipElement();
+      return;
+    }
+    if (attrName === "lbl-class") {
+      const name = this.getAttribute("name");
+      const lbl = this.querySelector(`label[for="${name}"]`);
+      lbl?.classList.add(newValue);
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
   }
   get value() {
     return this.formElement?.value || "";
@@ -4920,65 +5071,6 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
   set value(val) {
     if (this.formElement) {
       this.formElement.value = val;
-    }
-  }
-  _render() {
-    if (!this.componentElement) {
-      this.componentElement = document.createElement("div");
-      this.componentElement.classList.add("contents");
-      const labelText = this.getAttribute("lbl-label");
-      if (labelText) {
-        const label = document.createElement("label");
-        const name2 = this.getAttribute("name");
-        label.setAttribute("for", name2);
-        label.textContent = labelText;
-        const lblClass = this.getAttribute("lbl-class");
-        if (lblClass) {
-          label.classList.add(lblClass);
-        }
-        this.componentElement.appendChild(label);
-      }
-      const inputWrapper = document.createElement("div");
-      inputWrapper.classList.add("relative", "flex", "items-center");
-      this.formElement = document.createElement("input");
-      this.formElement.setAttribute("type", "text");
-      this.formElement.setAttribute("form-element", "");
-      const name = this.getAttribute("name");
-      if (name) {
-        this.formElement.setAttribute("name", name);
-        this.formElement.setAttribute("id", name);
-      }
-      const eltClass = this.getAttribute("elt-class");
-      if (eltClass) {
-        eltClass.split(" ").forEach((cls) => {
-          if (cls.trim()) {
-            this.formElement.classList.add(cls.trim());
-          }
-        });
-      }
-      this.spinnerIcon = document.createElement("wc-fa-icon");
-      this.spinnerIcon.setAttribute("icon", "circle-notch");
-      this.spinnerIcon.setAttribute("icon-style", "solid");
-      this.spinnerIcon.classList.add("absolute", "right-3", "text-primary", "animate-spin", "hidden");
-      this.formElement.addEventListener("change", (e) => {
-        this._handleVinChange(e);
-      });
-      inputWrapper.appendChild(this.formElement);
-      inputWrapper.appendChild(this.spinnerIcon);
-      this.componentElement.appendChild(inputWrapper);
-      this.passThruAttributes.forEach((attr) => {
-        const value = this.getAttribute(attr);
-        if (value !== null) {
-          this.formElement.setAttribute(attr, value);
-        }
-      });
-      this.passThruEmptyAttributes.forEach((attr) => {
-        if (this.hasAttribute(attr)) {
-          this.formElement.setAttribute(attr, "");
-        }
-      });
-      this._createTooltipElement();
-      this.appendChild(this.componentElement);
     }
   }
   async _handleVinChange(event) {
@@ -5088,53 +5180,6 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     });
     this.dispatchEvent(event);
   }
-  _handleAttributeChange(attrName, newValue) {
-    if (_WcVinDecoder.eventAttributes.includes(attrName)) {
-      if (this.formElement && newValue) {
-        const eventHandler = new Function("event", `
-          const element = event.target;
-          const value = element.value;
-          with (element) {
-            ${newValue}
-          }
-        `);
-        const eventName = attrName.substring(2);
-        this.formElement.addEventListener(eventName, eventHandler);
-      }
-      return;
-    }
-    if (this.passThruAttributes.includes(attrName)) {
-      if (this.formElement) {
-        this.formElement.setAttribute(attrName, newValue);
-      }
-      return;
-    }
-    if (this.passThruEmptyAttributes.includes(attrName)) {
-      if (this.formElement) {
-        this.formElement.setAttribute(attrName, "");
-      }
-      return;
-    }
-    if (this.ignoreAttributes.includes(attrName)) {
-      if (attrName === "api-url") {
-        this.apiUrl = newValue || this.apiUrl;
-      } else if (attrName === "database-endpoint") {
-        this.databaseEndpoint = newValue;
-      }
-      return;
-    }
-    if (attrName === "tooltip" || attrName === "tooltip-position") {
-      this._createTooltipElement();
-      return;
-    }
-    if (attrName === "lbl-class") {
-      const name = this.getAttribute("name");
-      const lbl = this.querySelector(`label[for="${name}"]`);
-      lbl?.classList.add(newValue);
-      return;
-    }
-    super._handleAttributeChange(attrName, newValue);
-  }
   _createTooltipElement() {
     const tooltip = this.getAttribute("tooltip");
     if (!tooltip) return;
@@ -5148,6 +5193,34 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     tooltipElement.setAttribute("position", position);
     if (this.formElement) {
       this.formElement.parentNode.insertBefore(tooltipElement, this.formElement.nextSibling);
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-vin-decoder {
+        display: contents;
+      }
+
+      wc-vin-decoder input {
+        width: 100%;
+      }
+
+      wc-vin-decoder wc-fa-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      wc-vin-decoder wc-fa-icon.hidden {
+        display: none !important;
+      }
+    `;
+    if (!document.getElementById("wc-vin-decoder-style")) {
+      const styleTag = document.createElement("style");
+      styleTag.id = "wc-vin-decoder-style";
+      styleTag.textContent = style;
+      document.head.appendChild(styleTag);
     }
   }
 };
@@ -5164,6 +5237,14 @@ var WcVinListener = class extends WcBaseComponent {
   constructor() {
     super();
     this.boundHandleVinChange = this._handleVinChange.bind(this);
+    const compEl = this.querySelector(".wc-vin-listener");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-vin-listener");
+      this.appendChild(this.componentElement);
+    }
   }
   connectedCallback() {
     super.connectedCallback();

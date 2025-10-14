@@ -71,6 +71,16 @@ class WcVinListener extends WcBaseComponent {
   constructor() {
     super();
     this.boundHandleVinChange = this._handleVinChange.bind(this);
+
+    // Create component wrapper element
+    const compEl = this.querySelector('.wc-vin-listener');
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement('div');
+      this.componentElement.classList.add('wc-vin-listener');
+      this.appendChild(this.componentElement);
+    }
   }
 
   connectedCallback() {
