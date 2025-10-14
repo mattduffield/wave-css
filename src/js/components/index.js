@@ -19,6 +19,8 @@ import './wc-flip-box.js';
 import './wc-google-map.js';
 import './wc-google-address.js';
 import './wc-address-listener.js';
+import './wc-vin-decoder.js';
+import './wc-vin-listener.js';
 import './wc-icon.js';
 import './wc-fa-icon.js';
 import './wc-image.js';
