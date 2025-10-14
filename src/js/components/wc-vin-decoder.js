@@ -48,6 +48,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       'tooltip-position',
       'class',
       'elt-class',
+      'vehicle-type',
       'autocomplete',
       'autocapitalize',
       'spellcheck',
@@ -59,6 +60,43 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       'oninput',
       'onblur',
       'onfocus'
+    ];
+  }
+
+  static get icons() {
+    return [
+      {
+        name: 'auto',
+        icon: `
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="CurrentColor">
+            <path d="M199.2 181.4L173.1 256L466.9 256L440.8 181.4C436.3 168.6 424.2 160 410.6 160L229.4 160C215.8 160 203.7 168.6 199.2 181.4zM103.6 260.8L138.8 160.3C152.3 121.8 188.6 96 229.4 96L410.6 96C451.4 96 487.7 121.8 501.2 160.3L536.4 260.8C559.6 270.4 576 293.3 576 320L576 512C576 529.7 561.7 544 544 544L512 544C494.3 544 480 529.7 480 512L480 480L160 480L160 512C160 529.7 145.7 544 128 544L96 544C78.3 544 64 529.7 64 512L64 320C64 293.3 80.4 270.4 103.6 260.8zM192 368C192 350.3 177.7 336 160 336C142.3 336 128 350.3 128 368C128 385.7 142.3 400 160 400C177.7 400 192 385.7 192 368zM480 400C497.7 400 512 385.7 512 368C512 350.3 497.7 336 480 336C462.3 336 448 350.3 448 368C448 385.7 462.3 400 480 400z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'auto-dualtone',
+        icon: `
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="CurrentColor">
+            <path opacity=".4" d="M64 480L64 512C64 529.7 78.3 544 96 544L128 544C145.7 544 160 529.7 160 512L160 480L64 480zM173.1 256L466.9 256L440.8 181.4C436.3 168.6 424.2 160 410.6 160L229.4 160C215.8 160 203.7 168.6 199.2 181.4L173.1 256zM480 480L480 512C480 529.7 494.3 544 512 544L544 544C561.7 544 576 529.7 576 512L576 480L480 480z"/><path d="M160 480L64 480L64 320C64 293.3 80.4 270.4 103.6 260.8L138.8 160.3C152.3 121.8 188.6 96 229.4 96L410.6 96C451.4 96 487.7 121.8 501.2 160.3L536.4 260.8C559.6 270.4 576 293.3 576 320L576 480L160 480zM229.4 160C215.8 160 203.7 168.6 199.2 181.4L173.1 256L466.9 256L440.8 181.4C436.3 168.6 424.2 160 410.6 160L229.4 160zM160 400C177.7 400 192 385.7 192 368C192 350.3 177.7 336 160 336C142.3 336 128 350.3 128 368C128 385.7 142.3 400 160 400zM512 368C512 350.3 497.7 336 480 336C462.3 336 448 350.3 448 368C448 385.7 462.3 400 480 400C497.7 400 512 385.7 512 368z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'motorcycle',
+        icon: `
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="CurrentColor">
+            <path d="M280 80C266.7 80 256 90.7 256 104C256 117.3 266.7 128 280 128L336.6 128L359.1 176.7L264 248C230.6 222.9 189 208 144 208L88 208C74.7 208 64 218.7 64 232C64 245.3 74.7 256 88 256L144 256C222.5 256 287.2 315.6 295.2 392L269.8 392C258.6 332.8 206.5 288 144 288C73.3 288 16 345.3 16 416C16 486.7 73.3 544 144 544C206.5 544 258.5 499.2 269.8 440L320 440C333.3 440 344 429.3 344 416L344 393.5C344 348.4 369.7 308.1 409.5 285.8L421.6 311.9C389.2 335.1 368.1 373.1 368.1 416C368.1 486.7 425.4 544 496.1 544C566.8 544 624.1 486.7 624.1 416C624.1 345.3 566.8 288 496.1 288C485.4 288 475.1 289.3 465.2 291.8L433.8 224L488 224C501.3 224 512 213.3 512 200L512 152C512 138.7 501.3 128 488 128L434.7 128C427.8 128 421 130.2 415.5 134.4L398.4 147.2L373.8 93.9C369.9 85.4 361.4 80 352 80L280 80zM445.8 364.4L474.2 426C479.8 438 494 443.3 506 437.7C518 432.1 523.3 417.9 517.7 405.9L489.2 344.3C491.4 344.1 493.6 344 495.9 344C535.7 344 567.9 376.2 567.9 416C567.9 455.8 535.7 488 495.9 488C456.1 488 423.9 455.8 423.9 416C423.9 395.8 432.2 377.5 445.7 364.4zM144 488C104.2 488 72 455.8 72 416C72 376.2 104.2 344 144 344C175.3 344 202 364 211.9 392L144 392C130.7 392 120 402.7 120 416C120 429.3 130.7 440 144 440L211.9 440C202 468 175.3 488 144 488z"/>
+          </svg>
+        `.trim()
+      },
+      {
+        name: 'motorcycle-dualtone',
+        icon: `
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="CurrentColor">
+            <path opacity=".4" d="M16 416C16 345.3 73.3 288 144 288C206.5 288 258.5 332.8 269.8 392L211.9 392C202 364 175.3 344 144 344C104.2 344 72 376.2 72 416C72 455.8 104.2 488 144 488C175.3 488 202 468 211.9 440L269.8 440C258.6 499.2 206.5 544 144 544C73.3 544 16 486.7 16 416zM368 416C368 373.1 389.1 335.1 421.5 311.9L445.7 364.4C432.3 377.5 423.9 395.8 423.9 416C423.9 455.8 456.1 488 495.9 488C535.7 488 567.9 455.8 567.9 416C567.9 376.2 535.7 344 495.9 344C493.7 344 491.4 344.1 489.2 344.3L464.9 291.8C474.8 289.3 485.2 288 495.8 288C566.5 288 623.8 345.3 623.8 416C623.8 486.7 566.5 544 495.8 544C425.1 544 367.8 486.7 367.8 416z"/><path d="M256 104C256 90.7 266.7 80 280 80L352 80C361.4 80 369.9 85.4 373.8 93.9L398.4 147.2L415.5 134.4C421 130.2 427.8 128 434.7 128L488 128C501.3 128 512 138.7 512 152L512 200C512 213.3 501.3 224 488 224L433.8 224L517.8 405.9C523.4 417.9 518.1 432.2 506.1 437.7C494.1 443.2 479.8 438 474.3 426L409.5 285.8C369.7 308.1 344 348.4 344 393.5L344 416C344 429.3 333.3 440 320 440L144 440C130.7 440 120 429.3 120 416C120 402.7 130.7 392 144 392L295.2 392C287.2 315.6 222.6 256 144 256L88 256C74.7 256 64 245.3 64 232C64 218.7 74.7 208 88 208L144 208C189 208 230.6 222.9 264 248L359.1 176.7L336.6 128L280 128C266.7 128 256 117.3 256 104z"/>
+          </svg>
+        `.trim()
+      }
     ];
   }
 
@@ -89,7 +127,8 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       'tooltip-position',
       'lbl-label',
       'lbl-class',
-      'elt-class'
+      'elt-class',
+      'vehicle-type'
     ];
     this.eventAttributes = [
       'onchange',
@@ -212,20 +251,32 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       }
     });
 
-    // Create spinner icon (hidden by default)
+    // Create vehicle icon (on the left)
+    const vehicleType = this.getAttribute('vehicle-type') || 'auto';
+    const iconData = WcVinDecoder.icons.find(i => i.name === vehicleType);
+    if (iconData) {
+      const vehicleIcon = document.createElement('span');
+      vehicleIcon.classList.add('icon', 'vehicle-icon');
+      vehicleIcon.innerHTML = iconData.icon;
+      inputWrapper.appendChild(vehicleIcon);
+    }
+
+    // Append input
+    inputWrapper.appendChild(this.formElement);
+
+    // Create spinner icon (hidden by default, on the right)
     this.spinnerIcon = document.createElement('wc-fa-icon');
     this.spinnerIcon.setAttribute('name', 'circle-notch');
     this.spinnerIcon.setAttribute('icon-style', 'solid');
     this.spinnerIcon.setAttribute('size', '1.25rem');
     this.spinnerIcon.classList.add('absolute', 'right-3', 'text-primary', 'animate-spin', 'hidden');
+    inputWrapper.appendChild(this.spinnerIcon);
 
     // Add change listener for VIN decoding
     this.formElement.addEventListener('change', (e) => {
       this._handleVinChange(e);
     });
 
-    inputWrapper.appendChild(this.formElement);
-    inputWrapper.appendChild(this.spinnerIcon);
     this.componentElement.appendChild(inputWrapper);
 
     this.labelElement = this.componentElement.querySelector('label');
@@ -468,6 +519,19 @@ export default class WcVinDecoder extends WcBaseFormComponent {
 
       wc-vin-decoder input {
         width: 100%;
+        padding-left: 30px;
+        min-width: 130px;
+      }
+
+      wc-vin-decoder .vehicle-icon {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       wc-vin-decoder wc-fa-icon {
