@@ -5292,14 +5292,23 @@ var WcVinListener = class extends WcBaseComponent {
     if (!fieldKey) return;
     const mappedField = this._getFieldMapping(fieldKey);
     if (!mappedField) return;
-    const value = data[mappedField];
+    let value = data[mappedField];
     if (value === void 0 || value === null) return;
+    value = this._transformValue(value, mappedField);
     if (element.tagName.toLowerCase().startsWith("wc-")) {
       element.value = value;
     } else if (element.tagName === "INPUT" || element.tagName === "SELECT" || element.tagName === "TEXTAREA") {
       element.value = value;
     }
     element.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  _transformValue(value, mappedField) {
+    if (mappedField === "msrp" || mappedField === "basePrice") {
+      if (typeof value === "string") {
+        return value.replace(/[$,\s]/g, "");
+      }
+    }
+    return value;
   }
   _extractFieldKey(fieldName) {
     const parts = fieldName.split(".");

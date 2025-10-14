@@ -157,8 +157,11 @@ class WcVinListener extends WcBaseComponent {
     if (!mappedField) return;
 
     // Get the value from the VIN data
-    const value = data[mappedField];
+    let value = data[mappedField];
     if (value === undefined || value === null) return;
+
+    // Transform value based on field type
+    value = this._transformValue(value, mappedField);
 
     // Update the field value
     if (element.tagName.toLowerCase().startsWith('wc-')) {
@@ -171,6 +174,18 @@ class WcVinListener extends WcBaseComponent {
 
     // Trigger change event so other listeners can react
     element.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  _transformValue(value, mappedField) {
+    // Strip dollar signs and commas from price/currency fields
+    if (mappedField === 'msrp' || mappedField === 'basePrice') {
+      if (typeof value === 'string') {
+        // Remove $, commas, and any whitespace
+        return value.replace(/[$,\s]/g, '');
+      }
+    }
+
+    return value;
   }
 
   _extractFieldKey(fieldName) {
