@@ -4475,7 +4475,6 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     const addressData = {
       addressGroup: this.getAttribute("address-group") || "address",
       street: "",
-      apt_suite: "",
       city: "",
       state: "",
       postal_code: "",
