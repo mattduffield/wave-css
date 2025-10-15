@@ -259,13 +259,35 @@ class WcGoogleAddress extends WcBaseFormComponent {
       switch(e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          const nextIndex = currentIndex < suggestions.length - 1 ? currentIndex + 1 : 0;
+          // Move DOWN the list (increase index)
+          let nextIndex;
+          if (currentIndex === -1) {
+            // No selection - go to first item
+            nextIndex = 0;
+          } else if (currentIndex < suggestions.length - 1) {
+            // Move to next item
+            nextIndex = currentIndex + 1;
+          } else {
+            // At end - wrap to beginning
+            nextIndex = 0;
+          }
           this._highlightSuggestion(suggestions, nextIndex);
           break;
 
         case 'ArrowUp':
           e.preventDefault();
-          const prevIndex = currentIndex > 0 ? currentIndex - 1 : suggestions.length - 1;
+          // Move UP the list (decrease index)
+          let prevIndex;
+          if (currentIndex === -1) {
+            // No selection - go to last item
+            prevIndex = suggestions.length - 1;
+          } else if (currentIndex > 0) {
+            // Move to previous item
+            prevIndex = currentIndex - 1;
+          } else {
+            // At beginning - wrap to end
+            prevIndex = suggestions.length - 1;
+          }
           this._highlightSuggestion(suggestions, prevIndex);
           break;
 

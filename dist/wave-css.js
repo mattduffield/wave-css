@@ -4341,12 +4341,26 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          const nextIndex = currentIndex < suggestions.length - 1 ? currentIndex + 1 : 0;
+          let nextIndex;
+          if (currentIndex === -1) {
+            nextIndex = 0;
+          } else if (currentIndex < suggestions.length - 1) {
+            nextIndex = currentIndex + 1;
+          } else {
+            nextIndex = 0;
+          }
           this._highlightSuggestion(suggestions, nextIndex);
           break;
         case "ArrowUp":
           e.preventDefault();
-          const prevIndex = currentIndex > 0 ? currentIndex - 1 : suggestions.length - 1;
+          let prevIndex;
+          if (currentIndex === -1) {
+            prevIndex = suggestions.length - 1;
+          } else if (currentIndex > 0) {
+            prevIndex = currentIndex - 1;
+          } else {
+            prevIndex = suggestions.length - 1;
+          }
           this._highlightSuggestion(suggestions, prevIndex);
           break;
         case "Enter":
