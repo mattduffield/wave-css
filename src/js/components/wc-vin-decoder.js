@@ -519,8 +519,14 @@ export default class WcVinDecoder extends WcBaseFormComponent {
 
       wc-vin-decoder input {
         width: 100%;
-        padding-left: 30px;
+        padding-left: 25px;
         min-width: 130px;
+      }
+
+      wc-vin-decoder input:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+        font-style: italic;
       }
 
       wc-vin-decoder .vehicle-icon {
@@ -543,6 +549,16 @@ export default class WcVinDecoder extends WcBaseFormComponent {
 
       wc-vin-decoder wc-fa-icon.hidden {
         display: none !important;
+      }
+
+      /* Required field - bold label with asterisk */
+      div.wc-vin-decoder:has(:required) > label {
+        font-weight: bold;
+      }
+
+      div.wc-vin-decoder:has(:required) > label::after {
+        content: ' *';
+        font-weight: bold;
       }
     `;
 
