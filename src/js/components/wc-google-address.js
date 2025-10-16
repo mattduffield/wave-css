@@ -210,18 +210,24 @@ class WcGoogleAddress extends WcBaseFormComponent {
     // - AutocompleteSuggestion.fetchAutocompleteSuggestions() for suggestions
     // - Place.fetchFields() for place details
 
-    // Wire up input events
-    this._wireAutocompleteEvents();
+    // Mark as initialized
+    this._autocompleteInitialized = true;
   }
 
-  _wireAutocompleteEvents() {
+  _wireEvents() {
+    super._wireEvents();
+
     if (!this.formElement) return;
 
-    let suggestionsContainer = this.querySelector('.address-suggestions');
-    if (!suggestionsContainer) {
-      suggestionsContainer = document.createElement('div');
-      suggestionsContainer.classList.add('address-suggestions');
-      this.componentElement.appendChild(suggestionsContainer);
+    // Prevent duplicate event listeners
+    if (this._autocompleteEventsWired) return;
+    this._autocompleteEventsWired = true;
+
+    this._suggestionsContainer = this.querySelector('.address-suggestions');
+    if (!this._suggestionsContainer) {
+      this._suggestionsContainer = document.createElement('div');
+      this._suggestionsContainer.classList.add('address-suggestions');
+      this.componentElement.appendChild(this._suggestionsContainer);
     }
 
     // Debounce function for input
@@ -233,23 +239,23 @@ class WcGoogleAddress extends WcBaseFormComponent {
       };
     };
 
-    // Input handler
-    const handleInput = debounce((e) => {
+    // Store handler references for cleanup
+    this._handleInputDebounced = debounce((e) => {
       const input = e.target.value.trim();
 
       if (input.length < 3) {
-        this._hideSuggestions(suggestionsContainer);
+        this._hideSuggestions(this._suggestionsContainer);
         return;
       }
 
-      this._fetchSuggestions(input, suggestionsContainer);
+      this._fetchSuggestions(input, this._suggestionsContainer);
     }, 300);
 
-    this.formElement.addEventListener('input', handleInput);
+    this.formElement.addEventListener('input', this._handleInputDebounced);
 
     // Keyboard navigation for suggestions
-    this.formElement.addEventListener('keydown', (e) => {
-      const suggestions = suggestionsContainer.querySelectorAll('.address-suggestion-item');
+    this._handleKeydown = (e) => {
+      const suggestions = this._suggestionsContainer.querySelectorAll('.address-suggestion-item');
       if (suggestions.length === 0) return;
 
       const currentIndex = Array.from(suggestions).findIndex(item =>
@@ -264,17 +270,13 @@ class WcGoogleAddress extends WcBaseFormComponent {
           if (currentIndex === -1) {
             // No selection - go to first item
             nextIndex = 0;
-            console.log('ArrowDown: No selection, going to first item (index 0)');
           } else if (currentIndex < suggestions.length - 1) {
             // Move to next item
             nextIndex = currentIndex + 1;
-            console.log(`ArrowDown: Moving from ${currentIndex} to ${nextIndex}`);
           } else {
             // At end - wrap to beginning
             nextIndex = 0;
-            console.log('ArrowDown: At end, wrapping to first item (index 0)');
           }
-          console.log(`Total suggestions: ${suggestions.length}, currentIndex: ${currentIndex}, nextIndex: ${nextIndex}`);
           this._highlightSuggestion(suggestions, nextIndex);
           break;
 
@@ -300,32 +302,65 @@ class WcGoogleAddress extends WcBaseFormComponent {
             e.preventDefault();
             const placeId = suggestions[currentIndex].dataset.placeId;
             this._selectPlace(placeId);
-            this._hideSuggestions(suggestionsContainer);
+            this._hideSuggestions(this._suggestionsContainer);
           }
           break;
 
         case 'Escape':
           e.preventDefault();
-          this._hideSuggestions(suggestionsContainer);
+          this._hideSuggestions(this._suggestionsContainer);
           break;
       }
-    });
+    };
+    this.formElement.addEventListener('keydown', this._handleKeydown);
 
     // Hide suggestions when clicking outside
-    document.addEventListener('click', (e) => {
+    this._handleDocumentClick = (e) => {
       if (!this.contains(e.target)) {
-        this._hideSuggestions(suggestionsContainer);
+        this._hideSuggestions(this._suggestionsContainer);
       }
-    });
+    };
+    document.addEventListener('click', this._handleDocumentClick);
 
     // Handle blur - slight delay to allow click on suggestions
-    this.formElement.addEventListener('blur', () => {
+    this._handleBlur = () => {
       setTimeout(() => {
         if (!this.querySelector('.address-suggestions:hover')) {
-          this._hideSuggestions(suggestionsContainer);
+          this._hideSuggestions(this._suggestionsContainer);
         }
       }, 200);
-    });
+    };
+    this.formElement.addEventListener('blur', this._handleBlur);
+  }
+
+  _unWireEvents() {
+    super._unWireEvents();
+
+    // Remove event listeners
+    if (this.formElement) {
+      if (this._handleInputDebounced) {
+        this.formElement.removeEventListener('input', this._handleInputDebounced);
+      }
+      if (this._handleKeydown) {
+        this.formElement.removeEventListener('keydown', this._handleKeydown);
+      }
+      if (this._handleBlur) {
+        this.formElement.removeEventListener('blur', this._handleBlur);
+      }
+    }
+
+    if (this._handleDocumentClick) {
+      document.removeEventListener('click', this._handleDocumentClick);
+    }
+
+    // Clean up suggestions container
+    if (this._suggestionsContainer) {
+      this._suggestionsContainer.remove();
+      this._suggestionsContainer = null;
+    }
+
+    // Reset flags
+    this._autocompleteEventsWired = false;
   }
 
   async _fetchSuggestions(input, container) {

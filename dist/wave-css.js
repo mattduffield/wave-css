@@ -4306,15 +4306,18 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       return;
     }
     this.sessionToken = new google.maps.places.AutocompleteSessionToken();
-    this._wireAutocompleteEvents();
+    this._autocompleteInitialized = true;
   }
-  _wireAutocompleteEvents() {
+  _wireEvents() {
+    super._wireEvents();
     if (!this.formElement) return;
-    let suggestionsContainer = this.querySelector(".address-suggestions");
-    if (!suggestionsContainer) {
-      suggestionsContainer = document.createElement("div");
-      suggestionsContainer.classList.add("address-suggestions");
-      this.componentElement.appendChild(suggestionsContainer);
+    if (this._autocompleteEventsWired) return;
+    this._autocompleteEventsWired = true;
+    this._suggestionsContainer = this.querySelector(".address-suggestions");
+    if (!this._suggestionsContainer) {
+      this._suggestionsContainer = document.createElement("div");
+      this._suggestionsContainer.classList.add("address-suggestions");
+      this.componentElement.appendChild(this._suggestionsContainer);
     }
     let debounceTimer;
     const debounce = (func, delay) => {
@@ -4323,17 +4326,17 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
         debounceTimer = setTimeout(() => func.apply(this, args), delay);
       };
     };
-    const handleInput = debounce((e) => {
+    this._handleInputDebounced = debounce((e) => {
       const input2 = e.target.value.trim();
       if (input2.length < 3) {
-        this._hideSuggestions(suggestionsContainer);
+        this._hideSuggestions(this._suggestionsContainer);
         return;
       }
-      this._fetchSuggestions(input2, suggestionsContainer);
+      this._fetchSuggestions(input2, this._suggestionsContainer);
     }, 300);
-    this.formElement.addEventListener("input", handleInput);
-    this.formElement.addEventListener("keydown", (e) => {
-      const suggestions = suggestionsContainer.querySelectorAll(".address-suggestion-item");
+    this.formElement.addEventListener("input", this._handleInputDebounced);
+    this._handleKeydown = (e) => {
+      const suggestions = this._suggestionsContainer.querySelectorAll(".address-suggestion-item");
       if (suggestions.length === 0) return;
       const currentIndex = Array.from(suggestions).findIndex(
         (item) => item.classList.contains("highlighted")
@@ -4344,15 +4347,11 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
           let nextIndex;
           if (currentIndex === -1) {
             nextIndex = 0;
-            console.log("ArrowDown: No selection, going to first item (index 0)");
           } else if (currentIndex < suggestions.length - 1) {
             nextIndex = currentIndex + 1;
-            console.log(`ArrowDown: Moving from ${currentIndex} to ${nextIndex}`);
           } else {
             nextIndex = 0;
-            console.log("ArrowDown: At end, wrapping to first item (index 0)");
           }
-          console.log(`Total suggestions: ${suggestions.length}, currentIndex: ${currentIndex}, nextIndex: ${nextIndex}`);
           this._highlightSuggestion(suggestions, nextIndex);
           break;
         case "ArrowUp":
@@ -4372,27 +4371,52 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
             e.preventDefault();
             const placeId = suggestions[currentIndex].dataset.placeId;
             this._selectPlace(placeId);
-            this._hideSuggestions(suggestionsContainer);
+            this._hideSuggestions(this._suggestionsContainer);
           }
           break;
         case "Escape":
           e.preventDefault();
-          this._hideSuggestions(suggestionsContainer);
+          this._hideSuggestions(this._suggestionsContainer);
           break;
       }
-    });
-    document.addEventListener("click", (e) => {
+    };
+    this.formElement.addEventListener("keydown", this._handleKeydown);
+    this._handleDocumentClick = (e) => {
       if (!this.contains(e.target)) {
-        this._hideSuggestions(suggestionsContainer);
+        this._hideSuggestions(this._suggestionsContainer);
       }
-    });
-    this.formElement.addEventListener("blur", () => {
+    };
+    document.addEventListener("click", this._handleDocumentClick);
+    this._handleBlur = () => {
       setTimeout(() => {
         if (!this.querySelector(".address-suggestions:hover")) {
-          this._hideSuggestions(suggestionsContainer);
+          this._hideSuggestions(this._suggestionsContainer);
         }
       }, 200);
-    });
+    };
+    this.formElement.addEventListener("blur", this._handleBlur);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.formElement) {
+      if (this._handleInputDebounced) {
+        this.formElement.removeEventListener("input", this._handleInputDebounced);
+      }
+      if (this._handleKeydown) {
+        this.formElement.removeEventListener("keydown", this._handleKeydown);
+      }
+      if (this._handleBlur) {
+        this.formElement.removeEventListener("blur", this._handleBlur);
+      }
+    }
+    if (this._handleDocumentClick) {
+      document.removeEventListener("click", this._handleDocumentClick);
+    }
+    if (this._suggestionsContainer) {
+      this._suggestionsContainer.remove();
+      this._suggestionsContainer = null;
+    }
+    this._autocompleteEventsWired = false;
   }
   async _fetchSuggestions(input2, container2) {
     const request = {
