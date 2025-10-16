@@ -578,7 +578,8 @@ const ICONS_TO_COPY = [
   'waveform',
   'waveform-lines',
   'location-pin',
-  'map-pin'
+  'map-pin',
+  'mailbox'
   // Add more icon names here
 ];
 
