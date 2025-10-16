@@ -965,7 +965,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input[type="auto"] input {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input[type="auto"] input + .icon {
         position: absolute;
@@ -974,7 +974,7 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input[type="auto-dualtone"] input {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input[type="auto-dualtone"] input + .icon {
         position: absolute;
@@ -984,7 +984,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input[type="motorcycle"] input {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input[type="motorcycle"] input + .icon {
         position: absolute;
@@ -993,7 +993,7 @@ class WcInput extends WcBaseFormComponent {
       }
       wc-input[type="motorcycle-dualtone"] input {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input[type="motorcycle-dualtone"] input + .icon {
         position: absolute;
@@ -1004,7 +1004,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input input[type="email"] {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input input[type="email"] + .icon {
         position: absolute;
@@ -1014,7 +1014,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input input[type="search"] {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input input[type="search"] + .icon {
         position: absolute;
@@ -1029,7 +1029,7 @@ class WcInput extends WcBaseFormComponent {
 
       wc-input input[type="tel"] {
         padding-left: 25px;
-        min-width: 130px;
+        min-width: 120px;
       }
       wc-input input[type="tel"] + .icon {
         position: absolute;
