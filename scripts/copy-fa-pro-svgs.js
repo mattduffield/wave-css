@@ -580,7 +580,14 @@ const ICONS_TO_COPY = [
   'location-pin',
   'map-pin',
   'mailbox',
-  'id-card'
+  'id-card',
+  'car-side',
+  'car',
+  'truck-front',
+  'truck-pickup',
+  'truck-suv',
+  'truck',
+  'motorcycle'
   // Add more icon names here
 ];
 
