@@ -4717,7 +4717,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
         right: 0;
         margin-top: 2px;
         background: white;
-        border: 2px solid var(--focus-border-color, #3b82f6);
+        /* border: 2px solid var(--focus-border-color, #3b82f6); */
         border-radius: 0.375rem;
         max-height: 300px;
         overflow-y: auto;
