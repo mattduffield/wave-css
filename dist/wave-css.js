@@ -4344,11 +4344,15 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
           let nextIndex;
           if (currentIndex === -1) {
             nextIndex = 0;
+            console.log("ArrowDown: No selection, going to first item (index 0)");
           } else if (currentIndex < suggestions.length - 1) {
             nextIndex = currentIndex + 1;
+            console.log(`ArrowDown: Moving from ${currentIndex} to ${nextIndex}`);
           } else {
             nextIndex = 0;
+            console.log("ArrowDown: At end, wrapping to first item (index 0)");
           }
+          console.log(`Total suggestions: ${suggestions.length}, currentIndex: ${currentIndex}, nextIndex: ${nextIndex}`);
           this._highlightSuggestion(suggestions, nextIndex);
           break;
         case "ArrowUp":
