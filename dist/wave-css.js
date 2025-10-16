@@ -4529,6 +4529,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       lng: location2 ? location2.lng() : null,
       formatted_address: formattedAddress,
       formatted_address_encoded: encodeURIComponent(formattedAddress),
+      formatted_address_slug: this._createAddressSlug(formattedAddress),
       place_id: place.id || ""
     };
     let streetNumber = "";
@@ -4559,6 +4560,10 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     });
     addressData.street = [streetNumber, route].filter(Boolean).join(" ");
     return addressData;
+  }
+  _createAddressSlug(formattedAddress) {
+    if (!formattedAddress) return "";
+    return formattedAddress.replace(/,?\s*(USA|United States|US)$/i, "").replace(/,/g, "").replace(/\s+/g, " ").trim().replace(/\s/g, "-");
   }
   _broadcastAddressChange(addressData) {
     const event = "google-address:change";
@@ -4874,8 +4879,10 @@ var WcAddressListener = class extends WcBaseComponent {
       "longitude": "lng",
       "formatted_address": "formatted_address",
       "formatted_address_encoded": "formatted_address_encoded",
+      "formatted_address_slug": "formatted_address_slug",
       "formattedaddress": "formatted_address",
       "formattedaddressencoded": "formatted_address_encoded",
+      "formattedaddressslug": "formatted_address_slug",
       "place_id": "place_id",
       "placeid": "place_id"
     };

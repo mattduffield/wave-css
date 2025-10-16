@@ -38,6 +38,12 @@
  *    - *.zip -> postal_code (alias)
  *    - *.county -> county
  *    - *.country -> country
+ *    - *.lat -> lat
+ *    - *.lng -> lng
+ *    - *.formatted_address -> formatted_address
+ *    - *.formatted_address_encoded -> formatted_address_encoded
+ *    - *.formatted_address_slug -> formatted_address_slug (Zillow-style)
+ *    - *.place_id -> place_id
  *
  */
 
@@ -184,8 +190,10 @@ class WcAddressListener extends WcBaseComponent {
       'longitude': 'lng',
       'formatted_address': 'formatted_address',
       'formatted_address_encoded': 'formatted_address_encoded',
+      'formatted_address_slug': 'formatted_address_slug',
       'formattedaddress': 'formatted_address',
       'formattedaddressencoded': 'formatted_address_encoded',
+      'formattedaddressslug': 'formatted_address_slug',
       'place_id': 'place_id',
       'placeid': 'place_id'
     };

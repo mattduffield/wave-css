@@ -38,6 +38,7 @@
  *      lng: -122.4194,
  *      formatted_address: "123 Main St, San Francisco, CA 94102, USA",
  *      formatted_address_encoded: "123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094102%2C%20USA",
+ *      formatted_address_slug: "123-Main-St-San-Francisco-CA-94102",
  *      place_id: "ChIJIQBpAG2ahYAR_6128GcTUEo"
  *    }
  *
@@ -521,6 +522,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
       lng: location ? location.lng() : null,
       formatted_address: formattedAddress,
       formatted_address_encoded: encodeURIComponent(formattedAddress),
+      formatted_address_slug: this._createAddressSlug(formattedAddress),
       place_id: place.id || ''
     };
 
@@ -558,6 +560,25 @@ class WcGoogleAddress extends WcBaseFormComponent {
     addressData.street = [streetNumber, route].filter(Boolean).join(' ');
 
     return addressData;
+  }
+
+  _createAddressSlug(formattedAddress) {
+    // Create a Zillow-style address slug
+    // Example: "123 Main St, San Francisco, CA 94102" -> "123-Main-St-San-Francisco-CA-94102"
+
+    if (!formattedAddress) return '';
+
+    return formattedAddress
+      // Remove country (USA, United States, etc.) - typically at the end
+      .replace(/,?\s*(USA|United States|US)$/i, '')
+      // Remove extra commas and spaces
+      .replace(/,/g, '')
+      // Replace multiple spaces with single space
+      .replace(/\s+/g, ' ')
+      // Trim
+      .trim()
+      // Replace spaces with dashes
+      .replace(/\s/g, '-');
   }
 
   _broadcastAddressChange(addressData) {
