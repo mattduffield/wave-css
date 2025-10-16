@@ -5425,6 +5425,10 @@ var WcVinListener = class extends WcBaseComponent {
     if (!mappedField) return;
     let value = data[mappedField];
     if (value === void 0 || value === null) return;
+    if (Array.isArray(value)) {
+      this._handleArrayValue(element, fieldName, value);
+      return;
+    }
     value = this._transformValue(value, mappedField);
     if (element.tagName.toLowerCase().startsWith("wc-")) {
       element.value = value;
@@ -5432,6 +5436,25 @@ var WcVinListener = class extends WcBaseComponent {
       element.value = value;
     }
     element.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  _handleArrayValue(element, fieldName, arrayValue) {
+    const baseName = fieldName.replace(/\.\d+$/, "");
+    const existingArrayInputs = this.querySelectorAll(`[name^="${baseName}."]`);
+    existingArrayInputs.forEach((input2) => {
+      if (input2 !== element && /\.\d+$/.test(input2.getAttribute("name"))) {
+        input2.remove();
+      }
+    });
+    if (element.tagName === "INPUT" && element.type === "hidden") {
+      element.value = "";
+    }
+    arrayValue.forEach((item, index) => {
+      const indexedInput = document.createElement("input");
+      indexedInput.type = "hidden";
+      indexedInput.name = `${baseName}.${index}`;
+      indexedInput.value = item;
+      element.parentNode.insertBefore(indexedInput, element.nextSibling);
+    });
   }
   _transformValue(value, mappedField) {
     if (mappedField === "msrp" || mappedField === "basePrice") {
@@ -5498,7 +5521,26 @@ var WcVinListener = class extends WcBaseComponent {
       "plantcountry": "plantCountry",
       "plant_country": "plantCountry",
       "plantstate": "plantState",
-      "plant_state": "plantState"
+      "plant_state": "plantState",
+      "brakesystemtype": "brakeSystemType",
+      "brake_system_type": "brakeSystemType",
+      "brakesystem": "brakeSystemType",
+      "brake_system": "brakeSystemType",
+      "brakes": "brakeSystemType",
+      "antilockbrakingsystem": "antilockBrakingSystem",
+      "antilock_braking_system": "antilockBrakingSystem",
+      "abs": "antilockBrakingSystem",
+      "vin": "vin",
+      "errorcode": "errorCode",
+      "error_code": "errorCode",
+      "errortext": "errorText",
+      "error_text": "errorText",
+      "errormessage": "errorText",
+      "error_message": "errorText",
+      "images": "images",
+      "msrpsource": "msrpSource",
+      "msrp_source": "msrpSource",
+      "timestamp": "timestamp"
     };
     const normalizedKey = fieldKey.toLowerCase().replace(/[-_]/g, "");
     return mappings[normalizedKey] || null;

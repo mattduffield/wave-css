@@ -160,6 +160,12 @@ class WcVinListener extends WcBaseComponent {
     let value = data[mappedField];
     if (value === undefined || value === null) return;
 
+    // Handle array values by creating multiple indexed inputs
+    if (Array.isArray(value)) {
+      this._handleArrayValue(element, fieldName, value);
+      return;
+    }
+
     // Transform value based on field type
     value = this._transformValue(value, mappedField);
 
@@ -174,6 +180,36 @@ class WcVinListener extends WcBaseComponent {
 
     // Trigger change event so other listeners can react
     element.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  _handleArrayValue(element, fieldName, arrayValue) {
+    // For array values (like images), create multiple indexed hidden inputs
+    // Example: name="vehicle.images" becomes vehicle.images.0, vehicle.images.1, etc.
+
+    // Remove any previously created array inputs
+    const baseName = fieldName.replace(/\.\d+$/, ''); // Remove any existing index
+    const existingArrayInputs = this.querySelectorAll(`[name^="${baseName}."]`);
+    existingArrayInputs.forEach(input => {
+      if (input !== element && /\.\d+$/.test(input.getAttribute('name'))) {
+        input.remove();
+      }
+    });
+
+    // If the original element is a placeholder, hide it
+    if (element.tagName === 'INPUT' && element.type === 'hidden') {
+      element.value = ''; // Clear the placeholder
+    }
+
+    // Create indexed inputs for each array item
+    arrayValue.forEach((item, index) => {
+      const indexedInput = document.createElement('input');
+      indexedInput.type = 'hidden';
+      indexedInput.name = `${baseName}.${index}`;
+      indexedInput.value = item;
+
+      // Insert after the original element
+      element.parentNode.insertBefore(indexedInput, element.nextSibling);
+    });
   }
 
   _transformValue(value, mappedField) {
@@ -250,7 +286,26 @@ class WcVinListener extends WcBaseComponent {
       'plantcountry': 'plantCountry',
       'plant_country': 'plantCountry',
       'plantstate': 'plantState',
-      'plant_state': 'plantState'
+      'plant_state': 'plantState',
+      'brakesystemtype': 'brakeSystemType',
+      'brake_system_type': 'brakeSystemType',
+      'brakesystem': 'brakeSystemType',
+      'brake_system': 'brakeSystemType',
+      'brakes': 'brakeSystemType',
+      'antilockbrakingsystem': 'antilockBrakingSystem',
+      'antilock_braking_system': 'antilockBrakingSystem',
+      'abs': 'antilockBrakingSystem',
+      'vin': 'vin',
+      'errorcode': 'errorCode',
+      'error_code': 'errorCode',
+      'errortext': 'errorText',
+      'error_text': 'errorText',
+      'errormessage': 'errorText',
+      'error_message': 'errorText',
+      'images': 'images',
+      'msrpsource': 'msrpSource',
+      'msrp_source': 'msrpSource',
+      'timestamp': 'timestamp'
     };
 
     const normalizedKey = fieldKey.toLowerCase().replace(/[-_]/g, '');
