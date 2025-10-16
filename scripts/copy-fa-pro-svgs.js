@@ -576,7 +576,9 @@ const ICONS_TO_COPY = [
   'gamepad',
   'gamepad-modern',
   'waveform',
-  'waveform-lines'
+  'waveform-lines',
+  'location-pin',
+  'map-pin'
   // Add more icon names here
 ];
 
