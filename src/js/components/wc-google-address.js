@@ -29,7 +29,6 @@
  *    {
  *      addressGroup: "address",
  *      street: "123 Main St",
- *      apt_suite: "",
  *      city: "San Francisco",
  *      state: "CA",
  *      postal_code: "94102",
@@ -38,6 +37,7 @@
  *      lat: 37.7749,
  *      lng: -122.4194,
  *      formatted_address: "123 Main St, San Francisco, CA 94102, USA",
+ *      formatted_address_encoded: "123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094102%2C%20USA",
  *      place_id: "ChIJIQBpAG2ahYAR_6128GcTUEo"
  *    }
  *
@@ -507,6 +507,8 @@ class WcGoogleAddress extends WcBaseFormComponent {
     const components = place.addressComponents || [];
     const location = place.location;
 
+    const formattedAddress = place.formattedAddress || '';
+
     const addressData = {
       addressGroup: this.getAttribute('address-group') || 'address',
       street: '',
@@ -517,7 +519,8 @@ class WcGoogleAddress extends WcBaseFormComponent {
       country: '',
       lat: location ? location.lat() : null,
       lng: location ? location.lng() : null,
-      formatted_address: place.formattedAddress || '',
+      formatted_address: formattedAddress,
+      formatted_address_encoded: encodeURIComponent(formattedAddress),
       place_id: place.id || ''
     };
 

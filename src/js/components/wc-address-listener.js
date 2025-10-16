@@ -181,7 +181,13 @@ class WcAddressListener extends WcBaseComponent {
       'latitude': 'lat',
       'lng': 'lng',
       'lon': 'lng',
-      'longitude': 'lng'
+      'longitude': 'lng',
+      'formatted_address': 'formatted_address',
+      'formatted_address_encoded': 'formatted_address_encoded',
+      'formattedaddress': 'formatted_address',
+      'formattedaddressencoded': 'formatted_address_encoded',
+      'place_id': 'place_id',
+      'placeid': 'place_id'
     };
 
     return mappings[fieldKey.toLowerCase()] || null;

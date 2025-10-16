@@ -4516,6 +4516,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   _parseAddressComponents(place) {
     const components = place.addressComponents || [];
     const location2 = place.location;
+    const formattedAddress = place.formattedAddress || "";
     const addressData = {
       addressGroup: this.getAttribute("address-group") || "address",
       street: "",
@@ -4526,7 +4527,8 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       country: "",
       lat: location2 ? location2.lat() : null,
       lng: location2 ? location2.lng() : null,
-      formatted_address: place.formattedAddress || "",
+      formatted_address: formattedAddress,
+      formatted_address_encoded: encodeURIComponent(formattedAddress),
       place_id: place.id || ""
     };
     let streetNumber = "";
@@ -4869,7 +4871,13 @@ var WcAddressListener = class extends WcBaseComponent {
       "latitude": "lat",
       "lng": "lng",
       "lon": "lng",
-      "longitude": "lng"
+      "longitude": "lng",
+      "formatted_address": "formatted_address",
+      "formatted_address_encoded": "formatted_address_encoded",
+      "formattedaddress": "formatted_address",
+      "formattedaddressencoded": "formatted_address_encoded",
+      "place_id": "place_id",
+      "placeid": "place_id"
     };
     return mappings[fieldKey.toLowerCase()] || null;
   }
