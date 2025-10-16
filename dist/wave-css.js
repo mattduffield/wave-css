@@ -4673,13 +4673,11 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
       this.formElement.setAttribute("class", eltClass);
     }
     this.componentElement.appendChild(this.formElement);
-    const icon = document.createElement("span");
-    icon.classList.add("icon");
-    icon.innerHTML = `
-      <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
-        <path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/>
-      </svg>
-    `.trim();
+    const icon = document.createElement("wc-fa-icon");
+    icon.setAttribute("name", "house");
+    icon.setAttribute("icon-style", "solid");
+    icon.setAttribute("size", "1rem");
+    icon.classList.add("address-icon");
     this.componentElement.appendChild(icon);
     this.labelElement = this.componentElement.querySelector("label");
   }
@@ -4691,28 +4689,17 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
 
       /* Match wc-input styling with icon */
       wc-google-address input[type="text"] {
-        padding-left: 25px;
-        min-width: 130px;
+        padding-left: 30px;
+        min-width: 120px;
       }
 
-      wc-google-address input[type="text"] + .icon {
+      wc-google-address wc-fa-icon.address-icon {
         position: absolute;
+        top: 50%;
         left: 5px;
-        color: var(--icon-color, #6b7280);
         pointer-events: none;
-        display: flex;
         align-items: center;
-        height: 100%;
-      }
-
-      /* Position icon with label */
-      wc-google-address label + input[type="text"] + .icon {
-        top: 10px;
-      }
-
-      /* Position icon without label */
-      wc-google-address input[type="text"]:first-child + .icon {
-        top: 0;
+        justify-content: center;
       }
 
       /* Match wc-input focus styling exactly */
