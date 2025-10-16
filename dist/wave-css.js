@@ -5103,13 +5103,23 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     this.spinnerIcon.setAttribute("size", "1.25rem");
     this.spinnerIcon.classList.add("absolute", "right-3", "text-primary", "animate-spin", "hidden");
     inputWrapper.appendChild(this.spinnerIcon);
-    this.formElement.addEventListener("change", (e) => {
-      this._handleVinChange(e);
-    });
     this.componentElement.appendChild(inputWrapper);
     this.labelElement = this.componentElement.querySelector("label");
   }
+  _wireEvents() {
+    super._wireEvents();
+    if (!this.formElement) return;
+    this._handleChangeForVin = (e) => {
+      this._handleVinChange(e);
+    };
+    this.formElement.addEventListener("change", this._handleChangeForVin);
+  }
   _unWireEvents() {
+    super._unWireEvents();
+    if (this.formElement && this._handleChangeForVin) {
+      this.formElement.removeEventListener("change", this._handleChangeForVin);
+      this._handleChangeForVin = null;
+    }
   }
   _handleAttributeChange(attrName, newValue) {
     if (this.eventAttributes.includes(attrName)) {
