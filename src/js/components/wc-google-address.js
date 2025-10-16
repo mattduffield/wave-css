@@ -56,7 +56,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
       'lbl-label', 'lbl-class', 'elt-class',
       'disabled', 'readonly', 'required', 'autocomplete',
       'api-key', 'address-group', 'target-map',
-      'countries', 'types', 'fields',
+      'countries', 'types', 'fields', 'icon-name',
       'data-lat', 'data-lng', 'data-address',
       'onchange', 'oninput', 'onblur', 'onfocus',
       'tooltip', 'tooltip-position'
@@ -74,7 +74,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
     this.passThruEmptyAttributes = ['disabled', 'readonly', 'required'];
     this.ignoreAttributes = ['lbl-class', 'lbl-label',
                              'api-key', 'address-group', 'target-map',
-                             'countries', 'types', 'fields',
+                             'countries', 'types', 'fields', 'icon-name',
                              'data-lat', 'data-lng', 'data-address'];
     this.eventAttributes = ['onchange', 'oninput', 'onblur', 'onfocus'];
 
@@ -718,8 +718,9 @@ class WcGoogleAddress extends WcBaseFormComponent {
     this.componentElement.appendChild(this.formElement);
 
     // Add address icon using wc-fa-icon (same pattern as wc-vin-decoder)
+    const iconName = this.getAttribute('icon-name') || 'house';
     const icon = document.createElement('wc-fa-icon');
-    icon.setAttribute('name', 'house');
+    icon.setAttribute('name', iconName);
     icon.setAttribute('icon-style', 'solid');
     icon.setAttribute('size', '1rem');
     icon.classList.add('address-icon');
