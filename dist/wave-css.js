@@ -5445,15 +5445,19 @@ var WcVinListener = class extends WcBaseComponent {
         input2.remove();
       }
     });
-    if (element.tagName === "INPUT" && element.type === "hidden") {
-      element.value = "";
-    }
+    const parent = element.parentNode;
+    const nextSibling = element.nextSibling;
+    element.remove();
     arrayValue.forEach((item, index) => {
       const indexedInput = document.createElement("input");
       indexedInput.type = "hidden";
       indexedInput.name = `${baseName}.${index}`;
       indexedInput.value = item;
-      element.parentNode.insertBefore(indexedInput, element.nextSibling);
+      if (nextSibling) {
+        parent.insertBefore(indexedInput, nextSibling);
+      } else {
+        parent.appendChild(indexedInput);
+      }
     });
   }
   _transformValue(value, mappedField) {

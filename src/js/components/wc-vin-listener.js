@@ -195,10 +195,12 @@ class WcVinListener extends WcBaseComponent {
       }
     });
 
-    // If the original element is a placeholder, hide it
-    if (element.tagName === 'INPUT' && element.type === 'hidden') {
-      element.value = ''; // Clear the placeholder
-    }
+    // Store reference to parent and next sibling before removing element
+    const parent = element.parentNode;
+    const nextSibling = element.nextSibling;
+
+    // Remove the placeholder element so it doesn't get posted
+    element.remove();
 
     // Create indexed inputs for each array item
     arrayValue.forEach((item, index) => {
@@ -207,8 +209,12 @@ class WcVinListener extends WcBaseComponent {
       indexedInput.name = `${baseName}.${index}`;
       indexedInput.value = item;
 
-      // Insert after the original element
-      element.parentNode.insertBefore(indexedInput, element.nextSibling);
+      // Insert where the original element was
+      if (nextSibling) {
+        parent.insertBefore(indexedInput, nextSibling);
+      } else {
+        parent.appendChild(indexedInput);
+      }
     });
   }
 
