@@ -11485,14 +11485,7 @@ var WcTab = class extends WcBaseComponent {
       this.componentElement.classList.add("wc-tab");
       this.appendChild(this.componentElement);
     }
-    const manualContrast = this.getAttribute("contrast");
-    if (manualContrast && manualContrast !== "auto") {
-      this.setAttribute("data-contrast", manualContrast);
-    } else {
-      if (this.nestingLevel > 0) {
-        this.setAttribute("data-nesting-level", this.nestingLevel);
-      }
-    }
+    this._updateContrast(this.getAttribute("contrast"));
   }
   async connectedCallback() {
     super.connectedCallback();
@@ -11506,8 +11499,21 @@ var WcTab = class extends WcBaseComponent {
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "animate") {
     } else if (attrName === "vertical") {
+    } else if (attrName === "contrast") {
+      this._updateContrast(newValue);
     } else {
       super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _updateContrast(contrastValue) {
+    this.removeAttribute("data-contrast");
+    this.removeAttribute("data-nesting-level");
+    if (contrastValue && contrastValue !== "auto") {
+      this.setAttribute("data-contrast", contrastValue);
+    } else {
+      if (this.nestingLevel > 0) {
+        this.setAttribute("data-nesting-level", this.nestingLevel);
+      }
     }
   }
   _render() {

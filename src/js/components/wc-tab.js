@@ -111,17 +111,8 @@ class WcTab extends WcBaseComponent {
       this.appendChild(this.componentElement);
     }
 
-    // Handle contrast attribute - manual override takes precedence over auto-detection
-    const manualContrast = this.getAttribute('contrast');
-    if (manualContrast && manualContrast !== 'auto') {
-      // Manual contrast specified - use it regardless of nesting level
-      this.setAttribute('data-contrast', manualContrast);
-    } else {
-      // Auto mode or no contrast specified - use nesting level detection
-      if (this.nestingLevel > 0) {
-        this.setAttribute('data-nesting-level', this.nestingLevel);
-      }
-    }
+    // Initialize contrast (manual override takes precedence over auto-detection)
+    this._updateContrast(this.getAttribute('contrast'));
 
     // console.log('ctor:wc-tab');
   }
@@ -139,13 +130,31 @@ class WcTab extends WcBaseComponent {
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {    
+  _handleAttributeChange(attrName, newValue) {
     if (attrName === 'animate') {
       // Do nothing...
     } else if (attrName === 'vertical') {
       // Do nothing...
+    } else if (attrName === 'contrast') {
+      this._updateContrast(newValue);
     } else {
-      super._handleAttributeChange(attrName, newValue);  
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+
+  _updateContrast(contrastValue) {
+    // Remove any existing data-contrast or data-nesting-level attributes
+    this.removeAttribute('data-contrast');
+    this.removeAttribute('data-nesting-level');
+
+    if (contrastValue && contrastValue !== 'auto') {
+      // Manual contrast specified - use it regardless of nesting level
+      this.setAttribute('data-contrast', contrastValue);
+    } else {
+      // Auto mode or no contrast specified - use nesting level detection
+      if (this.nestingLevel > 0) {
+        this.setAttribute('data-nesting-level', this.nestingLevel);
+      }
     }
   }
 
