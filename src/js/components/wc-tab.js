@@ -64,26 +64,22 @@
  *    </wc-tab-item>
  *  </wc-tab>
  *
- *  <!-- Manual contrast override -->
- *  <wc-tab contrast="darker"><!-- Always darker, even at root level --></wc-tab>
- *  <wc-tab contrast="lighter"><!-- Lighter background --></wc-tab>
- *  <wc-tab contrast="none"><!-- Disable auto-darkening --></wc-tab>
+ *  <!-- Manual contrast override with percentage-based naming -->
+ *  <wc-tab contrast="dark-15"><!-- Always darkened by 15% --></wc-tab>
+ *  <wc-tab contrast="light-20"><!-- Lightened by 20% --></wc-tab>
+ *  <wc-tab contrast="none"><!-- Disable contrast adjustment --></wc-tab>
  *
- *  Contrast values (from lightest to darkest):
+ *  Contrast values:
  *  - none: No contrast adjustment, use base colors
- *  - light: Lighten by 10%
- *  - extra-light: Lighten by 15%
- *  - lighter: Lighten by 20%
- *  - ultra-light: Lighten by 25%
- *  - lightest: Lighten by 30%
- *  - super-light: Lighten by 35%
- *  - dark: Darken by 10%
- *  - darker: Darken by 15% (matches auto nesting level 1)
- *  - extra-dark: Darken by 20%
- *  - ultra-dark: Darken by 25%
- *  - darkest: Darken by 30% (matches auto nesting level 2)
- *  - super-dark: Darken by 35%
  *  - auto: Default, uses nesting level for automatic contrast
+ *
+ *  Light values (lighten background):
+ *  - light-10, light-15, light-20, light-25, light-30, light-35, light-40
+ *
+ *  Dark values (darken background):
+ *  - dark-10, dark-15, dark-20, dark-25, dark-30, dark-35, dark-40
+ *
+ *  Note: dark-15 matches auto nesting level 1, dark-30 matches auto nesting level 2
  *
  *  API:
  *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(2)')
@@ -483,160 +479,186 @@ class WcTab extends WcBaseComponent {
         border-bottom-color: var(--card-bg-color);
       }
 
-      /* light - lighten by 10% */
-      wc-tab[data-contrast="light"] .wc-tab .tab-body {
+      /* light-10 - lighten by 10% */
+      wc-tab[data-contrast="light-10"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 90%, #fff 10%);
       }
-      wc-tab[data-contrast="light"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-10"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 90%, #fff 10%);
       }
-      wc-tab[data-contrast="light"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="light"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-10"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-10"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 90%, #fff 10%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 90%, #fff 10%);
       }
 
-      /* extra-light - lighten by 15% */
-      wc-tab[data-contrast="extra-light"] .wc-tab .tab-body {
+      /* light-15 - lighten by 15% */
+      wc-tab[data-contrast="light-15"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 85%, #fff 15%);
       }
-      wc-tab[data-contrast="extra-light"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-15"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #fff 15%);
       }
-      wc-tab[data-contrast="extra-light"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="extra-light"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-15"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-15"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 85%, #fff 15%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #fff 15%);
       }
 
-      /* lighter - lighten by 20% */
-      wc-tab[data-contrast="lighter"] .wc-tab .tab-body {
+      /* light-20 - lighten by 20% */
+      wc-tab[data-contrast="light-20"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 80%, #fff 20%);
       }
-      wc-tab[data-contrast="lighter"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-20"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 80%, #fff 20%);
       }
-      wc-tab[data-contrast="lighter"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="lighter"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-20"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-20"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 80%, #fff 20%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 80%, #fff 20%);
       }
 
-      /* ultra-light - lighten by 25% */
-      wc-tab[data-contrast="ultra-light"] .wc-tab .tab-body {
+      /* light-25 - lighten by 25% */
+      wc-tab[data-contrast="light-25"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 75%, #fff 25%);
       }
-      wc-tab[data-contrast="ultra-light"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-25"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 75%, #fff 25%);
       }
-      wc-tab[data-contrast="ultra-light"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="ultra-light"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-25"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-25"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 75%, #fff 25%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 75%, #fff 25%);
       }
 
-      /* lightest - lighten by 30% */
-      wc-tab[data-contrast="lightest"] .wc-tab .tab-body {
+      /* light-30 - lighten by 30% */
+      wc-tab[data-contrast="light-30"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 70%, #fff 30%);
       }
-      wc-tab[data-contrast="lightest"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-30"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #fff 30%);
       }
-      wc-tab[data-contrast="lightest"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="lightest"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-30"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-30"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 70%, #fff 30%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #fff 30%);
       }
 
-      /* super-light - lighten by 35% */
-      wc-tab[data-contrast="super-light"] .wc-tab .tab-body {
+      /* light-35 - lighten by 35% */
+      wc-tab[data-contrast="light-35"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 65%, #fff 35%);
       }
-      wc-tab[data-contrast="super-light"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="light-35"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 65%, #fff 35%);
       }
-      wc-tab[data-contrast="super-light"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="super-light"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="light-35"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-35"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 65%, #fff 35%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 65%, #fff 35%);
       }
 
-      /* dark - darken by 10% */
-      wc-tab[data-contrast="dark"] .wc-tab .tab-body {
+      /* light-40 - lighten by 40% */
+      wc-tab[data-contrast="light-40"] .wc-tab .tab-body {
+        background-color: color-mix(in srgb, var(--card-bg-color) 60%, #fff 40%);
+      }
+      wc-tab[data-contrast="light-40"] .wc-tab .tab-nav .tab-link {
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #fff 40%);
+      }
+      wc-tab[data-contrast="light-40"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="light-40"] .wc-tab .tab-nav .tab-link:hover {
+        background-color: color-mix(in srgb, var(--card-bg-color) 60%, #fff 40%);
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #fff 40%);
+      }
+
+      /* dark-10 - darken by 10% */
+      wc-tab[data-contrast="dark-10"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 90%, #000 10%);
       }
-      wc-tab[data-contrast="dark"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-10"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 90%, #000 10%);
       }
-      wc-tab[data-contrast="dark"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="dark"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-10"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-10"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 90%, #000 10%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 90%, #000 10%);
       }
 
-      /* darker - darken by 15% (matches nesting level 1) */
-      wc-tab[data-contrast="darker"] .wc-tab .tab-body {
+      /* dark-15 - darken by 15% (matches nesting level 1) */
+      wc-tab[data-contrast="dark-15"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
       }
-      wc-tab[data-contrast="darker"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-15"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
       }
-      wc-tab[data-contrast="darker"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="darker"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-15"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-15"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 85%, #000 15%);
       }
 
-      /* extra-dark - darken by 20% */
-      wc-tab[data-contrast="extra-dark"] .wc-tab .tab-body {
+      /* dark-20 - darken by 20% */
+      wc-tab[data-contrast="dark-20"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 80%, #000 20%);
       }
-      wc-tab[data-contrast="extra-dark"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-20"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 80%, #000 20%);
       }
-      wc-tab[data-contrast="extra-dark"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="extra-dark"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-20"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-20"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 80%, #000 20%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 80%, #000 20%);
       }
 
-      /* ultra-dark - darken by 25% */
-      wc-tab[data-contrast="ultra-dark"] .wc-tab .tab-body {
+      /* dark-25 - darken by 25% */
+      wc-tab[data-contrast="dark-25"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 75%, #000 25%);
       }
-      wc-tab[data-contrast="ultra-dark"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-25"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 75%, #000 25%);
       }
-      wc-tab[data-contrast="ultra-dark"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="ultra-dark"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-25"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-25"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 75%, #000 25%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 75%, #000 25%);
       }
 
-      /* darkest - darken by 30% (matches nesting level 2) */
-      wc-tab[data-contrast="darkest"] .wc-tab .tab-body {
+      /* dark-30 - darken by 30% (matches nesting level 2) */
+      wc-tab[data-contrast="dark-30"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
       }
-      wc-tab[data-contrast="darkest"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-30"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
       }
-      wc-tab[data-contrast="darkest"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="darkest"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-30"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-30"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 70%, #000 30%);
       }
 
-      /* super-dark - darken by 35% */
-      wc-tab[data-contrast="super-dark"] .wc-tab .tab-body {
+      /* dark-35 - darken by 35% */
+      wc-tab[data-contrast="dark-35"] .wc-tab .tab-body {
         background-color: color-mix(in srgb, var(--card-bg-color) 65%, #000 35%);
       }
-      wc-tab[data-contrast="super-dark"] .wc-tab .tab-nav .tab-link {
+      wc-tab[data-contrast="dark-35"] .wc-tab .tab-nav .tab-link {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 65%, #000 35%);
       }
-      wc-tab[data-contrast="super-dark"] .wc-tab .tab-nav .tab-link.active,
-      wc-tab[data-contrast="super-dark"] .wc-tab .tab-nav .tab-link:hover {
+      wc-tab[data-contrast="dark-35"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-35"] .wc-tab .tab-nav .tab-link:hover {
         background-color: color-mix(in srgb, var(--card-bg-color) 65%, #000 35%);
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 65%, #000 35%);
+      }
+
+      /* dark-40 - darken by 40% */
+      wc-tab[data-contrast="dark-40"] .wc-tab .tab-body {
+        background-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
+      }
+      wc-tab[data-contrast="dark-40"] .wc-tab .tab-nav .tab-link {
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
+      }
+      wc-tab[data-contrast="dark-40"] .wc-tab .tab-nav .tab-link.active,
+      wc-tab[data-contrast="dark-40"] .wc-tab .tab-nav .tab-link:hover {
+        background-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
+        border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
       }
 
       @keyframes tab-fade {
