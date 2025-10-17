@@ -3,12 +3,13 @@
  *  Name: wc-vin-listener
  *  Usage:
  *    <!-- Wrap form fields that should respond to VIN decoder changes -->
- *    <wc-vin-listener vin-group="vehicle">
+ *    <wc-vin-listener vin-group="vehicle" array-fields="images">
  *      <wc-input name="vehicle.year" lbl-label="Year" required></wc-input>
  *      <wc-input name="vehicle.make" lbl-label="Make" required></wc-input>
  *      <wc-input name="vehicle.model" lbl-label="Model" required></wc-input>
  *      <wc-input name="vehicle.trim" lbl-label="Trim"></wc-input>
  *      <wc-input name="vehicle.msrp" lbl-label="MSRP"></wc-input>
+ *      <!-- No need for placeholder input - images will be created dynamically -->
  *    </wc-vin-listener>
  *
  *    <!-- Or apply directly to individual fields -->
@@ -16,6 +17,8 @@
  *
  *  Attributes:
  *    - vin-group: The VIN group to listen for (must match wc-vin-decoder vin-group)
+ *    - array-fields: Comma-separated list of array fields to create dynamically (e.g., "images" or "images,photos")
+ *                    These fields will be created as indexed hidden inputs (e.g., vehicle.images.0, vehicle.images.1)
  *
  *  Direct Field Attribute (alternative approach):
  *    - vin-listener: Add this attribute directly to wc-input/wc-select to make it listen
@@ -25,6 +28,7 @@
  *    2. Filters events by matching vinGroup
  *    3. Updates child form fields based on their name attribute
  *    4. Supports mapping: name="vehicle.year" gets updated from vinData.year
+ *    5. Creates indexed hidden inputs for array fields specified in array-fields attribute
  *
  *  Field Mapping:
  *    Supports all VIN decoder response fields:
@@ -65,7 +69,7 @@ class WcVinListener extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['vin-group'];
+    return ['vin-group', 'array-fields'];
   }
 
   constructor() {
@@ -135,11 +139,70 @@ class WcVinListener extends WcBaseComponent {
   }
 
   _updateFields(data) {
+    // First, clean up any previously created array inputs
+    this._cleanupDynamicArrayInputs();
+
     // Find all form elements within this listener
     const formElements = this.querySelectorAll('[name]');
 
     formElements.forEach(element => {
       this._updateFieldValue(element, data);
+    });
+
+    // Handle array fields that don't have placeholder elements
+    // Check for array data fields that weren't matched by existing elements
+    this._createMissingArrayFields(data);
+  }
+
+  _cleanupDynamicArrayInputs() {
+    // Remove any hidden inputs that were dynamically created from previous VIN decodes
+    // These are inputs with names ending in .0, .1, .2, etc.
+    const dynamicInputs = this.querySelectorAll('input[type="hidden"][name]');
+    dynamicInputs.forEach(input => {
+      const name = input.getAttribute('name');
+      // Check if this is a dynamically created array input (ends with .number)
+      if (/\.\d+$/.test(name) && !input.hasAttribute('data-keep')) {
+        input.remove();
+      }
+    });
+  }
+
+  _createMissingArrayFields(data) {
+    // Get the array-fields attribute which specifies which fields to create as arrays
+    // Example: array-fields="images,photos" or array-fields="images"
+    const arrayFieldsAttr = this.getAttribute('array-fields');
+    if (!arrayFieldsAttr) return; // No array fields specified
+
+    // Parse comma-separated list of field names
+    const arrayFieldNames = arrayFieldsAttr.split(',').map(f => f.trim());
+
+    arrayFieldNames.forEach(fieldKey => {
+      const value = data[fieldKey];
+
+      // Skip if field doesn't exist or isn't an array
+      if (!Array.isArray(value) || value.length === 0) return;
+
+      // Check if we already have elements for this field
+      const existingPlaceholder = this.querySelector(`[name$=".${fieldKey}"]`);
+      const existingIndexed = this.querySelector(`[name$=".${fieldKey}.0"]`);
+
+      if (existingPlaceholder || existingIndexed) {
+        // Field is already handled
+        return;
+      }
+
+      // Create indexed hidden inputs for this array field
+      // Infer the base name from the vin-group attribute
+      const vinGroup = this.getAttribute('vin-group') || 'vehicle';
+      const baseName = vinGroup;
+
+      value.forEach((item, index) => {
+        const indexedInput = document.createElement('input');
+        indexedInput.type = 'hidden';
+        indexedInput.name = `${baseName}.${fieldKey}.${index}`;
+        indexedInput.value = item;
+        this.componentElement.appendChild(indexedInput);
+      });
     });
   }
 

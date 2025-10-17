@@ -5363,7 +5363,7 @@ var WcVinListener = class extends WcBaseComponent {
     return "wc-vin-listener";
   }
   static get observedAttributes() {
-    return ["vin-group"];
+    return ["vin-group", "array-fields"];
   }
   constructor() {
     super();
@@ -5411,9 +5411,43 @@ var WcVinListener = class extends WcBaseComponent {
     this._updateFields(vinData.data);
   }
   _updateFields(data) {
+    this._cleanupDynamicArrayInputs();
     const formElements = this.querySelectorAll("[name]");
     formElements.forEach((element) => {
       this._updateFieldValue(element, data);
+    });
+    this._createMissingArrayFields(data);
+  }
+  _cleanupDynamicArrayInputs() {
+    const dynamicInputs = this.querySelectorAll('input[type="hidden"][name]');
+    dynamicInputs.forEach((input2) => {
+      const name = input2.getAttribute("name");
+      if (/\.\d+$/.test(name) && !input2.hasAttribute("data-keep")) {
+        input2.remove();
+      }
+    });
+  }
+  _createMissingArrayFields(data) {
+    const arrayFieldsAttr = this.getAttribute("array-fields");
+    if (!arrayFieldsAttr) return;
+    const arrayFieldNames = arrayFieldsAttr.split(",").map((f) => f.trim());
+    arrayFieldNames.forEach((fieldKey) => {
+      const value = data[fieldKey];
+      if (!Array.isArray(value) || value.length === 0) return;
+      const existingPlaceholder = this.querySelector(`[name$=".${fieldKey}"]`);
+      const existingIndexed = this.querySelector(`[name$=".${fieldKey}.0"]`);
+      if (existingPlaceholder || existingIndexed) {
+        return;
+      }
+      const vinGroup = this.getAttribute("vin-group") || "vehicle";
+      const baseName = vinGroup;
+      value.forEach((item, index) => {
+        const indexedInput = document.createElement("input");
+        indexedInput.type = "hidden";
+        indexedInput.name = `${baseName}.${fieldKey}.${index}`;
+        indexedInput.value = item;
+        this.componentElement.appendChild(indexedInput);
+      });
     });
   }
   _updateFieldValue(element, data) {
