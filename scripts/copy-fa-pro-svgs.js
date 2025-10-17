@@ -587,7 +587,8 @@ const ICONS_TO_COPY = [
   'truck-pickup',
   'truck-suv',
   'truck',
-  'motorcycle'
+  'motorcycle',
+  'clock-rotate-left'
   // Add more icon names here
 ];
 
