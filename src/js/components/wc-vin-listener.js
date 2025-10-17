@@ -176,6 +176,10 @@ class WcVinListener extends WcBaseComponent {
     // Parse comma-separated list of field names
     const arrayFieldNames = arrayFieldsAttr.split(',').map(f => f.trim());
 
+    // Try to infer the base name from existing fields in this listener
+    // Look for any field with a name attribute to extract the prefix
+    const baseName = this._inferBaseName();
+
     arrayFieldNames.forEach(fieldKey => {
       const value = data[fieldKey];
 
@@ -192,10 +196,6 @@ class WcVinListener extends WcBaseComponent {
       }
 
       // Create indexed hidden inputs for this array field
-      // Infer the base name from the vin-group attribute
-      const vinGroup = this.getAttribute('vin-group') || 'vehicle';
-      const baseName = vinGroup;
-
       value.forEach((item, index) => {
         const indexedInput = document.createElement('input');
         indexedInput.type = 'hidden';
@@ -204,6 +204,31 @@ class WcVinListener extends WcBaseComponent {
         this.componentElement.appendChild(indexedInput);
       });
     });
+  }
+
+  _inferBaseName() {
+    // Try to extract the base name from existing fields
+    // Look for any field with a name attribute like "household_vehicles.0.year"
+    // and extract "household_vehicles.0"
+    const fieldsWithNames = this.querySelectorAll('[name]');
+
+    for (let field of fieldsWithNames) {
+      const name = field.getAttribute('name');
+      if (!name) continue;
+
+      // Check if this looks like a properly namespaced field
+      // e.g., "household_vehicles.0.year" -> extract "household_vehicles.0"
+      const parts = name.split('.');
+      if (parts.length >= 2) {
+        // Remove the last part (field name like "year", "make", etc.)
+        // and keep everything before it as the base
+        parts.pop();
+        return parts.join('.');
+      }
+    }
+
+    // Fallback to vin-group if we can't infer from fields
+    return this.getAttribute('vin-group') || 'vehicle';
   }
 
   _updateFieldValue(element, data) {

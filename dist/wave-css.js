@@ -5431,6 +5431,7 @@ var WcVinListener = class extends WcBaseComponent {
     const arrayFieldsAttr = this.getAttribute("array-fields");
     if (!arrayFieldsAttr) return;
     const arrayFieldNames = arrayFieldsAttr.split(",").map((f) => f.trim());
+    const baseName = this._inferBaseName();
     arrayFieldNames.forEach((fieldKey) => {
       const value = data[fieldKey];
       if (!Array.isArray(value) || value.length === 0) return;
@@ -5439,8 +5440,6 @@ var WcVinListener = class extends WcBaseComponent {
       if (existingPlaceholder || existingIndexed) {
         return;
       }
-      const vinGroup = this.getAttribute("vin-group") || "vehicle";
-      const baseName = vinGroup;
       value.forEach((item, index) => {
         const indexedInput = document.createElement("input");
         indexedInput.type = "hidden";
@@ -5449,6 +5448,19 @@ var WcVinListener = class extends WcBaseComponent {
         this.componentElement.appendChild(indexedInput);
       });
     });
+  }
+  _inferBaseName() {
+    const fieldsWithNames = this.querySelectorAll("[name]");
+    for (let field of fieldsWithNames) {
+      const name = field.getAttribute("name");
+      if (!name) continue;
+      const parts = name.split(".");
+      if (parts.length >= 2) {
+        parts.pop();
+        return parts.join(".");
+      }
+    }
+    return this.getAttribute("vin-group") || "vehicle";
   }
   _updateFieldValue(element, data) {
     const fieldName = element.getAttribute("name");
