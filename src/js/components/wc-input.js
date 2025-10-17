@@ -516,7 +516,7 @@ class WcInput extends WcBaseFormComponent {
       icon.classList.add('icon');
       const iconItem = WcInput.icons.find(f => f.name === 'tel-fill');
       icon.innerHTML = iconItem.icon;
-      this.formElement.setAttribute('_', `on load or input
+      this.formElement.setAttribute('_', `on load
           call wc.MaskHub.phoneMask(event)
           me.setCustomValidity('')
         end`);
@@ -897,7 +897,7 @@ class WcInput extends WcBaseFormComponent {
         padding: 0 0.5rem;
         background-color: var(--component-bg-color);
         color: var(--primary-color);
-        border-right: 1px solid var(--component-bg-color);
+        border-right: 1px solid var(--radio-checked-bg);
       }
       wc-input .radio-group.modern .radio-option:first-child {
         border-top-left-radius: 5px;

@@ -16499,23 +16499,169 @@ if (!customElements.get("wc-mask-hub")) {
         window.wc = {};
       }
       window.wc.MaskHub = this;
-    }
-    phoneMask(event) {
-      const { target } = event;
-      const phoneMask = IMask(target, {
-        mask: [
-          {
-            mask: "(000) 000-0000",
-            startsWith: ""
-            // lazy: false,
-            // eager: true
+      this.maskConfigs = {
+        phone: {
+          mask: "(000) 000-0000",
+          lazy: false,
+          placeholderChar: "_"
+        },
+        ssn: {
+          mask: "000-00-0000",
+          lazy: false,
+          placeholderChar: "_"
+        },
+        zip: {
+          mask: "00000",
+          lazy: false,
+          placeholderChar: "_"
+        },
+        zipPlus4: {
+          mask: "00000-0000",
+          lazy: false,
+          placeholderChar: "_"
+        },
+        date: {
+          mask: Date,
+          pattern: "m/d/Y",
+          lazy: false,
+          blocks: {
+            m: {
+              mask: IMask.MaskedRange,
+              from: 1,
+              to: 12,
+              maxLength: 2
+            },
+            d: {
+              mask: IMask.MaskedRange,
+              from: 1,
+              to: 31,
+              maxLength: 2
+            },
+            Y: {
+              mask: IMask.MaskedRange,
+              from: 1900,
+              to: 2099,
+              maxLength: 4
+            }
           }
-        ],
-        dispatch: function(appended, dynamicMasked) {
-          const number = (dynamicMasked.value + appended).replace(/\D/g, "");
-          return dynamicMasked.compiledMasks[0];
+        },
+        currency: {
+          mask: Number,
+          scale: 2,
+          thousandsSeparator: ",",
+          padFractionalZeros: true,
+          normalizeZeros: true,
+          radix: ".",
+          mapToRadix: ["."],
+          min: 0
         }
-      });
+      };
+    }
+    /**
+     * Generic method to apply any mask type to an input
+     * @param {Event} event - The event object with target input element
+     * @param {string} maskType - The type of mask to apply (phone, ssn, etc.)
+     */
+    applyMask(event, maskType = "phone") {
+      const { target } = event;
+      if (target._imaskInstance) {
+        return;
+      }
+      const maskConfig = this.maskConfigs[maskType];
+      if (!maskConfig) {
+        console.error(`WcMaskHub: Unknown mask type "${maskType}". Available types:`, Object.keys(this.maskConfigs));
+        return;
+      }
+      target._imaskInstance = IMask(target, maskConfig);
+      target._maskType = maskType;
+      if (target.value) {
+        target._imaskInstance.value = target.value;
+      }
+      if (!target._maskCleanupRegistered) {
+        target._maskCleanupRegistered = true;
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.removedNodes.forEach((node) => {
+              if (node === target || node.contains(target)) {
+                this._destroyMask(target);
+                observer.disconnect();
+              }
+            });
+          });
+        });
+        if (target.parentNode) {
+          observer.observe(target.parentNode, { childList: true, subtree: true });
+        }
+      }
+    }
+    /**
+     * Convenience method for phone mask (backwards compatibility)
+     */
+    phoneMask(event) {
+      this.applyMask(event, "phone");
+    }
+    /**
+     * Convenience method for SSN mask
+     */
+    ssnMask(event) {
+      this.applyMask(event, "ssn");
+    }
+    /**
+     * Convenience method for ZIP code mask
+     */
+    zipMask(event) {
+      this.applyMask(event, "zip");
+    }
+    /**
+     * Convenience method for ZIP+4 mask
+     */
+    zipPlus4Mask(event) {
+      this.applyMask(event, "zipPlus4");
+    }
+    /**
+     * Convenience method for date mask
+     */
+    dateMask(event) {
+      this.applyMask(event, "date");
+    }
+    /**
+     * Convenience method for currency mask
+     */
+    currencyMask(event) {
+      this.applyMask(event, "currency");
+    }
+    /**
+     * Destroy mask instance and cleanup
+     */
+    _destroyMask(target) {
+      if (target._imaskInstance) {
+        target._imaskInstance.destroy();
+        target._imaskInstance = null;
+        target._maskType = null;
+      }
+    }
+    /**
+     * Public method to get the unmasked value
+     * @param {HTMLElement} target - The input element
+     * @returns {string} The unmasked value
+     */
+    getUnmaskedValue(target) {
+      if (target._imaskInstance) {
+        return target._imaskInstance.unmaskedValue;
+      }
+      return target.value;
+    }
+    /**
+     * Public method to update mask value programmatically
+     * @param {HTMLElement} target - The input element
+     * @param {string} value - The value to set
+     */
+    updateMaskValue(target, value) {
+      if (target._imaskInstance) {
+        target._imaskInstance.value = value;
+      } else {
+        target.value = value;
+      }
     }
     _applyStyle() {
       const style = `
@@ -18429,7 +18575,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       icon.classList.add("icon");
       const iconItem = _WcInput.icons.find((f) => f.name === "tel-fill");
       icon.innerHTML = iconItem.icon;
-      this.formElement.setAttribute("_", `on load or input
+      this.formElement.setAttribute("_", `on load
           call wc.MaskHub.phoneMask(event)
           me.setCustomValidity('')
         end`);
@@ -18773,7 +18919,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         padding: 0 0.5rem;
         background-color: var(--component-bg-color);
         color: var(--primary-color);
-        border-right: 1px solid var(--component-bg-color);
+        border-right: 1px solid var(--radio-checked-bg);
       }
       wc-input .radio-group.modern .radio-option:first-child {
         border-top-left-radius: 5px;
