@@ -5419,12 +5419,18 @@ var WcVinListener = class extends WcBaseComponent {
     this._createMissingArrayFields(data);
   }
   _cleanupDynamicArrayInputs() {
-    const dynamicInputs = this.querySelectorAll('input[type="hidden"][name]');
-    dynamicInputs.forEach((input2) => {
-      const name = input2.getAttribute("name");
-      if (/\.\d+$/.test(name) && !input2.hasAttribute("data-keep")) {
-        input2.remove();
-      }
+    const arrayFieldsAttr = this.getAttribute("array-fields");
+    if (!arrayFieldsAttr) return;
+    const arrayFieldNames = arrayFieldsAttr.split(",").map((f) => f.trim());
+    arrayFieldNames.forEach((fieldKey) => {
+      const arrayInputs = this.querySelectorAll(`input[type="hidden"][name*=".${fieldKey}."]`);
+      arrayInputs.forEach((input2) => {
+        const name = input2.getAttribute("name");
+        const pattern = new RegExp(`\\.${fieldKey}\\.\\d+$`);
+        if (pattern.test(name)) {
+          input2.remove();
+        }
+      });
     });
   }
   _createMissingArrayFields(data) {

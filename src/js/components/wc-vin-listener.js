@@ -155,15 +155,24 @@ class WcVinListener extends WcBaseComponent {
   }
 
   _cleanupDynamicArrayInputs() {
-    // Remove any hidden inputs that were dynamically created from previous VIN decodes
-    // These are inputs with names ending in .0, .1, .2, etc.
-    const dynamicInputs = this.querySelectorAll('input[type="hidden"][name]');
-    dynamicInputs.forEach(input => {
-      const name = input.getAttribute('name');
-      // Check if this is a dynamically created array input (ends with .number)
-      if (/\.\d+$/.test(name) && !input.hasAttribute('data-keep')) {
-        input.remove();
-      }
+    // Remove any hidden inputs for array fields that will be recreated
+    // Only clean up fields that are in the array-fields attribute
+    const arrayFieldsAttr = this.getAttribute('array-fields');
+    if (!arrayFieldsAttr) return;
+
+    const arrayFieldNames = arrayFieldsAttr.split(',').map(f => f.trim());
+
+    arrayFieldNames.forEach(fieldKey => {
+      // Find all inputs with names like "*.fieldKey.0", "*.fieldKey.1", etc.
+      const arrayInputs = this.querySelectorAll(`input[type="hidden"][name*=".${fieldKey}."]`);
+      arrayInputs.forEach(input => {
+        const name = input.getAttribute('name');
+        // Check if this ends with .fieldKey.number (e.g., .images.0, .images.1)
+        const pattern = new RegExp(`\\.${fieldKey}\\.\\d+$`);
+        if (pattern.test(name)) {
+          input.remove();
+        }
+      });
     });
   }
 
