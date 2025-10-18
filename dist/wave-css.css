@@ -9349,6 +9349,9 @@
   .no-underline {
     text-decoration: none;
   }
+  .line-through {
+    text-decoration: line-through;
+  }
   .overflow-auto {
     overflow: auto;
   }
