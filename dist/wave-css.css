@@ -5748,6 +5748,45 @@
   .grid-col-span-6 {
     grid-column: span 6;
   }
+  .border-surface-1 {
+    border-color: var(--surface-1);
+  }
+  .border-surface-2 {
+    border-color: var(--surface-2);
+  }
+  .border-surface-3 {
+    border-color: var(--surface-3);
+  }
+  .border-surface-4 {
+    border-color: var(--surface-4);
+  }
+  .border-surface-5 {
+    border-color: var(--surface-5);
+  }
+  .border-surface-6 {
+    border-color: var(--surface-6);
+  }
+  .border-surface-7 {
+    border-color: var(--surface-7);
+  }
+  .border-surface-8 {
+    border-color: var(--surface-8);
+  }
+  .border-surface-9 {
+    border-color: var(--surface-9);
+  }
+  .border-surface-10 {
+    border-color: var(--surface-10);
+  }
+  .border-surface-11 {
+    border-color: var(--surface-11);
+  }
+  .border-surface-12 {
+    border-color: var(--surface-12);
+  }
+  .border-surface-13 {
+    border-color: var(--surface-13);
+  }
   .border-solid {
     border-style: solid;
   }
