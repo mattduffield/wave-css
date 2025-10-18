@@ -98,6 +98,7 @@ if (!customElements.get('wc-accordion')) {
     _createHeader(label, selected) {
       const allowMany = this.hasAttribute('allow-many');
       const el = document.createElement('button');
+      el.type = 'button'; // Prevent form submission
       el.classList.add('accordion-header');
       if (selected) {
         el.classList.add('accordion-active');
