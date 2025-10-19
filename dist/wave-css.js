@@ -18592,6 +18592,11 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         }
       } else {
         this.formElement?.setAttribute(attrName, "");
+        if (attrName === "autofocus" && this.formElement) {
+          setTimeout(() => {
+            this.formElement?.focus();
+          }, 100);
+        }
       }
     }
     if (this.ignoreAttributes.includes(attrName)) {

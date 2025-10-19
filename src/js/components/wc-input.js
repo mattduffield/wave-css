@@ -259,6 +259,14 @@ class WcInput extends WcBaseFormComponent {
         }
       } else {
         this.formElement?.setAttribute(attrName, '');
+
+        // Handle autofocus - need to explicitly call focus() for dynamic elements
+        if (attrName === 'autofocus' && this.formElement) {
+          // Use setTimeout to ensure DOM is ready
+          setTimeout(() => {
+            this.formElement?.focus();
+          }, 100);
+        }
       }
     }
     if (this.ignoreAttributes.includes(attrName)) {
