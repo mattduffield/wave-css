@@ -1,28 +1,64 @@
 /**
- * 
+ *
  *  Name: wc-sidenav
  *  Usage:
+ *    <!-- Default: Fixed positioning (global/full screen) -->
  *    <wc-sidenav class="mb-4" open-top="48px" open-vertical-text width="200px">
  *      <a href="#">About</a>
  *      <a href="#">Services</a>
  *      <a href="#">Clients</a>
  *      <a href="#">Contact</a>
  *    </wc-sidenav>
- * 
- *    <wc-sidenav class="mb-4" open-top="48px" push>
+ *
+ *    <wc-sidenav class="mb-4" open-top="48px" push push-target="#viewport">
  *      <a href="#">About</a>
  *      <a href="#">Services</a>
  *      <a href="#">Clients</a>
  *      <a href="#">Contact</a>
  *    </wc-sidenav>
- * 
- *    <wc-sidenav class="mb-4" open-top="48px" width="100%">
+ *
+ *    <wc-sidenav class="mb-4" open-top="48px" width="100%" overlay>
  *      <a href="#">About</a>
  *      <a href="#">Services</a>
  *      <a href="#">Clients</a>
  *      <a href="#">Contact</a>
  *    </wc-sidenav>
- * 
+ *
+ *    <!-- NEW: Relative positioning (scoped to parent container) -->
+ *    <!-- Parent container must have: position: relative, overflow: hidden -->
+ *    <div class="relative overflow-hidden h-screen">
+ *      <wc-sidenav relative push push-target=".content" width="250px" overlay>
+ *        <a href="#">About</a>
+ *        <a href="#">Services</a>
+ *        <a href="#">Clients</a>
+ *        <a href="#">Contact</a>
+ *      </wc-sidenav>
+ *      <div class="content">
+ *        <!-- Your content here - will be pushed when sidenav opens -->
+ *      </div>
+ *    </div>
+ *
+ *    <!-- Relative mode with right side -->
+ *    <div class="relative overflow-hidden h-96">
+ *      <wc-sidenav relative right-side push push-target=".content" width="200px">
+ *        <a href="#">Link 1</a>
+ *        <a href="#">Link 2</a>
+ *      </wc-sidenav>
+ *      <div class="content">
+ *        <!-- Content -->
+ *      </div>
+ *    </div>
+ *
+ *  Attributes:
+ *    - relative: Enable relative positioning mode (scoped to parent container)
+ *    - push: Push content when opening (requires push-target)
+ *    - push-target: CSS selector for element to push (default: "#viewport")
+ *    - overlay: Show overlay when open
+ *    - width: Width of sidenav (default: "250px")
+ *    - open-top: Top position for open button
+ *    - right-side: Position on right side (default is left)
+ *    - open-vertical-text: Use upright vertical text in open button
+ *
  *  API:
  *    wc.EventHub.broadcast('wc-sidenav:open', ['[data-wc-id="0982-a544-98da-b3da"]'])
  *    wc.EventHub.broadcast('wc-sidenav:close', ['[data-wc-id="0982-a544-98da-b3da"]'])
@@ -35,7 +71,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-sidenav')) {
   class WcSidenav extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'label', 'width', 'open-btn-class', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height'];
+      return ['id', 'class', 'label', 'width', 'open-btn-class', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height', 'relative'];
     }
 
     constructor() {
@@ -80,7 +116,7 @@ if (!customElements.get('wc-sidenav')) {
       this._unWireEvents();
     }
 
-    _handleAttributeChange(attrName, newValue) {    
+    _handleAttributeChange(attrName, newValue) {
       if (attrName === 'label') {
         // Do nothing...
       } else if (attrName === 'auto-height') {
@@ -103,8 +139,10 @@ if (!customElements.get('wc-sidenav')) {
         // Do nothing...
       } else if (attrName === 'width') {
         // Do nothing...
+      } else if (attrName === 'relative') {
+        // Do nothing...
       } else {
-        super._handleAttributeChange(attrName, newValue);  
+        super._handleAttributeChange(attrName, newValue);
       }
     }
 
@@ -285,12 +323,26 @@ if (!customElements.get('wc-sidenav')) {
           --background-color: var(--primary-bg-color);
           display: contents;
         }
-        wc-sidenav .wc-sidenav.sidenav {
+        /* Default mode: Fixed positioning (global/full screen) */
+        wc-sidenav:not([relative]) .wc-sidenav.sidenav {
           /* height: 100%; */
           width: 0;
           position: fixed;
           z-index: 2;
           top: 0;
+          background-color: var(--background-color);
+          overflow-x: hidden;
+          text-align: center;
+          transition: 0.5s;
+        }
+        /* Relative mode: Absolute positioning (scoped to parent container) */
+        wc-sidenav[relative] .wc-sidenav.sidenav {
+          width: 0;
+          position: absolute;
+          z-index: 2;
+          top: 0;
+          bottom: 0;
+          height: 100%;
           background-color: var(--background-color);
           overflow-x: hidden;
           text-align: center;
@@ -362,7 +414,8 @@ if (!customElements.get('wc-sidenav')) {
           background-color: var(--button-hover-bg-color);
         }
 
-        .overlay {
+        /* Default mode: Fixed overlay (covers entire viewport) */
+        wc-sidenav:not([relative]) .overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -371,7 +424,22 @@ if (!customElements.get('wc-sidenav')) {
           background-color: transparent;
           transition: background-color 0.5s ease;
         }
-        .overlay.open {
+        wc-sidenav:not([relative]) .overlay.open {
+          background-color: rgba(0,0,0,0.6);
+          z-index: 1;
+        }
+
+        /* Relative mode: Absolute overlay (scoped to parent container) */
+        wc-sidenav[relative] .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: transparent;
+          transition: background-color 0.5s ease;
+        }
+        wc-sidenav[relative] .overlay.open {
           background-color: rgba(0,0,0,0.6);
           z-index: 1;
         }

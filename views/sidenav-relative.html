@@ -1,0 +1,225 @@
+<div id="page-contents">
+  <div class="my-2 px-4">
+    <p class="mb-4 px-10">
+      The following examples showcase the new <strong>relative positioning mode</strong> for wc-sidenav. Unlike the global sidenavs, these are scoped to their parent containers and only affect the content within those containers.
+    </p>
+
+    <div class="grid-1 gap-4 px-10">
+
+      <!-- Example 1: Basic Relative Sidenav with Push -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 1: Relative Sidenav with Push (Left Side)</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">This sidenav is scoped to the card container. It pushes the content within the container only.</p>
+
+          <div class="relative overflow-hidden border border-surface-5" style="height: 400px;">
+            <wc-sidenav relative push push-target=".content-1" width="250px" overlay label="MENU" open-vertical-text>
+              <div class="p-4">
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Dashboard</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Profile</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Settings</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Messages</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Logout</a>
+              </div>
+            </wc-sidenav>
+
+            <div class="content-1 h-full p-6 overflow-auto">
+              <h4 class="mb-4">Main Content Area</h4>
+              <p class="mb-2">This content gets pushed to the right when the sidenav opens.</p>
+              <p class="mb-2">The sidenav is scoped to this container only and doesn't affect the rest of the page.</p>
+              <p class="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+              <p class="mb-2">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 2: Right Side Relative Sidenav -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 2: Relative Sidenav (Right Side) with Overlay</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">This sidenav opens from the right side and includes an overlay that only covers its container.</p>
+
+          <div class="relative overflow-hidden border border-surface-5" style="height: 400px;">
+            <wc-sidenav relative right-side push push-target=".content-2" width="200px" overlay label="INFO" background-color="#1a1a2e">
+              <div class="p-4">
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Help</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">About</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Contact</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">FAQ</a>
+              </div>
+            </wc-sidenav>
+
+            <div class="content-2 h-full p-6 overflow-auto">
+              <h4 class="mb-4">Content Area (Right Sidenav)</h4>
+              <p class="mb-2">Click the "INFO" button on the right to open the sidenav.</p>
+              <p class="mb-2">Notice how the overlay only covers this container, not the entire page.</p>
+              <p class="mb-2">The content gets pushed to the left when the sidenav opens.</p>
+              <p class="mb-2">This demonstrates how multiple relative sidenavs can coexist on the same page without interfering with each other.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 3: Smaller Container -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 3: Relative Sidenav in Smaller Container</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">This example shows a relative sidenav in a smaller container with auto-height.</p>
+
+          <div class="relative overflow-hidden border border-surface-5" style="height: 300px;">
+            <wc-sidenav relative push push-target=".content-3" width="180px" label="NAV" open-vertical-text auto-height>
+              <div class="p-4">
+                <a href="#" class="block py-2 px-3 hover:bg-primary-bg-color rounded text-sm">Home</a>
+                <a href="#" class="block py-2 px-3 hover:bg-primary-bg-color rounded text-sm">Products</a>
+                <a href="#" class="block py-2 px-3 hover:bg-primary-bg-color rounded text-sm">Services</a>
+                <a href="#" class="block py-2 px-3 hover:bg-primary-bg-color rounded text-sm">About</a>
+              </div>
+            </wc-sidenav>
+
+            <div class="content-3 h-full p-6 overflow-auto">
+              <h4 class="mb-4">Compact Layout</h4>
+              <p class="mb-2">This demonstrates a relative sidenav in a smaller, more compact layout.</p>
+              <p class="mb-2">Perfect for dashboard widgets or component-level navigation.</p>
+              <p class="mb-2">The sidenav uses auto-height to fit its content.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 4: Multiple Sidenavs in Same Container -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 4: Two Relative Sidenavs (Left & Right)</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">This example has both left and right sidenavs in the same container.</p>
+
+          <div class="relative overflow-hidden border border-surface-5" style="height: 400px;">
+            <wc-sidenav relative push push-target=".content-4" width="200px" overlay label="LEFT" open-top="20px" open-vertical-text>
+              <div class="p-4">
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Main Menu</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Categories</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Archive</a>
+              </div>
+            </wc-sidenav>
+
+            <wc-sidenav relative right-side push push-target=".content-4" width="200px" overlay label="RIGHT" open-top="20px" open-vertical-text background-color="#16213e">
+              <div class="p-4">
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Settings</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Preferences</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded">Account</a>
+              </div>
+            </wc-sidenav>
+
+            <div class="content-4 h-full p-6 overflow-auto flex items-center justify-center">
+              <div class="text-center">
+                <h4 class="mb-4">Center Content</h4>
+                <p class="mb-2">This content can be pushed from both left and right!</p>
+                <p class="mb-2">Open either or both sidenavs to see the effect.</p>
+                <p class="mb-2">Notice how they work independently but affect the same content area.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 5: Full Height Container -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 5: Full Height Relative Sidenav</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">A taller container demonstrating scrollable content with a relative sidenav.</p>
+
+          <div class="relative overflow-hidden border border-surface-5" style="height: 500px;">
+            <wc-sidenav relative push push-target=".content-5" width="220px" overlay label="SCROLL" open-vertical-text>
+              <div class="p-4">
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Introduction</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Getting Started</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Documentation</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">API Reference</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Examples</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Tutorials</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Best Practices</a>
+                <a href="#" class="block py-2 px-4 hover:bg-primary-bg-color rounded mb-2">Support</a>
+              </div>
+            </wc-sidenav>
+
+            <div class="content-5 h-full p-6 overflow-auto">
+              <h4 class="mb-4">Scrollable Content Area</h4>
+              <p class="mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+              <p class="mb-3">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+              <p class="mb-3">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+              <p class="mb-3">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p class="mb-3">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+              <p class="mb-3">Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+              <p class="mb-3">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.</p>
+              <p class="mb-3">Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Features Box -->
+      <div class="card border-primary-bg-color">
+        <div class="card-header bg-primary-bg-color">
+          <h3>Key Features of Relative Mode</h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-disc pl-6">
+            <li class="mb-2"><strong>Scoped to Container:</strong> The sidenav only affects its parent container, not the entire page.</li>
+            <li class="mb-2"><strong>Scoped Overlay:</strong> The overlay (when enabled) only covers the container, not the full viewport.</li>
+            <li class="mb-2"><strong>Flexible Positioning:</strong> Works on both left and right sides.</li>
+            <li class="mb-2"><strong>Push Content:</strong> Can push content within the container when opening.</li>
+            <li class="mb-2"><strong>Multiple Per Page:</strong> You can have multiple relative sidenavs on the same page without conflicts.</li>
+            <li class="mb-2"><strong>Container Requirements:</strong> Parent must have <code>position: relative</code> and <code>overflow: hidden</code>.</li>
+            <li class="mb-2"><strong>Backward Compatible:</strong> Existing global sidenavs continue to work unchanged.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="card">
+        <div class="card-header">
+          <h3>How to Use Relative Mode</h3>
+        </div>
+        <div class="card-body">
+          <pre class="bg-surface-10 p-4 rounded overflow-x-auto"><code>&lt;!-- Parent container must have: position: relative, overflow: hidden --&gt;
+&lt;div class="relative overflow-hidden" style="height: 400px;"&gt;
+  &lt;wc-sidenav relative push push-target=".content" width="250px" overlay&gt;
+    &lt;a href="#"&gt;Link 1&lt;/a&gt;
+    &lt;a href="#"&gt;Link 2&lt;/a&gt;
+  &lt;/wc-sidenav&gt;
+
+  &lt;div class="content"&gt;
+    &lt;!-- Your content here --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+          <h4 class="mt-4 mb-2">Key Attributes:</h4>
+          <ul class="list-disc pl-6">
+            <li><code>relative</code> - Enables relative positioning mode</li>
+            <li><code>push</code> - Pushes content when opening</li>
+            <li><code>push-target</code> - CSS selector for element to push</li>
+            <li><code>overlay</code> - Shows overlay when open</li>
+            <li><code>width</code> - Width of the sidenav</li>
+            <li><code>right-side</code> - Position on right instead of left</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <wc-event-handler
+    event-name="custom-event"
+    action-target="#page-contents"></wc-event-handler>
+
+</div>

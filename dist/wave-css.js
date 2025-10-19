@@ -10640,7 +10640,7 @@ customElements.define("wc-sidebar", WcSidebar);
 if (!customElements.get("wc-sidenav")) {
   class WcSidenav extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "label", "width", "open-btn-class", "open", "open-top", "open-vertical-text", "push", "push-target", "overlay", "background-color", "auto-height"];
+      return ["id", "class", "label", "width", "open-btn-class", "open", "open-top", "open-vertical-text", "push", "push-target", "overlay", "background-color", "auto-height", "relative"];
     }
     constructor() {
       super();
@@ -10686,6 +10686,7 @@ if (!customElements.get("wc-sidenav")) {
       } else if (attrName === "push-target") {
       } else if (attrName === "push") {
       } else if (attrName === "width") {
+      } else if (attrName === "relative") {
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -10847,12 +10848,26 @@ if (!customElements.get("wc-sidenav")) {
           --background-color: var(--primary-bg-color);
           display: contents;
         }
-        wc-sidenav .wc-sidenav.sidenav {
+        /* Default mode: Fixed positioning (global/full screen) */
+        wc-sidenav:not([relative]) .wc-sidenav.sidenav {
           /* height: 100%; */
           width: 0;
           position: fixed;
           z-index: 2;
           top: 0;
+          background-color: var(--background-color);
+          overflow-x: hidden;
+          text-align: center;
+          transition: 0.5s;
+        }
+        /* Relative mode: Absolute positioning (scoped to parent container) */
+        wc-sidenav[relative] .wc-sidenav.sidenav {
+          width: 0;
+          position: absolute;
+          z-index: 2;
+          top: 0;
+          bottom: 0;
+          height: 100%;
           background-color: var(--background-color);
           overflow-x: hidden;
           text-align: center;
@@ -10924,7 +10939,8 @@ if (!customElements.get("wc-sidenav")) {
           background-color: var(--button-hover-bg-color);
         }
 
-        .overlay {
+        /* Default mode: Fixed overlay (covers entire viewport) */
+        wc-sidenav:not([relative]) .overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -10933,7 +10949,22 @@ if (!customElements.get("wc-sidenav")) {
           background-color: transparent;
           transition: background-color 0.5s ease;
         }
-        .overlay.open {
+        wc-sidenav:not([relative]) .overlay.open {
+          background-color: rgba(0,0,0,0.6);
+          z-index: 1;
+        }
+
+        /* Relative mode: Absolute overlay (scoped to parent container) */
+        wc-sidenav[relative] .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: transparent;
+          transition: background-color 0.5s ease;
+        }
+        wc-sidenav[relative] .overlay.open {
           background-color: rgba(0,0,0,0.6);
           z-index: 1;
         }
