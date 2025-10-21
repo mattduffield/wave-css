@@ -11103,13 +11103,13 @@ if (!customElements.get("wc-sidenav")) {
         wc-sidenav[right-side] .wc-sidenav.sidenav {
           right: 0;
         }
+        /*
         wc-sidenav .wc-sidenav.sidenav a {
           text-decoration: none;
           color: var(--button-color);
           display: block;
           transition: 0.3s;
         }
-        /*
         wc-sidenav[left-side] .wc-sidenav.sidenav a {
           padding: 8px 8px 8px 32px;
         }
