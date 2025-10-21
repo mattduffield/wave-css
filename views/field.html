@@ -1,0 +1,325 @@
+<div id="page-contents">
+  <div class="my-2 px-4">
+    <h2 class="mb-4">wc-field - Read-Only Informational Component</h2>
+
+    <p class="mb-4 px-10">
+      The <code>wc-field</code> component is a read-only, informational display component that is <strong>NOT</strong> part of form submissions.
+      It's perfect for displaying data with optional labels and links.
+    </p>
+
+    <div class="grid-1 gap-4 px-10">
+
+      <!-- Example 1: Basic Usage -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 1: Basic Usage with Value Attribute</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-2 md:grid-4 gap-4">
+            <wc-field label="Name" value="John Doe"></wc-field>
+            <wc-field label="Email" value="john.doe@example.com"></wc-field>
+            <wc-field label="Status" value="Active"></wc-field>
+            <wc-field label="Role" value="Administrator"></wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 2: With Links -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 2: Clickable Labels with Links</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-2 md:grid-3 gap-4">
+            <wc-field
+              label="Bill Plans"
+              link="#bill-plans"
+              value="3 plans available">
+            </wc-field>
+
+            <wc-field
+              label="Payment History"
+              link="#payments"
+              value="12 payments">
+            </wc-field>
+
+            <wc-field
+              label="Documents"
+              link="#documents"
+              value="5 files">
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 3: With HTMX -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 3: HTMX Integration</h3>
+        </div>
+        <div class="card-body">
+          <p class="mb-4">Click the labels to trigger HTMX actions (simulated in this example)</p>
+
+          <div class="grid-1 sm:grid-2 gap-4">
+            <wc-field
+              label="Manage Bill Plans"
+              link="#"
+              hx-get="./home.html"
+              hx-target="#htmx-demo"
+              hx-swap="innerHTML"
+              value="Click to load details">
+            </wc-field>
+
+            <wc-field
+              label="View Profile"
+              link="#"
+              hx-get="./home.html"
+              hx-target="#htmx-demo"
+              hx-swap="innerHTML"
+              value="Click to view">
+            </wc-field>
+          </div>
+
+          <div id="htmx-demo" class="mt-4 p-4 border border-surface-5 rounded min-h-32">
+            <p class="text-center text-4">HTMX content will load here...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 4: Complex Content with Child Elements -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 4: Complex Content (No Slots - Just Child Elements)</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-2 md:grid-3 gap-4">
+
+            <wc-field label="Bill Plans">
+              <div class="col gap-1">
+                <div class="row justify-between text-xs">
+                  <span>Monthly:</span>
+                  <span class="font-bold">$99.99</span>
+                </div>
+                <div class="row justify-between text-xs">
+                  <span>Annual:</span>
+                  <span class="font-bold">$999.99</span>
+                </div>
+              </div>
+            </wc-field>
+
+            <wc-field label="Payment History">
+              <table class="w-full text-xs">
+                <tr><td>Jan 2025</td><td class="text-right">$99.99</td></tr>
+                <tr><td>Feb 2025</td><td class="text-right">$99.99</td></tr>
+                <tr><td>Mar 2025</td><td class="text-right">$99.99</td></tr>
+              </table>
+            </wc-field>
+
+            <wc-field label="Status Badge">
+              <div class="flex justify-center">
+                <span class="badge badge-success">Active</span>
+              </div>
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 5: Custom Styling -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 5: Custom Styling with Classes</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-2 md:grid-4 gap-4">
+
+            <wc-field
+              label="Total Amount"
+              label-class="font-bold text-primary"
+              value="$1,234.56"
+              value-class="text-2xl text-center text-success font-bold">
+            </wc-field>
+
+            <wc-field
+              label="Warning"
+              label-class="text-warning font-bold"
+              value="Payment Overdue"
+              value-class="text-center text-warning">
+            </wc-field>
+
+            <wc-field
+              label="Error Count"
+              label-class="text-danger"
+              value="5 errors"
+              value-class="text-lg text-center text-danger font-bold">
+            </wc-field>
+
+            <wc-field
+              label="Info"
+              label-class="text-info"
+              value="All systems operational"
+              value-class="text-center text-info text-xs">
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 6: Text Alignment -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 6: Text Alignment Options</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-3 gap-4">
+            <wc-field
+              label="Left Aligned"
+              value="This text is left aligned"
+              text-align="left">
+            </wc-field>
+
+            <wc-field
+              label="Center Aligned (Default)"
+              value="This text is centered">
+            </wc-field>
+
+            <wc-field
+              label="Right Aligned"
+              value="This text is right aligned"
+              text-align="right">
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 7: Without Label -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 7: Without Label (Value Only)</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-3 gap-4">
+            <wc-field value="Just a value, no label"></wc-field>
+
+            <wc-field value-class="text-center text-primary font-bold text-lg">
+              Styled value without label
+            </wc-field>
+
+            <wc-field>
+              <div class="text-center p-4 border border-primary-bg-color rounded">
+                Complex content without label
+              </div>
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 8: Real-World Use Case -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Example 8: Real-World Use Case - User Profile</h3>
+        </div>
+        <div class="card-body">
+          <div class="grid-1 sm:grid-2 md:grid-4 gap-4">
+            <wc-field label="Full Name" value="John Michael Doe"></wc-field>
+            <wc-field label="Email" value="john.doe@company.com"></wc-field>
+            <wc-field label="Phone" value="(555) 123-4567"></wc-field>
+            <wc-field label="Department" value="Engineering"></wc-field>
+
+            <wc-field
+              label="Bill Plans"
+              link="#manage-plans"
+              hx-get="./home.html"
+              hx-target="#profile-modal"
+              hx-swap="innerHTML">
+              <div class="text-center text-xs text-4">
+                3 active plans
+              </div>
+            </wc-field>
+
+            <wc-field label="Account Status">
+              <span class="badge badge-success">Active</span>
+            </wc-field>
+
+            <wc-field
+              label="Last Login"
+              value="2025-01-20 10:30 AM"
+              value-class="text-xs text-4 text-center">
+            </wc-field>
+
+            <wc-field
+              label="Credits Remaining"
+              value="$2,450.00"
+              value-class="text-lg font-bold text-success text-center">
+            </wc-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="card border-primary-bg-color">
+        <div class="card-header bg-primary-bg-color">
+          <h3>Usage Instructions</h3>
+        </div>
+        <div class="card-body">
+          <h4 class="mb-2">Basic Syntax:</h4>
+          <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>&lt;wc-field label="Label Text" value="Display Value"&gt;&lt;/wc-field&gt;</code></pre>
+
+          <h4 class="mb-2">With Link:</h4>
+          <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>&lt;wc-field
+  label="Bill Plans"
+  link="/v/bill_plans/create"
+  value="3 plans available"&gt;
+&lt;/wc-field&gt;</code></pre>
+
+          <h4 class="mb-2">With HTMX:</h4>
+          <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>&lt;wc-field
+  label="Bill Plans"
+  link="/v/bill_plans/create"
+  hx-get="/v/bill_plans/create?script_id=123"
+  hx-target="#modal-container"
+  hx-swap="innerHTML"
+  hx-push-url="false"
+  value="Manage plans"&gt;
+&lt;/wc-field&gt;</code></pre>
+
+          <h4 class="mb-2">Complex Content (No Slots - Just Child Elements):</h4>
+          <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>&lt;wc-field label="Bill Plans"&gt;
+  &lt;div class="text-center text-xs text-4"&gt;
+    {{Record.data.bill_plan}}
+  &lt;/div&gt;
+&lt;/wc-field&gt;</code></pre>
+
+          <h4 class="mt-4 mb-2">Available Attributes:</h4>
+          <ul class="list-disc pl-6">
+            <li><code>label</code> - Label text (optional)</li>
+            <li><code>label-class</code> - Custom CSS classes for label</li>
+            <li><code>value</code> - Display value (if not using child content)</li>
+            <li><code>value-class</code> - Custom CSS classes for value area</li>
+            <li><code>link</code> - URL for clickable label</li>
+            <li><code>text-align</code> - Text alignment (left, center, right)</li>
+            <li><code>hx-*</code> - Any HTMX attributes (hx-get, hx-target, etc.)</li>
+          </ul>
+
+          <h4 class="mt-4 mb-2">Key Features:</h4>
+          <ul class="list-disc pl-6">
+            <li>✅ Read-only informational component</li>
+            <li>✅ Does NOT participate in form submission</li>
+            <li>✅ Optional label (only renders if provided)</li>
+            <li>✅ Supports both simple values and complex child content</li>
+            <li>✅ Clickable labels with link support</li>
+            <li>✅ Full HTMX integration</li>
+            <li>✅ Customizable styling via classes</li>
+            <li>✅ No Shadow DOM (follows Wave CSS patterns)</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="profile-modal"></div>
+
+  <wc-event-handler
+    event-name="custom-event"
+    action-target="#page-contents"></wc-event-handler>
+
+</div>

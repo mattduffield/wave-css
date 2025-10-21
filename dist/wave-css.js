@@ -3486,6 +3486,230 @@ var WcDropdown = class extends WcBaseComponent {
 };
 customElements.define("wc-dropdown", WcDropdown);
 
+// src/js/components/wc-field.js
+var WcField = class extends WcBaseComponent {
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "label",
+      "label-class",
+      "value",
+      "value-class",
+      "link",
+      "text-align",
+      "hx-get",
+      "hx-post",
+      "hx-put",
+      "hx-delete",
+      "hx-patch",
+      "hx-target",
+      "hx-swap",
+      "hx-trigger",
+      "hx-indicator",
+      "hx-push-url",
+      "hx-vals",
+      "hx-include",
+      "hx-confirm"
+    ];
+  }
+  constructor() {
+    super();
+    const compEl = this.querySelector(".wc-field");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-field", "col");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (attrName === "label") {
+      this._render();
+    } else if (attrName === "label-class") {
+    } else if (attrName === "value") {
+      this._render();
+    } else if (attrName === "value-class") {
+    } else if (attrName === "link") {
+      this._render();
+    } else if (attrName === "text-align") {
+    } else if (attrName.startsWith("hx-")) {
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _render() {
+    super._render();
+    const innerEl = this.querySelector(".wc-field > *");
+    if (innerEl) {
+      return;
+    }
+    const userContent = Array.from(this.children).filter(
+      (child) => !child.classList.contains("wc-field")
+    );
+    this.componentElement.innerHTML = "";
+    if (userContent.length > 0) {
+      this._renderWithContent(userContent);
+    } else {
+      this._renderWithValue();
+    }
+    if (typeof htmx !== "undefined") {
+      htmx.process(this);
+    }
+  }
+  _renderWithContent(userContent) {
+    this._renderLabel();
+    const valueContainer = document.createElement("div");
+    valueContainer.classList.add("wc-field-value");
+    const valueClass = this.getAttribute("value-class");
+    if (valueClass) {
+      valueClass.split(" ").forEach((cls) => {
+        if (cls.trim()) valueContainer.classList.add(cls.trim());
+      });
+    } else {
+      valueContainer.classList.add("text-xs", "text-4");
+    }
+    const textAlign = this.getAttribute("text-align");
+    if (textAlign) {
+      valueContainer.classList.add(`text-${textAlign}`);
+    } else {
+      valueContainer.classList.add("text-center");
+    }
+    userContent.forEach((child) => {
+      valueContainer.appendChild(child);
+    });
+    this.componentElement.appendChild(valueContainer);
+  }
+  _renderWithValue() {
+    this._renderLabel();
+    const value = this.getAttribute("value");
+    if (value) {
+      const valueContainer = document.createElement("div");
+      valueContainer.classList.add("wc-field-value");
+      const valueClass = this.getAttribute("value-class");
+      if (valueClass) {
+        valueClass.split(" ").forEach((cls) => {
+          if (cls.trim()) valueContainer.classList.add(cls.trim());
+        });
+      } else {
+        valueContainer.classList.add("text-xs", "text-4");
+      }
+      const textAlign = this.getAttribute("text-align");
+      if (textAlign) {
+        valueContainer.classList.add(`text-${textAlign}`);
+      } else {
+        valueContainer.classList.add("text-center");
+      }
+      valueContainer.textContent = value;
+      this.componentElement.appendChild(valueContainer);
+    }
+  }
+  _renderLabel() {
+    const label = this.getAttribute("label");
+    if (!label) return;
+    const link = this.getAttribute("link");
+    const labelClass = this.getAttribute("label-class");
+    if (link) {
+      const anchor = document.createElement("a");
+      anchor.classList.add("wc-field-label", "mb-1", "cursor-pointer", "underline");
+      anchor.href = link;
+      this._addHtmxAttributes(anchor);
+      if (labelClass) {
+        labelClass.split(" ").forEach((cls) => {
+          if (cls.trim()) anchor.classList.add(cls.trim());
+        });
+      }
+      const labelElement = document.createElement("label");
+      labelElement.textContent = label;
+      anchor.appendChild(labelElement);
+      this.componentElement.appendChild(anchor);
+    } else {
+      const labelElement = document.createElement("label");
+      labelElement.classList.add("wc-field-label", "mb-1");
+      if (labelClass) {
+        labelClass.split(" ").forEach((cls) => {
+          if (cls.trim()) labelElement.classList.add(cls.trim());
+        });
+      }
+      labelElement.textContent = label;
+      this.componentElement.appendChild(labelElement);
+    }
+  }
+  _addHtmxAttributes(element) {
+    const htmxAttrs = [
+      "hx-get",
+      "hx-post",
+      "hx-put",
+      "hx-delete",
+      "hx-patch",
+      "hx-target",
+      "hx-swap",
+      "hx-trigger",
+      "hx-indicator",
+      "hx-push-url",
+      "hx-vals",
+      "hx-include",
+      "hx-confirm"
+    ];
+    htmxAttrs.forEach((attr) => {
+      const value = this.getAttribute(attr);
+      if (value !== null) {
+        element.setAttribute(attr, value);
+      }
+    });
+  }
+  _applyStyle() {
+    const style = `
+      wc-field {
+        display: contents;
+      }
+
+      wc-field .wc-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      wc-field .wc-field-label {
+        display: block;
+        font-weight: 500;
+      }
+
+      wc-field .wc-field-label:hover {
+        opacity: 0.8;
+      }
+
+      wc-field .wc-field-value {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      /* Text alignment utilities (if not using utility classes) */
+      wc-field[text-align="left"] .wc-field-value {
+        text-align: left;
+      }
+
+      wc-field[text-align="center"] .wc-field-value {
+        text-align: center;
+      }
+
+      wc-field[text-align="right"] .wc-field-value {
+        text-align: right;
+      }
+    `.trim();
+    this.loadStyle("wc-field-style", style);
+  }
+};
+customElements.define("wc-field", WcField);
+
 // src/js/components/wc-flip-box.js
 var WcFlipBox = class extends WcBaseComponent {
   static get observedAttributes() {

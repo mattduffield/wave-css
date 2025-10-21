@@ -1,0 +1,453 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <h2 class="mb-4">Bill Plans Tabulator Examples</h2>
+
+  <p class="mb-4 px-4">
+    The following examples show different ways to load data from the <code>_web_pilot_run</code> collection,
+    targeting the <code>data.bill_plans</code> array. Choose the approach that matches your API structure.
+  </p>
+
+  <!-- Example 1: Using URL parameters for script_id and data_id -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3>Example 1: URL Parameters (script_id & data_id)</h3>
+    </div>
+    <div class="card-body">
+      <p class="mb-4">
+        This example passes <code>script_id</code> and <code>data_id</code> as URL query parameters.
+        Your API endpoint should handle: <code>/api/_web_pilot_run?script_id=xxx&data_id=yyy</code>
+      </p>
+
+      <div class="row gap-4">
+        <wc-tabulator
+          class="rounded w-full max-h-500"
+          id="bill-plans-table-1"
+          collection-name="_web_pilot_run"
+          ajax-url="http://localhost:8080/api/_web_pilot_run"
+          ajax-params='{"script_id": "your-script-id-here", "data_id": "your-data-id-here"}'
+          placeholder="No Bill Plans Available"
+          row-height="40"
+          pagination
+          pagination-size="10"
+          pagination-counter="rows"
+          header-visible="true"
+          selectable-rows="true"
+          layout="fitDataStretch"
+          >
+          <wc-tabulator-column
+            title="Actions"
+            formatter="rowSelection"
+            title-formatter="rowSelection"
+            hoz-align="center"
+            header-hoz-align="center"
+            width=45
+            header-sort="false"
+            resizable="false"
+            frozen="true"
+            cell-click="toggleSelect"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            title="#"
+            formatter="function(cell) {
+                         var table = cell.getTable();
+                         var row = cell.getRow();
+                         var page = table.getPage() || 1;
+                         var pageSize = table.getPageSize();
+                         var index = row.getPosition(true);
+                         return (page - 1) * pageSize + index;
+                       }"
+            hoz-align="center"
+            width=40
+            header-sort="false"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <!-- Add your bill_plans specific columns here -->
+          <!-- Example columns - adjust field names to match your data structure -->
+          <wc-tabulator-column
+            field="plan_name"
+            title="Plan Name"
+            header-filter="input"
+            header-filter-func="like"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="amount"
+            title="Amount"
+            header-filter="input"
+            formatter="money"
+            formatter-params='{"thousand":",", "symbol":"$", "precision":2}'
+            hoz-align="right"
+            header-hoz-align="right"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="frequency"
+            title="Frequency"
+            header-filter="list"
+            header-filter-params='{"valuesLookup":true, "clearable":true}'
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="status"
+            title="Status"
+            header-filter="list"
+            header-filter-params='{"valuesLookup":true, "clearable":true}'
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="start_date"
+            title="Start Date"
+            formatter="localdatetime"
+            formatter-params='{"format": "DATE_SHORT"}'
+            sorter="date"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="is_active"
+            title="Active?"
+            formatter="tickCross"
+            header-filter="tickCross"
+            header-filter-params='{"tristate":true}'
+            hoz-align="center"
+            header-hoz-align="center"
+            visible="true"
+            ></wc-tabulator-column>
+        </wc-tabulator>
+      </div>
+    </div>
+  </div>
+
+  <!-- Example 2: Using path-based URL with script_id and data_id -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3>Example 2: Path-Based URL</h3>
+    </div>
+    <div class="card-body">
+      <p class="mb-4">
+        This example uses script_id and data_id in the URL path.
+        Your API endpoint should handle: <code>/api/_web_pilot_run/{script_id}/{data_id}/bill_plans</code>
+      </p>
+
+      <div class="row gap-4">
+        <wc-tabulator
+          class="rounded w-full max-h-500"
+          id="bill-plans-table-2"
+          collection-name="_web_pilot_run"
+          ajax-url="http://localhost:8080/api/_web_pilot_run/your-script-id/your-data-id/bill_plans"
+          placeholder="No Bill Plans Available"
+          row-height="40"
+          pagination
+          pagination-size="10"
+          pagination-counter="rows"
+          header-visible="true"
+          selectable-rows="true"
+          movable-columns="true"
+          row-context-menu="rowContextMenu"
+          layout="fitDataStretch"
+          >
+          <wc-tabulator-func name="onDelete">
+            (result) => {
+              wc.Prompt.toast({title: 'Bill Plan deleted successfully!', type: 'success'});
+            }
+          </wc-tabulator-func>
+
+          <wc-tabulator-column
+            title="Actions"
+            formatter="rowSelection"
+            title-formatter="rowSelection"
+            hoz-align="center"
+            header-hoz-align="center"
+            width=45
+            header-sort="false"
+            resizable="false"
+            frozen="true"
+            cell-click="toggleSelect"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            title="#"
+            formatter="function(cell) {
+                         var table = cell.getTable();
+                         var row = cell.getRow();
+                         var page = table.getPage() || 1;
+                         var pageSize = table.getPageSize();
+                         var index = row.getPosition(true);
+                         return (page - 1) * pageSize + index;
+                       }"
+            hoz-align="center"
+            width=40
+            header-sort="false"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="plan_id"
+            title="Plan ID"
+            header-filter="input"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="plan_name"
+            title="Plan Name"
+            header-filter="input"
+            header-filter-func="like"
+            editor="input"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="description"
+            title="Description"
+            header-filter="input"
+            editor="textarea"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="amount"
+            title="Amount"
+            header-filter="input"
+            formatter="money"
+            formatter-params='{"thousand":",", "symbol":"$", "precision":2}'
+            editor="number"
+            editor-params='{"min":0, "step":0.01}'
+            hoz-align="right"
+            header-hoz-align="right"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="frequency"
+            title="Frequency"
+            header-filter="list"
+            header-filter-params='{"valuesLookup":true, "clearable":true}'
+            editor="select"
+            editor-params='{"values":["Monthly", "Quarterly", "Semi-Annual", "Annual"]}'
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="status"
+            title="Status"
+            header-filter="list"
+            header-filter-params='{"valuesLookup":true, "clearable":true}'
+            editor="select"
+            editor-params='{"values":["Active", "Pending", "Cancelled", "Completed"]}'
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="start_date"
+            title="Start Date"
+            formatter="localdatetime"
+            formatter-params='{"format": "DATE_SHORT"}'
+            sorter="date"
+            editor="date"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="end_date"
+            title="End Date"
+            formatter="localdatetime"
+            formatter-params='{"format": "DATE_SHORT"}'
+            sorter="date"
+            editor="date"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="is_active"
+            title="Active?"
+            formatter="tickCross"
+            header-filter="tickCross"
+            header-filter-params='{"tristate":true}'
+            editor="tickCross"
+            hoz-align="center"
+            header-hoz-align="center"
+            visible="true"
+            ></wc-tabulator-column>
+        </wc-tabulator>
+      </div>
+    </div>
+  </div>
+
+  <!-- Example 3: Dynamic script_id and data_id from form inputs -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3>Example 3: Dynamic Parameters from Form</h3>
+    </div>
+    <div class="card-body">
+      <p class="mb-4">
+        This example lets you specify script_id and data_id dynamically via form inputs.
+      </p>
+
+      <div class="grid-1 sm:grid-2 gap-3 mb-4">
+        <wc-input
+          id="script-id-input"
+          name="script_id"
+          lbl-label="Script ID"
+          placeholder="Enter script ID"
+          value="your-script-id-here"
+          ></wc-input>
+
+        <wc-input
+          id="data-id-input"
+          name="data_id"
+          lbl-label="Data ID"
+          placeholder="Enter data ID"
+          value="your-data-id-here"
+          ></wc-input>
+      </div>
+
+      <button
+        class="btn btn-primary mb-4"
+        _="on click
+          set scriptId to #script-id-input.value
+          set dataId to #data-id-input.value
+          set table to #bill-plans-table-3
+          set url to 'http://localhost:8080/api/_web_pilot_run?script_id=' + scriptId + '&data_id=' + dataId
+          set table.ajaxURL to url
+          call table.setData()
+        ">
+        Load Bill Plans
+      </button>
+
+      <div class="row gap-4">
+        <wc-tabulator
+          class="rounded w-full max-h-500"
+          id="bill-plans-table-3"
+          collection-name="_web_pilot_run"
+          ajax-url="http://localhost:8080/api/_web_pilot_run"
+          ajax-params='{"script_id": "your-script-id-here", "data_id": "your-data-id-here"}'
+          placeholder="No Bill Plans Available - Click 'Load Bill Plans' button"
+          row-height="40"
+          pagination
+          pagination-size="10"
+          pagination-counter="rows"
+          header-visible="true"
+          selectable-rows="true"
+          layout="fitDataStretch"
+          >
+          <wc-tabulator-column
+            title="#"
+            formatter="function(cell) {
+                         var row = cell.getRow();
+                         return row.getPosition(true);
+                       }"
+            hoz-align="center"
+            width=40
+            header-sort="false"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="plan_name"
+            title="Plan Name"
+            header-filter="input"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="amount"
+            title="Amount"
+            formatter="money"
+            formatter-params='{"thousand":",", "symbol":"$", "precision":2}'
+            hoz-align="right"
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="frequency"
+            title="Frequency"
+            header-filter="list"
+            header-filter-params='{"valuesLookup":true}'
+            visible="true"
+            ></wc-tabulator-column>
+
+          <wc-tabulator-column
+            field="status"
+            title="Status"
+            visible="true"
+            ></wc-tabulator-column>
+        </wc-tabulator>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Response Format Guide -->
+  <div class="card border-primary-bg-color">
+    <div class="card-header bg-primary-bg-color">
+      <h3>API Response Format Guide</h3>
+    </div>
+    <div class="card-body">
+      <h4 class="mb-2">Expected API Response Structure:</h4>
+
+      <p class="mb-2"><strong>Option A:</strong> Direct array response (simplest)</p>
+      <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>[
+  {
+    "plan_id": "BP001",
+    "plan_name": "Monthly Premium",
+    "amount": 99.99,
+    "frequency": "Monthly",
+    "status": "Active",
+    "start_date": "2025-01-01",
+    "is_active": true
+  },
+  {
+    "plan_id": "BP002",
+    "plan_name": "Annual Subscription",
+    "amount": 999.99,
+    "frequency": "Annual",
+    "status": "Active",
+    "start_date": "2025-01-01",
+    "is_active": true
+  }
+]</code></pre>
+
+      <p class="mb-2"><strong>Option B:</strong> Nested in data object (requires ajax-response attribute)</p>
+      <pre class="bg-surface-10 p-4 rounded overflow-x-auto mb-4"><code>{
+  "success": true,
+  "data": {
+    "bill_plans": [
+      {
+        "plan_id": "BP001",
+        "plan_name": "Monthly Premium",
+        "amount": 99.99,
+        ...
+      }
+    ]
+  }
+}</code></pre>
+
+      <p class="mb-2">For Option B, add this attribute to wc-tabulator:</p>
+      <pre class="bg-surface-10 p-4 rounded overflow-x-auto"><code>ajax-response='{"data": "data.bill_plans"}'</code></pre>
+
+      <h4 class="mt-4 mb-2">Common Field Names in bill_plans:</h4>
+      <ul class="list-disc pl-6">
+        <li><code>plan_id</code> - Unique identifier</li>
+        <li><code>plan_name</code> - Name/title of the plan</li>
+        <li><code>description</code> - Plan details</li>
+        <li><code>amount</code> - Cost/price</li>
+        <li><code>frequency</code> - Billing frequency (Monthly, Annual, etc.)</li>
+        <li><code>status</code> - Current status (Active, Pending, etc.)</li>
+        <li><code>start_date</code> - When the plan starts</li>
+        <li><code>end_date</code> - When the plan ends (optional)</li>
+        <li><code>is_active</code> - Boolean active flag</li>
+      </ul>
+
+      <p class="mt-4"><strong>Note:</strong> Adjust the column <code>field</code> attributes to match your actual data structure.</p>
+    </div>
+  </div>
+
+</div>
