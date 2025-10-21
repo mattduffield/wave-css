@@ -191,6 +191,11 @@ class WcField extends WcBaseComponent {
     });
 
     this.componentElement.appendChild(valueContainer);
+
+    // Remove value-class attribute from wc-field after using it
+    if (valueClass) {
+      this.removeAttribute('value-class');
+    }
   }
 
   _renderWithValue() {
@@ -224,6 +229,12 @@ class WcField extends WcBaseComponent {
 
       valueContainer.textContent = value;
       this.componentElement.appendChild(valueContainer);
+
+      // Remove value and value-class attributes from wc-field after using them
+      this.removeAttribute('value');
+      if (valueClass) {
+        this.removeAttribute('value-class');
+      }
     }
   }
 
@@ -240,7 +251,7 @@ class WcField extends WcBaseComponent {
       anchor.classList.add('wc-field-label', 'mb-1', 'cursor-pointer', 'underline');
       anchor.href = link;
 
-      // Add HTMX attributes if present
+      // Add HTMX attributes if present (this will remove them from wc-field)
       this._addHtmxAttributes(anchor);
 
       // Add custom label classes if provided
@@ -255,6 +266,9 @@ class WcField extends WcBaseComponent {
       anchor.appendChild(labelElement);
 
       this.componentElement.appendChild(anchor);
+
+      // Remove link attribute from wc-field after applying to anchor
+      this.removeAttribute('link');
     } else {
       // Create plain label
       const labelElement = document.createElement('label');
@@ -270,10 +284,15 @@ class WcField extends WcBaseComponent {
       labelElement.textContent = label;
       this.componentElement.appendChild(labelElement);
     }
+
+    // Remove label-class attribute after using it
+    if (labelClass) {
+      this.removeAttribute('label-class');
+    }
   }
 
   _addHtmxAttributes(element) {
-    // Copy HTMX attributes from wc-field to the anchor
+    // Copy HTMX attributes from wc-field to the anchor, then remove from wc-field
     const htmxAttrs = [
       'hx-get', 'hx-post', 'hx-put', 'hx-delete', 'hx-patch',
       'hx-target', 'hx-swap', 'hx-trigger', 'hx-indicator',
@@ -284,6 +303,8 @@ class WcField extends WcBaseComponent {
       const value = this.getAttribute(attr);
       if (value !== null) {
         element.setAttribute(attr, value);
+        // Remove from wc-field to prevent duplicate HTMX bindings
+        this.removeAttribute(attr);
       }
     });
   }

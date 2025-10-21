@@ -3587,6 +3587,9 @@ var WcField = class extends WcBaseComponent {
       valueContainer.appendChild(child);
     });
     this.componentElement.appendChild(valueContainer);
+    if (valueClass) {
+      this.removeAttribute("value-class");
+    }
   }
   _renderWithValue() {
     this._renderLabel();
@@ -3610,6 +3613,10 @@ var WcField = class extends WcBaseComponent {
       }
       valueContainer.textContent = value;
       this.componentElement.appendChild(valueContainer);
+      this.removeAttribute("value");
+      if (valueClass) {
+        this.removeAttribute("value-class");
+      }
     }
   }
   _renderLabel() {
@@ -3631,6 +3638,7 @@ var WcField = class extends WcBaseComponent {
       labelElement.textContent = label;
       anchor.appendChild(labelElement);
       this.componentElement.appendChild(anchor);
+      this.removeAttribute("link");
     } else {
       const labelElement = document.createElement("label");
       labelElement.classList.add("wc-field-label", "mb-1");
@@ -3641,6 +3649,9 @@ var WcField = class extends WcBaseComponent {
       }
       labelElement.textContent = label;
       this.componentElement.appendChild(labelElement);
+    }
+    if (labelClass) {
+      this.removeAttribute("label-class");
     }
   }
   _addHtmxAttributes(element) {
@@ -3663,6 +3674,7 @@ var WcField = class extends WcBaseComponent {
       const value = this.getAttribute(attr);
       if (value !== null) {
         element.setAttribute(attr, value);
+        this.removeAttribute(attr);
       }
     });
   }
