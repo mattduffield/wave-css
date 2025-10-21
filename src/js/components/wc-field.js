@@ -248,7 +248,7 @@ class WcField extends WcBaseComponent {
 
     // Create anchor if link is provided OR if hx-get is present
     if (link || hxGet) {
-      // Create anchor with label
+      // Create clickable anchor with label
       const anchor = document.createElement('a');
       anchor.classList.add('wc-field-label', 'mb-1', 'cursor-pointer', 'underline');
 
