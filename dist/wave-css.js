@@ -3698,7 +3698,7 @@ var WcField = class extends WcBaseComponent {
         font-weight: 500;
       }
 
-      wc-field .wc-field-label:hover {
+      wc-field a.wc-field-label:hover {
         opacity: 0.8;
       }
 
