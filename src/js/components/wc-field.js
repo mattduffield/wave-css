@@ -243,13 +243,17 @@ class WcField extends WcBaseComponent {
     if (!label) return; // Don't render label if not provided
 
     const link = this.getAttribute('link');
+    const hxGet = this.getAttribute('hx-get');
     const labelClass = this.getAttribute('label-class');
 
-    if (link) {
+    // Create anchor if link is provided OR if hx-get is present
+    if (link || hxGet) {
       // Create anchor with label
       const anchor = document.createElement('a');
       anchor.classList.add('wc-field-label', 'mb-1', 'cursor-pointer', 'underline');
-      anchor.href = link;
+
+      // Use link if provided, otherwise fall back to hx-get
+      anchor.href = link || hxGet;
 
       // Add HTMX attributes if present (this will remove them from wc-field)
       this._addHtmxAttributes(anchor);
@@ -268,7 +272,9 @@ class WcField extends WcBaseComponent {
       this.componentElement.appendChild(anchor);
 
       // Remove link attribute from wc-field after applying to anchor
-      this.removeAttribute('link');
+      if (link) {
+        this.removeAttribute('link');
+      }
     } else {
       // Create plain label
       const labelElement = document.createElement('label');
