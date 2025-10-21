@@ -3627,7 +3627,7 @@ var WcField = class extends WcBaseComponent {
     const labelClass = this.getAttribute("label-class");
     if (link || hxGet) {
       const anchor = document.createElement("a");
-      anchor.classList.add("wc-field-label", "mb-1", "cursor-pointer", "underline");
+      anchor.classList.add("wc-field-label", "cursor-pointer", "underline");
       anchor.href = link || hxGet;
       this._addHtmxAttributes(anchor);
       if (labelClass) {
@@ -3644,7 +3644,7 @@ var WcField = class extends WcBaseComponent {
       }
     } else {
       const labelElement = document.createElement("label");
-      labelElement.classList.add("wc-field-label", "mb-1");
+      labelElement.classList.add("wc-field-label");
       if (labelClass) {
         labelClass.split(" ").forEach((cls) => {
           if (cls.trim()) labelElement.classList.add(cls.trim());

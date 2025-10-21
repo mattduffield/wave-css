@@ -250,7 +250,7 @@ class WcField extends WcBaseComponent {
     if (link || hxGet) {
       // Create clickable anchor with label
       const anchor = document.createElement('a');
-      anchor.classList.add('wc-field-label', 'mb-1', 'cursor-pointer', 'underline');
+      anchor.classList.add('wc-field-label', 'cursor-pointer', 'underline');
 
       // Use link if provided, otherwise fall back to hx-get
       anchor.href = link || hxGet;
@@ -278,7 +278,7 @@ class WcField extends WcBaseComponent {
     } else {
       // Create plain label
       const labelElement = document.createElement('label');
-      labelElement.classList.add('wc-field-label', 'mb-1');
+      labelElement.classList.add('wc-field-label');
 
       // Add custom label classes if provided
       if (labelClass) {
