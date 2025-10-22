@@ -1,13 +1,24 @@
 /**
- * 
+ *
  *  Name: wc-save-split-button
  *  Usage:
  *    <wc-save-split-button
+ *      form="form#myForm"
+ *      hx-include="form#myForm"
  *      save-url="/screen/contact/123"
  *      save-new-url="/screen/contact/create"
  *      save-return-url="/screen/contact_list/list">
  *    </wc-save-split-button>
- * 
+ *
+ *  Attributes:
+ *    - form: CSS selector for the form to validate (e.g., "form#myForm")
+ *            If not provided, falls back to hx-include for backwards compatibility
+ *    - hx-include: Form elements to include in HTMX request
+ *    - save-url: URL for the Save button
+ *    - save-new-url: URL to redirect after Save and Add New
+ *    - save-return-url: URL to redirect after Save and Return
+ *    - method: HTTP method (default: "post")
+ *
  *  API:
  *    wc.EventHub.broadcast('wc-accordion:open', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
  *    wc.EventHub.broadcast('wc-accordion:close', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
@@ -20,7 +31,7 @@ if (!customElements.get('wc-save-split-button')) {
 
   class WcSaveSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return ['hx-include'];
+      return ['form', 'hx-include'];
     }
 
     constructor() {
@@ -121,6 +132,22 @@ if (!customElements.get('wc-save-split-button')) {
     }
 
     _handleClick(event) {
+      // Get the form to validate - prefer dedicated 'form' attribute, fall back to 'hx-include'
+      const formSelector = this.getAttribute('form') || this.getAttribute('hx-include');
+      if (formSelector) {
+        const form = document.querySelector(formSelector);
+        if (form && form.tagName === 'FORM') {
+          // Check if form is valid using browser's built-in validation
+          if (!form.checkValidity()) {
+            // Form is invalid - trigger validation messages and prevent save
+            form.reportValidity();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+        }
+      }
+
       const method = this.getAttribute('method') || 'post';
       const isSaveBtn = event.target.classList.contains('save-btn');
       let url = event.target.dataset.url;

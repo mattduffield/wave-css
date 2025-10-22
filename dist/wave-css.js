@@ -10348,7 +10348,7 @@ if (!customElements.get("wc-save-button")) {
 if (!customElements.get("wc-save-split-button")) {
   class WcSaveSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return ["hx-include"];
+      return ["form", "hx-include"];
     }
     constructor() {
       super();
@@ -10439,6 +10439,18 @@ if (!customElements.get("wc-save-split-button")) {
       }
     }
     _handleClick(event) {
+      const formSelector = this.getAttribute("form") || this.getAttribute("hx-include");
+      if (formSelector) {
+        const form = document.querySelector(formSelector);
+        if (form && form.tagName === "FORM") {
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+        }
+      }
       const method = this.getAttribute("method") || "post";
       const isSaveBtn = event.target.classList.contains("save-btn");
       let url = event.target.dataset.url;
