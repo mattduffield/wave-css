@@ -81,17 +81,17 @@ if (!customElements.get('wc-save-split-button')) {
       
       const markup = `
         <button type="button" class="save-btn btn"
-          hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
+          hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
           <div class="dropdown-content text-sm">
             <a class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
+              hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
               data-url="${saveNewUrl}">
               Save and Add New
             </a>
             <a class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
+              hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
               data-url="${saveReturnUrl}">
               Save and Return
             </a>
@@ -131,27 +131,103 @@ if (!customElements.get('wc-save-split-button')) {
       }
     }
 
-    _handleClick(event) {
+    _validateForm() {
       // Get the form to validate - prefer dedicated 'form' attribute, fall back to 'hx-include'
       const formSelector = this.getAttribute('form') || this.getAttribute('hx-include');
-      if (formSelector) {
-        const form = document.querySelector(formSelector);
-        if (form && form.tagName === 'FORM') {
-          // Check if form is valid using browser's built-in validation
-          if (!form.checkValidity()) {
-            // Form is invalid - trigger validation messages and prevent save
-            form.reportValidity();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-          }
-        }
+      if (!formSelector) {
+        return true; // No form to validate
       }
 
+      const form = document.querySelector(formSelector);
+      if (!form || form.tagName !== 'FORM') {
+        return true; // Form not found or not a form element
+      }
+
+      // Check if form is valid using browser's built-in validation
+      const isValid = form.checkValidity();
+
+      if (!isValid) {
+        // Find the first invalid field
+        const firstInvalidField = form.querySelector(':invalid');
+
+        if (firstInvalidField) {
+          // Check if field is hidden (in a collapsed accordion, hidden tab, etc.)
+          const isHidden = firstInvalidField.offsetParent === null;
+
+          if (isHidden) {
+            // Field is hidden - try to make it visible
+            // Look for parent accordion or tab and open it
+            const accordion = firstInvalidField.closest('wc-accordion');
+            if (accordion) {
+              // Find the accordion item containing this field
+              const accordionItem = firstInvalidField.closest('.accordion-item');
+              if (accordionItem) {
+                const header = accordionItem.querySelector('.accordion-header');
+                if (header && !header.classList.contains('selected')) {
+                  header.click();
+                  // Wait a bit for animation
+                  setTimeout(() => {
+                    firstInvalidField.focus();
+                    form.reportValidity();
+                  }, 100);
+                  return false;
+                }
+              }
+            }
+
+            // Look for parent tab
+            const tab = firstInvalidField.closest('wc-tab-item');
+            if (tab) {
+              const tabId = tab.getAttribute('tab-id');
+              const tabHeader = document.querySelector(`[tab-id="${tabId}"]`);
+              if (tabHeader && !tabHeader.classList.contains('active')) {
+                tabHeader.click();
+                setTimeout(() => {
+                  firstInvalidField.focus();
+                  form.reportValidity();
+                }, 100);
+                return false;
+              }
+            }
+          }
+
+          // Try to focus and show validation message
+          try {
+            firstInvalidField.focus();
+            form.reportValidity();
+          } catch (e) {
+            // If focus fails, just show alert
+            alert('Please fill out all required fields before saving.');
+          }
+        } else {
+          // No specific invalid field found, just report
+          form.reportValidity();
+        }
+
+        return false;
+      }
+
+      return true;
+    }
+
+    _handleClick(event) {
+      const button = event.target.closest('button, a');
+      if (!button) return;
+
+      // Validate form first
+      if (!this._validateForm()) {
+        // Form is invalid - don't trigger the validated event
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+
+      // Form is valid - set up request handlers and trigger the validated event
       const method = this.getAttribute('method') || 'post';
-      const isSaveBtn = event.target.classList.contains('save-btn');
-      let url = event.target.dataset.url;
+      const isSaveBtn = button.classList.contains('save-btn');
+      let url = button.dataset.url;
       let hash = window.location.hash;
+
       //
       // The following is necessary to distinguish between a create and
       // return back to the new created record. Otherwise, it would
@@ -160,6 +236,7 @@ if (!customElements.get('wc-save-split-button')) {
       if (method == 'post' && isSaveBtn) {
         url = url.replace('create', '__id__')
       }
+
       // console.log('wc-save-split-button:click', event, url);
       document.body.addEventListener('htmx:configRequest', (e) => {
         // console.log('wc-save-split-button:htmx:configRequest', e, url);
@@ -168,6 +245,7 @@ if (!customElements.get('wc-save-split-button')) {
           sessionStorage.setItem('hash', hash);
         }
       }, {once: true});
+
       document.body.addEventListener('htmx:afterSwap', (e) => {
         // console.log('wc-save-split-button:htmx:afterSwap', e);
         const hash = sessionStorage.getItem('hash');
@@ -176,6 +254,9 @@ if (!customElements.get('wc-save-split-button')) {
           sessionStorage.removeItem('hash');
         }
       }, {once: true});
+
+      // Trigger the custom 'validated' event for HTMX to process
+      htmx.trigger(button, 'validated');
     }
 
     _applyStyle() {

@@ -10286,7 +10286,7 @@ if (!customElements.get("wc-page-designer")) {
 if (!customElements.get("wc-save-button")) {
   class WcSaveButton extends WcBaseComponent {
     static get observedAttributes() {
-      return [];
+      return ["form", "hx-include"];
     }
     constructor() {
       super();
@@ -10298,17 +10298,23 @@ if (!customElements.get("wc-save-button")) {
         const id = this.getAttribute("id") || "";
         const saveUrl = this.getAttribute("save-url") || "";
         const label = this.getAttribute("label") || "Save";
+        const hxInclude = this.getAttribute("hx-include") || "";
         this.componentElement = document.createElement("button");
+        this.componentElement.type = "button";
         this.componentElement.id = id;
         this.removeAttribute("id");
         this.componentElement.textContent = label;
-        this.componentElement.classList.add("wc-save-button");
+        this.componentElement.classList.add("wc-save-button", "btn");
         this.componentElement.setAttribute("hx-target", "#viewport");
         this.componentElement.setAttribute("hx-swap", "innerHTML transition:true");
         this.componentElement.setAttribute("hx-indicator", "#content-loader");
         this.componentElement.setAttribute("hx-post", saveUrl);
+        this.componentElement.setAttribute("hx-trigger", "validated");
         this.removeAttribute("save-url");
         this.componentElement.setAttribute("hx-push-url", "true");
+        if (hxInclude) {
+          this.componentElement.setAttribute("hx-include", hxInclude);
+        }
         this.appendChild(this.componentElement);
       }
     }
@@ -10320,7 +10326,80 @@ if (!customElements.get("wc-save-button")) {
       this._unWireEvents();
     }
     _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue);
+      if (attrName === "hx-include") {
+        if (newValue) {
+          this.componentElement.setAttribute("hx-include", newValue);
+        } else {
+          this.componentElement.removeAttribute("hx-include");
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    _validateForm() {
+      const formSelector = this.getAttribute("form") || this.getAttribute("hx-include");
+      if (!formSelector) {
+        return true;
+      }
+      const form = document.querySelector(formSelector);
+      if (!form || form.tagName !== "FORM") {
+        return true;
+      }
+      const isValid = form.checkValidity();
+      if (!isValid) {
+        const firstInvalidField = form.querySelector(":invalid");
+        if (firstInvalidField) {
+          const isHidden = firstInvalidField.offsetParent === null;
+          if (isHidden) {
+            const accordion = firstInvalidField.closest("wc-accordion");
+            if (accordion) {
+              const accordionItem = firstInvalidField.closest(".accordion-item");
+              if (accordionItem) {
+                const header = accordionItem.querySelector(".accordion-header");
+                if (header && !header.classList.contains("selected")) {
+                  header.click();
+                  setTimeout(() => {
+                    firstInvalidField.focus();
+                    form.reportValidity();
+                  }, 100);
+                  return false;
+                }
+              }
+            }
+            const tab = firstInvalidField.closest("wc-tab-item");
+            if (tab) {
+              const tabId = tab.getAttribute("tab-id");
+              const tabHeader = document.querySelector(`[tab-id="${tabId}"]`);
+              if (tabHeader && !tabHeader.classList.contains("active")) {
+                tabHeader.click();
+                setTimeout(() => {
+                  firstInvalidField.focus();
+                  form.reportValidity();
+                }, 100);
+                return false;
+              }
+            }
+          }
+          try {
+            firstInvalidField.focus();
+            form.reportValidity();
+          } catch (e) {
+            alert("Please fill out all required fields before saving.");
+          }
+        } else {
+          form.reportValidity();
+        }
+        return false;
+      }
+      return true;
+    }
+    _handleClick(event) {
+      if (!this._validateForm()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+      htmx.trigger(this.componentElement, "validated");
     }
     _applyStyle() {
       const style = `
@@ -10336,9 +10415,11 @@ if (!customElements.get("wc-save-button")) {
     }
     _wireEvents() {
       super._wireEvents();
+      this.componentElement.addEventListener("click", this._handleClick.bind(this));
     }
     _unWireEvents() {
       super._unWireEvents();
+      this.componentElement.removeEventListener("click", this._handleClick.bind(this));
     }
   }
   customElements.define("wc-save-button", WcSaveButton);
@@ -10391,17 +10472,17 @@ if (!customElements.get("wc-save-split-button")) {
       const hxIncludeAttr = hxInclude ? `hx-include="${hxInclude}"` : "";
       const markup = `
         <button type="button" class="save-btn btn"
-          hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
+          hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
           <div class="dropdown-content text-sm">
             <a class="save-new-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
+              hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
               data-url="${saveNewUrl}">
               Save and Add New
             </a>
             <a class="save-return-btn btn w-full"
-              hx-${method}="${saveUrl}" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
+              hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
               data-url="${saveReturnUrl}">
               Save and Return
             </a>
@@ -10438,22 +10519,74 @@ if (!customElements.get("wc-save-split-button")) {
         super._handleAttributeChange(attrName, newValue);
       }
     }
-    _handleClick(event) {
+    _validateForm() {
       const formSelector = this.getAttribute("form") || this.getAttribute("hx-include");
-      if (formSelector) {
-        const form = document.querySelector(formSelector);
-        if (form && form.tagName === "FORM") {
-          if (!form.checkValidity()) {
-            form.reportValidity();
-            event.preventDefault();
-            event.stopPropagation();
-            return;
+      if (!formSelector) {
+        return true;
+      }
+      const form = document.querySelector(formSelector);
+      if (!form || form.tagName !== "FORM") {
+        return true;
+      }
+      const isValid = form.checkValidity();
+      if (!isValid) {
+        const firstInvalidField = form.querySelector(":invalid");
+        if (firstInvalidField) {
+          const isHidden = firstInvalidField.offsetParent === null;
+          if (isHidden) {
+            const accordion = firstInvalidField.closest("wc-accordion");
+            if (accordion) {
+              const accordionItem = firstInvalidField.closest(".accordion-item");
+              if (accordionItem) {
+                const header = accordionItem.querySelector(".accordion-header");
+                if (header && !header.classList.contains("selected")) {
+                  header.click();
+                  setTimeout(() => {
+                    firstInvalidField.focus();
+                    form.reportValidity();
+                  }, 100);
+                  return false;
+                }
+              }
+            }
+            const tab = firstInvalidField.closest("wc-tab-item");
+            if (tab) {
+              const tabId = tab.getAttribute("tab-id");
+              const tabHeader = document.querySelector(`[tab-id="${tabId}"]`);
+              if (tabHeader && !tabHeader.classList.contains("active")) {
+                tabHeader.click();
+                setTimeout(() => {
+                  firstInvalidField.focus();
+                  form.reportValidity();
+                }, 100);
+                return false;
+              }
+            }
           }
+          try {
+            firstInvalidField.focus();
+            form.reportValidity();
+          } catch (e) {
+            alert("Please fill out all required fields before saving.");
+          }
+        } else {
+          form.reportValidity();
         }
+        return false;
+      }
+      return true;
+    }
+    _handleClick(event) {
+      const button = event.target.closest("button, a");
+      if (!button) return;
+      if (!this._validateForm()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
       }
       const method = this.getAttribute("method") || "post";
-      const isSaveBtn = event.target.classList.contains("save-btn");
-      let url = event.target.dataset.url;
+      const isSaveBtn = button.classList.contains("save-btn");
+      let url = button.dataset.url;
       let hash = window.location.hash;
       if (method == "post" && isSaveBtn) {
         url = url.replace("create", "__id__");
@@ -10471,6 +10604,7 @@ if (!customElements.get("wc-save-split-button")) {
           sessionStorage.removeItem("hash");
         }
       }, { once: true });
+      htmx.trigger(button, "validated");
     }
     _applyStyle() {
       const style = `
