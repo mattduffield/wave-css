@@ -2470,6 +2470,41 @@
     opacity: 1;
   }
 
+  /* Transition utilities */
+  .transition-none { transition: none; }
+  .transition-all { transition: all 0.2s ease-in-out; }
+  .transition-colors { transition: color, background-color, border-color 0.2s ease-in-out; }
+  .transition-opacity { transition: opacity 0.2s ease-in-out; }
+  .transition-transform { transition: transform 0.2s ease-in-out; }
+
+  /* Duration utilities */
+  .duration-75 { transition-duration: 75ms; }
+  .duration-100 { transition-duration: 100ms; }
+  .duration-150 { transition-duration: 150ms; }
+  .duration-200 { transition-duration: 200ms; }
+  .duration-300 { transition-duration: 300ms; }
+  .duration-500 { transition-duration: 500ms; }
+  .duration-700 { transition-duration: 700ms; }
+  .duration-1000 { transition-duration: 1000ms; }
+
+  /* Timing function utilities */
+  .ease-linear { transition-timing-function: linear; }
+  .ease-in { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+  .ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+  /* Scale utilities */
+  .scale-0 { transform: scale(0); }
+  .scale-50 { transform: scale(0.5); }
+  .scale-75 { transform: scale(0.75); }
+  .scale-90 { transform: scale(0.9); }
+  .scale-95 { transform: scale(0.95); }
+  .scale-100 { transform: scale(1); }
+  .scale-105 { transform: scale(1.05); }
+  .scale-110 { transform: scale(1.1); }
+  .scale-125 { transform: scale(1.25); }
+  .scale-150 { transform: scale(1.5); }
+
   .text-white {
     color: white;
   }
@@ -4595,6 +4630,33 @@
     transform-origin: 0 0; /* see note above */
   }
   .ldio-qjspg5uvdp div { box-sizing: content-box; }
+}
+
+@layer wc.hover {
+  /* Hover scale utilities */
+  .hover\:scale-0:hover { transform: scale(0); }
+  .hover\:scale-50:hover { transform: scale(0.5); }
+  .hover\:scale-75:hover { transform: scale(0.75); }
+  .hover\:scale-90:hover { transform: scale(0.9); }
+  .hover\:scale-95:hover { transform: scale(0.95); }
+  .hover\:scale-100:hover { transform: scale(1); }
+  .hover\:scale-105:hover { transform: scale(1.05); }
+  .hover\:scale-110:hover { transform: scale(1.1); }
+  .hover\:scale-125:hover { transform: scale(1.25); }
+  .hover\:scale-150:hover { transform: scale(1.5); }
+
+  /* Hover opacity utilities */
+  .hover\:opacity-0:hover { opacity: 0; }
+  .hover\:opacity-10:hover { opacity: 0.1; }
+  .hover\:opacity-20:hover { opacity: 0.2; }
+  .hover\:opacity-30:hover { opacity: 0.3; }
+  .hover\:opacity-40:hover { opacity: 0.4; }
+  .hover\:opacity-50:hover { opacity: 0.5; }
+  .hover\:opacity-60:hover { opacity: 0.6; }
+  .hover\:opacity-70:hover { opacity: 0.7; }
+  .hover\:opacity-80:hover { opacity: 0.8; }
+  .hover\:opacity-90:hover { opacity: 0.9; }
+  .hover\:opacity-100:hover { opacity: 1; }
 }
 
 @layer wc.usage {
