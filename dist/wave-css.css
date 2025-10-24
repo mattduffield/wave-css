@@ -10247,6 +10247,11 @@
     height: 1px;
     background-color: var(--primary-bg-color);
   }
+  a.htmx-request {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 }
 @layer wc.responsive {
   :root {
