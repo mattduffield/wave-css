@@ -343,6 +343,7 @@ class WcField extends WcBaseComponent {
       wc-field .wc-field-value {
         word-wrap: break-word;
         overflow-wrap: break-word;
+        min-height: 1.5em;
       }
 
       /* Text alignment utilities (if not using utility classes) */
