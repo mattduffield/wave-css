@@ -265,9 +265,8 @@ class WcField extends WcBaseComponent {
         });
       }
 
-      const labelElement = document.createElement('label');
-      labelElement.textContent = label;
-      anchor.appendChild(labelElement);
+      // Set text directly on anchor (no need for nested label element)
+      anchor.textContent = label;
 
       this.componentElement.appendChild(anchor);
 
@@ -330,6 +329,11 @@ class WcField extends WcBaseComponent {
       wc-field .wc-field-label {
         display: block;
         font-weight: 500;
+      }
+
+      /* Only show pointer and hover effect on anchors (which only exist when link/hx-get is present) */
+      wc-field a.wc-field-label {
+        cursor: pointer;
       }
 
       wc-field a.wc-field-label:hover {

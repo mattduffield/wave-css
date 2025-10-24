@@ -3635,9 +3635,7 @@ var WcField = class extends WcBaseComponent {
           if (cls.trim()) anchor.classList.add(cls.trim());
         });
       }
-      const labelElement = document.createElement("label");
-      labelElement.textContent = label;
-      anchor.appendChild(labelElement);
+      anchor.textContent = label;
       this.componentElement.appendChild(anchor);
       if (link) {
         this.removeAttribute("link");
@@ -3696,6 +3694,11 @@ var WcField = class extends WcBaseComponent {
       wc-field .wc-field-label {
         display: block;
         font-weight: 500;
+      }
+
+      /* Only show pointer and hover effect on anchors (which only exist when link/hx-get is present) */
+      wc-field a.wc-field-label {
+        cursor: pointer;
       }
 
       wc-field a.wc-field-label:hover {
