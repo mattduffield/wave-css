@@ -1039,6 +1039,9 @@
   }
 }
 @layer wc.colors {
+  .bg-transparent {
+    background-color: transparent;
+  }
   .bg-white {
     background-color: var(--wc-white);
   }

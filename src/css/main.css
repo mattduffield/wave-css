@@ -1027,6 +1027,7 @@
 
 @layer wc.colors {
   /* Background Color */
+  .bg-transparent { background-color: transparent; }
   .bg-white { background-color: var(--wc-white); }
   .bg-black { background-color: var(--wc-black); }
   .bg-slate-50 { background-color: var(--wc-slate-50); }
