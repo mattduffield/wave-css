@@ -202,9 +202,9 @@ class WcField extends WcBaseComponent {
     // Render label if present
     this._renderLabel();
 
-    // Render value if present
-    const value = this.getAttribute('value');
-    if (value) {
+    // Always render value container if value attribute exists (even if empty)
+    if (this.hasAttribute('value')) {
+      const value = this.getAttribute('value') || '';
       const valueContainer = document.createElement('div');
       valueContainer.classList.add('wc-field-value');
 

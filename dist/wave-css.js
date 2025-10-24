@@ -3593,8 +3593,8 @@ var WcField = class extends WcBaseComponent {
   }
   _renderWithValue() {
     this._renderLabel();
-    const value = this.getAttribute("value");
-    if (value) {
+    if (this.hasAttribute("value")) {
+      const value = this.getAttribute("value") || "";
       const valueContainer = document.createElement("div");
       valueContainer.classList.add("wc-field-value");
       const valueClass = this.getAttribute("value-class");
