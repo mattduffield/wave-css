@@ -3593,30 +3593,30 @@ var WcField = class extends WcBaseComponent {
   }
   _renderWithValue() {
     this._renderLabel();
+    const value = this.getAttribute("value") || "";
+    const valueContainer = document.createElement("div");
+    valueContainer.classList.add("wc-field-value");
+    const valueClass = this.getAttribute("value-class");
+    if (valueClass) {
+      valueClass.split(" ").forEach((cls) => {
+        if (cls.trim()) valueContainer.classList.add(cls.trim());
+      });
+    } else {
+      valueContainer.classList.add("text-xs", "text-4");
+    }
+    const textAlign = this.getAttribute("text-align");
+    if (textAlign) {
+      valueContainer.classList.add(`text-${textAlign}`);
+    } else {
+      valueContainer.classList.add("text-center");
+    }
+    valueContainer.textContent = value;
+    this.componentElement.appendChild(valueContainer);
     if (this.hasAttribute("value")) {
-      const value = this.getAttribute("value") || "";
-      const valueContainer = document.createElement("div");
-      valueContainer.classList.add("wc-field-value");
-      const valueClass = this.getAttribute("value-class");
-      if (valueClass) {
-        valueClass.split(" ").forEach((cls) => {
-          if (cls.trim()) valueContainer.classList.add(cls.trim());
-        });
-      } else {
-        valueContainer.classList.add("text-xs", "text-4");
-      }
-      const textAlign = this.getAttribute("text-align");
-      if (textAlign) {
-        valueContainer.classList.add(`text-${textAlign}`);
-      } else {
-        valueContainer.classList.add("text-center");
-      }
-      valueContainer.textContent = value;
-      this.componentElement.appendChild(valueContainer);
       this.removeAttribute("value");
-      if (valueClass) {
-        this.removeAttribute("value-class");
-      }
+    }
+    if (valueClass) {
+      this.removeAttribute("value-class");
     }
   }
   _renderLabel() {

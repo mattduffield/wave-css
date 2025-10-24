@@ -202,39 +202,39 @@ class WcField extends WcBaseComponent {
     // Render label if present
     this._renderLabel();
 
-    // Always render value container if value attribute exists (even if empty)
+    // Always render value container (even if no value attribute exists)
+    const value = this.getAttribute('value') || '';
+    const valueContainer = document.createElement('div');
+    valueContainer.classList.add('wc-field-value');
+
+    // Add custom value classes if provided
+    const valueClass = this.getAttribute('value-class');
+    if (valueClass) {
+      valueClass.split(' ').forEach(cls => {
+        if (cls.trim()) valueContainer.classList.add(cls.trim());
+      });
+    } else {
+      // Default classes
+      valueContainer.classList.add('text-xs', 'text-4');
+    }
+
+    // Add text alignment if specified
+    const textAlign = this.getAttribute('text-align');
+    if (textAlign) {
+      valueContainer.classList.add(`text-${textAlign}`);
+    } else {
+      valueContainer.classList.add('text-center');
+    }
+
+    valueContainer.textContent = value;
+    this.componentElement.appendChild(valueContainer);
+
+    // Remove value and value-class attributes from wc-field after using them
     if (this.hasAttribute('value')) {
-      const value = this.getAttribute('value') || '';
-      const valueContainer = document.createElement('div');
-      valueContainer.classList.add('wc-field-value');
-
-      // Add custom value classes if provided
-      const valueClass = this.getAttribute('value-class');
-      if (valueClass) {
-        valueClass.split(' ').forEach(cls => {
-          if (cls.trim()) valueContainer.classList.add(cls.trim());
-        });
-      } else {
-        // Default classes
-        valueContainer.classList.add('text-xs', 'text-4');
-      }
-
-      // Add text alignment if specified
-      const textAlign = this.getAttribute('text-align');
-      if (textAlign) {
-        valueContainer.classList.add(`text-${textAlign}`);
-      } else {
-        valueContainer.classList.add('text-center');
-      }
-
-      valueContainer.textContent = value;
-      this.componentElement.appendChild(valueContainer);
-
-      // Remove value and value-class attributes from wc-field after using them
       this.removeAttribute('value');
-      if (valueClass) {
-        this.removeAttribute('value-class');
-      }
+    }
+    if (valueClass) {
+      this.removeAttribute('value-class');
     }
   }
 
