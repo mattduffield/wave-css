@@ -13306,6 +13306,30 @@ if (!customElements.get("wc-tabulator")) {
       const formattedDate = this.localdatetime(cell, formatterParams, onRendered);
       return `<a href="${url}">${formattedDate}</a>`;
     }
+    phone(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return "";
+      const cleaned = ("" + value).replace(/\D/g, "");
+      if (cleaned.length === 10) {
+        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+      } else if (cleaned.length === 11 && cleaned[0] === "1") {
+        const match = cleaned.match(/^1(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "+1 (" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+      }
+      return value;
+    }
+    linkphone(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return "";
+      const formattedPhone = this.phone(cell, formatterParams, onRendered);
+      const cleaned = ("" + value).replace(/\D/g, "");
+      return `<a href="tel:+1${cleaned}">${formattedPhone}</a>`;
+    }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
       input = document.createElement("input");

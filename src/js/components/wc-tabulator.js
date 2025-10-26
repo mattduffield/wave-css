@@ -1028,6 +1028,43 @@ if (!customElements.get('wc-tabulator')) {
       return `<a href="${url}">${formattedDate}</a>`;
     }
 
+    phone(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return ""; // Handle null/undefined values
+
+      // Clean the phone number (remove all non-digits)
+      const cleaned = ('' + value).replace(/\D/g, '');
+
+      // Format based on length
+      // Support 10-digit US format: (XXX) XXX-XXXX
+      // Support 11-digit format (with country code): +1 (XXX) XXX-XXXX
+      if (cleaned.length === 10) {
+        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+        }
+      } else if (cleaned.length === 11 && cleaned[0] === '1') {
+        const match = cleaned.match(/^1(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return '+1 (' + match[1] + ') ' + match[2] + '-' + match[3];
+        }
+      }
+
+      // Return original value if it doesn't match expected format
+      return value;
+    }
+
+    linkphone(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return "";
+
+      const formattedPhone = this.phone(cell, formatterParams, onRendered);
+      const cleaned = ('' + value).replace(/\D/g, '');
+
+      // Create tel: link with cleaned number
+      return `<a href="tel:+1${cleaned}">${formattedPhone}</a>`;
+    }
+
     dateEditor(cell, onRendered, success, cancel) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
