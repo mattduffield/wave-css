@@ -780,7 +780,7 @@ if (!customElements.get('wc-tabulator')) {
     linkFormatter(cell, formatterParams, onRendered) {
       // Get the value from the cell
       var value = cell.getValue();
-          
+
       // Create the anchor element
       var linkElement = document.createElement("a");
 
@@ -799,6 +799,38 @@ if (!customElements.get('wc-tabulator')) {
         url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
       }
 
+      // Add query parameters if specified
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === 'object') {
+        const queryParts = [];
+
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+
+          // If value starts with '$', treat it as a field reference
+          if (typeof paramValue === 'string' && paramValue.startsWith('$')) {
+            const fieldPath = paramValue.substring(1); // Remove '$' prefix
+
+            // Support nested field paths like 'data.bill_plan'
+            resolvedValue = fieldPath.split('.').reduce((obj, prop) => {
+              return obj && obj[prop] !== undefined ? obj[prop] : undefined;
+            }, data);
+          } else {
+            // Static value
+            resolvedValue = paramValue;
+          }
+
+          // Only add param if value exists
+          if (resolvedValue !== null && resolvedValue !== undefined) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+
+        // Append query params to URL
+        if (queryParts.length > 0) {
+          const separator = url.includes('?') ? '&' : '?';
+          url += separator + queryParts.join('&');
+        }
+      }
 
       // Set the href attribute
       // linkElement.setAttribute("href", formatterParams.urlPrefix ? formatterParams.urlPrefix + value : value);
@@ -819,7 +851,7 @@ if (!customElements.get('wc-tabulator')) {
           linkElement.setAttribute(key, value);
         });
       }
-      
+
       return linkElement;
     }
 

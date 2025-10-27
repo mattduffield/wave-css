@@ -13121,6 +13121,27 @@ if (!customElements.get("wc-tabulator")) {
       } else {
         url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
       }
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
+        const queryParts = [];
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+          if (typeof paramValue === "string" && paramValue.startsWith("$")) {
+            const fieldPath = paramValue.substring(1);
+            resolvedValue = fieldPath.split(".").reduce((obj, prop) => {
+              return obj && obj[prop] !== void 0 ? obj[prop] : void 0;
+            }, data);
+          } else {
+            resolvedValue = paramValue;
+          }
+          if (resolvedValue !== null && resolvedValue !== void 0) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+        if (queryParts.length > 0) {
+          const separator = url.includes("?") ? "&" : "?";
+          url += separator + queryParts.join("&");
+        }
+      }
       linkElement.setAttribute("href", url);
       if (formatterParams.target) {
         linkElement.setAttribute("target", formatterParams.target);
