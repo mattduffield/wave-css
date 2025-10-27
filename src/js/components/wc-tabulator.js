@@ -803,9 +803,6 @@ if (!customElements.get('wc-tabulator')) {
       if (formatterParams.queryParams && typeof formatterParams.queryParams === 'object') {
         const queryParts = [];
 
-        console.log('linkFormatter: queryParams detected', formatterParams.queryParams);
-        console.log('linkFormatter: row data', data);
-
         Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
           let resolvedValue;
 
@@ -817,19 +814,14 @@ if (!customElements.get('wc-tabulator')) {
             resolvedValue = fieldPath.split('.').reduce((obj, prop) => {
               return obj && obj[prop] !== undefined ? obj[prop] : undefined;
             }, data);
-
-            console.log(`  ${key}: ${paramValue} -> ${resolvedValue}`);
           } else {
             // Static value
             resolvedValue = paramValue;
-            console.log(`  ${key}: ${resolvedValue} (static)`);
           }
 
           // Only add param if value exists
           if (resolvedValue !== null && resolvedValue !== undefined) {
             queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
-          } else {
-            console.log(`  ${key}: skipped (null/undefined)`);
           }
         });
 
@@ -837,9 +829,6 @@ if (!customElements.get('wc-tabulator')) {
         if (queryParts.length > 0) {
           const separator = url.includes('?') ? '&' : '?';
           url += separator + queryParts.join('&');
-          console.log('linkFormatter: final URL', url);
-        } else {
-          console.log('linkFormatter: no query params added');
         }
       }
 

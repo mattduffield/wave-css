@@ -13123,8 +13123,6 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
         const queryParts = [];
-        console.log("linkFormatter: queryParams detected", formatterParams.queryParams);
-        console.log("linkFormatter: row data", data);
         Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
           let resolvedValue;
           if (typeof paramValue === "string" && paramValue.startsWith("$")) {
@@ -13132,23 +13130,16 @@ if (!customElements.get("wc-tabulator")) {
             resolvedValue = fieldPath.split(".").reduce((obj, prop) => {
               return obj && obj[prop] !== void 0 ? obj[prop] : void 0;
             }, data);
-            console.log(`  ${key}: ${paramValue} -> ${resolvedValue}`);
           } else {
             resolvedValue = paramValue;
-            console.log(`  ${key}: ${resolvedValue} (static)`);
           }
           if (resolvedValue !== null && resolvedValue !== void 0) {
             queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
-          } else {
-            console.log(`  ${key}: skipped (null/undefined)`);
           }
         });
         if (queryParts.length > 0) {
           const separator = url.includes("?") ? "&" : "?";
           url += separator + queryParts.join("&");
-          console.log("linkFormatter: final URL", url);
-        } else {
-          console.log("linkFormatter: no query params added");
         }
       }
       linkElement.setAttribute("href", url);
