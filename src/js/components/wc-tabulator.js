@@ -1097,6 +1097,81 @@ if (!customElements.get('wc-tabulator')) {
       return `<a href="tel:+1${cleaned}">${formattedPhone}</a>`;
     }
 
+    linkPhoneFormatter(cell, formatterParams, onRendered) {
+      // Get the formatted phone number
+      const formattedPhone = this.phone(cell, formatterParams, onRendered);
+      if (!formattedPhone) return "";
+
+      // Build the URL using the same logic as linkFormatter
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
+      const screen = cell.getColumn().getDefinition().formatterParams.screen;
+      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
+      const data = cell.getData();
+      const id = data._id;
+      let url = '';
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
+
+      // Add query parameters if specified
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === 'object') {
+        const queryParts = [];
+
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+
+          // If value starts with '$', treat it as a field reference
+          if (typeof paramValue === 'string' && paramValue.startsWith('$')) {
+            const fieldPath = paramValue.substring(1); // Remove '$' prefix
+
+            // Support nested field paths like 'data.bill_plan'
+            resolvedValue = fieldPath.split('.').reduce((obj, prop) => {
+              return obj && obj[prop] !== undefined ? obj[prop] : undefined;
+            }, data);
+          } else {
+            // Static value
+            resolvedValue = paramValue;
+          }
+
+          // Only add param if value exists
+          if (resolvedValue !== null && resolvedValue !== undefined) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+
+        // Append query params to URL
+        if (queryParts.length > 0) {
+          const separator = url.includes('?') ? '&' : '?';
+          url += separator + queryParts.join('&');
+        }
+      }
+
+      // Create the anchor element
+      var linkElement = document.createElement("a");
+      linkElement.setAttribute("href", url);
+
+      // Set the target attribute if specified
+      if (formatterParams.target) {
+        linkElement.setAttribute("target", formatterParams.target);
+      }
+
+      // Set the link text to formatted phone number
+      linkElement.innerText = formattedPhone;
+
+      // If custom attributes are specified, add them to the link
+      if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {
+        Object.entries(formatterParams.attributes).forEach(([key, value]) => {
+          linkElement.setAttribute(key, value);
+        });
+      }
+
+      return linkElement;
+    }
+
     dateEditor(cell, onRendered, success, cancel) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered

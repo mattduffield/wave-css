@@ -13351,6 +13351,55 @@ if (!customElements.get("wc-tabulator")) {
       const cleaned = ("" + value).replace(/\D/g, "");
       return `<a href="tel:+1${cleaned}">${formattedPhone}</a>`;
     }
+    linkPhoneFormatter(cell, formatterParams, onRendered) {
+      const formattedPhone = this.phone(cell, formatterParams, onRendered);
+      if (!formattedPhone) return "";
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
+      const screen = cell.getColumn().getDefinition().formatterParams.screen;
+      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
+      const data = cell.getData();
+      const id = data._id;
+      let url = "";
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
+        const queryParts = [];
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+          if (typeof paramValue === "string" && paramValue.startsWith("$")) {
+            const fieldPath = paramValue.substring(1);
+            resolvedValue = fieldPath.split(".").reduce((obj, prop) => {
+              return obj && obj[prop] !== void 0 ? obj[prop] : void 0;
+            }, data);
+          } else {
+            resolvedValue = paramValue;
+          }
+          if (resolvedValue !== null && resolvedValue !== void 0) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+        if (queryParts.length > 0) {
+          const separator = url.includes("?") ? "&" : "?";
+          url += separator + queryParts.join("&");
+        }
+      }
+      var linkElement = document.createElement("a");
+      linkElement.setAttribute("href", url);
+      if (formatterParams.target) {
+        linkElement.setAttribute("target", formatterParams.target);
+      }
+      linkElement.innerText = formattedPhone;
+      if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
+        Object.entries(formatterParams.attributes).forEach(([key, value]) => {
+          linkElement.setAttribute(key, value);
+        });
+      }
+      return linkElement;
+    }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
       input = document.createElement("input");
