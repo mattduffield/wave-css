@@ -261,9 +261,12 @@ if (!customElements.get('wc-sidenav')) {
       const width = this.getAttribute('width') || '250px';
       const pushSelector = this.getAttribute('push-target') || '#viewport';
       const side = this.querySelector('.wc-sidenav');
+      const openBtn = this.querySelector('.openbtn');
+      const isRight = this.hasAttribute('right-side');
+
       side.classList.add('open');
       side.style.width = width;
-      
+
       if (this.hasAttribute('overlay')) {
         const overlay = this.querySelector('.overlay');
         if (overlay) {
@@ -273,7 +276,6 @@ if (!customElements.get('wc-sidenav')) {
       }
 
       if (this.hasAttribute('push')) {
-        const isRight = this.hasAttribute('right-side');
         if (pushSelector) {
           const pushTarget = document.querySelector(pushSelector);
           if (pushTarget) {
@@ -284,12 +286,24 @@ if (!customElements.get('wc-sidenav')) {
             }
           }
         }
+      } else {
+        // Only move the open button if NOT pushing content
+        if (openBtn) {
+          if (isRight) {
+            openBtn.style.transform = `translateX(-${width})`;
+          } else {
+            openBtn.style.transform = `translateX(${width})`;
+          }
+        }
       }
     }
 
     _closeNav(event) {
       const pushSelector = this.getAttribute('push-target') || '#viewport';
       const side = this.querySelector('.wc-sidenav');
+      const openBtn = this.querySelector('.openbtn');
+      const isRight = this.hasAttribute('right-side');
+
       side.classList.remove('open');
       side.style.width = '0';
 
@@ -302,7 +316,6 @@ if (!customElements.get('wc-sidenav')) {
       }
 
       if (this.hasAttribute('push')) {
-        const isRight = this.hasAttribute('right-side');
         if (pushSelector) {
           const pushTarget = document.querySelector(pushSelector);
           if (pushTarget) {
@@ -313,7 +326,11 @@ if (!customElements.get('wc-sidenav')) {
             }
           }
         }
-
+      } else {
+        // Only move the open button back if NOT pushing content
+        if (openBtn) {
+          openBtn.style.transform = 'translateX(0)';
+        }
       }
     }
 
@@ -388,6 +405,7 @@ if (!customElements.get('wc-sidenav')) {
         wc-sidenav .openbtn {
           position: absolute;
           z-index: 2;
+          transition: transform 0.5s ease;
         }
         wc-sidenav[left-side] .openbtn {
           left: 0;
