@@ -842,7 +842,30 @@ if (!customElements.get('wc-tabulator')) {
       }
 
       // Set the link text - either using labelField or the value itself
-      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+      let displayText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+
+      // Apply text filter if specified
+      if (formatterParams.filter && displayText) {
+        switch (formatterParams.filter) {
+          case 'upper':
+          case 'uppercase':
+            displayText = String(displayText).toUpperCase();
+            break;
+          case 'lower':
+          case 'lowercase':
+            displayText = String(displayText).toLowerCase();
+            break;
+          case 'title':
+          case 'titlecase':
+            displayText = String(displayText).toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+            break;
+          case 'capitalize':
+            displayText = String(displayText).charAt(0).toUpperCase() + String(displayText).slice(1).toLowerCase();
+            break;
+        }
+      }
+
+      linkElement.innerText = displayText;
 
       // If custom attributes are specified, add them to the link
       if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {

@@ -13161,7 +13161,27 @@ if (!customElements.get("wc-tabulator")) {
       if (formatterParams.target) {
         linkElement.setAttribute("target", formatterParams.target);
       }
-      linkElement.innerText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+      let displayText = formatterParams.labelField ? cell.getData()[formatterParams.labelField] : value;
+      if (formatterParams.filter && displayText) {
+        switch (formatterParams.filter) {
+          case "upper":
+          case "uppercase":
+            displayText = String(displayText).toUpperCase();
+            break;
+          case "lower":
+          case "lowercase":
+            displayText = String(displayText).toLowerCase();
+            break;
+          case "title":
+          case "titlecase":
+            displayText = String(displayText).toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+            break;
+          case "capitalize":
+            displayText = String(displayText).charAt(0).toUpperCase() + String(displayText).slice(1).toLowerCase();
+            break;
+        }
+      }
+      linkElement.innerText = displayText;
       if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
         Object.entries(formatterParams.attributes).forEach(([key, value2]) => {
           linkElement.setAttribute(key, value2);
