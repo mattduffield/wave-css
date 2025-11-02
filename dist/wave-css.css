@@ -9469,6 +9469,11 @@
   .whitespace-nowrap {
     white-space: nowrap;
   }
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .underline {
     text-decoration: underline;
   }
