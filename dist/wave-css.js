@@ -3706,9 +3706,13 @@ var WcField = class extends WcBaseComponent {
       }
 
       wc-field .wc-field-value {
+        min-height: 1.5em;
+      }
+
+      /* Default wrapping behavior - only when truncate is NOT applied */
+      wc-field .wc-field-value:not(.truncate) {
         word-wrap: break-word;
         overflow-wrap: break-word;
-        min-height: 1.5em;
       }
 
       /* Text alignment utilities (if not using utility classes) */
