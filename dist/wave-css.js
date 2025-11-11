@@ -20138,6 +20138,7 @@ var WcSelect = class extends WcBaseFormComponent {
       "disabled",
       "required",
       "autofocus",
+      "autocomplete",
       "elt-class",
       "onchange",
       "oninput",
@@ -20320,6 +20321,10 @@ var WcSelect = class extends WcBaseFormComponent {
     const size = this.getAttribute("size");
     if (size) {
       select.setAttribute("size", size);
+    }
+    const autocomplete = this.getAttribute("autocomplete");
+    if (autocomplete) {
+      select.setAttribute("autocomplete", autocomplete);
     }
     const children = Array.from(this.children);
     children.forEach((child) => {

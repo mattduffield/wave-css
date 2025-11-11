@@ -30,7 +30,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
 class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
     return ['name', 'id', 'class', 'multiple', 'value', 'items', 'url', 'display-member', 'value-member',
-      'lbl-label', 'disabled', 'required', 'autofocus', 'elt-class',
+      'lbl-label', 'disabled', 'required', 'autofocus', 'autocomplete', 'elt-class',
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
       'onkeypress', 'onclick',
       'tooltip', 'tooltip-position'];
@@ -238,6 +238,10 @@ class WcSelect extends WcBaseFormComponent {
     const size = this.getAttribute('size');
     if (size) {
       select.setAttribute('size', size);
+    }
+    const autocomplete = this.getAttribute('autocomplete');
+    if (autocomplete) {
+      select.setAttribute('autocomplete', autocomplete);
     }
     
     // Process children maintaining optgroup structure
