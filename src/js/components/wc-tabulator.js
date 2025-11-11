@@ -131,41 +131,25 @@ if (!customElements.get('wc-tabulator')) {
               if (cnt) {
                 htmx.process(cnt);
 
-                // Handle Hyperscript attributes that get HTML-escaped by SweetAlert2
-                // Find all wc-select elements with urls that need dynamic updates
-                const selectsWithUrls = cnt.querySelectorAll('wc-select[url]');
-                console.log('[Clone Dialog] Found wc-select elements with url:', selectsWithUrls.length);
+                // Handle dynamic URL dependencies using data-url-depends attribute
+                // This works around SweetAlert2's template variable processing
+                const dependentSelects = cnt.querySelectorAll('wc-select[data-url-template]');
 
-                selectsWithUrls.forEach(wcSelect => {
-                  const url = wcSelect.getAttribute('url');
-                  console.log('[Clone Dialog] Checking URL:', url);
+                dependentSelects.forEach(wcSelect => {
+                  const urlTemplate = wcSelect.getAttribute('data-url-template');
+                  const dependsOn = wcSelect.getAttribute('data-url-depends');
 
-                  // Check if URL contains template variables like {{...}} or ${...}
-                  // These indicate dependency on another field
-                  const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
-                  if (templateVarMatch) {
-                    console.log('[Clone Dialog] Template variable found:', templateVarMatch);
-                    // Extract the dependent field name from the template
-                    const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
-                    console.log('[Clone Dialog] Dependent field:', dependentField);
-
-                    // Store the original template URL so we can reuse it on each change
-                    const templateUrl = url;
-
-                    // Find the source select element by looking for common patterns
-                    const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) ||
-                                       cnt.querySelector(`input[name="${dependentField}"]`) ||
-                                       cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
-
-                    console.log('[Clone Dialog] Source select found:', sourceSelect);
+                  if (urlTemplate && dependsOn) {
+                    // Find the source select element
+                    const sourceSelect = cnt.querySelector(`select[name="${dependsOn}"]`) ||
+                                       cnt.querySelector(`input[name="${dependsOn}"]`);
 
                     if (sourceSelect) {
                       // Function to update the dependent select's URL
                       const updateUrl = () => {
                         const value = sourceSelect.value;
-                        // Replace template variables with actual value using the original template
-                        const newUrl = templateUrl.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
-                        console.log('[Clone Dialog] Updating URL from', templateUrl, 'to', newUrl, 'with value', value);
+                        // Replace {value} placeholder with actual value
+                        const newUrl = urlTemplate.replace(/\{value\}/g, value);
                         wcSelect.setAttribute('url', newUrl);
                       };
 
@@ -173,7 +157,6 @@ if (!customElements.get('wc-tabulator')) {
                       updateUrl();
 
                       // Update on change
-                      console.log('[Clone Dialog] Adding change listener to', sourceSelect);
                       sourceSelect.addEventListener('change', updateUrl);
                     }
                   }
