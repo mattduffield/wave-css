@@ -134,15 +134,20 @@ if (!customElements.get('wc-tabulator')) {
                 // Handle Hyperscript attributes that get HTML-escaped by SweetAlert2
                 // Find all wc-select elements with urls that need dynamic updates
                 const selectsWithUrls = cnt.querySelectorAll('wc-select[url]');
+                console.log('[Clone Dialog] Found wc-select elements with url:', selectsWithUrls.length);
+
                 selectsWithUrls.forEach(wcSelect => {
                   const url = wcSelect.getAttribute('url');
+                  console.log('[Clone Dialog] Checking URL:', url);
 
                   // Check if URL contains template variables like {{...}} or ${...}
                   // These indicate dependency on another field
                   const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
                   if (templateVarMatch) {
+                    console.log('[Clone Dialog] Template variable found:', templateVarMatch);
                     // Extract the dependent field name from the template
                     const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
+                    console.log('[Clone Dialog] Dependent field:', dependentField);
 
                     // Store the original template URL so we can reuse it on each change
                     const templateUrl = url;
@@ -152,12 +157,15 @@ if (!customElements.get('wc-tabulator')) {
                                        cnt.querySelector(`input[name="${dependentField}"]`) ||
                                        cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
 
+                    console.log('[Clone Dialog] Source select found:', sourceSelect);
+
                     if (sourceSelect) {
                       // Function to update the dependent select's URL
                       const updateUrl = () => {
                         const value = sourceSelect.value;
                         // Replace template variables with actual value using the original template
                         const newUrl = templateUrl.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        console.log('[Clone Dialog] Updating URL from', templateUrl, 'to', newUrl, 'with value', value);
                         wcSelect.setAttribute('url', newUrl);
                       };
 
@@ -165,6 +173,7 @@ if (!customElements.get('wc-tabulator')) {
                       updateUrl();
 
                       // Update on change
+                      console.log('[Clone Dialog] Adding change listener to', sourceSelect);
                       sourceSelect.addEventListener('change', updateUrl);
                     }
                   }

@@ -12588,20 +12588,27 @@ if (!customElements.get("wc-tabulator")) {
               if (cnt) {
                 htmx.process(cnt);
                 const selectsWithUrls = cnt.querySelectorAll("wc-select[url]");
+                console.log("[Clone Dialog] Found wc-select elements with url:", selectsWithUrls.length);
                 selectsWithUrls.forEach((wcSelect) => {
                   const url = wcSelect.getAttribute("url");
+                  console.log("[Clone Dialog] Checking URL:", url);
                   const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
                   if (templateVarMatch) {
+                    console.log("[Clone Dialog] Template variable found:", templateVarMatch);
                     const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
+                    console.log("[Clone Dialog] Dependent field:", dependentField);
                     const templateUrl = url;
                     const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) || cnt.querySelector(`input[name="${dependentField}"]`) || cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
+                    console.log("[Clone Dialog] Source select found:", sourceSelect);
                     if (sourceSelect) {
                       const updateUrl = () => {
                         const value = sourceSelect.value;
                         const newUrl = templateUrl.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        console.log("[Clone Dialog] Updating URL from", templateUrl, "to", newUrl, "with value", value);
                         wcSelect.setAttribute("url", newUrl);
                       };
                       updateUrl();
+                      console.log("[Clone Dialog] Adding change listener to", sourceSelect);
                       sourceSelect.addEventListener("change", updateUrl);
                     }
                   }
