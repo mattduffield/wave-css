@@ -129,33 +129,44 @@ if (!customElements.get('wc-tabulator')) {
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
               if (cnt) {
-                // Fix HTML-escaped Hyperscript attributes by recreating elements
-                // SweetAlert2 double-escapes attributes in templates
-                const elementsWithHyperscript = cnt.querySelectorAll('[_]');
-                elementsWithHyperscript.forEach(el => {
-                  const hyperscriptAttr = el.getAttribute('_');
-                  if (hyperscriptAttr) {
-                    // Check if the outerHTML contains escaped entities
-                    if (el.outerHTML.includes('&lt;') || el.outerHTML.includes('&quot;')) {
-                      // The attribute is double-escaped in the DOM
-                      // We need to replace the element with a properly parsed version
-                      const tempDiv = document.createElement('div');
+                htmx.process(cnt);
 
-                      // Get the outerHTML and decode it once
-                      const textarea = document.createElement('textarea');
-                      textarea.innerHTML = el.outerHTML;
-                      const decodedHTML = textarea.value;
+                // Handle Hyperscript attributes that get HTML-escaped by SweetAlert2
+                // Find all wc-select elements with urls that need dynamic updates
+                const selectsWithUrls = cnt.querySelectorAll('wc-select[url]');
+                selectsWithUrls.forEach(wcSelect => {
+                  const url = wcSelect.getAttribute('url');
 
-                      tempDiv.innerHTML = decodedHTML;
-                      const newElement = tempDiv.firstElementChild;
+                  // Check if URL contains template variables like {{...}} or ${...}
+                  // These indicate dependency on another field
+                  const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
+                  if (templateVarMatch) {
+                    // Extract the dependent field name from the template
+                    const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
 
-                      // Replace the old element with the decoded one
-                      el.parentNode.replaceChild(newElement, el);
+                    // Find the source select element by looking for common patterns
+                    const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) ||
+                                       cnt.querySelector(`input[name="${dependentField}"]`) ||
+                                       cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
+
+                    if (sourceSelect) {
+                      // Function to update the dependent select's URL
+                      const updateUrl = () => {
+                        const value = sourceSelect.value;
+                        // Replace template variables with actual value
+                        const newUrl = url.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        wcSelect.setAttribute('url', newUrl);
+                      };
+
+                      // Update on load
+                      updateUrl();
+
+                      // Update on change
+                      sourceSelect.addEventListener('change', updateUrl);
                     }
                   }
                 });
 
-                htmx.process(cnt);
                 _hyperscript.processNode(cnt);
               }
             },

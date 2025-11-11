@@ -12586,22 +12586,25 @@ if (!customElements.get("wc-tabulator")) {
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
               if (cnt) {
-                const elementsWithHyperscript = cnt.querySelectorAll("[_]");
-                elementsWithHyperscript.forEach((el) => {
-                  const hyperscriptAttr = el.getAttribute("_");
-                  if (hyperscriptAttr) {
-                    if (el.outerHTML.includes("&lt;") || el.outerHTML.includes("&quot;")) {
-                      const tempDiv = document.createElement("div");
-                      const textarea = document.createElement("textarea");
-                      textarea.innerHTML = el.outerHTML;
-                      const decodedHTML = textarea.value;
-                      tempDiv.innerHTML = decodedHTML;
-                      const newElement = tempDiv.firstElementChild;
-                      el.parentNode.replaceChild(newElement, el);
+                htmx.process(cnt);
+                const selectsWithUrls = cnt.querySelectorAll("wc-select[url]");
+                selectsWithUrls.forEach((wcSelect) => {
+                  const url = wcSelect.getAttribute("url");
+                  const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
+                  if (templateVarMatch) {
+                    const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
+                    const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) || cnt.querySelector(`input[name="${dependentField}"]`) || cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
+                    if (sourceSelect) {
+                      const updateUrl = () => {
+                        const value = sourceSelect.value;
+                        const newUrl = url.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        wcSelect.setAttribute("url", newUrl);
+                      };
+                      updateUrl();
+                      sourceSelect.addEventListener("change", updateUrl);
                     }
                   }
                 });
-                htmx.process(cnt);
                 _hyperscript.processNode(cnt);
               }
             },
