@@ -2938,6 +2938,11 @@
     grid-template-columns: repeat(6, 1fr);
   }
 
+  /* Grid children need min-width: 0 for truncation to work */
+  .grid-1 > *, .grid-2 > *, .grid-3 > *, .grid-4 > *, .grid-5 > *, .grid-6 > * {
+    min-width: 0;
+  }
+
   .grid-auto-2 {
     display: grid;
     grid-template-columns: repeat(2, auto);

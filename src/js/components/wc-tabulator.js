@@ -133,24 +133,48 @@ if (!customElements.get('wc-tabulator')) {
                 _hyperscript.processNode(cnt);
               }
             },
-            // preConfirm: () => {
-            //   if (this.funcs['onClonePreConfirm']) {
-            //     const payload = this.funcs['onClonePreConfirm'](row);
-            //     return payload;
-            //   } else {
-            //     // Fallback, to reduce redundancies.
-            //     const payload = {
-            //       "srcConnName": document.getElementById("srcConnName").value,
-            //       "srcDbName": document.getElementById("srcDbName").value,
-            //       "srcCollName": document.getElementById("srcCollName").value,
-            //       "tgtConnName": document.getElementById("tgtConnName").value,
-            //       "tgtDbNames": [...new Set(Array.from(document.getElementById("tgtDbNames").selectedOptions).map(m => m.value))],
-            //       "tgtCollName": document.getElementById("tgtCollName").value,
-            //       "recordIds": recordIds
-            //     }
-            //     return payload;
-            //   }
-            // },
+            preConfirm: () => {
+              if (this.funcs['onClonePreConfirm']) {
+                const payload = this.funcs['onClonePreConfirm'](row);
+                return payload;
+              } else {
+                // Fallback: collect form values from the clone template
+                const srcConnName = document.querySelector('[name="srcConnName"]')?.value;
+                const srcDbName = document.querySelector('[name="srcDbName"]')?.value;
+                const srcCollName = document.querySelector('[name="srcCollName"]')?.value;
+                const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
+
+                // Handle multiple select for tgtDbNames
+                const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
+                let tgtDbNames = [];
+                if (tgtDbNamesSelect) {
+                  // Check if it's a wc-select component
+                  const wcSelect = tgtDbNamesSelect.closest('wc-select');
+                  if (wcSelect) {
+                    // Get value from wc-select component (handles chip mode)
+                    const selectEl = wcSelect.querySelector('select');
+                    if (selectEl) {
+                      tgtDbNames = Array.from(selectEl.selectedOptions).map(opt => opt.value);
+                    }
+                  } else {
+                    // Regular select element
+                    tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
+                  }
+                }
+
+                const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;
+
+                const payload = {
+                  srcConnName,
+                  srcDbName,
+                  srcCollName,
+                  tgtConnName,
+                  tgtDbNames: [...new Set(tgtDbNames)], // Remove duplicates
+                  tgtCollName
+                };
+                return payload;
+              }
+            },
             callback: (result) => {
               if (this.funcs['onClone']) {
                 this.funcs['onClone'](row, result);

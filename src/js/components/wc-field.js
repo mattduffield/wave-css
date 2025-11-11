@@ -324,6 +324,7 @@ class WcField extends WcBaseComponent {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        min-width: 0; /* Required for truncation to work in flex/grid containers */
       }
 
       wc-field .wc-field-label {
