@@ -149,41 +149,33 @@ if (!customElements.get('wc-tabulator')) {
                 // Find wc-select by looking for the one that contains select[name="tgtDbNames"]
                 const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
                 const wcSelectTgtDb = tgtDbNamesSelect?.closest('wc-select');
-                console.log('wcSelectTgtDb found:', wcSelectTgtDb);
                 if (wcSelectTgtDb) {
                   // Try multiple approaches to get selected values from wc-select
 
                   // 1. In chip mode, values are in .chip elements
                   const chips = wcSelectTgtDb.querySelectorAll('.chip');
-                  console.log('Chips found:', chips.length, chips);
                   if (chips.length > 0) {
                     tgtDbNames = Array.from(chips).map(chip => chip.getAttribute('data-value'));
-                    console.log('Values from chips:', tgtDbNames);
                   }
 
                   // 2. Check the internal <select> element (standard mode)
                   if (tgtDbNames.length === 0) {
                     const selectElement = wcSelectTgtDb.querySelector('select');
-                    console.log('Select element:', selectElement, 'options:', selectElement?.options.length);
                     if (selectElement && selectElement.options.length > 0) {
                       tgtDbNames = Array.from(selectElement.options)
                         .filter(opt => opt.selected)
                         .map(opt => opt.value);
-                      console.log('Values from select options:', tgtDbNames);
                     }
                   }
 
                   // 3. Fallback to component's selectedOptions property
                   if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
                     tgtDbNames = wcSelectTgtDb.selectedOptions;
-                    console.log('Values from selectedOptions property:', tgtDbNames);
                   }
                 } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                   // Fallback to regular select element (not wc-select)
                   tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
-                  console.log('Values from regular select:', tgtDbNames);
                 }
-                console.log('Final tgtDbNames:', tgtDbNames);
 
                 const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;
 

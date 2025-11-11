@@ -12602,31 +12602,23 @@ if (!customElements.get("wc-tabulator")) {
                 let tgtDbNames = [];
                 const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
                 const wcSelectTgtDb = tgtDbNamesSelect?.closest("wc-select");
-                console.log("wcSelectTgtDb found:", wcSelectTgtDb);
                 if (wcSelectTgtDb) {
                   const chips = wcSelectTgtDb.querySelectorAll(".chip");
-                  console.log("Chips found:", chips.length, chips);
                   if (chips.length > 0) {
                     tgtDbNames = Array.from(chips).map((chip) => chip.getAttribute("data-value"));
-                    console.log("Values from chips:", tgtDbNames);
                   }
                   if (tgtDbNames.length === 0) {
                     const selectElement = wcSelectTgtDb.querySelector("select");
-                    console.log("Select element:", selectElement, "options:", selectElement?.options.length);
                     if (selectElement && selectElement.options.length > 0) {
                       tgtDbNames = Array.from(selectElement.options).filter((opt) => opt.selected).map((opt) => opt.value);
-                      console.log("Values from select options:", tgtDbNames);
                     }
                   }
                   if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
                     tgtDbNames = wcSelectTgtDb.selectedOptions;
-                    console.log("Values from selectedOptions property:", tgtDbNames);
                   }
                 } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                   tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
-                  console.log("Values from regular select:", tgtDbNames);
                 }
-                console.log("Final tgtDbNames:", tgtDbNames);
                 const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;
                 const payload = {
                   srcConnName,
