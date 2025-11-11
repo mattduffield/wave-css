@@ -13481,6 +13481,120 @@ if (!customElements.get("wc-tabulator")) {
       }
       return linkElement;
     }
+    linkDateTimeFormatter(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return "";
+      const date = new Date(value);
+      let formattedDate;
+      const dateFormat = formatterParams.dateFormat || "shortWithTime";
+      switch (dateFormat) {
+        case "short":
+          formattedDate = date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          });
+          break;
+        case "shortWithTime":
+          formattedDate = date.toLocaleString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+          });
+          break;
+        case "full":
+          formattedDate = date.toLocaleString("en-US");
+          break;
+        case "long":
+          formattedDate = date.toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+          });
+          break;
+        case "iso":
+          formattedDate = date.toISOString().slice(0, 19).replace("T", " ");
+          break;
+        case "relative":
+          const now = /* @__PURE__ */ new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / 6e4);
+          const diffHours = Math.floor(diffMs / 36e5);
+          const diffDays = Math.floor(diffMs / 864e5);
+          if (diffMins < 1) {
+            formattedDate = "Just now";
+          } else if (diffMins < 60) {
+            formattedDate = `${diffMins} min${diffMins !== 1 ? "s" : ""} ago`;
+          } else if (diffHours < 24) {
+            formattedDate = `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+          } else if (diffDays < 7) {
+            formattedDate = `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+          } else {
+            formattedDate = date.toLocaleDateString("en-US");
+          }
+          break;
+        default:
+          formattedDate = date.toLocaleString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+          });
+      }
+      const routePrefix = formatterParams.routePrefix || "screen";
+      const screen = formatterParams.screen;
+      const screen_id = formatterParams.screen_id;
+      const id_name = formatterParams.id_name;
+      const data = cell.getData();
+      const id = data._id;
+      let url = "";
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
+        const queryParts = [];
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+          if (typeof paramValue === "string" && paramValue.startsWith("$")) {
+            const fieldPath = paramValue.substring(1);
+            resolvedValue = fieldPath.split(".").reduce((obj, prop) => {
+              return obj && obj[prop] !== void 0 ? obj[prop] : void 0;
+            }, data);
+          } else {
+            resolvedValue = paramValue;
+          }
+          if (resolvedValue !== null && resolvedValue !== void 0) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+        if (queryParts.length > 0) {
+          const separator = url.includes("?") ? "&" : "?";
+          url += separator + queryParts.join("&");
+        }
+      }
+      var linkElement = document.createElement("a");
+      linkElement.setAttribute("href", url);
+      if (formatterParams.target) {
+        linkElement.setAttribute("target", formatterParams.target);
+      }
+      linkElement.innerText = formattedDate;
+      if (formatterParams.attributes && typeof formatterParams.attributes === "object") {
+        Object.entries(formatterParams.attributes).forEach(([key, value2]) => {
+          linkElement.setAttribute(key, value2);
+        });
+      }
+      return linkElement;
+    }
     dateEditor(cell, onRendered, success, cancel) {
       var cellValue = luxon.DateTime.fromFormat(cell.getValue(), "dd/MM/yyyy").toFormat("yyyy-MM-dd");
       input = document.createElement("input");

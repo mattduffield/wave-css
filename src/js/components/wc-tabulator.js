@@ -1266,6 +1266,158 @@ if (!customElements.get('wc-tabulator')) {
       return linkElement;
     }
 
+    linkDateTimeFormatter(cell, formatterParams, onRendered) {
+      const value = cell.getValue();
+      if (!value) return "";
+
+      // Format the datetime
+      const date = new Date(value);
+      let formattedDate;
+
+      // Get format from params or use default (shortWithTime)
+      const dateFormat = formatterParams.dateFormat || 'shortWithTime';
+
+      switch(dateFormat) {
+        case 'short':
+          // 12/25/2023
+          formattedDate = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          });
+          break;
+        case 'shortWithTime':
+          // 12/25/2023, 2:30 PM (DEFAULT)
+          formattedDate = date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          break;
+        case 'full':
+          // 12/25/2023, 2:30:45 PM (includes seconds)
+          formattedDate = date.toLocaleString('en-US');
+          break;
+        case 'long':
+          // Dec 25, 2023, 2:30 PM
+          formattedDate = date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          break;
+        case 'iso':
+          // 2023-12-25 14:30:45
+          formattedDate = date.toISOString().slice(0, 19).replace('T', ' ');
+          break;
+        case 'relative':
+          // 2 hours ago
+          const now = new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMs / 3600000);
+          const diffDays = Math.floor(diffMs / 86400000);
+
+          if (diffMins < 1) {
+            formattedDate = 'Just now';
+          } else if (diffMins < 60) {
+            formattedDate = `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+          } else if (diffHours < 24) {
+            formattedDate = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+          } else if (diffDays < 7) {
+            formattedDate = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+          } else {
+            formattedDate = date.toLocaleDateString('en-US');
+          }
+          break;
+        default:
+          // Default to shortWithTime if unrecognized format
+          formattedDate = date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+      }
+
+      // Build the URL using the same logic as linkFormatter
+      const routePrefix = formatterParams.routePrefix || 'screen';
+      const screen = formatterParams.screen;
+      const screen_id = formatterParams.screen_id;
+      const id_name = formatterParams.id_name;
+      const data = cell.getData();
+      const id = data._id;
+      let url = '';
+      if (screen) {
+        url = `/${routePrefix}/${screen}/${id}`;
+      } else {
+        // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
+        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+      }
+
+      // Add query parameters if specified
+      if (formatterParams.queryParams && typeof formatterParams.queryParams === 'object') {
+        const queryParts = [];
+
+        Object.entries(formatterParams.queryParams).forEach(([key, paramValue]) => {
+          let resolvedValue;
+
+          // If value starts with '$', treat it as a field reference
+          if (typeof paramValue === 'string' && paramValue.startsWith('$')) {
+            const fieldPath = paramValue.substring(1); // Remove '$' prefix
+
+            // Support nested field paths like 'data.bill_plan'
+            resolvedValue = fieldPath.split('.').reduce((obj, prop) => {
+              return obj && obj[prop] !== undefined ? obj[prop] : undefined;
+            }, data);
+          } else {
+            // Static value
+            resolvedValue = paramValue;
+          }
+
+          // Only add param if value exists
+          if (resolvedValue !== null && resolvedValue !== undefined) {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(resolvedValue)}`);
+          }
+        });
+
+        // Append query params to URL
+        if (queryParts.length > 0) {
+          const separator = url.includes('?') ? '&' : '?';
+          url += separator + queryParts.join('&');
+        }
+      }
+
+      // Create the anchor element
+      var linkElement = document.createElement("a");
+      linkElement.setAttribute("href", url);
+
+      // Set the target attribute if specified
+      if (formatterParams.target) {
+        linkElement.setAttribute("target", formatterParams.target);
+      }
+
+      // Set the link text to formatted date
+      linkElement.innerText = formattedDate;
+
+      // If custom attributes are specified, add them to the link
+      if (formatterParams.attributes && typeof formatterParams.attributes === 'object') {
+        Object.entries(formatterParams.attributes).forEach(([key, value]) => {
+          linkElement.setAttribute(key, value);
+        });
+      }
+
+      return linkElement;
+    }
+
     dateEditor(cell, onRendered, success, cancel) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
