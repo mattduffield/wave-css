@@ -12593,11 +12593,12 @@ if (!customElements.get("wc-tabulator")) {
                   const templateVarMatch = url.match(/\{\{([^}]+)\}\}|\$\{([^}]+)\}/);
                   if (templateVarMatch) {
                     const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
+                    const templateUrl = url;
                     const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) || cnt.querySelector(`input[name="${dependentField}"]`) || cnt.querySelector(`[name*="${dependentField.toLowerCase()}"]`);
                     if (sourceSelect) {
                       const updateUrl = () => {
                         const value = sourceSelect.value;
-                        const newUrl = url.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        const newUrl = templateUrl.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
                         wcSelect.setAttribute("url", newUrl);
                       };
                       updateUrl();

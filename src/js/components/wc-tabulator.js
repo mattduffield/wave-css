@@ -144,6 +144,9 @@ if (!customElements.get('wc-tabulator')) {
                     // Extract the dependent field name from the template
                     const dependentField = (templateVarMatch[1] || templateVarMatch[2]).trim();
 
+                    // Store the original template URL so we can reuse it on each change
+                    const templateUrl = url;
+
                     // Find the source select element by looking for common patterns
                     const sourceSelect = cnt.querySelector(`select[name="${dependentField}"]`) ||
                                        cnt.querySelector(`input[name="${dependentField}"]`) ||
@@ -153,8 +156,8 @@ if (!customElements.get('wc-tabulator')) {
                       // Function to update the dependent select's URL
                       const updateUrl = () => {
                         const value = sourceSelect.value;
-                        // Replace template variables with actual value
-                        const newUrl = url.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
+                        // Replace template variables with actual value using the original template
+                        const newUrl = templateUrl.replace(/\{\{[^}]+\}\}|\$\{[^}]+\}/g, value);
                         wcSelect.setAttribute('url', newUrl);
                       };
 
