@@ -145,19 +145,15 @@ if (!customElements.get('wc-tabulator')) {
                 const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
 
                 // Handle multiple select for tgtDbNames
-                const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
                 let tgtDbNames = [];
-                if (tgtDbNamesSelect) {
-                  // Check if it's a wc-select component
-                  const wcSelect = tgtDbNamesSelect.closest('wc-select');
-                  if (wcSelect) {
-                    // Get value from wc-select component (handles chip mode)
-                    const selectEl = wcSelect.querySelector('select');
-                    if (selectEl) {
-                      tgtDbNames = Array.from(selectEl.selectedOptions).map(opt => opt.value);
-                    }
-                  } else {
-                    // Regular select element
+                const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
+                if (wcSelectTgtDb) {
+                  // Access the wc-select component's selectedOptions property directly
+                  tgtDbNames = wcSelectTgtDb.selectedOptions || [];
+                } else {
+                  // Fallback to regular select element
+                  const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
+                  if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                     tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
                   }
                 }

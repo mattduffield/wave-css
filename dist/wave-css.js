@@ -12599,16 +12599,13 @@ if (!customElements.get("wc-tabulator")) {
                 const srcDbName = document.querySelector('[name="srcDbName"]')?.value;
                 const srcCollName = document.querySelector('[name="srcCollName"]')?.value;
                 const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
-                const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
                 let tgtDbNames = [];
-                if (tgtDbNamesSelect) {
-                  const wcSelect = tgtDbNamesSelect.closest("wc-select");
-                  if (wcSelect) {
-                    const selectEl = wcSelect.querySelector("select");
-                    if (selectEl) {
-                      tgtDbNames = Array.from(selectEl.selectedOptions).map((opt) => opt.value);
-                    }
-                  } else {
+                const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
+                if (wcSelectTgtDb) {
+                  tgtDbNames = wcSelectTgtDb.selectedOptions || [];
+                } else {
+                  const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
+                  if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                     tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
                   }
                 }
