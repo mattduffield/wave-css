@@ -12589,9 +12589,16 @@ if (!customElements.get("wc-tabulator")) {
                 const elementsWithHyperscript = cnt.querySelectorAll("[_]");
                 elementsWithHyperscript.forEach((el) => {
                   const hyperscriptAttr = el.getAttribute("_");
-                  if (hyperscriptAttr && (hyperscriptAttr.includes("&lt;") || hyperscriptAttr.includes("&quot;"))) {
-                    const decoded = hyperscriptAttr.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
-                    el.setAttribute("_", decoded);
+                  if (hyperscriptAttr) {
+                    if (el.outerHTML.includes("&lt;") || el.outerHTML.includes("&quot;")) {
+                      const tempDiv = document.createElement("div");
+                      const textarea = document.createElement("textarea");
+                      textarea.innerHTML = el.outerHTML;
+                      const decodedHTML = textarea.value;
+                      tempDiv.innerHTML = decodedHTML;
+                      const newElement = tempDiv.firstElementChild;
+                      el.parentNode.replaceChild(newElement, el);
+                    }
                   }
                 });
                 htmx.process(cnt);
