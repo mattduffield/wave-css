@@ -12586,6 +12586,14 @@ if (!customElements.get("wc-tabulator")) {
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
               if (cnt) {
+                const elementsWithHyperscript = cnt.querySelectorAll("[_]");
+                elementsWithHyperscript.forEach((el) => {
+                  const hyperscriptAttr = el.getAttribute("_");
+                  if (hyperscriptAttr && (hyperscriptAttr.includes("&lt;") || hyperscriptAttr.includes("&quot;"))) {
+                    const decoded = hyperscriptAttr.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+                    el.setAttribute("_", decoded);
+                  }
+                });
                 htmx.process(cnt);
                 _hyperscript.processNode(cnt);
               }
