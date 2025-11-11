@@ -278,6 +278,12 @@ class WcSelect extends WcBaseFormComponent {
       ipt.id = 'dropdownInput';
       ipt.setAttribute('placeholder', 'Add or select...');
 
+      // Apply autocomplete attribute if specified
+      const autocomplete = this.getAttribute('autocomplete');
+      if (autocomplete) {
+        ipt.setAttribute('autocomplete', autocomplete);
+      }
+
       // Add event wiring for the dropdown input
       this.eventAttributes.forEach(attr => {
         const value = this.getAttribute(attr);

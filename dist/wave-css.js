@@ -20354,6 +20354,10 @@ var WcSelect = class extends WcBaseFormComponent {
       ipt.classList.add("dropdown-input");
       ipt.id = "dropdownInput";
       ipt.setAttribute("placeholder", "Add or select...");
+      const autocomplete2 = this.getAttribute("autocomplete");
+      if (autocomplete2) {
+        ipt.setAttribute("autocomplete", autocomplete2);
+      }
       this.eventAttributes.forEach((attr) => {
         const value = this.getAttribute(attr);
         if (value && attr !== "onchange") {
