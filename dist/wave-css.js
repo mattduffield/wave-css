@@ -12602,9 +12602,21 @@ if (!customElements.get("wc-tabulator")) {
                 let tgtDbNames = [];
                 const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
                 if (wcSelectTgtDb) {
-                  tgtDbNames = wcSelectTgtDb.selectedOptions || [];
+                  const chips = wcSelectTgtDb.querySelectorAll(".chip");
+                  if (chips.length > 0) {
+                    tgtDbNames = Array.from(chips).map((chip) => chip.getAttribute("data-value"));
+                  }
+                  if (tgtDbNames.length === 0) {
+                    const selectElement = wcSelectTgtDb.querySelector("select");
+                    if (selectElement && selectElement.options.length > 0) {
+                      tgtDbNames = Array.from(selectElement.options).filter((opt) => opt.selected).map((opt) => opt.value);
+                    }
+                  }
+                  if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
+                    tgtDbNames = wcSelectTgtDb.selectedOptions;
+                  }
                 } else {
-                  const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
+                  const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
                   if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                     tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
                   }

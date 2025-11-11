@@ -148,11 +148,31 @@ if (!customElements.get('wc-tabulator')) {
                 let tgtDbNames = [];
                 const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
                 if (wcSelectTgtDb) {
-                  // Access the wc-select component's selectedOptions property directly
-                  tgtDbNames = wcSelectTgtDb.selectedOptions || [];
+                  // Try multiple approaches to get selected values from wc-select
+
+                  // 1. In chip mode, values are in .chip elements
+                  const chips = wcSelectTgtDb.querySelectorAll('.chip');
+                  if (chips.length > 0) {
+                    tgtDbNames = Array.from(chips).map(chip => chip.getAttribute('data-value'));
+                  }
+
+                  // 2. Check the internal <select> element (standard mode)
+                  if (tgtDbNames.length === 0) {
+                    const selectElement = wcSelectTgtDb.querySelector('select');
+                    if (selectElement && selectElement.options.length > 0) {
+                      tgtDbNames = Array.from(selectElement.options)
+                        .filter(opt => opt.selected)
+                        .map(opt => opt.value);
+                    }
+                  }
+
+                  // 3. Fallback to component's selectedOptions property
+                  if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
+                    tgtDbNames = wcSelectTgtDb.selectedOptions;
+                  }
                 } else {
-                  // Fallback to regular select element
-                  const tgtDbNamesSelect = document.querySelector('[name="tgtDbNames"]');
+                  // Fallback to regular select element (not wc-select)
+                  const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
                   if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                     tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
                   }
