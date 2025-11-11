@@ -12600,7 +12600,8 @@ if (!customElements.get("wc-tabulator")) {
                 const srcCollName = document.querySelector('[name="srcCollName"]')?.value;
                 const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
                 let tgtDbNames = [];
-                const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
+                const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
+                const wcSelectTgtDb = tgtDbNamesSelect?.closest("wc-select");
                 console.log("wcSelectTgtDb found:", wcSelectTgtDb);
                 if (wcSelectTgtDb) {
                   const chips = wcSelectTgtDb.querySelectorAll(".chip");
@@ -12621,12 +12622,9 @@ if (!customElements.get("wc-tabulator")) {
                     tgtDbNames = wcSelectTgtDb.selectedOptions;
                     console.log("Values from selectedOptions property:", tgtDbNames);
                   }
-                } else {
-                  const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
-                  if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
-                    tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
-                    console.log("Values from regular select:", tgtDbNames);
-                  }
+                } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
+                  tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
+                  console.log("Values from regular select:", tgtDbNames);
                 }
                 console.log("Final tgtDbNames:", tgtDbNames);
                 const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;

@@ -146,7 +146,9 @@ if (!customElements.get('wc-tabulator')) {
 
                 // Handle multiple select for tgtDbNames
                 let tgtDbNames = [];
-                const wcSelectTgtDb = document.querySelector('wc-select[name="tgtDbNames"]');
+                // Find wc-select by looking for the one that contains select[name="tgtDbNames"]
+                const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
+                const wcSelectTgtDb = tgtDbNamesSelect?.closest('wc-select');
                 console.log('wcSelectTgtDb found:', wcSelectTgtDb);
                 if (wcSelectTgtDb) {
                   // Try multiple approaches to get selected values from wc-select
@@ -176,13 +178,10 @@ if (!customElements.get('wc-tabulator')) {
                     tgtDbNames = wcSelectTgtDb.selectedOptions;
                     console.log('Values from selectedOptions property:', tgtDbNames);
                   }
-                } else {
+                } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
                   // Fallback to regular select element (not wc-select)
-                  const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
-                  if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
-                    tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
-                    console.log('Values from regular select:', tgtDbNames);
-                  }
+                  tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
+                  console.log('Values from regular select:', tgtDbNames);
                 }
                 console.log('Final tgtDbNames:', tgtDbNames);
 
