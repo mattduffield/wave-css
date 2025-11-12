@@ -12726,6 +12726,8 @@ if (!customElements.get("wc-tabulator")) {
       const innerEl = this.querySelector(".wc-tabulator > *");
       if (innerEl) {
       } else {
+        this.getFuncs();
+        this.getRowMenu();
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
@@ -12767,8 +12769,6 @@ if (!customElements.get("wc-tabulator")) {
         }
         this.colFieldFormatter = obj;
       }
-      this.getFuncs();
-      this.getRowMenu();
       const dataAttr = this.getAttribute("data");
       let inlineData = null;
       if (dataAttr) {

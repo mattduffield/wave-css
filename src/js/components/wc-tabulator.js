@@ -312,6 +312,11 @@ if (!customElements.get('wc-tabulator')) {
       if (innerEl) {
         // Do nothing...
       } else {
+        // IMPORTANT: Get funcs and row menu BEFORE clearing innerHTML
+        // because these elements are declarative children that will be wiped out
+        this.getFuncs();
+        this.getRowMenu();
+
         this.componentElement.innerHTML = '';
         this._createInnerElement();
       }
@@ -357,10 +362,10 @@ if (!customElements.get('wc-tabulator')) {
           obj.formatter = this.resolveFormatter(obj.params, obj.formatter);
         }
         this.colFieldFormatter = obj;
-      } 
+      }
 
-      this.getFuncs();
-      this.getRowMenu();
+      // NOTE: getFuncs() and getRowMenu() are now called in _render() BEFORE innerHTML is cleared
+      // This is necessary because these declarative elements would otherwise be wiped out
 
       // Check if data attribute is provided for inline data
       const dataAttr = this.getAttribute('data');
