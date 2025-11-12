@@ -13693,8 +13693,17 @@ if (!customElements.get("wc-tabulator")) {
             loadingOption.selected = true;
             select.appendChild(loadingOption);
             fetch(editorParams.url).then((response) => response.json()).then((data) => {
-              this.editorOptionsCache[cacheKey] = data;
-              populateOptions(data);
+              let options = data;
+              if (data.results && Array.isArray(data.results)) {
+                options = data.results;
+              } else if (data.data && Array.isArray(data.data)) {
+                options = data.data;
+              } else if (!Array.isArray(data)) {
+                console.warn("Select editor: Expected array or object with results/data property, got:", data);
+                options = [];
+              }
+              this.editorOptionsCache[cacheKey] = options;
+              populateOptions(options);
             }).catch((error) => {
               console.error("Error loading select options:", error);
               select.innerHTML = "<option disabled selected>Error loading options</option>";

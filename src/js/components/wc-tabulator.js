@@ -1582,9 +1582,26 @@ if (!customElements.get('wc-tabulator')) {
             fetch(editorParams.url)
               .then(response => response.json())
               .then(data => {
-                // Cache the options for this URL - all future edits for this column use the cache
-                this.editorOptionsCache[cacheKey] = data;
-                populateOptions(data);
+                // Handle different API response formats
+                let options = data;
+
+                // If response has a 'results' property, use that
+                if (data.results && Array.isArray(data.results)) {
+                  options = data.results;
+                }
+                // If response has a 'data' property, use that
+                else if (data.data && Array.isArray(data.data)) {
+                  options = data.data;
+                }
+                // Otherwise assume data itself is the array
+                else if (!Array.isArray(data)) {
+                  console.warn('Select editor: Expected array or object with results/data property, got:', data);
+                  options = [];
+                }
+
+                // Cache the processed options for this URL - all future edits for this column use the cache
+                this.editorOptionsCache[cacheKey] = options;
+                populateOptions(options);
               })
               .catch(error => {
                 console.error('Error loading select options:', error);
