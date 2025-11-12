@@ -13651,6 +13651,7 @@ if (!customElements.get("wc-tabulator")) {
     selectEditor(cell, onRendered, success, cancel, editorParams) {
       const cellValue = cell.getValue();
       const field = cell.getColumn().getField();
+      const self = this;
       const select = document.createElement("select");
       select.style.width = "100%";
       select.style.padding = "4px";
@@ -13659,6 +13660,12 @@ if (!customElements.get("wc-tabulator")) {
       const textField = editorParams?.textField || "text";
       const populateOptions = (options) => {
         select.innerHTML = "";
+        if (editorParams?.allowEmpty) {
+          const emptyOption = document.createElement("option");
+          emptyOption.value = "";
+          emptyOption.textContent = editorParams.emptyText || "(None)";
+          select.appendChild(emptyOption);
+        }
         if (editorParams?.placeholder) {
           const placeholderOption = document.createElement("option");
           placeholderOption.value = "";
@@ -13677,15 +13684,15 @@ if (!customElements.get("wc-tabulator")) {
             select.appendChild(optionElement);
           });
         }
-        if (cellValue) {
+        if (cellValue !== null && cellValue !== void 0) {
           select.value = cellValue;
         }
       };
       if (editorParams) {
         if (editorParams.url) {
           const cacheKey = editorParams.url;
-          if (this.editorOptionsCache[cacheKey]) {
-            populateOptions(this.editorOptionsCache[cacheKey]);
+          if (self.editorOptionsCache[cacheKey]) {
+            populateOptions(self.editorOptionsCache[cacheKey]);
           } else {
             const loadingOption = document.createElement("option");
             loadingOption.textContent = "Loading...";
@@ -13702,7 +13709,7 @@ if (!customElements.get("wc-tabulator")) {
                 console.warn("Select editor: Expected array or object with results/data property, got:", data);
                 options = [];
               }
-              this.editorOptionsCache[cacheKey] = options;
+              self.editorOptionsCache[cacheKey] = options;
               populateOptions(options);
             }).catch((error) => {
               console.error("Error loading select options:", error);
@@ -13711,10 +13718,10 @@ if (!customElements.get("wc-tabulator")) {
           }
         } else if (editorParams.options) {
           const cacheKey = `static_${field}`;
-          if (!this.editorOptionsCache[cacheKey]) {
-            this.editorOptionsCache[cacheKey] = editorParams.options;
+          if (!self.editorOptionsCache[cacheKey]) {
+            self.editorOptionsCache[cacheKey] = editorParams.options;
           }
-          populateOptions(this.editorOptionsCache[cacheKey]);
+          populateOptions(self.editorOptionsCache[cacheKey]);
         }
       }
       onRendered(function() {

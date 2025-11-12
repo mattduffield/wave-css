@@ -1516,6 +1516,9 @@ if (!customElements.get('wc-tabulator')) {
       const cellValue = cell.getValue();
       const field = cell.getColumn().getField();
 
+      // Capture 'this' context for use in callbacks
+      const self = this;
+
       // Create native select element
       const select = document.createElement("select");
       select.style.width = "100%";
@@ -1530,6 +1533,14 @@ if (!customElements.get('wc-tabulator')) {
       const populateOptions = (options) => {
         // Clear existing options first
         select.innerHTML = '';
+
+        // Add empty option if allowEmpty is true (before placeholder)
+        if (editorParams?.allowEmpty) {
+          const emptyOption = document.createElement("option");
+          emptyOption.value = "";
+          emptyOption.textContent = editorParams.emptyText || "(None)";
+          select.appendChild(emptyOption);
+        }
 
         // Add placeholder option if provided
         if (editorParams?.placeholder) {
@@ -1553,8 +1564,8 @@ if (!customElements.get('wc-tabulator')) {
           });
         }
 
-        // Set initial value
-        if (cellValue) {
+        // Set initial value (including empty string)
+        if (cellValue !== null && cellValue !== undefined) {
           select.value = cellValue;
         }
       };
@@ -1567,9 +1578,9 @@ if (!customElements.get('wc-tabulator')) {
           const cacheKey = editorParams.url;
 
           // Check if we already have cached options
-          if (this.editorOptionsCache[cacheKey]) {
+          if (self.editorOptionsCache[cacheKey]) {
             // Use cached options immediately - no fetch needed!
-            populateOptions(this.editorOptionsCache[cacheKey]);
+            populateOptions(self.editorOptionsCache[cacheKey]);
           } else {
             // Add loading option
             const loadingOption = document.createElement("option");
@@ -1600,7 +1611,7 @@ if (!customElements.get('wc-tabulator')) {
                 }
 
                 // Cache the processed options for this URL - all future edits for this column use the cache
-                this.editorOptionsCache[cacheKey] = options;
+                self.editorOptionsCache[cacheKey] = options;
                 populateOptions(options);
               })
               .catch(error => {
@@ -1615,11 +1626,11 @@ if (!customElements.get('wc-tabulator')) {
           const cacheKey = `static_${field}`;
 
           // Cache static options too (for consistency)
-          if (!this.editorOptionsCache[cacheKey]) {
-            this.editorOptionsCache[cacheKey] = editorParams.options;
+          if (!self.editorOptionsCache[cacheKey]) {
+            self.editorOptionsCache[cacheKey] = editorParams.options;
           }
 
-          populateOptions(this.editorOptionsCache[cacheKey]);
+          populateOptions(self.editorOptionsCache[cacheKey]);
         }
       }
 
