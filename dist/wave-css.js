@@ -12709,6 +12709,8 @@ if (!customElements.get("wc-tabulator")) {
         this.componentElement.id = this.getAttribute("id") || "wc-tabulator";
         this.appendChild(this.componentElement);
       }
+      this.getFuncs();
+      this.getRowMenu();
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -12726,8 +12728,6 @@ if (!customElements.get("wc-tabulator")) {
       const innerEl = this.querySelector(".wc-tabulator > *");
       if (innerEl) {
       } else {
-        this.getFuncs();
-        this.getRowMenu();
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }

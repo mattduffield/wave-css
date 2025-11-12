@@ -285,8 +285,15 @@ if (!customElements.get('wc-tabulator')) {
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-tabulator');
         this.componentElement.id = this.getAttribute('id') || 'wc-tabulator';
-        this.appendChild(this.componentElement);      
+        this.appendChild(this.componentElement);
       }
+
+      // CRITICAL: Read declarative funcs and row menu in constructor
+      // This must happen BEFORE parent components (wc-form, wc-div) call _moveDeclarativeInner()
+      // which would move these elements and make them inaccessible
+      this.getFuncs();
+      this.getRowMenu();
+
       // console.log('ctor:wc-tabulator');
     }
 
@@ -312,10 +319,10 @@ if (!customElements.get('wc-tabulator')) {
       if (innerEl) {
         // Do nothing...
       } else {
-        // IMPORTANT: Get funcs and row menu BEFORE clearing innerHTML
-        // because these elements are declarative children that will be wiped out
-        this.getFuncs();
-        this.getRowMenu();
+        // NOTE: getFuncs() and getRowMenu() are called in constructor
+        // This is necessary because parent components (wc-form, wc-div) may call
+        // _moveDeclarativeInner() before our _render() runs, which would move
+        // the wc-tabulator-func elements before we can read them
 
         this.componentElement.innerHTML = '';
         this._createInnerElement();
