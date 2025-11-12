@@ -13852,13 +13852,22 @@ if (!customElements.get("wc-tabulator")) {
       this._syncForm = form;
       this._syncFormField = formField;
       const syncHandler = (event) => {
+        console.log("wc-tabulator: htmx:configRequest fired", event.detail);
         const targetElement = event.detail?.elt;
+        console.log("wc-tabulator: targetElement", targetElement);
         if (targetElement) {
           const hxInclude = targetElement.getAttribute("hx-include");
+          console.log("wc-tabulator: hx-include", hxInclude);
           const isOurForm = targetElement.closest(`#${formSyncId}`) || hxInclude === `#${formSyncId}` || hxInclude === `form#${formSyncId}`;
+          console.log("wc-tabulator: isOurForm", isOurForm, "formSyncId", formSyncId);
           if (isOurForm) {
+            console.log("wc-tabulator: Syncing table data to form");
             this._syncToForm(form, formField);
+          } else {
+            console.log("wc-tabulator: Not our form, skipping sync");
           }
+        } else {
+          console.log("wc-tabulator: No targetElement found");
         }
       };
       form.addEventListener("htmx:configRequest", syncHandler);
@@ -13866,23 +13875,32 @@ if (!customElements.get("wc-tabulator")) {
       this._syncHandler = syncHandler;
     }
     _syncToForm(form, formField) {
+      console.log("wc-tabulator: _syncToForm called", { form, formField });
       const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
       const excludeFields = excludeFieldsAttr.split(",").map((f) => f.trim()).filter((f) => f);
-      form.querySelectorAll("[data-tabulator-sync]").forEach((el) => el.remove());
+      console.log("wc-tabulator: excludeFields", excludeFields);
+      const oldInputs = form.querySelectorAll("[data-tabulator-sync]");
+      console.log("wc-tabulator: Removing old sync inputs", oldInputs.length);
+      oldInputs.forEach((el) => el.remove());
       if (!this.table) {
         console.warn("wc-tabulator: Table not initialized yet, cannot sync data.");
         return;
       }
       const data = this.table.getData();
+      console.log("wc-tabulator: Table data", data);
+      let inputCount = 0;
       data.forEach((row, index) => {
         const isEmptyRow = Object.values(row).every(
           (value) => value === "" || value === null || value === void 0
         );
+        console.log(`wc-tabulator: Row ${index}`, { row, isEmptyRow });
         if (isEmptyRow) {
+          console.log(`wc-tabulator: Skipping empty row ${index}`);
           return;
         }
         Object.keys(row).forEach((field) => {
           if (excludeFields.includes(field)) {
+            console.log(`wc-tabulator: Skipping excluded field ${field}`);
             return;
           }
           const value = row[field];
@@ -13891,9 +13909,12 @@ if (!customElements.get("wc-tabulator")) {
           input2.name = `${formField}.${index}.${field}`;
           input2.value = value !== null && value !== void 0 ? value : "";
           input2.setAttribute("data-tabulator-sync", "true");
+          console.log("wc-tabulator: Created hidden input", { name: input2.name, value: input2.value });
           form.appendChild(input2);
+          inputCount++;
         });
       });
+      console.log(`wc-tabulator: Total hidden inputs created: ${inputCount}`);
     }
     _applyStyle() {
       const style = `
