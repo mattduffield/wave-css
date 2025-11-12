@@ -13862,7 +13862,7 @@ if (!customElements.get("wc-tabulator")) {
           console.log("wc-tabulator: isOurForm", isOurForm, "formSyncId", formSyncId);
           if (isOurForm) {
             console.log("wc-tabulator: Syncing table data to form");
-            this._syncToForm(form, formField);
+            this._syncToForm(form, formField, event);
           } else {
             console.log("wc-tabulator: Not our form, skipping sync");
           }
@@ -13874,21 +13874,19 @@ if (!customElements.get("wc-tabulator")) {
       document.body.addEventListener("htmx:configRequest", syncHandler);
       this._syncHandler = syncHandler;
     }
-    _syncToForm(form, formField) {
-      console.log("wc-tabulator: _syncToForm called", { form, formField });
+    _syncToForm(form, formField, event) {
+      console.log("wc-tabulator: _syncToForm called", { form, formField, event });
       const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
       const excludeFields = excludeFieldsAttr.split(",").map((f) => f.trim()).filter((f) => f);
-      console.log("wc-tabulator: excludeFields", excludeFields);
-      const oldInputs = form.querySelectorAll("[data-tabulator-sync]");
-      console.log("wc-tabulator: Removing old sync inputs", oldInputs.length);
-      oldInputs.forEach((el) => el.remove());
       if (!this.table) {
         console.warn("wc-tabulator: Table not initialized yet, cannot sync data.");
         return;
       }
       const data = this.table.getData();
       console.log("wc-tabulator: Table data", data);
-      let inputCount = 0;
+      const parameters = event.detail.parameters;
+      console.log("wc-tabulator: Original parameters", parameters);
+      let fieldCount = 0;
       data.forEach((row, index) => {
         const isEmptyRow = Object.values(row).every(
           (value) => value === "" || value === null || value === void 0
@@ -13904,17 +13902,15 @@ if (!customElements.get("wc-tabulator")) {
             return;
           }
           const value = row[field];
-          const input2 = document.createElement("input");
-          input2.type = "hidden";
-          input2.name = `${formField}.${index}.${field}`;
-          input2.value = value !== null && value !== void 0 ? value : "";
-          input2.setAttribute("data-tabulator-sync", "true");
-          console.log("wc-tabulator: Created hidden input", { name: input2.name, value: input2.value });
-          form.appendChild(input2);
-          inputCount++;
+          const paramName = `${formField}.${index}.${field}`;
+          const paramValue = value !== null && value !== void 0 ? value : "";
+          parameters[paramName] = paramValue;
+          console.log("wc-tabulator: Added parameter", { name: paramName, value: paramValue });
+          fieldCount++;
         });
       });
-      console.log(`wc-tabulator: Total hidden inputs created: ${inputCount}`);
+      console.log(`wc-tabulator: Total fields added: ${fieldCount}`);
+      console.log("wc-tabulator: Final parameters", parameters);
     }
     _applyStyle() {
       const style = `

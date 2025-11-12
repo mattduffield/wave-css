@@ -1815,7 +1815,7 @@ if (!customElements.get('wc-tabulator')) {
 
           if (isOurForm) {
             console.log('wc-tabulator: Syncing table data to form');
-            this._syncToForm(form, formField);
+            this._syncToForm(form, formField, event);
           } else {
             console.log('wc-tabulator: Not our form, skipping sync');
           }
@@ -1832,18 +1832,12 @@ if (!customElements.get('wc-tabulator')) {
       this._syncHandler = syncHandler;
     }
 
-    _syncToForm(form, formField) {
-      console.log('wc-tabulator: _syncToForm called', {form, formField});
+    _syncToForm(form, formField, event) {
+      console.log('wc-tabulator: _syncToForm called', {form, formField, event});
 
       // Get exclude fields (comma-separated list)
       const excludeFieldsAttr = this.getAttribute('form-exclude-fields') || '';
       const excludeFields = excludeFieldsAttr.split(',').map(f => f.trim()).filter(f => f);
-      console.log('wc-tabulator: excludeFields', excludeFields);
-
-      // Remove any existing hidden inputs from previous sync
-      const oldInputs = form.querySelectorAll('[data-tabulator-sync]');
-      console.log('wc-tabulator: Removing old sync inputs', oldInputs.length);
-      oldInputs.forEach(el => el.remove());
 
       // Get table data
       if (!this.table) {
@@ -1854,9 +1848,13 @@ if (!customElements.get('wc-tabulator')) {
       const data = this.table.getData();
       console.log('wc-tabulator: Table data', data);
 
-      let inputCount = 0;
+      // Instead of creating hidden inputs, directly modify the HTMX parameters
+      const parameters = event.detail.parameters;
+      console.log('wc-tabulator: Original parameters', parameters);
 
-      // Generate hidden inputs for each row
+      let fieldCount = 0;
+
+      // Add table data to parameters
       data.forEach((row, index) => {
         // Check if row is empty (all values are empty/null/undefined)
         const isEmptyRow = Object.values(row).every(value =>
@@ -1871,7 +1869,7 @@ if (!customElements.get('wc-tabulator')) {
           return;
         }
 
-        // Create hidden inputs for each field in the row
+        // Add each field to the parameters object
         Object.keys(row).forEach(field => {
           // Skip excluded fields
           if (excludeFields.includes(field)) {
@@ -1880,22 +1878,19 @@ if (!customElements.get('wc-tabulator')) {
           }
 
           const value = row[field];
+          const paramName = `${formField}.${index}.${field}`;
+          const paramValue = value !== null && value !== undefined ? value : '';
 
-          // Create hidden input with proper naming: formField.index.field
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = `${formField}.${index}.${field}`;
-          input.value = value !== null && value !== undefined ? value : '';
-          input.setAttribute('data-tabulator-sync', 'true');
+          // Add to HTMX parameters
+          parameters[paramName] = paramValue;
 
-          console.log('wc-tabulator: Created hidden input', {name: input.name, value: input.value});
-
-          form.appendChild(input);
-          inputCount++;
+          console.log('wc-tabulator: Added parameter', {name: paramName, value: paramValue});
+          fieldCount++;
         });
       });
 
-      console.log(`wc-tabulator: Total hidden inputs created: ${inputCount}`);
+      console.log(`wc-tabulator: Total fields added: ${fieldCount}`);
+      console.log('wc-tabulator: Final parameters', parameters);
     }
 
     _applyStyle() {
