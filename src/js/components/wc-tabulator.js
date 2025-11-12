@@ -302,6 +302,7 @@ if (!customElements.get('wc-tabulator')) {
       super.connectedCallback();
 
       this._applyStyle();
+      this._setupFormSync();
       // console.log('conntectedCallback:wc-tabulator');
     }
 
@@ -1751,16 +1752,91 @@ if (!customElements.get('wc-tabulator')) {
       if (this.hasAttribute('pagination')) {
         const {data, last_page, last_row} = response;
         if (data == null && last_page === 0) {
-          return {last_page: 0, last_row: 0, data: []};  
+          return {last_page: 0, last_row: 0, data: []};
         }
         else if (data && last_page && last_row) {
-          return {last_page, last_row, data};  
+          return {last_page, last_row, data};
         } else {
           return {last_page: 10, data: results};
-        }  
+        }
       } else {
         return results;
       }
+    }
+
+    _setupFormSync() {
+      // Check if form-sync attribute is present
+      const formSyncId = this.getAttribute('form-sync');
+      if (!formSyncId) {
+        return; // No form sync requested
+      }
+
+      // Validate that form-field is provided
+      const formField = this.getAttribute('form-field');
+      if (!formField) {
+        throw new Error(`wc-tabulator: 'form-field' attribute is required when using 'form-sync'. Please specify the field name for the array (e.g., form-field="users").`);
+      }
+
+      // Find the form
+      const form = document.getElementById(formSyncId);
+      if (!form) {
+        console.warn(`wc-tabulator: Form with id="${formSyncId}" not found. Form sync will not work.`);
+        return;
+      }
+
+      // Listen for HTMX configRequest event (fires before HTMX sends the request)
+      form.addEventListener('htmx:configRequest', () => {
+        this._syncToForm(form, formField);
+      });
+    }
+
+    _syncToForm(form, formField) {
+      // Get exclude fields (comma-separated list)
+      const excludeFieldsAttr = this.getAttribute('form-exclude-fields') || '';
+      const excludeFields = excludeFieldsAttr.split(',').map(f => f.trim()).filter(f => f);
+
+      // Remove any existing hidden inputs from previous sync
+      form.querySelectorAll('[data-tabulator-sync]').forEach(el => el.remove());
+
+      // Get table data
+      if (!this.table) {
+        console.warn('wc-tabulator: Table not initialized yet, cannot sync data.');
+        return;
+      }
+
+      const data = this.table.getData();
+
+      // Generate hidden inputs for each row
+      data.forEach((row, index) => {
+        // Check if row is empty (all values are empty/null/undefined)
+        const isEmptyRow = Object.values(row).every(value =>
+          value === '' || value === null || value === undefined
+        );
+
+        // Skip empty rows
+        if (isEmptyRow) {
+          return;
+        }
+
+        // Create hidden inputs for each field in the row
+        Object.keys(row).forEach(field => {
+          // Skip excluded fields
+          if (excludeFields.includes(field)) {
+            return;
+          }
+
+          const value = row[field];
+
+          // Create hidden input with proper naming: formField.index.field
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = `${formField}.${index}.${field}`;
+          input.value = value !== null && value !== undefined ? value : '';
+          input.setAttribute('data-tabulator-sync', 'true');
+
+          form.appendChild(input);
+        });
+      });
     }
 
     _applyStyle() {

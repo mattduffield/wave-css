@@ -12716,6 +12716,7 @@ if (!customElements.get("wc-tabulator")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
+      this._setupFormSync();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -13827,6 +13828,54 @@ if (!customElements.get("wc-tabulator")) {
       } else {
         return results;
       }
+    }
+    _setupFormSync() {
+      const formSyncId = this.getAttribute("form-sync");
+      if (!formSyncId) {
+        return;
+      }
+      const formField = this.getAttribute("form-field");
+      if (!formField) {
+        throw new Error(`wc-tabulator: 'form-field' attribute is required when using 'form-sync'. Please specify the field name for the array (e.g., form-field="users").`);
+      }
+      const form = document.getElementById(formSyncId);
+      if (!form) {
+        console.warn(`wc-tabulator: Form with id="${formSyncId}" not found. Form sync will not work.`);
+        return;
+      }
+      form.addEventListener("htmx:configRequest", () => {
+        this._syncToForm(form, formField);
+      });
+    }
+    _syncToForm(form, formField) {
+      const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
+      const excludeFields = excludeFieldsAttr.split(",").map((f) => f.trim()).filter((f) => f);
+      form.querySelectorAll("[data-tabulator-sync]").forEach((el) => el.remove());
+      if (!this.table) {
+        console.warn("wc-tabulator: Table not initialized yet, cannot sync data.");
+        return;
+      }
+      const data = this.table.getData();
+      data.forEach((row, index) => {
+        const isEmptyRow = Object.values(row).every(
+          (value) => value === "" || value === null || value === void 0
+        );
+        if (isEmptyRow) {
+          return;
+        }
+        Object.keys(row).forEach((field) => {
+          if (excludeFields.includes(field)) {
+            return;
+          }
+          const value = row[field];
+          const input2 = document.createElement("input");
+          input2.type = "hidden";
+          input2.name = `${formField}.${index}.${field}`;
+          input2.value = value !== null && value !== void 0 ? value : "";
+          input2.setAttribute("data-tabulator-sync", "true");
+          form.appendChild(input2);
+        });
+      });
     }
     _applyStyle() {
       const style = `
