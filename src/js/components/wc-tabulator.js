@@ -359,6 +359,7 @@ if (!customElements.get('wc-tabulator')) {
       const rowClick = this.getAttribute('row-click');
       const rowSelected = this.getAttribute('row-selected');
       const rowDeselected = this.getAttribute('row-deselected');
+      const height = this.getAttribute('height');
 
       // Process any column field formatters.
       if (colFieldFormatter) {
@@ -427,6 +428,7 @@ if (!customElements.get('wc-tabulator')) {
       }
       if (rowFormatter) options.rowFormatter = this.resolveRowFormatter(rowFormatter);
       if (rowHeight) options.rowHeight = parseInt(rowHeight);
+      if (height) options.height = height; // Can be "300px", "100%", or any valid CSS height value
       if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == 'true' ? true : false;
       if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == 'true' ? true : false;
       if (frozenRows) options.frozenRows = parseInt(frozenRows);

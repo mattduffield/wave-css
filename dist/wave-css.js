@@ -12760,6 +12760,7 @@ if (!customElements.get("wc-tabulator")) {
       const rowClick = this.getAttribute("row-click");
       const rowSelected = this.getAttribute("row-selected");
       const rowDeselected = this.getAttribute("row-deselected");
+      const height = this.getAttribute("height");
       if (colFieldFormatter) {
         let obj = JSON.parse(colFieldFormatter);
         if (obj && obj.params && obj.params.url) {
@@ -12819,6 +12820,7 @@ if (!customElements.get("wc-tabulator")) {
       }
       if (rowFormatter) options.rowFormatter = this.resolveRowFormatter(rowFormatter);
       if (rowHeight) options.rowHeight = parseInt(rowHeight);
+      if (height) options.height = height;
       if (resizableRows) options.resizableRows = resizableRows.toLowerCase() == "true" ? true : false;
       if (resizableRowGuide) options.resizableRowGuide = resizableRowGuide.toLowerCase() == "true" ? true : false;
       if (frozenRows) options.frozenRows = parseInt(frozenRows);
