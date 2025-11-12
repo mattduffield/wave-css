@@ -12477,7 +12477,7 @@ if (!customElements.get("wc-tabulator-row-menu")) {
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class"];
+      return ["id", "class", "data"];
     }
     icons = {
       "eye": {
@@ -12769,11 +12769,22 @@ if (!customElements.get("wc-tabulator")) {
       }
       this.getFuncs();
       this.getRowMenu();
+      const dataAttr = this.getAttribute("data");
+      let inlineData = null;
+      if (dataAttr) {
+        try {
+          inlineData = JSON.parse(dataAttr);
+        } catch (e) {
+          console.error("Error parsing data attribute:", e);
+        }
+      }
       const options = {
         columns: this.getColumnsConfig(),
         layout: this.getAttribute("layout") || "fitData",
-        filterMode: "remote",
-        sortMode: "remote",
+        filterMode: inlineData ? "local" : "remote",
+        // Local filtering if using inline data
+        sortMode: inlineData ? "local" : "remote",
+        // Local sorting if using inline data
         ajaxURL: this.getAttribute("ajax-url") || "",
         // URL for server-side loading
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
@@ -12781,9 +12792,12 @@ if (!customElements.get("wc-tabulator")) {
         ajaxResponse: this.handleAjaxResponse.bind(this)
         // Optional custom handling of server response
       };
+      if (inlineData) {
+        options.data = inlineData;
+      }
       if (pagination) options.pagination = pagination;
       if (options.pagination) {
-        options.paginationMode = "remote";
+        options.paginationMode = inlineData ? "local" : "remote";
         if (paginationSize) {
           options.paginationSize = parseInt(paginationSize) || 10;
         } else {
