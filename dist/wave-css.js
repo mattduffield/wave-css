@@ -12909,9 +12909,15 @@ if (!customElements.get("wc-tabulator")) {
       const funcElements = this.querySelectorAll("wc-tabulator-func");
       funcElements.forEach((el) => {
         const name = el.getAttribute("name");
-        const func = el.textContent;
-        const value = new Function(`return (${func})`)();
-        this.funcs[name] = value;
+        const func = el.textContent.trim();
+        try {
+          const value = new Function(`return (${func})`)();
+          this.funcs[name] = value;
+        } catch (e) {
+          console.error(`Error parsing wc-tabulator-func "${name}":`, e);
+          console.error("Function content:", func);
+          console.error("Attempted to create:", `return (${func})`);
+        }
         el.innerHTML = "";
       });
     }
