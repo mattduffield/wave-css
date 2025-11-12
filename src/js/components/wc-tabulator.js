@@ -309,6 +309,14 @@ if (!customElements.get('wc-tabulator')) {
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
+
+      // Clean up form sync event listeners
+      if (this._syncHandler) {
+        if (this._syncForm) {
+          this._syncForm.removeEventListener('htmx:configRequest', this._syncHandler);
+        }
+        document.body.removeEventListener('htmx:configRequest', this._syncHandler);
+      }
     }
 
     async _handleAttributeChange(attrName, newValue) {
@@ -1784,10 +1792,32 @@ if (!customElements.get('wc-tabulator')) {
         return;
       }
 
-      // Listen for HTMX configRequest event (fires before HTMX sends the request)
-      form.addEventListener('htmx:configRequest', () => {
-        this._syncToForm(form, formField);
-      });
+      // Store form reference for later use
+      this._syncForm = form;
+      this._syncFormField = formField;
+
+      // Listen for HTMX configRequest event on both the form AND document.body
+      // (wc-save-split-button triggers it on document.body)
+      const syncHandler = (event) => {
+        // Check if this event is for our form by looking at the target element
+        const targetElement = event.detail?.elt;
+        if (targetElement) {
+          // Check if the target is within our form or has hx-include pointing to our form
+          const hxInclude = targetElement.getAttribute('hx-include');
+          const isOurForm = targetElement.closest(`#${formSyncId}`) || hxInclude === `#${formSyncId}` || hxInclude === `form#${formSyncId}`;
+
+          if (isOurForm) {
+            this._syncToForm(form, formField);
+          }
+        }
+      };
+
+      // Listen on both form and body to catch all cases
+      form.addEventListener('htmx:configRequest', syncHandler);
+      document.body.addEventListener('htmx:configRequest', syncHandler);
+
+      // Store handler reference for cleanup
+      this._syncHandler = syncHandler;
     }
 
     _syncToForm(form, formField) {

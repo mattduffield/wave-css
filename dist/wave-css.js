@@ -12721,6 +12721,12 @@ if (!customElements.get("wc-tabulator")) {
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
+      if (this._syncHandler) {
+        if (this._syncForm) {
+          this._syncForm.removeEventListener("htmx:configRequest", this._syncHandler);
+        }
+        document.body.removeEventListener("htmx:configRequest", this._syncHandler);
+      }
     }
     async _handleAttributeChange(attrName, newValue) {
       super._handleAttributeChange(attrName, newValue);
@@ -13843,9 +13849,21 @@ if (!customElements.get("wc-tabulator")) {
         console.warn(`wc-tabulator: Form with id="${formSyncId}" not found. Form sync will not work.`);
         return;
       }
-      form.addEventListener("htmx:configRequest", () => {
-        this._syncToForm(form, formField);
-      });
+      this._syncForm = form;
+      this._syncFormField = formField;
+      const syncHandler = (event) => {
+        const targetElement = event.detail?.elt;
+        if (targetElement) {
+          const hxInclude = targetElement.getAttribute("hx-include");
+          const isOurForm = targetElement.closest(`#${formSyncId}`) || hxInclude === `#${formSyncId}` || hxInclude === `form#${formSyncId}`;
+          if (isOurForm) {
+            this._syncToForm(form, formField);
+          }
+        }
+      };
+      form.addEventListener("htmx:configRequest", syncHandler);
+      document.body.addEventListener("htmx:configRequest", syncHandler);
+      this._syncHandler = syncHandler;
     }
     _syncToForm(form, formField) {
       const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
