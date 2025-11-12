@@ -1505,7 +1505,7 @@ if (!customElements.get('wc-tabulator')) {
       return input;
     }
 
-    selectEditor(cell, onRendered, success, cancel, editorParams) {
+    async selectEditor(cell, onRendered, success, cancel, editorParams) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
       //success - function to call to pass the successfully updated value to Tabulator
@@ -1514,89 +1514,87 @@ if (!customElements.get('wc-tabulator')) {
 
       const cellValue = cell.getValue();
 
-      // Create wc-select element
-      const select = document.createElement("wc-select");
+      // Create native select element
+      const select = document.createElement("select");
+      select.style.width = "100%";
+      select.style.padding = "4px";
+      select.style.boxSizing = "border-box";
 
-      // Apply editor params to wc-select
+      // Handle options - either from array or URL
+      let options = [];
+
       if (editorParams) {
-        // Support for url attribute (for dynamic options)
+        // Load options from URL if provided
         if (editorParams.url) {
-          select.setAttribute('url', editorParams.url);
+          try {
+            const response = await fetch(editorParams.url);
+            const data = await response.json();
+            options = data;
+          } catch (error) {
+            console.error('Error loading select options:', error);
+          }
+        }
+        // Or use static options array
+        else if (editorParams.options) {
+          options = editorParams.options;
         }
 
-        // Support for options array
-        if (editorParams.options) {
-          select.setAttribute('options', JSON.stringify(editorParams.options));
-        }
-
-        // Support for value and text fields
-        if (editorParams.valueField) {
-          select.setAttribute('value-field', editorParams.valueField);
-        }
-        if (editorParams.textField) {
-          select.setAttribute('text-field', editorParams.textField);
-        }
-
-        // Support for placeholder
+        // Add placeholder option if provided
         if (editorParams.placeholder) {
-          select.setAttribute('placeholder', editorParams.placeholder);
-        }
-
-        // Support for any other attributes
-        if (editorParams.attributes) {
-          Object.entries(editorParams.attributes).forEach(([key, value]) => {
-            select.setAttribute(key, value);
-          });
+          const placeholderOption = document.createElement("option");
+          placeholderOption.value = "";
+          placeholderOption.textContent = editorParams.placeholder;
+          placeholderOption.disabled = true;
+          select.appendChild(placeholderOption);
         }
       }
 
-      // Style the select to fit the cell
-      select.style.width = "100%";
-      select.style.boxSizing = "border-box";
+      // Determine field names for value and text
+      const valueField = editorParams?.valueField || 'value';
+      const textField = editorParams?.textField || 'text';
+
+      // Populate select with options
+      options.forEach(option => {
+        const optionElement = document.createElement("option");
+        optionElement.value = option[valueField];
+        optionElement.textContent = option[textField];
+        if (option[valueField] == cellValue) {
+          optionElement.selected = true;
+        }
+        select.appendChild(optionElement);
+      });
 
       // Set initial value
       if (cellValue) {
-        select.setAttribute('value', cellValue);
+        select.value = cellValue;
       }
 
       onRendered(function() {
-        // Wait for wc-select to be fully initialized
-        setTimeout(() => {
-          const nativeSelect = select.querySelector('select');
-          if (nativeSelect) {
-            nativeSelect.focus();
-          }
-        }, 100);
+        select.focus();
+        select.style.height = "100%";
       });
 
       function onChange() {
-        const newValue = select.value;
-        if (newValue != cellValue) {
-          success(newValue);
+        if (select.value != cellValue) {
+          success(select.value);
         } else {
           cancel();
         }
       }
 
-      // Listen for change on the wc-select
+      // Submit new value on blur or change
       select.addEventListener("change", onChange);
+      select.addEventListener("blur", onChange);
 
-      // Listen for blur on the native select inside wc-select
-      setTimeout(() => {
-        const nativeSelect = select.querySelector('select');
-        if (nativeSelect) {
-          nativeSelect.addEventListener("blur", onChange);
-
-          nativeSelect.addEventListener("keydown", function(e) {
-            if (e.key === 'Enter') {
-              onChange();
-            }
-            if (e.key === 'Escape') {
-              cancel();
-            }
-          });
+      // Submit new value on enter
+      select.addEventListener("keydown", function(e) {
+        if (e.key === 'Enter') {
+          onChange();
         }
-      }, 100);
+        if (e.key === 'Escape') {
+          cancel();
+        }
+      });
 
       return select;
     }

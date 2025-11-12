@@ -13647,67 +13647,68 @@ if (!customElements.get("wc-tabulator")) {
       });
       return input;
     }
-    selectEditor(cell, onRendered, success, cancel, editorParams) {
+    async selectEditor(cell, onRendered, success, cancel, editorParams) {
       const cellValue = cell.getValue();
-      const select = document.createElement("wc-select");
+      const select = document.createElement("select");
+      select.style.width = "100%";
+      select.style.padding = "4px";
+      select.style.boxSizing = "border-box";
+      let options = [];
       if (editorParams) {
         if (editorParams.url) {
-          select.setAttribute("url", editorParams.url);
-        }
-        if (editorParams.options) {
-          select.setAttribute("options", JSON.stringify(editorParams.options));
-        }
-        if (editorParams.valueField) {
-          select.setAttribute("value-field", editorParams.valueField);
-        }
-        if (editorParams.textField) {
-          select.setAttribute("text-field", editorParams.textField);
+          try {
+            const response = await fetch(editorParams.url);
+            const data = await response.json();
+            options = data;
+          } catch (error) {
+            console.error("Error loading select options:", error);
+          }
+        } else if (editorParams.options) {
+          options = editorParams.options;
         }
         if (editorParams.placeholder) {
-          select.setAttribute("placeholder", editorParams.placeholder);
-        }
-        if (editorParams.attributes) {
-          Object.entries(editorParams.attributes).forEach(([key, value]) => {
-            select.setAttribute(key, value);
-          });
+          const placeholderOption = document.createElement("option");
+          placeholderOption.value = "";
+          placeholderOption.textContent = editorParams.placeholder;
+          placeholderOption.disabled = true;
+          select.appendChild(placeholderOption);
         }
       }
-      select.style.width = "100%";
-      select.style.boxSizing = "border-box";
+      const valueField = editorParams?.valueField || "value";
+      const textField = editorParams?.textField || "text";
+      options.forEach((option) => {
+        const optionElement = document.createElement("option");
+        optionElement.value = option[valueField];
+        optionElement.textContent = option[textField];
+        if (option[valueField] == cellValue) {
+          optionElement.selected = true;
+        }
+        select.appendChild(optionElement);
+      });
       if (cellValue) {
-        select.setAttribute("value", cellValue);
+        select.value = cellValue;
       }
       onRendered(function() {
-        setTimeout(() => {
-          const nativeSelect = select.querySelector("select");
-          if (nativeSelect) {
-            nativeSelect.focus();
-          }
-        }, 100);
+        select.focus();
+        select.style.height = "100%";
       });
       function onChange() {
-        const newValue = select.value;
-        if (newValue != cellValue) {
-          success(newValue);
+        if (select.value != cellValue) {
+          success(select.value);
         } else {
           cancel();
         }
       }
       select.addEventListener("change", onChange);
-      setTimeout(() => {
-        const nativeSelect = select.querySelector("select");
-        if (nativeSelect) {
-          nativeSelect.addEventListener("blur", onChange);
-          nativeSelect.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") {
-              onChange();
-            }
-            if (e.key === "Escape") {
-              cancel();
-            }
-          });
+      select.addEventListener("blur", onChange);
+      select.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          onChange();
         }
-      }, 100);
+        if (e.key === "Escape") {
+          cancel();
+        }
+      });
       return select;
     }
     getAjaxConfig() {
