@@ -1505,7 +1505,7 @@ if (!customElements.get('wc-tabulator')) {
       return input;
     }
 
-    async selectEditor(cell, onRendered, success, cancel, editorParams) {
+    selectEditor(cell, onRendered, success, cancel, editorParams) {
       //cell - the cell component for the editable cell
       //onRendered - function to call when the editor has been rendered
       //success - function to call to pass the successfully updated value to Tabulator
@@ -1520,53 +1520,69 @@ if (!customElements.get('wc-tabulator')) {
       select.style.padding = "4px";
       select.style.boxSizing = "border-box";
 
-      // Handle options - either from array or URL
-      let options = [];
+      // Determine field names for value and text
+      const valueField = editorParams?.valueField || 'value';
+      const textField = editorParams?.textField || 'text';
 
-      if (editorParams) {
-        // Load options from URL if provided
-        if (editorParams.url) {
-          try {
-            const response = await fetch(editorParams.url);
-            const data = await response.json();
-            options = data;
-          } catch (error) {
-            console.error('Error loading select options:', error);
-          }
-        }
-        // Or use static options array
-        else if (editorParams.options) {
-          options = editorParams.options;
-        }
+      // Function to populate select with options
+      const populateOptions = (options) => {
+        // Clear existing options first
+        select.innerHTML = '';
 
         // Add placeholder option if provided
-        if (editorParams.placeholder) {
+        if (editorParams?.placeholder) {
           const placeholderOption = document.createElement("option");
           placeholderOption.value = "";
           placeholderOption.textContent = editorParams.placeholder;
           placeholderOption.disabled = true;
           select.appendChild(placeholderOption);
         }
-      }
 
-      // Determine field names for value and text
-      const valueField = editorParams?.valueField || 'value';
-      const textField = editorParams?.textField || 'text';
-
-      // Populate select with options
-      options.forEach(option => {
-        const optionElement = document.createElement("option");
-        optionElement.value = option[valueField];
-        optionElement.textContent = option[textField];
-        if (option[valueField] == cellValue) {
-          optionElement.selected = true;
+        // Add all options
+        if (Array.isArray(options)) {
+          options.forEach(option => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option[valueField];
+            optionElement.textContent = option[textField];
+            if (option[valueField] == cellValue) {
+              optionElement.selected = true;
+            }
+            select.appendChild(optionElement);
+          });
         }
-        select.appendChild(optionElement);
-      });
 
-      // Set initial value
-      if (cellValue) {
-        select.value = cellValue;
+        // Set initial value
+        if (cellValue) {
+          select.value = cellValue;
+        }
+      };
+
+      // Handle options - either from array or URL
+      if (editorParams) {
+        // Load options from URL if provided
+        if (editorParams.url) {
+          // Add loading option
+          const loadingOption = document.createElement("option");
+          loadingOption.textContent = "Loading...";
+          loadingOption.disabled = true;
+          loadingOption.selected = true;
+          select.appendChild(loadingOption);
+
+          // Fetch options asynchronously
+          fetch(editorParams.url)
+            .then(response => response.json())
+            .then(data => {
+              populateOptions(data);
+            })
+            .catch(error => {
+              console.error('Error loading select options:', error);
+              select.innerHTML = '<option disabled selected>Error loading options</option>';
+            });
+        }
+        // Or use static options array
+        else if (editorParams.options) {
+          populateOptions(editorParams.options);
+        }
       }
 
       onRendered(function() {

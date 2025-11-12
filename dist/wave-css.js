@@ -13647,46 +13647,54 @@ if (!customElements.get("wc-tabulator")) {
       });
       return input;
     }
-    async selectEditor(cell, onRendered, success, cancel, editorParams) {
+    selectEditor(cell, onRendered, success, cancel, editorParams) {
       const cellValue = cell.getValue();
       const select = document.createElement("select");
       select.style.width = "100%";
       select.style.padding = "4px";
       select.style.boxSizing = "border-box";
-      let options = [];
-      if (editorParams) {
-        if (editorParams.url) {
-          try {
-            const response = await fetch(editorParams.url);
-            const data = await response.json();
-            options = data;
-          } catch (error) {
-            console.error("Error loading select options:", error);
-          }
-        } else if (editorParams.options) {
-          options = editorParams.options;
-        }
-        if (editorParams.placeholder) {
+      const valueField = editorParams?.valueField || "value";
+      const textField = editorParams?.textField || "text";
+      const populateOptions = (options) => {
+        select.innerHTML = "";
+        if (editorParams?.placeholder) {
           const placeholderOption = document.createElement("option");
           placeholderOption.value = "";
           placeholderOption.textContent = editorParams.placeholder;
           placeholderOption.disabled = true;
           select.appendChild(placeholderOption);
         }
-      }
-      const valueField = editorParams?.valueField || "value";
-      const textField = editorParams?.textField || "text";
-      options.forEach((option) => {
-        const optionElement = document.createElement("option");
-        optionElement.value = option[valueField];
-        optionElement.textContent = option[textField];
-        if (option[valueField] == cellValue) {
-          optionElement.selected = true;
+        if (Array.isArray(options)) {
+          options.forEach((option) => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option[valueField];
+            optionElement.textContent = option[textField];
+            if (option[valueField] == cellValue) {
+              optionElement.selected = true;
+            }
+            select.appendChild(optionElement);
+          });
         }
-        select.appendChild(optionElement);
-      });
-      if (cellValue) {
-        select.value = cellValue;
+        if (cellValue) {
+          select.value = cellValue;
+        }
+      };
+      if (editorParams) {
+        if (editorParams.url) {
+          const loadingOption = document.createElement("option");
+          loadingOption.textContent = "Loading...";
+          loadingOption.disabled = true;
+          loadingOption.selected = true;
+          select.appendChild(loadingOption);
+          fetch(editorParams.url).then((response) => response.json()).then((data) => {
+            populateOptions(data);
+          }).catch((error) => {
+            console.error("Error loading select options:", error);
+            select.innerHTML = "<option disabled selected>Error loading options</option>";
+          });
+        } else if (editorParams.options) {
+          populateOptions(editorParams.options);
+        }
       }
       onRendered(function() {
         select.focus();
