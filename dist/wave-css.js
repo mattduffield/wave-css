@@ -13039,6 +13039,8 @@ if (!customElements.get("wc-tabulator")) {
         if (editor) {
           if (editor == "dateEditor") {
             column.editor = this.dateEditor.bind(this);
+          } else if (editor == "selectEditor") {
+            column.editor = this.selectEditor.bind(this);
           } else {
             column.editor = editor;
           }
@@ -13644,6 +13646,69 @@ if (!customElements.get("wc-tabulator")) {
         }
       });
       return input;
+    }
+    selectEditor(cell, onRendered, success, cancel, editorParams) {
+      const cellValue = cell.getValue();
+      const select = document.createElement("wc-select");
+      if (editorParams) {
+        if (editorParams.url) {
+          select.setAttribute("url", editorParams.url);
+        }
+        if (editorParams.options) {
+          select.setAttribute("options", JSON.stringify(editorParams.options));
+        }
+        if (editorParams.valueField) {
+          select.setAttribute("value-field", editorParams.valueField);
+        }
+        if (editorParams.textField) {
+          select.setAttribute("text-field", editorParams.textField);
+        }
+        if (editorParams.placeholder) {
+          select.setAttribute("placeholder", editorParams.placeholder);
+        }
+        if (editorParams.attributes) {
+          Object.entries(editorParams.attributes).forEach(([key, value]) => {
+            select.setAttribute(key, value);
+          });
+        }
+      }
+      select.style.width = "100%";
+      select.style.boxSizing = "border-box";
+      if (cellValue) {
+        select.setAttribute("value", cellValue);
+      }
+      onRendered(function() {
+        setTimeout(() => {
+          const nativeSelect = select.querySelector("select");
+          if (nativeSelect) {
+            nativeSelect.focus();
+          }
+        }, 100);
+      });
+      function onChange() {
+        const newValue = select.value;
+        if (newValue != cellValue) {
+          success(newValue);
+        } else {
+          cancel();
+        }
+      }
+      select.addEventListener("change", onChange);
+      setTimeout(() => {
+        const nativeSelect = select.querySelector("select");
+        if (nativeSelect) {
+          nativeSelect.addEventListener("blur", onChange);
+          nativeSelect.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+              onChange();
+            }
+            if (e.key === "Escape") {
+              cancel();
+            }
+          });
+        }
+      }, 100);
+      return select;
     }
     getAjaxConfig() {
       return {

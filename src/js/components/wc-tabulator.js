@@ -718,10 +718,12 @@ if (!customElements.get('wc-tabulator')) {
         if (editor) {
           if (editor == 'dateEditor') {
             column.editor = this.dateEditor.bind(this);
+          } else if (editor == 'selectEditor') {
+            column.editor = this.selectEditor.bind(this);
           } else {
             column.editor = editor;
           }
-        } 
+        }
         if (editorParams) column.editorParams = JSON.parse(editorParams);
         if (cellClick) {
           column.cellClick = this.resolveFunc(cellClick);
@@ -1501,6 +1503,102 @@ if (!customElements.get('wc-tabulator')) {
       });
 
       return input;
+    }
+
+    selectEditor(cell, onRendered, success, cancel, editorParams) {
+      //cell - the cell component for the editable cell
+      //onRendered - function to call when the editor has been rendered
+      //success - function to call to pass the successfully updated value to Tabulator
+      //cancel - function to call to abort the edit and return to a normal cell
+      //editorParams - params object passed from the column definition
+
+      const cellValue = cell.getValue();
+
+      // Create wc-select element
+      const select = document.createElement("wc-select");
+
+      // Apply editor params to wc-select
+      if (editorParams) {
+        // Support for url attribute (for dynamic options)
+        if (editorParams.url) {
+          select.setAttribute('url', editorParams.url);
+        }
+
+        // Support for options array
+        if (editorParams.options) {
+          select.setAttribute('options', JSON.stringify(editorParams.options));
+        }
+
+        // Support for value and text fields
+        if (editorParams.valueField) {
+          select.setAttribute('value-field', editorParams.valueField);
+        }
+        if (editorParams.textField) {
+          select.setAttribute('text-field', editorParams.textField);
+        }
+
+        // Support for placeholder
+        if (editorParams.placeholder) {
+          select.setAttribute('placeholder', editorParams.placeholder);
+        }
+
+        // Support for any other attributes
+        if (editorParams.attributes) {
+          Object.entries(editorParams.attributes).forEach(([key, value]) => {
+            select.setAttribute(key, value);
+          });
+        }
+      }
+
+      // Style the select to fit the cell
+      select.style.width = "100%";
+      select.style.boxSizing = "border-box";
+
+      // Set initial value
+      if (cellValue) {
+        select.setAttribute('value', cellValue);
+      }
+
+      onRendered(function() {
+        // Wait for wc-select to be fully initialized
+        setTimeout(() => {
+          const nativeSelect = select.querySelector('select');
+          if (nativeSelect) {
+            nativeSelect.focus();
+          }
+        }, 100);
+      });
+
+      function onChange() {
+        const newValue = select.value;
+        if (newValue != cellValue) {
+          success(newValue);
+        } else {
+          cancel();
+        }
+      }
+
+      // Listen for change on the wc-select
+      select.addEventListener("change", onChange);
+
+      // Listen for blur on the native select inside wc-select
+      setTimeout(() => {
+        const nativeSelect = select.querySelector('select');
+        if (nativeSelect) {
+          nativeSelect.addEventListener("blur", onChange);
+
+          nativeSelect.addEventListener("keydown", function(e) {
+            if (e.key === 'Enter') {
+              onChange();
+            }
+            if (e.key === 'Escape') {
+              cancel();
+            }
+          });
+        }
+      }, 100);
+
+      return select;
     }
 
     getAjaxConfig() {
