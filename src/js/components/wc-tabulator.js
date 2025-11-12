@@ -276,6 +276,7 @@ if (!customElements.get('wc-tabulator')) {
     constructor() {
       super();
       this.table = null;
+      this.editorOptionsCache = {}; // Cache for editor options to avoid redundant fetches
 
       this._internals = this.attachInternals();
       const compEl = this.querySelector('.wc-tabulator');
@@ -1513,6 +1514,7 @@ if (!customElements.get('wc-tabulator')) {
       //editorParams - params object passed from the column definition
 
       const cellValue = cell.getValue();
+      const field = cell.getColumn().getField();
 
       // Create native select element
       const select = document.createElement("select");
@@ -1561,27 +1563,46 @@ if (!customElements.get('wc-tabulator')) {
       if (editorParams) {
         // Load options from URL if provided
         if (editorParams.url) {
-          // Add loading option
-          const loadingOption = document.createElement("option");
-          loadingOption.textContent = "Loading...";
-          loadingOption.disabled = true;
-          loadingOption.selected = true;
-          select.appendChild(loadingOption);
+          // Use URL as cache key (supports multiple columns with different URLs)
+          const cacheKey = editorParams.url;
 
-          // Fetch options asynchronously
-          fetch(editorParams.url)
-            .then(response => response.json())
-            .then(data => {
-              populateOptions(data);
-            })
-            .catch(error => {
-              console.error('Error loading select options:', error);
-              select.innerHTML = '<option disabled selected>Error loading options</option>';
-            });
+          // Check if we already have cached options
+          if (this.editorOptionsCache[cacheKey]) {
+            // Use cached options immediately - no fetch needed!
+            populateOptions(this.editorOptionsCache[cacheKey]);
+          } else {
+            // Add loading option
+            const loadingOption = document.createElement("option");
+            loadingOption.textContent = "Loading...";
+            loadingOption.disabled = true;
+            loadingOption.selected = true;
+            select.appendChild(loadingOption);
+
+            // Fetch options asynchronously and cache them
+            fetch(editorParams.url)
+              .then(response => response.json())
+              .then(data => {
+                // Cache the options for this URL - all future edits for this column use the cache
+                this.editorOptionsCache[cacheKey] = data;
+                populateOptions(data);
+              })
+              .catch(error => {
+                console.error('Error loading select options:', error);
+                select.innerHTML = '<option disabled selected>Error loading options</option>';
+              });
+          }
         }
         // Or use static options array
         else if (editorParams.options) {
-          populateOptions(editorParams.options);
+          // Use field name as cache key for static options
+          const cacheKey = `static_${field}`;
+
+          // Cache static options too (for consistency)
+          if (!this.editorOptionsCache[cacheKey]) {
+            this.editorOptionsCache[cacheKey] = editorParams.options;
+          }
+
+          populateOptions(this.editorOptionsCache[cacheKey]);
         }
       }
 

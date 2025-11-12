@@ -12699,6 +12699,7 @@ if (!customElements.get("wc-tabulator")) {
     constructor() {
       super();
       this.table = null;
+      this.editorOptionsCache = {};
       this._internals = this.attachInternals();
       const compEl = this.querySelector(".wc-tabulator");
       if (compEl) {
@@ -13649,6 +13650,7 @@ if (!customElements.get("wc-tabulator")) {
     }
     selectEditor(cell, onRendered, success, cancel, editorParams) {
       const cellValue = cell.getValue();
+      const field = cell.getColumn().getField();
       const select = document.createElement("select");
       select.style.width = "100%";
       select.style.padding = "4px";
@@ -13681,19 +13683,29 @@ if (!customElements.get("wc-tabulator")) {
       };
       if (editorParams) {
         if (editorParams.url) {
-          const loadingOption = document.createElement("option");
-          loadingOption.textContent = "Loading...";
-          loadingOption.disabled = true;
-          loadingOption.selected = true;
-          select.appendChild(loadingOption);
-          fetch(editorParams.url).then((response) => response.json()).then((data) => {
-            populateOptions(data);
-          }).catch((error) => {
-            console.error("Error loading select options:", error);
-            select.innerHTML = "<option disabled selected>Error loading options</option>";
-          });
+          const cacheKey = editorParams.url;
+          if (this.editorOptionsCache[cacheKey]) {
+            populateOptions(this.editorOptionsCache[cacheKey]);
+          } else {
+            const loadingOption = document.createElement("option");
+            loadingOption.textContent = "Loading...";
+            loadingOption.disabled = true;
+            loadingOption.selected = true;
+            select.appendChild(loadingOption);
+            fetch(editorParams.url).then((response) => response.json()).then((data) => {
+              this.editorOptionsCache[cacheKey] = data;
+              populateOptions(data);
+            }).catch((error) => {
+              console.error("Error loading select options:", error);
+              select.innerHTML = "<option disabled selected>Error loading options</option>";
+            });
+          }
         } else if (editorParams.options) {
-          populateOptions(editorParams.options);
+          const cacheKey = `static_${field}`;
+          if (!this.editorOptionsCache[cacheKey]) {
+            this.editorOptionsCache[cacheKey] = editorParams.options;
+          }
+          populateOptions(this.editorOptionsCache[cacheKey]);
         }
       }
       onRendered(function() {
