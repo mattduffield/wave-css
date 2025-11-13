@@ -593,6 +593,11 @@ if (!customElements.get('wc-tabulator')) {
         // Get function text and trim whitespace
         const func = el.textContent.trim();
 
+        // Skip if function content is empty (e.g., when HTMX clones for history)
+        if (!func) {
+          return;
+        }
+
         try {
           const value = new Function(`return (${func})`)(); // Inline function
           this.funcs[name] = value;
@@ -620,7 +625,13 @@ if (!customElements.get('wc-tabulator')) {
         } else {
           const label = el.getAttribute('label');
           const icon = el.getAttribute('icon');
-          const func = el.textContent;
+          const func = el.textContent.trim();
+
+          // Skip if function content is empty (e.g., when HTMX clones for history)
+          if (!func) {
+            return;
+          }
+
           const value = new Function(`return (${func})`)(); // Inline function
           mnu = {
             label: this.createMenuLabel(label, this.icons[icon]),
@@ -1828,8 +1839,8 @@ if (!customElements.get('wc-tabulator')) {
       const excludeFields = excludeFieldsAttr.split(',').map(f => f.trim()).filter(f => f);
 
       // Get table data
+      // Silently skip if table not initialized (e.g., when HTMX creates temporary instances)
       if (!this.table) {
-        console.warn('wc-tabulator: Table not initialized yet, cannot sync data.');
         return;
       }
 

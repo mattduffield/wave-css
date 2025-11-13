@@ -12920,6 +12920,9 @@ if (!customElements.get("wc-tabulator")) {
       funcElements.forEach((el) => {
         const name = el.getAttribute("name");
         const func = el.textContent.trim();
+        if (!func) {
+          return;
+        }
         try {
           const value = new Function(`return (${func})`)();
           this.funcs[name] = value;
@@ -12945,7 +12948,10 @@ if (!customElements.get("wc-tabulator")) {
         } else {
           const label = el.getAttribute("label");
           const icon = el.getAttribute("icon");
-          const func = el.textContent;
+          const func = el.textContent.trim();
+          if (!func) {
+            return;
+          }
           const value = new Function(`return (${func})`)();
           mnu = {
             label: this.createMenuLabel(label, this.icons[icon]),
@@ -13869,7 +13875,6 @@ if (!customElements.get("wc-tabulator")) {
       const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
       const excludeFields = excludeFieldsAttr.split(",").map((f) => f.trim()).filter((f) => f);
       if (!this.table) {
-        console.warn("wc-tabulator: Table not initialized yet, cannot sync data.");
         return;
       }
       const data = this.table.getData();
