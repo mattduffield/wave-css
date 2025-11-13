@@ -13852,30 +13852,20 @@ if (!customElements.get("wc-tabulator")) {
       this._syncForm = form;
       this._syncFormField = formField;
       const syncHandler = (event) => {
-        console.log("wc-tabulator: htmx:configRequest fired", event.detail);
         const targetElement = event.detail?.elt;
-        console.log("wc-tabulator: targetElement", targetElement);
         if (targetElement) {
           const hxInclude = targetElement.getAttribute("hx-include");
-          console.log("wc-tabulator: hx-include", hxInclude);
           const isOurForm = targetElement.closest(`#${formSyncId}`) || hxInclude === `#${formSyncId}` || hxInclude === `form#${formSyncId}`;
-          console.log("wc-tabulator: isOurForm", isOurForm, "formSyncId", formSyncId);
           if (isOurForm) {
-            console.log("wc-tabulator: Syncing table data to form");
-            this._syncToForm(form, formField, event);
-          } else {
-            console.log("wc-tabulator: Not our form, skipping sync");
+            this._syncToForm(formField, event);
           }
-        } else {
-          console.log("wc-tabulator: No targetElement found");
         }
       };
       form.addEventListener("htmx:configRequest", syncHandler);
       document.body.addEventListener("htmx:configRequest", syncHandler);
       this._syncHandler = syncHandler;
     }
-    _syncToForm(form, formField, event) {
-      console.log("wc-tabulator: _syncToForm called", { form, formField, event });
+    _syncToForm(formField, event) {
       const excludeFieldsAttr = this.getAttribute("form-exclude-fields") || "";
       const excludeFields = excludeFieldsAttr.split(",").map((f) => f.trim()).filter((f) => f);
       if (!this.table) {
@@ -13883,34 +13873,24 @@ if (!customElements.get("wc-tabulator")) {
         return;
       }
       const data = this.table.getData();
-      console.log("wc-tabulator: Table data", data);
       const parameters = event.detail.parameters;
-      console.log("wc-tabulator: Original parameters", parameters);
-      let fieldCount = 0;
       data.forEach((row, index) => {
         const isEmptyRow = Object.values(row).every(
           (value) => value === "" || value === null || value === void 0
         );
-        console.log(`wc-tabulator: Row ${index}`, { row, isEmptyRow });
         if (isEmptyRow) {
-          console.log(`wc-tabulator: Skipping empty row ${index}`);
           return;
         }
         Object.keys(row).forEach((field) => {
           if (excludeFields.includes(field)) {
-            console.log(`wc-tabulator: Skipping excluded field ${field}`);
             return;
           }
           const value = row[field];
           const paramName = `${formField}.${index}.${field}`;
           const paramValue = value !== null && value !== void 0 ? value : "";
           parameters[paramName] = paramValue;
-          console.log("wc-tabulator: Added parameter", { name: paramName, value: paramValue });
-          fieldCount++;
         });
       });
-      console.log(`wc-tabulator: Total fields added: ${fieldCount}`);
-      console.log("wc-tabulator: Final parameters", parameters);
     }
     _applyStyle() {
       const style = `
