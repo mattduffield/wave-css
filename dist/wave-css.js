@@ -13675,6 +13675,19 @@ if (!customElements.get("wc-tabulator")) {
       const textField = editorParams?.textField || "text";
       const populateOptions = (options) => {
         select.innerHTML = "";
+        let sortedOptions = options;
+        if (editorParams?.sort && Array.isArray(options)) {
+          sortedOptions = [...options].sort((a, b) => {
+            const aVal = a[textField];
+            const bVal = b[textField];
+            if (editorParams.sort === "asc") {
+              return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+            } else if (editorParams.sort === "desc") {
+              return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+            }
+            return 0;
+          });
+        }
         if (editorParams?.allowEmpty) {
           const emptyOption = document.createElement("option");
           emptyOption.value = "";
@@ -13688,8 +13701,8 @@ if (!customElements.get("wc-tabulator")) {
           placeholderOption.disabled = true;
           select.appendChild(placeholderOption);
         }
-        if (Array.isArray(options)) {
-          options.forEach((option) => {
+        if (Array.isArray(sortedOptions)) {
+          sortedOptions.forEach((option) => {
             const optionElement = document.createElement("option");
             optionElement.value = option[valueField];
             optionElement.textContent = option[textField];
