@@ -524,8 +524,8 @@ class WcInput extends WcBaseFormComponent {
       icon.classList.add('icon');
       const iconItem = WcInput.icons.find(f => f.name === 'tel-fill');
       icon.innerHTML = iconItem.icon;
-      this.formElement.setAttribute('_', `on wc:ready
-          log "wc:ready fired and now calling MaskHub..."
+      this.formElement.setAttribute('_', `on wc:ready from document
+          log "wc:ready from document!"
           call wc.MaskHub.phoneMask(event)
           me.setCustomValidity('')
         end`);
