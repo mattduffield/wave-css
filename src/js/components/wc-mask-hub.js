@@ -1,14 +1,15 @@
 /*
  * Name: WcMaskHub
- * Usage: 
- * 
+ * Usage:
+ *
  *  <wc-mask-hub></wc-mask-hub>
- * 
+ *
  * References:
  *  https://github.com/uNmAnNeR/imaskjs
  */
 
-import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { loadStyle } from './helper-function.js';
+import { DependencyManager } from '../utils/dependency-manager.js';
 
 if (!customElements.get('wc-mask-hub')) {
   class WcMaskHub extends HTMLElement {
@@ -18,10 +19,10 @@ if (!customElements.get('wc-mask-hub')) {
 
     constructor() {
       super();
-      this.loadCSS = loadCSS.bind(this);
-      this.loadScript = loadScript.bind(this);
-      this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+
+      // Register IMask as a required dependency
+      DependencyManager.register('IMask');
 
       // console.log('ctor:wc-mask-hub');
     }
@@ -40,9 +41,8 @@ if (!customElements.get('wc-mask-hub')) {
     }
 
     async renderMask() {
-      await Promise.all([
-        this.loadLibrary('https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js', 'IMask'),
-      ]);
+      // Use dependency manager - this will deduplicate if multiple components try to load
+      await DependencyManager.load('IMask');
 
       if (!window.wc) {
         window.wc = {};

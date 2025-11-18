@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - Dependency Management Example</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .status-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .status-loading {
+      background: #fbbf24;
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .status-ready {
+      background: #10b981;
+    }
+    .status-error {
+      background: #ef4444;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    pre {
+      background: var(--surface-2);
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .example-section {
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body class="p-6">
+  <div class="container mx-auto max-w-4xl">
+    <h1 class="text-3xl font-bold mb-2">Dependency Management Example</h1>
+    <p class="text-gray-600 mb-6">Demonstrating robust dependency loading with Wave CSS</p>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <h2 class="text-xl font-semibold mb-4">Wave CSS Ready State</h2>
+      <div id="ready-status" class="mb-4">
+        <span class="status-indicator status-loading"></span>
+        <span>Loading dependencies...</span>
+      </div>
+      <div id="dependency-status" class="text-sm"></div>
+    </div>
+
+    <!-- Example 1: Phone Input with IMask -->
+    <div class="example-section">
+      <h2 class="text-xl font-semibold mb-3">Example 1: Phone Number Input</h2>
+      <p class="text-sm text-gray-600 mb-3">This demonstrates IMask loading and automatic phone formatting.</p>
+
+      <wc-mask-hub></wc-mask-hub>
+      <div class="grid gap-4">
+        <wc-input
+          name="phone1"
+          lbl-label="Phone Number"
+          type="tel"
+          placeholder="(___) ___-____"
+          onfocus="wc.MaskHub.phoneMask(event)"
+        ></wc-input>
+
+        <wc-input
+          name="phone2"
+          lbl-label="Mobile"
+          type="tel"
+          placeholder="(___) ___-____"
+          onfocus="wc.MaskHub.phoneMask(event)"
+        ></wc-input>
+      </div>
+
+      <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+        <p class="text-sm text-blue-800">
+          ✓ <strong>Try refreshing the page</strong> - phone masks will still work because IMask is loaded before initialization
+        </p>
+      </div>
+    </div>
+
+    <!-- Example 2: Currency Input -->
+    <div class="example-section">
+      <h2 class="text-xl font-semibold mb-3">Example 2: Currency Input</h2>
+      <p class="text-sm text-gray-600 mb-3">Currency formatting also uses IMask.</p>
+
+      <wc-input
+        name="salary"
+        lbl-label="Annual Salary"
+        type="text"
+        placeholder="$0.00"
+        onfocus="wc.MaskHub.currencyMask(event)"
+      ></wc-input>
+    </div>
+
+    <!-- Example 3: Application Code -->
+    <div class="example-section">
+      <h2 class="text-xl font-semibold mb-3">Example 3: Application Code</h2>
+      <p class="text-sm text-gray-600 mb-3">Your application code can wait for Wave CSS to be ready:</p>
+
+      <pre><code>// In your app.js
+async function initApp() {
+  // Wait for all Wave CSS dependencies
+  await wc.ready;
+  console.log('✓ Wave CSS ready!');
+
+  // Safe to initialize your app
+  setupEventHandlers();
+  loadUserData();
+}
+
+initApp();</code></pre>
+
+      <div class="mt-3">
+        <button id="check-status-btn" class="btn btn-primary">
+          Check Dependency Status
+        </button>
+      </div>
+    </div>
+
+    <!-- Console Output -->
+    <div class="example-section">
+      <h2 class="text-xl font-semibold mb-3">Console Output</h2>
+      <div id="console-output" class="p-4 bg-gray-900 text-green-400 font-mono text-sm rounded min-h-[200px] max-h-[400px] overflow-y-auto">
+        <div class="opacity-50"># Console output will appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+
+  <script type="module">
+    // Custom console logger to show output on page
+    const consoleOutput = document.getElementById('console-output');
+
+    function logToPage(message, type = 'log') {
+      const timestamp = new Date().toLocaleTimeString();
+      const colors = {
+        log: 'text-green-400',
+        error: 'text-red-400',
+        warn: 'text-yellow-400'
+      };
+
+      const line = document.createElement('div');
+      line.className = colors[type] || colors.log;
+      line.textContent = `[${timestamp}] ${message}`;
+      consoleOutput.appendChild(line);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    // Hook into console
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      logToPage(args.join(' '), 'log');
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      logToPage(args.join(' '), 'error');
+    };
+
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      logToPage(args.join(' '), 'warn');
+    };
+
+    // Wait for Wave CSS to be ready
+    async function initApp() {
+      console.log('Application starting...');
+      console.log('Waiting for Wave CSS dependencies...');
+
+      const startTime = performance.now();
+
+      try {
+        // This is the key API - wait for all dependencies to load
+        await wc.ready;
+
+        const loadTime = (performance.now() - startTime).toFixed(2);
+        console.log(`✓ All Wave CSS dependencies loaded in ${loadTime}ms`);
+
+        // Update UI
+        const statusEl = document.getElementById('ready-status');
+        statusEl.innerHTML = `
+          <span class="status-indicator status-ready"></span>
+          <span class="font-semibold text-green-600">Ready! Dependencies loaded in ${loadTime}ms</span>
+        `;
+
+        // Show dependency status
+        updateDependencyStatus();
+
+        // Safe to initialize app features now
+        console.log('✓ Application initialized successfully');
+
+      } catch (error) {
+        console.error('Failed to load dependencies:', error);
+
+        const statusEl = document.getElementById('ready-status');
+        statusEl.innerHTML = `
+          <span class="status-indicator status-error"></span>
+          <span class="font-semibold text-red-600">Error loading dependencies</span>
+        `;
+      }
+    }
+
+    function updateDependencyStatus() {
+      const status = wc.DependencyManager.getStatus();
+      const statusEl = document.getElementById('dependency-status');
+
+      let html = '<div class="grid grid-cols-1 md:grid-cols-3 gap-2">';
+      for (const [name, info] of Object.entries(status)) {
+        const statusClass = info.loaded ? 'text-green-600' : 'text-gray-400';
+        const icon = info.loaded ? '✓' : '○';
+
+        html += `
+          <div class="${statusClass}">
+            <strong>${icon} ${name}</strong><br>
+            <span class="text-xs">
+              ${info.loaded ? 'Loaded' : 'Not loaded'}
+              ${info.globalAvailable ? ' (Available)' : ''}
+            </span>
+          </div>
+        `;
+      }
+      html += '</div>';
+
+      statusEl.innerHTML = html;
+    }
+
+    // Check status button
+    document.getElementById('check-status-btn').addEventListener('click', () => {
+      console.log('Current dependency status:');
+      const status = wc.DependencyManager.getStatus();
+
+      for (const [name, info] of Object.entries(status)) {
+        console.log(`  ${name}: ${JSON.stringify(info)}`);
+      }
+
+      // Check specific dependencies
+      console.log(`IMask loaded: ${wc.DependencyManager.isLoaded('IMask')}`);
+      console.log(`CodeMirror loaded: ${wc.DependencyManager.isLoaded('CodeMirror')}`);
+
+      updateDependencyStatus();
+    });
+
+    // Initialize the app
+    initApp();
+
+    // Example: Using wc.ready in a simpler way
+    wc.ready.then(() => {
+      console.log('Alternative syntax: wc.ready.then() also works!');
+    });
+  </script>
+</body>
+</html>

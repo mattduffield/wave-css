@@ -22,6 +22,7 @@
 
 import { sleep } from './helper-function.js';
 import { WcBaseComponent } from './wc-base-component.js';
+import { DependencyManager } from '../utils/dependency-manager.js';
 
 if (!customElements.get('wc-code-mirror')) {
   class WcCodeMirror extends WcBaseComponent {
@@ -37,6 +38,10 @@ if (!customElements.get('wc-code-mirror')) {
       this._isResizing = false;
       this._internals = this.attachInternals();
       this.firstContent = '';
+
+      // Register CodeMirror as a required dependency
+      DependencyManager.register('CodeMirror');
+
       if (this.innerHTML.trim() != "") {
         this.firstContent = this.innerHTML.replaceAll('=&gt;', '=>');
         this.innerHTML = "";
@@ -50,7 +55,7 @@ if (!customElements.get('wc-code-mirror')) {
       } else {
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-code-mirror');
-        this.appendChild(this.componentElement);      
+        this.appendChild(this.componentElement);
       }
       // console.log('ctor:wc-code-mirror');
     }
@@ -183,10 +188,8 @@ if (!customElements.get('wc-code-mirror')) {
       // Set the initial value from the attribute if provided
       const initialValue = this.getAttribute('value') || this.firstContent || '';
 
-      await Promise.all([
-        this.loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css'),
-        this.loadLibrary('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js', 'CodeMirror')
-      ]);
+      // Use dependency manager for CodeMirror core library
+      await DependencyManager.load('CodeMirror');
 
       // Render the editor and pass the initial value
       await this.renderEditor(initialValue);

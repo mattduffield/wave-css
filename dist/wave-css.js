@@ -614,6 +614,201 @@ if (typeof window !== "undefined") {
   window.wc.iconRegistry = iconRegistry;
 }
 
+// src/js/utils/dependency-manager.js
+var WcDependencyManager = class {
+  constructor() {
+    this._dependencies = /* @__PURE__ */ new Map();
+    this._registeredDependencies = /* @__PURE__ */ new Set();
+    this._readyPromise = null;
+    this._readyResolve = null;
+    this._readyReject = null;
+    this._dependencyConfigs = {
+      "IMask": {
+        url: "https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js",
+        globalName: "IMask",
+        timeout: 1e4
+      },
+      "CodeMirror": {
+        urls: [
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css",
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"
+        ],
+        globalName: "CodeMirror",
+        timeout: 15e3
+      },
+      "Tabulator": {
+        urls: [
+          "https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js",
+          "https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"
+        ],
+        globalName: "Tabulator",
+        timeout: 15e3
+      }
+    };
+    this._initializeReadyPromise();
+  }
+  /**
+   * Initialize the ready promise that applications can await
+   */
+  _initializeReadyPromise() {
+    this._readyPromise = new Promise((resolve, reject) => {
+      this._readyResolve = resolve;
+      this._readyReject = reject;
+    });
+  }
+  /**
+   * Register a dependency as required (called by components during construction)
+   * This lets us know what needs to load before we're "ready"
+   */
+  register(dependencyName) {
+    this._registeredDependencies.add(dependencyName);
+  }
+  /**
+   * Load a dependency (returns promise that resolves when loaded)
+   * Handles deduplication - multiple calls return the same promise
+   */
+  async load(dependencyName, customConfig = null) {
+    if (this._dependencies.has(dependencyName)) {
+      return this._dependencies.get(dependencyName);
+    }
+    const config = customConfig || this._dependencyConfigs[dependencyName];
+    if (!config) {
+      const error = new Error(`Unknown dependency: ${dependencyName}. Please provide a configuration.`);
+      console.error(error);
+      return Promise.reject(error);
+    }
+    const loadingPromise = this._loadDependency(dependencyName, config);
+    this._dependencies.set(dependencyName, loadingPromise);
+    return loadingPromise;
+  }
+  /**
+   * Internal method to actually load a dependency
+   */
+  async _loadDependency(dependencyName, config) {
+    if (config.globalName && window[config.globalName]) {
+      console.log(`\u2713 ${dependencyName} already loaded`);
+      return window[config.globalName];
+    }
+    console.log(`\u23F3 Loading ${dependencyName}...`);
+    const urls = Array.isArray(config.urls) ? config.urls : [config.url];
+    const timeout = config.timeout || 1e4;
+    try {
+      const loadPromises = urls.map(
+        (url) => this._loadResource(url, timeout)
+      );
+      await Promise.all(loadPromises);
+      if (config.globalName && !window[config.globalName]) {
+        throw new Error(`${dependencyName} loaded but ${config.globalName} not found on window`);
+      }
+      console.log(`\u2713 ${dependencyName} loaded successfully`);
+      this._checkIfReady();
+      return config.globalName ? window[config.globalName] : true;
+    } catch (error) {
+      console.error(`\u2717 Failed to load ${dependencyName}:`, error);
+      this._dependencies.delete(dependencyName);
+      throw error;
+    }
+  }
+  /**
+   * Load a single resource (JS or CSS) with timeout
+   */
+  _loadResource(url, timeout) {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Timeout loading ${url} after ${timeout}ms`));
+      }, timeout);
+      const isCSS = url.endsWith(".css");
+      if (isCSS) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+        link.onload = () => {
+          clearTimeout(timeoutId);
+          resolve();
+        };
+        link.onerror = () => {
+          clearTimeout(timeoutId);
+          reject(new Error(`Failed to load CSS: ${url}`));
+        };
+        document.head.appendChild(link);
+      } else {
+        const script = document.createElement("script");
+        script.src = url;
+        script.onload = () => {
+          clearTimeout(timeoutId);
+          resolve();
+        };
+        script.onerror = () => {
+          clearTimeout(timeoutId);
+          reject(new Error(`Failed to load script: ${url}`));
+        };
+        document.head.appendChild(script);
+      }
+    });
+  }
+  /**
+   * Check if all registered dependencies are loaded
+   */
+  _checkIfReady() {
+    if (this._registeredDependencies.size === 0) {
+      return;
+    }
+    const allLoaded = Array.from(this._registeredDependencies).every((dep) => {
+      const promise = this._dependencies.get(dep);
+      const config = this._dependencyConfigs[dep];
+      return config && config.globalName && window[config.globalName];
+    });
+    if (allLoaded && this._readyResolve) {
+      console.log("\u2713 All Wave CSS dependencies ready!");
+      this._readyResolve();
+      this._readyResolve = null;
+    }
+  }
+  /**
+   * Get the ready promise
+   */
+  get ready() {
+    return this._readyPromise;
+  }
+  /**
+   * Check if a specific dependency is loaded
+   */
+  isLoaded(dependencyName) {
+    const config = this._dependencyConfigs[dependencyName];
+    if (!config) return false;
+    if (config.globalName) {
+      return !!window[config.globalName];
+    }
+    return this._dependencies.has(dependencyName);
+  }
+  /**
+   * Get status of all dependencies
+   */
+  getStatus() {
+    const status = {};
+    for (const [name, config] of Object.entries(this._dependencyConfigs)) {
+      status[name] = {
+        registered: this._registeredDependencies.has(name),
+        loaded: this.isLoaded(name),
+        globalAvailable: config.globalName ? !!window[config.globalName] : null
+      };
+    }
+    return status;
+  }
+  /**
+   * Add a custom dependency configuration
+   */
+  addDependency(name, config) {
+    this._dependencyConfigs[name] = config;
+  }
+};
+var dependencyManager = new WcDependencyManager();
+if (!window.wc) {
+  window.wc = {};
+}
+window.wc.DependencyManager = dependencyManager;
+window.wc.ready = dependencyManager.ready;
+
 // src/js/components/wc-icon-config.js
 var existingConfig = window.WcIconConfig || {};
 var WcIconConfig = {
@@ -1862,6 +2057,7 @@ if (!customElements.get("wc-code-mirror")) {
       this._isResizing = false;
       this._internals = this.attachInternals();
       this.firstContent = "";
+      dependencyManager.register("CodeMirror");
       if (this.innerHTML.trim() != "") {
         this.firstContent = this.innerHTML.replaceAll("=&gt;", "=>");
         this.innerHTML = "";
@@ -1991,10 +2187,7 @@ if (!customElements.get("wc-code-mirror")) {
       settingsPopover.setAttribute("popover", "manual");
       this.componentElement.appendChild(settingsPopover);
       const initialValue = this.getAttribute("value") || this.firstContent || "";
-      await Promise.all([
-        this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"),
-        this.loadLibrary("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js", "CodeMirror")
-      ]);
+      await dependencyManager.load("CodeMirror");
       await this.renderEditor(initialValue);
       this._internals.setFormValue(initialValue);
     }
@@ -17598,10 +17791,8 @@ if (!customElements.get("wc-mask-hub")) {
     }
     constructor() {
       super();
-      this.loadCSS = loadCSS.bind(this);
-      this.loadScript = loadScript.bind(this);
-      this.loadLibrary = loadLibrary.bind(this);
       this.loadStyle = loadStyle.bind(this);
+      dependencyManager.register("IMask");
     }
     async connectedCallback() {
       if (document.querySelector(this.tagName) !== this) {
@@ -17615,9 +17806,7 @@ if (!customElements.get("wc-mask-hub")) {
     disconnectedCallback() {
     }
     async renderMask() {
-      await Promise.all([
-        this.loadLibrary("https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.1/imask.min.js", "IMask")
-      ]);
+      await dependencyManager.load("IMask");
       if (!window.wc) {
         window.wc = {};
       }
@@ -21507,6 +21696,7 @@ var WcTextarea = class extends WcBaseFormComponent {
 };
 customElements.define("wc-textarea", WcTextarea);
 export {
+  dependencyManager as DependencyManager,
   WcIconConfig,
   applyRule,
   checkResources,

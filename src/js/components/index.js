@@ -1,5 +1,6 @@
 export * from './helper-function.js';
 export { iconRegistry } from '../utils/icon-registry.js';
+export { DependencyManager } from '../utils/dependency-manager.js';
 export { WcIconConfig } from './wc-icon-config.js';
 import './wc-base-component.js';
 import './wc-base-form-component.js';
