@@ -839,9 +839,17 @@ if (typeof window !== "undefined") {
   document.addEventListener("htmx:afterSwap", (event) => {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
-      dependencyManager.triggerReadyForElement(target);
-      target.querySelectorAll('[_*="wc:ready"]').forEach((el) => {
-        dependencyManager.triggerReadyForElement(el);
+      console.log("HTMX afterSwap - dispatching wc:ready to new content");
+      target.dispatchEvent(new CustomEvent("wc:ready", {
+        bubbles: true,
+        detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+      }));
+      const allElements = target.querySelectorAll("*");
+      allElements.forEach((el) => {
+        el.dispatchEvent(new CustomEvent("wc:ready", {
+          bubbles: false,
+          detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+        }));
       });
     }
   });

@@ -315,12 +315,21 @@ if (typeof window !== 'undefined') {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
 
-      // Dispatch to the swapped container
-      dependencyManager.triggerReadyForElement(target);
+      console.log('HTMX afterSwap - dispatching wc:ready to new content');
 
-      // Also dispatch to any child elements that might be listening
-      target.querySelectorAll('[_*="wc:ready"]').forEach(el => {
-        dependencyManager.triggerReadyForElement(el);
+      // Dispatch to the swapped container itself
+      target.dispatchEvent(new CustomEvent('wc:ready', {
+        bubbles: true,
+        detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+      }));
+
+      // Also dispatch to all child elements (hyperscript may be listening on specific elements)
+      const allElements = target.querySelectorAll('*');
+      allElements.forEach(el => {
+        el.dispatchEvent(new CustomEvent('wc:ready', {
+          bubbles: false,
+          detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+        }));
       });
     }
   });
