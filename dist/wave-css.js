@@ -617,6 +617,7 @@ if (typeof window !== "undefined") {
 // src/js/utils/dependency-manager.js
 var WcDependencyManager = class {
   constructor() {
+    this._debug = false;
     this._dependencies = /* @__PURE__ */ new Map();
     this._registeredDependencies = /* @__PURE__ */ new Set();
     this._readyPromise = null;
@@ -646,6 +647,20 @@ var WcDependencyManager = class {
       }
     };
     this._initializeReadyPromise();
+  }
+  /**
+   * Debug logging helper
+   */
+  _log(...args) {
+    if (this._debug) {
+      console.log("[WcDependencyManager]", ...args);
+    }
+  }
+  /**
+   * Enable or disable debug logging
+   */
+  setDebug(enabled) {
+    this._debug = enabled;
   }
   /**
    * Initialize the ready promise that applications can await
@@ -686,10 +701,10 @@ var WcDependencyManager = class {
    */
   async _loadDependency(dependencyName, config) {
     if (config.globalName && window[config.globalName]) {
-      console.log(`\u2713 ${dependencyName} already loaded`);
+      this._log(`\u2713 ${dependencyName} already loaded`);
       return window[config.globalName];
     }
-    console.log(`\u23F3 Loading ${dependencyName}...`);
+    this._log(`\u23F3 Loading ${dependencyName}...`);
     const urls = Array.isArray(config.urls) ? config.urls : [config.url];
     const timeout = config.timeout || 1e4;
     try {
@@ -700,7 +715,7 @@ var WcDependencyManager = class {
       if (config.globalName && !window[config.globalName]) {
         throw new Error(`${dependencyName} loaded but ${config.globalName} not found on window`);
       }
-      console.log(`\u2713 ${dependencyName} loaded successfully`);
+      this._log(`\u2713 ${dependencyName} loaded successfully`);
       this._checkIfReady();
       return config.globalName ? window[config.globalName] : true;
     } catch (error) {
@@ -759,13 +774,13 @@ var WcDependencyManager = class {
       return config && config.globalName && window[config.globalName];
     });
     if (allLoaded && this._readyResolve) {
-      console.log("\u2713 All Wave CSS dependencies ready!");
+      this._log("\u2713 All Wave CSS dependencies ready!");
       this._readyResolve();
       this._readyResolve = null;
       let dispatchCount = 0;
       const dispatchReady = (source = "unknown") => {
         dispatchCount++;
-        console.log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
+        this._log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
         document.dispatchEvent(new CustomEvent("wc:ready", {
           detail: {
             dependencies: Array.from(this._registeredDependencies),
@@ -774,27 +789,27 @@ var WcDependencyManager = class {
           }
         }));
       };
-      console.log("Current document.readyState:", document.readyState);
+      this._log("Current document.readyState:", document.readyState);
       if (document.readyState === "loading") {
-        console.log("Waiting for DOMContentLoaded before dispatching wc:ready");
+        this._log("Waiting for DOMContentLoaded before dispatching wc:ready");
         document.addEventListener("DOMContentLoaded", () => {
           dispatchReady("DOMContentLoaded");
           setTimeout(() => dispatchReady("DOMContentLoaded+50ms"), 50);
           setTimeout(() => dispatchReady("DOMContentLoaded+150ms"), 150);
         }, { once: true });
       } else if (document.readyState === "interactive") {
-        console.log("DOM interactive, dispatching wc:ready with retries");
+        this._log("DOM interactive, dispatching wc:ready with retries");
         setTimeout(() => dispatchReady("interactive+0ms"), 0);
         setTimeout(() => dispatchReady("interactive+100ms"), 100);
         setTimeout(() => dispatchReady("interactive+200ms"), 200);
       } else {
-        console.log("DOM complete, dispatching wc:ready with retries");
+        this._log("DOM complete, dispatching wc:ready with retries");
         setTimeout(() => dispatchReady("complete+0ms"), 0);
         setTimeout(() => dispatchReady("complete+50ms"), 50);
         setTimeout(() => dispatchReady("complete+150ms"), 150);
       }
       window.addEventListener("load", () => {
-        console.log("window.load fired, dispatching wc:ready");
+        this._log("window.load fired, dispatching wc:ready");
         dispatchReady("window.load");
         setTimeout(() => dispatchReady("window.load+100ms"), 100);
       }, { once: true });
@@ -872,28 +887,28 @@ if (typeof window !== "undefined") {
   document.addEventListener("htmx:afterSettle", (event) => {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
-      console.log("HTMX afterSettle - dependencies ready, dispatching wc:ready to new content");
-      console.log("Target element:", target);
+      dependencyManager._log("HTMX afterSettle - dependencies ready, dispatching wc:ready to new content");
+      dependencyManager._log("Target element:", target);
       setTimeout(() => {
-        console.log("Dispatching wc:ready after hyperscript initialization delay");
+        dependencyManager._log("Dispatching wc:ready after hyperscript initialization delay");
         target.dispatchEvent(new CustomEvent("wc:ready", {
           bubbles: true,
           detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
         }));
         const allElements = target.querySelectorAll("*");
-        console.log(`Dispatching wc:ready to ${allElements.length} child elements`);
+        dependencyManager._log(`Dispatching wc:ready to ${allElements.length} child elements`);
         allElements.forEach((el, index) => {
           el.dispatchEvent(new CustomEvent("wc:ready", {
             bubbles: false,
             detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
           }));
-          if (el.tagName === "WC-INPUT" && el.getAttribute("type") === "tel") {
-            console.log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute("name"));
+          if (dependencyManager._debug && el.tagName === "WC-INPUT" && el.getAttribute("type") === "tel") {
+            dependencyManager._log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute("name"));
           }
         });
       }, 100);
     } else {
-      console.log("HTMX afterSettle - dependencies not ready yet");
+      dependencyManager._log("HTMX afterSettle - dependencies not ready yet");
     }
   });
 }
@@ -17966,7 +17981,9 @@ if (!customElements.get("wc-mask-hub")) {
     applyMask(event, maskType = "phone") {
       const { target } = event;
       if (target._imaskInstance) {
-        console.log("Mask already applied to element, skipping:", target.getAttribute("name") || target.id || "unnamed");
+        if (window.wc?.DependencyManager?._debug) {
+          console.log("[WcMaskHub] Mask already applied to element, skipping:", target.getAttribute("name") || target.id || "unnamed");
+        }
         return;
       }
       const maskConfig = this.maskConfigs[maskType];
@@ -17974,7 +17991,9 @@ if (!customElements.get("wc-mask-hub")) {
         console.error(`WcMaskHub: Unknown mask type "${maskType}". Available types:`, Object.keys(this.maskConfigs));
         return;
       }
-      console.log("Applying", maskType, "mask to element:", target.getAttribute("name") || target.id || "unnamed");
+      if (window.wc?.DependencyManager?._debug) {
+        console.log("[WcMaskHub] Applying", maskType, "mask to element:", target.getAttribute("name") || target.id || "unnamed");
+      }
       target._imaskInstance = IMask(target, maskConfig);
       target._maskType = maskType;
       if (target.value) {
@@ -19998,7 +20017,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       const iconItem = _WcInput.icons.find((f) => f.name === "tel-fill");
       icon.innerHTML = iconItem.icon;
       this.formElement.setAttribute("_", `on wc:ready from document
-          log "wc:ready from document!"
           call wc.MaskHub.phoneMaskElement(me)
           me.setCustomValidity('')
         end`);

@@ -19,6 +19,9 @@
 
 class WcDependencyManager {
   constructor() {
+    // Debug mode - set to true to enable verbose logging
+    this._debug = false;
+
     // Track loading state for each dependency
     this._dependencies = new Map();
 
@@ -57,6 +60,22 @@ class WcDependencyManager {
 
     // Initialize ready promise
     this._initializeReadyPromise();
+  }
+
+  /**
+   * Debug logging helper
+   */
+  _log(...args) {
+    if (this._debug) {
+      console.log('[WcDependencyManager]', ...args);
+    }
+  }
+
+  /**
+   * Enable or disable debug logging
+   */
+  setDebug(enabled) {
+    this._debug = enabled;
   }
 
   /**
@@ -110,11 +129,11 @@ class WcDependencyManager {
   async _loadDependency(dependencyName, config) {
     // Check if already globally available
     if (config.globalName && window[config.globalName]) {
-      console.log(`✓ ${dependencyName} already loaded`);
+      this._log(`✓ ${dependencyName} already loaded`);
       return window[config.globalName];
     }
 
-    console.log(`⏳ Loading ${dependencyName}...`);
+    this._log(`⏳ Loading ${dependencyName}...`);
 
     // Normalize URLs to array
     const urls = Array.isArray(config.urls) ? config.urls : [config.url];
@@ -133,7 +152,7 @@ class WcDependencyManager {
         throw new Error(`${dependencyName} loaded but ${config.globalName} not found on window`);
       }
 
-      console.log(`✓ ${dependencyName} loaded successfully`);
+      this._log(`✓ ${dependencyName} loaded successfully`);
 
       // Check if all registered dependencies are now loaded
       this._checkIfReady();
@@ -208,7 +227,7 @@ class WcDependencyManager {
     });
 
     if (allLoaded && this._readyResolve) {
-      console.log('✓ All Wave CSS dependencies ready!');
+      this._log('✓ All Wave CSS dependencies ready!');
       this._readyResolve();
       this._readyResolve = null; // Prevent multiple calls
 
@@ -217,7 +236,7 @@ class WcDependencyManager {
       // Dispatch wc:ready event - we'll dispatch multiple times to ensure hyperscript catches it
       const dispatchReady = (source = 'unknown') => {
         dispatchCount++;
-        console.log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
+        this._log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
         document.dispatchEvent(new CustomEvent('wc:ready', {
           detail: {
             dependencies: Array.from(this._registeredDependencies),
@@ -228,13 +247,13 @@ class WcDependencyManager {
       };
 
       // Check DOM ready state
-      console.log('Current document.readyState:', document.readyState);
+      this._log('Current document.readyState:', document.readyState);
 
       // Strategy: Dispatch multiple times at different intervals to catch hyperscript
       // whenever it's ready. Hyperscript handlers should be idempotent anyway.
 
       if (document.readyState === 'loading') {
-        console.log('Waiting for DOMContentLoaded before dispatching wc:ready');
+        this._log('Waiting for DOMContentLoaded before dispatching wc:ready');
         document.addEventListener('DOMContentLoaded', () => {
           // After DOMContentLoaded, dispatch multiple times
           dispatchReady('DOMContentLoaded');
@@ -244,13 +263,13 @@ class WcDependencyManager {
       } else if (document.readyState === 'interactive') {
         // DOM parsed but still loading resources
         // Dispatch immediately and then retry
-        console.log('DOM interactive, dispatching wc:ready with retries');
+        this._log('DOM interactive, dispatching wc:ready with retries');
         setTimeout(() => dispatchReady('interactive+0ms'), 0);
         setTimeout(() => dispatchReady('interactive+100ms'), 100);
         setTimeout(() => dispatchReady('interactive+200ms'), 200);
       } else {
         // DOM completely loaded
-        console.log('DOM complete, dispatching wc:ready with retries');
+        this._log('DOM complete, dispatching wc:ready with retries');
         setTimeout(() => dispatchReady('complete+0ms'), 0);
         setTimeout(() => dispatchReady('complete+50ms'), 50);
         setTimeout(() => dispatchReady('complete+150ms'), 150);
@@ -258,7 +277,7 @@ class WcDependencyManager {
 
       // Additional safety net: dispatch on window load
       window.addEventListener('load', () => {
-        console.log('window.load fired, dispatching wc:ready');
+        this._log('window.load fired, dispatching wc:ready');
         dispatchReady('window.load');
         setTimeout(() => dispatchReady('window.load+100ms'), 100);
       }, { once: true });
@@ -362,12 +381,12 @@ if (typeof window !== 'undefined') {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
 
-      console.log('HTMX afterSettle - dependencies ready, dispatching wc:ready to new content');
-      console.log('Target element:', target);
+      dependencyManager._log('HTMX afterSettle - dependencies ready, dispatching wc:ready to new content');
+      dependencyManager._log('Target element:', target);
 
       // Give hyperscript a moment to process the new elements
       setTimeout(() => {
-        console.log('Dispatching wc:ready after hyperscript initialization delay');
+        dependencyManager._log('Dispatching wc:ready after hyperscript initialization delay');
 
         // Dispatch to the swapped container itself
         target.dispatchEvent(new CustomEvent('wc:ready', {
@@ -377,7 +396,7 @@ if (typeof window !== 'undefined') {
 
         // Also dispatch to all child elements (hyperscript may be listening on specific elements)
         const allElements = target.querySelectorAll('*');
-        console.log(`Dispatching wc:ready to ${allElements.length} child elements`);
+        dependencyManager._log(`Dispatching wc:ready to ${allElements.length} child elements`);
 
         allElements.forEach((el, index) => {
           el.dispatchEvent(new CustomEvent('wc:ready', {
@@ -386,13 +405,13 @@ if (typeof window !== 'undefined') {
           }));
 
           // Log phone inputs specifically
-          if (el.tagName === 'WC-INPUT' && el.getAttribute('type') === 'tel') {
-            console.log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute('name'));
+          if (dependencyManager._debug && el.tagName === 'WC-INPUT' && el.getAttribute('type') === 'tel') {
+            dependencyManager._log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute('name'));
           }
         });
       }, 100); // 100ms delay to let hyperscript initialize
     } else {
-      console.log('HTMX afterSettle - dependencies not ready yet');
+      dependencyManager._log('HTMX afterSettle - dependencies not ready yet');
     }
   });
 }

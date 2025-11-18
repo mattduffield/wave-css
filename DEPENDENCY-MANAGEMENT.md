@@ -52,6 +52,27 @@ async function main() {
 main();
 ```
 
+### Enable Debug Logging
+
+By default, the dependency manager runs silently. To enable verbose logging for troubleshooting:
+
+```javascript
+// Enable debug logging
+wc.DependencyManager.setDebug(true);
+
+// Now you'll see detailed logs:
+// [WcDependencyManager] ⏳ Loading IMask...
+// [WcDependencyManager] ✓ IMask loaded successfully
+// [WcDependencyManager] ✓ All Wave CSS dependencies ready!
+// [WcDependencyManager] Current document.readyState: interactive
+// [WcDependencyManager] DOM interactive, dispatching wc:ready with retries
+// [WcDependencyManager] Dispatching wc:ready event #1 (source: interactive+0ms)
+// [WcMaskHub] Applying phone mask to element: contact.mobile_number
+
+// Disable when done debugging
+wc.DependencyManager.setDebug(false);
+```
+
 ### Check Dependency Status
 
 ```javascript
@@ -457,6 +478,26 @@ Get detailed status of all configured dependencies.
 ```javascript
 const status = DependencyManager.getStatus();
 ```
+
+### `wc.DependencyManager.setDebug(enabled)`
+**Parameters:** `enabled` (boolean) - Enable or disable debug logging
+
+Enable verbose console logging for troubleshooting.
+
+```javascript
+// Enable debug mode
+wc.DependencyManager.setDebug(true);
+
+// Disable debug mode
+wc.DependencyManager.setDebug(false);
+```
+
+**Debug output includes:**
+- Dependency loading progress
+- Ready state changes
+- Event dispatch timing and sources
+- Mask application details
+- HTMX integration actions
 
 ### `wc.DependencyManager.addDependency(name, config)`
 **Parameters:**
