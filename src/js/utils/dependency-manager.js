@@ -212,10 +212,24 @@ class WcDependencyManager {
       this._readyResolve();
       this._readyResolve = null; // Prevent multiple calls
 
-      // Dispatch custom event for Hyperscript and other event-based code
-      document.dispatchEvent(new CustomEvent('wc:ready', {
-        detail: { dependencies: Array.from(this._registeredDependencies) }
-      }));
+      // Dispatch wc:ready event, but wait for DOM to be ready first
+      const dispatchReady = () => {
+        console.log('Dispatching wc:ready event (DOM is ready)');
+        document.dispatchEvent(new CustomEvent('wc:ready', {
+          detail: { dependencies: Array.from(this._registeredDependencies) }
+        }));
+      };
+
+      // If DOM is still loading, wait for DOMContentLoaded
+      // This ensures all elements exist and hyperscript has processed them
+      if (document.readyState === 'loading') {
+        console.log('Waiting for DOMContentLoaded before dispatching wc:ready');
+        document.addEventListener('DOMContentLoaded', dispatchReady, { once: true });
+      } else {
+        // DOM already loaded, dispatch on next tick to ensure all listeners are set up
+        console.log('DOM already loaded, dispatching wc:ready on next tick');
+        setTimeout(dispatchReady, 0);
+      }
     }
   }
 

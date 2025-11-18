@@ -762,9 +762,19 @@ var WcDependencyManager = class {
       console.log("\u2713 All Wave CSS dependencies ready!");
       this._readyResolve();
       this._readyResolve = null;
-      document.dispatchEvent(new CustomEvent("wc:ready", {
-        detail: { dependencies: Array.from(this._registeredDependencies) }
-      }));
+      const dispatchReady = () => {
+        console.log("Dispatching wc:ready event (DOM is ready)");
+        document.dispatchEvent(new CustomEvent("wc:ready", {
+          detail: { dependencies: Array.from(this._registeredDependencies) }
+        }));
+      };
+      if (document.readyState === "loading") {
+        console.log("Waiting for DOMContentLoaded before dispatching wc:ready");
+        document.addEventListener("DOMContentLoaded", dispatchReady, { once: true });
+      } else {
+        console.log("DOM already loaded, dispatching wc:ready on next tick");
+        setTimeout(dispatchReady, 0);
+      }
     }
   }
   /**
