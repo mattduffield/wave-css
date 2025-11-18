@@ -211,6 +211,11 @@ class WcDependencyManager {
       console.log('✓ All Wave CSS dependencies ready!');
       this._readyResolve();
       this._readyResolve = null; // Prevent multiple calls
+
+      // Dispatch custom event for Hyperscript and other event-based code
+      document.dispatchEvent(new CustomEvent('wc:ready', {
+        detail: { dependencies: Array.from(this._registeredDependencies) }
+      }));
     }
   }
 
@@ -219,6 +224,35 @@ class WcDependencyManager {
    */
   get ready() {
     return this._readyPromise;
+  }
+
+  /**
+   * Check if the system is already ready
+   */
+  get isReady() {
+    // If no dependencies registered, not ready yet
+    if (this._registeredDependencies.size === 0) {
+      return false;
+    }
+
+    // Check if all registered dependencies are loaded
+    return Array.from(this._registeredDependencies).every(dep => {
+      const config = this._dependencyConfigs[dep];
+      return config && config.globalName && window[config.globalName];
+    });
+  }
+
+  /**
+   * Trigger initialization for an element (for HTMX partial loads)
+   * This dispatches wc:ready to a specific element if dependencies are already loaded
+   */
+  triggerReadyForElement(element) {
+    if (this.isReady) {
+      element.dispatchEvent(new CustomEvent('wc:ready', {
+        bubbles: false,
+        detail: { dependencies: Array.from(this._registeredDependencies) }
+      }));
+    }
   }
 
   /**
@@ -272,6 +306,25 @@ window.wc.DependencyManager = dependencyManager;
 
 // Create the wc.ready promise
 window.wc.ready = dependencyManager.ready;
+
+// Setup HTMX integration for partial loads
+// When HTMX swaps in new content, dispatch wc:ready to new elements if dependencies are already loaded
+if (typeof window !== 'undefined') {
+  document.addEventListener('htmx:afterSwap', (event) => {
+    // If dependencies are already loaded, trigger wc:ready for the new content
+    if (dependencyManager.isReady) {
+      const target = event.detail.target;
+
+      // Dispatch to the swapped container
+      dependencyManager.triggerReadyForElement(target);
+
+      // Also dispatch to any child elements that might be listening
+      target.querySelectorAll('[_*="wc:ready"]').forEach(el => {
+        dependencyManager.triggerReadyForElement(el);
+      });
+    }
+  });
+}
 
 // Export default
 export default dependencyManager;

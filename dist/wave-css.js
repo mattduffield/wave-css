@@ -762,6 +762,9 @@ var WcDependencyManager = class {
       console.log("\u2713 All Wave CSS dependencies ready!");
       this._readyResolve();
       this._readyResolve = null;
+      document.dispatchEvent(new CustomEvent("wc:ready", {
+        detail: { dependencies: Array.from(this._registeredDependencies) }
+      }));
     }
   }
   /**
@@ -769,6 +772,30 @@ var WcDependencyManager = class {
    */
   get ready() {
     return this._readyPromise;
+  }
+  /**
+   * Check if the system is already ready
+   */
+  get isReady() {
+    if (this._registeredDependencies.size === 0) {
+      return false;
+    }
+    return Array.from(this._registeredDependencies).every((dep) => {
+      const config = this._dependencyConfigs[dep];
+      return config && config.globalName && window[config.globalName];
+    });
+  }
+  /**
+   * Trigger initialization for an element (for HTMX partial loads)
+   * This dispatches wc:ready to a specific element if dependencies are already loaded
+   */
+  triggerReadyForElement(element) {
+    if (this.isReady) {
+      element.dispatchEvent(new CustomEvent("wc:ready", {
+        bubbles: false,
+        detail: { dependencies: Array.from(this._registeredDependencies) }
+      }));
+    }
   }
   /**
    * Check if a specific dependency is loaded
@@ -808,6 +835,17 @@ if (!window.wc) {
 }
 window.wc.DependencyManager = dependencyManager;
 window.wc.ready = dependencyManager.ready;
+if (typeof window !== "undefined") {
+  document.addEventListener("htmx:afterSwap", (event) => {
+    if (dependencyManager.isReady) {
+      const target = event.detail.target;
+      dependencyManager.triggerReadyForElement(target);
+      target.querySelectorAll('[_*="wc:ready"]').forEach((el) => {
+        dependencyManager.triggerReadyForElement(el);
+      });
+    }
+  });
+}
 
 // src/js/components/wc-icon-config.js
 var existingConfig = window.WcIconConfig || {};
