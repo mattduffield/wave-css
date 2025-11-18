@@ -17852,11 +17852,11 @@ if (!customElements.get("wc-mask-hub")) {
     disconnectedCallback() {
     }
     async renderMask() {
-      await dependencyManager.load("IMask");
       if (!window.wc) {
         window.wc = {};
       }
       window.wc.MaskHub = this;
+      await dependencyManager.load("IMask");
       this.maskConfigs = {
         phone: {
           mask: "(000) 000-0000",

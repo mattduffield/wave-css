@@ -41,13 +41,14 @@ if (!customElements.get('wc-mask-hub')) {
     }
 
     async renderMask() {
-      // Use dependency manager - this will deduplicate if multiple components try to load
-      await DependencyManager.load('IMask');
-
+      // Set wc.MaskHub BEFORE loading IMask so it's available when wc:ready fires
       if (!window.wc) {
         window.wc = {};
       }
       window.wc.MaskHub = this;
+
+      // Use dependency manager - this will deduplicate if multiple components try to load
+      await DependencyManager.load('IMask');
 
       // Define mask configurations for different types
       this.maskConfigs = {
