@@ -768,11 +768,15 @@ var WcDependencyManager = class {
           detail: { dependencies: Array.from(this._registeredDependencies) }
         }));
       };
+      console.log("Current document.readyState:", document.readyState);
       if (document.readyState === "loading") {
         console.log("Waiting for DOMContentLoaded before dispatching wc:ready");
         document.addEventListener("DOMContentLoaded", dispatchReady, { once: true });
+      } else if (document.readyState === "interactive") {
+        console.log("DOM interactive, dispatching wc:ready after short delay");
+        setTimeout(dispatchReady, 50);
       } else {
-        console.log("DOM already loaded, dispatching wc:ready on next tick");
+        console.log("DOM complete, dispatching wc:ready on next tick");
         setTimeout(dispatchReady, 0);
       }
     }

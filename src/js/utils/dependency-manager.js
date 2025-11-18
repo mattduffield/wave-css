@@ -220,14 +220,22 @@ class WcDependencyManager {
         }));
       };
 
+      // Check DOM ready state
+      console.log('Current document.readyState:', document.readyState);
+
       // If DOM is still loading, wait for DOMContentLoaded
       // This ensures all elements exist and hyperscript has processed them
       if (document.readyState === 'loading') {
         console.log('Waiting for DOMContentLoaded before dispatching wc:ready');
         document.addEventListener('DOMContentLoaded', dispatchReady, { once: true });
+      } else if (document.readyState === 'interactive') {
+        // DOM parsed but still loading resources
+        // Give hyperscript a moment to process elements that just appeared
+        console.log('DOM interactive, dispatching wc:ready after short delay');
+        setTimeout(dispatchReady, 50);
       } else {
-        // DOM already loaded, dispatch on next tick to ensure all listeners are set up
-        console.log('DOM already loaded, dispatching wc:ready on next tick');
+        // DOM completely loaded
+        console.log('DOM complete, dispatching wc:ready on next tick');
         setTimeout(dispatchReady, 0);
       }
     }
