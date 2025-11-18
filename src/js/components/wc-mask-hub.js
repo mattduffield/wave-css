@@ -120,6 +120,7 @@ if (!customElements.get('wc-mask-hub')) {
 
       // Check if mask already exists
       if (target._imaskInstance) {
+        console.log('Mask already applied to element, skipping:', target.getAttribute('name') || target.id || 'unnamed');
         return; // Already initialized
       }
 
@@ -129,6 +130,8 @@ if (!customElements.get('wc-mask-hub')) {
         console.error(`WcMaskHub: Unknown mask type "${maskType}". Available types:`, Object.keys(this.maskConfigs));
         return;
       }
+
+      console.log('Applying', maskType, 'mask to element:', target.getAttribute('name') || target.id || 'unnamed');
 
       // Create and store the IMask instance
       target._imaskInstance = IMask(target, maskConfig);

@@ -298,6 +298,46 @@ document.addEventListener('htmx:afterSettle', (event) => {
 - Without the delay, `wc:ready` would fire before listeners exist
 - 100ms is sufficient for hyperscript initialization while remaining imperceptible to users
 
+### Retry Strategy for Cached Page Loads
+
+When pages are loaded from browser cache (simple reload), resources load extremely fast - sometimes before hyperscript has initialized. To handle this, the dependency manager uses a **retry dispatch strategy**:
+
+**Multiple dispatches at different intervals:**
+```javascript
+// Example: When document.readyState is 'interactive'
+setTimeout(() => dispatchReady('interactive+0ms'), 0);
+setTimeout(() => dispatchReady('interactive+100ms'), 100);
+setTimeout(() => dispatchReady('interactive+200ms'), 200);
+```
+
+**Why this works:**
+- Each `wc:ready` dispatch happens at a different time
+- At least one dispatch occurs after hyperscript finishes initialization
+- Wave CSS components are **idempotent** - safe to call multiple times
+- The first dispatch that finds listeners will apply masks
+- Subsequent dispatches are skipped (mask already exists)
+
+**Console output example:**
+```
+✓ All Wave CSS dependencies ready!
+Current document.readyState: interactive
+DOM interactive, dispatching wc:ready with retries
+Dispatching wc:ready event #1 (source: interactive+0ms)
+Dispatching wc:ready event #2 (source: interactive+100ms)
+Applying phone mask to element: contact.mobile_number
+Dispatching wc:ready event #3 (source: interactive+200ms)
+Mask already applied to element, skipping: contact.mobile_number
+window.load fired, dispatching wc:ready
+Dispatching wc:ready event #4 (source: window.load)
+Mask already applied to element, skipping: contact.mobile_number
+```
+
+This ensures masks apply reliably on:
+- Hard reload (Cmd+Shift+R / Ctrl+Shift+F5)
+- Simple reload (Cmd+R / Ctrl+R)
+- Back/forward navigation
+- Cached page loads
+
 ## Migration Guide
 
 If you have existing Wave CSS components with custom dependency loading:

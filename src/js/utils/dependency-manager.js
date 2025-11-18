@@ -212,32 +212,56 @@ class WcDependencyManager {
       this._readyResolve();
       this._readyResolve = null; // Prevent multiple calls
 
-      // Dispatch wc:ready event, but wait for DOM to be ready first
-      const dispatchReady = () => {
-        console.log('Dispatching wc:ready event (DOM is ready)');
+      let dispatchCount = 0;
+
+      // Dispatch wc:ready event - we'll dispatch multiple times to ensure hyperscript catches it
+      const dispatchReady = (source = 'unknown') => {
+        dispatchCount++;
+        console.log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
         document.dispatchEvent(new CustomEvent('wc:ready', {
-          detail: { dependencies: Array.from(this._registeredDependencies) }
+          detail: {
+            dependencies: Array.from(this._registeredDependencies),
+            dispatchCount,
+            source
+          }
         }));
       };
 
       // Check DOM ready state
       console.log('Current document.readyState:', document.readyState);
 
-      // If DOM is still loading, wait for DOMContentLoaded
-      // This ensures all elements exist and hyperscript has processed them
+      // Strategy: Dispatch multiple times at different intervals to catch hyperscript
+      // whenever it's ready. Hyperscript handlers should be idempotent anyway.
+
       if (document.readyState === 'loading') {
         console.log('Waiting for DOMContentLoaded before dispatching wc:ready');
-        document.addEventListener('DOMContentLoaded', dispatchReady, { once: true });
+        document.addEventListener('DOMContentLoaded', () => {
+          // After DOMContentLoaded, dispatch multiple times
+          dispatchReady('DOMContentLoaded');
+          setTimeout(() => dispatchReady('DOMContentLoaded+50ms'), 50);
+          setTimeout(() => dispatchReady('DOMContentLoaded+150ms'), 150);
+        }, { once: true });
       } else if (document.readyState === 'interactive') {
         // DOM parsed but still loading resources
-        // Give hyperscript a moment to process elements that just appeared
-        console.log('DOM interactive, dispatching wc:ready after short delay');
-        setTimeout(dispatchReady, 50);
+        // Dispatch immediately and then retry
+        console.log('DOM interactive, dispatching wc:ready with retries');
+        setTimeout(() => dispatchReady('interactive+0ms'), 0);
+        setTimeout(() => dispatchReady('interactive+100ms'), 100);
+        setTimeout(() => dispatchReady('interactive+200ms'), 200);
       } else {
         // DOM completely loaded
-        console.log('DOM complete, dispatching wc:ready on next tick');
-        setTimeout(dispatchReady, 0);
+        console.log('DOM complete, dispatching wc:ready with retries');
+        setTimeout(() => dispatchReady('complete+0ms'), 0);
+        setTimeout(() => dispatchReady('complete+50ms'), 50);
+        setTimeout(() => dispatchReady('complete+150ms'), 150);
       }
+
+      // Additional safety net: dispatch on window load
+      window.addEventListener('load', () => {
+        console.log('window.load fired, dispatching wc:ready');
+        dispatchReady('window.load');
+        setTimeout(() => dispatchReady('window.load+100ms'), 100);
+      }, { once: true });
     }
   }
 

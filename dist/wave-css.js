@@ -762,23 +762,42 @@ var WcDependencyManager = class {
       console.log("\u2713 All Wave CSS dependencies ready!");
       this._readyResolve();
       this._readyResolve = null;
-      const dispatchReady = () => {
-        console.log("Dispatching wc:ready event (DOM is ready)");
+      let dispatchCount = 0;
+      const dispatchReady = (source = "unknown") => {
+        dispatchCount++;
+        console.log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
         document.dispatchEvent(new CustomEvent("wc:ready", {
-          detail: { dependencies: Array.from(this._registeredDependencies) }
+          detail: {
+            dependencies: Array.from(this._registeredDependencies),
+            dispatchCount,
+            source
+          }
         }));
       };
       console.log("Current document.readyState:", document.readyState);
       if (document.readyState === "loading") {
         console.log("Waiting for DOMContentLoaded before dispatching wc:ready");
-        document.addEventListener("DOMContentLoaded", dispatchReady, { once: true });
+        document.addEventListener("DOMContentLoaded", () => {
+          dispatchReady("DOMContentLoaded");
+          setTimeout(() => dispatchReady("DOMContentLoaded+50ms"), 50);
+          setTimeout(() => dispatchReady("DOMContentLoaded+150ms"), 150);
+        }, { once: true });
       } else if (document.readyState === "interactive") {
-        console.log("DOM interactive, dispatching wc:ready after short delay");
-        setTimeout(dispatchReady, 50);
+        console.log("DOM interactive, dispatching wc:ready with retries");
+        setTimeout(() => dispatchReady("interactive+0ms"), 0);
+        setTimeout(() => dispatchReady("interactive+100ms"), 100);
+        setTimeout(() => dispatchReady("interactive+200ms"), 200);
       } else {
-        console.log("DOM complete, dispatching wc:ready on next tick");
-        setTimeout(dispatchReady, 0);
+        console.log("DOM complete, dispatching wc:ready with retries");
+        setTimeout(() => dispatchReady("complete+0ms"), 0);
+        setTimeout(() => dispatchReady("complete+50ms"), 50);
+        setTimeout(() => dispatchReady("complete+150ms"), 150);
       }
+      window.addEventListener("load", () => {
+        console.log("window.load fired, dispatching wc:ready");
+        dispatchReady("window.load");
+        setTimeout(() => dispatchReady("window.load+100ms"), 100);
+      }, { once: true });
     }
   }
   /**
@@ -17947,6 +17966,7 @@ if (!customElements.get("wc-mask-hub")) {
     applyMask(event, maskType = "phone") {
       const { target } = event;
       if (target._imaskInstance) {
+        console.log("Mask already applied to element, skipping:", target.getAttribute("name") || target.id || "unnamed");
         return;
       }
       const maskConfig = this.maskConfigs[maskType];
@@ -17954,6 +17974,7 @@ if (!customElements.get("wc-mask-hub")) {
         console.error(`WcMaskHub: Unknown mask type "${maskType}". Available types:`, Object.keys(this.maskConfigs));
         return;
       }
+      console.log("Applying", maskType, "mask to element:", target.getAttribute("name") || target.id || "unnamed");
       target._imaskInstance = IMask(target, maskConfig);
       target._maskType = maskType;
       if (target.value) {
