@@ -332,27 +332,43 @@ window.wc.ready = dependencyManager.ready;
 // Setup HTMX integration for partial loads
 // When HTMX swaps in new content, dispatch wc:ready to new elements if dependencies are already loaded
 if (typeof window !== 'undefined') {
-  document.addEventListener('htmx:afterSwap', (event) => {
+  // Use htmx:afterSettle instead of htmx:afterSwap to ensure hyperscript has processed elements
+  document.addEventListener('htmx:afterSettle', (event) => {
     // If dependencies are already loaded, trigger wc:ready for the new content
     if (dependencyManager.isReady) {
       const target = event.detail.target;
 
-      console.log('HTMX afterSwap - dispatching wc:ready to new content');
+      console.log('HTMX afterSettle - dependencies ready, dispatching wc:ready to new content');
+      console.log('Target element:', target);
 
-      // Dispatch to the swapped container itself
-      target.dispatchEvent(new CustomEvent('wc:ready', {
-        bubbles: true,
-        detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
-      }));
+      // Give hyperscript a moment to process the new elements
+      setTimeout(() => {
+        console.log('Dispatching wc:ready after hyperscript initialization delay');
 
-      // Also dispatch to all child elements (hyperscript may be listening on specific elements)
-      const allElements = target.querySelectorAll('*');
-      allElements.forEach(el => {
-        el.dispatchEvent(new CustomEvent('wc:ready', {
-          bubbles: false,
+        // Dispatch to the swapped container itself
+        target.dispatchEvent(new CustomEvent('wc:ready', {
+          bubbles: true,
           detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
         }));
-      });
+
+        // Also dispatch to all child elements (hyperscript may be listening on specific elements)
+        const allElements = target.querySelectorAll('*');
+        console.log(`Dispatching wc:ready to ${allElements.length} child elements`);
+
+        allElements.forEach((el, index) => {
+          el.dispatchEvent(new CustomEvent('wc:ready', {
+            bubbles: false,
+            detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+          }));
+
+          // Log phone inputs specifically
+          if (el.tagName === 'WC-INPUT' && el.getAttribute('type') === 'tel') {
+            console.log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute('name'));
+          }
+        });
+      }, 100); // 100ms delay to let hyperscript initialize
+    } else {
+      console.log('HTMX afterSettle - dependencies not ready yet');
     }
   });
 }

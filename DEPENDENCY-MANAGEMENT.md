@@ -233,26 +233,70 @@ wc.DependencyManager.addDependency('SlowLibrary', {
 
 ## HTMX Compatibility
 
-The dependency manager works seamlessly with HTMX:
+The dependency manager works seamlessly with HTMX and includes built-in integration for dynamic content updates.
 
 **Initial Page Load:**
 ```html
 <wc-mask-hub></wc-mask-hub>
-<wc-input type="tel" data-mask="phone"></wc-input>
+<wc-input type="tel"
+  _="on wc:ready from document
+     call wc.MaskHub.phoneMaskElement(me)
+  end">
+</wc-input>
 ```
 - `wc-mask-hub` registers and loads IMask
 - `wc.ready` resolves when IMask is loaded
-- Phone inputs can safely apply masks
+- `wc:ready` event fires after DOMContentLoaded
+- Hyperscript listeners receive the event and apply masks
 
-**HTMX Partial Update:**
+**HTMX Partial Update (Automatic):**
 ```html
 <!-- HTMX swaps in new content -->
-<wc-input type="tel" data-mask="phone"></wc-input>
+<wc-input type="tel"
+  _="on wc:ready from document
+     call wc.MaskHub.phoneMaskElement(me)
+  end">
+</wc-input>
 ```
-- New input component created
-- Calls `DependencyManager.load('IMask')`
-- Returns immediately (already loaded)
-- Mask applies instantly
+- HTMX fires `htmx:afterSettle` event
+- DependencyManager detects content swap
+- After 100ms delay (for hyperscript initialization), dispatches `wc:ready` to new elements
+- Hyperscript listeners on new elements receive the event
+- Masks apply automatically
+
+### How It Works
+
+The dependency manager listens for `htmx:afterSettle` events:
+
+```javascript
+document.addEventListener('htmx:afterSettle', (event) => {
+  if (dependencyManager.isReady) {
+    const target = event.detail.target;
+
+    // Wait for hyperscript to process new elements
+    setTimeout(() => {
+      // Dispatch wc:ready to container
+      target.dispatchEvent(new CustomEvent('wc:ready', { bubbles: true }));
+
+      // Dispatch wc:ready to all child elements
+      target.querySelectorAll('*').forEach(el => {
+        el.dispatchEvent(new CustomEvent('wc:ready', { bubbles: false }));
+      });
+    }, 100);
+  }
+});
+```
+
+**Why `htmx:afterSettle` instead of `htmx:afterSwap`?**
+- `htmx:afterSwap` fires immediately after content is swapped
+- Hyperscript may not have processed `_` attributes yet
+- `htmx:afterSettle` fires after all HTMX processing completes
+- The 100ms delay ensures hyperscript has initialized listeners
+
+**Why the 100ms delay?**
+- Hyperscript needs time to parse and attach event listeners to new elements
+- Without the delay, `wc:ready` would fire before listeners exist
+- 100ms is sufficient for hyperscript initialization while remaining imperceptible to users
 
 ## Migration Guide
 

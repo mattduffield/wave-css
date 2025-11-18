@@ -850,21 +850,31 @@ if (!window.wc) {
 window.wc.DependencyManager = dependencyManager;
 window.wc.ready = dependencyManager.ready;
 if (typeof window !== "undefined") {
-  document.addEventListener("htmx:afterSwap", (event) => {
+  document.addEventListener("htmx:afterSettle", (event) => {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
-      console.log("HTMX afterSwap - dispatching wc:ready to new content");
-      target.dispatchEvent(new CustomEvent("wc:ready", {
-        bubbles: true,
-        detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
-      }));
-      const allElements = target.querySelectorAll("*");
-      allElements.forEach((el) => {
-        el.dispatchEvent(new CustomEvent("wc:ready", {
-          bubbles: false,
+      console.log("HTMX afterSettle - dependencies ready, dispatching wc:ready to new content");
+      console.log("Target element:", target);
+      setTimeout(() => {
+        console.log("Dispatching wc:ready after hyperscript initialization delay");
+        target.dispatchEvent(new CustomEvent("wc:ready", {
+          bubbles: true,
           detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
         }));
-      });
+        const allElements = target.querySelectorAll("*");
+        console.log(`Dispatching wc:ready to ${allElements.length} child elements`);
+        allElements.forEach((el, index) => {
+          el.dispatchEvent(new CustomEvent("wc:ready", {
+            bubbles: false,
+            detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
+          }));
+          if (el.tagName === "WC-INPUT" && el.getAttribute("type") === "tel") {
+            console.log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute("name"));
+          }
+        });
+      }, 100);
+    } else {
+      console.log("HTMX afterSettle - dependencies not ready yet");
     }
   });
 }
