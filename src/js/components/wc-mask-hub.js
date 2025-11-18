@@ -163,10 +163,26 @@ if (!customElements.get('wc-mask-hub')) {
     }
 
     /**
+     * Apply mask to an element directly (for use with hyperscript/events without proper target)
+     * @param {HTMLElement} element - The input element
+     * @param {string} maskType - The type of mask to apply
+     */
+    applyMaskToElement(element, maskType = 'phone') {
+      this.applyMask({ target: element }, maskType);
+    }
+
+    /**
      * Convenience method for phone mask (backwards compatibility)
      */
     phoneMask(event) {
       this.applyMask(event, 'phone');
+    }
+
+    /**
+     * Convenience method for phone mask on element (for hyperscript)
+     */
+    phoneMaskElement(element) {
+      this.applyMaskToElement(element, 'phone');
     }
 
     /**

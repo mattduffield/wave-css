@@ -526,7 +526,7 @@ class WcInput extends WcBaseFormComponent {
       icon.innerHTML = iconItem.icon;
       this.formElement.setAttribute('_', `on wc:ready from document
           log "wc:ready from document!"
-          call wc.MaskHub.phoneMask(event)
+          call wc.MaskHub.phoneMaskElement(me)
           me.setCustomValidity('')
         end`);
       this.componentElement.appendChild(this.formElement);

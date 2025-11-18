@@ -17953,10 +17953,24 @@ if (!customElements.get("wc-mask-hub")) {
       }
     }
     /**
+     * Apply mask to an element directly (for use with hyperscript/events without proper target)
+     * @param {HTMLElement} element - The input element
+     * @param {string} maskType - The type of mask to apply
+     */
+    applyMaskToElement(element, maskType = "phone") {
+      this.applyMask({ target: element }, maskType);
+    }
+    /**
      * Convenience method for phone mask (backwards compatibility)
      */
     phoneMask(event) {
       this.applyMask(event, "phone");
+    }
+    /**
+     * Convenience method for phone mask on element (for hyperscript)
+     */
+    phoneMaskElement(element) {
+      this.applyMaskToElement(element, "phone");
     }
     /**
      * Convenience method for SSN mask
@@ -19940,7 +19954,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       icon.innerHTML = iconItem.icon;
       this.formElement.setAttribute("_", `on wc:ready from document
           log "wc:ready from document!"
-          call wc.MaskHub.phoneMask(event)
+          call wc.MaskHub.phoneMaskElement(me)
           me.setCustomValidity('')
         end`);
       this.componentElement.appendChild(this.formElement);
