@@ -5897,13 +5897,8 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         content: ' *';
         font-weight: bold;
       }
-    `;
-    if (!document.getElementById("wc-vin-decoder-style")) {
-      const styleTag = document.createElement("style");
-      styleTag.id = "wc-vin-decoder-style";
-      styleTag.textContent = style;
-      document.head.appendChild(styleTag);
-    }
+    `.trim();
+    this.loadStyle("wc-vin-decoder-style", style);
   }
 };
 customElements.define(WcVinDecoder.is, WcVinDecoder);
@@ -5930,6 +5925,7 @@ var WcVinListener = class extends WcBaseComponent {
   }
   connectedCallback() {
     super.connectedCallback();
+    this._applyStyle();
     document.addEventListener("vin-decoder:change", this.boundHandleVinChange);
     this._setupDirectListeners();
   }
@@ -6074,6 +6070,14 @@ var WcVinListener = class extends WcBaseComponent {
   _extractFieldKey(fieldName) {
     const parts = fieldName.split(".");
     return parts[parts.length - 1];
+  }
+  _applyStyle() {
+    const style = `
+      wc-vin-listener {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle("wc-vin-listener-style", style);
   }
   _getFieldMapping(fieldKey) {
     const mappings = {

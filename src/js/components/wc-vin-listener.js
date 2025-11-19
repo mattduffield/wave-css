@@ -90,6 +90,8 @@ class WcVinListener extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
 
+    this._applyStyle();
+
     // Listen for VIN decoder change events
     document.addEventListener('vin-decoder:change', this.boundHandleVinChange);
 
@@ -333,6 +335,15 @@ class WcVinListener extends WcBaseComponent {
     // "year" -> "year"
     const parts = fieldName.split('.');
     return parts[parts.length - 1];
+  }
+
+  _applyStyle() {
+    const style = `
+      wc-vin-listener {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle('wc-vin-listener-style', style);
   }
 
   _getFieldMapping(fieldKey) {

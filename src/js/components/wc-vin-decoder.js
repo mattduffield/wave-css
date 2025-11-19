@@ -574,14 +574,8 @@ export default class WcVinDecoder extends WcBaseFormComponent {
         content: ' *';
         font-weight: bold;
       }
-    `;
-
-    if (!document.getElementById('wc-vin-decoder-style')) {
-      const styleTag = document.createElement('style');
-      styleTag.id = 'wc-vin-decoder-style';
-      styleTag.textContent = style;
-      document.head.appendChild(styleTag);
-    }
+    `.trim();
+    this.loadStyle('wc-vin-decoder-style', style);
   }
 }
 
