@@ -5343,6 +5343,7 @@ var WcAddressListener = class extends WcBaseComponent {
   }
   connectedCallback() {
     super.connectedCallback();
+    this._applyStyle();
     document.addEventListener("google-address:change", this.boundHandleAddressChange);
     this._setupDirectListeners();
   }
@@ -5438,11 +5439,15 @@ var WcAddressListener = class extends WcBaseComponent {
     if (attrName === "address-group") {
     }
   }
+  _applyStyle() {
+    const style = `
+      wc-address-listener {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle("wc-address-listener-style", style);
+  }
   _render() {
-    if (!this.querySelector("slot")) {
-      const slot = document.createElement("slot");
-      this.appendChild(slot);
-    }
   }
 };
 customElements.define(WcAddressListener.is, WcAddressListener);

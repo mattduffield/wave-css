@@ -66,6 +66,8 @@ class WcAddressListener extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
 
+    this._applyStyle();
+
     // Listen for address change events
     document.addEventListener('google-address:change', this.boundHandleAddressChange);
 
@@ -208,13 +210,17 @@ class WcAddressListener extends WcBaseComponent {
     }
   }
 
+  _applyStyle() {
+    const style = `
+      wc-address-listener {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle('wc-address-listener-style', style);
+  }
+
   _render() {
     // This component doesn't render anything, it just wraps children
-    // Use slot to display children
-    if (!this.querySelector('slot')) {
-      const slot = document.createElement('slot');
-      this.appendChild(slot);
-    }
   }
 }
 
