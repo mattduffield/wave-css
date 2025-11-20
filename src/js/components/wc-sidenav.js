@@ -296,6 +296,13 @@ if (!customElements.get('wc-sidenav')) {
           }
         }
       }
+
+      // Dispatch custom event
+      this.dispatchEvent(new CustomEvent('sidenav:opened', {
+        bubbles: true,
+        composed: true,
+        detail: { width }
+      }));
     }
 
     _closeNav(event) {
@@ -332,6 +339,12 @@ if (!customElements.get('wc-sidenav')) {
           openBtn.style.transform = 'translateX(0)';
         }
       }
+
+      // Dispatch custom event
+      this.dispatchEvent(new CustomEvent('sidenav:closed', {
+        bubbles: true,
+        composed: true
+      }));
     }
 
     _applyStyle() {

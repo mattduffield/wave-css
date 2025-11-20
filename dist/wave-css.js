@@ -11537,6 +11537,11 @@ if (!customElements.get("wc-sidenav")) {
           }
         }
       }
+      this.dispatchEvent(new CustomEvent("sidenav:opened", {
+        bubbles: true,
+        composed: true,
+        detail: { width }
+      }));
     }
     _closeNav(event) {
       const pushSelector = this.getAttribute("push-target") || "#viewport";
@@ -11568,6 +11573,10 @@ if (!customElements.get("wc-sidenav")) {
           openBtn.style.transform = "translateX(0)";
         }
       }
+      this.dispatchEvent(new CustomEvent("sidenav:closed", {
+        bubbles: true,
+        composed: true
+      }));
     }
     _applyStyle() {
       const style = `
