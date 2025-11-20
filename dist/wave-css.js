@@ -2534,7 +2534,7 @@ if (!customElements.get("wc-code-mirror")) {
             <wc-input class="col-1" name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute("indent-unit")}" type="number"></wc-input>
           </div>
           <div class="row gap-2 justify-end gap-x-4">
-            <button class="" id="apply-settings" type="submit">
+            <button class="" id="apply-settings" type="button">
               Apply
             </button>
             <button class="btn-clear" id="cancel-settings" type="button">

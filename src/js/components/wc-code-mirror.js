@@ -264,7 +264,7 @@ if (!customElements.get('wc-code-mirror')) {
             <wc-input class="col-1" name="indent-unit" lbl-label="Indent Unit" value="${this.getAttribute('indent-unit')}" type="number"></wc-input>
           </div>
           <div class="row gap-2 justify-end gap-x-4">
-            <button class="" id="apply-settings" type="submit">
+            <button class="" id="apply-settings" type="button">
               Apply
             </button>
             <button class="btn-clear" id="cancel-settings" type="button">
@@ -705,17 +705,12 @@ if (!customElements.get('wc-code-mirror')) {
         }
       }
 
-
-
-
-
       const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
       if (!document.querySelector(`script[src="${modeUrl}"]`)) {
         await this.loadScript(modeUrl);
       }
 
       this.editor.setOption('mode', mode);
-
 
       // If mode is HTML-based, apply our highlighting
       if (['htmlmixed', 'php', 'markdown', 'htmlembedded'].includes(mode)) {
@@ -733,8 +728,6 @@ if (!customElements.get('wc-code-mirror')) {
       const settingsIcon = this.querySelector('.settings-icon');
       settingsIcon.removeEventListener('click', this._handleSettingsIconClick.bind(this));
     }
-
-
 
     /**
      * Add JavaScript highlighting to web components
