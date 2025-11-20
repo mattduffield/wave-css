@@ -362,7 +362,6 @@ if (!customElements.get('wc-sidenav')) {
           height: 100%;
           background-color: var(--background-color);
           overflow-x: hidden;
-          text-align: center;
           transition: 0.5s;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav {
@@ -394,6 +393,7 @@ if (!customElements.get('wc-sidenav')) {
         wc-sidenav .wc-sidenav.sidenav .closebtn {
           position: absolute;
           top: 5px;
+          text-align: center;
           z-index: 3;
         }
         wc-sidenav[left-side] .wc-sidenav.sidenav .closebtn {
