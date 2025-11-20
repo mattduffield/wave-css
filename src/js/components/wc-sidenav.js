@@ -349,7 +349,6 @@ if (!customElements.get('wc-sidenav')) {
           top: 0;
           background-color: var(--background-color);
           overflow-x: hidden;
-          text-align: center;
           transition: 0.5s;
         }
         /* Relative mode: Absolute positioning (scoped to parent container) */
