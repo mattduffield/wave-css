@@ -11410,6 +11410,19 @@ if (!customElements.get("wc-sidenav")) {
         setTimeout(() => {
           this._openNav({ target: null });
         }, 0);
+      } else {
+        if (this.hasAttribute("push")) {
+          const pushSelector = this.getAttribute("push-target") || "#viewport";
+          const pushTarget = document.querySelector(pushSelector);
+          if (pushTarget) {
+            const isRight = this.hasAttribute("right-side");
+            if (isRight) {
+              pushTarget.style.marginRight = "0";
+            } else {
+              pushTarget.style.marginLeft = "0";
+            }
+          }
+        }
       }
     }
     disconnectedCallback() {

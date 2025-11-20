@@ -114,6 +114,22 @@ if (!customElements.get('wc-sidenav')) {
         setTimeout(() => {
           this._openNav({target: null});
         }, 0);
+      } else {
+        // If sidenav is NOT open, ensure push target is reset
+        // This handles the case where the page reloaded without the open attribute
+        // but the push target still has margin from a previous session
+        if (this.hasAttribute('push')) {
+          const pushSelector = this.getAttribute('push-target') || '#viewport';
+          const pushTarget = document.querySelector(pushSelector);
+          if (pushTarget) {
+            const isRight = this.hasAttribute('right-side');
+            if (isRight) {
+              pushTarget.style.marginRight = '0';
+            } else {
+              pushTarget.style.marginLeft = '0';
+            }
+          }
+        }
       }
       // console.log('connectedCallback:wc-sidenav');
     }
