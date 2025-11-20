@@ -582,6 +582,13 @@ if (!customElements.get('wc-code-mirror')) {
       this.editor.focus();
     }
 
+    async display(timeout=100) {
+      await sleep(timeout);
+      if (this.editor) {
+        this.editor.refresh();
+      }
+    }
+
     async getGutters() {
       if (this.hasAttribute('fold-gutter')) {
         // Need to load these serially...

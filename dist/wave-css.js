@@ -2801,6 +2801,12 @@ if (!customElements.get("wc-code-mirror")) {
       this.editor.refresh();
       this.editor.focus();
     }
+    async display(timeout = 100) {
+      await sleep(timeout);
+      if (this.editor) {
+        this.editor.refresh();
+      }
+    }
     async getGutters() {
       if (this.hasAttribute("fold-gutter")) {
         await this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldcode.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/brace-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/comment-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/xml-fold.min.js"), await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js");
