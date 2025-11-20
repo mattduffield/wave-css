@@ -2826,6 +2826,10 @@ if (!customElements.get("wc-code-mirror")) {
       await sleep(timeout);
       if (this.editor) {
         const currentValue = this.editor.getValue();
+        const mode = this.getAttribute("mode") || "javascript";
+        const theme = this.getAttribute("theme") || "default";
+        this.editor.setOption("mode", mode);
+        this.editor.setOption("theme", theme);
         this.editor.setValue("");
         this.editor.refresh();
         await sleep(10);

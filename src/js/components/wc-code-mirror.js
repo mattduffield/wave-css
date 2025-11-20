@@ -588,6 +588,13 @@ if (!customElements.get('wc-code-mirror')) {
         // Store the current value
         const currentValue = this.editor.getValue();
 
+        // Reapply mode and theme to ensure syntax highlighting works
+        const mode = this.getAttribute('mode') || 'javascript';
+        const theme = this.getAttribute('theme') || 'default';
+
+        this.editor.setOption('mode', mode);
+        this.editor.setOption('theme', theme);
+
         // Force a complete re-render by clearing and setting the value
         this.editor.setValue('');
         this.editor.refresh();
