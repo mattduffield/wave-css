@@ -11,12 +11,32 @@ export class WcBaseFormComponent extends WcBaseComponent {
 
   // Value getter and setter
   get value() {
-    return this._isCheckbox() ? this.checked : this._value;
+    if (this._isCheckbox()) {
+      return this.checked;
+    } else if (this._isRadio()) {
+      // For radio buttons, find the checked input
+      const checkedRadio = this.querySelector('input[type="radio"]:checked');
+      return checkedRadio ? checkedRadio.value : this._value;
+    } else {
+      return this._value;
+    }
   }
-  
+
   set value(newValue) {
     if (this._isCheckbox()) {
       this.checked = newValue;
+    } else if (this._isRadio()) {
+      // For radio buttons, check the matching radio
+      const radios = this.querySelectorAll('input[type="radio"]');
+      radios.forEach(radio => {
+        if (radio.value === newValue) {
+          radio.checked = true;
+        } else {
+          radio.checked = false;
+        }
+      });
+      this._value = newValue;
+      this._internals.setFormValue(newValue);
     } else {
       this._value = newValue;
       this._internals.setFormValue(this._value); // Set the form value to submit
@@ -150,6 +170,11 @@ export class WcBaseFormComponent extends WcBaseComponent {
 
   _isCheckbox() {
     return this.formElement?.type === 'checkbox';
+  }
+
+  _isRadio() {
+    // Check if this component has radio inputs
+    return this.getAttribute('type') === 'radio' || this.formElement?.type === 'radio';
   }
 
   _isRange() {
