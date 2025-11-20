@@ -124,10 +124,12 @@ if (!customElements.get('wc-sidenav')) {
           if (pushTarget) {
             const isRight = this.hasAttribute('right-side');
             if (isRight) {
-              pushTarget.style.marginRight = '0';
+              pushTarget.style.marginRight = '';
             } else {
-              pushTarget.style.marginLeft = '0';
+              pushTarget.style.marginLeft = '';
             }
+            // Also clean up transition if it was set
+            pushTarget.style.transition = '';
           }
         }
       }
@@ -137,6 +139,23 @@ if (!customElements.get('wc-sidenav')) {
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
+
+      // Clean up push target styles when navigating away
+      // This prevents margin styles from persisting on the next page
+      if (this.hasAttribute('push')) {
+        const pushSelector = this.getAttribute('push-target') || '#viewport';
+        const pushTarget = document.querySelector(pushSelector);
+        if (pushTarget) {
+          const isRight = this.hasAttribute('right-side');
+          if (isRight) {
+            pushTarget.style.marginRight = '';
+          } else {
+            pushTarget.style.marginLeft = '';
+          }
+          // Also clean up transition if it was set
+          pushTarget.style.transition = '';
+        }
+      }
     }
 
     _handleAttributeChange(attrName, newValue) {
