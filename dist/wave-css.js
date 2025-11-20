@@ -11394,19 +11394,23 @@ if (!customElements.get("wc-sidenav")) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        const isOpen = this.hasAttribute("open");
         this.componentElement = document.createElement("div");
         this.componentElement.classList.add("wc-sidenav", "sidenav");
         this.appendChild(this.componentElement);
-        if (isOpen) {
-          this._openNav({ target: null });
-        }
       }
     }
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
+      const side = this.querySelector(".wc-sidenav");
+      const hasOpenAttr = this.hasAttribute("open");
+      const hasOpenClass = side?.classList.contains("open");
+      if (hasOpenAttr || hasOpenClass) {
+        setTimeout(() => {
+          this._openNav({ target: null });
+        }, 0);
+      }
     }
     disconnectedCallback() {
       super.disconnectedCallback();

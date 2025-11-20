@@ -91,14 +91,9 @@ if (!customElements.get('wc-sidenav')) {
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        const isOpen = this.hasAttribute('open');
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-sidenav', 'sidenav');
         this.appendChild(this.componentElement);
-        if (isOpen) {
-          this._openNav({target:null});
-          // this.componentElement.classList.add('open');
-        }
       }
       // console.log('ctor:wc-sidenav');
     }
@@ -108,6 +103,18 @@ if (!customElements.get('wc-sidenav')) {
 
       this._applyStyle();
       this._wireEvents();
+
+      // Apply open state after component is fully rendered
+      const side = this.querySelector('.wc-sidenav');
+      const hasOpenAttr = this.hasAttribute('open');
+      const hasOpenClass = side?.classList.contains('open');
+
+      if (hasOpenAttr || hasOpenClass) {
+        // Use a small delay to ensure all elements are rendered
+        setTimeout(() => {
+          this._openNav({target: null});
+        }, 0);
+      }
       // console.log('connectedCallback:wc-sidenav');
     }
 
