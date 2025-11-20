@@ -2804,6 +2804,13 @@ if (!customElements.get("wc-code-mirror")) {
     async display(timeout = 100) {
       await sleep(timeout);
       if (this.editor) {
+        const currentValue = this.editor.getValue();
+        this.editor.setValue("");
+        this.editor.refresh();
+        await sleep(10);
+        this.editor.setValue(currentValue);
+        this.editor.refresh();
+        await sleep(50);
         this.editor.refresh();
       }
     }

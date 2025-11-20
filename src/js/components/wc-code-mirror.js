@@ -585,6 +585,20 @@ if (!customElements.get('wc-code-mirror')) {
     async display(timeout=100) {
       await sleep(timeout);
       if (this.editor) {
+        // Store the current value
+        const currentValue = this.editor.getValue();
+
+        // Force a complete re-render by clearing and setting the value
+        this.editor.setValue('');
+        this.editor.refresh();
+
+        await sleep(10);
+
+        this.editor.setValue(currentValue);
+        this.editor.refresh();
+
+        // Final refresh after a short delay to ensure everything is painted
+        await sleep(50);
         this.editor.refresh();
       }
     }
