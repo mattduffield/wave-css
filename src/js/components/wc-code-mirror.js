@@ -368,7 +368,7 @@ if (!customElements.get('wc-code-mirror')) {
           overflow: hidden;
           resize: vertical;
     
-          min-height: 10em;        
+          /* min-height: 10em; */
         }
         .wc-code-mirror:focus-within {
           /* border: 2px solid var(--primary-bg-color); */
@@ -376,7 +376,7 @@ if (!customElements.get('wc-code-mirror')) {
 
         .CodeMirror {
           height: auto;
-          min-height: 150px;
+          min-height: 34px;
           width: 100%;
           box-sizing: border-box; /* Avoid overflow caused by padding or borders */
           overflow: auto; /* Scroll within the editor */

@@ -4726,8 +4726,8 @@
     pointer-events: auto;
   }
   .popover-form {
-    background-color: var(--bg-color);
-    color: var(--color);
+    background-color: var(--primary-bg-color);
+    color: var(--primary-color);
   }
   .cursor-auto {
     cursor: auto;
