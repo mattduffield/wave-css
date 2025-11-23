@@ -5496,7 +5496,9 @@
     color: var(--button-disabled-color);
     cursor: not-allowed;
   }
-  .btn-sm {
+  a.btn.btn-sm,
+  input[type="button"].btn.btn-sm,
+  button.btn.btn-sm {
     padding: 0.25rem .5rem;
   }
 
