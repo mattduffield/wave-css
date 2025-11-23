@@ -5496,6 +5496,9 @@
     color: var(--button-disabled-color);
     cursor: not-allowed;
   }
+  .btn-sm {
+    padding: 0.25rem .5rem;
+  }
 
   hr {
     border: none;
