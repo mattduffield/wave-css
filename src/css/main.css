@@ -4705,6 +4705,294 @@
   .swatch:nth-of-type(12) { background: var(--swatch-12); }
 }
 
+@layer wc.tables {
+  /* Base table styles - requires .wc-table class */
+  .wc-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg-color);
+    color: var(--text-1);
+    border: 1px solid var(--component-border-color);
+  }
+
+  /* Table headers */
+  .wc-table thead {
+    background-color: var(--primary-bg-color);
+    color: var(--primary-text-color);
+  }
+
+  .wc-table thead th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--component-border-color);
+    white-space: nowrap;
+  }
+
+  /* Table body */
+  .wc-table tbody tr {
+    border-bottom: 1px solid var(--component-border-color);
+  }
+
+  .wc-table tbody td {
+    padding: 0.75rem 1rem;
+  }
+
+  .wc-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  /* Table footer */
+  .wc-table tfoot {
+    background-color: var(--surface-2);
+    font-weight: 600;
+  }
+
+  .wc-table tfoot td,
+  .wc-table tfoot th {
+    padding: 0.75rem 1rem;
+    border-top: 2px solid var(--component-border-color);
+  }
+
+  /* Striped rows */
+  .wc-table.wc-table-striped tbody tr:nth-child(odd) {
+    background-color: var(--surface-1);
+  }
+
+  .wc-table.wc-table-striped tbody tr:nth-child(even) {
+    background-color: var(--surface-2);
+  }
+
+  /* Hover effect */
+  .wc-table.wc-table-hover tbody tr:hover {
+    background-color: var(--surface-3);
+    cursor: pointer;
+  }
+
+  /* Bordered table */
+  .wc-table.wc-table-bordered th,
+  .wc-table.wc-table-bordered td {
+    border: 1px solid var(--component-border-color);
+  }
+
+  /* Borderless table */
+  .wc-table.wc-table-borderless,
+  .wc-table.wc-table-borderless th,
+  .wc-table.wc-table-borderless td,
+  .wc-table.wc-table-borderless thead th,
+  .wc-table.wc-table-borderless tbody + tbody {
+    border: none;
+  }
+
+  /* Small/Condensed table */
+  .wc-table.wc-table-sm th,
+  .wc-table.wc-table-sm td {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Medium table */
+  .wc-table.wc-table-md th,
+  .wc-table.wc-table-md td {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Large table */
+  .wc-table.wc-table-lg th,
+  .wc-table.wc-table-lg td {
+    padding: 1.25rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  /* Responsive wrapper */
+  .wc-table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Cell alignment utilities - only when parent has .wc-table */
+  .wc-table .wc-text-left {
+    text-align: left;
+  }
+
+  .wc-table .wc-text-center {
+    text-align: center;
+  }
+
+  .wc-table .wc-text-right {
+    text-align: right;
+  }
+
+  /* Column width utilities */
+  .wc-table .wc-w-auto {
+    width: auto;
+  }
+
+  .wc-table .wc-w-min {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  /* Sortable headers */
+  .wc-table th.wc-sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 2rem;
+  }
+
+  .wc-table th.wc-sortable:hover {
+    background-color: var(--surface-3);
+  }
+
+  .wc-table th.wc-sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.3;
+  }
+
+  .wc-table th.wc-sortable.wc-sort-asc::after {
+    content: '↑';
+    opacity: 1;
+  }
+
+  .wc-table th.wc-sortable.wc-sort-desc::after {
+    content: '↓';
+    opacity: 1;
+  }
+
+  /* Row states */
+  .wc-table tr.wc-table-active {
+    background-color: var(--surface-3);
+  }
+
+  .wc-table tr.wc-table-primary {
+    background-color: var(--primary-bg-color);
+    color: var(--primary-text-color);
+  }
+
+  .wc-table tr.wc-table-success {
+    background-color: color-mix(in srgb, var(--success-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table tr.wc-table-warning {
+    background-color: color-mix(in srgb, var(--warning-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table tr.wc-table-error,
+  .wc-table tr.wc-table-danger {
+    background-color: color-mix(in srgb, var(--error-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table tr.wc-table-info {
+    background-color: color-mix(in srgb, var(--info-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  /* Cell states */
+  .wc-table td.wc-table-active,
+  .wc-table th.wc-table-active {
+    background-color: var(--surface-3);
+  }
+
+  .wc-table td.wc-table-primary,
+  .wc-table th.wc-table-primary {
+    background-color: var(--primary-bg-color);
+    color: var(--primary-text-color);
+  }
+
+  .wc-table td.wc-table-success,
+  .wc-table th.wc-table-success {
+    background-color: color-mix(in srgb, var(--success-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table td.wc-table-warning,
+  .wc-table th.wc-table-warning {
+    background-color: color-mix(in srgb, var(--warning-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table td.wc-table-error,
+  .wc-table td.wc-table-danger,
+  .wc-table th.wc-table-error,
+  .wc-table th.wc-table-danger {
+    background-color: color-mix(in srgb, var(--error-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  .wc-table td.wc-table-info,
+  .wc-table th.wc-table-info {
+    background-color: color-mix(in srgb, var(--info-bg-color) 20%, transparent);
+    color: var(--text-1);
+  }
+
+  /* Dark variant */
+  .wc-table.wc-table-dark {
+    background-color: var(--surface-1);
+    color: var(--text-1);
+  }
+
+  .wc-table.wc-table-dark thead {
+    background-color: var(--surface-2);
+  }
+
+  .wc-table.wc-table-dark tbody tr {
+    border-color: var(--component-border-color);
+  }
+
+  /* Fixed header */
+  .wc-table-fixed-header {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .wc-table-fixed-header .wc-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  /* Caption */
+  .wc-table caption {
+    padding: 0.75rem 1rem;
+    color: var(--text-2);
+    text-align: left;
+    caption-side: top;
+  }
+
+  .wc-table caption.wc-caption-bottom {
+    caption-side: bottom;
+  }
+
+  /* Loading state */
+  .wc-table.wc-table-loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Empty state */
+  .wc-table tbody tr.wc-table-empty td {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-2);
+    font-style: italic;
+  }
+
+  /* Clickable rows */
+  .wc-table.wc-table-clickable tbody tr {
+    cursor: pointer;
+  }
+
+  .wc-table.wc-table-clickable tbody tr:hover {
+    background-color: var(--surface-3);
+  }
+}
+
 @layer wc.palette {
   .palette {
     display: grid;

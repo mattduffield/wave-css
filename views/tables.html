@@ -1,0 +1,748 @@
+<div id="page-contents">
+  <style>
+    .example-section {
+      margin-bottom: 3rem;
+    }
+    .example-section h2 {
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--component-border-color);
+    }
+    .example-section h3 {
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-2);
+    }
+    .code-example {
+      background-color: var(--surface-1);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+    }
+  </style>
+
+  <h1 class="text-4xl font-bold mb-2">Wave CSS Tables</h1>
+    <p class="text-2 mb-6">Comprehensive table styling with theme support</p>
+
+    <!-- Basic Table -->
+    <section class="example-section">
+      <h2>Basic Table</h2>
+      <p class="text-2 mb-4">Simple table with default styling using <code class="bg-surface-2 px-2 py-1 rounded">.wc-table</code></p>
+
+      <table class="wc-table">
+        <caption>Employee Directory</caption>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Salary</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>John Doe</td>
+            <td>Engineering</td>
+            <td>Senior Developer</td>
+            <td>$95,000</td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td>Jane Smith</td>
+            <td>Marketing</td>
+            <td>Marketing Manager</td>
+            <td>$85,000</td>
+          </tr>
+          <tr>
+            <td>003</td>
+            <td>Bob Johnson</td>
+            <td>Sales</td>
+            <td>Sales Representative</td>
+            <td>$65,000</td>
+          </tr>
+          <tr>
+            <td>004</td>
+            <td>Alice Williams</td>
+            <td>HR</td>
+            <td>HR Director</td>
+            <td>$90,000</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="wc-text-right">Total:</td>
+            <td>$335,000</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Striped Table -->
+    <section class="example-section">
+      <h2>Striped Table</h2>
+      <p class="text-2 mb-4">Add <code class="bg-surface-2 px-2 py-1 rounded">.wc-table-striped</code> for alternating row colors</p>
+
+      <table class="wc-table wc-table-striped">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Laptop Pro 15"</td>
+            <td>Electronics</td>
+            <td>$1,299.99</td>
+            <td>45</td>
+            <td>In Stock</td>
+          </tr>
+          <tr>
+            <td>Wireless Mouse</td>
+            <td>Accessories</td>
+            <td>$29.99</td>
+            <td>150</td>
+            <td>In Stock</td>
+          </tr>
+          <tr>
+            <td>USB-C Cable</td>
+            <td>Accessories</td>
+            <td>$12.99</td>
+            <td>5</td>
+            <td>Low Stock</td>
+          </tr>
+          <tr>
+            <td>Monitor 27"</td>
+            <td>Electronics</td>
+            <td>$399.99</td>
+            <td>0</td>
+            <td>Out of Stock</td>
+          </tr>
+          <tr>
+            <td>Keyboard Mechanical</td>
+            <td>Accessories</td>
+            <td>$89.99</td>
+            <td>32</td>
+            <td>In Stock</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Hover Table -->
+    <section class="example-section">
+      <h2>Hover Table</h2>
+      <p class="text-2 mb-4">Add <code class="bg-surface-2 px-2 py-1 rounded">.wc-table-hover</code> for row hover effects</p>
+
+      <table class="wc-table wc-table-hover">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#1001</td>
+            <td>Sarah Connor</td>
+            <td>2024-01-15</td>
+            <td>$245.50</td>
+            <td>Delivered</td>
+          </tr>
+          <tr>
+            <td>#1002</td>
+            <td>Kyle Reese</td>
+            <td>2024-01-16</td>
+            <td>$89.99</td>
+            <td>Processing</td>
+          </tr>
+          <tr>
+            <td>#1003</td>
+            <td>John Connor</td>
+            <td>2024-01-17</td>
+            <td>$156.25</td>
+            <td>Shipped</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Bordered and Borderless -->
+    <section class="example-section">
+      <h2>Bordered & Borderless Tables</h2>
+
+      <h3>Bordered Table (.wc-table-bordered)</h3>
+      <table class="wc-table wc-table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alice Johnson</td>
+            <td>alice@example.com</td>
+            <td>(555) 123-4567</td>
+          </tr>
+          <tr>
+            <td>Bob Smith</td>
+            <td>bob@example.com</td>
+            <td>(555) 234-5678</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Borderless Table (.wc-table-borderless)</h3>
+      <table class="wc-table wc-table-borderless">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Carol White</td>
+            <td>carol@example.com</td>
+            <td>(555) 345-6789</td>
+          </tr>
+          <tr>
+            <td>David Brown</td>
+            <td>david@example.com</td>
+            <td>(555) 456-7890</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Size Variants -->
+    <section class="example-section">
+      <h2>Size Variants</h2>
+
+      <h3>Small/Condensed Table (.wc-table-sm)</h3>
+      <table class="wc-table wc-table-sm wc-table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Task</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Fix login bug</td>
+            <td>High</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Update documentation</td>
+            <td>Medium</td>
+            <td>In Progress</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Add dark mode</td>
+            <td>Low</td>
+            <td>Pending</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Medium Table (.wc-table-md)</h3>
+      <table class="wc-table wc-table-md wc-table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Task</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Code review</td>
+            <td>Medium</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Test new feature</td>
+            <td>Medium</td>
+            <td>In Progress</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Update dependencies</td>
+            <td>Low</td>
+            <td>Pending</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Large Table (.wc-table-lg)</h3>
+      <table class="wc-table wc-table-lg wc-table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Task</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Review pull request</td>
+            <td>High</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Deploy to production</td>
+            <td>Critical</td>
+            <td>In Progress</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sortable Headers -->
+    <section class="example-section">
+      <h2>Sortable Headers</h2>
+      <p class="text-2 mb-4">Add <code class="bg-surface-2 px-2 py-1 rounded">.wc-sortable</code> to headers for sort indicators</p>
+
+      <table class="wc-table wc-table-hover">
+        <thead>
+          <tr>
+            <th class="wc-sortable wc-sort-asc">Name</th>
+            <th class="wc-sortable">Email</th>
+            <th class="wc-sortable wc-sort-desc">Join Date</th>
+            <th class="wc-sortable">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alex Turner</td>
+            <td>alex@example.com</td>
+            <td>2024-01-10</td>
+            <td>Active</td>
+          </tr>
+          <tr>
+            <td>Beth Wilson</td>
+            <td>beth@example.com</td>
+            <td>2024-01-08</td>
+            <td>Active</td>
+          </tr>
+          <tr>
+            <td>Chris Davis</td>
+            <td>chris@example.com</td>
+            <td>2024-01-12</td>
+            <td>Inactive</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Row and Cell States -->
+    <section class="example-section">
+      <h2>Row States</h2>
+      <p class="text-2 mb-4">Apply state classes to rows or individual cells</p>
+
+      <table class="wc-table">
+        <thead>
+          <tr>
+            <th>Test Case</th>
+            <th>Expected</th>
+            <th>Actual</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="wc-table-success">
+            <td>Login Flow</td>
+            <td>Redirect to dashboard</td>
+            <td>Redirect to dashboard</td>
+            <td>Passed</td>
+          </tr>
+          <tr class="wc-table-warning">
+            <td>Password Reset</td>
+            <td>Email sent</td>
+            <td>Email delayed</td>
+            <td>Warning</td>
+          </tr>
+          <tr class="wc-table-error">
+            <td>Payment Processing</td>
+            <td>Transaction complete</td>
+            <td>Transaction failed</td>
+            <td>Failed</td>
+          </tr>
+          <tr class="wc-table-info">
+            <td>User Registration</td>
+            <td>Account created</td>
+            <td>Pending verification</td>
+            <td>Info</td>
+          </tr>
+          <tr class="wc-table-active">
+            <td>Profile Update</td>
+            <td>Changes saved</td>
+            <td>In progress...</td>
+            <td>Active</td>
+          </tr>
+          <tr class="wc-table-primary">
+            <td>Dashboard Load</td>
+            <td>< 2s load time</td>
+            <td>1.5s load time</td>
+            <td>Primary</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Cell States -->
+    <section class="example-section">
+      <h2>Cell States</h2>
+      <p class="text-2 mb-4">Apply state classes to individual cells</p>
+
+      <table class="wc-table wc-table-striped">
+        <thead>
+          <tr>
+            <th>Server</th>
+            <th>CPU</th>
+            <th>Memory</th>
+            <th>Disk</th>
+            <th>Network</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Server-01</td>
+            <td class="wc-table-success">25%</td>
+            <td class="wc-table-success">45%</td>
+            <td class="wc-table-warning">78%</td>
+            <td class="wc-table-success">12%</td>
+          </tr>
+          <tr>
+            <td>Server-02</td>
+            <td class="wc-table-warning">65%</td>
+            <td class="wc-table-success">52%</td>
+            <td class="wc-table-success">34%</td>
+            <td class="wc-table-success">8%</td>
+          </tr>
+          <tr>
+            <td>Server-03</td>
+            <td class="wc-table-error">92%</td>
+            <td class="wc-table-error">88%</td>
+            <td class="wc-table-error">95%</td>
+            <td class="wc-table-warning">67%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Alignment and Width -->
+    <section class="example-section">
+      <h2>Text Alignment & Column Width</h2>
+      <p class="text-2 mb-4">Use <code class="bg-surface-2 px-2 py-1 rounded">.wc-text-left/center/right</code> and <code class="bg-surface-2 px-2 py-1 rounded">.wc-w-min/auto</code></p>
+
+      <table class="wc-table wc-table-bordered">
+        <thead>
+          <tr>
+            <th class="wc-w-min">ID</th>
+            <th class="wc-text-left">Product</th>
+            <th class="wc-text-center">Quantity</th>
+            <th class="wc-text-right">Price</th>
+            <th class="wc-text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="wc-w-min">1</td>
+            <td class="wc-text-left">Widget A</td>
+            <td class="wc-text-center">5</td>
+            <td class="wc-text-right">$19.99</td>
+            <td class="wc-text-right">$99.95</td>
+          </tr>
+          <tr>
+            <td class="wc-w-min">2</td>
+            <td class="wc-text-left">Widget B</td>
+            <td class="wc-text-center">3</td>
+            <td class="wc-text-right">$24.99</td>
+            <td class="wc-text-right">$74.97</td>
+          </tr>
+          <tr>
+            <td class="wc-w-min">3</td>
+            <td class="wc-text-left">Widget C</td>
+            <td class="wc-text-center">7</td>
+            <td class="wc-text-right">$14.99</td>
+            <td class="wc-text-right">$104.93</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="wc-text-right"><strong>Grand Total:</strong></td>
+            <td class="wc-text-right"><strong>$279.85</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Responsive Table -->
+    <section class="example-section">
+      <h2>Responsive Table</h2>
+      <p class="text-2 mb-4">Wrap table with <code class="bg-surface-2 px-2 py-1 rounded">.wc-table-responsive</code> for horizontal scroll</p>
+
+      <div class="wc-table-responsive">
+        <table class="wc-table wc-table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Department</th>
+              <th>Position</th>
+              <th>Start Date</th>
+              <th>Salary</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Emma Thompson</td>
+              <td>emma.thompson@example.com</td>
+              <td>(555) 111-2222</td>
+              <td>Engineering</td>
+              <td>Lead Developer</td>
+              <td>2020-03-15</td>
+              <td>$110,000</td>
+              <td>Active</td>
+              <td>
+                <button class="btn btn-sm btn-primary">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Michael Chen</td>
+              <td>michael.chen@example.com</td>
+              <td>(555) 222-3333</td>
+              <td>Marketing</td>
+              <td>Marketing Director</td>
+              <td>2019-07-22</td>
+              <td>$95,000</td>
+              <td>Active</td>
+              <td>
+                <button class="btn btn-sm btn-primary">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Fixed Header -->
+    <section class="example-section">
+      <h2>Fixed Header Table</h2>
+      <p class="text-2 mb-4">Wrap with <code class="bg-surface-2 px-2 py-1 rounded">.wc-table-fixed-header</code> for scrollable body with sticky header</p>
+
+      <div class="wc-table-fixed-header">
+        <table class="wc-table wc-table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Event</th>
+              <th>Location</th>
+              <th>Attendees</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2024-01-15</td><td>Team Meeting</td><td>Conference Room A</td><td>12</td></tr>
+            <tr><td>2024-01-16</td><td>Client Presentation</td><td>Office 301</td><td>5</td></tr>
+            <tr><td>2024-01-17</td><td>Workshop</td><td>Training Center</td><td>25</td></tr>
+            <tr><td>2024-01-18</td><td>Code Review</td><td>Dev Lab</td><td>8</td></tr>
+            <tr><td>2024-01-19</td><td>Sprint Planning</td><td>Conference Room B</td><td>10</td></tr>
+            <tr><td>2024-01-20</td><td>Hackathon</td><td>Main Hall</td><td>50</td></tr>
+            <tr><td>2024-01-21</td><td>Design Review</td><td>Studio</td><td>6</td></tr>
+            <tr><td>2024-01-22</td><td>All Hands</td><td>Auditorium</td><td>100</td></tr>
+            <tr><td>2024-01-23</td><td>Training Session</td><td>Room 205</td><td>15</td></tr>
+            <tr><td>2024-01-24</td><td>Product Demo</td><td>Demo Room</td><td>20</td></tr>
+            <tr><td>2024-01-25</td><td>QA Testing</td><td>QA Lab</td><td>7</td></tr>
+            <tr><td>2024-01-26</td><td>Deployment</td><td>Operations Center</td><td>4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Combined Features -->
+    <section class="example-section">
+      <h2>Combined Features</h2>
+      <p class="text-2 mb-4">Striped + Hover + Bordered + Small</p>
+
+      <table class="wc-table wc-table-striped wc-table-hover wc-table-bordered wc-table-sm">
+        <thead>
+          <tr>
+            <th class="wc-sortable">Country</th>
+            <th class="wc-sortable wc-text-right">Population</th>
+            <th class="wc-sortable wc-text-right">Area (km²)</th>
+            <th class="wc-sortable wc-text-right">GDP (Billion)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>United States</td>
+            <td class="wc-text-right">331,002,651</td>
+            <td class="wc-text-right">9,833,520</td>
+            <td class="wc-text-right">$21,427</td>
+          </tr>
+          <tr>
+            <td>China</td>
+            <td class="wc-text-right">1,439,323,776</td>
+            <td class="wc-text-right">9,596,961</td>
+            <td class="wc-text-right">$14,343</td>
+          </tr>
+          <tr>
+            <td>Japan</td>
+            <td class="wc-text-right">126,476,461</td>
+            <td class="wc-text-right">377,975</td>
+            <td class="wc-text-right">$5,082</td>
+          </tr>
+          <tr>
+            <td>Germany</td>
+            <td class="wc-text-right">83,783,942</td>
+            <td class="wc-text-right">357,114</td>
+            <td class="wc-text-right">$3,846</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Loading and Empty States -->
+    <section class="example-section">
+      <h2>Special States</h2>
+
+      <h3>Loading State (.wc-table-loading)</h3>
+      <table class="wc-table wc-table-loading">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Task 1</td>
+            <td>Loading...</td>
+            <td>50%</td>
+          </tr>
+          <tr>
+            <td>Task 2</td>
+            <td>Loading...</td>
+            <td>75%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Empty State</h3>
+      <table class="wc-table wc-table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="wc-table-empty">
+            <td colspan="3">No data available</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Theme Integration -->
+    <section class="example-section">
+      <h2>Theme Integration</h2>
+      <p class="text-2 mb-4">Tables automatically adapt to the selected theme</p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-sm btn-primary" onclick="document.documentElement.className='theme-ocean'">Ocean</button>
+        <button class="btn btn-sm btn-primary" onclick="document.documentElement.className='theme-sunset'">Sunset</button>
+        <button class="btn btn-sm btn-primary" onclick="document.documentElement.className='theme-forest'">Forest</button>
+        <button class="btn btn-sm btn-primary" onclick="document.documentElement.className='theme-lavender'">Lavender</button>
+        <button class="btn btn-sm btn-primary" onclick="document.documentElement.className='theme-midnight'">Midnight</button>
+      </div>
+
+      <table class="wc-table wc-table-striped wc-table-hover">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Theme Colors</td>
+            <td>Uses CSS variables from active theme</td>
+            <td class="wc-table-success">Active</td>
+          </tr>
+          <tr>
+            <td>Auto Adaptation</td>
+            <td>Colors update when theme changes</td>
+            <td class="wc-table-success">Active</td>
+          </tr>
+          <tr>
+            <td>Dark Mode</td>
+            <td>Optimized for both light and dark themes</td>
+            <td class="wc-table-success">Active</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  <script>
+    // Add interactive sorting demo
+    document.querySelectorAll('.wc-sortable').forEach(header => {
+      header.addEventListener('click', function() {
+        // Remove sort classes from siblings
+        this.parentElement.querySelectorAll('.wc-sortable').forEach(h => {
+          if (h !== this) {
+            h.classList.remove('wc-sort-asc', 'wc-sort-desc');
+          }
+        });
+
+        // Toggle sort direction
+        if (this.classList.contains('wc-sort-asc')) {
+          this.classList.remove('wc-sort-asc');
+          this.classList.add('wc-sort-desc');
+        } else if (this.classList.contains('wc-sort-desc')) {
+          this.classList.remove('wc-sort-desc');
+        } else {
+          this.classList.add('wc-sort-asc');
+        }
+      });
+    });
+  </script>
+</div>
