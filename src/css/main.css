@@ -4769,6 +4769,52 @@
     cursor: pointer;
   }
 
+  /* Prevent parent row hover from affecting cells that contain nested tables */
+  .wc-table.wc-table-hover tbody tr:hover > td:has(.wc-table-nested) {
+    background-color: transparent;
+  }
+
+  /* Nested table styling */
+  .wc-table-nested {
+    border: none;
+    background-color: var(--card-bg-color);
+    width: 100%;
+  }
+
+  .wc-table-nested thead {
+    background-color: var(--surface-2);
+    color: var(--text-1);
+  }
+
+  .wc-table-nested thead th {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--component-border-color);
+  }
+
+  .wc-table-nested tbody tr {
+    background-color: var(--card-bg-color);
+  }
+
+  .wc-table-nested tbody td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Nested table hover - distinct from parent */
+  .wc-table-nested.wc-table-hover tbody tr:hover {
+    background-color: var(--surface-3);
+  }
+
+  /* Nested table striped rows */
+  .wc-table-nested.wc-table-striped tbody tr:nth-child(odd) {
+    background-color: var(--surface-1);
+  }
+
+  .wc-table-nested.wc-table-striped tbody tr:nth-child(even) {
+    background-color: var(--surface-2);
+  }
+
   /* Bordered table */
   .wc-table.wc-table-bordered th,
   .wc-table.wc-table-bordered td {

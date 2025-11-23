@@ -681,6 +681,137 @@
       </table>
     </section>
 
+    <!-- Nested Tables -->
+    <section class="example-section">
+      <h2>Nested Tables</h2>
+      <p class="text-2 mb-4">Use <code class="bg-surface-2 px-2 py-1 rounded">.wc-table-nested</code> for tables inside table cells to prevent hover conflicts</p>
+
+      <table class="wc-table wc-table-hover wc-table-striped">
+        <thead>
+          <tr>
+            <th class="w-12"></th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="cursor-pointer">
+            <td onclick="this.closest('tr').nextElementSibling.classList.toggle('hidden')">
+              <wc-fa-icon name="chevron-right" size="1rem"></wc-fa-icon>
+            </td>
+            <td>Laptop Pro 15"</td>
+            <td>Electronics</td>
+            <td><span class="badge badge-blue">Active</span></td>
+          </tr>
+          <tr class="hidden">
+            <td colspan="4" class="p-0">
+              <div class="p-4">
+                <h4 class="text-sm font-semibold mb-2">Specifications</h4>
+                <table class="wc-table-nested wc-table-hover wc-table-bordered" style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>Component</th>
+                      <th>Model</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Processor</td>
+                      <td>Intel Core i7-12700H</td>
+                      <td>2.3GHz - 4.7GHz</td>
+                    </tr>
+                    <tr>
+                      <td>Memory</td>
+                      <td>DDR5 RAM</td>
+                      <td>32GB</td>
+                    </tr>
+                    <tr>
+                      <td>Storage</td>
+                      <td>NVMe SSD</td>
+                      <td>1TB</td>
+                    </tr>
+                    <tr>
+                      <td>Display</td>
+                      <td>Retina Display</td>
+                      <td>2880x1800</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          <tr class="cursor-pointer">
+            <td onclick="this.closest('tr').nextElementSibling.classList.toggle('hidden')">
+              <wc-fa-icon name="chevron-right" size="1rem"></wc-fa-icon>
+            </td>
+            <td>Wireless Mouse</td>
+            <td>Accessories</td>
+            <td><span class="badge badge-green">In Stock</span></td>
+          </tr>
+          <tr class="hidden">
+            <td colspan="4" class="p-0">
+              <div class="p-4">
+                <h4 class="text-sm font-semibold mb-2">Features</h4>
+                <table class="wc-table-nested wc-table-striped" style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>Feature</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Connectivity</td>
+                      <td>Bluetooth 5.0 & 2.4GHz Wireless</td>
+                    </tr>
+                    <tr>
+                      <td>Battery</td>
+                      <td>Up to 6 months (rechargeable)</td>
+                    </tr>
+                    <tr>
+                      <td>DPI</td>
+                      <td>800-4000 DPI adjustable</td>
+                    </tr>
+                    <tr>
+                      <td>Buttons</td>
+                      <td>6 programmable buttons</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="code-example mt-4">
+<pre><code>&lt;!-- Parent table with hover --&gt;
+&lt;table class="wc-table wc-table-hover"&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Parent row with hover&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td colspan="4"&gt;
+        &lt;!-- Nested table with .wc-table-nested --&gt;
+        &lt;table class="wc-table-nested wc-table-hover"&gt;
+          &lt;thead&gt;
+            &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Value&lt;/th&gt;&lt;/tr&gt;
+          &lt;/thead&gt;
+          &lt;tbody&gt;
+            &lt;tr&gt;&lt;td&gt;Detail 1&lt;/td&gt;&lt;td&gt;Value 1&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td&gt;Detail 2&lt;/td&gt;&lt;td&gt;Value 2&lt;/td&gt;&lt;/tr&gt;
+          &lt;/tbody&gt;
+        &lt;/table&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+      </div>
+    </section>
+
     <!-- Theme Integration -->
     <section class="example-section">
       <h2>Theme Integration</h2>
