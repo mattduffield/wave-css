@@ -12250,9 +12250,24 @@ var WcTabItem = class extends WcBaseComponent {
     }
   }
   _handleAttributeChange(attrName, newValue) {
-    if (attrName === "test") {
+    if (attrName === "label") {
+      this._updateButtonLabel(newValue);
+    } else if (attrName === "test") {
     } else {
       super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _updateButtonLabel(newLabel) {
+    const parentTab = this.closest("wc-tab");
+    if (!parentTab) return;
+    const tabItems = Array.from(parentTab.querySelectorAll(":scope > .wc-tab > .tab-body > wc-tab-item"));
+    const myIndex = tabItems.indexOf(this);
+    if (myIndex === -1) return;
+    const buttons = parentTab.querySelectorAll(":scope > .wc-tab > .tab-nav > button.tab-link");
+    const btn = buttons[myIndex];
+    if (btn && newLabel) {
+      btn.textContent = newLabel;
+      btn.dataset.label = newLabel;
     }
   }
   _render() {

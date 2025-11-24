@@ -79,11 +79,34 @@ class WcTabItem extends WcBaseComponent {
     }
   }
 
-  _handleAttributeChange(attrName, newValue) {    
-    if (attrName === 'test') {
+  _handleAttributeChange(attrName, newValue) {
+    if (attrName === 'label') {
+      // Update the corresponding button text and data-label
+      this._updateButtonLabel(newValue);
+    } else if (attrName === 'test') {
       // Do nothing...
     } else {
-      super._handleAttributeChange(attrName, newValue);  
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+
+  _updateButtonLabel(newLabel) {
+    const parentTab = this.closest('wc-tab');
+    if (!parentTab) return;
+
+    // Find the button by its position (index) rather than label
+    // since the old label might have changed
+    const tabItems = Array.from(parentTab.querySelectorAll(':scope > .wc-tab > .tab-body > wc-tab-item'));
+    const myIndex = tabItems.indexOf(this);
+
+    if (myIndex === -1) return;
+
+    const buttons = parentTab.querySelectorAll(':scope > .wc-tab > .tab-nav > button.tab-link');
+    const btn = buttons[myIndex];
+
+    if (btn && newLabel) {
+      btn.textContent = newLabel;
+      btn.dataset.label = newLabel;
     }
   }
 
