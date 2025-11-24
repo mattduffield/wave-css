@@ -1,5 +1,5 @@
 /**
- * 
+ *
  *  Name: wc-tab-item
  *  Usage:
  *  <wc-tab-item class="active" label="London">
@@ -18,7 +18,15 @@
  *      </p>
  *    </div>
  *  </wc-tab-item>
- * 
+ *
+ *  API:
+ *  // Programmatically activate a tab
+ *  const tabItem = document.querySelector('wc-tab-item[label="New York"]');
+ *  tabItem.activate();
+ *
+ *  // Or simply click the wc-tab-item element
+ *  tabItem.click();
+ *
  */
 
 
@@ -46,12 +54,29 @@ class WcTabItem extends WcBaseComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    this._wireEvents();
     // console.log('connectedCallback:wc-tab-item');
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
+  }
+
+  /**
+   * Activate this tab item by clicking its corresponding button
+   */
+  activate() {
+    const label = this.getAttribute('label');
+    if (!label) return;
+
+    const parentTab = this.closest('wc-tab');
+    if (!parentTab) return;
+
+    const btn = parentTab.querySelector(`button.tab-link[data-label="${label}"]`);
+    if (btn) {
+      btn.click();
+    }
   }
 
   _handleAttributeChange(attrName, newValue) {    
@@ -105,8 +130,23 @@ class WcTabItem extends WcBaseComponent {
     this.loadStyle('wc-tab-item-style', style);
   }
 
+  _wireEvents() {
+    super._wireEvents();
+    // Add click listener to make the tab item clickable
+    this.addEventListener('click', this._handleClick.bind(this));
+  }
+
   _unWireEvents() {
     super._unWireEvents();
+    this.removeEventListener('click', this._handleClick.bind(this));
+  }
+
+  _handleClick(event) {
+    // Only activate if clicking directly on wc-tab-item, not on child elements
+    // This prevents interference with buttons/links inside the tab content
+    if (event.target === this || event.target === this.componentElement) {
+      this.activate();
+    }
   }
 
 }

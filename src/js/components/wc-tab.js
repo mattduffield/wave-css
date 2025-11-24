@@ -365,10 +365,42 @@ class WcTab extends WcBaseComponent {
 
   _restoreTabsFromHash() {
     const hashParts = location.hash.slice(1).split('+');
+    let activatedAnyTab = false;
+
     hashParts.forEach(part => {
       const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
-      btn?.click();  
+      if (btn) {
+        btn.click();
+        activatedAnyTab = true;
+      }
     });
+
+    // If no tabs were activated from hash, check for wc-tab-item with active class
+    if (!activatedAnyTab) {
+      // Look for wc-tab-item elements that are direct children of this tab's body
+      const tabBody = this.querySelector(':scope > .wc-tab > .tab-body');
+      if (tabBody) {
+        // Find wc-tab-item with active class or inner .wc-tab-item with active class
+        const activeTabItems = Array.from(tabBody.children).filter(child => {
+          return child.tagName.toLowerCase() === 'wc-tab-item' &&
+                 (child.classList.contains('active') ||
+                  child.querySelector(':scope > .wc-tab-item.active'));
+        });
+
+        if (activeTabItems.length > 0) {
+          // Activate the first one found
+          const label = activeTabItems[0].getAttribute('label');
+          const btn = this.querySelector(`button[data-label="${label}"]`);
+          btn?.click();
+        } else {
+          // Fallback: if no active class found, activate first tab
+          const firstBtn = this.querySelector('.tab-nav > .tab-link:first-child');
+          if (firstBtn && !this.querySelector('.tab-nav > .tab-link.active')) {
+            firstBtn.click();
+          }
+        }
+      }
+    }
   }
 
   _applyStyle() {

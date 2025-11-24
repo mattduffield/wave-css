@@ -12230,10 +12230,24 @@ var WcTabItem = class extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+    this._wireEvents();
   }
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
+  }
+  /**
+   * Activate this tab item by clicking its corresponding button
+   */
+  activate() {
+    const label = this.getAttribute("label");
+    if (!label) return;
+    const parentTab = this.closest("wc-tab");
+    if (!parentTab) return;
+    const btn = parentTab.querySelector(`button.tab-link[data-label="${label}"]`);
+    if (btn) {
+      btn.click();
+    }
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "test") {
@@ -12276,8 +12290,18 @@ var WcTabItem = class extends WcBaseComponent {
     `.trim();
     this.loadStyle("wc-tab-item-style", style);
   }
+  _wireEvents() {
+    super._wireEvents();
+    this.addEventListener("click", this._handleClick.bind(this));
+  }
   _unWireEvents() {
     super._unWireEvents();
+    this.removeEventListener("click", this._handleClick.bind(this));
+  }
+  _handleClick(event) {
+    if (event.target === this || event.target === this.componentElement) {
+      this.activate();
+    }
   }
 };
 customElements.define("wc-tab-item", WcTabItem);
@@ -12498,10 +12522,32 @@ var WcTab = class extends WcBaseComponent {
   }
   _restoreTabsFromHash() {
     const hashParts = location.hash.slice(1).split("+");
+    let activatedAnyTab = false;
     hashParts.forEach((part) => {
       const btn = this.querySelector(`button[data-label="${decodeURI(part)}"]`);
-      btn?.click();
+      if (btn) {
+        btn.click();
+        activatedAnyTab = true;
+      }
     });
+    if (!activatedAnyTab) {
+      const tabBody = this.querySelector(":scope > .wc-tab > .tab-body");
+      if (tabBody) {
+        const activeTabItems = Array.from(tabBody.children).filter((child) => {
+          return child.tagName.toLowerCase() === "wc-tab-item" && (child.classList.contains("active") || child.querySelector(":scope > .wc-tab-item.active"));
+        });
+        if (activeTabItems.length > 0) {
+          const label = activeTabItems[0].getAttribute("label");
+          const btn = this.querySelector(`button[data-label="${label}"]`);
+          btn?.click();
+        } else {
+          const firstBtn = this.querySelector(".tab-nav > .tab-link:first-child");
+          if (firstBtn && !this.querySelector(".tab-nav > .tab-link.active")) {
+            firstBtn.click();
+          }
+        }
+      }
+    }
   }
   _applyStyle() {
     const style = `
