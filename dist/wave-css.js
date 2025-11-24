@@ -12459,12 +12459,17 @@ var WcTab = class extends WcBaseComponent {
       }
     });
     target.classList.add("active");
-    const label = target.textContent;
-    const contents = this.querySelector(`.wc-tab-item[label='${label}']`);
-    contents.classList.add("active");
-    const payload = { detail: { label } };
-    const custom = new CustomEvent("tabchange", payload);
-    contents.dispatchEvent(custom);
+    const label = target.dataset.label || target.textContent;
+    const buttons = this.querySelectorAll(":scope > .wc-tab > .tab-nav > button.tab-link");
+    const buttonIndex = Array.from(buttons).indexOf(target);
+    const tabItems = this.querySelectorAll(":scope > .wc-tab > .tab-body > wc-tab-item");
+    const contents = tabItems[buttonIndex];
+    if (contents) {
+      contents.classList.add("active");
+      const payload = { detail: { label } };
+      const custom = new CustomEvent("tabchange", payload);
+      contents.dispatchEvent(custom);
+    }
     location.hash = this._buildActiveTabStringFromRoot(target);
   }
   _buildActiveTabStringFromRoot(startElement) {
