@@ -11,9 +11,10 @@
  *      <wc-input name="vehicle.msrp" lbl-label="MSRP"></wc-input>
  *      <!-- No need for placeholder input - images will be created dynamically -->
  *
- *      <!-- Dynamic links that update with VIN data - use name attribute -->
+ *      <!-- Dynamic links that update with VIN data - use name + href-template -->
  *      <a name="household_vehicles.0.search"
  *         href="https://google.com/search?q={{vehicle.year}}+{{vehicle.make}}+{{vehicle.model}}"
+ *         href-template="https://google.com/search?q=${year}+${make}+${model}"
  *         target="_blank">Google Search</a>
  *    </wc-vin-listener>
  *
@@ -29,10 +30,13 @@
  *    - vin-listener: Add this attribute directly to wc-input/wc-select to make it listen
  *
  *  Anchor Tag Support:
- *    - Anchor tags with 'name' attribute will have their href updated with VIN data
- *    - The href can contain template variables that your server-side template engine renders
- *    - When VIN changes, JavaScript replaces {{field}} placeholders with new values
- *    - Example: <a name="vehicle.search" href="https://google.com/search?q={{year}}+{{make}}+{{model}}">
+ *    - Anchor tags with 'name' attribute can have their href updated with VIN data
+ *    - Use 'href' for server-rendered initial values (works with existing records)
+ *    - Use 'href-template' with ${field} syntax for dynamic updates (Pongo2 won't process ${})
+ *    - When VIN changes, JavaScript replaces ${field} placeholders with new values
+ *    - Example: <a name="vehicle.search"
+ *                  href="https://google.com/search?q={{vehicle.year}}+{{vehicle.make}}+{{vehicle.model}}"
+ *                  href-template="https://google.com/search?q=${year}+${make}+${model}">
  *
  *  Legacy Link Attribute (still supported):
  *    - vin-link: Add this attribute to <a> tags with a template URL using {{field}} syntax
@@ -356,16 +360,16 @@ class WcVinListener extends WcBaseComponent {
   }
 
   _updateAnchorHref(element, fieldName, data) {
-    // For anchor tags, the name attribute contains a template for building the href
-    // Example: name="household_vehicles.0.search" with href-template attribute
-    // Or we use the href attribute as a template if it contains field references
+    // For anchor tags, use href-template attribute to specify the template
+    // Example: href-template="https://google.com/search?q=${year}+${make}+${model}"
+    // The href attribute can have server-rendered values for initial state
 
-    const hrefTemplate = element.getAttribute('href-template') || element.getAttribute('href');
+    const hrefTemplate = element.getAttribute('href-template');
     if (!hrefTemplate) return;
 
-    // Build href by replacing field placeholders
-    // Support both {{field}} and {field} syntax for flexibility
-    const updatedHref = hrefTemplate.replace(/\{\{?(\w+)\}?\}/g, (_match, fieldKey) => {
+    // Build href by replacing field placeholders using ${field} syntax
+    // This avoids conflicts with server-side template engines that use {{field}}
+    const updatedHref = hrefTemplate.replace(/\$\{(\w+)\}/g, (_match, fieldKey) => {
       // Map the field key to the VIN data field
       const mappedField = this._getFieldMapping(fieldKey);
       if (!mappedField) return '';

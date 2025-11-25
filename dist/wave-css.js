@@ -6111,9 +6111,9 @@ var WcVinListener = class extends WcBaseComponent {
     return value;
   }
   _updateAnchorHref(element, fieldName, data) {
-    const hrefTemplate = element.getAttribute("href-template") || element.getAttribute("href");
+    const hrefTemplate = element.getAttribute("href-template");
     if (!hrefTemplate) return;
-    const updatedHref = hrefTemplate.replace(/\{\{?(\w+)\}?\}/g, (_match, fieldKey) => {
+    const updatedHref = hrefTemplate.replace(/\$\{(\w+)\}/g, (_match, fieldKey) => {
       const mappedField = this._getFieldMapping(fieldKey);
       if (!mappedField) return "";
       const value = data[mappedField];
