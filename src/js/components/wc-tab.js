@@ -273,7 +273,23 @@ class WcTab extends WcBaseComponent {
       contents.classList.add('active');
       const payload = { detail: { label }, bubbles: true, composed: true };
       const custom = new CustomEvent('tabchange', payload);
-      contents.dispatchEvent(custom);
+
+      // Dispatch on the wc-tab-item element itself
+      console.log('wc-tab: Dispatching tabchange event on wc-tab-item', contents, 'with label:', label);
+      const result1 = contents.dispatchEvent(custom);
+      console.log('wc-tab: Event dispatched on wc-tab-item, result:', result1);
+
+      // Also dispatch on the inner .wc-tab-item div to ensure children receive it
+      // This is needed because the wc-tab-item element might have display:contents
+      const innerDiv = contents.querySelector(':scope > .wc-tab-item');
+      if (innerDiv) {
+        const custom2 = new CustomEvent('tabchange', payload);
+        console.log('wc-tab: Also dispatching on inner div.wc-tab-item');
+        const result2 = innerDiv.dispatchEvent(custom2);
+        console.log('wc-tab: Event dispatched on inner div, result:', result2);
+      }
+    } else {
+      console.log('wc-tab: No contents found for button index:', buttonIndex);
     }
 
     location.hash = this._buildActiveTabStringFromRoot(target);

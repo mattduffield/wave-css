@@ -64,7 +64,12 @@ if (!customElements.get('wc-code-mirror')) {
       super.connectedCallback();
 
       this._applyStyle();
-      // console.log('conntectedCallback:wc-code-mirror');
+      console.log('connectedCallback:wc-code-mirror - component connected, name:', this.getAttribute('name'));
+
+      // Debug: Add event listener for tabchange
+      this.addEventListener('tabchange', (e) => {
+        console.log('wc-code-mirror: Received tabchange event!', e.detail, 'editor exists:', !!this.editor);
+      });
     }
 
     disconnectedCallback() {
