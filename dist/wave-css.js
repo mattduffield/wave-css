@@ -2826,10 +2826,19 @@ if (!customElements.get("wc-code-mirror")) {
       await sleep(timeout);
       if (this.editor) {
         const currentValue = this.editor.getValue();
+        this.editor.setSize(null, this.getAttribute("height") || null);
+        this.editor.refresh();
+        await sleep(50);
         const mode = this.getAttribute("mode") || "javascript";
         const theme = this.getAttribute("theme") || "default";
-        this.editor.setOption("mode", mode);
-        this.editor.setOption("theme", theme);
+        if (mode && mode !== "javascript") {
+          await this.loadMode(mode);
+          this.editor.setOption("mode", mode);
+        }
+        if (theme && theme !== "default") {
+          await this.loadTheme(theme);
+          this.editor.setOption("theme", theme);
+        }
         this.editor.setValue("");
         this.editor.refresh();
         await sleep(10);

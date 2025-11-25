@@ -588,12 +588,27 @@ if (!customElements.get('wc-code-mirror')) {
         // Store the current value
         const currentValue = this.editor.getValue();
 
+        // First, ensure CodeMirror recalculates dimensions
+        // This is critical when the element was hidden and is now visible
+        this.editor.setSize(null, this.getAttribute('height') || null);
+        this.editor.refresh();
+
+        await sleep(50);
+
         // Reapply mode and theme to ensure syntax highlighting works
         const mode = this.getAttribute('mode') || 'javascript';
         const theme = this.getAttribute('theme') || 'default';
 
-        this.editor.setOption('mode', mode);
-        this.editor.setOption('theme', theme);
+        // Force mode and theme reload if they're not default
+        if (mode && mode !== 'javascript') {
+          await this.loadMode(mode);
+          this.editor.setOption('mode', mode);
+        }
+
+        if (theme && theme !== 'default') {
+          await this.loadTheme(theme);
+          this.editor.setOption('theme', theme);
+        }
 
         // Force a complete re-render by clearing and setting the value
         this.editor.setValue('');
