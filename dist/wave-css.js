@@ -2202,10 +2202,6 @@ if (!customElements.get("wc-code-mirror")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      console.log("connectedCallback:wc-code-mirror - component connected, name:", this.getAttribute("name"));
-      this.addEventListener("tabchange", (e) => {
-        console.log("wc-code-mirror: Received tabchange event!", e.detail, "editor exists:", !!this.editor);
-      });
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -12515,18 +12511,12 @@ var WcTab = class extends WcBaseComponent {
       contents.classList.add("active");
       const payload = { detail: { label }, bubbles: true, composed: true };
       const custom = new CustomEvent("tabchange", payload);
-      console.log("wc-tab: Dispatching tabchange event on wc-tab-item", contents, "with label:", label);
-      const result1 = contents.dispatchEvent(custom);
-      console.log("wc-tab: Event dispatched on wc-tab-item, result:", result1);
+      contents.dispatchEvent(custom);
       const innerDiv = contents.querySelector(":scope > .wc-tab-item");
       if (innerDiv) {
         const custom2 = new CustomEvent("tabchange", payload);
-        console.log("wc-tab: Also dispatching on inner div.wc-tab-item");
-        const result2 = innerDiv.dispatchEvent(custom2);
-        console.log("wc-tab: Event dispatched on inner div, result:", result2);
+        innerDiv.dispatchEvent(custom2);
       }
-    } else {
-      console.log("wc-tab: No contents found for button index:", buttonIndex);
     }
     location.hash = this._buildActiveTabStringFromRoot(target);
   }
