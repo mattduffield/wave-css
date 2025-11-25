@@ -10,6 +10,9 @@
  *      <wc-input name="vehicle.trim" lbl-label="Trim"></wc-input>
  *      <wc-input name="vehicle.msrp" lbl-label="MSRP"></wc-input>
  *      <!-- No need for placeholder input - images will be created dynamically -->
+ *
+ *      <!-- Dynamic links that update with VIN data -->
+ *      <a vin-link="https://google.com/search?q={{year}}+{{make}}+{{model}}" target="_blank">Google Search</a>
  *    </wc-vin-listener>
  *
  *    <!-- Or apply directly to individual fields -->
@@ -23,12 +26,18 @@
  *  Direct Field Attribute (alternative approach):
  *    - vin-listener: Add this attribute directly to wc-input/wc-select to make it listen
  *
+ *  Link Attribute:
+ *    - vin-link: Add this attribute to <a> tags with a template URL using {{field}} syntax
+ *                The href will be updated with VIN data when decoded
+ *                Example: vin-link="https://google.com/search?q={{year}}+{{make}}+{{model}}"
+ *
  *  How it works:
  *    1. Listens for 'vin-decoder:change' events
  *    2. Filters events by matching vinGroup
  *    3. Updates child form fields based on their name attribute
  *    4. Supports mapping: name="vehicle.year" gets updated from vinData.year
  *    5. Creates indexed hidden inputs for array fields specified in array-fields attribute
+ *    6. Updates links with vin-link attribute by replacing {{field}} placeholders with actual values
  *
  *  Field Mapping:
  *    Supports all VIN decoder response fields:
@@ -154,6 +163,9 @@ class WcVinListener extends WcBaseComponent {
     // Handle array fields that don't have placeholder elements
     // Check for array data fields that weren't matched by existing elements
     this._createMissingArrayFields(data);
+
+    // Update any links with vin-link attribute
+    this._updateLinks(data);
   }
 
   _cleanupDynamicArrayInputs() {
@@ -335,6 +347,29 @@ class WcVinListener extends WcBaseComponent {
     // "year" -> "year"
     const parts = fieldName.split('.');
     return parts[parts.length - 1];
+  }
+
+  _updateLinks(data) {
+    // Find all links with vin-link attribute
+    const vinLinks = this.querySelectorAll('[vin-link]');
+
+    vinLinks.forEach(link => {
+      const template = link.getAttribute('vin-link');
+      if (!template) return;
+
+      // Replace template placeholders with actual data
+      // Supports {{field}} syntax
+      const updatedHref = template.replace(/\{\{(\w+)\}\}/g, (_match, fieldKey) => {
+        const value = data[fieldKey];
+        if (value === undefined || value === null) return '';
+
+        // URL encode the value
+        return encodeURIComponent(value);
+      });
+
+      // Update the href attribute
+      link.setAttribute('href', updatedHref);
+    });
   }
 
   _applyStyle() {

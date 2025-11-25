@@ -6002,6 +6002,7 @@ var WcVinListener = class extends WcBaseComponent {
       this._updateFieldValue(element, data);
     });
     this._createMissingArrayFields(data);
+    this._updateLinks(data);
   }
   _cleanupDynamicArrayInputs() {
     const arrayFieldsAttr = this.getAttribute("array-fields");
@@ -6108,6 +6109,19 @@ var WcVinListener = class extends WcBaseComponent {
   _extractFieldKey(fieldName) {
     const parts = fieldName.split(".");
     return parts[parts.length - 1];
+  }
+  _updateLinks(data) {
+    const vinLinks = this.querySelectorAll("[vin-link]");
+    vinLinks.forEach((link) => {
+      const template = link.getAttribute("vin-link");
+      if (!template) return;
+      const updatedHref = template.replace(/\{\{(\w+)\}\}/g, (_match, fieldKey) => {
+        const value = data[fieldKey];
+        if (value === void 0 || value === null) return "";
+        return encodeURIComponent(value);
+      });
+      link.setAttribute("href", updatedHref);
+    });
   }
   _applyStyle() {
     const style = `
