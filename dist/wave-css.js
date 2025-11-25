@@ -2817,10 +2817,14 @@ if (!customElements.get("wc-code-mirror")) {
         this.editor.setOption("readOnly", isDisabled);
       }
     }
-    async refresh(timeout = 500) {
+    async refresh(timeout = 500, shouldFocus = false) {
       await sleep(timeout);
-      this.editor.refresh();
-      this.editor.focus();
+      if (this.editor) {
+        this.editor.refresh();
+        if (shouldFocus) {
+          this.editor.focus();
+        }
+      }
     }
     async display(timeout = 100) {
       await sleep(timeout);

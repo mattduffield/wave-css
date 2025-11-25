@@ -576,10 +576,14 @@ if (!customElements.get('wc-code-mirror')) {
       }
     }
 
-    async refresh(timeout=500) {
+    async refresh(timeout=500, shouldFocus=false) {
       await sleep(timeout);
-      this.editor.refresh();
-      this.editor.focus();
+      if (this.editor) {
+        this.editor.refresh();
+        if (shouldFocus) {
+          this.editor.focus();
+        }
+      }
     }
 
     async display(timeout=100) {
