@@ -11,8 +11,10 @@
  *      <wc-input name="vehicle.msrp" lbl-label="MSRP"></wc-input>
  *      <!-- No need for placeholder input - images will be created dynamically -->
  *
- *      <!-- Dynamic links that update with VIN data -->
- *      <a vin-link="https://google.com/search?q={{year}}+{{make}}+{{model}}" target="_blank">Google Search</a>
+ *      <!-- Dynamic links that update with VIN data - use name attribute -->
+ *      <a name="household_vehicles.0.search"
+ *         href="https://google.com/search?q={{vehicle.year}}+{{vehicle.make}}+{{vehicle.model}}"
+ *         target="_blank">Google Search</a>
  *    </wc-vin-listener>
  *
  *    <!-- Or apply directly to individual fields -->
@@ -26,7 +28,13 @@
  *  Direct Field Attribute (alternative approach):
  *    - vin-listener: Add this attribute directly to wc-input/wc-select to make it listen
  *
- *  Link Attribute:
+ *  Anchor Tag Support:
+ *    - Anchor tags with 'name' attribute will have their href updated with VIN data
+ *    - The href can contain template variables that your server-side template engine renders
+ *    - When VIN changes, JavaScript replaces {{field}} placeholders with new values
+ *    - Example: <a name="vehicle.search" href="https://google.com/search?q={{year}}+{{make}}+{{model}}">
+ *
+ *  Legacy Link Attribute (still supported):
  *    - vin-link: Add this attribute to <a> tags with a template URL using {{field}} syntax
  *                The href will be updated with VIN data when decoded
  *                Example: vin-link="https://google.com/search?q={{year}}+{{make}}+{{model}}"
@@ -258,6 +266,12 @@ class WcVinListener extends WcBaseComponent {
     const fieldName = element.getAttribute('name');
     if (!fieldName) return;
 
+    // Handle anchor tags specially - build href from multiple fields
+    if (element.tagName === 'A') {
+      this._updateAnchorHref(element, fieldName, data);
+      return;
+    }
+
     // Extract the field key from the name
     // Supports patterns like "vehicle.year" or just "year"
     const fieldKey = this._extractFieldKey(fieldName);
@@ -339,6 +353,32 @@ class WcVinListener extends WcBaseComponent {
     }
 
     return value;
+  }
+
+  _updateAnchorHref(element, fieldName, data) {
+    // For anchor tags, the name attribute contains a template for building the href
+    // Example: name="household_vehicles.0.search" with href-template attribute
+    // Or we use the href attribute as a template if it contains field references
+
+    const hrefTemplate = element.getAttribute('href-template') || element.getAttribute('href');
+    if (!hrefTemplate) return;
+
+    // Build href by replacing field placeholders
+    // Support both {{field}} and {field} syntax for flexibility
+    const updatedHref = hrefTemplate.replace(/\{\{?(\w+)\}?\}/g, (_match, fieldKey) => {
+      // Map the field key to the VIN data field
+      const mappedField = this._getFieldMapping(fieldKey);
+      if (!mappedField) return '';
+
+      const value = data[mappedField];
+      if (value === undefined || value === null) return '';
+
+      // URL encode the value
+      return encodeURIComponent(value);
+    });
+
+    // Update the href
+    element.setAttribute('href', updatedHref);
   }
 
   _extractFieldKey(fieldName) {

@@ -6057,6 +6057,10 @@ var WcVinListener = class extends WcBaseComponent {
   _updateFieldValue(element, data) {
     const fieldName = element.getAttribute("name");
     if (!fieldName) return;
+    if (element.tagName === "A") {
+      this._updateAnchorHref(element, fieldName, data);
+      return;
+    }
     const fieldKey = this._extractFieldKey(fieldName);
     if (!fieldKey) return;
     const mappedField = this._getFieldMapping(fieldKey);
@@ -6105,6 +6109,18 @@ var WcVinListener = class extends WcBaseComponent {
       }
     }
     return value;
+  }
+  _updateAnchorHref(element, fieldName, data) {
+    const hrefTemplate = element.getAttribute("href-template") || element.getAttribute("href");
+    if (!hrefTemplate) return;
+    const updatedHref = hrefTemplate.replace(/\{\{?(\w+)\}?\}/g, (_match, fieldKey) => {
+      const mappedField = this._getFieldMapping(fieldKey);
+      if (!mappedField) return "";
+      const value = data[mappedField];
+      if (value === void 0 || value === null) return "";
+      return encodeURIComponent(value);
+    });
+    element.setAttribute("href", updatedHref);
   }
   _extractFieldKey(fieldName) {
     const parts = fieldName.split(".");
