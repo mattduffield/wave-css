@@ -12509,7 +12509,7 @@ var WcTab = class extends WcBaseComponent {
     const contents = tabItems[buttonIndex];
     if (contents) {
       contents.classList.add("active");
-      const payload = { detail: { label } };
+      const payload = { detail: { label }, bubbles: true, composed: true };
       const custom = new CustomEvent("tabchange", payload);
       contents.dispatchEvent(custom);
     }
