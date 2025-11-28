@@ -19440,11 +19440,11 @@ var WcChart = class _WcChart extends WcBaseComponent {
     console.log("wc-chart: _handleAttributeChange called:", attrName, "new:", newValue, "old:", oldValue, "_isConnected:", this._isConnected);
     if (_WcChart.observedAttributes.includes(attrName)) {
       console.log("wc-chart: Attribute is in observedAttributes, chartInstance exists:", !!this.chartInstance);
-      if (this.chartInstance && oldValue !== null) {
+      if (this.chartInstance) {
         console.log("wc-chart: Recreating chart due to attribute change");
         this._createChart();
       } else {
-        console.log("wc-chart: Skipping chart recreation - either no instance yet or initial attribute setting");
+        console.log("wc-chart: Chart instance does not exist yet - will be created in connectedCallback");
       }
     } else {
       super._handleAttributeChange(attrName, newValue, oldValue);
