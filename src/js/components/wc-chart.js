@@ -422,10 +422,15 @@ class WcChart extends WcBaseComponent {
     // Skip default base class handling for our attributes
     if (WcChart.observedAttributes.includes(attrName)) {
       console.log('wc-chart: Attribute is in observedAttributes, chartInstance exists:', !!this.chartInstance);
-      // Recreate chart when relevant attributes change
-      if (this.chartInstance) {
+
+      // Only recreate chart if:
+      // 1. Chart instance already exists (after initial render)
+      // 2. AND this is not the initial attribute setting (oldValue should not be null)
+      if (this.chartInstance && oldValue !== null) {
         console.log('wc-chart: Recreating chart due to attribute change');
         this._createChart();
+      } else {
+        console.log('wc-chart: Skipping chart recreation - either no instance yet or initial attribute setting');
       }
     } else {
       super._handleAttributeChange(attrName, newValue, oldValue);
