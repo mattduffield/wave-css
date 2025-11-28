@@ -19159,6 +19159,8 @@ var WcChart = class _WcChart extends WcBaseComponent {
     this.componentElement.classList.add("wc-chart", "relative", "w-full");
     this.appendChild(this.componentElement);
   }
+  _render() {
+  }
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
@@ -19435,8 +19437,11 @@ var WcChart = class _WcChart extends WcBaseComponent {
     return options;
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
+    console.log("wc-chart: _handleAttributeChange called:", attrName, "new:", newValue, "old:", oldValue, "_isConnected:", this._isConnected);
     if (_WcChart.observedAttributes.includes(attrName)) {
+      console.log("wc-chart: Attribute is in observedAttributes, chartInstance exists:", !!this.chartInstance);
       if (this.chartInstance) {
+        console.log("wc-chart: Recreating chart due to attribute change");
         this._createChart();
       }
     } else {

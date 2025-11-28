@@ -70,6 +70,11 @@ class WcChart extends WcBaseComponent {
     this.appendChild(this.componentElement);
   }
 
+  _render() {
+    // Override base _render to prevent adding 'contents' class
+    // wc-chart manages its own structure
+  }
+
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();  // Apply styles first to ensure CSS variables are available
@@ -412,10 +417,14 @@ class WcChart extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
+    console.log('wc-chart: _handleAttributeChange called:', attrName, 'new:', newValue, 'old:', oldValue, '_isConnected:', this._isConnected);
+
     // Skip default base class handling for our attributes
     if (WcChart.observedAttributes.includes(attrName)) {
+      console.log('wc-chart: Attribute is in observedAttributes, chartInstance exists:', !!this.chartInstance);
       // Recreate chart when relevant attributes change
       if (this.chartInstance) {
+        console.log('wc-chart: Recreating chart due to attribute change');
         this._createChart();
       }
     } else {
