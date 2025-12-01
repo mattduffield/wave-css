@@ -162,10 +162,7 @@ class WcChart extends WcBaseComponent {
   }
 
   _createChart() {
-    console.log('wc-chart: _createChart called, window.Chart:', !!window.Chart, 'canvas:', !!this.canvas);
-
     if (!window.Chart || !this.canvas) {
-      console.log('wc-chart: Cannot create chart - Chart.js not loaded or canvas not created');
       // Store config to create chart when library is loaded
       this.pendingChartConfig = this._buildChartConfig();
       return;
@@ -175,17 +172,14 @@ class WcChart extends WcBaseComponent {
     this._destroyChart();
 
     const config = this._buildChartConfig();
-    console.log('wc-chart: Chart config built:', !!config, 'datasets:', config?.data?.datasets?.length);
 
     // Config should always exist now, even with empty data
     if (!config) {
-      console.log('wc-chart: No config - this should not happen');
       return;
     }
 
     try {
       this.chartInstance = new window.Chart(this.canvas, config);
-      console.log('wc-chart: Chart instance created successfully!', !!this.chartInstance);
 
       // Dispatch event when chart is created
       this.dispatchEvent(new CustomEvent('chart-created', {
@@ -428,27 +422,19 @@ class WcChart extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    console.log('wc-chart: _handleAttributeChange called:', attrName, 'new:', newValue, 'old:', oldValue, '_isConnected:', this._isConnected);
-
     // Skip default base class handling for our attributes
     if (WcChart.observedAttributes.includes(attrName)) {
-      console.log('wc-chart: Attribute is in observedAttributes, chartInstance exists:', !!this.chartInstance);
-
       // Recreate chart if instance exists (means chart has been initialized)
       // This handles dynamic attribute updates after the chart is rendered
       if (this.chartInstance) {
-        console.log('wc-chart: Recreating chart due to attribute change');
         this._createChart();
       } else if (this.canvas && window.Chart) {
         // Chart instance doesn't exist yet, but canvas and Chart.js are available
         // This happens when initial data was empty but now data is being added
-        console.log('wc-chart: Chart instance does not exist but canvas is ready - attempting to create chart');
         this._createChart();
-      } else {
-        console.log('wc-chart: Chart instance does not exist yet - will be created in connectedCallback');
-        // Chart will be created during connectedCallback -> _initChart()
-        // No action needed here - the new attribute values will be picked up when chart is created
       }
+      // Otherwise, chart will be created during connectedCallback -> _initChart()
+      // No action needed - the new attribute values will be picked up when chart is created
     } else {
       super._handleAttributeChange(attrName, newValue, oldValue);
     }

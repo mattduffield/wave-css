@@ -19220,22 +19220,17 @@ var WcChart = class _WcChart extends WcBaseComponent {
     this.componentElement.appendChild(wrapper);
   }
   _createChart() {
-    console.log("wc-chart: _createChart called, window.Chart:", !!window.Chart, "canvas:", !!this.canvas);
     if (!window.Chart || !this.canvas) {
-      console.log("wc-chart: Cannot create chart - Chart.js not loaded or canvas not created");
       this.pendingChartConfig = this._buildChartConfig();
       return;
     }
     this._destroyChart();
     const config = this._buildChartConfig();
-    console.log("wc-chart: Chart config built:", !!config, "datasets:", config?.data?.datasets?.length);
     if (!config) {
-      console.log("wc-chart: No config - this should not happen");
       return;
     }
     try {
       this.chartInstance = new window.Chart(this.canvas, config);
-      console.log("wc-chart: Chart instance created successfully!", !!this.chartInstance);
       this.dispatchEvent(new CustomEvent("chart-created", {
         detail: { chart: this.chartInstance },
         bubbles: true
@@ -19442,17 +19437,11 @@ var WcChart = class _WcChart extends WcBaseComponent {
     return options;
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
-    console.log("wc-chart: _handleAttributeChange called:", attrName, "new:", newValue, "old:", oldValue, "_isConnected:", this._isConnected);
     if (_WcChart.observedAttributes.includes(attrName)) {
-      console.log("wc-chart: Attribute is in observedAttributes, chartInstance exists:", !!this.chartInstance);
       if (this.chartInstance) {
-        console.log("wc-chart: Recreating chart due to attribute change");
         this._createChart();
       } else if (this.canvas && window.Chart) {
-        console.log("wc-chart: Chart instance does not exist but canvas is ready - attempting to create chart");
         this._createChart();
-      } else {
-        console.log("wc-chart: Chart instance does not exist yet - will be created in connectedCallback");
       }
     } else {
       super._handleAttributeChange(attrName, newValue, oldValue);
