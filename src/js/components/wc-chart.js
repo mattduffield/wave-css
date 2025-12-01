@@ -162,7 +162,10 @@ class WcChart extends WcBaseComponent {
   }
 
   _createChart() {
+    console.log('wc-chart: _createChart called, window.Chart:', !!window.Chart, 'canvas:', !!this.canvas);
+
     if (!window.Chart || !this.canvas) {
+      console.log('wc-chart: Cannot create chart - Chart.js not loaded or canvas not created');
       // Store config to create chart when library is loaded
       this.pendingChartConfig = this._buildChartConfig();
       return;
@@ -172,11 +175,18 @@ class WcChart extends WcBaseComponent {
     this._destroyChart();
 
     const config = this._buildChartConfig();
-    if (!config) return;
+    console.log('wc-chart: Chart config built:', !!config, 'datasets:', config?.data?.datasets?.length);
+
+    // Config should always exist now, even with empty data
+    if (!config) {
+      console.log('wc-chart: No config - this should not happen');
+      return;
+    }
 
     try {
       this.chartInstance = new window.Chart(this.canvas, config);
-      
+      console.log('wc-chart: Chart instance created successfully!', !!this.chartInstance);
+
       // Dispatch event when chart is created
       this.dispatchEvent(new CustomEvent('chart-created', {
         detail: { chart: this.chartInstance },
@@ -191,16 +201,14 @@ class WcChart extends WcBaseComponent {
     const type = this.getAttribute('type') || 'bar';
     const labels = this._parseJSON(this.getAttribute('labels'), []);
     const datasets = this._buildDatasets();
-    
-    if (!datasets || datasets.length === 0) {
-      return null;
-    }
 
+    // Allow creating chart with empty datasets to enable dynamic updates
+    // Previously returned null when no datasets, preventing future updates
     const config = {
       type: type,
       data: {
         labels: labels,
-        datasets: datasets
+        datasets: datasets || []
       },
       options: this._buildChartOptions(type)
     };
@@ -213,14 +221,17 @@ class WcChart extends WcBaseComponent {
     const datasetsAttr = this.getAttribute('datasets');
     if (datasetsAttr) {
       const datasets = this._parseJSON(datasetsAttr, []);
+      if (datasets.length === 0) return [];
       return datasets.map((dataset, index) => this._formatDataset(dataset, index));
     }
 
     // Build single dataset from data and label attributes
     const data = this._parseJSON(this.getAttribute('data'), []);
     const label = this.getAttribute('label') || 'Dataset';
-    
-    if (!data || data.length === 0) {
+
+    // Allow empty data - chart will be created but empty
+    // This enables dynamic updates when data is added later
+    if (!data) {
       return [];
     }
 
@@ -427,6 +438,11 @@ class WcChart extends WcBaseComponent {
       // This handles dynamic attribute updates after the chart is rendered
       if (this.chartInstance) {
         console.log('wc-chart: Recreating chart due to attribute change');
+        this._createChart();
+      } else if (this.canvas && window.Chart) {
+        // Chart instance doesn't exist yet, but canvas and Chart.js are available
+        // This happens when initial data was empty but now data is being added
+        console.log('wc-chart: Chart instance does not exist but canvas is ready - attempting to create chart');
         this._createChart();
       } else {
         console.log('wc-chart: Chart instance does not exist yet - will be created in connectedCallback');
