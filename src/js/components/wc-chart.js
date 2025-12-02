@@ -148,13 +148,17 @@ class WcChart extends WcBaseComponent {
 
     const wrapper = document.createElement('div');
     wrapper.classList.add('chart-wrapper', 'relative');
-    
+
     // Set dimensions
     const height = this.getAttribute('height') || '400';
     const width = this.getAttribute('width') || 'auto';
-    
+
     if (width !== 'auto') {
       wrapper.style.width = `${width}px`;
+    } else {
+      // When width is auto, set min-width to prevent flex shrinking to zero
+      wrapper.style.minWidth = '0';
+      wrapper.style.width = '100%';
     }
     wrapper.style.height = `${height}px`;
 

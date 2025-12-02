@@ -19295,6 +19295,9 @@ var WcChart = class _WcChart extends WcBaseComponent {
     const width = this.getAttribute("width") || "auto";
     if (width !== "auto") {
       wrapper.style.width = `${width}px`;
+    } else {
+      wrapper.style.minWidth = "0";
+      wrapper.style.width = "100%";
     }
     wrapper.style.height = `${height}px`;
     this.canvas = document.createElement("canvas");
