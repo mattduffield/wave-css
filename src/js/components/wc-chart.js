@@ -1,8 +1,8 @@
 /**
  * Name: wc-chart
  * Usage:
- * 
- *   <wc-chart 
+ *
+ *   <wc-chart
  *     type="bar"
  *     labels='["Q1", "Q2", "Q3", "Q4"]'
  *     data='[65, 59, 80, 81]'
@@ -12,16 +12,21 @@
  *     width="auto"
  *     colors='["#3498db"]'
  *     show-legend="true"
+ *     legend-position="bottom"
  *     show-data-labels="false">
  *   </wc-chart>
- * 
+ *
  *   <wc-chart
  *     type="line"
  *     labels='["Jan", "Feb", "Mar", "Apr"]'
  *     datasets='[{"label": "2023", "data": [10,20,30,40]}, {"label": "2024", "data": [15,25,35,45]}]'
- *     title="Monthly Revenue">
+ *     title="Monthly Revenue"
+ *     legend-position="right">
  *   </wc-chart>
- * 
+ *
+ * Attributes:
+ *   - legend-position: "top" (default), "bottom", "left", "right"
+ *
  * References:
  *   https://www.chartjs.org/
  *   https://cdn.jsdelivr.net/npm/chart.js@4.4.1
@@ -38,7 +43,7 @@ class WcChart extends WcBaseComponent {
     return [
       'type', 'labels', 'data', 'label', 'datasets',
       'title', 'height', 'width', 'colors',
-      'show-legend', 'show-data-labels', 'padding-top',
+      'show-legend', 'legend-position', 'show-data-labels', 'padding-top',
       'responsive', 'maintain-aspect-ratio',
       'x-axis-title', 'y-axis-title', 'stacked',
       'tension', 'fill', 'point-radius', 'border-width',
@@ -284,6 +289,7 @@ class WcChart extends WcBaseComponent {
 
   _buildChartOptions(type) {
     const showLegend = this.getAttribute('show-legend') !== 'false';
+    const legendPosition = this.getAttribute('legend-position') || 'top';
     const showDataLabels = this.getAttribute('show-data-labels') === 'true';
     const responsive = this.getAttribute('responsive') !== 'false';
     const maintainAspectRatio = this.getAttribute('maintain-aspect-ratio') !== 'false';
@@ -292,7 +298,7 @@ class WcChart extends WcBaseComponent {
     const yAxisTitle = this.getAttribute('y-axis-title');
     const stacked = this.getAttribute('stacked') === 'true';
     const paddingTop = parseInt(this.getAttribute('padding-top') || (showDataLabels && type === 'bar' ? '30' : '0'));
-    
+
     // Get Wave CSS theme colors
     const textColor = this._getThemeColor('text-color', '--primary-color');
     const gridColor = this._getThemeColor('grid-color', '--component-border-color');
@@ -303,7 +309,7 @@ class WcChart extends WcBaseComponent {
       plugins: {
         legend: {
           display: showLegend,
-          position: 'top',
+          position: legendPosition,
           labels: {
             color: textColor
           }

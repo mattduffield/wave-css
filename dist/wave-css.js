@@ -19207,6 +19207,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
       "width",
       "colors",
       "show-legend",
+      "legend-position",
       "show-data-labels",
       "padding-top",
       "responsive",
@@ -19391,6 +19392,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
   }
   _buildChartOptions(type) {
     const showLegend = this.getAttribute("show-legend") !== "false";
+    const legendPosition = this.getAttribute("legend-position") || "top";
     const showDataLabels = this.getAttribute("show-data-labels") === "true";
     const responsive = this.getAttribute("responsive") !== "false";
     const maintainAspectRatio = this.getAttribute("maintain-aspect-ratio") !== "false";
@@ -19407,7 +19409,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
       plugins: {
         legend: {
           display: showLegend,
-          position: "top",
+          position: legendPosition,
           labels: {
             color: textColor
           }
