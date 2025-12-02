@@ -19667,6 +19667,12 @@ var WcChart = class _WcChart extends WcBaseComponent {
     }
   }
   _applyStyle() {
+    const style = `
+      wc-chart {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle("wc-chart-style", style);
   }
   // Public methods
   refresh() {

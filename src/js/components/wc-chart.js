@@ -628,8 +628,12 @@ class WcChart extends WcBaseComponent {
   }
 
   _applyStyle() {
-    // Apply any custom styles if needed
-    // No need to inject styles - we use theme colors directly
+    const style = `
+      wc-chart {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle('wc-chart-style', style);
   }
 
   // Public methods
