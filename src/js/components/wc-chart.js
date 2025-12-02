@@ -71,7 +71,7 @@ class WcChart extends WcBaseComponent {
 
     // Create the component structure
     this.componentElement = document.createElement('div');
-    this.componentElement.classList.add('wc-chart', 'relative', 'w-full');
+    this.componentElement.classList.add('wc-chart', 'relative');
     this.appendChild(this.componentElement);
   }
 

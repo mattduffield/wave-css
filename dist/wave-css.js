@@ -19240,7 +19240,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
       "--secondary-bg-color"
     ];
     this.componentElement = document.createElement("div");
-    this.componentElement.classList.add("wc-chart", "relative", "w-full");
+    this.componentElement.classList.add("wc-chart", "relative");
     this.appendChild(this.componentElement);
   }
   _render() {
