@@ -100,6 +100,7 @@ const ICONS_TO_COPY = [
   'user-nurse',
   'user-secret',
   'user-tie',
+  'user-hat-tie',
   'users-slash',
   'user-music',
   'hand-dots',
@@ -107,6 +108,7 @@ const ICONS_TO_COPY = [
   'heart-pulse',
   'star',
   'camera',
+  'camera-cctv',
   'envelope',
   'envelopes',
   'bell',
@@ -119,6 +121,7 @@ const ICONS_TO_COPY = [
   'user-robot',
   'message',
   'messages',
+  'messages-dollar',
   'message-dots',
   'comment-dots',
   'ticket',
@@ -169,6 +172,7 @@ const ICONS_TO_COPY = [
   'arrows-rotate-reverse',
   'arrow-rotate-right',
   'arrow-rotate-left',
+  'arrow-progress',
   'right-left',
   'download',
   'upload',
@@ -591,7 +595,8 @@ const ICONS_TO_COPY = [
   'motorcycle',
   'clock-rotate-left',
   'text',
-  'hashtag'
+  'hashtag',
+  'microchip'
   // Add more icon names here
 ];
 
