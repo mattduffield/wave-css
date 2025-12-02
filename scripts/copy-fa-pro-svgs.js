@@ -445,6 +445,7 @@ const ICONS_TO_COPY = [
   'horizontal-rule',
   'underline',
   'rectangle',
+  'rectangle-code',
   'rectangle-history',
   'rectangle-vertical-history',
   'input-text',

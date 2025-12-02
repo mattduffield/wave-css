@@ -169,6 +169,35 @@
           height="250">
         </wc-chart>
       </section>
+
+
+
+
+      <div class="grid-1 sm:grid-2 gap-4">
+        <section class="flex justify-center container p-4 rounded-md">
+          <wc-chart
+            type="pie"
+            labels='["Backlog", "Current Sprint", "In DEV", "In UAT", "In Prod"]'
+            data='[55, 15, 5, 5, 20]'
+            title="Issue Tracking"
+            legend-position="right"
+            height="300">
+          </wc-chart>
+        </section>
+
+        <section class="flex justify-center container p-4 rounded-md">
+          <wc-chart
+            type="doughnut"
+            labels='["Agents", "Back Office", "Developer", "General", "Sales", "Security", "Web Automations"]'
+            data='[25000, 15000, 45000, 5000, 10000, 15000, 30000]'
+            title="Application Distribution 2025"
+            legend-position="right"
+            height="300">
+          </wc-chart>
+        </section>
+      </div>
+
+
     </div>
   </div>
 
