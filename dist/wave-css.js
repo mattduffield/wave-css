@@ -19731,7 +19731,7 @@ var WcChartjs = class extends WcChart {
       ...WcChart.observedAttributes,
       "url",
       "ajax-method",
-      "ajax-params",
+      "url-params",
       "ajax-headers",
       "auto-refresh",
       "loading-text"
@@ -19765,7 +19765,7 @@ var WcChartjs = class extends WcChart {
       if (oldValue !== null && oldValue !== newValue) {
         this._fetchChartData();
       }
-    } else if (attrName === "ajax-params" && this._isConnected && this._initialFetchDone) {
+    } else if (attrName === "url-params" && this._isConnected && this._initialFetchDone) {
       if (oldValue !== null && oldValue !== newValue) {
         this._fetchChartData();
       }
@@ -19816,12 +19816,12 @@ var WcChartjs = class extends WcChart {
     }
   }
   _buildRequestUrl(baseUrl) {
-    const ajaxParams = this._parseJSON(this.getAttribute("ajax-params"), {});
-    if (Object.keys(ajaxParams).length === 0) {
+    const urlParams = this._parseJSON(this.getAttribute("url-params"), {});
+    if (Object.keys(urlParams).length === 0) {
       return baseUrl;
     }
     const url = new URL(baseUrl, window.location.origin);
-    Object.entries(ajaxParams).forEach(([key, value]) => {
+    Object.entries(urlParams).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
     return url.toString();
@@ -19951,7 +19951,7 @@ var WcChartjs = class extends WcChart {
     this.setAttribute("url", url);
   }
   setParams(params) {
-    this.setAttribute("ajax-params", JSON.stringify(params));
+    this.setAttribute("url-params", JSON.stringify(params));
   }
 };
 if (!customElements.get(WcChartjs.is)) {

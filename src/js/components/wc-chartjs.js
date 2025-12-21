@@ -22,7 +22,7 @@
  * Attributes:
  *   - url: URL to fetch chart data from (returns {labels, datasets, title?, type?})
  *   - ajax-method: HTTP method (default: "GET")
- *   - ajax-params: Additional query parameters as JSON string
+ *   - url-params: Additional query parameters as JSON string
  *   - ajax-headers: Custom headers as JSON string
  *   - auto-refresh: Auto-refresh interval in milliseconds
  *   - loading-text: Text to show while loading (default: "Loading chart...")
@@ -61,7 +61,7 @@ class WcChartjs extends WcChart {
       ...WcChart.observedAttributes,
       'url',
       'ajax-method',
-      'ajax-params',
+      'url-params',
       'ajax-headers',
       'auto-refresh',
       'loading-text'
@@ -111,7 +111,7 @@ class WcChartjs extends WcChart {
       if (oldValue !== null && oldValue !== newValue) {
         this._fetchChartData();
       }
-    } else if (attrName === 'ajax-params' && this._isConnected && this._initialFetchDone) {
+    } else if (attrName === 'url-params' && this._isConnected && this._initialFetchDone) {
       // Params changed after initial load, refetch data
       if (oldValue !== null && oldValue !== newValue) {
         this._fetchChartData();
@@ -186,16 +186,16 @@ class WcChartjs extends WcChart {
   }
 
   _buildRequestUrl(baseUrl) {
-    const ajaxParams = this._parseJSON(this.getAttribute('ajax-params'), {});
+    const urlParams = this._parseJSON(this.getAttribute('url-params'), {});
 
     // If no params, return base URL
-    if (Object.keys(ajaxParams).length === 0) {
+    if (Object.keys(urlParams).length === 0) {
       return baseUrl;
     }
 
     // Build query string
     const url = new URL(baseUrl, window.location.origin);
-    Object.entries(ajaxParams).forEach(([key, value]) => {
+    Object.entries(urlParams).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
 
@@ -361,7 +361,7 @@ class WcChartjs extends WcChart {
   }
 
   setParams(params) {
-    this.setAttribute('ajax-params', JSON.stringify(params));
+    this.setAttribute('url-params', JSON.stringify(params));
   }
 }
 
