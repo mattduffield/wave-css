@@ -26,6 +26,8 @@
  *   - ajax-headers: Custom headers as JSON string
  *   - auto-refresh: Auto-refresh interval in milliseconds
  *   - loading-text: Text to show while loading (default: "Loading chart...")
+ *   - busy-indicator: Use wc-busy-indicator instead of loading-text ("true" or "false")
+ *   - busy-indicator-type: Type of busy indicator (chart-bar, chart-line, chart-pie, spinner, etc.)
  *   - All wc-chart attributes (type, labels, data, datasets, title, height, etc.)
  *
  * Events:
@@ -64,7 +66,9 @@ class WcChartjs extends WcChart {
       'url-params',
       'ajax-headers',
       'auto-refresh',
-      'loading-text'
+      'loading-text',
+      'busy-indicator',
+      'busy-indicator-type'
     ];
   }
 
@@ -258,18 +262,36 @@ class WcChartjs extends WcChart {
   _showLoading() {
     if (this.loadingIndicator) return;
 
-    const loadingText = this.getAttribute('loading-text') || 'Loading chart...';
+    const useBusyIndicator = this.getAttribute('busy-indicator') === 'true';
+    const loadingText = this.getAttribute('loading-text') || '';
 
-    this.loadingIndicator = document.createElement('div');
-    this.loadingIndicator.classList.add('wc-chartjs-loading', 'flex', 'items-center', 'justify-center', 'p-8');
-    this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
+    if (useBusyIndicator) {
+      // Use wc-busy-indicator component
+      const chartType = this.getAttribute('type') || 'bar';
+      const busyType = this.getAttribute('busy-indicator-type') || `chart-${chartType}`;
+      const size = this.getAttribute('height') > 400 ? 'large' : 'medium';
 
-    this.loadingIndicator.innerHTML = `
-      <div class="text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
-        <div class="text-gray-600 dark:text-gray-400">${loadingText}</div>
-      </div>
-    `;
+      this.loadingIndicator = document.createElement('wc-busy-indicator');
+      this.loadingIndicator.setAttribute('type', busyType);
+      if (loadingText) {
+        this.loadingIndicator.setAttribute('text', loadingText);
+      }
+      this.loadingIndicator.setAttribute('size', size);
+      this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
+    } else {
+      // Use simple loading text (original behavior)
+      const text = loadingText || 'Loading chart...';
+      this.loadingIndicator = document.createElement('div');
+      this.loadingIndicator.classList.add('wc-chartjs-loading', 'flex', 'items-center', 'justify-center', 'p-8');
+      this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
+
+      this.loadingIndicator.innerHTML = `
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
+          <div class="text-gray-600 dark:text-gray-400">${text}</div>
+        </div>
+      `;
+    }
 
     // Insert at the beginning
     if (this.componentElement) {

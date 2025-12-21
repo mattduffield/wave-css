@@ -46,7 +46,6 @@
       <option value="page-designer">Page Designer</option>
       <option value="chart">Chart</option>
       <option value="chartjs">ChartJS</option>
-      <option value="busy-indicator">Busy Indicator</option>
       <option value="prospect-quote-chart">Prospect Quote Chart</option>
       <option value="google-map">Google Map</option>
       <option value="google-address">Google Address</option>
