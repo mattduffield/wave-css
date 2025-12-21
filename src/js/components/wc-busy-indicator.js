@@ -8,6 +8,7 @@
  *   <!-- With specific type -->
  *   <wc-busy-indicator type="chart-bar"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-line"></wc-busy-indicator>
+ *   <wc-busy-indicator type="chart-ecg"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-connector"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-pie"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-doughnut"></wc-busy-indicator>
@@ -22,10 +23,11 @@
  *   <wc-busy-indicator type="chart-bar" size="large"></wc-busy-indicator>
  *
  * Attributes:
- *   - type: Type of indicator (chart-bar, chart-line, chart-pie, spinner, pulse, dots, skeleton)
+ *   - type: Type of indicator (chart-bar, chart-line, chart-ecg, chart-pie, spinner, pulse, dots, skeleton)
  *   - text: Optional text to display below indicator
  *   - size: Size of indicator (small, medium, large) - default: medium
  *   - color: Custom color (defaults to theme primary color)
+ *   - use-color-variations: Use multiple swatch colors (true/false) - defaults vary by type
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -36,7 +38,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['type', 'text', 'size', 'color'];
+    return ['type', 'text', 'size', 'color', 'use-color-variations'];
   }
 
   constructor() {
@@ -57,7 +59,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (['type', 'text', 'size', 'color'].includes(attrName)) {
+    if (['type', 'text', 'size', 'color', 'use-color-variations'].includes(attrName)) {
       if (this.componentElement) {
         this._renderIndicator();
       }
@@ -106,6 +108,8 @@ class WcBusyIndicator extends WcBaseComponent {
         return this._createChartBarIndicator(dimensions);
       case 'chart-line':
         return this._createChartLineIndicator(dimensions);
+      case 'chart-ecg':
+        return this._createChartEcgIndicator(dimensions);
       case 'chart-connector':
         return this._createChartConnectorIndicator(dimensions);
       case 'chart-pie':
@@ -123,6 +127,19 @@ class WcBusyIndicator extends WcBaseComponent {
       default:
         return this._createSpinnerIndicator(dimensions);
     }
+  }
+
+  _shouldUseColorVariations() {
+    // Check if use-color-variations is explicitly set
+    const attr = this.getAttribute('use-color-variations');
+    if (attr !== null) {
+      return attr === 'true';
+    }
+
+    // Default behavior varies by type
+    const type = this.getAttribute('type') || 'spinner';
+    const variationTypes = ['chart-bar', 'chart-doughnut'];
+    return variationTypes.includes(type);
   }
 
   _getThemeColorVariations(count) {
@@ -150,6 +167,14 @@ class WcBusyIndicator extends WcBaseComponent {
     }
 
     return variations;
+  }
+
+  _getPrimaryColor() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--primary-500')
+      .trim() || getComputedStyle(document.documentElement)
+      .getPropertyValue('--primary-bg-color')
+      .trim() || '#3498db';
   }
 
   _adjustColorLightness(color, percent) {
@@ -231,8 +256,10 @@ class WcBusyIndicator extends WcBaseComponent {
     const totalWidth = (barWidth * numBars) + (gap * (numBars - 1));
     const startX = (dims.width - totalWidth) / 2;
 
-    // Get theme color variations
-    const colors = this._getThemeColorVariations(numBars);
+    // Determine if using color variations
+    const useVariations = this._shouldUseColorVariations();
+    const colors = useVariations ? this._getThemeColorVariations(numBars) : null;
+    const singleColor = this._getPrimaryColor();
 
     for (let i = 0; i < numBars; i++) {
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -241,7 +268,14 @@ class WcBusyIndicator extends WcBaseComponent {
       rect.setAttribute('width', barWidth);
       rect.setAttribute('rx', barWidth / 4);
       rect.setAttribute('class', 'busy-indicator-bar');
-      rect.setAttribute('fill', colors[i]);
+
+      // Apply color based on variations setting
+      if (useVariations && colors) {
+        rect.setAttribute('fill', colors[i]);
+      } else {
+        rect.setAttribute('fill', singleColor);
+      }
+
       rect.style.animationDelay = `${i * 0.1}s`;
       svg.appendChild(rect);
     }
@@ -250,6 +284,42 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _createChartLineIndicator(dims) {
+    // Simple parallax scrolling lines - like a 2D background pattern
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', dims.width);
+    svg.setAttribute('height', dims.height);
+    svg.setAttribute('viewBox', `0 0 ${dims.width} ${dims.height}`);
+
+    const numLines = 5;
+    const lineSpacing = dims.height / (numLines + 1);
+    const primaryColor = this._getPrimaryColor();
+
+    for (let i = 0; i < numLines; i++) {
+      const y = lineSpacing * (i + 1);
+
+      // Create line
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', 0);
+      line.setAttribute('x2', dims.width);
+      line.setAttribute('y1', y);
+      line.setAttribute('y2', y);
+      line.setAttribute('stroke', primaryColor);
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('class', 'busy-indicator-parallax-line');
+      line.setAttribute('opacity', 0.3 + (i * 0.15)); // Varying opacity for depth
+
+      // Different animation delays and durations for parallax effect
+      line.style.animationDelay = `${i * 0.2}s`;
+      line.style.animationDuration = `${3 + (i * 0.5)}s`;
+
+      svg.appendChild(line);
+    }
+
+    return svg;
+  }
+
+  _createChartEcgIndicator(dims) {
     // Live dashboard style - continuous wavy line that animates like ECG/heartbeat monitor
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', dims.width);
@@ -285,7 +355,7 @@ class WcBusyIndicator extends WcBaseComponent {
     // Create glow effect layer (underneath)
     const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     glowPath.setAttribute('d', pathData);
-    glowPath.setAttribute('class', 'busy-indicator-live-line-glow');
+    glowPath.setAttribute('class', 'busy-indicator-ecg-line-glow');
     glowPath.setAttribute('stroke-width', '6');
     glowPath.setAttribute('fill', 'none');
     glowPath.setAttribute('opacity', '0.3');
@@ -294,7 +364,7 @@ class WcBusyIndicator extends WcBaseComponent {
     // Create main animated path (on top)
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', pathData);
-    path.setAttribute('class', 'busy-indicator-live-line');
+    path.setAttribute('class', 'busy-indicator-ecg-line');
     path.setAttribute('stroke-width', '3');
     path.setAttribute('fill', 'none');
     svg.appendChild(path);
@@ -379,16 +449,26 @@ class WcBusyIndicator extends WcBaseComponent {
     const outerRadius = size * 0.4;
     const innerRadius = size * 0.2; // Hole in the middle
 
-    // Create 4 doughnut segments with theme color variations
+    // Create 4 doughnut segments
     const segments = 4;
-    const colors = this._getThemeColorVariations(segments);
+    const useVariations = this._shouldUseColorVariations();
+    const colors = useVariations ? this._getThemeColorVariations(segments) : null;
+    const singleColor = this._getPrimaryColor();
 
     for (let i = 0; i < segments; i++) {
       const startAngle = (i * 360 / segments) - 90;
       const endAngle = ((i + 1) * 360 / segments) - 90;
 
       const path = this._createDoughnutSegment(centerX, centerY, outerRadius, innerRadius, startAngle, endAngle);
-      path.setAttribute('fill', colors[i]);
+
+      // Apply color based on variations setting
+      if (useVariations && colors) {
+        path.setAttribute('fill', colors[i]);
+      } else {
+        path.setAttribute('fill', singleColor);
+        path.setAttribute('opacity', 0.4 + (i * 0.15)); // Vary opacity if single color
+      }
+
       path.setAttribute('class', 'busy-indicator-doughnut-segment');
       path.style.animationDelay = `${i * 0.15}s`;
       svg.appendChild(path);
@@ -517,21 +597,35 @@ class WcBusyIndicator extends WcBaseComponent {
         }
       }
 
-      /* Chart Line Animation - Live Dashboard ECG Style */
-      .busy-indicator-live-line {
+      /* Chart Line Animation - Simple Parallax Scrolling */
+      .busy-indicator-parallax-line {
+        animation: parallax-scroll 3s linear infinite;
+      }
+
+      @keyframes parallax-scroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* Chart ECG Animation - Live Dashboard ECG Style */
+      .busy-indicator-ecg-line {
         stroke: var(--primary-500, var(--primary-bg-color, #3498db));
         stroke-dasharray: 1000;
         stroke-dashoffset: 0;
-        animation: live-line-flow 2.5s ease-in-out infinite;
+        animation: ecg-line-flow 2.5s ease-in-out infinite;
       }
 
-      .busy-indicator-live-line-glow {
+      .busy-indicator-ecg-line-glow {
         stroke: var(--primary-400, var(--primary-bg-color, #3498db));
         filter: blur(3px);
-        animation: live-line-glow 2.5s ease-in-out infinite;
+        animation: ecg-line-glow 2.5s ease-in-out infinite;
       }
 
-      @keyframes live-line-flow {
+      @keyframes ecg-line-flow {
         0% {
           stroke-dashoffset: 0;
           opacity: 1;
@@ -546,7 +640,7 @@ class WcBusyIndicator extends WcBaseComponent {
         }
       }
 
-      @keyframes live-line-glow {
+      @keyframes ecg-line-glow {
         0%, 100% {
           opacity: 0.2;
         }

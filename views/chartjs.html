@@ -147,6 +147,69 @@
         </wc-chartjs>
       </section>
 
+      <!-- Example 8: Busy Indicators -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 8: Busy Indicator Styles</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Different busy indicator animations you can use with the <code>busy-indicator-type</code> attribute.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">chart-bar</h3>
+            <wc-busy-indicator type="chart-bar" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">With color variations (default)</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">chart-line</h3>
+            <wc-busy-indicator type="chart-line" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Parallax scrolling lines</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">chart-ecg</h3>
+            <wc-busy-indicator type="chart-ecg" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Heartbeat monitor style</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">chart-doughnut</h3>
+            <wc-busy-indicator type="chart-doughnut" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">With color variations (default)</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">spinner</h3>
+            <wc-busy-indicator type="spinner" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Classic spinner</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h3 class="text-lg font-semibold mb-2">pulse</h3>
+            <wc-busy-indicator type="pulse" size="medium" text="Loading..."></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Pulsing circle</p>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4">Color Variations Toggle</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Use the <code>use-color-variations</code> attribute to toggle multi-color display (defaults to true for chart-bar and chart-doughnut).
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">chart-bar (variations enabled)</h4>
+            <wc-busy-indicator type="chart-bar" use-color-variations="true" size="medium"></wc-busy-indicator>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">chart-bar (single color)</h4>
+            <wc-busy-indicator type="chart-bar" use-color-variations="false" size="medium"></wc-busy-indicator>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">chart-doughnut (variations enabled)</h4>
+            <wc-busy-indicator type="chart-doughnut" use-color-variations="true" size="medium"></wc-busy-indicator>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">chart-doughnut (single color)</h4>
+            <wc-busy-indicator type="chart-doughnut" use-color-variations="false" size="medium"></wc-busy-indicator>
+          </div>
+        </div>
+      </section>
+
       <!-- API Documentation -->
       <section class="container p-4 rounded-md">
         <h2 class="text-2xl font-semibold mb-4">API Response Format</h2>
