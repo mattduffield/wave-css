@@ -9,6 +9,7 @@
  *   <wc-busy-indicator type="chart-bar"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-line"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-ecg"></wc-busy-indicator>
+ *   <wc-busy-indicator type="horizontal-bar"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-connector"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-pie"></wc-busy-indicator>
  *   <wc-busy-indicator type="chart-doughnut"></wc-busy-indicator>
@@ -23,7 +24,7 @@
  *   <wc-busy-indicator type="chart-bar" size="large"></wc-busy-indicator>
  *
  * Attributes:
- *   - type: Type of indicator (chart-bar, chart-line, chart-ecg, chart-pie, spinner, pulse, dots, skeleton)
+ *   - type: Type of indicator (chart-bar, chart-line, chart-ecg, horizontal-bar, chart-pie, spinner, pulse, dots, skeleton)
  *   - text: Optional text to display below indicator
  *   - size: Size of indicator (small, medium, large) - default: medium
  *   - color: Custom color (defaults to theme primary color)
@@ -110,6 +111,8 @@ class WcBusyIndicator extends WcBaseComponent {
         return this._createChartLineIndicator(dimensions);
       case 'chart-ecg':
         return this._createChartEcgIndicator(dimensions);
+      case 'horizontal-bar':
+        return this._createHorizontalBarIndicator(dimensions);
       case 'chart-connector':
         return this._createChartConnectorIndicator(dimensions);
       case 'chart-pie':
@@ -284,7 +287,72 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _createChartLineIndicator(dims) {
-    // Simple parallax scrolling lines - like a 2D background pattern
+    // Animated line chart like Dribbble example - line graph with moving dots
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', dims.width);
+    svg.setAttribute('height', dims.height);
+    svg.setAttribute('viewBox', `0 0 ${dims.width} ${dims.height}`);
+
+    const primaryColor = this._getPrimaryColor();
+    const numPoints = 8;
+    const padding = 10;
+
+    // Generate random-ish data points for the line
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+      const x = padding + (i / (numPoints - 1)) * (dims.width - padding * 2);
+      const normalizedPos = i / (numPoints - 1);
+      // Create a wave-like pattern
+      const baseY = dims.height * 0.5;
+      const variation = Math.sin(normalizedPos * Math.PI * 2) * (dims.height * 0.25);
+      const y = baseY + variation;
+      points.push({ x, y });
+    }
+
+    // Create the line path
+    let pathData = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpX = (prev.x + curr.x) / 2;
+      pathData += ` Q ${cpX} ${curr.y} ${curr.x} ${curr.y}`;
+    }
+
+    // Background line (static)
+    const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    bgPath.setAttribute('d', pathData);
+    bgPath.setAttribute('fill', 'none');
+    bgPath.setAttribute('stroke', primaryColor);
+    bgPath.setAttribute('stroke-width', '3');
+    bgPath.setAttribute('opacity', '0.2');
+    svg.appendChild(bgPath);
+
+    // Animated line (draws in)
+    const animPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    animPath.setAttribute('d', pathData);
+    animPath.setAttribute('fill', 'none');
+    animPath.setAttribute('stroke', primaryColor);
+    animPath.setAttribute('stroke-width', '3');
+    animPath.setAttribute('class', 'busy-indicator-chart-line-path');
+    svg.appendChild(animPath);
+
+    // Add animated dots at each point
+    points.forEach((point, i) => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', '5');
+      circle.setAttribute('fill', primaryColor);
+      circle.setAttribute('class', 'busy-indicator-chart-line-dot');
+      circle.style.animationDelay = `${i * 0.15}s`;
+      svg.appendChild(circle);
+    });
+
+    return svg;
+  }
+
+  _createHorizontalBarIndicator(dims) {
+    // Simple parallax scrolling horizontal bars - like a 2D background pattern
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', dims.width);
     svg.setAttribute('height', dims.height);
@@ -297,16 +365,16 @@ class WcBusyIndicator extends WcBaseComponent {
     for (let i = 0; i < numLines; i++) {
       const y = lineSpacing * (i + 1);
 
-      // Create line
+      // Create thicker horizontal line
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', 0);
       line.setAttribute('x2', dims.width);
       line.setAttribute('y1', y);
       line.setAttribute('y2', y);
       line.setAttribute('stroke', primaryColor);
-      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-width', '4'); // Increased from 2 to 4
       line.setAttribute('stroke-linecap', 'round');
-      line.setAttribute('class', 'busy-indicator-parallax-line');
+      line.setAttribute('class', 'busy-indicator-horizontal-bar');
       line.setAttribute('opacity', 0.3 + (i * 0.15)); // Varying opacity for depth
 
       // Different animation delays and durations for parallax effect
@@ -597,12 +665,49 @@ class WcBusyIndicator extends WcBaseComponent {
         }
       }
 
-      /* Chart Line Animation - Simple Parallax Scrolling */
-      .busy-indicator-parallax-line {
-        animation: parallax-scroll 3s linear infinite;
+      /* Chart Line Animation - Animated line graph with dots */
+      .busy-indicator-chart-line-path {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: chart-line-draw 2.5s ease-in-out infinite;
       }
 
-      @keyframes parallax-scroll {
+      .busy-indicator-chart-line-dot {
+        animation: chart-line-dot-pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes chart-line-draw {
+        0% {
+          stroke-dashoffset: 1000;
+          opacity: 0.3;
+        }
+        50% {
+          stroke-dashoffset: 0;
+          opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: -1000;
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes chart-line-dot-pulse {
+        0%, 100% {
+          r: 4;
+          opacity: 0.5;
+        }
+        50% {
+          r: 6;
+          opacity: 1;
+        }
+      }
+
+      /* Horizontal Bar Animation - Simple Parallax Scrolling */
+      .busy-indicator-horizontal-bar {
+        animation: horizontal-bar-scroll 3s linear infinite;
+      }
+
+      @keyframes horizontal-bar-scroll {
         0% {
           transform: translateX(0);
         }

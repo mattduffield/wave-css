@@ -20039,6 +20039,8 @@ var WcBusyIndicator = class extends WcBaseComponent {
         return this._createChartLineIndicator(dimensions);
       case "chart-ecg":
         return this._createChartEcgIndicator(dimensions);
+      case "horizontal-bar":
+        return this._createHorizontalBarIndicator(dimensions);
       case "chart-connector":
         return this._createChartConnectorIndicator(dimensions);
       case "chart-pie":
@@ -20182,6 +20184,56 @@ var WcBusyIndicator = class extends WcBaseComponent {
     svg.setAttribute("width", dims.width);
     svg.setAttribute("height", dims.height);
     svg.setAttribute("viewBox", `0 0 ${dims.width} ${dims.height}`);
+    const primaryColor = this._getPrimaryColor();
+    const numPoints = 8;
+    const padding = 10;
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+      const x = padding + i / (numPoints - 1) * (dims.width - padding * 2);
+      const normalizedPos = i / (numPoints - 1);
+      const baseY = dims.height * 0.5;
+      const variation = Math.sin(normalizedPos * Math.PI * 2) * (dims.height * 0.25);
+      const y = baseY + variation;
+      points.push({ x, y });
+    }
+    let pathData = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpX = (prev.x + curr.x) / 2;
+      pathData += ` Q ${cpX} ${curr.y} ${curr.x} ${curr.y}`;
+    }
+    const bgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    bgPath.setAttribute("d", pathData);
+    bgPath.setAttribute("fill", "none");
+    bgPath.setAttribute("stroke", primaryColor);
+    bgPath.setAttribute("stroke-width", "3");
+    bgPath.setAttribute("opacity", "0.2");
+    svg.appendChild(bgPath);
+    const animPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    animPath.setAttribute("d", pathData);
+    animPath.setAttribute("fill", "none");
+    animPath.setAttribute("stroke", primaryColor);
+    animPath.setAttribute("stroke-width", "3");
+    animPath.setAttribute("class", "busy-indicator-chart-line-path");
+    svg.appendChild(animPath);
+    points.forEach((point, i) => {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", point.x);
+      circle.setAttribute("cy", point.y);
+      circle.setAttribute("r", "5");
+      circle.setAttribute("fill", primaryColor);
+      circle.setAttribute("class", "busy-indicator-chart-line-dot");
+      circle.style.animationDelay = `${i * 0.15}s`;
+      svg.appendChild(circle);
+    });
+    return svg;
+  }
+  _createHorizontalBarIndicator(dims) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", dims.width);
+    svg.setAttribute("height", dims.height);
+    svg.setAttribute("viewBox", `0 0 ${dims.width} ${dims.height}`);
     const numLines = 5;
     const lineSpacing = dims.height / (numLines + 1);
     const primaryColor = this._getPrimaryColor();
@@ -20193,9 +20245,9 @@ var WcBusyIndicator = class extends WcBaseComponent {
       line.setAttribute("y1", y);
       line.setAttribute("y2", y);
       line.setAttribute("stroke", primaryColor);
-      line.setAttribute("stroke-width", "2");
+      line.setAttribute("stroke-width", "4");
       line.setAttribute("stroke-linecap", "round");
-      line.setAttribute("class", "busy-indicator-parallax-line");
+      line.setAttribute("class", "busy-indicator-horizontal-bar");
       line.setAttribute("opacity", 0.3 + i * 0.15);
       line.style.animationDelay = `${i * 0.2}s`;
       line.style.animationDuration = `${3 + i * 0.5}s`;
@@ -20421,12 +20473,49 @@ var WcBusyIndicator = class extends WcBaseComponent {
         }
       }
 
-      /* Chart Line Animation - Simple Parallax Scrolling */
-      .busy-indicator-parallax-line {
-        animation: parallax-scroll 3s linear infinite;
+      /* Chart Line Animation - Animated line graph with dots */
+      .busy-indicator-chart-line-path {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: chart-line-draw 2.5s ease-in-out infinite;
       }
 
-      @keyframes parallax-scroll {
+      .busy-indicator-chart-line-dot {
+        animation: chart-line-dot-pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes chart-line-draw {
+        0% {
+          stroke-dashoffset: 1000;
+          opacity: 0.3;
+        }
+        50% {
+          stroke-dashoffset: 0;
+          opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: -1000;
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes chart-line-dot-pulse {
+        0%, 100% {
+          r: 4;
+          opacity: 0.5;
+        }
+        50% {
+          r: 6;
+          opacity: 1;
+        }
+      }
+
+      /* Horizontal Bar Animation - Simple Parallax Scrolling */
+      .busy-indicator-horizontal-bar {
+        animation: horizontal-bar-scroll 3s linear infinite;
+      }
+
+      @keyframes horizontal-bar-scroll {
         0% {
           transform: translateX(0);
         }
