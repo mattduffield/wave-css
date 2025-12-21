@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prospect Quote By Agent By Day</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body>
+  <div class="relative grid grid-rows-[auto,1fr] h-screen">
+    <!-- Header -->
+    <div class="h-16 text-xl text-center font-bold dark:text-gray-400 mt-2">
+      <span id="chartTitle">Prospect Quote By Agent By Day</span>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="chart-container relative overflow-auto p-4"
+         _="on load
+              call sendMessageToParent('loaded:6563d14ab200a925d8eaffd3?num_days=' + get #numDays.value + '&quote_state=' + get #quoteState.value)
+            end
+            on message from window.parent
+              if event.data == 'mode:dark'
+                add .dark to first <html/>
+              else if event.data == 'mode:light'
+                remove .dark from first <html/>
+              end
+            end">
+      <!-- The chart will automatically fetch its data from the ajax-url -->
+      <wc-chartjs
+        id="agentChart"
+        ajax-url=""
+        type="bar"
+        height="600"
+        show-legend="true"
+        legend-position="top"
+        show-data-labels="false"
+        responsive="true"
+        maintain-aspect-ratio="false"
+        y-axis-title="Number of Quotes"
+        x-axis-title="Date"
+        loading-text="Loading prospect quote data...">
+      </wc-chartjs>
+    </div>
+  </div>
+
+  <!-- Hidden inputs to store query params -->
+  <input type="hidden" id="numDays" value="">
+  <input type="hidden" id="quoteState" value="">
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Get query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const numDays = urlParams.get('num_days') || '14';
+    const quoteState = urlParams.get('quote_state') || '';
+
+    // Store in hidden inputs for hyperscript access
+    document.getElementById('numDays').value = numDays;
+    document.getElementById('quoteState').value = quoteState;
+
+    // Update title based on query params
+    const titleElement = document.getElementById('chartTitle');
+    if (quoteState) {
+      titleElement.textContent = `${quoteState} Prospect Quote By Agent By Day (Past ${numDays} days)`;
+    } else {
+      titleElement.textContent = `Prospect Quote By Agent By Day (Past ${numDays} days)`;
+    }
+
+    // Configure chart with URL and parameters
+    document.addEventListener('DOMContentLoaded', () => {
+      customElements.whenDefined('wc-chartjs').then(() => {
+        const chart = document.getElementById('agentChart');
+
+        // Set the ajax URL and parameters
+        chart.setAttribute('ajax-url', '/api/prospect-quotes/chart-data');
+        chart.setParams({
+          num_days: numDays,
+          quote_state: quoteState
+        });
+      });
+    });
+
+    // Send message to parent window (if in iframe)
+    function sendMessageToParent(message) {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage(message, '*');
+      }
+    }
+  </script>
+</body>
+</html>

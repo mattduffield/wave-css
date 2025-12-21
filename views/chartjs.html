@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WC-ChartJS Examples</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <style>
+    .chart-container {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+
+  <div id="page-contents">
+    <div class="flex flex-col flex-1 p-6 gap-4">
+      <header class="mb-8">
+        <h1 class="text-4xl font-bold mb-2">WC-ChartJS Component Examples</h1>
+        <p class="text-gray-600 dark:text-gray-400">Dynamic charts that fetch data from AJAX endpoints</p>
+      </header>
+
+      <wc-theme-selector class="mb-4"></wc-theme-selector>
+
+      <!-- Example 1: Basic AJAX Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 1: Basic AJAX Chart</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          This chart fetches data from a URL endpoint. The endpoint should return JSON with labels and datasets.
+        </p>
+        <wc-chartjs
+          id="ajaxChart1"
+          ajax-url="/api/chart-data/sales"
+          type="bar"
+          height="400"
+          show-legend="true"
+          legend-position="top"
+          loading-text="Loading sales data...">
+        </wc-chartjs>
+      </section>
+
+      <!-- Example 2: Chart with Query Parameters -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 2: Chart with Dynamic Parameters</h2>
+        <div class="mb-4 flex gap-2">
+          <button id="btnDays7" class="btn btn-sm btn-primary">Last 7 Days</button>
+          <button id="btnDays14" class="btn btn-sm btn-secondary">Last 14 Days</button>
+          <button id="btnDays30" class="btn btn-sm btn-info">Last 30 Days</button>
+        </div>
+        <wc-chartjs
+          id="ajaxChart2"
+          ajax-url="/api/prospect-quotes/chart-data"
+          ajax-params='{"num_days": "14", "quote_state": ""}'
+          type="bar"
+          height="500"
+          show-legend="true"
+          legend-position="top"
+          y-axis-title="Number of Quotes"
+          x-axis-title="Date">
+        </wc-chartjs>
+      </section>
+
+      <!-- Example 3: Auto-Refresh Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 3: Auto-Refresh Chart</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          This chart automatically refreshes every 30 seconds (30000ms).
+        </p>
+        <wc-chartjs
+          id="ajaxChart3"
+          ajax-url="/api/chart-data/realtime"
+          type="line"
+          height="350"
+          auto-refresh="30000"
+          show-legend="true"
+          tension="0.3">
+        </wc-chartjs>
+      </section>
+
+      <!-- Example 4: Pie Chart from API -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 4: Pie Chart from API</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <wc-chartjs
+            ajax-url="/api/chart-data/market-share"
+            type="pie"
+            height="350"
+            legend-position="right">
+          </wc-chartjs>
+          <wc-chartjs
+            ajax-url="/api/chart-data/budget"
+            type="doughnut"
+            height="350"
+            legend-position="right">
+          </wc-chartjs>
+        </div>
+      </section>
+
+      <!-- Example 5: Stacked Bar Chart -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 5: Stacked Chart with Custom Headers</h2>
+        <wc-chartjs
+          ajax-url="/api/chart-data/device-usage"
+          ajax-headers='{"Authorization": "Bearer token123", "Custom-Header": "value"}'
+          type="bar"
+          stacked="true"
+          height="400"
+          show-legend="true">
+        </wc-chartjs>
+      </section>
+
+      <!-- Example 6: Fallback to Static Data -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 6: Static Data (No AJAX)</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          When no ajax-url is provided, wc-chartjs works exactly like wc-chart with inline data.
+        </p>
+        <wc-chartjs
+          type="line"
+          labels='["January", "February", "March", "April", "May"]'
+          datasets='[
+            {"label": "2023", "data": [65, 59, 80, 81, 56]},
+            {"label": "2024", "data": [85, 79, 100, 101, 76]}
+          ]'
+          title="Static Line Chart"
+          height="300"
+          tension="0.4">
+        </wc-chartjs>
+      </section>
+
+      <!-- Example 7: Manual Reload -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 7: Manual Reload Control</h2>
+        <div class="mb-4 flex gap-2">
+          <button id="btnReload" class="btn btn-primary">Reload Chart</button>
+          <button id="btnChangeUrl" class="btn btn-secondary">Change Data Source</button>
+        </div>
+        <wc-chartjs
+          id="manualChart"
+          ajax-url="/api/chart-data/manual"
+          type="bar"
+          height="350"
+          show-data-labels="true">
+        </wc-chartjs>
+      </section>
+
+      <!-- API Documentation -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">API Response Format</h2>
+        <p class="mb-4">Your API endpoint should return JSON in this format:</p>
+        <pre class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto"><code>{
+  "labels": ["Q1", "Q2", "Q3", "Q4"],
+  "datasets": [
+    {
+      "label": "2023 Sales",
+      "data": [120, 150, 180, 220],
+      "backgroundColor": "#E57373",
+      "borderColor": "#F44336",
+      "borderWidth": 1
+    },
+    {
+      "label": "2024 Sales",
+      "data": [180, 220, 260, 320],
+      "backgroundColor": "#64B5F6",
+      "borderColor": "#2196F3",
+      "borderWidth": 1
+    }
+  ],
+  "title": "Quarterly Sales Comparison",  // Optional
+  "type": "bar",                          // Optional
+  "showLegend": true,                     // Optional
+  "legendPosition": "top",                // Optional
+  "xAxisTitle": "Quarter",                // Optional
+  "yAxisTitle": "Revenue ($K)"            // Optional
+}</code></pre>
+      </section>
+
+      <!-- Events Documentation -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Events</h2>
+        <div id="eventLog" class="bg-gray-100 dark:bg-gray-800 p-4 rounded h-32 overflow-y-auto font-mono text-sm">
+          <div class="text-gray-500">Event log will appear here...</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Wait for components to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const eventLog = document.getElementById('eventLog');
+
+      // Log events from all charts
+      document.addEventListener('chartjs:loading', (e) => {
+        logEvent('🔄 Loading', e.detail);
+      });
+
+      document.addEventListener('chartjs:loaded', (e) => {
+        logEvent('✅ Loaded', e.detail);
+      });
+
+      document.addEventListener('chartjs:error', (e) => {
+        logEvent('❌ Error', e.detail);
+      });
+
+      function logEvent(type, detail) {
+        const entry = document.createElement('div');
+        entry.className = 'mb-1';
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${type}: ${JSON.stringify(detail)}`;
+        eventLog.appendChild(entry);
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
+
+      // Example 2: Dynamic parameters
+      const chart2 = document.getElementById('ajaxChart2');
+      document.getElementById('btnDays7')?.addEventListener('click', () => {
+        chart2.setParams({ num_days: "7", quote_state: "" });
+      });
+      document.getElementById('btnDays14')?.addEventListener('click', () => {
+        chart2.setParams({ num_days: "14", quote_state: "" });
+      });
+      document.getElementById('btnDays30')?.addEventListener('click', () => {
+        chart2.setParams({ num_days: "30", quote_state: "" });
+      });
+
+      // Example 7: Manual reload
+      const manualChart = document.getElementById('manualChart');
+      document.getElementById('btnReload')?.addEventListener('click', () => {
+        manualChart.reload();
+      });
+      document.getElementById('btnChangeUrl')?.addEventListener('click', () => {
+        manualChart.setUrl('/api/chart-data/alternative');
+      });
+    });
+
+    // Mock API endpoints for demo purposes
+    // In production, remove this and use real backend endpoints
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // Intercept fetch calls for demo
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        const url = args[0];
+
+        // Mock responses for different endpoints
+        if (url.includes('/api/chart-data/sales')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+              datasets: [{
+                label: 'Monthly Sales',
+                data: [65, 59, 80, 81, 56, 55],
+                backgroundColor: '#64B5F6',
+                borderColor: '#2196F3',
+                borderWidth: 2
+              }],
+              title: 'Monthly Sales 2024',
+              yAxisTitle: 'Sales ($K)'
+            })
+          });
+        }
+
+        if (url.includes('/api/prospect-quotes/chart-data')) {
+          const urlObj = new URL(url, window.location.origin);
+          const numDays = urlObj.searchParams.get('num_days') || '14';
+
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              labels: ['2024-01-01 (15)', '2024-01-02 (23)', '2024-01-03 (18)', '2024-01-04 (25)'],
+              datasets: [
+                {
+                  label: 'Agent Smith',
+                  data: [8, 12, 10, 15],
+                  backgroundColor: '#E57373',
+                  borderColor: '#F44336',
+                  borderWidth: 1
+                },
+                {
+                  label: 'Agent Jones',
+                  data: [7, 11, 8, 10],
+                  backgroundColor: '#64B5F6',
+                  borderColor: '#2196F3',
+                  borderWidth: 1
+                }
+              ],
+              title: `Prospect Quotes (Last ${numDays} days)`,
+              type: 'bar'
+            })
+          });
+        }
+
+        if (url.includes('/api/chart-data/realtime')) {
+          const randomData = () => Math.floor(Math.random() * 50) + 20;
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              labels: ['Now-5m', 'Now-4m', 'Now-3m', 'Now-2m', 'Now-1m', 'Now'],
+              datasets: [{
+                label: 'Real-time Data',
+                data: [randomData(), randomData(), randomData(), randomData(), randomData(), randomData()],
+                backgroundColor: '#4DB6AC',
+                borderColor: '#009688',
+                borderWidth: 2
+              }],
+              title: 'Real-time Monitoring'
+            })
+          });
+        }
+
+        if (url.includes('/api/chart-data/market-share')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              labels: ['Product A', 'Product B', 'Product C', 'Product D'],
+              datasets: [{
+                label: 'Market Share',
+                data: [30, 25, 20, 25]
+              }],
+              title: 'Market Share Distribution'
+            })
+          });
+        }
+
+        if (url.includes('/api/chart-data/budget')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              labels: ['Marketing', 'Development', 'Operations', 'Sales'],
+              datasets: [{
+                label: 'Budget',
+                data: [25000, 45000, 20000, 30000]
+              }],
+              title: 'Budget Allocation'
+            })
+          });
+        }
+
+        // Fallback for other endpoints
+        return originalFetch.apply(this, args);
+      };
+    }
+  </script>
+</body>
+</html>
