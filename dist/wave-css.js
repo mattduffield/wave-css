@@ -19885,6 +19885,10 @@ var WcChartjs = class extends WcChart {
     const useBusyIndicator = this.getAttribute("busy-indicator") === "true";
     const loadingText = this.getAttribute("loading-text") || "";
     const height = this.getAttribute("height") || "400";
+    if (this.componentElement) {
+      this.componentElement.style.position = "relative";
+      this.componentElement.style.minHeight = `${height}px`;
+    }
     if (useBusyIndicator) {
       const chartType = this.getAttribute("type") || "bar";
       const busyType = this.getAttribute("busy-indicator-type") || `chart-${chartType}`;
@@ -19907,14 +19911,16 @@ var WcChartjs = class extends WcChart {
       this.loadingIndicator.style.position = "absolute";
       this.loadingIndicator.style.top = "0";
       this.loadingIndicator.style.left = "0";
+      this.loadingIndicator.style.right = "0";
+      this.loadingIndicator.style.bottom = "0";
       this.loadingIndicator.style.width = "100%";
       this.loadingIndicator.style.height = "100%";
-      this.loadingIndicator.style.minHeight = `${height}px`;
       this.loadingIndicator.style.display = "flex";
       this.loadingIndicator.style.alignItems = "center";
       this.loadingIndicator.style.justifyContent = "center";
       this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
       this.loadingIndicator.style.zIndex = "10";
+      this.loadingIndicator.style.pointerEvents = "auto";
     } else {
       const text = loadingText || "Loading chart...";
       this.loadingIndicator = document.createElement("div");
@@ -19922,11 +19928,13 @@ var WcChartjs = class extends WcChart {
       this.loadingIndicator.style.position = "absolute";
       this.loadingIndicator.style.top = "0";
       this.loadingIndicator.style.left = "0";
+      this.loadingIndicator.style.right = "0";
+      this.loadingIndicator.style.bottom = "0";
       this.loadingIndicator.style.width = "100%";
       this.loadingIndicator.style.height = "100%";
-      this.loadingIndicator.style.minHeight = `${height}px`;
       this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
       this.loadingIndicator.style.zIndex = "10";
+      this.loadingIndicator.style.pointerEvents = "auto";
       this.loadingIndicator.innerHTML = `
         <div class="text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
@@ -19988,18 +19996,36 @@ var WcChartjs = class extends WcChart {
   _createExpandButton() {
     const expandSelector = this.getAttribute("expand-selector");
     if (!expandSelector) return;
-    const buttonContainer = document.createElement("div");
-    buttonContainer.classList.add("wc-chartjs-expand-btn-container");
     this._expandButton = document.createElement("wc-fa-icon");
     this._expandButton.setAttribute("name", "expand");
     this._expandButton.setAttribute("icon-style", "solid");
     this._expandButton.setAttribute("size", "1.25rem");
     this._expandButton.classList.add("wc-chartjs-expand-btn", "cursor-pointer");
     this._expandButton.setAttribute("title", "Expand chart");
+    this._expandButton.style.position = "absolute";
+    this._expandButton.style.right = "0.5rem";
+    this._expandButton.style.top = "0.5rem";
+    this._expandButton.style.zIndex = "20";
+    this._expandButton.style.padding = "0.5rem";
+    this._expandButton.style.backgroundColor = "var(--surface-2)";
+    this._expandButton.style.border = "1px solid var(--surface-4)";
+    this._expandButton.style.borderRadius = "0.375rem";
+    this._expandButton.style.transition = "all 0.2s ease";
     this._expandButton.addEventListener("click", () => this._toggleExpand());
-    buttonContainer.appendChild(this._expandButton);
+    this._expandButton.addEventListener("mouseenter", () => {
+      this._expandButton.style.backgroundColor = "var(--surface-3)";
+      this._expandButton.style.borderColor = "var(--primary-bg-color)";
+      this._expandButton.style.color = "var(--primary-bg-color)";
+      this._expandButton.style.transform = "scale(1.1)";
+    });
+    this._expandButton.addEventListener("mouseleave", () => {
+      this._expandButton.style.backgroundColor = "var(--surface-2)";
+      this._expandButton.style.borderColor = "var(--surface-4)";
+      this._expandButton.style.color = "";
+      this._expandButton.style.transform = "scale(1)";
+    });
     if (this.componentElement) {
-      this.componentElement.appendChild(buttonContainer);
+      this.componentElement.appendChild(this._expandButton);
     }
   }
   _toggleExpand() {
@@ -20091,34 +20117,6 @@ var WcChartjs = class extends WcChart {
     const style = `
       wc-chartjs {
         display: contents;
-      }
-
-      /* Expand button styling */
-      .wc-chartjs-expand-btn-container {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        z-index: 10;
-      }
-
-      .wc-chartjs-expand-btn {
-        background: var(--surface-2);
-        border: 1px solid var(--surface-4);
-        border-radius: 0.375rem;
-        padding: 0.5rem;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .wc-chartjs-expand-btn:hover {
-        background: var(--surface-3);
-        border-color: var(--primary-bg-color);
-        color: var(--primary-bg-color);
-        transform: scale(1.1);
       }
 
       /* Expanded state styling */

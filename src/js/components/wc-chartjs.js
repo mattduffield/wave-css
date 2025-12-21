@@ -280,6 +280,12 @@ class WcChartjs extends WcChart {
     const loadingText = this.getAttribute('loading-text') || '';
     const height = this.getAttribute('height') || '400';
 
+    // Ensure componentElement has proper positioning context
+    if (this.componentElement) {
+      this.componentElement.style.position = 'relative';
+      this.componentElement.style.minHeight = `${height}px`;
+    }
+
     if (useBusyIndicator) {
       // Use wc-busy-indicator component
       const chartType = this.getAttribute('type') || 'bar';
@@ -304,19 +310,21 @@ class WcChartjs extends WcChart {
         this.loadingIndicator.setAttribute('color-levels', colorLevels);
       }
 
-      // Make it an overlay
+      // Make it an overlay - confined to componentElement
       this.loadingIndicator.classList.add('wc-chartjs-loading-overlay');
       this.loadingIndicator.style.position = 'absolute';
       this.loadingIndicator.style.top = '0';
       this.loadingIndicator.style.left = '0';
+      this.loadingIndicator.style.right = '0';
+      this.loadingIndicator.style.bottom = '0';
       this.loadingIndicator.style.width = '100%';
       this.loadingIndicator.style.height = '100%';
-      this.loadingIndicator.style.minHeight = `${height}px`;
       this.loadingIndicator.style.display = 'flex';
       this.loadingIndicator.style.alignItems = 'center';
       this.loadingIndicator.style.justifyContent = 'center';
       this.loadingIndicator.style.backgroundColor = 'var(--surface-1)';
       this.loadingIndicator.style.zIndex = '10';
+      this.loadingIndicator.style.pointerEvents = 'auto';
     } else {
       // Use simple loading text (original behavior)
       const text = loadingText || 'Loading chart...';
@@ -325,11 +333,13 @@ class WcChartjs extends WcChart {
       this.loadingIndicator.style.position = 'absolute';
       this.loadingIndicator.style.top = '0';
       this.loadingIndicator.style.left = '0';
+      this.loadingIndicator.style.right = '0';
+      this.loadingIndicator.style.bottom = '0';
       this.loadingIndicator.style.width = '100%';
       this.loadingIndicator.style.height = '100%';
-      this.loadingIndicator.style.minHeight = `${height}px`;
       this.loadingIndicator.style.backgroundColor = 'var(--surface-1)';
       this.loadingIndicator.style.zIndex = '10';
+      this.loadingIndicator.style.pointerEvents = 'auto';
 
       this.loadingIndicator.innerHTML = `
         <div class="text-center">
@@ -405,11 +415,7 @@ class WcChartjs extends WcChart {
     const expandSelector = this.getAttribute('expand-selector');
     if (!expandSelector) return;
 
-    // Create expand button container
-    const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('wc-chartjs-expand-btn-container');
-
-    // Create wc-fa-icon for expand/collapse
+    // Create wc-fa-icon for expand/collapse (no container)
     this._expandButton = document.createElement('wc-fa-icon');
     this._expandButton.setAttribute('name', 'expand');
     this._expandButton.setAttribute('icon-style', 'solid');
@@ -417,14 +423,38 @@ class WcChartjs extends WcChart {
     this._expandButton.classList.add('wc-chartjs-expand-btn', 'cursor-pointer');
     this._expandButton.setAttribute('title', 'Expand chart');
 
+    // Position absolutely in top-right corner
+    this._expandButton.style.position = 'absolute';
+    this._expandButton.style.right = '0.5rem';
+    this._expandButton.style.top = '0.5rem';
+    this._expandButton.style.zIndex = '20';
+    this._expandButton.style.padding = '0.5rem';
+    this._expandButton.style.backgroundColor = 'var(--surface-2)';
+    this._expandButton.style.border = '1px solid var(--surface-4)';
+    this._expandButton.style.borderRadius = '0.375rem';
+    this._expandButton.style.transition = 'all 0.2s ease';
+
     // Add click handler
     this._expandButton.addEventListener('click', () => this._toggleExpand());
 
-    buttonContainer.appendChild(this._expandButton);
+    // Add hover effect
+    this._expandButton.addEventListener('mouseenter', () => {
+      this._expandButton.style.backgroundColor = 'var(--surface-3)';
+      this._expandButton.style.borderColor = 'var(--primary-bg-color)';
+      this._expandButton.style.color = 'var(--primary-bg-color)';
+      this._expandButton.style.transform = 'scale(1.1)';
+    });
 
-    // Insert button into componentElement
+    this._expandButton.addEventListener('mouseleave', () => {
+      this._expandButton.style.backgroundColor = 'var(--surface-2)';
+      this._expandButton.style.borderColor = 'var(--surface-4)';
+      this._expandButton.style.color = '';
+      this._expandButton.style.transform = 'scale(1)';
+    });
+
+    // Insert button directly into componentElement
     if (this.componentElement) {
-      this.componentElement.appendChild(buttonContainer);
+      this.componentElement.appendChild(this._expandButton);
     }
   }
 
@@ -556,34 +586,6 @@ class WcChartjs extends WcChart {
     const style = `
       wc-chartjs {
         display: contents;
-      }
-
-      /* Expand button styling */
-      .wc-chartjs-expand-btn-container {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        z-index: 10;
-      }
-
-      .wc-chartjs-expand-btn {
-        background: var(--surface-2);
-        border: 1px solid var(--surface-4);
-        border-radius: 0.375rem;
-        padding: 0.5rem;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .wc-chartjs-expand-btn:hover {
-        background: var(--surface-3);
-        border-color: var(--primary-bg-color);
-        color: var(--primary-bg-color);
-        transform: scale(1.1);
       }
 
       /* Expanded state styling */
