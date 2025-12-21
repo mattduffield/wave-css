@@ -95,7 +95,8 @@ class WcChartjs extends WcChart {
     // Don't call parent connectedCallback yet if we have url
     const url = this.getAttribute('url');
 
-    if (url) {
+    if (url && !this._initialFetchDone) {
+      // Only fetch on first connection, not when moving during expand/collapse
       // Show loading state
       this._showLoading();
 
@@ -108,9 +109,10 @@ class WcChartjs extends WcChart {
 
       // Setup auto-refresh if specified
       this._setupAutoRefresh();
-    } else {
+    } else if (!this._initialFetchDone) {
       // No url, work like regular wc-chart
       await super.connectedCallback();
+      this._initialFetchDone = true;
     }
 
     // Create expand button if expand-selector is present

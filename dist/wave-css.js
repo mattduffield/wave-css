@@ -19756,14 +19756,15 @@ var WcChartjs = class extends WcChart {
   }
   async connectedCallback() {
     const url = this.getAttribute("url");
-    if (url) {
+    if (url && !this._initialFetchDone) {
       this._showLoading();
       await this._fetchChartData();
       this._initialFetchDone = true;
       await super.connectedCallback();
       this._setupAutoRefresh();
-    } else {
+    } else if (!this._initialFetchDone) {
       await super.connectedCallback();
+      this._initialFetchDone = true;
     }
     this._createExpandButton();
   }
