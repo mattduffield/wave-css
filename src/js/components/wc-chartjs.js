@@ -415,39 +415,39 @@ class WcChartjs extends WcChart {
     const expandSelector = this.getAttribute('expand-selector');
     if (!expandSelector) return;
 
-    // Create wc-fa-icon for expand/collapse (no container)
+    // Don't create if button already exists
+    if (this._expandButton && this._expandButton.parentElement) {
+      return;
+    }
+
+    // Create wc-fa-icon for expand/collapse (no container, no background)
     this._expandButton = document.createElement('wc-fa-icon');
     this._expandButton.setAttribute('name', 'expand');
     this._expandButton.setAttribute('icon-style', 'solid');
-    this._expandButton.setAttribute('size', '1.25rem');
+    this._expandButton.setAttribute('size', '1.5rem');
     this._expandButton.classList.add('wc-chartjs-expand-btn', 'cursor-pointer');
     this._expandButton.setAttribute('title', 'Expand chart');
 
-    // Position absolutely in top-right corner
+    // Position absolutely in top-right corner - icon only, no background
     this._expandButton.style.position = 'absolute';
     this._expandButton.style.right = '0.5rem';
     this._expandButton.style.top = '0.5rem';
     this._expandButton.style.zIndex = '20';
-    this._expandButton.style.padding = '0.5rem';
-    this._expandButton.style.backgroundColor = 'var(--surface-2)';
-    this._expandButton.style.border = '1px solid var(--surface-4)';
-    this._expandButton.style.borderRadius = '0.375rem';
     this._expandButton.style.transition = 'all 0.2s ease';
+    this._expandButton.style.opacity = '0.7';
 
     // Add click handler
     this._expandButton.addEventListener('click', () => this._toggleExpand());
 
-    // Add hover effect
+    // Add hover effect - just opacity and scale, no background
     this._expandButton.addEventListener('mouseenter', () => {
-      this._expandButton.style.backgroundColor = 'var(--surface-3)';
-      this._expandButton.style.borderColor = 'var(--primary-bg-color)';
+      this._expandButton.style.opacity = '1';
       this._expandButton.style.color = 'var(--primary-bg-color)';
-      this._expandButton.style.transform = 'scale(1.1)';
+      this._expandButton.style.transform = 'scale(1.2)';
     });
 
     this._expandButton.addEventListener('mouseleave', () => {
-      this._expandButton.style.backgroundColor = 'var(--surface-2)';
-      this._expandButton.style.borderColor = 'var(--surface-4)';
+      this._expandButton.style.opacity = '0.7';
       this._expandButton.style.color = '';
       this._expandButton.style.transform = 'scale(1)';
     });
@@ -556,6 +556,11 @@ class WcChartjs extends WcChart {
       if (wrapper) {
         wrapper.style.height = `${this._originalHeight}px`;
       }
+
+      // Also reset componentElement minHeight
+      if (this.componentElement) {
+        this.componentElement.style.minHeight = `${this._originalHeight}px`;
+      }
     } else {
       this.removeAttribute('height');
 
@@ -563,6 +568,11 @@ class WcChartjs extends WcChart {
       const wrapper = this.componentElement?.querySelector('.chart-wrapper');
       if (wrapper) {
         wrapper.style.height = '400px'; // Default height
+      }
+
+      // Reset componentElement minHeight to default
+      if (this.componentElement) {
+        this.componentElement.style.minHeight = '400px';
       }
     }
 
