@@ -278,6 +278,7 @@ class WcChartjs extends WcChart {
 
     const useBusyIndicator = this.getAttribute('busy-indicator') === 'true';
     const loadingText = this.getAttribute('loading-text') || '';
+    const height = this.getAttribute('height') || '400';
 
     if (useBusyIndicator) {
       // Use wc-busy-indicator component
@@ -303,13 +304,32 @@ class WcChartjs extends WcChart {
         this.loadingIndicator.setAttribute('color-levels', colorLevels);
       }
 
-      this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
+      // Make it an overlay
+      this.loadingIndicator.classList.add('wc-chartjs-loading-overlay');
+      this.loadingIndicator.style.position = 'absolute';
+      this.loadingIndicator.style.top = '0';
+      this.loadingIndicator.style.left = '0';
+      this.loadingIndicator.style.width = '100%';
+      this.loadingIndicator.style.height = '100%';
+      this.loadingIndicator.style.minHeight = `${height}px`;
+      this.loadingIndicator.style.display = 'flex';
+      this.loadingIndicator.style.alignItems = 'center';
+      this.loadingIndicator.style.justifyContent = 'center';
+      this.loadingIndicator.style.backgroundColor = 'var(--surface-1)';
+      this.loadingIndicator.style.zIndex = '10';
     } else {
       // Use simple loading text (original behavior)
       const text = loadingText || 'Loading chart...';
       this.loadingIndicator = document.createElement('div');
-      this.loadingIndicator.classList.add('wc-chartjs-loading', 'flex', 'items-center', 'justify-center', 'p-8');
-      this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
+      this.loadingIndicator.classList.add('wc-chartjs-loading', 'wc-chartjs-loading-overlay', 'flex', 'items-center', 'justify-center', 'p-8');
+      this.loadingIndicator.style.position = 'absolute';
+      this.loadingIndicator.style.top = '0';
+      this.loadingIndicator.style.left = '0';
+      this.loadingIndicator.style.width = '100%';
+      this.loadingIndicator.style.height = '100%';
+      this.loadingIndicator.style.minHeight = `${height}px`;
+      this.loadingIndicator.style.backgroundColor = 'var(--surface-1)';
+      this.loadingIndicator.style.zIndex = '10';
 
       this.loadingIndicator.innerHTML = `
         <div class="text-center">
@@ -448,7 +468,14 @@ class WcChartjs extends WcChart {
 
     // Set height to fill the target container
     const targetHeight = targetElement.clientHeight || window.innerHeight;
-    this.setAttribute('height', String(targetHeight - 40)); // Subtract padding
+    const newHeight = targetHeight - 40; // Subtract padding
+    this.setAttribute('height', String(newHeight));
+
+    // Update the chart wrapper's inline style to match new height
+    const wrapper = this.componentElement?.querySelector('.chart-wrapper');
+    if (wrapper) {
+      wrapper.style.height = `${newHeight}px`;
+    }
 
     // Update button icon and state
     this._isExpanded = true;
@@ -493,8 +520,20 @@ class WcChartjs extends WcChart {
     // Restore original height
     if (this._originalHeight) {
       this.setAttribute('height', this._originalHeight);
+
+      // Update the chart wrapper's inline style to match restored height
+      const wrapper = this.componentElement?.querySelector('.chart-wrapper');
+      if (wrapper) {
+        wrapper.style.height = `${this._originalHeight}px`;
+      }
     } else {
       this.removeAttribute('height');
+
+      // Update the chart wrapper's inline style to default
+      const wrapper = this.componentElement?.querySelector('.chart-wrapper');
+      if (wrapper) {
+        wrapper.style.height = '400px'; // Default height
+      }
     }
 
     // Update button icon and state

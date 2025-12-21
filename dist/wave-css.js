@@ -19884,6 +19884,7 @@ var WcChartjs = class extends WcChart {
     if (this.loadingIndicator) return;
     const useBusyIndicator = this.getAttribute("busy-indicator") === "true";
     const loadingText = this.getAttribute("loading-text") || "";
+    const height = this.getAttribute("height") || "400";
     if (useBusyIndicator) {
       const chartType = this.getAttribute("type") || "bar";
       const busyType = this.getAttribute("busy-indicator-type") || `chart-${chartType}`;
@@ -19902,12 +19903,30 @@ var WcChartjs = class extends WcChart {
       if (colorLevels) {
         this.loadingIndicator.setAttribute("color-levels", colorLevels);
       }
-      this.loadingIndicator.style.minHeight = this.getAttribute("height") ? `${this.getAttribute("height")}px` : "400px";
+      this.loadingIndicator.classList.add("wc-chartjs-loading-overlay");
+      this.loadingIndicator.style.position = "absolute";
+      this.loadingIndicator.style.top = "0";
+      this.loadingIndicator.style.left = "0";
+      this.loadingIndicator.style.width = "100%";
+      this.loadingIndicator.style.height = "100%";
+      this.loadingIndicator.style.minHeight = `${height}px`;
+      this.loadingIndicator.style.display = "flex";
+      this.loadingIndicator.style.alignItems = "center";
+      this.loadingIndicator.style.justifyContent = "center";
+      this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
+      this.loadingIndicator.style.zIndex = "10";
     } else {
       const text = loadingText || "Loading chart...";
       this.loadingIndicator = document.createElement("div");
-      this.loadingIndicator.classList.add("wc-chartjs-loading", "flex", "items-center", "justify-center", "p-8");
-      this.loadingIndicator.style.minHeight = this.getAttribute("height") ? `${this.getAttribute("height")}px` : "400px";
+      this.loadingIndicator.classList.add("wc-chartjs-loading", "wc-chartjs-loading-overlay", "flex", "items-center", "justify-center", "p-8");
+      this.loadingIndicator.style.position = "absolute";
+      this.loadingIndicator.style.top = "0";
+      this.loadingIndicator.style.left = "0";
+      this.loadingIndicator.style.width = "100%";
+      this.loadingIndicator.style.height = "100%";
+      this.loadingIndicator.style.minHeight = `${height}px`;
+      this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
+      this.loadingIndicator.style.zIndex = "10";
       this.loadingIndicator.innerHTML = `
         <div class="text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
@@ -20009,7 +20028,12 @@ var WcChartjs = class extends WcChart {
     });
     targetElement.appendChild(this);
     const targetHeight = targetElement.clientHeight || window.innerHeight;
-    this.setAttribute("height", String(targetHeight - 40));
+    const newHeight = targetHeight - 40;
+    this.setAttribute("height", String(newHeight));
+    const wrapper = this.componentElement?.querySelector(".chart-wrapper");
+    if (wrapper) {
+      wrapper.style.height = `${newHeight}px`;
+    }
     this._isExpanded = true;
     if (this._expandButton) {
       this._expandButton.removeAttribute("name");
@@ -20042,8 +20066,16 @@ var WcChartjs = class extends WcChart {
     }
     if (this._originalHeight) {
       this.setAttribute("height", this._originalHeight);
+      const wrapper = this.componentElement?.querySelector(".chart-wrapper");
+      if (wrapper) {
+        wrapper.style.height = `${this._originalHeight}px`;
+      }
     } else {
       this.removeAttribute("height");
+      const wrapper = this.componentElement?.querySelector(".chart-wrapper");
+      if (wrapper) {
+        wrapper.style.height = "400px";
+      }
     }
     this._isExpanded = false;
     if (this._expandButton) {
