@@ -28,7 +28,7 @@
  *   - text: Optional text to display below indicator
  *   - size: Size of indicator (small, medium, large) - default: medium
  *   - color: Custom color (defaults to theme primary color)
- *   - use-color-variations: Use multiple swatch colors (true/false) - defaults vary by type
+ *   - color-variation: Color variation mode (standard, subtle, off) - defaults to standard for chart-bar/chart-doughnut, off for others
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -39,7 +39,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['type', 'text', 'size', 'color', 'use-color-variations'];
+    return ['type', 'text', 'size', 'color', 'color-variation'];
   }
 
   constructor() {
@@ -60,7 +60,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (['type', 'text', 'size', 'color', 'use-color-variations'].includes(attrName)) {
+    if (['type', 'text', 'size', 'color', 'color-variation'].includes(attrName)) {
       if (this.componentElement) {
         this._renderIndicator();
       }
@@ -132,41 +132,73 @@ class WcBusyIndicator extends WcBaseComponent {
     }
   }
 
-  _shouldUseColorVariations() {
-    // Check if use-color-variations is explicitly set
-    const attr = this.getAttribute('use-color-variations');
-    if (attr !== null) {
-      return attr === 'true';
+  _getColorVariationMode() {
+    // Get the color-variation attribute
+    const attr = this.getAttribute('color-variation');
+
+    // If explicitly set, use that value
+    if (attr !== null && ['standard', 'subtle', 'off'].includes(attr)) {
+      return attr;
     }
 
     // Default behavior varies by type
     const type = this.getAttribute('type') || 'spinner';
     const variationTypes = ['chart-bar', 'chart-doughnut'];
-    return variationTypes.includes(type);
+    return variationTypes.includes(type) ? 'standard' : 'off';
   }
 
   _getThemeColorVariations(count) {
-    // Use Wave CSS swatch colors which automatically handle dark/light mode
-    // Swatches range from 50 (lightest) to 900 (darkest)
-    // Use middle-to-darker range for better visibility: 300, 400, 500, 600, 700, 800
-    const swatchLevels = [300, 400, 500, 600, 700, 800];
+    const mode = this._getColorVariationMode();
     const variations = [];
 
-    for (let i = 0; i < count; i++) {
-      const level = swatchLevels[i % swatchLevels.length];
-      const color = getComputedStyle(document.documentElement)
-        .getPropertyValue(`--primary-${level}`)
-        .trim();
-
-      if (color) {
-        variations.push(color);
-      } else {
-        // Fallback to primary color with lightness adjustment if swatch not found
-        const primaryColor = getComputedStyle(document.documentElement)
-          .getPropertyValue('--primary-bg-color')
-          .trim() || '#3498db';
-        variations.push(this._adjustColorLightness(primaryColor, (i - 2) * 15));
+    if (mode === 'off') {
+      // All same color
+      const primaryColor = this._getPrimaryColor();
+      for (let i = 0; i < count; i++) {
+        variations.push(primaryColor);
       }
+      return variations;
+    }
+
+    if (mode === 'standard') {
+      // Use --surface-x variables for strong, visible differences
+      // Pick surface levels with good spacing: 3, 5, 7, 9, 11, 13
+      const surfaceLevels = [3, 5, 7, 9, 11, 13];
+
+      for (let i = 0; i < count; i++) {
+        const level = surfaceLevels[i % surfaceLevels.length];
+        const color = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--surface-${level}`)
+          .trim();
+
+        if (color) {
+          variations.push(color);
+        } else {
+          // Fallback if surface variables don't exist
+          const primaryColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-bg-color')
+            .trim() || '#3498db';
+          const step = (i - Math.floor(count / 2)) * 40; // Large steps for visibility
+          variations.push(this._adjustColorLightness(primaryColor, step));
+        }
+      }
+      return variations;
+    }
+
+    if (mode === 'subtle') {
+      // Use HSL adjustments with moderate steps
+      const primaryColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-bg-color')
+        .trim() || '#3498db';
+
+      // Subtle steps: -20%, -10%, 0%, +10%, +20%, +30%
+      const steps = [-20, -10, 0, 10, 20, 30];
+
+      for (let i = 0; i < count; i++) {
+        const step = steps[i % steps.length];
+        variations.push(this._adjustColorLightness(primaryColor, step));
+      }
+      return variations;
     }
 
     return variations;
@@ -259,10 +291,8 @@ class WcBusyIndicator extends WcBaseComponent {
     const totalWidth = (barWidth * numBars) + (gap * (numBars - 1));
     const startX = (dims.width - totalWidth) / 2;
 
-    // Determine if using color variations
-    const useVariations = this._shouldUseColorVariations();
-    const colors = useVariations ? this._getThemeColorVariations(numBars) : null;
-    const singleColor = this._getPrimaryColor();
+    // Get colors based on color-variation mode
+    const colors = this._getThemeColorVariations(numBars);
 
     for (let i = 0; i < numBars; i++) {
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -271,14 +301,7 @@ class WcBusyIndicator extends WcBaseComponent {
       rect.setAttribute('width', barWidth);
       rect.setAttribute('rx', barWidth / 4);
       rect.setAttribute('class', 'busy-indicator-bar');
-
-      // Apply color based on variations setting
-      if (useVariations && colors) {
-        rect.setAttribute('fill', colors[i]);
-      } else {
-        rect.setAttribute('fill', singleColor);
-      }
-
+      rect.setAttribute('fill', colors[i]);
       rect.style.animationDelay = `${i * 0.1}s`;
       svg.appendChild(rect);
     }
@@ -519,22 +542,19 @@ class WcBusyIndicator extends WcBaseComponent {
 
     // Create 4 doughnut segments
     const segments = 4;
-    const useVariations = this._shouldUseColorVariations();
-    const colors = useVariations ? this._getThemeColorVariations(segments) : null;
-    const singleColor = this._getPrimaryColor();
+    const mode = this._getColorVariationMode();
+    const colors = this._getThemeColorVariations(segments);
 
     for (let i = 0; i < segments; i++) {
       const startAngle = (i * 360 / segments) - 90;
       const endAngle = ((i + 1) * 360 / segments) - 90;
 
       const path = this._createDoughnutSegment(centerX, centerY, outerRadius, innerRadius, startAngle, endAngle);
+      path.setAttribute('fill', colors[i]);
 
-      // Apply color based on variations setting
-      if (useVariations && colors) {
-        path.setAttribute('fill', colors[i]);
-      } else {
-        path.setAttribute('fill', singleColor);
-        path.setAttribute('opacity', 0.4 + (i * 0.15)); // Vary opacity if single color
+      // If mode is 'off', add opacity variation to show segments
+      if (mode === 'off') {
+        path.setAttribute('opacity', 0.4 + (i * 0.15));
       }
 
       path.setAttribute('class', 'busy-indicator-doughnut-segment');

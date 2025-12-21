@@ -11,68 +11,276 @@
     <div class="flex flex-col flex-1 p-6 gap-4">
       <header class="mb-8">
         <h1 class="text-4xl font-bold mb-2">Busy Indicator Component</h1>
-        <p class="text-gray-600 dark:text-gray-400">Theme-aware loading indicators for charts and other components</p>
+        <p class="text-gray-600 dark:text-gray-400">Theme-aware loading indicators with multiple animation styles</p>
       </header>
 
       <wc-theme-selector class="mb-4"></wc-theme-selector>
 
-      <!-- Chart Indicators -->
+      <!-- All Animation Types -->
       <section class="container p-4 rounded-md">
-        <h2 class="text-2xl font-semibold mb-4">Chart-Specific Indicators</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Chart Bar</h3>
-            <div class="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="chart-bar" text="Loading bar chart..."></wc-busy-indicator>
+        <h2 class="text-2xl font-semibold mb-4">All Animation Types</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          Complete showcase of all available busy indicator animations
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- chart-bar -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-bar</h3>
+            <p class="text-xs text-gray-500 text-center">Vertical bars with color variations</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" size="medium"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-bar"</code>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Chart Line</h3>
-            <p class="text-sm text-gray-500 text-center">Mountain silhouette animation</p>
-            <div class="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="chart-line" text="Loading line chart..."></wc-busy-indicator>
+          <!-- chart-line -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-line</h3>
+            <p class="text-xs text-gray-500 text-center">Animated line graph with dots</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-line" size="medium"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-line"</code>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Chart Pie</h3>
-            <div class="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="chart-pie" text="Loading pie chart..."></wc-busy-indicator>
+          <!-- chart-ecg -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-ecg</h3>
+            <p class="text-xs text-gray-500 text-center">ECG heartbeat monitor style</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-ecg" size="medium"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-ecg"</code>
+          </div>
+
+          <!-- horizontal-bar -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">horizontal-bar</h3>
+            <p class="text-xs text-gray-500 text-center">Parallax scrolling bars</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="horizontal-bar" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="horizontal-bar"</code>
+          </div>
+
+          <!-- chart-connector -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-connector</h3>
+            <p class="text-xs text-gray-500 text-center">Wavy line with animated dots</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-connector" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-connector"</code>
+          </div>
+
+          <!-- chart-pie -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-pie</h3>
+            <p class="text-xs text-gray-500 text-center">Pie chart segments</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-pie" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-pie"</code>
+          </div>
+
+          <!-- chart-doughnut -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">chart-doughnut</h3>
+            <p class="text-xs text-gray-500 text-center">Doughnut with color variations</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="chart-doughnut" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="chart-doughnut"</code>
+          </div>
+
+          <!-- spinner -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">spinner</h3>
+            <p class="text-xs text-gray-500 text-center">Classic spinner</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="spinner" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="spinner"</code>
+          </div>
+
+          <!-- pulse -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">pulse</h3>
+            <p class="text-xs text-gray-500 text-center">Pulsing circle</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="pulse" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="pulse"</code>
+          </div>
+
+          <!-- dots -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">dots</h3>
+            <p class="text-xs text-gray-500 text-center">Bouncing dots</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="dots" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="dots"</code>
+          </div>
+
+          <!-- skeleton -->
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h3 class="font-semibold text-lg">skeleton</h3>
+            <p class="text-xs text-gray-500 text-center">Skeleton loading bars</p>
+            <div class="w-full h-32 flex items-center justify-center">
+              <wc-busy-indicator type="skeleton" size="medium"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">type="skeleton"</code>
           </div>
         </div>
       </section>
 
-      <!-- General Indicators -->
+      <!-- Color Variations Feature -->
       <section class="container p-4 rounded-md">
-        <h2 class="text-2xl font-semibold mb-4">General Purpose Indicators</h2>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Spinner</h3>
-            <div class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="spinner"></wc-busy-indicator>
+        <h2 class="text-2xl font-semibold mb-4">Color Variation Modes</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          The <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">color-variation</code> attribute controls the color diversity:
+        </p>
+        <ul class="list-disc list-inside mb-6 text-gray-700 dark:text-gray-300 space-y-2">
+          <li><strong>standard</strong> - Uses --surface-3, --surface-5, --surface-7, --surface-9, --surface-11, --surface-13 (strong visible differences)</li>
+          <li><strong>subtle</strong> - Uses HSL lightness adjustments (-20%, -10%, 0%, +10%, +20%, +30%)</li>
+          <li><strong>off</strong> - All bars/segments same color</li>
+        </ul>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Default: <strong>standard</strong> for chart-bar and chart-doughnut, <strong>off</strong> for others
+        </p>
+
+        <h3 class="text-xl font-semibold mb-4">Chart Bar - All Three Modes</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-green-400 dark:border-green-600 rounded-lg bg-green-50 dark:bg-green-900/20">
+            <h4 class="font-semibold text-lg">Standard (Default)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-x variables</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" color-variation="standard" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="standard"</code>
+          </div>
+
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <h4 class="font-semibold text-lg">Subtle</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">HSL lightness adjustments</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" color-variation="subtle" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="subtle"</code>
+          </div>
+
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h4 class="font-semibold text-lg">Off</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Single color only</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" color-variation="off" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="off"</code>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4">Chart Doughnut - All Three Modes</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-purple-400 dark:border-purple-600 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+            <h4 class="font-semibold text-lg">Standard (Default)</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-x variables</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="standard"</code>
+          </div>
+
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <h4 class="font-semibold text-lg">Subtle</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">HSL lightness adjustments</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-doughnut" color-variation="subtle" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="subtle"</code>
+          </div>
+
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            <h4 class="font-semibold text-lg">Off</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Same color with opacity variation</p>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-doughnut" color-variation="off" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="off"</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Theme Showcase with Color Swatches -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Theme Colors Showcase</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          All indicators automatically use Wave CSS swatch colors. Try switching themes with the selector above to see the colors change!
+        </p>
+
+        <h3 class="text-xl font-semibold mb-4">Color Variation Examples Across Themes</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Fire Theme -->
+          <div class="theme-fire p-6 rounded-lg border-2 border-red-400">
+            <h4 class="font-semibold mb-3 text-center text-red-700 dark:text-red-300">Fire Theme</h4>
+            <div class="flex flex-col gap-4">
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-bar" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-center">
+              <p class="font-mono">--surface-3, 5, 7, 9, 11, 13</p>
             </div>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Pulse</h3>
-            <div class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="pulse"></wc-busy-indicator>
+          <!-- Ocean Theme -->
+          <div class="theme-ocean p-6 rounded-lg border-2 border-blue-400">
+            <h4 class="font-semibold mb-3 text-center text-blue-700 dark:text-blue-300">Ocean Theme</h4>
+            <div class="flex flex-col gap-4">
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-bar" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-center">
+              <p class="font-mono">--surface-3, 5, 7, 9, 11, 13</p>
             </div>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Dots</h3>
-            <div class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="dots"></wc-busy-indicator>
+          <!-- Forest Theme -->
+          <div class="theme-forest p-6 rounded-lg border-2 border-green-400">
+            <h4 class="font-semibold mb-3 text-center text-green-700 dark:text-green-300">Forest Theme</h4>
+            <div class="flex flex-col gap-4">
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-bar" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-center">
+              <p class="font-mono">--surface-3, 5, 7, 9, 11, 13</p>
             </div>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
-            <h3 class="font-semibold">Skeleton</h3>
-            <div class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
-              <wc-busy-indicator type="skeleton"></wc-busy-indicator>
+          <!-- Sunset Theme -->
+          <div class="theme-sunset p-6 rounded-lg border-2 border-orange-400">
+            <h4 class="font-semibold mb-3 text-center text-orange-700 dark:text-orange-300">Sunset Theme</h4>
+            <div class="flex flex-col gap-4">
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-bar" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+              <div class="h-24 flex items-center justify-center bg-white/50 dark:bg-black/20 rounded">
+                <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="small"></wc-busy-indicator>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-center">
+              <p class="font-mono">--surface-3, 5, 7, 9, 11, 13</p>
             </div>
           </div>
         </div>
@@ -82,25 +290,28 @@
       <section class="container p-4 rounded-md">
         <h2 class="text-2xl font-semibold mb-4">Size Variations</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="flex flex-col items-center gap-2">
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
             <h3 class="font-semibold">Small</h3>
-            <div class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
+            <div class="w-full h-24 flex items-center justify-center">
               <wc-busy-indicator type="chart-bar" size="small"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">size="small"</code>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-blue-400 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-900/20">
             <h3 class="font-semibold">Medium (Default)</h3>
-            <div class="w-full h-40 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
+            <div class="w-full h-32 flex items-center justify-center">
               <wc-busy-indicator type="chart-bar" size="medium"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">size="medium"</code>
           </div>
 
-          <div class="flex flex-col items-center gap-2">
+          <div class="flex flex-col items-center gap-3 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
             <h3 class="font-semibold">Large</h3>
-            <div class="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded">
+            <div class="w-full h-40 flex items-center justify-center">
               <wc-busy-indicator type="chart-bar" size="large"></wc-busy-indicator>
             </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">size="large"</code>
           </div>
         </div>
       </section>
@@ -108,94 +319,163 @@
       <!-- Integrated with wc-chartjs -->
       <section class="container p-4 rounded-md">
         <h2 class="text-2xl font-semibold mb-4">Integrated with WC-ChartJS</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          Busy indicators work seamlessly with wc-chartjs components during data loading.
+        </p>
 
-        <h3 class="text-lg font-semibold mb-2">With Busy Indicator</h3>
-        <wc-chartjs
-          id="chart-with-indicator"
-          url="/api/chart-data/slow"
-          type="bar"
-          height="400"
-          busy-indicator="true"
-          show-legend="true">
-        </wc-chartjs>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Auto-matched Type (chart-bar)</h3>
+            <wc-chartjs
+              id="chart-with-indicator"
+              url="/api/chart-data/slow"
+              type="bar"
+              height="300"
+              busy-indicator="true"
+              show-legend="true">
+            </wc-chartjs>
+          </div>
 
-        <h3 class="text-lg font-semibold mb-2 mt-8">With Loading Text (Default)</h3>
-        <wc-chartjs
-          id="chart-with-text"
-          url="/api/chart-data/slow"
-          type="line"
-          height="400"
-          loading-text="Fetching chart data..."
-          show-legend="true">
-        </wc-chartjs>
-
-        <h3 class="text-lg font-semibold mb-2 mt-8">Custom Busy Indicator Type</h3>
-        <wc-chartjs
-          id="chart-custom-indicator"
-          url="/api/chart-data/slow"
-          type="pie"
-          height="400"
-          busy-indicator="true"
-          busy-indicator-type="pulse"
-          loading-text="Loading pie chart data..."
-          show-legend="true">
-        </wc-chartjs>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Custom Type (pulse)</h3>
+            <wc-chartjs
+              id="chart-custom-indicator"
+              url="/api/chart-data/slow"
+              type="line"
+              height="300"
+              busy-indicator="true"
+              busy-indicator-type="pulse"
+              show-legend="true">
+            </wc-chartjs>
+          </div>
+        </div>
       </section>
 
-      <!-- Standalone Examples -->
+      <!-- Code Examples -->
       <section class="container p-4 rounded-md">
-        <h2 class="text-2xl font-semibold mb-4">Standalone Usage</h2>
-        <p class="mb-4 text-gray-600 dark:text-gray-400">
-          You can use wc-busy-indicator independently in your own components:
-        </p>
-        <div class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto">
+        <h2 class="text-2xl font-semibold mb-4">Code Examples</h2>
+
+        <h3 class="text-lg font-semibold mb-3">Basic Usage</h3>
+        <div class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto mb-6">
           <pre><code>&lt;!-- Simple usage --&gt;
 &lt;wc-busy-indicator type="chart-bar"&gt;&lt;/wc-busy-indicator&gt;
 
-&lt;!-- With text --&gt;
+&lt;!-- With text and size --&gt;
 &lt;wc-busy-indicator
   type="chart-line"
   text="Loading data..."
   size="large"&gt;
 &lt;/wc-busy-indicator&gt;
 
-&lt;!-- Programmatic control --&gt;
-&lt;wc-busy-indicator id="myIndicator" type="spinner"&gt;&lt;/wc-busy-indicator&gt;
+&lt;!-- With color variations --&gt;
+&lt;wc-busy-indicator
+  type="chart-bar"
+  color-variation="standard"
+  size="medium"&gt;
+&lt;/wc-busy-indicator&gt;
+
+&lt;!-- Subtle color variations --&gt;
+&lt;wc-busy-indicator
+  type="chart-bar"
+  color-variation="subtle"&gt;
+&lt;/wc-busy-indicator&gt;
+
+&lt;!-- No color variations --&gt;
+&lt;wc-busy-indicator
+  type="chart-bar"
+  color-variation="off"&gt;
+&lt;/wc-busy-indicator&gt;</code></pre>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-3">With WC-ChartJS</h3>
+        <div class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto mb-6">
+          <pre><code>&lt;!-- Automatic busy indicator (matches chart type) --&gt;
+&lt;wc-chartjs
+  url="/api/data"
+  type="bar"
+  busy-indicator="true"&gt;
+&lt;/wc-chartjs&gt;
+
+&lt;!-- Custom busy indicator type --&gt;
+&lt;wc-chartjs
+  url="/api/data"
+  type="line"
+  busy-indicator="true"
+  busy-indicator-type="chart-ecg"&gt;
+&lt;/wc-chartjs&gt;</code></pre>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-3">Programmatic Control</h3>
+        <div class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto">
+          <pre><code>&lt;wc-busy-indicator id="myIndicator" type="spinner"&gt;&lt;/wc-busy-indicator&gt;
 
 &lt;script&gt;
   const indicator = document.getElementById('myIndicator');
 
-  // Show
+  // Show the indicator
   indicator.show();
 
-  // Hide
+  // Hide the indicator
   indicator.hide();
 
-  // Remove
+  // Remove from DOM
   indicator.remove();
+
+  // Change type dynamically
+  indicator.setAttribute('type', 'chart-bar');
+
+  // Change color variation mode
+  indicator.setAttribute('color-variation', 'standard'); // or 'subtle' or 'off'
 &lt;/script&gt;</code></pre>
         </div>
       </section>
 
-      <!-- Theme Showcase -->
+      <!-- Attributes Reference -->
       <section class="container p-4 rounded-md">
-        <h2 class="text-2xl font-semibold mb-4">Theme Aware</h2>
-        <p class="mb-4 text-gray-600 dark:text-gray-400">
-          All indicators automatically adapt to the current Wave CSS theme. Try switching themes using the selector above!
-        </p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="theme-fire p-4 rounded">
-            <wc-busy-indicator type="chart-bar" size="small"></wc-busy-indicator>
-          </div>
-          <div class="theme-ocean p-4 rounded">
-            <wc-busy-indicator type="chart-line" size="small"></wc-busy-indicator>
-          </div>
-          <div class="theme-sunset p-4 rounded">
-            <wc-busy-indicator type="chart-pie" size="small"></wc-busy-indicator>
-          </div>
-          <div class="theme-forest p-4 rounded">
-            <wc-busy-indicator type="pulse" size="small"></wc-busy-indicator>
-          </div>
+        <h2 class="text-2xl font-semibold mb-4">Attributes Reference</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
+            <thead class="bg-gray-200 dark:bg-gray-700">
+              <tr>
+                <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Attribute</th>
+                <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Type</th>
+                <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Default</th>
+                <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>type</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">spinner</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Animation type: chart-bar, chart-line, chart-ecg, horizontal-bar, chart-connector, chart-pie, chart-doughnut, spinner, pulse, dots, skeleton</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>text</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">""</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Optional text to display below the indicator</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>size</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">medium</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Size: small, medium, large</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>color-variation</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">standard* / off</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Color variation mode: "standard" (--surface-x), "subtle" (HSL adjustments), "off" (single color). *Defaults to "standard" for chart-bar and chart-doughnut, "off" for others</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>color</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">theme color</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Custom color override (CSS color value)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </div>

@@ -19981,7 +19981,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     return "wc-busy-indicator";
   }
   static get observedAttributes() {
-    return ["type", "text", "size", "color", "use-color-variations"];
+    return ["type", "text", "size", "color", "color-variation"];
   }
   constructor() {
     super();
@@ -19998,7 +19998,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     this._renderIndicator();
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (["type", "text", "size", "color", "use-color-variations"].includes(attrName)) {
+    if (["type", "text", "size", "color", "color-variation"].includes(attrName)) {
       if (this.componentElement) {
         this._renderIndicator();
       }
@@ -20059,27 +20059,48 @@ var WcBusyIndicator = class extends WcBaseComponent {
         return this._createSpinnerIndicator(dimensions);
     }
   }
-  _shouldUseColorVariations() {
-    const attr = this.getAttribute("use-color-variations");
-    if (attr !== null) {
-      return attr === "true";
+  _getColorVariationMode() {
+    const attr = this.getAttribute("color-variation");
+    if (attr !== null && ["standard", "subtle", "off"].includes(attr)) {
+      return attr;
     }
     const type = this.getAttribute("type") || "spinner";
     const variationTypes = ["chart-bar", "chart-doughnut"];
-    return variationTypes.includes(type);
+    return variationTypes.includes(type) ? "standard" : "off";
   }
   _getThemeColorVariations(count) {
-    const swatchLevels = [300, 400, 500, 600, 700, 800];
+    const mode = this._getColorVariationMode();
     const variations = [];
-    for (let i = 0; i < count; i++) {
-      const level = swatchLevels[i % swatchLevels.length];
-      const color = getComputedStyle(document.documentElement).getPropertyValue(`--primary-${level}`).trim();
-      if (color) {
-        variations.push(color);
-      } else {
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--primary-bg-color").trim() || "#3498db";
-        variations.push(this._adjustColorLightness(primaryColor, (i - 2) * 15));
+    if (mode === "off") {
+      const primaryColor = this._getPrimaryColor();
+      for (let i = 0; i < count; i++) {
+        variations.push(primaryColor);
       }
+      return variations;
+    }
+    if (mode === "standard") {
+      const surfaceLevels = [3, 5, 7, 9, 11, 13];
+      for (let i = 0; i < count; i++) {
+        const level = surfaceLevels[i % surfaceLevels.length];
+        const color = getComputedStyle(document.documentElement).getPropertyValue(`--surface-${level}`).trim();
+        if (color) {
+          variations.push(color);
+        } else {
+          const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--primary-bg-color").trim() || "#3498db";
+          const step = (i - Math.floor(count / 2)) * 40;
+          variations.push(this._adjustColorLightness(primaryColor, step));
+        }
+      }
+      return variations;
+    }
+    if (mode === "subtle") {
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--primary-bg-color").trim() || "#3498db";
+      const steps = [-20, -10, 0, 10, 20, 30];
+      for (let i = 0; i < count; i++) {
+        const step = steps[i % steps.length];
+        variations.push(this._adjustColorLightness(primaryColor, step));
+      }
+      return variations;
     }
     return variations;
   }
@@ -20159,9 +20180,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     const numBars = 5;
     const totalWidth = barWidth * numBars + gap * (numBars - 1);
     const startX = (dims.width - totalWidth) / 2;
-    const useVariations = this._shouldUseColorVariations();
-    const colors = useVariations ? this._getThemeColorVariations(numBars) : null;
-    const singleColor = this._getPrimaryColor();
+    const colors = this._getThemeColorVariations(numBars);
     for (let i = 0; i < numBars; i++) {
       const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       const x = startX + i * (barWidth + gap);
@@ -20169,11 +20188,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
       rect.setAttribute("width", barWidth);
       rect.setAttribute("rx", barWidth / 4);
       rect.setAttribute("class", "busy-indicator-bar");
-      if (useVariations && colors) {
-        rect.setAttribute("fill", colors[i]);
-      } else {
-        rect.setAttribute("fill", singleColor);
-      }
+      rect.setAttribute("fill", colors[i]);
       rect.style.animationDelay = `${i * 0.1}s`;
       svg.appendChild(rect);
     }
@@ -20355,17 +20370,14 @@ var WcBusyIndicator = class extends WcBaseComponent {
     const outerRadius = size * 0.4;
     const innerRadius = size * 0.2;
     const segments = 4;
-    const useVariations = this._shouldUseColorVariations();
-    const colors = useVariations ? this._getThemeColorVariations(segments) : null;
-    const singleColor = this._getPrimaryColor();
+    const mode = this._getColorVariationMode();
+    const colors = this._getThemeColorVariations(segments);
     for (let i = 0; i < segments; i++) {
       const startAngle = i * 360 / segments - 90;
       const endAngle = (i + 1) * 360 / segments - 90;
       const path = this._createDoughnutSegment(centerX, centerY, outerRadius, innerRadius, startAngle, endAngle);
-      if (useVariations && colors) {
-        path.setAttribute("fill", colors[i]);
-      } else {
-        path.setAttribute("fill", singleColor);
+      path.setAttribute("fill", colors[i]);
+      if (mode === "off") {
         path.setAttribute("opacity", 0.4 + i * 0.15);
       }
       path.setAttribute("class", "busy-indicator-doughnut-segment");
