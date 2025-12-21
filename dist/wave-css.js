@@ -19736,7 +19736,9 @@ var WcChartjs = class extends WcChart {
       "auto-refresh",
       "loading-text",
       "busy-indicator",
-      "busy-indicator-type"
+      "busy-indicator-type",
+      "busy-color-variation",
+      "busy-color-levels"
     ];
   }
   constructor() {
@@ -19885,6 +19887,14 @@ var WcChartjs = class extends WcChart {
         this.loadingIndicator.setAttribute("text", loadingText);
       }
       this.loadingIndicator.setAttribute("size", size);
+      const colorVariation = this.getAttribute("busy-color-variation");
+      if (colorVariation) {
+        this.loadingIndicator.setAttribute("color-variation", colorVariation);
+      }
+      const colorLevels = this.getAttribute("busy-color-levels");
+      if (colorLevels) {
+        this.loadingIndicator.setAttribute("color-levels", colorLevels);
+      }
       this.loadingIndicator.style.minHeight = this.getAttribute("height") ? `${this.getAttribute("height")}px` : "400px";
     } else {
       const text = loadingText || "Loading chart...";
@@ -20065,7 +20075,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
       return attr;
     }
     const type = this.getAttribute("type") || "spinner";
-    const variationTypes = ["chart-bar", "chart-doughnut"];
+    const variationTypes = ["chart-bar", "chart-pie", "chart-doughnut"];
     return variationTypes.includes(type) ? "standard" : "off";
   }
   _getThemeColorVariations(count) {
@@ -20085,7 +20095,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
         surfaceLevels = customLevels.split(",").map((s) => parseInt(s.trim())).filter((n) => !isNaN(n));
       }
       if (!surfaceLevels || surfaceLevels.length === 0) {
-        surfaceLevels = [3, 5, 7, 9, 11, 13];
+        surfaceLevels = [4, 6, 7, 8, 10];
       }
       for (let i = 0; i < count; i++) {
         const level = surfaceLevels[i % surfaceLevels.length];
@@ -20356,10 +20366,16 @@ var WcBusyIndicator = class extends WcBaseComponent {
     const centerY = size / 2;
     const radius = size * 0.4;
     const segments = 4;
+    const mode = this._getColorVariationMode();
+    const colors = this._getThemeColorVariations(segments);
     for (let i = 0; i < segments; i++) {
       const startAngle = i * 360 / segments - 90;
       const endAngle = (i + 1) * 360 / segments - 90;
       const path = this._createPieSegment(centerX, centerY, radius, startAngle, endAngle);
+      path.setAttribute("fill", colors[i]);
+      if (mode === "off") {
+        path.setAttribute("opacity", 0.4 + i * 0.15);
+      }
       path.setAttribute("class", "busy-indicator-pie-segment");
       path.style.animationDelay = `${i * 0.15}s`;
       svg.appendChild(path);

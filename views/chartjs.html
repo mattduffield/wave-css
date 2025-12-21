@@ -191,28 +191,95 @@
           </div>
         </div>
 
-        <h3 class="text-xl font-semibold mb-4">Color Variations Toggle</h3>
+        <h3 class="text-xl font-semibold mb-4">Color Variation Modes</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-4">
-          Use the <code>use-color-variations</code> attribute to toggle multi-color display (defaults to true for chart-bar and chart-doughnut).
+          Use the <code>color-variation</code> attribute to control color display: "standard" (strong visible differences using --surface-x), "subtle" (HSL adjustments), or "off" (single color). chart-bar, chart-pie, and chart-doughnut default to "standard".
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">standard (default)</h4>
+            <wc-busy-indicator type="chart-bar" color-variation="standard" size="medium"></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Uses --surface-4,6,7,8,10</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">subtle</h4>
+            <wc-busy-indicator type="chart-bar" color-variation="subtle" size="medium"></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">HSL lightness adjustments</p>
+          </div>
+          <div class="flex flex-col items-center p-4 border rounded">
+            <h4 class="text-md font-semibold mb-2">off</h4>
+            <wc-busy-indicator type="chart-bar" color-variation="off" size="medium"></wc-busy-indicator>
+            <p class="text-xs text-gray-500 mt-2">Single color</p>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-4 mt-8">Custom Color Levels</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Use <code>color-levels</code> to customize which --surface-x variables are used (default: "4,6,7,8,10").
         </p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="flex flex-col items-center p-4 border rounded">
-            <h4 class="text-md font-semibold mb-2">chart-bar (variations enabled)</h4>
-            <wc-busy-indicator type="chart-bar" use-color-variations="true" size="medium"></wc-busy-indicator>
+            <h4 class="text-md font-semibold mb-2">Default levels (4,6,7,8,10)</h4>
+            <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="medium"></wc-busy-indicator>
           </div>
           <div class="flex flex-col items-center p-4 border rounded">
-            <h4 class="text-md font-semibold mb-2">chart-bar (single color)</h4>
-            <wc-busy-indicator type="chart-bar" use-color-variations="false" size="medium"></wc-busy-indicator>
-          </div>
-          <div class="flex flex-col items-center p-4 border rounded">
-            <h4 class="text-md font-semibold mb-2">chart-doughnut (variations enabled)</h4>
-            <wc-busy-indicator type="chart-doughnut" use-color-variations="true" size="medium"></wc-busy-indicator>
-          </div>
-          <div class="flex flex-col items-center p-4 border rounded">
-            <h4 class="text-md font-semibold mb-2">chart-doughnut (single color)</h4>
-            <wc-busy-indicator type="chart-doughnut" use-color-variations="false" size="medium"></wc-busy-indicator>
+            <h4 class="text-md font-semibold mb-2">Custom levels (2,5,8,11)</h4>
+            <wc-busy-indicator type="chart-doughnut" color-variation="standard" color-levels="2,5,8,11" size="medium"></wc-busy-indicator>
           </div>
         </div>
+      </section>
+
+      <!-- Example 9: wc-chartjs with Busy Indicator Color Control -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 9: Control Busy Indicator Colors from wc-chartjs</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Use <code>busy-color-variation</code> and <code>busy-color-levels</code> to control the loading indicator appearance.
+        </p>
+
+        <h3 class="text-lg font-semibold mb-2">Standard Mode (default)</h3>
+        <wc-chartjs
+          url="/api/chart-data/demo1"
+          type="bar"
+          height="300"
+          busy-indicator="true"
+          busy-indicator-type="chart-bar"
+          busy-color-variation="standard"
+          loading-text="Loading with standard colors...">
+        </wc-chartjs>
+
+        <h3 class="text-lg font-semibold mb-2 mt-6">Subtle Color Variations</h3>
+        <wc-chartjs
+          url="/api/chart-data/demo2"
+          type="pie"
+          height="300"
+          busy-indicator="true"
+          busy-indicator-type="chart-pie"
+          busy-color-variation="subtle"
+          loading-text="Loading with subtle colors...">
+        </wc-chartjs>
+
+        <h3 class="text-lg font-semibold mb-2 mt-6">Single Color (off)</h3>
+        <wc-chartjs
+          url="/api/chart-data/demo3"
+          type="doughnut"
+          height="300"
+          busy-indicator="true"
+          busy-indicator-type="chart-doughnut"
+          busy-color-variation="off"
+          loading-text="Loading with single color...">
+        </wc-chartjs>
+
+        <h3 class="text-lg font-semibold mb-2 mt-6">Custom Color Levels</h3>
+        <wc-chartjs
+          url="/api/chart-data/demo4"
+          type="bar"
+          height="300"
+          busy-indicator="true"
+          busy-indicator-type="chart-bar"
+          busy-color-variation="standard"
+          busy-color-levels="3,5,7,9,11"
+          loading-text="Loading with custom surface levels...">
+        </wc-chartjs>
       </section>
 
       <!-- API Documentation -->
@@ -405,6 +472,29 @@
               }],
               title: 'Budget Allocation'
             })
+          });
+        }
+
+        // Demo endpoints for Example 9 (busy indicator color control)
+        if (url.includes('/api/chart-data/demo')) {
+          // Simulate slow loading to see the busy indicator
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                  labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                  datasets: [{
+                    label: 'Sales 2024',
+                    data: [120, 150, 180, 220],
+                    backgroundColor: '#64B5F6',
+                    borderColor: '#2196F3',
+                    borderWidth: 2
+                  }],
+                  title: 'Quarterly Sales'
+                })
+              });
+            }, 3000); // 3 second delay to see busy indicator
           });
         }
 

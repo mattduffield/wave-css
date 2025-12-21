@@ -29,7 +29,7 @@
  *   - size: Size of indicator (small, medium, large) - default: medium
  *   - color: Custom color (defaults to theme primary color)
  *   - color-variation: Color variation mode (standard, subtle, off) - defaults to standard for chart-bar/chart-doughnut, off for others
- *   - color-levels: Comma-separated surface levels for standard mode (e.g. "4,6,7,8,10") - defaults to "3,5,7,9,11,13"
+ *   - color-levels: Comma-separated surface levels for standard mode (e.g. "3,5,7,9,11") - defaults to "4,6,7,8,10"
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -144,7 +144,7 @@ class WcBusyIndicator extends WcBaseComponent {
 
     // Default behavior varies by type
     const type = this.getAttribute('type') || 'spinner';
-    const variationTypes = ['chart-bar', 'chart-doughnut'];
+    const variationTypes = ['chart-bar', 'chart-pie', 'chart-doughnut'];
     return variationTypes.includes(type) ? 'standard' : 'off';
   }
 
@@ -174,7 +174,7 @@ class WcBusyIndicator extends WcBaseComponent {
 
       // Fallback to defaults if no valid custom levels
       if (!surfaceLevels || surfaceLevels.length === 0) {
-        surfaceLevels = [3, 5, 7, 9, 11, 13];
+        surfaceLevels = [4, 6, 7, 8, 10];
       }
 
       for (let i = 0; i < count; i++) {
@@ -525,13 +525,23 @@ class WcBusyIndicator extends WcBaseComponent {
     const centerY = size / 2;
     const radius = size * 0.4;
 
-    // Create 4 pie segments
+    // Create 4 pie segments with color variations like doughnut
     const segments = 4;
+    const mode = this._getColorVariationMode();
+    const colors = this._getThemeColorVariations(segments);
+
     for (let i = 0; i < segments; i++) {
       const startAngle = (i * 360 / segments) - 90;
       const endAngle = ((i + 1) * 360 / segments) - 90;
 
       const path = this._createPieSegment(centerX, centerY, radius, startAngle, endAngle);
+      path.setAttribute('fill', colors[i]);
+
+      // If mode is 'off', add opacity variation to show segments
+      if (mode === 'off') {
+        path.setAttribute('opacity', 0.4 + (i * 0.15));
+      }
+
       path.setAttribute('class', 'busy-indicator-pie-segment');
       path.style.animationDelay = `${i * 0.15}s`;
       svg.appendChild(path);

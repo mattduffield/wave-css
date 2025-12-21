@@ -28,6 +28,8 @@
  *   - loading-text: Text to show while loading (default: "Loading chart...")
  *   - busy-indicator: Use wc-busy-indicator instead of loading-text ("true" or "false")
  *   - busy-indicator-type: Type of busy indicator (chart-bar, chart-line, chart-pie, spinner, etc.)
+ *   - busy-color-variation: Color variation mode for busy indicator (standard, subtle, off)
+ *   - busy-color-levels: Comma-separated surface levels for busy indicator (e.g., "4,6,7,8,10")
  *   - All wc-chart attributes (type, labels, data, datasets, title, height, etc.)
  *
  * Events:
@@ -68,7 +70,9 @@ class WcChartjs extends WcChart {
       'auto-refresh',
       'loading-text',
       'busy-indicator',
-      'busy-indicator-type'
+      'busy-indicator-type',
+      'busy-color-variation',
+      'busy-color-levels'
     ];
   }
 
@@ -277,6 +281,18 @@ class WcChartjs extends WcChart {
         this.loadingIndicator.setAttribute('text', loadingText);
       }
       this.loadingIndicator.setAttribute('size', size);
+
+      // Pass through color variation attributes
+      const colorVariation = this.getAttribute('busy-color-variation');
+      if (colorVariation) {
+        this.loadingIndicator.setAttribute('color-variation', colorVariation);
+      }
+
+      const colorLevels = this.getAttribute('busy-color-levels');
+      if (colorLevels) {
+        this.loadingIndicator.setAttribute('color-levels', colorLevels);
+      }
+
       this.loadingIndicator.style.minHeight = this.getAttribute('height') ? `${this.getAttribute('height')}px` : '400px';
     } else {
       // Use simple loading text (original behavior)
