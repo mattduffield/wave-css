@@ -20037,8 +20037,12 @@ var WcBusyIndicator = class extends WcBaseComponent {
         return this._createChartBarIndicator(dimensions);
       case "chart-line":
         return this._createChartLineIndicator(dimensions);
+      case "chart-connector":
+        return this._createChartConnectorIndicator(dimensions);
       case "chart-pie":
         return this._createChartPieIndicator(dimensions);
+      case "chart-doughnut":
+        return this._createChartDoughnutIndicator(dimensions);
       case "spinner":
         return this._createSpinnerIndicator(dimensions);
       case "pulse":
@@ -20051,6 +20055,79 @@ var WcBusyIndicator = class extends WcBaseComponent {
         return this._createSpinnerIndicator(dimensions);
     }
   }
+  _getThemeColorVariations(count) {
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--primary-bg-color").trim() || "#3498db";
+    const variations = [];
+    const step = 20;
+    for (let i = 0; i < count; i++) {
+      const adjustment = (i - Math.floor(count / 2)) * step;
+      variations.push(this._adjustColorLightness(primaryColor, adjustment));
+    }
+    return variations;
+  }
+  _adjustColorLightness(color, percent) {
+    let r, g, b;
+    if (color.startsWith("#")) {
+      const hex = color.replace("#", "");
+      r = parseInt(hex.substr(0, 2), 16);
+      g = parseInt(hex.substr(2, 2), 16);
+      b = parseInt(hex.substr(4, 2), 16);
+    } else if (color.startsWith("rgb")) {
+      const match = color.match(/\d+/g);
+      if (match && match.length >= 3) {
+        r = parseInt(match[0]);
+        g = parseInt(match[1]);
+        b = parseInt(match[2]);
+      } else {
+        return color;
+      }
+    } else {
+      return color;
+    }
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+          break;
+        case g:
+          h = ((b - r) / d + 2) / 6;
+          break;
+        case b:
+          h = ((r - g) / d + 4) / 6;
+          break;
+      }
+    }
+    l = Math.max(0, Math.min(1, l + percent / 100));
+    let r2, g2, b2;
+    if (s === 0) {
+      r2 = g2 = b2 = l;
+    } else {
+      const hue2rgb = (p2, q2, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p2 + (q2 - p2) * 6 * t;
+        if (t < 1 / 2) return q2;
+        if (t < 2 / 3) return p2 + (q2 - p2) * (2 / 3 - t) * 6;
+        return p2;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r2 = hue2rgb(p, q, h + 1 / 3);
+      g2 = hue2rgb(p, q, h);
+      b2 = hue2rgb(p, q, h - 1 / 3);
+    }
+    return `rgb(${Math.round(r2 * 255)}, ${Math.round(g2 * 255)}, ${Math.round(b2 * 255)})`;
+  }
   _createChartBarIndicator(dims) {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", dims.width);
@@ -20061,6 +20138,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     const numBars = 5;
     const totalWidth = barWidth * numBars + gap * (numBars - 1);
     const startX = (dims.width - totalWidth) / 2;
+    const colors = this._getThemeColorVariations(numBars);
     for (let i = 0; i < numBars; i++) {
       const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       const x = startX + i * (barWidth + gap);
@@ -20068,12 +20146,40 @@ var WcBusyIndicator = class extends WcBaseComponent {
       rect.setAttribute("width", barWidth);
       rect.setAttribute("rx", barWidth / 4);
       rect.setAttribute("class", "busy-indicator-bar");
+      rect.setAttribute("fill", colors[i]);
       rect.style.animationDelay = `${i * 0.1}s`;
       svg.appendChild(rect);
     }
     return svg;
   }
   _createChartLineIndicator(dims) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", dims.width);
+    svg.setAttribute("height", dims.height);
+    svg.setAttribute("viewBox", `0 0 ${dims.width} ${dims.height}`);
+    const lineWidth = 4;
+    const gap = lineWidth * 1.5;
+    const numLines = Math.floor(dims.width / (lineWidth + gap));
+    const totalWidth = lineWidth * numLines + gap * (numLines - 1);
+    const startX = (dims.width - totalWidth) / 2;
+    const colors = this._getThemeColorVariations(numLines);
+    for (let i = 0; i < numLines; i++) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const x = startX + i * (lineWidth + gap) + lineWidth / 2;
+      line.setAttribute("x1", x);
+      line.setAttribute("x2", x);
+      line.setAttribute("y1", dims.height);
+      line.setAttribute("y2", dims.height / 2);
+      line.setAttribute("stroke", colors[i % colors.length]);
+      line.setAttribute("stroke-width", lineWidth);
+      line.setAttribute("stroke-linecap", "round");
+      line.setAttribute("class", "busy-indicator-mountain-line");
+      line.style.animationDelay = `${i * 0.08}s`;
+      svg.appendChild(line);
+    }
+    return svg;
+  }
+  _createChartConnectorIndicator(dims) {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", dims.width);
     svg.setAttribute("height", dims.height);
@@ -20087,7 +20193,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
       d += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
     }
     path.setAttribute("d", d);
-    path.setAttribute("class", "busy-indicator-line");
+    path.setAttribute("class", "busy-indicator-connector-line");
     path.setAttribute("stroke-width", "3");
     path.setAttribute("fill", "none");
     svg.appendChild(path);
@@ -20098,7 +20204,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
       circle.setAttribute("cx", x);
       circle.setAttribute("cy", y);
       circle.setAttribute("r", "4");
-      circle.setAttribute("class", "busy-indicator-dot");
+      circle.setAttribute("class", "busy-indicator-connector-dot");
       circle.style.animationDelay = `${i * 0.1}s`;
       svg.appendChild(circle);
     }
@@ -20124,6 +20230,29 @@ var WcBusyIndicator = class extends WcBaseComponent {
     }
     return svg;
   }
+  _createChartDoughnutIndicator(dims) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const size = Math.min(dims.width, dims.height);
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const outerRadius = size * 0.4;
+    const innerRadius = size * 0.2;
+    const segments = 4;
+    const colors = this._getThemeColorVariations(segments);
+    for (let i = 0; i < segments; i++) {
+      const startAngle = i * 360 / segments - 90;
+      const endAngle = (i + 1) * 360 / segments - 90;
+      const path = this._createDoughnutSegment(centerX, centerY, outerRadius, innerRadius, startAngle, endAngle);
+      path.setAttribute("fill", colors[i]);
+      path.setAttribute("class", "busy-indicator-doughnut-segment");
+      path.style.animationDelay = `${i * 0.15}s`;
+      svg.appendChild(path);
+    }
+    return svg;
+  }
   _createPieSegment(cx, cy, r, startAngle, endAngle) {
     const startRad = startAngle * Math.PI / 180;
     const endRad = endAngle * Math.PI / 180;
@@ -20134,6 +20263,29 @@ var WcBusyIndicator = class extends WcBaseComponent {
     const largeArc = endAngle - startAngle > 180 ? 1 : 0;
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     const d = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+    path.setAttribute("d", d);
+    return path;
+  }
+  _createDoughnutSegment(cx, cy, outerR, innerR, startAngle, endAngle) {
+    const startRad = startAngle * Math.PI / 180;
+    const endRad = endAngle * Math.PI / 180;
+    const x1 = cx + outerR * Math.cos(startRad);
+    const y1 = cy + outerR * Math.sin(startRad);
+    const x2 = cx + outerR * Math.cos(endRad);
+    const y2 = cy + outerR * Math.sin(endRad);
+    const x3 = cx + innerR * Math.cos(endRad);
+    const y3 = cy + innerR * Math.sin(endRad);
+    const x4 = cx + innerR * Math.cos(startRad);
+    const y4 = cy + innerR * Math.sin(startRad);
+    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const d = `
+      M ${x1} ${y1}
+      A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2} ${y2}
+      L ${x3} ${y3}
+      A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4}
+      Z
+    `;
     path.setAttribute("d", d);
     return path;
   }
@@ -20181,9 +20333,8 @@ var WcBusyIndicator = class extends WcBaseComponent {
         display: contents;
       }
 
-      /* Chart Bar Animation */
+      /* Chart Bar Animation - now uses inline colors from theme variations */
       .busy-indicator-bar {
-        fill: var(--primary-bg-color, #3498db);
         transform-origin: bottom;
         animation: bar-pulse 1.2s ease-in-out infinite;
       }
@@ -20192,7 +20343,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
         0%, 100% {
           y: 60%;
           height: 40%;
-          opacity: 0.6;
+          opacity: 0.7;
         }
         50% {
           y: 20%;
@@ -20201,15 +20352,31 @@ var WcBusyIndicator = class extends WcBaseComponent {
         }
       }
 
-      /* Chart Line Animation */
-      .busy-indicator-line {
+      /* Chart Line Animation - Mountain Silhouette */
+      .busy-indicator-mountain-line {
+        animation: mountain-grow 1.5s ease-in-out infinite;
+      }
+
+      @keyframes mountain-grow {
+        0%, 100% {
+          y2: 80%;
+          opacity: 0.6;
+        }
+        50% {
+          y2: 10%;
+          opacity: 1;
+        }
+      }
+
+      /* Chart Connector Animation - Wavy line with dots */
+      .busy-indicator-connector-line {
         stroke: var(--primary-bg-color, #3498db);
         stroke-dasharray: 1000;
         stroke-dashoffset: 1000;
-        animation: line-draw 2s ease-in-out infinite;
+        animation: connector-draw 2s ease-in-out infinite;
       }
 
-      @keyframes line-draw {
+      @keyframes connector-draw {
         0% {
           stroke-dashoffset: 1000;
         }
@@ -20221,12 +20388,12 @@ var WcBusyIndicator = class extends WcBaseComponent {
         }
       }
 
-      .busy-indicator-dot {
+      .busy-indicator-connector-dot {
         fill: var(--primary-bg-color, #3498db);
-        animation: dot-pulse 1.5s ease-in-out infinite;
+        animation: connector-dot-pulse 1.5s ease-in-out infinite;
       }
 
-      @keyframes dot-pulse {
+      @keyframes connector-dot-pulse {
         0%, 100% {
           r: 3;
           opacity: 0.5;
@@ -20252,6 +20419,23 @@ var WcBusyIndicator = class extends WcBaseComponent {
         50% {
           opacity: 1;
           transform: scale(1.05);
+        }
+      }
+
+      /* Chart Doughnut Animation - uses inline colors from theme variations */
+      .busy-indicator-doughnut-segment {
+        transform-origin: center;
+        animation: doughnut-pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes doughnut-pulse {
+        0%, 100% {
+          opacity: 0.6;
+          transform: scale(0.98);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.02);
         }
       }
 
