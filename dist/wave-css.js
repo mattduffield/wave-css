@@ -19925,6 +19925,15 @@ var WcChartjs = class extends WcChart {
       this.autoRefreshInterval = null;
     }
   }
+  _applyStyle() {
+    super._applyStyle();
+    const style = `
+      wc-chartjs {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle("wc-chartjs-style", style);
+  }
   // Public methods
   reload() {
     const errorElements = this.querySelectorAll(".wc-chartjs-error");

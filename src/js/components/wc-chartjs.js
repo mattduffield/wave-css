@@ -325,6 +325,19 @@ class WcChartjs extends WcChart {
     }
   }
 
+  _applyStyle() {
+    // Call parent style first (for wc-chart styles)
+    super._applyStyle();
+
+    // Add wc-chartjs specific styles
+    const style = `
+      wc-chartjs {
+        display: contents;
+      }
+    `.trim();
+    this.loadStyle('wc-chartjs-style', style);
+  }
+
   // Public methods
   reload() {
     // Remove any error messages
