@@ -19741,12 +19741,14 @@ var WcChartjs = class extends WcChart {
     this.autoRefreshInterval = null;
     this.isLoading = false;
     this.loadingIndicator = null;
+    this._initialFetchDone = false;
   }
   async connectedCallback() {
     const url = this.getAttribute("url");
     if (url) {
       this._showLoading();
       await this._fetchChartData();
+      this._initialFetchDone = true;
       await super.connectedCallback();
       this._setupAutoRefresh();
     } else {
@@ -19758,10 +19760,14 @@ var WcChartjs = class extends WcChart {
     this._clearAutoRefresh();
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (attrName === "url" && this._isConnected) {
-      this._fetchChartData();
-    } else if (attrName === "ajax-params" && this._isConnected) {
-      this._fetchChartData();
+    if (attrName === "url" && this._isConnected && this._initialFetchDone) {
+      if (oldValue !== null && oldValue !== newValue) {
+        this._fetchChartData();
+      }
+    } else if (attrName === "ajax-params" && this._isConnected && this._initialFetchDone) {
+      if (oldValue !== null && oldValue !== newValue) {
+        this._fetchChartData();
+      }
     } else if (attrName === "auto-refresh") {
       this._setupAutoRefresh();
     } else {

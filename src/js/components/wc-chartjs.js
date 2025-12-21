@@ -73,6 +73,7 @@ class WcChartjs extends WcChart {
     this.autoRefreshInterval = null;
     this.isLoading = false;
     this.loadingIndicator = null;
+    this._initialFetchDone = false;
   }
 
   async connectedCallback() {
@@ -85,6 +86,7 @@ class WcChartjs extends WcChart {
 
       // Fetch data first
       await this._fetchChartData();
+      this._initialFetchDone = true;
 
       // Then initialize the chart with fetched data
       await super.connectedCallback();
@@ -103,12 +105,17 @@ class WcChartjs extends WcChart {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (attrName === 'url' && this._isConnected) {
-      // URL changed, refetch data
-      this._fetchChartData();
-    } else if (attrName === 'ajax-params' && this._isConnected) {
-      // Params changed, refetch data
-      this._fetchChartData();
+    if (attrName === 'url' && this._isConnected && this._initialFetchDone) {
+      // URL changed after initial load, refetch data
+      // Only refetch if this is a real change (oldValue exists and is different)
+      if (oldValue !== null && oldValue !== newValue) {
+        this._fetchChartData();
+      }
+    } else if (attrName === 'ajax-params' && this._isConnected && this._initialFetchDone) {
+      // Params changed after initial load, refetch data
+      if (oldValue !== null && oldValue !== newValue) {
+        this._fetchChartData();
+      }
     } else if (attrName === 'auto-refresh') {
       // Auto-refresh interval changed
       this._setupAutoRefresh();
