@@ -25,10 +25,10 @@
                 remove .dark from first <html/>
               end
             end">
-      <!-- The chart will automatically fetch its data from the ajax-url -->
+      <!-- The chart will automatically fetch its data from the url -->
       <wc-chartjs
         id="agentChart"
-        ajax-url=""
+        url=""
         type="bar"
         height="600"
         show-legend="true"
@@ -71,8 +71,8 @@
       customElements.whenDefined('wc-chartjs').then(() => {
         const chart = document.getElementById('agentChart');
 
-        // Set the ajax URL and parameters
-        chart.setAttribute('ajax-url', '/api/prospect-quotes/chart-data');
+        // Set the URL and parameters
+        chart.setAttribute('url', '/api/prospect-quotes/chart-data');
         chart.setParams({
           num_days: numDays,
           quote_state: quoteState

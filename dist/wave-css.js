@@ -19728,7 +19728,7 @@ var WcChartjs = class extends WcChart {
   static get observedAttributes() {
     return [
       ...WcChart.observedAttributes,
-      "ajax-url",
+      "url",
       "ajax-method",
       "ajax-params",
       "ajax-headers",
@@ -19743,8 +19743,8 @@ var WcChartjs = class extends WcChart {
     this.loadingIndicator = null;
   }
   async connectedCallback() {
-    const ajaxUrl = this.getAttribute("ajax-url");
-    if (ajaxUrl) {
+    const url = this.getAttribute("url");
+    if (url) {
       this._showLoading();
       await this._fetchChartData();
       await super.connectedCallback();
@@ -19758,7 +19758,7 @@ var WcChartjs = class extends WcChart {
     this._clearAutoRefresh();
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (attrName === "ajax-url" && this._isConnected) {
+    if (attrName === "url" && this._isConnected) {
       this._fetchChartData();
     } else if (attrName === "ajax-params" && this._isConnected) {
       this._fetchChartData();
@@ -19769,21 +19769,21 @@ var WcChartjs = class extends WcChart {
     }
   }
   async _fetchChartData() {
-    const ajaxUrl = this.getAttribute("ajax-url");
-    if (!ajaxUrl) return;
+    const url = this.getAttribute("url");
+    if (!url) return;
     this.isLoading = true;
     this._showLoading();
     this.dispatchEvent(new CustomEvent("chartjs:loading", {
       bubbles: true,
-      detail: { url: ajaxUrl }
+      detail: { url }
     }));
     try {
-      const url = this._buildRequestUrl(ajaxUrl);
+      const requestUrl = this._buildRequestUrl(url);
       const method = this.getAttribute("ajax-method") || "GET";
       const headers = this._parseJSON(this.getAttribute("ajax-headers"), {
         "Content-Type": "application/json"
       });
-      const response = await fetch(url, {
+      const response = await fetch(requestUrl, {
         method,
         headers
       });
@@ -19932,7 +19932,7 @@ var WcChartjs = class extends WcChart {
     return this._fetchChartData();
   }
   setUrl(url) {
-    this.setAttribute("ajax-url", url);
+    this.setAttribute("url", url);
   }
   setParams(params) {
     this.setAttribute("ajax-params", JSON.stringify(params));

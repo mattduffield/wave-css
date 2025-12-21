@@ -4,7 +4,7 @@
  *
  *   <!-- Fetch data from URL -->
  *   <wc-chartjs
- *     ajax-url="/api/prospect-quotes/chart-data?num_days=14"
+ *     url="/api/prospect-quotes/chart-data?num_days=14"
  *     type="bar"
  *     height="400"
  *     show-legend="true"
@@ -20,7 +20,7 @@
  *   </wc-chartjs>
  *
  * Attributes:
- *   - ajax-url: URL to fetch chart data from (returns {labels, datasets, title?, type?})
+ *   - url: URL to fetch chart data from (returns {labels, datasets, title?, type?})
  *   - ajax-method: HTTP method (default: "GET")
  *   - ajax-params: Additional query parameters as JSON string
  *   - ajax-headers: Custom headers as JSON string
@@ -59,7 +59,7 @@ class WcChartjs extends WcChart {
   static get observedAttributes() {
     return [
       ...WcChart.observedAttributes,
-      'ajax-url',
+      'url',
       'ajax-method',
       'ajax-params',
       'ajax-headers',
@@ -76,10 +76,10 @@ class WcChartjs extends WcChart {
   }
 
   async connectedCallback() {
-    // Don't call parent connectedCallback yet if we have ajax-url
-    const ajaxUrl = this.getAttribute('ajax-url');
+    // Don't call parent connectedCallback yet if we have url
+    const url = this.getAttribute('url');
 
-    if (ajaxUrl) {
+    if (url) {
       // Show loading state
       this._showLoading();
 
@@ -92,7 +92,7 @@ class WcChartjs extends WcChart {
       // Setup auto-refresh if specified
       this._setupAutoRefresh();
     } else {
-      // No ajax-url, work like regular wc-chart
+      // No url, work like regular wc-chart
       await super.connectedCallback();
     }
   }
@@ -103,7 +103,7 @@ class WcChartjs extends WcChart {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (attrName === 'ajax-url' && this._isConnected) {
+    if (attrName === 'url' && this._isConnected) {
       // URL changed, refetch data
       this._fetchChartData();
     } else if (attrName === 'ajax-params' && this._isConnected) {
@@ -119,8 +119,8 @@ class WcChartjs extends WcChart {
   }
 
   async _fetchChartData() {
-    const ajaxUrl = this.getAttribute('ajax-url');
-    if (!ajaxUrl) return;
+    const url = this.getAttribute('url');
+    if (!url) return;
 
     this.isLoading = true;
     this._showLoading();
@@ -128,12 +128,12 @@ class WcChartjs extends WcChart {
     // Dispatch loading event
     this.dispatchEvent(new CustomEvent('chartjs:loading', {
       bubbles: true,
-      detail: { url: ajaxUrl }
+      detail: { url: url }
     }));
 
     try {
       // Build URL with params
-      const url = this._buildRequestUrl(ajaxUrl);
+      const requestUrl = this._buildRequestUrl(url);
 
       // Get method and headers
       const method = this.getAttribute('ajax-method') || 'GET';
@@ -142,7 +142,7 @@ class WcChartjs extends WcChart {
       });
 
       // Fetch data
-      const response = await fetch(url, {
+      const response = await fetch(requestUrl, {
         method: method,
         headers: headers
       });
@@ -336,7 +336,7 @@ class WcChartjs extends WcChart {
   }
 
   setUrl(url) {
-    this.setAttribute('ajax-url', url);
+    this.setAttribute('url', url);
   }
 
   setParams(params) {

@@ -33,7 +33,7 @@
         </p>
         <wc-chartjs
           id="ajaxChart1"
-          ajax-url="/api/chart-data/sales"
+          url="/api/chart-data/sales"
           type="bar"
           height="400"
           show-legend="true"
@@ -52,7 +52,7 @@
         </div>
         <wc-chartjs
           id="ajaxChart2"
-          ajax-url="/api/prospect-quotes/chart-data"
+          url="/api/prospect-quotes/chart-data"
           ajax-params='{"num_days": "14", "quote_state": ""}'
           type="bar"
           height="500"
@@ -71,7 +71,7 @@
         </p>
         <wc-chartjs
           id="ajaxChart3"
-          ajax-url="/api/chart-data/realtime"
+          url="/api/chart-data/realtime"
           type="line"
           height="350"
           auto-refresh="30000"
@@ -85,13 +85,13 @@
         <h2 class="text-2xl font-semibold mb-4">Example 4: Pie Chart from API</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <wc-chartjs
-            ajax-url="/api/chart-data/market-share"
+            url="/api/chart-data/market-share"
             type="pie"
             height="350"
             legend-position="right">
           </wc-chartjs>
           <wc-chartjs
-            ajax-url="/api/chart-data/budget"
+            url="/api/chart-data/budget"
             type="doughnut"
             height="350"
             legend-position="right">
@@ -103,7 +103,7 @@
       <section class="container p-4 rounded-md">
         <h2 class="text-2xl font-semibold mb-4">Example 5: Stacked Chart with Custom Headers</h2>
         <wc-chartjs
-          ajax-url="/api/chart-data/device-usage"
+          url="/api/chart-data/device-usage"
           ajax-headers='{"Authorization": "Bearer token123", "Custom-Header": "value"}'
           type="bar"
           stacked="true"
@@ -116,7 +116,7 @@
       <section class="container p-4 rounded-md">
         <h2 class="text-2xl font-semibold mb-4">Example 6: Static Data (No AJAX)</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-4">
-          When no ajax-url is provided, wc-chartjs works exactly like wc-chart with inline data.
+          When no url is provided, wc-chartjs works exactly like wc-chart with inline data.
         </p>
         <wc-chartjs
           type="line"
@@ -140,7 +140,7 @@
         </div>
         <wc-chartjs
           id="manualChart"
-          ajax-url="/api/chart-data/manual"
+          url="/api/chart-data/manual"
           type="bar"
           height="350"
           show-data-labels="true">
