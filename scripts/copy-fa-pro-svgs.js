@@ -596,7 +596,9 @@ const ICONS_TO_COPY = [
   'clock-rotate-left',
   'text',
   'hashtag',
-  'microchip'
+  'microchip',
+  'expand',
+  'compress'
   // Add more icon names here
 ];
 

@@ -30,6 +30,7 @@
  *   - busy-indicator-type: Type of busy indicator (chart-bar, chart-line, chart-pie, spinner, etc.)
  *   - busy-color-variation: Color variation mode for busy indicator (standard, subtle, off)
  *   - busy-color-levels: Comma-separated surface levels for busy indicator (e.g., "4,6,7,8,10")
+ *   - expand-selector: CSS selector for expand target (default: "#viewport"). Adds expand/collapse button
  *   - All wc-chart attributes (type, labels, data, datasets, title, height, etc.)
  *
  * Events:
@@ -72,7 +73,8 @@ class WcChartjs extends WcChart {
       'busy-indicator',
       'busy-indicator-type',
       'busy-color-variation',
-      'busy-color-levels'
+      'busy-color-levels',
+      'expand-selector'
     ];
   }
 
@@ -82,6 +84,10 @@ class WcChartjs extends WcChart {
     this.isLoading = false;
     this.loadingIndicator = null;
     this._initialFetchDone = false;
+    this._isExpanded = false;
+    this._expandButton = null;
+    this._originalParent = null;
+    this._originalNextSibling = null;
   }
 
   async connectedCallback() {
@@ -105,6 +111,9 @@ class WcChartjs extends WcChart {
       // No url, work like regular wc-chart
       await super.connectedCallback();
     }
+
+    // Create expand button if expand-selector is present
+    this._createExpandButton();
   }
 
   disconnectedCallback() {
@@ -371,6 +380,122 @@ class WcChartjs extends WcChart {
     }
   }
 
+  _createExpandButton() {
+    const expandSelector = this.getAttribute('expand-selector');
+    if (!expandSelector) return;
+
+    // Create expand button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('wc-chartjs-expand-btn-container');
+
+    // Create wc-fa-icon for expand/collapse
+    this._expandButton = document.createElement('wc-fa-icon');
+    this._expandButton.setAttribute('name', 'expand');
+    this._expandButton.setAttribute('icon-style', 'solid');
+    this._expandButton.setAttribute('size', '1.25rem');
+    this._expandButton.classList.add('wc-chartjs-expand-btn', 'cursor-pointer');
+    this._expandButton.setAttribute('title', 'Expand chart');
+
+    // Add click handler
+    this._expandButton.addEventListener('click', () => this._toggleExpand());
+
+    buttonContainer.appendChild(this._expandButton);
+
+    // Insert button into componentElement
+    if (this.componentElement) {
+      this.componentElement.appendChild(buttonContainer);
+    }
+  }
+
+  _toggleExpand() {
+    const expandSelector = this.getAttribute('expand-selector') || '#viewport';
+    const targetElement = document.querySelector(expandSelector);
+
+    if (!targetElement) {
+      console.warn(`wc-chartjs: expand-selector "${expandSelector}" not found`);
+      return;
+    }
+
+    if (this._isExpanded) {
+      // Collapse: move back to original position
+      this._collapse();
+    } else {
+      // Expand: move to target element
+      this._expand(targetElement);
+    }
+  }
+
+  _expand(targetElement) {
+    // Store original position
+    this._originalParent = this.parentElement;
+    this._originalNextSibling = this.nextElementSibling;
+
+    // Add expanded class
+    this.classList.add('wc-chartjs-expanded');
+    if (this.componentElement) {
+      this.componentElement.classList.add('wc-chartjs-expanded-content');
+    }
+
+    // Hide all siblings in the target element
+    Array.from(targetElement.children).forEach(child => {
+      child.style.display = 'none';
+    });
+
+    // Move to target element
+    targetElement.appendChild(this);
+
+    // Update button icon and state
+    this._isExpanded = true;
+    if (this._expandButton) {
+      // Force attribute update and re-render
+      this._expandButton.removeAttribute('name');
+      setTimeout(() => {
+        this._expandButton.setAttribute('name', 'compress');
+        this._expandButton.setAttribute('title', 'Collapse chart');
+      }, 0);
+    }
+  }
+
+  _collapse() {
+    const expandSelector = this.getAttribute('expand-selector') || '#viewport';
+    const targetElement = document.querySelector(expandSelector);
+
+    // Remove expanded class
+    this.classList.remove('wc-chartjs-expanded');
+    if (this.componentElement) {
+      this.componentElement.classList.remove('wc-chartjs-expanded-content');
+    }
+
+    // Move back to original position
+    if (this._originalParent) {
+      if (this._originalNextSibling) {
+        this._originalParent.insertBefore(this, this._originalNextSibling);
+      } else {
+        this._originalParent.appendChild(this);
+      }
+    }
+
+    // Restore visibility of all siblings in the target element
+    if (targetElement) {
+      Array.from(targetElement.children).forEach(child => {
+        if (child !== this) {
+          child.style.display = '';
+        }
+      });
+    }
+
+    // Update button icon and state
+    this._isExpanded = false;
+    if (this._expandButton) {
+      // Force attribute update and re-render
+      this._expandButton.removeAttribute('name');
+      setTimeout(() => {
+        this._expandButton.setAttribute('name', 'expand');
+        this._expandButton.setAttribute('title', 'Expand chart');
+      }, 0);
+    }
+  }
+
   _applyStyle() {
     // Call parent style first (for wc-chart styles)
     super._applyStyle();
@@ -379,6 +504,56 @@ class WcChartjs extends WcChart {
     const style = `
       wc-chartjs {
         display: contents;
+      }
+
+      /* Expand button styling */
+      .wc-chartjs-expand-btn-container {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        z-index: 10;
+      }
+
+      .wc-chartjs-expand-btn {
+        background: var(--surface-2);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .wc-chartjs-expand-btn:hover {
+        background: var(--surface-3);
+        border-color: var(--primary-bg-color);
+        color: var(--primary-bg-color);
+        transform: scale(1.1);
+      }
+
+      /* Expanded state styling */
+      wc-chartjs.wc-chartjs-expanded {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        background: var(--surface-1);
+        padding: 1rem;
+        overflow: auto;
+      }
+
+      .wc-chartjs-expanded-content {
+        width: 100%;
+        height: calc(100vh - 2rem);
+      }
+
+      .wc-chartjs-expanded canvas {
+        max-height: calc(100vh - 4rem) !important;
       }
     `.trim();
     this.loadStyle('wc-chartjs-style', style);

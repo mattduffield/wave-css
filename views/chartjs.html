@@ -16,6 +16,9 @@
     }
   </style>
 
+  <!-- Viewport for expanded charts -->
+  <div id="viewport"></div>
+
   <div id="page-contents">
     <div class="flex flex-col flex-1 p-6 gap-4">
       <header class="mb-8">
@@ -38,7 +41,9 @@
           height="400"
           show-legend="true"
           legend-position="top"
-          loading-text="Loading sales data...">
+          loading-text="Loading sales data..."
+          expand-selector="#viewport">
+
         </wc-chartjs>
       </section>
 
@@ -127,7 +132,8 @@
           ]'
           title="Static Line Chart"
           height="300"
-          tension="0.4">
+          tension="0.4"
+          expand-selector="#viewport">
         </wc-chartjs>
       </section>
 
@@ -280,6 +286,68 @@
           busy-color-levels="3,5,7,9,11"
           loading-text="Loading with custom surface levels...">
         </wc-chartjs>
+      </section>
+
+      <!-- Example 10: Expandable Charts -->
+      <section class="container p-4 rounded-md">
+        <h2 class="text-2xl font-semibold mb-4">Example 10: Expandable Charts</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Use <code>expand-selector</code> to add an expand/collapse button. Click the expand icon to view the chart in fullscreen.
+          The chart will move to the target selector (default: "#viewport") and display fullscreen with a collapse button.
+        </p>
+
+        <h3 class="text-lg font-semibold mb-2">Chart with Expand to #viewport (default)</h3>
+        <div class="border rounded p-4 mb-6" style="min-height: 400px;">
+          <wc-chartjs
+            url="/api/chart-data/sales"
+            type="bar"
+            height="350"
+            show-legend="true"
+            legend-position="top"
+            expand-selector="#viewport"
+            title="Sales Chart - Click expand icon to fullscreen">
+          </wc-chartjs>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-2">Line Chart with Expand</h3>
+        <div class="border rounded p-4 mb-6" style="min-height: 400px;">
+          <wc-chartjs
+            url="/api/chart-data/realtime"
+            type="line"
+            height="350"
+            tension="0.3"
+            expand-selector="#viewport"
+            title="Real-time Data - Expandable">
+          </wc-chartjs>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-2">Pie Chart with Busy Indicator and Expand</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border rounded p-4" style="min-height: 400px;">
+            <wc-chartjs
+              url="/api/chart-data/market-share"
+              type="pie"
+              height="350"
+              legend-position="right"
+              expand-selector="#viewport"
+              busy-indicator="true"
+              busy-indicator-type="chart-pie"
+              title="Market Share - Expandable">
+            </wc-chartjs>
+          </div>
+          <div class="border rounded p-4" style="min-height: 400px;">
+            <wc-chartjs
+              url="/api/chart-data/budget"
+              type="doughnut"
+              height="350"
+              legend-position="right"
+              expand-selector="#viewport"
+              busy-indicator="true"
+              busy-indicator-type="chart-doughnut"
+              title="Budget - Expandable">
+            </wc-chartjs>
+          </div>
+        </div>
       </section>
 
       <!-- API Documentation -->
