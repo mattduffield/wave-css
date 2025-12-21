@@ -159,6 +159,7 @@ class WcChart extends WcBaseComponent {
       // When width is auto, set min-width to prevent flex shrinking to zero
       wrapper.style.minWidth = '0';
       wrapper.style.width = '100%';
+      wrapper.style.flex = '1'; // Grow to fill flex containers
     }
     wrapper.style.height = `${height}px`;
 

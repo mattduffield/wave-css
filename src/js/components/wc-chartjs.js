@@ -228,7 +228,8 @@ class WcChartjs extends WcChart {
     if (data.title) {
       this.setAttribute('title', data.title);
     }
-    if (data.type) {
+    // Only apply type from API if not already set in HTML
+    if (data.type && !this.hasAttribute('type')) {
       this.setAttribute('type', data.type);
     }
     if (data.colors) {

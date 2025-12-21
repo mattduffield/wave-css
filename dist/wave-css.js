@@ -19298,6 +19298,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
     } else {
       wrapper.style.minWidth = "0";
       wrapper.style.width = "100%";
+      wrapper.style.flex = "1";
     }
     wrapper.style.height = `${height}px`;
     this.canvas = document.createElement("canvas");
@@ -19843,7 +19844,7 @@ var WcChartjs = class extends WcChart {
     if (data.title) {
       this.setAttribute("title", data.title);
     }
-    if (data.type) {
+    if (data.type && !this.hasAttribute("type")) {
       this.setAttribute("type", data.type);
     }
     if (data.colors) {
