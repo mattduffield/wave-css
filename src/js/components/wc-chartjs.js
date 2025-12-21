@@ -424,7 +424,7 @@ class WcChartjs extends WcChart {
     this._expandButton = document.createElement('wc-fa-icon');
     this._expandButton.setAttribute('name', 'expand');
     this._expandButton.setAttribute('icon-style', 'solid');
-    this._expandButton.setAttribute('size', '1.5rem');
+    this._expandButton.setAttribute('size', '1rem');
     this._expandButton.classList.add('wc-chartjs-expand-btn', 'cursor-pointer');
     this._expandButton.setAttribute('title', 'Expand chart');
 
