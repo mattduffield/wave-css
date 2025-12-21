@@ -126,17 +126,27 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _getThemeColorVariations(count) {
-    // Get the primary color from CSS variable
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-color').trim() || '#3498db';
-
-    // Convert to HSL and create variations
+    // Use Wave CSS swatch colors which automatically handle dark/light mode
+    // Swatches range from 50 (lightest) to 900 (darkest)
+    // Use middle-to-darker range for better visibility: 300, 400, 500, 600, 700, 800
+    const swatchLevels = [300, 400, 500, 600, 700, 800];
     const variations = [];
-    const step = 20; // Lightness variation step
 
     for (let i = 0; i < count; i++) {
-      // Adjust lightness: darker to lighter
-      const adjustment = (i - Math.floor(count / 2)) * step;
-      variations.push(this._adjustColorLightness(primaryColor, adjustment));
+      const level = swatchLevels[i % swatchLevels.length];
+      const color = getComputedStyle(document.documentElement)
+        .getPropertyValue(`--primary-${level}`)
+        .trim();
+
+      if (color) {
+        variations.push(color);
+      } else {
+        // Fallback to primary color with lightness adjustment if swatch not found
+        const primaryColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--primary-bg-color')
+          .trim() || '#3498db';
+        variations.push(this._adjustColorLightness(primaryColor, (i - 2) * 15));
+      }
     }
 
     return variations;
@@ -240,36 +250,54 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _createChartLineIndicator(dims) {
-    // Mountain silhouette - vertical lines that grow/shrink
+    // Live dashboard style - continuous wavy line that animates like ECG/heartbeat monitor
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', dims.width);
     svg.setAttribute('height', dims.height);
     svg.setAttribute('viewBox', `0 0 ${dims.width} ${dims.height}`);
 
-    const lineWidth = 4; // Medium thickness - visible but not thick
-    const gap = lineWidth * 1.5;
-    const numLines = Math.floor(dims.width / (lineWidth + gap));
-    const totalWidth = (lineWidth * numLines) + (gap * (numLines - 1));
-    const startX = (dims.width - totalWidth) / 2;
+    // Create smooth wavy path with multiple points for realistic line chart look
+    const numPoints = 30;
+    const amplitude = dims.height * 0.35;
+    const centerY = dims.height / 2;
 
-    // Get theme color variations
-    const colors = this._getThemeColorVariations(numLines);
+    // Generate smooth wave path using quadratic curves
+    let pathData = '';
+    for (let i = 0; i <= numPoints; i++) {
+      const x = (i / numPoints) * dims.width;
+      const normalizedX = i / numPoints;
 
-    for (let i = 0; i < numLines; i++) {
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      const x = startX + (i * (lineWidth + gap)) + (lineWidth / 2);
+      // Create wave pattern with varying frequency for live dashboard effect
+      const wave1 = Math.sin(normalizedX * Math.PI * 4) * 0.5;
+      const wave2 = Math.sin(normalizedX * Math.PI * 8) * 0.3;
+      const y = centerY + (wave1 + wave2) * amplitude;
 
-      line.setAttribute('x1', x);
-      line.setAttribute('x2', x);
-      line.setAttribute('y1', dims.height);
-      line.setAttribute('y2', dims.height / 2);
-      line.setAttribute('stroke', colors[i % colors.length]);
-      line.setAttribute('stroke-width', lineWidth);
-      line.setAttribute('stroke-linecap', 'round');
-      line.setAttribute('class', 'busy-indicator-mountain-line');
-      line.style.animationDelay = `${i * 0.08}s`;
-      svg.appendChild(line);
+      if (i === 0) {
+        pathData = `M ${x} ${y}`;
+      } else {
+        // Use quadratic curves for smooth interpolation
+        const prevX = ((i - 1) / numPoints) * dims.width;
+        const controlX = (prevX + x) / 2;
+        pathData += ` Q ${controlX} ${y} ${x} ${y}`;
+      }
     }
+
+    // Create glow effect layer (underneath)
+    const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    glowPath.setAttribute('d', pathData);
+    glowPath.setAttribute('class', 'busy-indicator-live-line-glow');
+    glowPath.setAttribute('stroke-width', '6');
+    glowPath.setAttribute('fill', 'none');
+    glowPath.setAttribute('opacity', '0.3');
+    svg.appendChild(glowPath);
+
+    // Create main animated path (on top)
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathData);
+    path.setAttribute('class', 'busy-indicator-live-line');
+    path.setAttribute('stroke-width', '3');
+    path.setAttribute('fill', 'none');
+    svg.appendChild(path);
 
     return svg;
   }
@@ -489,19 +517,41 @@ class WcBusyIndicator extends WcBaseComponent {
         }
       }
 
-      /* Chart Line Animation - Mountain Silhouette */
-      .busy-indicator-mountain-line {
-        animation: mountain-grow 1.5s ease-in-out infinite;
+      /* Chart Line Animation - Live Dashboard ECG Style */
+      .busy-indicator-live-line {
+        stroke: var(--primary-500, var(--primary-bg-color, #3498db));
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 0;
+        animation: live-line-flow 2.5s ease-in-out infinite;
       }
 
-      @keyframes mountain-grow {
-        0%, 100% {
-          y2: 80%;
-          opacity: 0.6;
+      .busy-indicator-live-line-glow {
+        stroke: var(--primary-400, var(--primary-bg-color, #3498db));
+        filter: blur(3px);
+        animation: live-line-glow 2.5s ease-in-out infinite;
+      }
+
+      @keyframes live-line-flow {
+        0% {
+          stroke-dashoffset: 0;
+          opacity: 1;
         }
         50% {
-          y2: 10%;
+          stroke-dashoffset: -200;
+          opacity: 0.9;
+        }
+        100% {
+          stroke-dashoffset: -400;
           opacity: 1;
+        }
+      }
+
+      @keyframes live-line-glow {
+        0%, 100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 0.5;
         }
       }
 
