@@ -19752,6 +19752,7 @@ var WcChartjs = class extends WcChart {
     this._expandButton = null;
     this._originalParent = null;
     this._originalNextSibling = null;
+    this._originalHeight = null;
   }
   async connectedCallback() {
     const url = this.getAttribute("url");
@@ -19998,6 +19999,7 @@ var WcChartjs = class extends WcChart {
   _expand(targetElement) {
     this._originalParent = this.parentElement;
     this._originalNextSibling = this.nextElementSibling;
+    this._originalHeight = this.getAttribute("height");
     this.classList.add("wc-chartjs-expanded");
     if (this.componentElement) {
       this.componentElement.classList.add("wc-chartjs-expanded-content");
@@ -20006,6 +20008,8 @@ var WcChartjs = class extends WcChart {
       child.style.display = "none";
     });
     targetElement.appendChild(this);
+    const targetHeight = targetElement.clientHeight || window.innerHeight;
+    this.setAttribute("height", String(targetHeight - 40));
     this._isExpanded = true;
     if (this._expandButton) {
       this._expandButton.removeAttribute("name");
@@ -20035,6 +20039,11 @@ var WcChartjs = class extends WcChart {
           child.style.display = "";
         }
       });
+    }
+    if (this._originalHeight) {
+      this.setAttribute("height", this._originalHeight);
+    } else {
+      this.removeAttribute("height");
     }
     this._isExpanded = false;
     if (this._expandButton) {

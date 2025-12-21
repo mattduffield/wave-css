@@ -88,6 +88,7 @@ class WcChartjs extends WcChart {
     this._expandButton = null;
     this._originalParent = null;
     this._originalNextSibling = null;
+    this._originalHeight = null;
   }
 
   async connectedCallback() {
@@ -426,9 +427,10 @@ class WcChartjs extends WcChart {
   }
 
   _expand(targetElement) {
-    // Store original position
+    // Store original position and height
     this._originalParent = this.parentElement;
     this._originalNextSibling = this.nextElementSibling;
+    this._originalHeight = this.getAttribute('height');
 
     // Add expanded class
     this.classList.add('wc-chartjs-expanded');
@@ -443,6 +445,10 @@ class WcChartjs extends WcChart {
 
     // Move to target element
     targetElement.appendChild(this);
+
+    // Set height to fill the target container
+    const targetHeight = targetElement.clientHeight || window.innerHeight;
+    this.setAttribute('height', String(targetHeight - 40)); // Subtract padding
 
     // Update button icon and state
     this._isExpanded = true;
@@ -482,6 +488,13 @@ class WcChartjs extends WcChart {
           child.style.display = '';
         }
       });
+    }
+
+    // Restore original height
+    if (this._originalHeight) {
+      this.setAttribute('height', this._originalHeight);
+    } else {
+      this.removeAttribute('height');
     }
 
     // Update button icon and state
