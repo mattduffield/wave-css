@@ -19981,7 +19981,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     return "wc-busy-indicator";
   }
   static get observedAttributes() {
-    return ["type", "text", "size", "color", "color-variation"];
+    return ["type", "text", "size", "color", "color-variation", "color-levels"];
   }
   constructor() {
     super();
@@ -19998,7 +19998,7 @@ var WcBusyIndicator = class extends WcBaseComponent {
     this._renderIndicator();
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (["type", "text", "size", "color", "color-variation"].includes(attrName)) {
+    if (["type", "text", "size", "color", "color-variation", "color-levels"].includes(attrName)) {
       if (this.componentElement) {
         this._renderIndicator();
       }
@@ -20079,7 +20079,14 @@ var WcBusyIndicator = class extends WcBaseComponent {
       return variations;
     }
     if (mode === "standard") {
-      const surfaceLevels = [3, 5, 7, 9, 11, 13];
+      const customLevels = this.getAttribute("color-levels");
+      let surfaceLevels;
+      if (customLevels) {
+        surfaceLevels = customLevels.split(",").map((s) => parseInt(s.trim())).filter((n) => !isNaN(n));
+      }
+      if (!surfaceLevels || surfaceLevels.length === 0) {
+        surfaceLevels = [3, 5, 7, 9, 11, 13];
+      }
       for (let i = 0; i < count; i++) {
         const level = surfaceLevels[i % surfaceLevels.length];
         const color = getComputedStyle(document.documentElement).getPropertyValue(`--surface-${level}`).trim();

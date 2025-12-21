@@ -154,7 +154,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div class="flex flex-col items-center gap-3 p-6 border-2 border-green-400 dark:border-green-600 rounded-lg bg-green-50 dark:bg-green-900/20">
             <h4 class="font-semibold text-lg">Standard (Default)</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-x variables</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-3, 5, 7, 9, 11, 13</p>
             <div class="w-full h-40 flex items-center justify-center">
               <wc-busy-indicator type="chart-bar" color-variation="standard" size="large"></wc-busy-indicator>
             </div>
@@ -180,11 +180,33 @@
           </div>
         </div>
 
+        <h3 class="text-xl font-semibold mb-4">Custom Color Levels</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Use the <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">color-levels</code> attribute to specify which surface variables to use in standard mode.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-indigo-400 dark:border-indigo-600 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+            <h4 class="font-semibold text-lg">Default Levels (3,5,7,9,11,13)</h4>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" color-variation="standard" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-variation="standard"</code>
+          </div>
+
+          <div class="flex flex-col items-center gap-3 p-6 border-2 border-pink-400 dark:border-pink-600 rounded-lg bg-pink-50 dark:bg-pink-900/20">
+            <h4 class="font-semibold text-lg">Custom Levels (4,6,7,8,10)</h4>
+            <div class="w-full h-40 flex items-center justify-center">
+              <wc-busy-indicator type="chart-bar" color-variation="standard" color-levels="4,6,7,8,10" size="large"></wc-busy-indicator>
+            </div>
+            <code class="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">color-levels="4,6,7,8,10"</code>
+          </div>
+        </div>
+
         <h3 class="text-xl font-semibold mb-4">Chart Doughnut - All Three Modes</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="flex flex-col items-center gap-3 p-6 border-2 border-purple-400 dark:border-purple-600 rounded-lg bg-purple-50 dark:bg-purple-900/20">
             <h4 class="font-semibold text-lg">Standard (Default)</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-x variables</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Uses --surface-3, 5, 7, 9</p>
             <div class="w-full h-40 flex items-center justify-center">
               <wc-busy-indicator type="chart-doughnut" color-variation="standard" size="large"></wc-busy-indicator>
             </div>
@@ -384,6 +406,13 @@
 &lt;wc-busy-indicator
   type="chart-bar"
   color-variation="off"&gt;
+&lt;/wc-busy-indicator&gt;
+
+&lt;!-- Custom color levels --&gt;
+&lt;wc-busy-indicator
+  type="chart-bar"
+  color-variation="standard"
+  color-levels="4,6,7,8,10"&gt;
 &lt;/wc-busy-indicator&gt;</code></pre>
         </div>
 
@@ -467,6 +496,12 @@
                 <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
                 <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">standard* / off</td>
                 <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Color variation mode: "standard" (--surface-x), "subtle" (HSL adjustments), "off" (single color). *Defaults to "standard" for chart-bar and chart-doughnut, "off" for others</td>
+              </tr>
+              <tr>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>color-levels</code></td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">string</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">"3,5,7,9,11,13"</td>
+                <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Comma-separated surface variable levels to use in "standard" mode (e.g., "4,6,7,8,10"). Only applies when color-variation is "standard".</td>
               </tr>
               <tr>
                 <td class="border border-gray-300 dark:border-gray-600 px-4 py-2"><code>color</code></td>

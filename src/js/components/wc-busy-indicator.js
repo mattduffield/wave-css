@@ -29,6 +29,7 @@
  *   - size: Size of indicator (small, medium, large) - default: medium
  *   - color: Custom color (defaults to theme primary color)
  *   - color-variation: Color variation mode (standard, subtle, off) - defaults to standard for chart-bar/chart-doughnut, off for others
+ *   - color-levels: Comma-separated surface levels for standard mode (e.g. "4,6,7,8,10") - defaults to "3,5,7,9,11,13"
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -39,7 +40,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['type', 'text', 'size', 'color', 'color-variation'];
+    return ['type', 'text', 'size', 'color', 'color-variation', 'color-levels'];
   }
 
   constructor() {
@@ -60,7 +61,7 @@ class WcBusyIndicator extends WcBaseComponent {
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
-    if (['type', 'text', 'size', 'color', 'color-variation'].includes(attrName)) {
+    if (['type', 'text', 'size', 'color', 'color-variation', 'color-levels'].includes(attrName)) {
       if (this.componentElement) {
         this._renderIndicator();
       }
@@ -162,8 +163,19 @@ class WcBusyIndicator extends WcBaseComponent {
 
     if (mode === 'standard') {
       // Use --surface-x variables for strong, visible differences
-      // Pick surface levels with good spacing: 3, 5, 7, 9, 11, 13
-      const surfaceLevels = [3, 5, 7, 9, 11, 13];
+      // Get custom levels from attribute or use defaults
+      const customLevels = this.getAttribute('color-levels');
+      let surfaceLevels;
+
+      if (customLevels) {
+        // Parse comma-separated values
+        surfaceLevels = customLevels.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      }
+
+      // Fallback to defaults if no valid custom levels
+      if (!surfaceLevels || surfaceLevels.length === 0) {
+        surfaceLevels = [3, 5, 7, 9, 11, 13];
+      }
 
       for (let i = 0; i < count; i++) {
         const level = surfaceLevels[i % surfaceLevels.length];
