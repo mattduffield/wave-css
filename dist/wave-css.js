@@ -19918,7 +19918,7 @@ var WcChartjs = class extends WcChart {
       this.loadingIndicator.style.display = "flex";
       this.loadingIndicator.style.alignItems = "center";
       this.loadingIndicator.style.justifyContent = "center";
-      this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
+      this.loadingIndicator.style.backgroundColor = "transparent";
       this.loadingIndicator.style.zIndex = "10";
       this.loadingIndicator.style.pointerEvents = "auto";
     } else {
@@ -19932,7 +19932,7 @@ var WcChartjs = class extends WcChart {
       this.loadingIndicator.style.bottom = "0";
       this.loadingIndicator.style.width = "100%";
       this.loadingIndicator.style.height = "100%";
-      this.loadingIndicator.style.backgroundColor = "var(--surface-1)";
+      this.loadingIndicator.style.backgroundColor = "transparent";
       this.loadingIndicator.style.zIndex = "10";
       this.loadingIndicator.style.pointerEvents = "auto";
       this.loadingIndicator.innerHTML = `
