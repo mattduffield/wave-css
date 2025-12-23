@@ -1,0 +1,561 @@
+{% extends "__template_name__" %}
+
+{% block css %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300&family=Josefin+Sans:wght@300&family=Lato:wght@300&family=Montserrat:wght@300&family=Prata&display=swap" rel="stylesheet">
+  <style>
+    .member button.delete {
+      display: none;
+    }
+    .member:last-of-type button.delete {
+      display: block;
+    }
+  </style>
+{% endblock css %}
+
+{% block pageContent %}
+  {% set Josefin = "font-family: 'Josefin+Sans', sans-serif;" %}
+  {% set Cormorant = "font-family: 'Cormorant', serif;" %}
+  {% set Montserrat = "font-family: 'Montserrat', sans-serif;" %}
+  {% set Lato = "font-family: 'Lato', sans-serif;" %}
+  {% set Prata = "font-family: 'Prata', serif;" %}
+
+  {% set org = view.lookups.current_organization %}
+  {% set states = view.lookups.states %}
+  {% set gender_types = view.lookups.gender_types %}
+  {% set marital_status_types = view.lookups.marital_status_types %}
+  {% set coverage_types = view.lookups.coverage_types %}
+  {% set referral_sources = view.lookups.referral_sources %}
+  {% set license_status_types = view.lookups.license_status_types %}
+  {% set yes_no_types = view.lookups.yes_no_types %}
+  {% set insurance_types = view.lookups.insurance_types %}
+  {% set data = {"address": {}, "member": {"contact": {}, "driver": {}}, "quote": {}, "vehicle": {}, "liability_limits": {}, "referral": {}} %}
+  {% set data = view.lookups.prospect %}
+  {% set pegram_quote_member_id = "6502557d5aedfe2e74c53878" %}
+
+  <div class="h-screen flex flex-col flex-1 gap-4 p-0 sm:p-6">
+    <div tag="header-top" class="flex flex-col sm:flex-row gap-4 border-0 sm:border-b-2 border-b-gray-200 pb-3 dark:border-b-gray-600">
+      <div class="order-2 sm:order-1 flex flex-col justify-center border-0 sm:border-r-2 border-r-gray-200 px-4 dark:border-r-gray-600" style="{{ Montserrat }}">
+        <div class="text-orange-400 font-bold text-center text-3xl tracking-widest">
+          704-563-4343
+        </div>
+        <div class="hidden sm:block text-xl uppercase tracking-widest">
+          info@pegramins.com
+        </div>
+      </div>
+      <div class="order-1 sm:order-2 flex flex-col flex-1 justify-center border-b border-b-gray-700 sm:border-0 p-2 sm:p-0" style="{{ Cormorant }}">
+        <div class="flex flex-row flex-1 justify-center items-center sm:gap-3">
+          <div class="order-2 sm:order-1 flex-1 text-2xl sm:text-4xl font-bold tracking-widest uppercase text-center">
+            Pegram Insurance
+          </div>
+          <img class="order-1 sm:order-2 w-[80px] h-[60px]" src="https://static.showit.co/200/VEQj34ICTFib2ZoOuFE69w/183782/pegram_logo_no_words.png">
+        </div>
+      </div>
+      <div class="order-3 sm:order-3 flex flex-row sm:flex-col justify-center items-center border-0 sm:border-l-2 border-l-gray-200 sm:px-4 gap-1 sm:gap-0 dark:border-l-gray-600" style="{{ Montserrat }}">
+        <div class="text-sm sm:text-xl uppercase tracking-widest">
+          4420-C THE PLAZA
+        </div>
+        <div class="text-sm sm:text-xl uppercase tracking-widest">
+          CHARLOTTE, NC 28215
+        </div>
+      </div>
+    </div>
+    <div tag="slogan" class="hidden sm:flex flex-row text-2xl text-orange-400 text-center italic self-center tracking-widest max-w-[1000px]" style="{{ Lato }}">
+      We save you money by shopping for the lowest rates across all of our carriers and giving you the lowest rate possible.
+    </div>
+    <div tag="separator" class="relative border border-gray-200 sm:border-4 sm:border-gray-900" style="{{ Montserrat }}">
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center bg-orange-400 text-xs text-white w-28 h-5 uppercase">
+        <a href="/64fe3d8560971d96ffba6763">Q</a>UOTE
+      </div>
+    </div>
+    <div tag="ctas" class="flex flex-col sm:flex-row sm:gap-4 justify-center">
+      <div class="flex flex-col flex-1 justify-center items-center border-0 sm:border-r-2 border-r-gray-200 py-4 dark:border-r-gray-600" style="{{ Cormorant }}">
+        <div class="flex flex-row max-w-[360px] hidden">
+          {% set qr_code_url = org.domain_url ~ "g/64fa219868589b3519f3841c" %}
+          {{ view.lookups.generate_qr_code(data=qr_code_url)|safe }}
+        </div>
+        <div class="flex flex-row text-4xl text-center font-bold tracking-widest max-w-[360px]">
+          START YOUR QUOTE TODAY!
+        </div>
+      </div>
+      <div class="flex flex-row flex-1 text-lg text-orange-400 font-bold justify-center sm:italic sm:tracking-widest p-2 sm:p-0" style="{{ Lato }}">
+        <div class="flex flex-row text-center max-w-[480px]">Fill out the information below and we'll get to work on your quote right away! For one-on-one customer service, please call our dealership hotline at
+  704-563-4343.
+        </div>
+      </div>
+    </div>
+    <div tag="content" class="flex flex-row flex-1 p-4 border-2 border-gray-200 sm:rounded-md bg-gray-50 dark:bg-gray-900 dark:border-gray-600">
+      <form id="prospect_form"
+            class="p-0 sm:p-4 flex flex-col flex-1 gap-2"
+            hx-encoding="multipart/form-data"
+            hx-post=""
+            hx-swap="none"
+            hx-indicator="#content-loader">
+
+        <div class="flex flex-row gap-3 text-2xl text-2xl text-orange-400">
+          Customer Info
+        </div>
+
+        <!-- Name Fields -->
+        <div class="flex flex-row gap-3">
+          <wc-input name="first_name"
+                    lbl-label="First"
+                    class="col-1"
+                    value="{{data.first_name}}"
+                    required>
+          </wc-input>
+          <wc-input name="last_name"
+                    lbl-label="Last"
+                    class="col-1"
+                    value="{{data.last_name}}"
+                    required>
+          </wc-input>
+        </div>
+
+        <!-- Address Fields -->
+        <div class="flex flex-row gap-3">
+          <wc-google-address name="address-street"
+                             lbl-label="Street"
+                             class="col-1"
+                             api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+                             address-group="address"
+                             countries="us"
+                             types="address"
+                             placeholder="Street address..."
+                             value="{{data.address.street}}"
+                             data-lat="{{data.address.lat}}"
+                             data-lng="{{data.address.lng}}"
+                             data-address="{{data.address.formatted_address}}"
+                             required>
+          </wc-google-address>
+          <wc-input name="address-apt_suite"
+                    lbl-label="Apt/Suite"
+                    class="col w-17"
+                    value="{{data.address.apt_suite}}">
+          </wc-input>
+        </div>
+
+        <wc-address-listener address-group="address">
+          <input type="hidden" name="address-lat" value="{{data.address.lat}}">
+          <input type="hidden" name="address-lng" value="{{data.address.lng}}">
+          <input type="hidden" name="address-formatted_address" value="{{data.address.formatted_address}}">
+          <input type="hidden" name="address-map_address" value="{{data.address.map_address}}">
+
+          <div class="flex flex-row gap-3">
+            <wc-input name="address-city"
+                      lbl-label="City"
+                      class="col-1"
+                      value="{{data.address.city}}"
+                      required>
+            </wc-input>
+            <wc-select name="address-state"
+                       lbl-label="State"
+                       class="col w-18"
+                       required>
+              <option value="">Choose...</option>
+              {% set val = data.address.state %}
+              {% for item in states %}
+              <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.value}}</option>
+              {% endfor %}
+            </wc-select>
+            <wc-input name="address-postal_code"
+                      lbl-label="ZIP"
+                      class="col w-20"
+                      value="{{data.address.postal_code}}"
+                      required>
+            </wc-input>
+          </div>
+
+          <div class="flex flex-row gap-3">
+            <wc-input name="address-county"
+                      lbl-label="County"
+                      class="col-1"
+                      value="{{data.address.county}}"
+                      required>
+            </wc-input>
+          </div>
+        </wc-address-listener>
+
+        <!-- Mailing Address -->
+        <div class="mailing_address_wrapper flex-1 hidden">
+          <div class="flex flex-row gap-3">
+            <wc-input name="mailing_address-mailing_same_as_physical"
+                      lbl-label="Mailing Address Same?"
+                      type="radio"
+                      radio-group-class="row modern"
+                      value="{{data.mailing_address.mailing_same_as_physical}}">
+              {% set val = data.mailing_address.mailing_same_as_physical %}
+              {% for item in yes_no_types %}
+              <option value="{{item.value}}"{% if val == item.value %} checked{% endif %}>{{item.key}}</option>
+              {% endfor %}
+            </wc-input>
+            <wc-input name="mailing_address-street"
+                      lbl-label="Mailing"
+                      class="col-1"
+                      value="{{data.mailing_address.street}}">
+            </wc-input>
+            <wc-input name="mailing_address-apt_suite"
+                      lbl-label="Apt/Suite"
+                      class="col w-17"
+                      value="{{data.mailing_address.apt_suite}}">
+            </wc-input>
+          </div>
+          <div class="flex flex-row gap-3">
+            <wc-input name="mailing_address-city"
+                      lbl-label="City"
+                      class="col-1"
+                      value="{{data.mailing_address.city}}">
+            </wc-input>
+            <wc-select name="mailing_address-state"
+                       lbl-label="State"
+                       class="col w-18">
+              <option value="">Choose...</option>
+              {% set val = data.mailing_address.state %}
+              {% for item in states %}
+              <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.value}}</option>
+              {% endfor %}
+            </wc-select>
+            <wc-input name="mailing_address-postal_code"
+                      lbl-label="ZIP"
+                      class="col w-20"
+                      value="{{data.mailing_address.postal_code}}">
+            </wc-input>
+          </div>
+          <div class="flex flex-row gap-3">
+            <wc-input name="mailing_address-county"
+                      lbl-label="County"
+                      class="col-1"
+                      value="{{data.mailing_address.county}}">
+            </wc-input>
+          </div>
+        </div>
+
+        <!-- Household Members -->
+        <div class="members flex flex-col">
+          <div class="member flex flex-col">
+            {% set mbr_prefix = "household_members-0-" %}
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input type="hidden" name="{{mbr_prefix}}first_name" value="{{data.household_members[0].first_name}}">
+              <input type="hidden" name="{{mbr_prefix}}last_name" value="{{data.household_members[0].last_name}}">
+
+              <wc-input name="{{mbr_prefix}}contact-email"
+                        lbl-label="Email"
+                        type="email"
+                        class="col-1"
+                        value="{{data.household_members[0].contact.email}}"
+                        required>
+              </wc-input>
+              <wc-input name="{{mbr_prefix}}contact-mobile_number"
+                        lbl-label="Mobile #"
+                        type="tel"
+                        class="col-1"
+                        value="{{data.household_members[0].contact.mobile_number}}"
+                        required>
+              </wc-input>
+
+              <input type="hidden" name="{{mbr_prefix}}contact-preferred_language" value="{{data.household_members[0].contact.preferred_language}}">
+              <input type="hidden" name="{{mbr_prefix}}contact-contact_permission" value="{{data.household_members[0].contact.contact_permission}}">
+              <input type="hidden" name="{{mbr_prefix}}contact-contact_time" value="{{data.household_members[0].contact.contact_time}}">
+            </div>
+
+            <div class="flex flex-row sm:flex-row gap-3">
+              <wc-input name="{{mbr_prefix}}gender"
+                        lbl-label="Gender"
+                        type="radio"
+                        radio-group-class="row modern"
+                        value="{{data.household_members[0].gender}}"
+                        required>
+                {% set val = data.household_members[0].gender %}
+                {% for item in gender_types %}
+                <option value="{{item.value}}"{% if val == item.value %} checked{% endif %}>{{item.key}}</option>
+                {% endfor %}
+              </wc-input>
+
+              <wc-select name="{{mbr_prefix}}marital_status"
+                         lbl-label="Marital Status"
+                         class="col-1"
+                         required>
+                <option value="">Choose...</option>
+                {% set val = data.household_members[0].marital_status %}
+                {% for item in marital_status_types %}
+                <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.key}}</option>
+                {% endfor %}
+              </wc-select>
+            </div>
+
+            <div class="flex flex-row sm:flex-row gap-3">
+              <wc-select name="quote-coverage_type"
+                         lbl-label="Coverage Type"
+                         class="col-1"
+                         required>
+                <option value="">Choose...</option>
+                {% set val = data.quote.coverage_type %}
+                {% for item in coverage_types %}
+                <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.key}}</option>
+                {% endfor %}
+              </wc-select>
+
+              <wc-input name="{{mbr_prefix}}birth_date"
+                        lbl-label="DOB"
+                        type="date"
+                        class="col-1"
+                        value="{{data.household_members[0].birth_date}}"
+                        required>
+              </wc-input>
+
+              <input type="hidden" name="{{mbr_prefix}}full_name" value="{{data.household_members[0].full_name}}">
+              <input type="hidden" name="{{mbr_prefix}}current_age" value="{{data.household_members[0].current_age}}">
+            </div>
+
+            <div class="flex flex-row sm:flex-row gap-3 mb-3">
+              <wc-select name="{{mbr_prefix}}driver-license_status"
+                         lbl-label="Lic.Status"
+                         class="col-1"
+                         required>
+                <option value="">Choose...</option>
+                {% set val = data.household_members[0].driver.license_status %}
+                {% for item in license_status_types %}
+                <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.key}}</option>
+                {% endfor %}
+              </wc-select>
+
+              <wc-select name="{{mbr_prefix}}driver-license_state"
+                         lbl-label="Lic. State"
+                         class="col-1"
+                         required>
+                <option value="">Choose...</option>
+                {% set val = data.household_members[0].driver.license_state %}
+                {% for item in states %}
+                <option value="{{item.value}}"{% if val == item.value %} selected{% endif %}>{{item.value}}</option>
+                {% endfor %}
+              </wc-select>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+              <wc-input name="{{mbr_prefix}}driver-license_number"
+                        lbl-label="Lic. #"
+                        class="col-1"
+                        value="{{data.household_members[0].driver.license_number}}"
+                        required>
+              </wc-input>
+
+              <input type="hidden" name="{{mbr_prefix}}driver-license_date" value="{{data.household_members[0].driver.license_date}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-license_age" value="{{data.household_members[0].driver.license_age}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-license_years_experience" value="{{data.household_members[0].driver.license_years_experience}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-relationship_to_customer" value="{{data.household_members[0].driver.relationship_to_customer}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-driver_status" value="{{data.household_members[0].driver.driver_status}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-driver_type" value="{{data.household_members[0].driver.driver_type}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-international_years_experience" value="{{data.household_members[0].driver.international_years_experience}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-military_student_type" value="{{data.household_members[0].driver.military_student_type}}">
+              <input type="hidden" name="{{mbr_prefix}}driver-employment_status" value="{{data.household_members[0].driver.employment_status}}">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary"
+                  hx-get="/template/{{ pegram_quote_member_id }}?template_name=main_template"
+                  hx-trigger="click"
+                  hx-target=".members"
+                  hx-swap="beforeend"
+                  hx-push-url="false"
+                  hx-vals="js:{record_index: countElements('.member')}"
+                  hx-indicator="#content-loader"
+                  _="on htmx:afterRequest if detail.successful then
+                    transition my opacity to 0 then settle then remove me
+                  end">
+            Add Another Driver?
+          </button>
+        </div>
+
+        <!-- Vehicle Info -->
+        <div class="flex flex-row gap-3 text-2xl text-2xl text-orange-400">
+          Vehicle Info
+        </div>
+
+        <div class="flex flex-row gap-3">
+          <wc-input name="quote-insurance_type"
+                    lbl-label="Product"
+                    type="radio"
+                    radio-group-class="row modern"
+                    value="{{data.quote.insurance_type}}"
+                    required>
+            {% set val = data.quote.insurance_type %}
+            {% for item in insurance_types %}
+            <option value="{{item.value}}"{% if val == item.value %} checked{% endif %}>{{item.key}}</option>
+            {% endfor %}
+          </wc-input>
+        </div>
+
+        {% set vehicle = data.household_vehicles[0] %}
+        {% set idx = 0 %}
+
+        <div class="flex flex-row gap-3">
+          <wc-vin-decoder name="household_vehicles.{{idx}}.vin"
+                          lbl-label="VIN"
+                          placeholder="Enter VIN..."
+                          class="col-1"
+                          value="{{vehicle.vin}}"
+                          vehicle-type="{{data.quote.insurance_type}}"
+                          required>
+          </wc-vin-decoder>
+        </div>
+
+        <wc-vin-listener vin-group="default" array-fields="images">
+          <div class="flex flex-row gap-3">
+            <wc-input name="household_vehicles.{{idx}}.year"
+                      lbl-label="Year"
+                      class="col-1"
+                      value="{{vehicle.year}}"
+                      required>
+            </wc-input>
+            <wc-input name="household_vehicles.{{idx}}.make"
+                      lbl-label="Make"
+                      class="col-1"
+                      value="{{vehicle.make}}"
+                      required>
+            </wc-input>
+            <wc-input name="household_vehicles.{{idx}}.model"
+                      lbl-label="Model"
+                      class="col-1"
+                      value="{{vehicle.model}}"
+                      required>
+            </wc-input>
+          </div>
+
+          <div class="flex flex-row gap-3">
+            <wc-input name="household_vehicles.{{idx}}.trim"
+                      lbl-label="Trim"
+                      class="col-1"
+                      value="{{vehicle.trim}}">
+            </wc-input>
+            <wc-input name="household_vehicles.{{idx}}.msrp"
+                      lbl-label="MSRP"
+                      type="currency"
+                      class="col-1"
+                      value="{{vehicle.msrp}}">
+            </wc-input>
+          </div>
+
+          <input type="hidden" name="household_vehicles.{{idx}}.series" value="{{vehicle.series}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.bodyClass" value="{{vehicle.bodyClass}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.doors" value="{{vehicle.doors}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.wheels" value="{{vehicle.wheels}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.seats" value="{{vehicle.seats}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.transmissionStyle" value="{{vehicle.transmissionStyle}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.transmissionSpeeds" value="{{vehicle.transmissionSpeeds}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.driveType" value="{{vehicle.driveType}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.axles" value="{{vehicle.axles}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.fuelType" value="{{vehicle.fuelType}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.brakeSystemType" value="{{vehicle.brakeSystemType}}">
+        </wc-vin-listener>
+
+        <div class="flex flex-row gap-3">
+          <wc-input name="household_vehicles.{{idx}}.has_lien"
+                    lbl-label="Has Lien?"
+                    type="radio"
+                    radio-group-class="row modern"
+                    value="{{vehicle.has_lien}}"
+                    required>
+            {% set val = vehicle.has_lien %}
+            {% for item in yes_no_types %}
+            <option value="{{item.value}}"{% if val == item.value %} checked{% endif %}>{{item.key}}</option>
+            {% endfor %}
+          </wc-input>
+
+          <div class="lien_holder_{{idx}} col-1 hidden">
+            <wc-input name="household_vehicles.{{idx}}.lien_holder"
+                      lbl-label="Lien Holder"
+                      class="col-1"
+                      value="{{vehicle.lien_holder}}">
+            </wc-input>
+          </div>
+        </div>
+
+        <div class="flex flex-row gap-3 hidden">
+          <input type="hidden" name="household_vehicles.{{idx}}.vehicle_use_code" value="{{vehicle.vehicle_use_code}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.assigned_driver" value="{{vehicle.assigned_driver}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.ownership" value="{{vehicle.ownership}}">
+          <input type="hidden" name="household_vehicles.{{idx}}.ins_comprehensive" value="{{vehicle.ins_comprehensive}}" class="comp">
+          <input type="hidden" name="household_vehicles.{{idx}}.ins_collision" value="{{vehicle.ins_collision}}" class="coll">
+          <input type="hidden" name="household_vehicles.{{idx}}.ins_towing" value="{{vehicle.ins_towing}}" class="tow">
+          <input type="hidden" name="household_vehicles.{{idx}}.ins_rental" value="{{vehicle.ins_rental}}" class="rent">
+        </div>
+
+        <div class="flex flex-row gap-3 hidden">
+          <input type="hidden" name="quote-effective_date" value="{{data.quote.effective_date}}">
+          <input type="hidden" name="quote-term_length" value="{{data.quote.term_length}}">
+          <input type="hidden" name="quote-has_prior_coverage" value="{{data.quote.has_prior_coverage}}">
+        </div>
+
+        <div class="flex flex-row gap-3 hidden">
+          <input type="hidden" name="liability_limits-bi" value="{{data.liability_limits.bi}}">
+          <input type="hidden" name="liability_limits-umbi" value="{{data.liability_limits.umbi}}">
+          <input type="hidden" name="liability_limits-umuimbi" value="{{data.liability_limits.umuimbi}}">
+          <input type="hidden" name="liability_limits-pd" value="{{data.liability_limits.pd}}">
+          <input type="hidden" name="liability_limits-umpd" value="{{data.liability_limits.umpd}}">
+          <input type="hidden" name="liability_limits-med" value="{{data.liability_limits.med}}">
+          <input type="hidden" name="liability_limits-add" value="{{data.liability_limits.add}}">
+        </div>
+
+        <div class="flex flex-row gap-3 mb-3 hidden">
+          <input type="hidden" name="referral-referral_source" value="{{data.referral.referral_source}}">
+        </div>
+
+        <!-- Dealer Info -->
+        <div class="flex flex-row gap-3 text-2xl text-2xl text-orange-400">
+          Dealer Info
+        </div>
+
+        <div class="flex flex-row gap-3">
+          <wc-input name="referral-referral"
+                    lbl-label="Dealer Name"
+                    class="col-1"
+                    value="{{data.referral.referral}}"
+                    required>
+          </wc-input>
+          <wc-input name="referral-referral_city"
+                    lbl-label="City"
+                    class="col-1"
+                    value="{{data.referral.referral_city}}"
+                    required>
+          </wc-input>
+        </div>
+
+        <div class="flex flex-row gap-3">
+          <wc-input name="referral-referral_sales_person"
+                    lbl-label="Sales Person"
+                    class="col-1"
+                    value="{{data.referral.referral_sales_person}}"
+                    required>
+          </wc-input>
+        </div>
+
+        <div class="flex flex-row gap-3">
+          <wc-textarea name="referral-referral_notes"
+                       lbl-label="Dealer Notes"
+                       class="col-1"
+                       value="{{data.referral.referral_notes}}">
+          </wc-textarea>
+        </div>
+
+        <div class="flex flex-row gap-3 hidden">
+          <wc-input name="is_locked"
+                    type="checkbox"
+                    {% if data.is_locked %}checked{% endif %}>
+          </wc-input>
+          <wc-input name="is_active"
+                    type="checkbox"
+                    {% if data.is_active %}checked{% endif %}>
+          </wc-input>
+        </div>
+
+        <div class="flex flex-row gap-3 mt-4 justify-center">
+          <button type="submit" class="btn btn-primary uppercase">
+            Submit Quote
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
