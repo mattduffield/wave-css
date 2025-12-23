@@ -48,6 +48,14 @@ esbuild.build({
   outfile: 'dist/wave-css.min.css'
 }).catch(() => process.exit(1));
 
+// Critical CSS minification (for inlining in <head>)
+esbuild.build({
+  entryPoints: ['src/css/critical.css'],
+  bundle: true,
+  minify: true,
+  outfile: 'dist/wave-critical.min.css'
+}).catch(() => process.exit(1));
+
 // Copy SVG assets to dist
 function copyRecursiveSync(src, dest) {
   if (!fs.existsSync(src)) return;

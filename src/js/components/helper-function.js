@@ -318,12 +318,16 @@ export function hide(selector) {
   const el = document.querySelector(selector);
   if (!el) return;
 
+  // Skip if already marked as hidden by this function
+  if (el.dataset.hiddenByFunction === 'true') return;
+
   // Find responsive display classes (sm:flex, md:block, lg:grid, etc.)
   const responsiveDisplayClasses = Array.from(el.classList).filter(cls =>
     /^(sm|md|lg|xl|2xl):(flex|block|inline|inline-block|inline-flex|grid)$/.test(cls)
   );
 
   if (responsiveDisplayClasses.length > 0) {
+    // Has responsive display classes - ONLY override with responsive hidden classes
     // Store original responsive display classes in data attribute
     el.dataset.originalResponsiveDisplay = responsiveDisplayClasses.join(' ');
 
@@ -334,11 +338,12 @@ export function hide(selector) {
       el.classList.add(`${prefix}:hidden`);
     });
 
-    // Add base hidden for mobile (below first breakpoint)
-    el.classList.add('hidden');
+    // Mark as hidden by function (DO NOT add base .hidden class)
+    el.dataset.hiddenByFunction = 'true';
   } else {
-    // No responsive classes, just add base hidden
+    // No responsive classes - ONLY add base hidden
     el.classList.add('hidden');
+    el.dataset.hiddenByFunction = 'true';
   }
 }
 
@@ -346,12 +351,16 @@ export function show(selector) {
   const el = document.querySelector(selector);
   if (!el) return;
 
+  // Only proceed if this was hidden by the hide() function
+  if (el.dataset.hiddenByFunction !== 'true') return;
+
   // Find responsive hidden classes
   const responsiveHiddenClasses = Array.from(el.classList).filter(cls =>
     /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
   );
 
   if (responsiveHiddenClasses.length > 0) {
+    // Has responsive hidden classes - ONLY restore responsive display classes
     // Remove responsive hidden classes
     responsiveHiddenClasses.forEach(cls => {
       el.classList.remove(cls);
@@ -366,12 +375,14 @@ export function show(selector) {
       delete el.dataset.originalResponsiveDisplay;
     }
 
-    // Remove base hidden
-    el.classList.remove('hidden');
+    // DO NOT remove base .hidden class when using responsive classes
   } else {
-    // No responsive classes, just remove base hidden
+    // No responsive classes - ONLY remove base hidden
     el.classList.remove('hidden');
   }
+
+  // Clear the flag
+  delete el.dataset.hiddenByFunction;
 }
 
 export function hideAndShow(hideSelector, showSelector) {
