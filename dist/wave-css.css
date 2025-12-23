@@ -5533,9 +5533,6 @@
     right: 0;
     bottom: 0;
   }
-  .hidden {
-    display: none;
-  }
   .row {
     display: flex;
     flex-direction: row;
@@ -9583,6 +9580,9 @@
     50% {
       opacity: 0.5;
     }
+  }
+  .hidden {
+    display: none;
   }
 }
 @layer wc.external {
