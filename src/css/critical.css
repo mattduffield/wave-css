@@ -1,5 +1,8 @@
 /* Critical CSS to prevent FOUC - inline in <head> */
 
+/* No body hiding - let your skeleton pattern work naturally.
+   The critical utilities below prevent layout shift flicker. */
+
 /* Display utilities */
 .hidden {
   display: none;
