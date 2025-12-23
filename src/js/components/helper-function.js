@@ -316,12 +316,62 @@ export async function sleep(ms) {
 
 export function hide(selector) {
   const el = document.querySelector(selector);
-  el.classList.add('hidden');
+  if (!el) return;
+
+  // Find responsive display classes (sm:flex, md:block, lg:grid, etc.)
+  const responsiveDisplayClasses = Array.from(el.classList).filter(cls =>
+    /^(sm|md|lg|xl|2xl):(flex|block|inline|inline-block|inline-flex|grid)$/.test(cls)
+  );
+
+  if (responsiveDisplayClasses.length > 0) {
+    // Store original responsive display classes in data attribute
+    el.dataset.originalResponsiveDisplay = responsiveDisplayClasses.join(' ');
+
+    // Replace responsive display classes with responsive hidden classes
+    responsiveDisplayClasses.forEach(cls => {
+      const prefix = cls.split(':')[0]; // sm, md, lg, xl, 2xl
+      el.classList.remove(cls);
+      el.classList.add(`${prefix}:hidden`);
+    });
+
+    // Add base hidden for mobile (below first breakpoint)
+    el.classList.add('hidden');
+  } else {
+    // No responsive classes, just add base hidden
+    el.classList.add('hidden');
+  }
 }
 
 export function show(selector) {
   const el = document.querySelector(selector);
-  el.classList.remove('hidden');
+  if (!el) return;
+
+  // Find responsive hidden classes
+  const responsiveHiddenClasses = Array.from(el.classList).filter(cls =>
+    /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
+  );
+
+  if (responsiveHiddenClasses.length > 0) {
+    // Remove responsive hidden classes
+    responsiveHiddenClasses.forEach(cls => {
+      el.classList.remove(cls);
+    });
+
+    // Restore original responsive display classes if stored
+    if (el.dataset.originalResponsiveDisplay) {
+      const originalClasses = el.dataset.originalResponsiveDisplay.split(' ');
+      originalClasses.forEach(cls => {
+        el.classList.add(cls);
+      });
+      delete el.dataset.originalResponsiveDisplay;
+    }
+
+    // Remove base hidden
+    el.classList.remove('hidden');
+  } else {
+    // No responsive classes, just remove base hidden
+    el.classList.remove('hidden');
+  }
 }
 
 export function hideAndShow(hideSelector, showSelector) {

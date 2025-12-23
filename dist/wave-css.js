@@ -213,11 +213,43 @@ async function sleep(ms) {
 }
 function hide(selector) {
   const el = document.querySelector(selector);
-  el.classList.add("hidden");
+  if (!el) return;
+  const responsiveDisplayClasses = Array.from(el.classList).filter(
+    (cls) => /^(sm|md|lg|xl|2xl):(flex|block|inline|inline-block|inline-flex|grid)$/.test(cls)
+  );
+  if (responsiveDisplayClasses.length > 0) {
+    el.dataset.originalResponsiveDisplay = responsiveDisplayClasses.join(" ");
+    responsiveDisplayClasses.forEach((cls) => {
+      const prefix = cls.split(":")[0];
+      el.classList.remove(cls);
+      el.classList.add(`${prefix}:hidden`);
+    });
+    el.classList.add("hidden");
+  } else {
+    el.classList.add("hidden");
+  }
 }
 function show(selector) {
   const el = document.querySelector(selector);
-  el.classList.remove("hidden");
+  if (!el) return;
+  const responsiveHiddenClasses = Array.from(el.classList).filter(
+    (cls) => /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
+  );
+  if (responsiveHiddenClasses.length > 0) {
+    responsiveHiddenClasses.forEach((cls) => {
+      el.classList.remove(cls);
+    });
+    if (el.dataset.originalResponsiveDisplay) {
+      const originalClasses = el.dataset.originalResponsiveDisplay.split(" ");
+      originalClasses.forEach((cls) => {
+        el.classList.add(cls);
+      });
+      delete el.dataset.originalResponsiveDisplay;
+    }
+    el.classList.remove("hidden");
+  } else {
+    el.classList.remove("hidden");
+  }
 }
 function hideAndShow(hideSelector, showSelector) {
   hide(hideSelector);
