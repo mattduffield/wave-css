@@ -10527,21 +10527,6 @@
     --breakpoint-xl: 1280px;
     --breakpoint-2xl: 1536px;
   }
-  .hidden {
-    display: none;
-  }
-  .block {
-    display: block;
-  }
-  .flex {
-    display: flex;
-  }
-  .inline-flex {
-    display: inline-flex;
-  }
-  .grid {
-    display: grid;
-  }
   @media (min-width: 640px) {
     .sm\:block {
       display: block;
@@ -12910,4 +12895,7 @@
   }
 }
 @layer wc.main {
+  .hidden {
+    display: none;
+  }
 }

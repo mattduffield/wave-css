@@ -5525,27 +5525,6 @@
     --breakpoint-2xl: 1536px;
   }
 
-  /* Base display utilities - must come before responsive variants */
-  .hidden {
-    display: none;
-  }
-
-  .block {
-    display: block;
-  }
-
-  .flex {
-    display: flex;
-  }
-
-  .inline-flex {
-    display: inline-flex;
-  }
-
-  .grid {
-    display: grid;
-  }
-
   /* Small devices (640px and up) */
   @media (min-width: 640px) {
     /* Display utilities */
@@ -6421,5 +6400,9 @@
 }
 
 @layer wc.main {
-  /* .hidden and display utilities moved to wc.responsive layer */
+
+  .hidden {
+    display: none;
+  }
+
 }

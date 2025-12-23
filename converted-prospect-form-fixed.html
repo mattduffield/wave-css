@@ -57,6 +57,16 @@
     .dark .dark\:bg-gray-900 {
       background-color: var(--wc-gray-900);
     }
+
+    /* Fix for responsive hidden pattern - hidden on mobile, show on sm+ */
+    @media (min-width: 640px) {
+      .hidden.sm\:block {
+        display: block !important;
+      }
+      .hidden.sm\:flex {
+        display: flex !important;
+      }
+    }
   </style>
 {% endblock css %}
 
