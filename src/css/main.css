@@ -6405,4 +6405,21 @@
     display: none;
   }
 
+  /* Base display utilities for overriding .hidden with responsive classes */
+  .block {
+    display: block;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .inline-flex {
+    display: inline-flex;
+  }
+
+  .grid {
+    display: grid;
+  }
+
 }
