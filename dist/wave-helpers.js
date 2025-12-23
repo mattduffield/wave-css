@@ -268,7 +268,6 @@ var WaveHelpers = (() => {
   function hide(selector) {
     const el = document.querySelector(selector);
     if (!el) return;
-    if (el.dataset.hiddenByFunction === "true") return;
     const responsiveDisplayClasses = Array.from(el.classList).filter(
       (cls) => /^(sm|md|lg|xl|2xl):(flex|block|inline|inline-block|inline-flex|grid)$/.test(cls)
     );
@@ -279,16 +278,13 @@ var WaveHelpers = (() => {
         el.classList.remove(cls);
         el.classList.add(`${prefix}:hidden`);
       });
-      el.dataset.hiddenByFunction = "true";
     } else {
       el.classList.add("hidden");
-      el.dataset.hiddenByFunction = "true";
     }
   }
   function show(selector) {
     const el = document.querySelector(selector);
     if (!el) return;
-    if (el.dataset.hiddenByFunction !== "true") return;
     const responsiveHiddenClasses = Array.from(el.classList).filter(
       (cls) => /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
     );
@@ -306,7 +302,6 @@ var WaveHelpers = (() => {
     } else {
       el.classList.remove("hidden");
     }
-    delete el.dataset.hiddenByFunction;
   }
   function hideAndShow(hideSelector, showSelector) {
     hide(hideSelector);
