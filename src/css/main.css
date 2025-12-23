@@ -5525,11 +5525,6 @@
     --breakpoint-2xl: 1536px;
   }
 
-  /* Display utilities - must come before responsive breakpoints */
-  .hidden {
-    display: none;
-  }
-
   /* Small devices (640px and up) */
   @media (min-width: 640px) {
     /* Display utilities */
@@ -6405,5 +6400,9 @@
 }
 
 @layer wc.main {
-  /* .hidden moved to wc.responsive layer before breakpoints for proper cascade */
+
+  .hidden {
+    display: none;
+  }
+
 }
