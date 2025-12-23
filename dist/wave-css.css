@@ -9474,6 +9474,9 @@
   .tracking-wider {
     letter-spacing: 0.05em;
   }
+  .tracking-widest {
+    letter-spacing: 0.1em;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
