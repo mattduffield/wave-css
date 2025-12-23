@@ -2714,6 +2714,10 @@
 
   .inset-0 { top: 0; left: 0; right: 0; bottom: 0; }
 
+  .hidden {
+    display: none;
+  }
+
   .row {
     display: flex;
     flex-direction: row;
@@ -5527,14 +5531,14 @@
 
   /* Small devices (640px and up) */
   @media (min-width: 640px) {
-    /* Display utilities - !important allows them to override .hidden from wc.main layer */
-    .sm\:block { display: block !important; }
-    .sm\:inline-block { display: inline-block !important; }
-    .sm\:inline { display: inline !important; }
-    .sm\:flex { display: flex !important; }
-    .sm\:inline-flex { display: inline-flex !important; }
-    .sm\:grid { display: grid !important; }
-    .sm\:hidden { display: none !important; }
+    /* Display utilities */
+    .sm\:block { display: block; }
+    .sm\:inline-block { display: inline-block; }
+    .sm\:inline { display: inline; }
+    .sm\:flex { display: flex; }
+    .sm\:inline-flex { display: inline-flex; }
+    .sm\:grid { display: grid; }
+    .sm\:hidden { display: none; }
 
     /* Flex utilities */
     .sm\:flex-row { flex-direction: row; }
@@ -5724,14 +5728,14 @@
 
   /* Medium devices (768px and up) */
   @media (min-width: 768px) {
-    /* Display utilities - !important allows them to override .hidden from wc.main layer */
-    .md\:block { display: block !important; }
-    .md\:inline-block { display: inline-block !important; }
-    .md\:inline { display: inline !important; }
-    .md\:flex { display: flex !important; }
-    .md\:inline-flex { display: inline-flex !important; }
-    .md\:grid { display: grid !important; }
-    .md\:hidden { display: none !important; }
+    /* Display utilities */
+    .md\:block { display: block; }
+    .md\:inline-block { display: inline-block; }
+    .md\:inline { display: inline; }
+    .md\:flex { display: flex; }
+    .md\:inline-flex { display: inline-flex; }
+    .md\:grid { display: grid; }
+    .md\:hidden { display: none; }
 
     /* Flex utilities */
     .md\:flex-row { flex-direction: row; }
@@ -5920,14 +5924,14 @@
 
   /* Large devices (1024px and up) */
   @media (min-width: 1024px) {
-    /* Display utilities - !important allows them to override .hidden from wc.main layer */
-    .lg\:block { display: block !important; }
-    .lg\:inline-block { display: inline-block !important; }
-    .lg\:inline { display: inline !important; }
-    .lg\:flex { display: flex !important; }
-    .lg\:inline-flex { display: inline-flex !important; }
-    .lg\:grid { display: grid !important; }
-    .lg\:hidden { display: none !important; }
+    /* Display utilities */
+    .lg\:block { display: block; }
+    .lg\:inline-block { display: inline-block; }
+    .lg\:inline { display: inline; }
+    .lg\:flex { display: flex; }
+    .lg\:inline-flex { display: inline-flex; }
+    .lg\:grid { display: grid; }
+    .lg\:hidden { display: none; }
 
     /* Flex utilities */
     .lg\:flex-row { flex-direction: row; }
@@ -6115,14 +6119,14 @@
 
   /* Extra large devices (1280px and up) */
   @media (min-width: 1280px) {
-    /* Display utilities - !important allows them to override .hidden from wc.main layer */
-    .xl\:block { display: block !important; }
-    .xl\:inline-block { display: inline-block !important; }
-    .xl\:inline { display: inline !important; }
-    .xl\:flex { display: flex !important; }
-    .xl\:inline-flex { display: inline-flex !important; }
-    .xl\:grid { display: grid !important; }
-    .xl\:hidden { display: none !important; }
+    /* Display utilities */
+    .xl\:block { display: block; }
+    .xl\:inline-block { display: inline-block; }
+    .xl\:inline { display: inline; }
+    .xl\:flex { display: flex; }
+    .xl\:inline-flex { display: inline-flex; }
+    .xl\:grid { display: grid; }
+    .xl\:hidden { display: none; }
 
     /* Flex utilities */
     .xl\:flex-row { flex-direction: row; }
@@ -6269,14 +6273,14 @@
 
   /* 2X large devices (1536px and up) */
   @media (min-width: 1536px) {
-    /* Display utilities - !important allows them to override .hidden from wc.main layer */
-    .\32xl\:block { display: block !important; }
-    .\32xl\:inline-block { display: inline-block !important; }
-    .\32xl\:inline { display: inline !important; }
-    .\32xl\:flex { display: flex !important; }
-    .\32xl\:inline-flex { display: inline-flex !important; }
-    .\32xl\:grid { display: grid !important; }
-    .\32xl\:hidden { display: none !important; }
+    /* Display utilities */
+    .\32xl\:block { display: block; }
+    .\32xl\:inline-block { display: inline-block; }
+    .\32xl\:inline { display: inline; }
+    .\32xl\:flex { display: flex; }
+    .\32xl\:inline-flex { display: inline-flex; }
+    .\32xl\:grid { display: grid; }
+    .\32xl\:hidden { display: none; }
 
     /* Flex utilities */
     .\32xl\:flex-row { flex-direction: row; }
@@ -6400,9 +6404,5 @@
 }
 
 @layer wc.main {
-
-  .hidden {
-    display: none;
-  }
-
+  /* .hidden moved to wc.utility layer to come before wc.responsive */
 }
