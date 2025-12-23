@@ -351,8 +351,8 @@ export function show(selector) {
   const el = document.querySelector(selector);
   if (!el) return;
 
-  // Only proceed if this was hidden by the hide() function
-  if (el.dataset.hiddenByFunction !== 'true') return;
+  // // Only proceed if this was hidden by the hide() function
+  // if (el.dataset.hiddenByFunction !== 'true') return;
 
   // Find responsive hidden classes
   const responsiveHiddenClasses = Array.from(el.classList).filter(cls =>

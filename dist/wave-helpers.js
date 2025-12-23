@@ -288,7 +288,6 @@ var WaveHelpers = (() => {
   function show(selector) {
     const el = document.querySelector(selector);
     if (!el) return;
-    if (el.dataset.hiddenByFunction !== "true") return;
     const responsiveHiddenClasses = Array.from(el.classList).filter(
       (cls) => /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
     );
