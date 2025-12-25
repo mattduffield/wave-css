@@ -279,7 +279,7 @@ Filter by place type:
       name="address.street"
       lbl-label="Street Address"
       class="col-1"
-      api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+      api-key=""
       address-group="address"
       target-map="address-map"
       countries="us"
@@ -322,7 +322,7 @@ Filter by place type:
 
   <wc-google-map
     id="address-map"
-    api-key="AIzaSyDuWOTGr4N8FRsJ9r0MtEkXx-JFXgg_c48"
+    api-key=""
     zoom="13"
     map-type="roadmap">
   </wc-google-map>
