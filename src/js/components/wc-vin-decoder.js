@@ -7,7 +7,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  *
  * @attr {string} name - Input name for form submission
  * @attr {string} value - Current VIN value
- * @attr {string} api-url - VIN decoder API URL (default: https://vin-decoder-ligipcg4jq-uc.a.run.app)
+ * @attr {string} api-url - VIN decoder API URL (default: https://vin-dev.webendcreator.com)
  * @attr {string} database-endpoint - Optional endpoint to check database first
  * @attr {string} lbl-label - Label text
  * @attr {string} placeholder - Input placeholder
@@ -22,7 +22,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  * <wc-vin-decoder
  *   name="vin"
  *   lbl-label="VIN Number"
- *   api-url="https://vin-decoder-ligipcg4jq-uc.a.run.app"
+ *   api-url="https://vin-dev.webendcreator.com"
  *   database-endpoint="/api/vehicles/vin"
  *   required>
  * </wc-vin-decoder>
@@ -148,7 +148,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     }
 
     // Default API URL and state
-    this.apiUrl = 'https://vin-decoder-ligipcg4jq-uc.a.run.app';
+    this.apiUrl = 'https://vin-dev.webendcreator.com';
     this.databaseEndpoint = null;
     this.isDecoding = false;
     this.lastDecodedVin = null;
