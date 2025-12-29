@@ -14394,6 +14394,39 @@ if (!customElements.get("wc-tabulator")) {
         }
       };
     }
+    /**
+     * Build MongoDB projection string from column fields and formatter dependencies.
+     * Automatically extracts fields from wc-tabulator-column elements.
+     *
+     * @returns {string} Comma-separated list of field names (e.g., "_id,first_name,last_name,address.state")
+     */
+    _buildProjection() {
+      const fields = /* @__PURE__ */ new Set(["_id"]);
+      this.querySelectorAll("wc-tabulator-column").forEach((col) => {
+        const field = col.getAttribute("field");
+        if (field) {
+          const cleanField = field.replace(/\.\d+\./g, ".");
+          fields.add(cleanField);
+        }
+        const formatterParams = col.getAttribute("formatter-params");
+        if (formatterParams) {
+          try {
+            const params = JSON.parse(formatterParams);
+            if (params.queryParams) {
+              Object.values(params.queryParams).forEach((value) => {
+                if (typeof value === "string" && value.startsWith("$")) {
+                  const fieldName = value.substring(1);
+                  fields.add(fieldName);
+                }
+              });
+            }
+          } catch (e) {
+            console.warn("Failed to parse formatter-params:", formatterParams, e);
+          }
+        }
+      });
+      return Array.from(fields).join(",");
+    }
     getAjaxURLGenerator(url, config, params) {
       let ajaxParamsParts = [];
       const ajaxParamsMap = JSON.parse(this.getAttribute("ajax-params-map") || "{}");
@@ -14424,6 +14457,10 @@ if (!customElements.get("wc-tabulator")) {
       const { sort } = params;
       if (sort && sort.length > 0) {
         ajaxParamsParts.push(`sort=${JSON.stringify(sort)}`);
+      }
+      const projection = this._buildProjection();
+      if (projection && projection.length > 3) {
+        ajaxParamsParts.push(`projection=${projection}`);
       }
       const ajaxParamsStr = ajaxParamsParts.join("&");
       if (url.includes("?")) {

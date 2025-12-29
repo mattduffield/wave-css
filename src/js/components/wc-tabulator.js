@@ -1712,6 +1712,48 @@ if (!customElements.get('wc-tabulator')) {
       };
     }
 
+    /**
+     * Build MongoDB projection string from column fields and formatter dependencies.
+     * Automatically extracts fields from wc-tabulator-column elements.
+     *
+     * @returns {string} Comma-separated list of field names (e.g., "_id,first_name,last_name,address.state")
+     */
+    _buildProjection() {
+      const fields = new Set(['_id']); // Always include _id
+
+      // Get all column fields
+      this.querySelectorAll('wc-tabulator-column').forEach(col => {
+        const field = col.getAttribute('field');
+        if (field) {
+          // Handle nested array fields: household_members.0.contact.email -> household_members.contact.email
+          const cleanField = field.replace(/\.\d+\./g, '.'); // Remove array indices like .0.
+          fields.add(cleanField);
+        }
+
+        // Check formatter-params for field references (fields starting with $)
+        const formatterParams = col.getAttribute('formatter-params');
+        if (formatterParams) {
+          try {
+            const params = JSON.parse(formatterParams);
+            // Look for queryParams that reference fields with $ prefix
+            if (params.queryParams) {
+              Object.values(params.queryParams).forEach(value => {
+                if (typeof value === 'string' && value.startsWith('$')) {
+                  const fieldName = value.substring(1); // Remove $ prefix
+                  fields.add(fieldName);
+                }
+              });
+            }
+          } catch (e) {
+            console.warn('Failed to parse formatter-params:', formatterParams, e);
+          }
+        }
+      });
+
+      // Return comma-separated string of field names
+      return Array.from(fields).join(',');
+    }
+
     getAjaxURLGenerator(url, config, params) {
       //url - the url from the ajaxURL property or setData function
       //config - the request config object from the ajaxConfig property
@@ -1749,6 +1791,12 @@ if (!customElements.get('wc-tabulator')) {
       const {sort} = params;
       if (sort && sort.length > 0) {
         ajaxParamsParts.push(`sort=${JSON.stringify(sort)}`);
+      }
+
+      // Add projection to optimize data transfer for large collections
+      const projection = this._buildProjection();
+      if (projection && projection.length > 3) { // More than just "_id"
+        ajaxParamsParts.push(`projection=${projection}`);
       }
 
       const ajaxParamsStr = ajaxParamsParts.join("&");
