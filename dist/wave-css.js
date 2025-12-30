@@ -13087,7 +13087,7 @@ if (!customElements.get("wc-tabulator-row-menu")) {
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "data"];
+      return ["id", "class", "data", "projection-fields"];
     }
     icons = {
       "eye": {
@@ -14425,6 +14425,15 @@ if (!customElements.get("wc-tabulator")) {
           }
         }
       });
+      const additionalFields = this.getAttribute("projection-fields");
+      if (additionalFields) {
+        additionalFields.split(",").forEach((field) => {
+          const trimmedField = field.trim();
+          if (trimmedField) {
+            fields.add(trimmedField);
+          }
+        });
+      }
       return Array.from(fields).join(",");
     }
     getAjaxURLGenerator(url, config, params) {
