@@ -148,7 +148,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     }
 
     // Default API URL and state
-    this.apiUrl = 'https://vin-dev.webendcreator.com';
+    this.apiUrl = 'https://vin.pegramins.com';
     this.databaseEndpoint = null;
     this.isDecoding = false;
     this.lastDecodedVin = null;

@@ -5729,7 +5729,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-vin-decoder", "relative");
       this.appendChild(this.componentElement);
     }
-    this.apiUrl = "https://vin-dev.webendcreator.com";
+    this.apiUrl = "https://vin.pegramins.com";
     this.databaseEndpoint = null;
     this.isDecoding = false;
     this.lastDecodedVin = null;
