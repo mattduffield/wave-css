@@ -221,6 +221,11 @@ class WcThemeSelector extends WcBaseComponent {
   }
 
   _handleLoadTheme() {
+    // Don't override if wc-theme component is controlling the theme
+    if (document.documentElement.dataset.themeControlledBy === 'wc-theme') {
+      return;
+    }
+
     const savedTheme = localStorage.getItem("theme") || "rose";
     const themeClass = `theme-${savedTheme}`;
     const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);

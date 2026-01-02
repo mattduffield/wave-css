@@ -16,7 +16,7 @@
  *    - Otherwise, loads theme from localStorage (defaults to 'rose')
  *    - Supports both theme name and dark/light mode in the same attribute
  */
-import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { loadStyle } from './helper-function.js';
 
 if (!customElements.get('wc-theme')) {
 
@@ -27,16 +27,35 @@ if (!customElements.get('wc-theme')) {
 
     constructor() {
       super();
-      this.classList.add('contents');
     }
 
     connectedCallback() {
+      console.log('[wc-theme] connectedCallback - theme attr:', this.getAttribute('theme'));
+      this._applyStyle();
+      // Mark that wc-theme is controlling the theme
+      if (this.hasAttribute('theme')) {
+        document.documentElement.dataset.themeControlledBy = 'wc-theme';
+      }
       this._handleLoadTheme();
     }
 
+    _applyStyle() {
+      const style = `
+        wc-theme {
+          display: contents;
+        }
+      `.trim();
+      loadStyle('wc-theme', style);
+    }
+
     attributeChangedCallback(name, oldValue, newValue) {
-      if (name === 'theme' && oldValue !== newValue && this.isConnected) {
-        this._handleLoadTheme();
+      console.log('[wc-theme] attributeChangedCallback:', { name, oldValue, newValue, isConnected: this.isConnected });
+      if (name === 'theme' && oldValue !== newValue) {
+        // Only handle if connected
+        if (this.isConnected) {
+          document.documentElement.dataset.themeControlledBy = 'wc-theme';
+          this._handleLoadTheme();
+        }
       }
     }
 
@@ -46,6 +65,7 @@ if (!customElements.get('wc-theme')) {
 
       // Check if theme attribute is provided
       const themeAttr = this.getAttribute('theme');
+      console.log('[wc-theme] _handleLoadTheme - themeAttr:', themeAttr);
 
       if (themeAttr) {
         // Parse theme attribute (e.g., "ocean dark", "dark ocean", "ocean")
@@ -79,6 +99,7 @@ if (!customElements.get('wc-theme')) {
 
       // Apply theme class
       const themeClass = `theme-${themeName}`;
+      console.log('[wc-theme] Applying theme:', { themeName, themeClass, isDark });
 
       // Remove any current theme classes
       document.documentElement.classList.forEach(cls => {
@@ -89,17 +110,19 @@ if (!customElements.get('wc-theme')) {
 
       // Add the selected theme class to the documentElement
       document.documentElement.classList.add(themeClass);
+      console.log('[wc-theme] Applied theme class:', themeClass, 'Current classes:', document.documentElement.className);
 
       // Apply dark/light mode if specified
       if (isDark === true) {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
+        console.log('[wc-theme] Applied dark mode');
       } else if (isDark === false) {
         document.documentElement.classList.add('light');
         document.documentElement.classList.remove('dark');
+        console.log('[wc-theme] Applied light mode');
       }
     }
-
   }
 
   customElements.define('wc-theme', WcTheme);

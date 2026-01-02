@@ -15089,6 +15089,9 @@ var WcThemeSelector = class extends WcBaseComponent {
     }
   }
   _handleLoadTheme() {
+    if (document.documentElement.dataset.themeControlledBy === "wc-theme") {
+      return;
+    }
     const savedTheme = localStorage.getItem("theme") || "rose";
     const themeClass = `theme-${savedTheme}`;
     const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
@@ -19250,20 +19253,37 @@ if (!customElements.get("wc-theme")) {
     }
     constructor() {
       super();
-      this.classList.add("contents");
     }
     connectedCallback() {
+      console.log("[wc-theme] connectedCallback - theme attr:", this.getAttribute("theme"));
+      this._applyStyle();
+      if (this.hasAttribute("theme")) {
+        document.documentElement.dataset.themeControlledBy = "wc-theme";
+      }
       this._handleLoadTheme();
     }
+    _applyStyle() {
+      const style = `
+        wc-theme {
+          display: contents;
+        }
+      `.trim();
+      loadStyle("wc-theme", style);
+    }
     attributeChangedCallback(name, oldValue, newValue) {
-      if (name === "theme" && oldValue !== newValue && this.isConnected) {
-        this._handleLoadTheme();
+      console.log("[wc-theme] attributeChangedCallback:", { name, oldValue, newValue, isConnected: this.isConnected });
+      if (name === "theme" && oldValue !== newValue) {
+        if (this.isConnected) {
+          document.documentElement.dataset.themeControlledBy = "wc-theme";
+          this._handleLoadTheme();
+        }
       }
     }
     _handleLoadTheme() {
       let themeName = null;
       let isDark = null;
       const themeAttr = this.getAttribute("theme");
+      console.log("[wc-theme] _handleLoadTheme - themeAttr:", themeAttr);
       if (themeAttr) {
         const parts = themeAttr.trim().toLowerCase().split(/\s+/);
         if (parts.includes("dark")) {
@@ -19287,18 +19307,22 @@ if (!customElements.get("wc-theme")) {
         }
       }
       const themeClass = `theme-${themeName}`;
+      console.log("[wc-theme] Applying theme:", { themeName, themeClass, isDark });
       document.documentElement.classList.forEach((cls) => {
         if (cls.startsWith("theme-")) {
           document.documentElement.classList.remove(cls);
         }
       });
       document.documentElement.classList.add(themeClass);
+      console.log("[wc-theme] Applied theme class:", themeClass, "Current classes:", document.documentElement.className);
       if (isDark === true) {
         document.documentElement.classList.add("dark");
         document.documentElement.classList.remove("light");
+        console.log("[wc-theme] Applied dark mode");
       } else if (isDark === false) {
         document.documentElement.classList.add("light");
         document.documentElement.classList.remove("dark");
+        console.log("[wc-theme] Applied light mode");
       }
     }
   }
