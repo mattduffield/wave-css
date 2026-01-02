@@ -30,7 +30,6 @@ if (!customElements.get('wc-theme')) {
     }
 
     connectedCallback() {
-      console.log('[wc-theme] connectedCallback - theme attr:', this.getAttribute('theme'));
       this._applyStyle();
       // Mark that wc-theme is controlling the theme
       if (this.hasAttribute('theme')) {
@@ -49,7 +48,6 @@ if (!customElements.get('wc-theme')) {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-      console.log('[wc-theme] attributeChangedCallback:', { name, oldValue, newValue, isConnected: this.isConnected });
       if (name === 'theme' && oldValue !== newValue) {
         // Only handle if connected
         if (this.isConnected) {
@@ -65,7 +63,6 @@ if (!customElements.get('wc-theme')) {
 
       // Check if theme attribute is provided
       const themeAttr = this.getAttribute('theme');
-      console.log('[wc-theme] _handleLoadTheme - themeAttr:', themeAttr);
 
       if (themeAttr) {
         // Parse theme attribute (e.g., "ocean dark", "dark ocean", "ocean")
@@ -99,7 +96,6 @@ if (!customElements.get('wc-theme')) {
 
       // Apply theme class
       const themeClass = `theme-${themeName}`;
-      console.log('[wc-theme] Applying theme:', { themeName, themeClass, isDark });
 
       // Remove any current theme classes
       document.documentElement.classList.forEach(cls => {
@@ -110,17 +106,14 @@ if (!customElements.get('wc-theme')) {
 
       // Add the selected theme class to the documentElement
       document.documentElement.classList.add(themeClass);
-      console.log('[wc-theme] Applied theme class:', themeClass, 'Current classes:', document.documentElement.className);
 
       // Apply dark/light mode if specified
       if (isDark === true) {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
-        console.log('[wc-theme] Applied dark mode');
       } else if (isDark === false) {
         document.documentElement.classList.add('light');
         document.documentElement.classList.remove('dark');
-        console.log('[wc-theme] Applied light mode');
       }
     }
   }

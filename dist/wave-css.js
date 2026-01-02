@@ -19255,7 +19255,6 @@ if (!customElements.get("wc-theme")) {
       super();
     }
     connectedCallback() {
-      console.log("[wc-theme] connectedCallback - theme attr:", this.getAttribute("theme"));
       this._applyStyle();
       if (this.hasAttribute("theme")) {
         document.documentElement.dataset.themeControlledBy = "wc-theme";
@@ -19271,7 +19270,6 @@ if (!customElements.get("wc-theme")) {
       loadStyle("wc-theme", style);
     }
     attributeChangedCallback(name, oldValue, newValue) {
-      console.log("[wc-theme] attributeChangedCallback:", { name, oldValue, newValue, isConnected: this.isConnected });
       if (name === "theme" && oldValue !== newValue) {
         if (this.isConnected) {
           document.documentElement.dataset.themeControlledBy = "wc-theme";
@@ -19283,7 +19281,6 @@ if (!customElements.get("wc-theme")) {
       let themeName = null;
       let isDark = null;
       const themeAttr = this.getAttribute("theme");
-      console.log("[wc-theme] _handleLoadTheme - themeAttr:", themeAttr);
       if (themeAttr) {
         const parts = themeAttr.trim().toLowerCase().split(/\s+/);
         if (parts.includes("dark")) {
@@ -19307,22 +19304,18 @@ if (!customElements.get("wc-theme")) {
         }
       }
       const themeClass = `theme-${themeName}`;
-      console.log("[wc-theme] Applying theme:", { themeName, themeClass, isDark });
       document.documentElement.classList.forEach((cls) => {
         if (cls.startsWith("theme-")) {
           document.documentElement.classList.remove(cls);
         }
       });
       document.documentElement.classList.add(themeClass);
-      console.log("[wc-theme] Applied theme class:", themeClass, "Current classes:", document.documentElement.className);
       if (isDark === true) {
         document.documentElement.classList.add("dark");
         document.documentElement.classList.remove("light");
-        console.log("[wc-theme] Applied dark mode");
       } else if (isDark === false) {
         document.documentElement.classList.add("light");
         document.documentElement.classList.remove("dark");
-        console.log("[wc-theme] Applied light mode");
       }
     }
   }
