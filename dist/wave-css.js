@@ -19245,6 +19245,9 @@ if (!customElements.get("wc-notify")) {
 // src/js/components/wc-theme.js
 if (!customElements.get("wc-theme")) {
   class WcTheme extends HTMLElement {
+    static get observedAttributes() {
+      return ["theme"];
+    }
     constructor() {
       super();
       this.classList.add("contents");
@@ -19252,15 +19255,51 @@ if (!customElements.get("wc-theme")) {
     connectedCallback() {
       this._handleLoadTheme();
     }
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (name === "theme" && oldValue !== newValue && this.isConnected) {
+        this._handleLoadTheme();
+      }
+    }
     _handleLoadTheme() {
-      const savedTheme = localStorage.getItem("theme") || "rose";
-      const themeClass = `theme-${savedTheme}`;
+      let themeName = null;
+      let isDark = null;
+      const themeAttr = this.getAttribute("theme");
+      if (themeAttr) {
+        const parts = themeAttr.trim().toLowerCase().split(/\s+/);
+        if (parts.includes("dark")) {
+          isDark = true;
+          themeName = parts.find((p) => p !== "dark" && p !== "light") || "rose";
+        } else if (parts.includes("light")) {
+          isDark = false;
+          themeName = parts.find((p) => p !== "dark" && p !== "light") || "rose";
+        } else {
+          themeName = parts[0] || "rose";
+        }
+        localStorage.setItem("theme", themeName);
+        if (isDark !== null) {
+          localStorage.setItem("darkMode", isDark ? "true" : "false");
+        }
+      } else {
+        themeName = localStorage.getItem("theme") || "rose";
+        const savedDarkMode = localStorage.getItem("darkMode");
+        if (savedDarkMode !== null) {
+          isDark = savedDarkMode === "true";
+        }
+      }
+      const themeClass = `theme-${themeName}`;
       document.documentElement.classList.forEach((cls) => {
         if (cls.startsWith("theme-")) {
           document.documentElement.classList.remove(cls);
         }
       });
       document.documentElement.classList.add(themeClass);
+      if (isDark === true) {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      } else if (isDark === false) {
+        document.documentElement.classList.add("light");
+        document.documentElement.classList.remove("dark");
+      }
     }
   }
   customElements.define("wc-theme", WcTheme);
