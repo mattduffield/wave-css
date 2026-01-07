@@ -7,7 +7,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  *
  * @attr {string} name - Input name for form submission
  * @attr {string} value - Current VIN value
- * @attr {string} api-url - VIN decoder API URL (default: https://vin.pegramsin.com)
+ * @attr {string} api-url - VIN decoder API URL (default: https://vin.pegramins.com)
  * @attr {string} database-endpoint - Optional endpoint to check database first
  * @attr {string} vin-group - VIN group identifier to target specific wc-vin-listener components
  * @attr {string} lbl-label - Label text
@@ -24,7 +24,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  *   name="vin"
  *   lbl-label="VIN Number"
  *   vin-group="vehicle-0"
- *   api-url="https://vin.pegramsin.com"
+ *   api-url="https://vin.pegramins.com"
  *   database-endpoint="/api/vehicles/vin"
  *   required>
  * </wc-vin-decoder>
@@ -152,7 +152,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     }
 
     // Default API URL and state
-    this.apiUrl = 'https://vin.pegramsin.com';
+    this.apiUrl = 'https://vin.pegramins.com';
     this.databaseEndpoint = null;
     this.vinGroup = null;
     this.isDecoding = false;
