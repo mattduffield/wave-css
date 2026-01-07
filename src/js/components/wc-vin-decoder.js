@@ -9,19 +9,21 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  * @attr {string} value - Current VIN value
  * @attr {string} api-url - VIN decoder API URL (default: https://vin-dev.webendcreator.com)
  * @attr {string} database-endpoint - Optional endpoint to check database first
+ * @attr {string} vin-group - VIN group identifier to target specific wc-vin-listener components
  * @attr {string} lbl-label - Label text
  * @attr {string} placeholder - Input placeholder
  * @attr {boolean} required - Whether input is required
  * @attr {boolean} disabled - Whether input is disabled
  * @attr {boolean} readonly - Whether input is readonly
  *
- * @fires vin-decoder:change - Fired when VIN is decoded successfully
+ * @fires vin-decoder:change - Fired when VIN is decoded successfully (includes vinGroup in detail)
  * @fires vin-decoder:error - Fired when decoding fails
  *
  * @example
  * <wc-vin-decoder
  *   name="vin"
  *   lbl-label="VIN Number"
+ *   vin-group="vehicle-0"
  *   api-url="https://vin-dev.webendcreator.com"
  *   database-endpoint="/api/vehicles/vin"
  *   required>
@@ -38,6 +40,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       'value',
       'api-url',
       'database-endpoint',
+      'vin-group',
       'lbl-label',
       'lbl-class',
       'placeholder',
@@ -123,6 +126,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     this.ignoreAttributes = [
       'api-url',
       'database-endpoint',
+      'vin-group',
       'tooltip',
       'tooltip-position',
       'lbl-label',
@@ -148,8 +152,9 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     }
 
     // Default API URL and state
-    this.apiUrl = 'https://vin.pegramins.com';
+    this.apiUrl = 'https://vin-dev.webendcreator.com';
     this.databaseEndpoint = null;
+    this.vinGroup = null;
     this.isDecoding = false;
     this.lastDecodedVin = null;
     this.cachedData = null;
@@ -332,6 +337,8 @@ export default class WcVinDecoder extends WcBaseFormComponent {
         this.apiUrl = newValue || this.apiUrl;
       } else if (attrName === 'database-endpoint') {
         this.databaseEndpoint = newValue;
+      } else if (attrName === 'vin-group') {
+        this.vinGroup = newValue;
       }
       // Do nothing else
       return;
@@ -485,7 +492,8 @@ export default class WcVinDecoder extends WcBaseFormComponent {
       composed: true,
       detail: {
         vin: this.value,
-        data: data
+        data: data,
+        vinGroup: this.vinGroup
       }
     });
     this.dispatchEvent(event);

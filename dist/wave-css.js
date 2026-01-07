@@ -5627,6 +5627,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       "value",
       "api-url",
       "database-endpoint",
+      "vin-group",
       "lbl-label",
       "lbl-class",
       "placeholder",
@@ -5708,6 +5709,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     this.ignoreAttributes = [
       "api-url",
       "database-endpoint",
+      "vin-group",
       "tooltip",
       "tooltip-position",
       "lbl-label",
@@ -5729,8 +5731,9 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-vin-decoder", "relative");
       this.appendChild(this.componentElement);
     }
-    this.apiUrl = "https://vin.pegramins.com";
+    this.apiUrl = "https://vin-dev.webendcreator.com";
     this.databaseEndpoint = null;
+    this.vinGroup = null;
     this.isDecoding = false;
     this.lastDecodedVin = null;
     this.cachedData = null;
@@ -5867,6 +5870,8 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         this.apiUrl = newValue || this.apiUrl;
       } else if (attrName === "database-endpoint") {
         this.databaseEndpoint = newValue;
+      } else if (attrName === "vin-group") {
+        this.vinGroup = newValue;
       }
       return;
     }
@@ -5981,7 +5986,8 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       composed: true,
       detail: {
         vin: this.value,
-        data
+        data,
+        vinGroup: this.vinGroup
       }
     });
     this.dispatchEvent(event);
