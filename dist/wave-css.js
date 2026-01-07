@@ -5731,7 +5731,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-vin-decoder", "relative");
       this.appendChild(this.componentElement);
     }
-    this.apiUrl = "https://vin-dev.webendcreator.com";
+    this.apiUrl = "https://vin.pegramsin.com";
     this.databaseEndpoint = null;
     this.vinGroup = null;
     this.isDecoding = false;
