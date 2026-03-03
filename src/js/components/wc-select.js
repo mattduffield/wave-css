@@ -350,9 +350,21 @@ class WcSelect extends WcBaseFormComponent {
     
     // Clear existing options
     this.formElement.innerHTML = '';
-    
+
     let optionsHTML = '';
-    
+
+    // Prepend empty placeholder option if placeholder attribute is set
+    const placeholder = this.getAttribute('placeholder');
+    if (placeholder !== null) {
+      const emptyOpt = document.createElement('option');
+      emptyOpt.value = '';
+      emptyOpt.textContent = placeholder || '';
+      this.formElement.appendChild(emptyOpt);
+      if (isChipMode) {
+        optionsHTML += `<div class="option" data-value="">${placeholder || ''}</div>`;
+      }
+    }
+
     this._items.forEach((item) => {
       // Check if item is an optgroup
       if (item.optgroup && Array.isArray(item.options)) {

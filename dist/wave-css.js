@@ -22746,6 +22746,16 @@ var WcSelect = class extends WcBaseFormComponent {
     const isChipMode = this.getAttribute("mode") === "chip";
     this.formElement.innerHTML = "";
     let optionsHTML = "";
+    const placeholder = this.getAttribute("placeholder");
+    if (placeholder !== null) {
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = placeholder || "";
+      this.formElement.appendChild(emptyOpt);
+      if (isChipMode) {
+        optionsHTML += `<div class="option" data-value="">${placeholder || ""}</div>`;
+      }
+    }
     this._items.forEach((item) => {
       if (item.optgroup && Array.isArray(item.options)) {
         const optgroup = document.createElement("optgroup");
