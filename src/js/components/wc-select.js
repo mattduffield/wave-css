@@ -132,7 +132,8 @@ class WcSelect extends WcBaseFormComponent {
       if (newValue) {
         fetch(newValue).then(response => response.json())
           .then(data => {
-            this._items = data;  
+            const resultsMember = this.getAttribute('results-member');
+            this._items = resultsMember ? data[resultsMember] : (Array.isArray(data) ? data : data.results || data);
             this._generateOptionsFromItems();
             this._items.forEach(item => {
               if (item.selected) {
