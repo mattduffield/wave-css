@@ -601,6 +601,7 @@ const ICONS_TO_COPY = [
   "expand",
   "compress",
   "inbox",
+  "flask",
   // Add more icon names here
 ];
 
