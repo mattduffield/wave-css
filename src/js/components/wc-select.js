@@ -134,6 +134,16 @@ class WcSelect extends WcBaseFormComponent {
           .then(data => {
             const resultsMember = this.getAttribute('results-member');
             this._items = resultsMember ? data[resultsMember] : (Array.isArray(data) ? data : data.results || data);
+            const sortAttr = this.getAttribute('sort');
+            if (sortAttr !== null) {
+              const displayMember = this.getAttribute('display-member') || 'key';
+              const dir = sortAttr === 'desc' ? -1 : 1;
+              this._items.sort(function(a, b) {
+                const aVal = String(typeof a === 'object' ? a[displayMember] || '' : a).toLowerCase();
+                const bVal = String(typeof b === 'object' ? b[displayMember] || '' : b).toLowerCase();
+                return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
+              });
+            }
             this._generateOptionsFromItems();
             this._items.forEach(item => {
               if (item.selected) {
