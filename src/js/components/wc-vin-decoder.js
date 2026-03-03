@@ -16,7 +16,7 @@ import { WcBaseFormComponent } from './wc-base-form-component.js';
  * @attr {boolean} disabled - Whether input is disabled
  * @attr {boolean} readonly - Whether input is readonly
  *
- * @fires vin-decoder:change - Fired when VIN is decoded successfully (includes vinGroup in detail)
+ * @fires vin-decoder:change - Fired when VIN is decoded successfully (includes vinGroup and source in detail)
  * @fires vin-decoder:error - Fired when decoding fails
  *
  * @example
@@ -158,6 +158,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     this.isDecoding = false;
     this.lastDecodedVin = null;
     this.cachedData = null;
+    this.dataSource = null; // Track where data came from: 'database', 'api', or 'cache'
     this.formElement = null;
     this.spinnerIcon = null;
     this.labelElement = null;
@@ -385,7 +386,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
 
     // Don't decode the same VIN twice
     if (vin === this.lastDecodedVin && this.cachedData) {
-      this._broadcastChange(this.cachedData);
+      this._broadcastChange(this.cachedData, 'cache');
       return;
     }
 
@@ -400,21 +401,29 @@ export default class WcVinDecoder extends WcBaseFormComponent {
 
     try {
       let data = null;
+      let source = null;
 
       // Check database first if endpoint is provided
       if (this.databaseEndpoint) {
         data = await this._checkDatabase(vin);
+        if (data) {
+          source = 'database';
+        }
       }
 
       // If not in database, call the VIN decoder API
       if (!data) {
         data = await this._callVinDecoderApi(vin);
+        if (data) {
+          source = 'api';
+        }
       }
 
       if (data) {
         this.lastDecodedVin = vin;
         this.cachedData = data;
-        this._broadcastChange(data);
+        this.dataSource = source;
+        this._broadcastChange(data, source);
       }
     } catch (error) {
       console.error('wc-vin-decoder: Error decoding VIN:', error);
@@ -486,14 +495,15 @@ export default class WcVinDecoder extends WcBaseFormComponent {
     this.spinnerIcon?.classList.add('hidden');
   }
 
-  _broadcastChange(data) {
+  _broadcastChange(data, source) {
     const event = new CustomEvent('vin-decoder:change', {
       bubbles: true,
       composed: true,
       detail: {
         vin: this.value,
         data: data,
-        vinGroup: this.vinGroup
+        vinGroup: this.vinGroup,
+        source: source // 'database', 'api', or 'cache'
       }
     });
     this.dispatchEvent(event);

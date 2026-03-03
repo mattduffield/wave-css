@@ -5737,6 +5737,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     this.isDecoding = false;
     this.lastDecodedVin = null;
     this.cachedData = null;
+    this.dataSource = null;
     this.formElement = null;
     this.spinnerIcon = null;
     this.labelElement = null;
@@ -5903,7 +5904,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       return;
     }
     if (vin === this.lastDecodedVin && this.cachedData) {
-      this._broadcastChange(this.cachedData);
+      this._broadcastChange(this.cachedData, "cache");
       return;
     }
     await this._decodeVin(vin);
@@ -5914,16 +5915,24 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     this._showSpinner();
     try {
       let data = null;
+      let source = null;
       if (this.databaseEndpoint) {
         data = await this._checkDatabase(vin);
+        if (data) {
+          source = "database";
+        }
       }
       if (!data) {
         data = await this._callVinDecoderApi(vin);
+        if (data) {
+          source = "api";
+        }
       }
       if (data) {
         this.lastDecodedVin = vin;
         this.cachedData = data;
-        this._broadcastChange(data);
+        this.dataSource = source;
+        this._broadcastChange(data, source);
       }
     } catch (error) {
       console.error("wc-vin-decoder: Error decoding VIN:", error);
@@ -5980,14 +5989,16 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
   _hideSpinner() {
     this.spinnerIcon?.classList.add("hidden");
   }
-  _broadcastChange(data) {
+  _broadcastChange(data, source) {
     const event = new CustomEvent("vin-decoder:change", {
       bubbles: true,
       composed: true,
       detail: {
         vin: this.value,
         data,
-        vinGroup: this.vinGroup
+        vinGroup: this.vinGroup,
+        source
+        // 'database', 'api', or 'cache'
       }
     });
     this.dispatchEvent(event);

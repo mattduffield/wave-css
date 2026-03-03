@@ -1,3 +1,11 @@
+/**
+ *
+ * References:
+ * https://webllm.mlc.ai/
+ * https://chat.webllm.ai/
+ *
+ */
+
 import { WcBaseComponent } from './wc-base-component.js';
 
 if (!customElements.get('wc-ai-bot')) {
