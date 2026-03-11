@@ -11617,7 +11617,8 @@ if (!customElements.get("wc-sidenav")) {
       }
     }
     _handleAttributeChange(attrName, newValue) {
-      if (attrName === "label") {
+      if (attrName === "id") {
+      } else if (attrName === "label") {
       } else if (attrName === "auto-height") {
       } else if (attrName === "background-color") {
       } else if (attrName === "open-vertical-text") {

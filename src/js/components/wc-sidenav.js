@@ -159,7 +159,9 @@ if (!customElements.get('wc-sidenav')) {
     }
 
     _handleAttributeChange(attrName, newValue) {
-      if (attrName === 'label') {
+      if (attrName === 'id') {
+        // Do not propagate id to componentElement (would create duplicate IDs)
+      } else if (attrName === 'label') {
         // Do nothing...
       } else if (attrName === 'auto-height') {
         // Do nothing...
