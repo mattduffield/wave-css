@@ -162,7 +162,10 @@ if (!customElements.get('wc-sidenav')) {
       if (attrName === 'id') {
         // Do not propagate id to componentElement (would create duplicate IDs)
       } else if (attrName === 'label') {
-        // Do nothing...
+        const openSpan = this.querySelector('.openbtn span');
+        if (openSpan) {
+          openSpan.textContent = newValue || 'Sidenav';
+        }
       } else if (attrName === 'auto-height') {
         // Do nothing...
       } else if (attrName === 'background-color') {

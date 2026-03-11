@@ -11619,6 +11619,10 @@ if (!customElements.get("wc-sidenav")) {
     _handleAttributeChange(attrName, newValue) {
       if (attrName === "id") {
       } else if (attrName === "label") {
+        const openSpan = this.querySelector(".openbtn span");
+        if (openSpan) {
+          openSpan.textContent = newValue || "Sidenav";
+        }
       } else if (attrName === "auto-height") {
       } else if (attrName === "background-color") {
       } else if (attrName === "open-vertical-text") {
