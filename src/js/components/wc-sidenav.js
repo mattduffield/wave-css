@@ -71,7 +71,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-sidenav')) {
   class WcSidenav extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'label', 'width', 'open-btn-class', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height', 'relative'];
+      return ['id', 'class', 'label', 'width', 'open-btn-class', 'open', 'open-top', 'open-vertical-text', 'push', 'push-target', 'overlay', 'background-color', 'auto-height', 'relative', 'close-btn-position', 'no-tab'];
     }
 
     constructor() {
@@ -187,6 +187,10 @@ if (!customElements.get('wc-sidenav')) {
       } else if (attrName === 'width') {
         // Do nothing...
       } else if (attrName === 'relative') {
+        // Do nothing...
+      } else if (attrName === 'close-btn-position') {
+        // Do nothing...
+      } else if (attrName === 'no-tab') {
         // Do nothing...
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -458,6 +462,17 @@ if (!customElements.get('wc-sidenav')) {
         }
         wc-sidenav[right-side] .wc-sidenav.sidenav .closebtn {
           left: 5px;
+        }
+        wc-sidenav[close-btn-position="right"] .wc-sidenav.sidenav .closebtn {
+          right: 5px;
+          left: auto;
+        }
+        wc-sidenav[close-btn-position="left"] .wc-sidenav.sidenav .closebtn {
+          left: 5px;
+          right: auto;
+        }
+        wc-sidenav[no-tab] .openbtn {
+          display: none;
         }
         wc-sidenav .openbtn {
           position: absolute;
