@@ -11690,39 +11690,37 @@ if (!customElements.get("wc-sidenav")) {
         }
       }
     }
-    _handleHelper(event, btnSelector) {
-      const { detail } = event;
-      const { selector } = detail;
+    _matchesSelector(selector) {
       const isArray = Array.isArray(selector);
       if (typeof selector === "string" || isArray) {
         const tgts = document.querySelectorAll(selector);
-        tgts.forEach((tgt) => {
-          if (tgt === this) {
-            if (btnSelector === "toggle") {
-              const side = this.querySelector(".wc-sidenav");
-              if (side.classList.contains("open")) {
-                btnSelector = ".closebtn";
-              } else {
-                btnSelector = ".openbtn";
-              }
-            }
-            const btn = tgt?.querySelector(btnSelector);
-            btn?.click();
-          }
-        });
-      } else {
-        const btn = selector?.querySelector(btnSelector);
-        btn?.click();
+        for (const tgt of tgts) {
+          if (tgt === this) return true;
+        }
+        return false;
       }
+      return selector === this;
     }
     _handleOpen(event) {
-      this._handleHelper(event, ".openbtn");
+      const { detail } = event;
+      const { selector } = detail;
+      if (this._matchesSelector(selector)) {
+        this._openNav(event);
+      }
     }
     _handleClose(event) {
-      this._handleHelper(event, ".closebtn");
+      const { detail } = event;
+      const { selector } = detail;
+      if (this._matchesSelector(selector)) {
+        this._closeNav(event);
+      }
     }
     _handleToggle(event) {
-      this._handleHelper(event, "toggle");
+      const { detail } = event;
+      const { selector } = detail;
+      if (this._matchesSelector(selector)) {
+        this._toggleNav(event);
+      }
     }
     _toggleNav(event) {
       const side = this.querySelector(".wc-sidenav");
