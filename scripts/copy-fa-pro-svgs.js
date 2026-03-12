@@ -302,6 +302,7 @@ const ICONS_TO_COPY = [
   "brackets-curly",
   "brackets-square",
   "bug",
+  "bugs",
   "terminal",
   "square-terminal",
   "sort",
