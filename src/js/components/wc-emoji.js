@@ -408,16 +408,28 @@ if (!customElements.get('wc-emoji')) {
       if (!selector) {
         this.componentElement.style.opacity = '';
         this.componentElement.style.pointerEvents = '';
+        this.componentElement.style.transition = '';
         return;
       }
+
+      // Set initial hidden state immediately
+      this.componentElement.style.opacity = '0';
+      this.componentElement.style.pointerEvents = 'none';
+      this.componentElement.style.transition = 'opacity 0.2s ease-in-out';
+
       // Find the closest ancestor matching the selector
-      this._hoverTargetEl = this.closest(selector);
-      if (this._hoverTargetEl) {
-        this.componentElement.style.opacity = '0';
-        this.componentElement.style.pointerEvents = 'none';
-        this.componentElement.style.transition = 'opacity 0.2s ease-in-out';
-        this._hoverTargetEl.addEventListener('mouseenter', this._boundHoverShow);
-        this._hoverTargetEl.addEventListener('mouseleave', this._boundHoverHide);
+      const findTarget = () => {
+        this._hoverTargetEl = this.closest(selector);
+        if (this._hoverTargetEl) {
+          this._hoverTargetEl.addEventListener('mouseenter', this._boundHoverShow);
+          this._hoverTargetEl.addEventListener('mouseleave', this._boundHoverHide);
+        }
+      };
+
+      // Try immediately, retry on next frame if not found (HTMX timing)
+      findTarget();
+      if (!this._hoverTargetEl) {
+        requestAnimationFrame(() => findTarget());
       }
     }
 

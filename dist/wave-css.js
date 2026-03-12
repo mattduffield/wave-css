@@ -4240,15 +4240,22 @@ if (!customElements.get("wc-emoji")) {
       if (!selector) {
         this.componentElement.style.opacity = "";
         this.componentElement.style.pointerEvents = "";
+        this.componentElement.style.transition = "";
         return;
       }
-      this._hoverTargetEl = this.closest(selector);
-      if (this._hoverTargetEl) {
-        this.componentElement.style.opacity = "0";
-        this.componentElement.style.pointerEvents = "none";
-        this.componentElement.style.transition = "opacity 0.2s ease-in-out";
-        this._hoverTargetEl.addEventListener("mouseenter", this._boundHoverShow);
-        this._hoverTargetEl.addEventListener("mouseleave", this._boundHoverHide);
+      this.componentElement.style.opacity = "0";
+      this.componentElement.style.pointerEvents = "none";
+      this.componentElement.style.transition = "opacity 0.2s ease-in-out";
+      const findTarget = () => {
+        this._hoverTargetEl = this.closest(selector);
+        if (this._hoverTargetEl) {
+          this._hoverTargetEl.addEventListener("mouseenter", this._boundHoverShow);
+          this._hoverTargetEl.addEventListener("mouseleave", this._boundHoverHide);
+        }
+      };
+      findTarget();
+      if (!this._hoverTargetEl) {
+        requestAnimationFrame(() => findTarget());
       }
     }
     _unwireHoverTarget() {
