@@ -16,6 +16,7 @@ import './wc-contact-chip.js';
 import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';
+import './wc-emoji.js';
 import './wc-field.js';
 import './wc-flip-box.js';
 import './wc-google-map.js';

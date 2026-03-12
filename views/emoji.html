@@ -1,0 +1,119 @@
+<div id="page-contents">
+  <div class="col gap-6 p-6">
+    <h1>Emoji Component</h1>
+
+    <div class="col gap-4">
+      <h2>Default Quick Reactions</h2>
+      <p>Quick emoji buttons with an expandable picker. Click an emoji to see the event in the console.</p>
+      <div class="row gap-4">
+        <wc-emoji onpick="console.log('Picked:', event.detail.emoji)"></wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Custom Quick Emojis</h2>
+      <p>Override the default quick-access emojis with the <code>quick-emojis</code> attribute.</p>
+      <div class="row gap-4">
+        <wc-emoji
+          quick-emojis='["🔥","🚀","💯","⭐","🏆"]'
+          onpick="console.log('Picked:', event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Picker Only</h2>
+      <p>Hide the quick bar and show only the trigger button that opens the full picker.</p>
+      <div class="row gap-4">
+        <wc-emoji picker-only
+          onpick="console.log('Picked:', event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Custom Trigger Emoji</h2>
+      <p>Change the emoji shown on the "more" trigger button.</p>
+      <div class="row gap-6">
+        <div class="col gap-2">
+          <span>Plus sign trigger:</span>
+          <wc-emoji trigger-emoji="➕"
+            onpick="console.log('Picked:', event.detail.emoji)">
+          </wc-emoji>
+        </div>
+        <div class="col gap-2">
+          <span>Sparkle trigger:</span>
+          <wc-emoji trigger-emoji="✨"
+            onpick="console.log('Picked:', event.detail.emoji)">
+          </wc-emoji>
+        </div>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Custom Categories</h2>
+      <p>Override the default categories with your own emoji sets.</p>
+      <div class="row gap-4">
+        <wc-emoji
+          categories='[{"name":"Food","emojis":["🍕","🍔","🌮","🍣","🍩","🍦","🥗","🍪"]},{"name":"Animals","emojis":["🐶","🐱","🐻","🦊","🐼","🐨","🦁","🐸"]}]'
+          onpick="console.log('Picked:', event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>EventHub API</h2>
+      <p>Open, close, or toggle the picker programmatically.</p>
+      <div class="row gap-4">
+        <button class="btn btn-primary btn-sm"
+          onclick="wc.EventHub.broadcast('wc-emoji:open', '#api-demo')">Open</button>
+        <button class="btn btn-secondary btn-sm"
+          onclick="wc.EventHub.broadcast('wc-emoji:close', '#api-demo')">Close</button>
+        <button class="btn btn-outline-primary btn-sm"
+          onclick="wc.EventHub.broadcast('wc-emoji:toggle', '#api-demo')">Toggle</button>
+      </div>
+      <div class="row gap-4">
+        <wc-emoji id="api-demo"
+          onpick="console.log('Picked:', event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Reaction Bar Example</h2>
+      <p>A practical example simulating comment reactions.</p>
+      <div class="col gap-2 p-4" style="border: 1px solid var(--component-border-color); border-radius: 4px;">
+        <div class="row gap-2">
+          <strong>Jane Doe</strong>
+          <span>2m ago</span>
+        </div>
+        <p>Great work on the new feature! Looks amazing.</p>
+        <div id="demo-reactions" class="row gap-1"></div>
+        <wc-emoji
+          quick-emojis='["👍","❤️","🎉","😂"]'
+          onpick="demoAddReaction(event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function demoAddReaction(emoji) {
+  var container = document.getElementById('demo-reactions');
+  if (!container) return;
+  var existing = container.querySelector('[data-emoji="' + CSS.escape(emoji) + '"]');
+  if (existing) {
+    var countEl = existing.querySelector('.count');
+    countEl.textContent = parseInt(countEl.textContent) + 1;
+  } else {
+    var badge = document.createElement('span');
+    badge.dataset.emoji = emoji;
+    badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:0.8rem;cursor:pointer;background-color:var(--component-bg-color);border:1px solid var(--component-border-color);';
+    badge.innerHTML = '<span>' + emoji + '</span><span class="count">1</span>';
+    badge.onclick = function() { demoAddReaction(emoji); };
+    container.appendChild(badge);
+  }
+}
+</script>
