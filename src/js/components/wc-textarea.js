@@ -319,9 +319,9 @@ class WcTextarea extends WcBaseFormComponent {
         bottom: 100%;
         left: 0;
         z-index: 100;
-        background-color: var(--component-bg-color, var(--bg-color, #fff));
-        color: var(--color, inherit);
-        border: 1px solid var(--component-border-color);
+        background: var(--secondary-bg-color, var(--bg-color, #fff));
+        color: var(--primary-color, var(--color, inherit));
+        border: 1px solid var(--accent-bg-color, var(--component-border-color));
         border-radius: 6px;
         padding: 4px 0;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -339,7 +339,8 @@ class WcTextarea extends WcBaseFormComponent {
       }
       .wc-emoji-ac-item:hover,
       .wc-emoji-ac-item.selected {
-        background-color: var(--primary-alt-bg-color, rgba(0, 0, 0, 0.08));
+        background-color: var(--primary-bg-color);
+        color: var(--primary-color);
       }
       .wc-emoji-ac-emoji {
         font-size: 1.1rem;

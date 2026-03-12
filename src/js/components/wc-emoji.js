@@ -484,7 +484,8 @@ if (!customElements.get('wc-emoji')) {
           transition: background-color 0.2s ease-in-out;
         }
         .wc-emoji button:hover {
-          background-color: var(--component-bg-color, var(--primary-alt-bg-color));
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
         }
         .wc-emoji-trigger {
           opacity: 0.7;
@@ -500,9 +501,9 @@ if (!customElements.get('wc-emoji')) {
           top: 100%;
           right: 0;
           z-index: 100;
-          background-color: var(--component-bg-color, var(--bg-color, #fff));
-          color: var(--color, inherit);
-          border: 1px solid var(--component-border-color);
+          background: var(--secondary-bg-color, var(--bg-color, #fff));
+          color: var(--primary-color, var(--color, inherit));
+          border: 1px solid var(--accent-bg-color, var(--component-border-color));
           border-radius: 8px;
           padding: 8px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -532,7 +533,8 @@ if (!customElements.get('wc-emoji')) {
           text-align: center;
         }
         .wc-emoji-grid button:hover {
-          background-color: var(--component-bg-color, var(--primary-alt-bg-color));
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
           transform: scale(1.2);
         }
       `;
