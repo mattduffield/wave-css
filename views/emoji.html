@@ -80,6 +80,42 @@
     </div>
 
     <div class="col gap-4">
+      <h2>Hover Target</h2>
+      <p>The emoji bar is hidden until a specified ancestor is hovered. Use <code>hover-target</code> with a CSS selector. Try hovering over the comments below.</p>
+      <div class="col gap-2">
+        <div class="comment-row row gap-2 p-3 items-center" style="border: 1px solid var(--component-border-color); border-radius: 4px;">
+          <strong>Alice</strong>
+          <span>Great idea!</span>
+          <div class="ml-auto">
+            <wc-emoji hover-target=".comment-row"
+              onpick="console.log('Picked:', event.detail.emoji, event.detail.shortcode)">
+            </wc-emoji>
+          </div>
+        </div>
+        <div class="comment-row row gap-2 p-3 items-center" style="border: 1px solid var(--component-border-color); border-radius: 4px;">
+          <strong>Bob</strong>
+          <span>Let's ship it!</span>
+          <div class="ml-auto">
+            <wc-emoji hover-target=".comment-row"
+              onpick="console.log('Picked:', event.detail.emoji, event.detail.shortcode)">
+            </wc-emoji>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Shortcode Autocomplete in Textarea</h2>
+      <p>Type <code>:</code> followed by a shortcode name (e.g. <code>:thumbsup</code>, <code>:fire</code>, <code>:tada</code>) to see the autocomplete popup. Use arrow keys to navigate and Enter/Tab to select.</p>
+      <wc-textarea class="col-1"
+        rows="4"
+        name="emoji-demo"
+        emoji-shortcodes
+        placeholder="Try typing :thu or :fir to see emoji suggestions...">
+      </wc-textarea>
+    </div>
+
+    <div class="col gap-4">
       <h2>Reaction Bar Example</h2>
       <p>A practical example simulating comment reactions.</p>
       <div class="col gap-2 p-4" style="border: 1px solid var(--component-border-color); border-radius: 4px;">
@@ -92,6 +128,16 @@
         <wc-emoji
           quick-emojis='["👍","❤️","🎉","😂"]'
           onpick="demoAddReaction(event.detail.emoji)">
+        </wc-emoji>
+      </div>
+    </div>
+
+    <div class="col gap-4">
+      <h2>Shortcode Titles</h2>
+      <p>Hover over any emoji button to see its shortcode in the tooltip. The event also includes the shortcode.</p>
+      <div class="row gap-4">
+        <wc-emoji
+          onpick="console.log('Emoji:', event.detail.emoji, 'Shortcode:', event.detail.shortcode)">
         </wc-emoji>
       </div>
     </div>

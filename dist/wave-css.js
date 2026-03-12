@@ -3868,7 +3868,98 @@ customElements.define("wc-dropdown", WcDropdown);
 if (!customElements.get("wc-emoji")) {
   class WcEmoji extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "quick-emojis", "picker-only", "trigger-emoji", "onpick", "categories"];
+      return ["id", "class", "quick-emojis", "picker-only", "trigger-emoji", "onpick", "categories", "hover-target"];
+    }
+    static get shortcodeMap() {
+      return {
+        // Smileys
+        "\u{1F600}": ":grinning:",
+        "\u{1F603}": ":smiley:",
+        "\u{1F604}": ":smile:",
+        "\u{1F601}": ":grin:",
+        "\u{1F602}": ":joy:",
+        "\u{1F923}": ":rofl:",
+        "\u{1F60A}": ":blush:",
+        "\u{1F607}": ":innocent:",
+        "\u{1F60D}": ":heart_eyes:",
+        "\u{1F929}": ":star_struck:",
+        "\u{1F618}": ":kissing_heart:",
+        "\u{1F970}": ":smiling_face_with_hearts:",
+        "\u{1F60E}": ":sunglasses:",
+        "\u{1F914}": ":thinking:",
+        "\u{1FAE1}": ":saluting_face:",
+        "\u{1F917}": ":hugs:",
+        "\u{1F610}": ":neutral_face:",
+        "\u{1F611}": ":expressionless:",
+        "\u{1F644}": ":roll_eyes:",
+        "\u{1F62E}": ":open_mouth:",
+        "\u{1F622}": ":cry:",
+        "\u{1F62D}": ":sob:",
+        // Gestures
+        "\u{1F44D}": ":thumbsup:",
+        "\u{1F44E}": ":thumbsdown:",
+        "\u{1F44F}": ":clap:",
+        "\u{1F64C}": ":raised_hands:",
+        "\u{1F91D}": ":handshake:",
+        "\u{1F4AA}": ":muscle:",
+        "\u{1F91E}": ":crossed_fingers:",
+        "\u270C\uFE0F": ":v:",
+        "\u{1F44B}": ":wave:",
+        "\u{1FAF6}": ":heart_hands:",
+        // Symbols
+        "\u2764\uFE0F": ":heart:",
+        "\u{1F525}": ":fire:",
+        "\u2B50": ":star:",
+        "\u2705": ":white_check_mark:",
+        "\u{1F389}": ":tada:",
+        "\u{1F4AF}": ":100:",
+        "\u{1F680}": ":rocket:",
+        "\u{1F4A1}": ":bulb:",
+        "\u26A1": ":zap:",
+        "\u{1F440}": ":eyes:",
+        "\u{1F3C6}": ":trophy:",
+        "\u{1F48E}": ":gem:",
+        // Extra common
+        "\u{1F605}": ":sweat_smile:",
+        "\u{1F61C}": ":stuck_out_tongue_winking_eye:",
+        "\u{1F973}": ":partying_face:",
+        "\u{1F624}": ":triumph:",
+        "\u{1F631}": ":scream:",
+        "\u{1F92F}": ":exploding_head:",
+        "\u{1F64F}": ":pray:",
+        "\u{1F919}": ":call_me:",
+        "\u270A": ":fist:",
+        "\u{1F590}\uFE0F": ":raised_hand_with_fingers_splayed:",
+        "\u{1F918}": ":metal:",
+        "\u{1F494}": ":broken_heart:",
+        "\u{1F495}": ":two_hearts:",
+        "\u{1F496}": ":sparkling_heart:",
+        "\u{1F31F}": ":star2:",
+        "\u2728": ":sparkles:",
+        "\u{1F3AF}": ":dart:",
+        "\u{1F3B6}": ":notes:",
+        "\u{1F4AC}": ":speech_balloon:",
+        "\u{1F514}": ":bell:",
+        "\u{1F4CC}": ":pushpin:",
+        "\u{1F517}": ":link:",
+        "\u{1F4CE}": ":paperclip:",
+        "\u{1F3E0}": ":house:",
+        "\u{1F30D}": ":earth_africa:",
+        "\u23F0": ":alarm_clock:",
+        "\u{1F4C5}": ":date:",
+        "\u{1F511}": ":key:",
+        "\u{1F6E0}\uFE0F": ":hammer_and_wrench:"
+      };
+    }
+    static getShortcode(emoji) {
+      return WcEmoji.shortcodeMap[emoji] || emoji;
+    }
+    static getEmojiByShortcode(shortcode) {
+      const map = WcEmoji.shortcodeMap;
+      for (const [emoji, code] of Object.entries(map)) {
+        if (code === shortcode) return emoji;
+      }
+      return null;
     }
     static get defaultCategories() {
       return [
@@ -3894,6 +3985,9 @@ if (!customElements.get("wc-emoji")) {
       this._boundHandleOpen = this._handleOpen.bind(this);
       this._boundHandleClose = this._handleClose.bind(this);
       this._boundHandleToggle = this._handleToggle.bind(this);
+      this._boundHoverShow = this._hoverShow.bind(this);
+      this._boundHoverHide = this._hoverHide.bind(this);
+      this._hoverTargetEl = null;
       const compEl = this.querySelector(".wc-emoji");
       if (compEl) {
         this.componentElement = compEl;
@@ -3927,6 +4021,8 @@ if (!customElements.get("wc-emoji")) {
         this._wireOnpick(newValue);
       } else if (attrName === "categories") {
         this._rebuild();
+      } else if (attrName === "hover-target") {
+        this._wireHoverTarget(newValue);
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -3969,6 +4065,7 @@ if (!customElements.get("wc-emoji")) {
           btn.type = "button";
           btn.dataset.emoji = emoji;
           btn.textContent = emoji;
+          btn.title = WcEmoji.getShortcode(emoji);
           btn.addEventListener("click", (e) => {
             e.stopPropagation();
             this._pickEmoji(emoji);
@@ -4008,6 +4105,7 @@ if (!customElements.get("wc-emoji")) {
           btn.type = "button";
           btn.dataset.emoji = emoji;
           btn.textContent = emoji;
+          btn.title = WcEmoji.getShortcode(emoji);
           btn.addEventListener("click", (e) => {
             e.stopPropagation();
             this._pickEmoji(emoji);
@@ -4023,7 +4121,7 @@ if (!customElements.get("wc-emoji")) {
       this.dispatchEvent(new CustomEvent("emoji:pick", {
         bubbles: true,
         composed: true,
-        detail: { emoji }
+        detail: { emoji, shortcode: WcEmoji.getShortcode(emoji) }
       }));
     }
     _togglePicker() {
@@ -4051,6 +4149,9 @@ if (!customElements.get("wc-emoji")) {
       if (picker) {
         picker.classList.remove("open");
         this._isOpen = false;
+      }
+      if (this._hoverTargetEl && !this._hoverTargetEl.matches(":hover")) {
+        this._hoverHide();
       }
     }
     _positionPicker(picker) {
@@ -4134,6 +4235,38 @@ if (!customElements.get("wc-emoji")) {
         this._togglePicker();
       }
     }
+    _wireHoverTarget(selector) {
+      this._unwireHoverTarget();
+      if (!selector) {
+        this.componentElement.style.opacity = "";
+        this.componentElement.style.pointerEvents = "";
+        return;
+      }
+      this._hoverTargetEl = this.closest(selector);
+      if (this._hoverTargetEl) {
+        this.componentElement.style.opacity = "0";
+        this.componentElement.style.pointerEvents = "none";
+        this.componentElement.style.transition = "opacity 0.2s ease-in-out";
+        this._hoverTargetEl.addEventListener("mouseenter", this._boundHoverShow);
+        this._hoverTargetEl.addEventListener("mouseleave", this._boundHoverHide);
+      }
+    }
+    _unwireHoverTarget() {
+      if (this._hoverTargetEl) {
+        this._hoverTargetEl.removeEventListener("mouseenter", this._boundHoverShow);
+        this._hoverTargetEl.removeEventListener("mouseleave", this._boundHoverHide);
+        this._hoverTargetEl = null;
+      }
+    }
+    _hoverShow() {
+      this.componentElement.style.opacity = "1";
+      this.componentElement.style.pointerEvents = "auto";
+    }
+    _hoverHide() {
+      if (this._isOpen) return;
+      this.componentElement.style.opacity = "0";
+      this.componentElement.style.pointerEvents = "none";
+    }
     _wireEvents() {
       super._wireEvents();
       window.addEventListener("click", this._boundHandleWindowClick);
@@ -4147,6 +4280,7 @@ if (!customElements.get("wc-emoji")) {
       document.body.removeEventListener("wc-emoji:open", this._boundHandleOpen);
       document.body.removeEventListener("wc-emoji:close", this._boundHandleClose);
       document.body.removeEventListener("wc-emoji:toggle", this._boundHandleToggle);
+      this._unwireHoverTarget();
       if (this._onpickHandler) {
         this.removeEventListener("emoji:pick", this._onpickHandler);
         this._onpickHandler = null;
@@ -23819,11 +23953,18 @@ customElements.define("wc-select", WcSelect);
 // src/js/components/wc-textarea.js
 var WcTextarea = class extends WcBaseFormComponent {
   static get observedAttributes() {
-    return ["name", "id", "class", "value", "rows", "cols", "placeholder", "lbl-label", "disabled", "readonly", "required", "autofocus", "elt-class"];
+    return ["name", "id", "class", "value", "rows", "cols", "placeholder", "lbl-label", "disabled", "readonly", "required", "autofocus", "elt-class", "emoji-shortcodes"];
   }
   constructor() {
     super();
     this.firstContent = "";
+    this._emojiPopup = null;
+    this._emojiSearch = "";
+    this._emojiStartPos = -1;
+    this._emojiSelectedIndex = 0;
+    this._boundOnInput = this._onEmojiInput.bind(this);
+    this._boundOnKeydown = this._onEmojiKeydown.bind(this);
+    this._boundOnBlur = this._onEmojiBlur.bind(this);
     if (this.firstChild && this.firstChild.nodeName == "#text") {
       this.firstContent = this.firstChild.textContent;
       this.removeChild(this.firstChild);
@@ -23861,6 +24002,8 @@ var WcTextarea = class extends WcBaseFormComponent {
       this.formElement?.setAttribute("cols", newValue);
     } else if (attrName === "rows") {
       this.formElement?.setAttribute("rows", newValue);
+    } else if (attrName === "emoji-shortcodes") {
+      this._wireEmojiShortcodes();
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -23872,6 +24015,9 @@ var WcTextarea = class extends WcBaseFormComponent {
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
+    }
+    if (this.hasAttribute("emoji-shortcodes")) {
+      this._wireEmojiShortcodes();
     }
     if (typeof htmx !== "undefined") {
       htmx.process(this);
@@ -23894,16 +24040,205 @@ var WcTextarea = class extends WcBaseFormComponent {
       this.setAttribute("value", this.firstContent.trim());
     }
   }
+  _wireEmojiShortcodes() {
+    if (!this.formElement) return;
+    this.formElement.removeEventListener("input", this._boundOnInput);
+    this.formElement.removeEventListener("keydown", this._boundOnKeydown);
+    this.formElement.removeEventListener("blur", this._boundOnBlur);
+    this.formElement.addEventListener("input", this._boundOnInput);
+    this.formElement.addEventListener("keydown", this._boundOnKeydown);
+    this.formElement.addEventListener("blur", this._boundOnBlur);
+  }
+  _getShortcodeMap() {
+    const WcEmoji = customElements.get("wc-emoji");
+    if (WcEmoji && WcEmoji.shortcodeMap) {
+      return WcEmoji.shortcodeMap;
+    }
+    return {};
+  }
+  _getShortcodeEntries() {
+    const map = this._getShortcodeMap();
+    return Object.entries(map).map(([emoji, code]) => ({ emoji, code }));
+  }
+  _onEmojiInput() {
+    if (this._emojiInserting) return;
+    const ta = this.formElement;
+    const pos = ta.selectionStart;
+    const text = ta.value.substring(0, pos);
+    const completeMatch = text.match(/:([a-z0-9_]+):$/);
+    if (completeMatch) {
+      const shortcode = ":" + completeMatch[1] + ":";
+      const WcEmojiCls = customElements.get("wc-emoji");
+      if (WcEmojiCls) {
+        const emoji = WcEmojiCls.getEmojiByShortcode(shortcode);
+        if (emoji) {
+          this._emojiStartPos = pos - shortcode.length;
+          this._insertEmoji(emoji);
+          return;
+        }
+      }
+    }
+    const lastColon = text.lastIndexOf(":");
+    if (lastColon === -1) {
+      this._closeEmojiPopup();
+      return;
+    }
+    const query = text.substring(lastColon + 1);
+    if (query.includes(" ") || query.includes(":")) {
+      this._closeEmojiPopup();
+      return;
+    }
+    this._emojiStartPos = lastColon;
+    this._emojiSearch = query.toLowerCase();
+    if (!this._emojiPopup) {
+      this._emojiSelectedIndex = 0;
+    }
+    if (this._emojiSearch.length === 0) {
+      this._emojiSelectedIndex = 0;
+      this._showEmojiPopup(this._getShortcodeEntries().slice(0, 8));
+    } else {
+      const matches = this._getShortcodeEntries().filter(
+        (e) => e.code.toLowerCase().includes(this._emojiSearch)
+      ).slice(0, 8);
+      if (matches.length > 0) {
+        this._emojiSelectedIndex = Math.min(this._emojiSelectedIndex, matches.length - 1);
+        this._showEmojiPopup(matches);
+      } else {
+        this._closeEmojiPopup();
+      }
+    }
+  }
+  _onEmojiKeydown(e) {
+    if (!this._emojiPopup) return;
+    const items = this._emojiPopup.querySelectorAll(".wc-emoji-ac-item");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      this._emojiSelectedIndex = Math.min(this._emojiSelectedIndex + 1, items.length - 1);
+      this._highlightEmojiItem(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      this._emojiSelectedIndex = Math.max(this._emojiSelectedIndex - 1, 0);
+      this._highlightEmojiItem(items);
+    } else if (e.key === "Enter" || e.key === "Tab") {
+      if (this._emojiPopup) {
+        e.preventDefault();
+        const selected = items[this._emojiSelectedIndex];
+        if (selected) {
+          this._insertEmoji(selected.dataset.emoji);
+        }
+      }
+    } else if (e.key === "Escape") {
+      this._closeEmojiPopup();
+    }
+  }
+  _onEmojiBlur() {
+    setTimeout(() => this._closeEmojiPopup(), 200);
+  }
+  _showEmojiPopup(matches) {
+    if (!this._emojiPopup) {
+      this._emojiPopup = document.createElement("div");
+      this._emojiPopup.className = "wc-emoji-autocomplete";
+      this.componentElement.appendChild(this._emojiPopup);
+    }
+    this._emojiPopup.innerHTML = "";
+    matches.forEach((m, i) => {
+      const item = document.createElement("div");
+      item.className = "wc-emoji-ac-item" + (i === this._emojiSelectedIndex ? " selected" : "");
+      item.dataset.emoji = m.emoji;
+      item.innerHTML = `<span class="wc-emoji-ac-emoji">${m.emoji}</span><span class="wc-emoji-ac-code">${m.code}</span>`;
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        this._insertEmoji(m.emoji);
+      });
+      this._emojiPopup.appendChild(item);
+    });
+    this._positionEmojiPopup();
+  }
+  _positionEmojiPopup() {
+    if (!this._emojiPopup || !this.formElement) return;
+    const ta = this.formElement;
+    const taRect = ta.getBoundingClientRect();
+    const compRect = this.componentElement.getBoundingClientRect();
+    this._emojiPopup.style.bottom = compRect.bottom - taRect.bottom + ta.offsetHeight + "px";
+    this._emojiPopup.style.left = "0";
+  }
+  _highlightEmojiItem(items) {
+    items.forEach((item, i) => {
+      item.classList.toggle("selected", i === this._emojiSelectedIndex);
+    });
+  }
+  _insertEmoji(emoji) {
+    const ta = this.formElement;
+    const before = ta.value.substring(0, this._emojiStartPos);
+    const after = ta.value.substring(ta.selectionStart);
+    ta.value = before + emoji + after;
+    const newPos = before.length + emoji.length;
+    ta.setSelectionRange(newPos, newPos);
+    ta.focus();
+    this._closeEmojiPopup();
+    this._emojiInserting = true;
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+    ta.dispatchEvent(new Event("change", { bubbles: true }));
+    this._emojiInserting = false;
+  }
+  _closeEmojiPopup() {
+    if (this._emojiPopup) {
+      this._emojiPopup.remove();
+      this._emojiPopup = null;
+    }
+    this._emojiStartPos = -1;
+    this._emojiSearch = "";
+  }
   _applyStyle() {
     const style = `
       wc-textarea {
         display: contents;
+      }
+      .wc-emoji-autocomplete {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        z-index: 100;
+        background-color: var(--component-bg-color, var(--bg-color, #fff));
+        color: var(--color, inherit);
+        border: 1px solid var(--component-border-color);
+        border-radius: 6px;
+        padding: 4px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        min-width: 200px;
+        max-height: 240px;
+        overflow-y: auto;
+      }
+      .wc-emoji-ac-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .wc-emoji-ac-item:hover,
+      .wc-emoji-ac-item.selected {
+        background-color: var(--primary-alt-bg-color, rgba(0, 0, 0, 0.08));
+      }
+      .wc-emoji-ac-emoji {
+        font-size: 1.1rem;
+      }
+      .wc-emoji-ac-code {
+        opacity: 0.7;
       }
     `.trim();
     this.loadStyle("wc-textarea-style", style);
   }
   _unWireEvents() {
     super._unWireEvents();
+    if (this.formElement) {
+      this.formElement.removeEventListener("input", this._boundOnInput);
+      this.formElement.removeEventListener("keydown", this._boundOnKeydown);
+      this.formElement.removeEventListener("blur", this._boundOnBlur);
+    }
+    this._closeEmojiPopup();
   }
 };
 customElements.define("wc-textarea", WcTextarea);

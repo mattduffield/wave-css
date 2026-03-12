@@ -26,14 +26,20 @@
  *    - trigger-emoji: Text/emoji shown on the "more" button (default: "...")
  *    - onpick: Event handler when an emoji is selected. Receives event.detail.emoji
  *    - categories: JSON array to override default emoji categories
+ *    - hover-target: CSS selector for an ancestor element — emoji bar is hidden until that ancestor is hovered
  *
  *  Events:
- *    - emoji:pick — dispatched when an emoji is selected, with { detail: { emoji } }
+ *    - emoji:pick — dispatched when an emoji is selected, with { detail: { emoji, shortcode } }
  *
  *  API:
  *    wc.EventHub.broadcast('wc-emoji:open', '#myEmoji')
  *    wc.EventHub.broadcast('wc-emoji:close', '#myEmoji')
  *    wc.EventHub.broadcast('wc-emoji:toggle', '#myEmoji')
+ *
+ *  Shortcodes:
+ *    All emojis have associated shortcodes (e.g. :thumbsup: for 👍).
+ *    Shortcodes are shown as tooltips on hover.
+ *    Use WcEmoji.shortcodeMap to look up shortcodes programmatically.
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -41,7 +47,49 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-emoji')) {
   class WcEmoji extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'quick-emojis', 'picker-only', 'trigger-emoji', 'onpick', 'categories'];
+      return ['id', 'class', 'quick-emojis', 'picker-only', 'trigger-emoji', 'onpick', 'categories', 'hover-target'];
+    }
+
+    static get shortcodeMap() {
+      return {
+        // Smileys
+        '😀': ':grinning:', '😃': ':smiley:', '😄': ':smile:', '😁': ':grin:',
+        '😂': ':joy:', '🤣': ':rofl:', '😊': ':blush:', '😇': ':innocent:',
+        '😍': ':heart_eyes:', '🤩': ':star_struck:', '😘': ':kissing_heart:', '🥰': ':smiling_face_with_hearts:',
+        '😎': ':sunglasses:', '🤔': ':thinking:', '🫡': ':saluting_face:', '🤗': ':hugs:',
+        '😐': ':neutral_face:', '😑': ':expressionless:', '🙄': ':roll_eyes:', '😮': ':open_mouth:',
+        '😢': ':cry:', '😭': ':sob:',
+        // Gestures
+        '👍': ':thumbsup:', '👎': ':thumbsdown:', '👏': ':clap:', '🙌': ':raised_hands:',
+        '🤝': ':handshake:', '💪': ':muscle:', '🤞': ':crossed_fingers:', '✌️': ':v:',
+        '👋': ':wave:', '🫶': ':heart_hands:',
+        // Symbols
+        '❤️': ':heart:', '🔥': ':fire:', '⭐': ':star:', '✅': ':white_check_mark:',
+        '🎉': ':tada:', '💯': ':100:', '🚀': ':rocket:', '💡': ':bulb:',
+        '⚡': ':zap:', '👀': ':eyes:', '🏆': ':trophy:', '💎': ':gem:',
+        // Extra common
+        '😅': ':sweat_smile:', '😜': ':stuck_out_tongue_winking_eye:', '🥳': ':partying_face:',
+        '😤': ':triumph:', '😱': ':scream:', '🤯': ':exploding_head:',
+        '🙏': ':pray:', '🤙': ':call_me:', '✊': ':fist:',
+        '🖐️': ':raised_hand_with_fingers_splayed:', '🤘': ':metal:',
+        '💔': ':broken_heart:', '💕': ':two_hearts:', '💖': ':sparkling_heart:',
+        '🌟': ':star2:', '✨': ':sparkles:', '🎯': ':dart:', '🎶': ':notes:',
+        '💬': ':speech_balloon:', '🔔': ':bell:', '📌': ':pushpin:',
+        '🔗': ':link:', '📎': ':paperclip:', '🏠': ':house:', '🌍': ':earth_africa:',
+        '⏰': ':alarm_clock:', '📅': ':date:', '🔑': ':key:', '🛠️': ':hammer_and_wrench:',
+      };
+    }
+
+    static getShortcode(emoji) {
+      return WcEmoji.shortcodeMap[emoji] || emoji;
+    }
+
+    static getEmojiByShortcode(shortcode) {
+      const map = WcEmoji.shortcodeMap;
+      for (const [emoji, code] of Object.entries(map)) {
+        if (code === shortcode) return emoji;
+      }
+      return null;
     }
 
     static get defaultCategories() {
@@ -70,6 +118,9 @@ if (!customElements.get('wc-emoji')) {
       this._boundHandleOpen = this._handleOpen.bind(this);
       this._boundHandleClose = this._handleClose.bind(this);
       this._boundHandleToggle = this._handleToggle.bind(this);
+      this._boundHoverShow = this._hoverShow.bind(this);
+      this._boundHoverHide = this._hoverHide.bind(this);
+      this._hoverTargetEl = null;
 
       const compEl = this.querySelector('.wc-emoji');
       if (compEl) {
@@ -108,6 +159,8 @@ if (!customElements.get('wc-emoji')) {
         this._wireOnpick(newValue);
       } else if (attrName === 'categories') {
         this._rebuild();
+      } else if (attrName === 'hover-target') {
+        this._wireHoverTarget(newValue);
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -154,6 +207,7 @@ if (!customElements.get('wc-emoji')) {
           btn.type = 'button';
           btn.dataset.emoji = emoji;
           btn.textContent = emoji;
+          btn.title = WcEmoji.getShortcode(emoji);
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             this._pickEmoji(emoji);
@@ -197,6 +251,7 @@ if (!customElements.get('wc-emoji')) {
           btn.type = 'button';
           btn.dataset.emoji = emoji;
           btn.textContent = emoji;
+          btn.title = WcEmoji.getShortcode(emoji);
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             this._pickEmoji(emoji);
@@ -214,7 +269,7 @@ if (!customElements.get('wc-emoji')) {
       this.dispatchEvent(new CustomEvent('emoji:pick', {
         bubbles: true,
         composed: true,
-        detail: { emoji }
+        detail: { emoji, shortcode: WcEmoji.getShortcode(emoji) }
       }));
     }
 
@@ -246,6 +301,10 @@ if (!customElements.get('wc-emoji')) {
       if (picker) {
         picker.classList.remove('open');
         this._isOpen = false;
+      }
+      // Re-hide if hover-target is active and mouse is not over the target
+      if (this._hoverTargetEl && !this._hoverTargetEl.matches(':hover')) {
+        this._hoverHide();
       }
     }
 
@@ -344,6 +403,43 @@ if (!customElements.get('wc-emoji')) {
       }
     }
 
+    _wireHoverTarget(selector) {
+      this._unwireHoverTarget();
+      if (!selector) {
+        this.componentElement.style.opacity = '';
+        this.componentElement.style.pointerEvents = '';
+        return;
+      }
+      // Find the closest ancestor matching the selector
+      this._hoverTargetEl = this.closest(selector);
+      if (this._hoverTargetEl) {
+        this.componentElement.style.opacity = '0';
+        this.componentElement.style.pointerEvents = 'none';
+        this.componentElement.style.transition = 'opacity 0.2s ease-in-out';
+        this._hoverTargetEl.addEventListener('mouseenter', this._boundHoverShow);
+        this._hoverTargetEl.addEventListener('mouseleave', this._boundHoverHide);
+      }
+    }
+
+    _unwireHoverTarget() {
+      if (this._hoverTargetEl) {
+        this._hoverTargetEl.removeEventListener('mouseenter', this._boundHoverShow);
+        this._hoverTargetEl.removeEventListener('mouseleave', this._boundHoverHide);
+        this._hoverTargetEl = null;
+      }
+    }
+
+    _hoverShow() {
+      this.componentElement.style.opacity = '1';
+      this.componentElement.style.pointerEvents = 'auto';
+    }
+
+    _hoverHide() {
+      if (this._isOpen) return;
+      this.componentElement.style.opacity = '0';
+      this.componentElement.style.pointerEvents = 'none';
+    }
+
     _wireEvents() {
       super._wireEvents();
       window.addEventListener('click', this._boundHandleWindowClick);
@@ -358,6 +454,7 @@ if (!customElements.get('wc-emoji')) {
       document.body.removeEventListener('wc-emoji:open', this._boundHandleOpen);
       document.body.removeEventListener('wc-emoji:close', this._boundHandleClose);
       document.body.removeEventListener('wc-emoji:toggle', this._boundHandleToggle);
+      this._unwireHoverTarget();
       if (this._onpickHandler) {
         this.removeEventListener('emoji:pick', this._onpickHandler);
         this._onpickHandler = null;
