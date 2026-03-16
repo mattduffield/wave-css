@@ -14043,11 +14043,13 @@ if (!customElements.get("wc-tabulator")) {
           await sleep(1e3);
           htmx.process(this);
         }
-        if (document.hidden && this.table.getDataCount() === 0) {
+        if (document.hidden) {
           const onVisible = () => {
             if (!document.hidden) {
               document.removeEventListener("visibilitychange", onVisible);
-              this.table.setData();
+              if (this.table.getDataCount() === 0) {
+                this.table.setData();
+              }
             }
           };
           document.addEventListener("visibilitychange", onVisible);
