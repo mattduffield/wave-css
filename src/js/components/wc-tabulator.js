@@ -503,16 +503,14 @@ if (!customElements.get('wc-tabulator')) {
           htmx.process(this);
         }
 
-        // Fix for Cmd+Click background tabs: browsers throttle AJAX in hidden tabs,
-        // causing Tabulator to initialize with zero data. Register a one-time listener
-        // that checks data count when the tab becomes visible and re-fetches if empty.
+        // Fix for Cmd+Click background tabs: browsers report zero dimensions
+        // for hidden tabs, so Tabulator calculates incorrect column widths and
+        // row heights. Force a full redraw when the tab becomes visible.
         if (document.hidden) {
           const onVisible = () => {
             if (!document.hidden) {
               document.removeEventListener('visibilitychange', onVisible);
-              if (this.table.getDataCount() === 0) {
-                this.table.setData();
-              }
+              this.table.redraw(true);
             }
           };
           document.addEventListener('visibilitychange', onVisible);

@@ -14047,9 +14047,7 @@ if (!customElements.get("wc-tabulator")) {
           const onVisible = () => {
             if (!document.hidden) {
               document.removeEventListener("visibilitychange", onVisible);
-              if (this.table.getDataCount() === 0) {
-                this.table.setData();
-              }
+              this.table.redraw(true);
             }
           };
           document.addEventListener("visibilitychange", onVisible);
