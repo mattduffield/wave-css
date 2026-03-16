@@ -502,6 +502,18 @@ if (!customElements.get('wc-tabulator')) {
           await sleep(1000);
           htmx.process(this);
         }
+
+        // Fix for Cmd+Click background tabs: browsers throttle AJAX in hidden tabs,
+        // causing Tabulator to initialize with zero data. Re-fetch when tab becomes visible.
+        if (document.hidden && this.table.getDataCount() === 0) {
+          const onVisible = () => {
+            if (!document.hidden) {
+              document.removeEventListener('visibilitychange', onVisible);
+              this.table.setData();
+            }
+          };
+          document.addEventListener('visibilitychange', onVisible);
+        }
       });
       if ("onCellEdited" in this.funcs) {
         this.table.on("cellEdited", this.funcs["onCellEdited"].bind(this));  
