@@ -47,7 +47,7 @@ Include the required JavaScript files:
     field="name" 
     title="Name"
     formatter="link"
-    formatter-params='{"url": "urlFormatter", "routePrefix": "screen", "screen": "user"}'>
+    formatter-params='{"url": "urlFormatter", "routePrefix": "x", "template": "user"}'>
   </wc-tabulator-column>
 </wc-tabulator>
 ```

@@ -27,7 +27,7 @@
       record-size="200"
       header-visible="true"
       selectable-rows="true"
-      xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
+      xcol-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "x", "template": "contact", "url": "urlFormatter"}}'
       xlayout="fitColumns"
       xgroup-by="description"
       xresponsive-layout="collapse"
@@ -165,7 +165,7 @@
       header-visible="true"
       selectable-rows="true"
       initial-filter='[{"field": "description", "type": "in", "value": ["Auto Pay Authorization", "Correct License Information", "DynamicDrive discount", "License information Required", "Renewal ToDo: NC Driver License Number", "Renewal ToDo: Proof of Driving Experience required", "Credit Card Expiring", "Eligible Risk Cancel", "Eligible Risk Proof", "Foreign Experience"]}]'
-      col-field-formatter='{"cols": ["named_insured"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
+      col-field-formatter='{"cols": ["named_insured"], "formatter": "link", "params": {"routePrefix": "x", "template": "contact", "url": "urlFormatter"}}'
       xlayout="fitColumns"
       group-by="description"
       xresponsive-layout="collapse"
@@ -341,7 +341,7 @@
       pagination-counter="rows"
       header-visible="true"
       selectable-rows="true"
-      col-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}'
+      col-field-formatter='{"cols": ["first_name", "last_name", "email"], "formatter": "link", "params": {"routePrefix": "x", "template": "contact", "url": "urlFormatter"}}'
       group-by="gender"
       layout="fitColumns">
       <wc-tabulator-func name="onDelete"
@@ -376,7 +376,7 @@
         header-filter-func="starts"
         header-menu="headerMenu"
         formatter="link"
-        formatter-params='{"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
+        formatter-params='{"routePrefix": "x", "template": "contact", "url": "urlFormatter"}'
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="last_name"
@@ -398,7 +398,7 @@
         header-filter="input"
         header-menu="headerMenu"
         formatter="link"
-        formatter-params='{"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
+        formatter-params='{"routePrefix": "x", "template": "contact", "url": "urlFormatter"}'
         ></wc-tabulator-column>
       <wc-tabulator-column
         field="address.city"
@@ -475,7 +475,7 @@
         title="Release Date"
         xformatter="localDatetimeFormatter"
         formatter="linklocaldatetime"
-        formatter-params='{"format": "DATETIME_STANDARD", "routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}'
+        formatter-params='{"format": "DATETIME_STANDARD", "routePrefix": "x", "template": "contact", "url": "urlFormatter"}'
         vert-align="middle"
         header-hoz-align="right"
         hoz-align="right"

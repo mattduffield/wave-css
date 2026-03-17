@@ -14263,17 +14263,17 @@ if (!customElements.get("wc-tabulator")) {
       }
     }
     urlFormatter(cell, formatterParams, onRendered) {
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "x";
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = "";
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
       return url;
     }
@@ -14288,17 +14288,17 @@ if (!customElements.get("wc-tabulator")) {
     linkFormatter(cell, formatterParams, onRendered) {
       var value = cell.getValue();
       var linkElement = document.createElement("a");
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "x";
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = "";
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
       if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
         const queryParts = [];
@@ -14553,17 +14553,17 @@ if (!customElements.get("wc-tabulator")) {
     linkPhoneFormatter(cell, formatterParams, onRendered) {
       const formattedPhone = this.phone(cell, formatterParams, onRendered);
       if (!formattedPhone) return "";
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "screen";
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || "x";
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = "";
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
       if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
         const queryParts = [];
@@ -14667,17 +14667,17 @@ if (!customElements.get("wc-tabulator")) {
             hour12: true
           });
       }
-      const routePrefix = formatterParams.routePrefix || "screen";
-      const screen = formatterParams.screen;
-      const screen_id = formatterParams.screen_id;
+      const routePrefix = formatterParams.routePrefix || "x";
+      const template = formatterParams.template || formatterParams.screen;
+      const template_id = formatterParams.template_id || formatterParams.screen_id;
       const id_name = formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = "";
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
       if (formatterParams.queryParams && typeof formatterParams.queryParams === "object") {
         const queryParts = [];

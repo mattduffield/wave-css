@@ -769,7 +769,7 @@ if (!customElements.get('wc-tabulator')) {
         if (formatter) {
           column.formatter = this.resolveCellFormatter(formatter);
         } else {
-          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
+          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "x", "template": "contact", "url": "urlFormatter"}}
           if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatter = this.colFieldFormatter.formatter;                        
           }
@@ -783,7 +783,7 @@ if (!customElements.get('wc-tabulator')) {
             column.formatterParams = fp;
           }
         } else {
-          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "screen", "screen": "contact", "url": "urlFormatter"}}
+          // {"cols": ["first_name", "last_name"], "formatter": "link", "params": {"routePrefix": "x", "template": "contact", "url": "urlFormatter"}}
           if (field && this.colFieldFormatter?.cols?.includes(field)) {
             column.formatterParams = this.colFieldFormatter.params;
           }
@@ -898,18 +898,18 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     urlFormatter(cell, formatterParams, onRendered) {
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = '';
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
         // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
       return url;
     }
@@ -932,18 +932,18 @@ if (!customElements.get('wc-tabulator')) {
       var linkElement = document.createElement("a");
 
 
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = '';
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
         // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
 
       // Add query parameters if specified
@@ -1273,18 +1273,18 @@ if (!customElements.get('wc-tabulator')) {
       if (!formattedPhone) return "";
 
       // Build the URL using the same logic as linkFormatter
-      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'screen';
-      const screen = cell.getColumn().getDefinition().formatterParams.screen;
-      const screen_id = cell.getColumn().getDefinition().formatterParams.screen_id;
+      const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
+      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = '';
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
         // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
 
       // Add query parameters if specified
@@ -1425,18 +1425,18 @@ if (!customElements.get('wc-tabulator')) {
       }
 
       // Build the URL using the same logic as linkFormatter
-      const routePrefix = formatterParams.routePrefix || 'screen';
-      const screen = formatterParams.screen;
-      const screen_id = formatterParams.screen_id;
+      const routePrefix = formatterParams.routePrefix || 'x';
+      const template = formatterParams.template || formatterParams.screen;
+      const template_id = formatterParams.template_id || formatterParams.screen_id;
       const id_name = formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
       let url = '';
-      if (screen) {
-        url = `/${routePrefix}/${screen}/${id}`;
+      if (template) {
+        url = `/${routePrefix}/${template}/${id}`;
       } else {
         // /x/64f525ffbe4a5f4c9cf79afb?macro_builder_id=65a5c4b71443ccf68de9e55a
-        url = `/${routePrefix}/${screen_id}?${id_name}=${id}`;
+        url = `/${routePrefix}/${template_id}?${id_name}=${id}`;
       }
 
       // Add query parameters if specified
