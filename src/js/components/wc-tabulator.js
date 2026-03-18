@@ -901,8 +901,8 @@ if (!customElements.get('wc-tabulator')) {
 
     urlFormatter(cell, formatterParams, onRendered) {
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
-      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
-      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
+      const template = cell.getColumn().getDefinition().formatterParams.template;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
@@ -935,8 +935,8 @@ if (!customElements.get('wc-tabulator')) {
 
 
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
-      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
-      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
+      const template = cell.getColumn().getDefinition().formatterParams.template;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
@@ -1276,8 +1276,8 @@ if (!customElements.get('wc-tabulator')) {
 
       // Build the URL using the same logic as linkFormatter
       const routePrefix = cell.getColumn().getDefinition().formatterParams.routePrefix || 'x';
-      const template = cell.getColumn().getDefinition().formatterParams.template || cell.getColumn().getDefinition().formatterParams.screen;
-      const template_id = cell.getColumn().getDefinition().formatterParams.template_id || cell.getColumn().getDefinition().formatterParams.screen_id;
+      const template = cell.getColumn().getDefinition().formatterParams.template;
+      const template_id = cell.getColumn().getDefinition().formatterParams.template_id;
       const id_name = cell.getColumn().getDefinition().formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
@@ -1428,8 +1428,8 @@ if (!customElements.get('wc-tabulator')) {
 
       // Build the URL using the same logic as linkFormatter
       const routePrefix = formatterParams.routePrefix || 'x';
-      const template = formatterParams.template || formatterParams.screen;
-      const template_id = formatterParams.template_id || formatterParams.screen_id;
+      const template = formatterParams.template;
+      const template_id = formatterParams.template_id;
       const id_name = formatterParams.id_name;
       const data = cell.getData();
       const id = data._id;
