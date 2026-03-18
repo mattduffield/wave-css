@@ -505,12 +505,14 @@ if (!customElements.get('wc-tabulator')) {
 
         // Fix for Cmd+Click background tabs: browsers report zero dimensions
         // for hidden tabs, so Tabulator calculates incorrect column widths and
-        // row heights. Force a full redraw when the tab becomes visible.
+        // row heights. Force a re-fetch and full redraw when the tab becomes visible.
         if (document.hidden) {
           const onVisible = () => {
             if (!document.hidden) {
               document.removeEventListener('visibilitychange', onVisible);
-              this.table.redraw(true);
+              this.table.setData().then(() => {
+                this.table.redraw(true);
+              });
             }
           };
           document.addEventListener('visibilitychange', onVisible);
