@@ -1020,6 +1020,249 @@ if (!customElements.get('wc-page-designer')) {
           { name: 'value', label: 'Value', type: 'string' },
           { name: 'content', label: 'Content', type: 'multiline-string' },
         ],
+        'wc-address-listener': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'address_group', label: 'Address Group', type: 'string', isLabel: true },
+        ],
+        'wc-ai-bot': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'bot_id', label: 'Bot ID', type: 'string', isLabel: true },
+          { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: 'standard', enum: ['standard', 'assistant'] },
+          { name: 'model', label: 'Model', type: 'string' },
+          { name: 'system_prompt', label: 'System Prompt', type: 'multiline-string' },
+          { name: 'title', label: 'Title', type: 'string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'theme', label: 'Theme', type: 'string-enum', defaultValue: 'bubble', enum: ['bubble', 'minimal', 'sidebar'] },
+          { name: 'position', label: 'Position', type: 'string-enum', defaultValue: 'bottom-right', enum: ['bottom-right', 'bottom-left', 'top-right', 'top-left'] },
+          { name: 'auto_open', label: 'Auto Open?', type: 'boolean' },
+          { name: 'temperature', label: 'Temperature', type: 'string', defaultValue: '0.7' },
+          { name: 'max_tokens', label: 'Max Tokens', type: 'string', defaultValue: '1000' },
+          { name: 'context_urls', label: 'Context URLs', type: 'string' },
+          { name: 'context_window_size', label: 'Context Window Size', type: 'string' },
+          { name: 'debug', label: 'Debug?', type: 'boolean' },
+          { name: 'force_enable', label: 'Force Enable?', type: 'boolean' },
+        ],
+        'wc-article-card': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'url', label: 'URL', type: 'string', isLabel: true },
+          { name: 'img_url', label: 'Image URL', type: 'string' },
+          { name: 'article_type', label: 'Article Type', type: 'string' },
+        ],
+        'wc-behavior': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'hx_get', label: 'HX Get', type: 'string', isLabel: true },
+          { name: 'hx_post', label: 'HX Post', type: 'string' },
+          { name: 'hx_put', label: 'HX Put', type: 'string' },
+          { name: 'hx_delete', label: 'HX Delete', type: 'string' },
+          { name: 'hx_target', label: 'HX Target', type: 'string' },
+          { name: 'hx_trigger', label: 'HX Trigger', type: 'string' },
+          { name: 'hx_swap', label: 'HX Swap', type: 'string' },
+          { name: 'hx_select', label: 'HX Select', type: 'string' },
+          { name: 'hx_push_url', label: 'HX Push URL', type: 'string' },
+          { name: 'hx_vals', label: 'HX Vals', type: 'string' },
+          { name: 'hx_headers', label: 'HX Headers', type: 'string' },
+          { name: 'hx_indicator', label: 'HX Indicator', type: 'string' },
+          { name: 'hx_include', label: 'HX Include', type: 'string' },
+          { name: 'hx_confirm', label: 'HX Confirm', type: 'string' },
+        ],
+        'wc-busy-indicator': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'indicator_type', label: 'Indicator Type', type: 'string-enum', defaultValue: 'spinner', enum: ['spinner', 'dots', 'pulse', 'bars'] },
+          { name: 'text', label: 'Text', type: 'string', isLabel: true },
+          { name: 'size', label: 'Size', type: 'string' },
+          { name: 'color', label: 'Color', type: 'string' },
+          { name: 'color_variation', label: 'Color Variation', type: 'string' },
+          { name: 'color_levels', label: 'Color Levels', type: 'string' },
+        ],
+        'wc-chart': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'chart_type', label: 'Chart Type', type: 'string-enum', defaultValue: 'bar', enum: ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'] },
+          { name: 'title', label: 'Title', type: 'string', isLabel: true },
+          { name: 'labels', label: 'Labels', type: 'string', isSubLabel: true },
+          { name: 'data', label: 'Data', type: 'string' },
+          { name: 'datasets', label: 'Datasets', type: 'multiline-string' },
+          { name: 'height', label: 'Height', type: 'string' },
+          { name: 'width', label: 'Width', type: 'string' },
+          { name: 'colors', label: 'Colors', type: 'string' },
+          { name: 'show_legend', label: 'Show Legend?', type: 'boolean' },
+          { name: 'legend_position', label: 'Legend Position', type: 'string-enum', defaultValue: 'top', enum: ['top', 'bottom', 'left', 'right'] },
+          { name: 'stacked', label: 'Stacked?', type: 'boolean' },
+          { name: 'responsive', label: 'Responsive?', type: 'boolean' },
+        ],
+        'wc-chartjs': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'chart_type', label: 'Chart Type', type: 'string-enum', defaultValue: 'bar', enum: ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'] },
+          { name: 'title', label: 'Title', type: 'string', isLabel: true },
+          { name: 'labels', label: 'Labels', type: 'string', isSubLabel: true },
+          { name: 'data', label: 'Data', type: 'string' },
+          { name: 'datasets', label: 'Datasets', type: 'multiline-string' },
+          { name: 'height', label: 'Height', type: 'string' },
+          { name: 'width', label: 'Width', type: 'string' },
+          { name: 'url', label: 'Data URL', type: 'string' },
+          { name: 'ajax_method', label: 'AJAX Method', type: 'string-enum', defaultValue: 'GET', enum: ['GET', 'POST'] },
+          { name: 'auto_refresh', label: 'Auto Refresh (ms)', type: 'string' },
+          { name: 'colors', label: 'Colors', type: 'string' },
+          { name: 'show_legend', label: 'Show Legend?', type: 'boolean' },
+          { name: 'legend_position', label: 'Legend Position', type: 'string-enum', defaultValue: 'top', enum: ['top', 'bottom', 'left', 'right'] },
+          { name: 'stacked', label: 'Stacked?', type: 'boolean' },
+          { name: 'responsive', label: 'Responsive?', type: 'boolean' },
+          { name: 'busy_indicator', label: 'Busy Indicator?', type: 'boolean' },
+          { name: 'busy_indicator_type', label: 'Busy Indicator Type', type: 'string' },
+        ],
+        'wc-dropdown': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'mode', label: 'Mode', type: 'string-enum', defaultValue: '', enum: ['', 'search'] },
+          { name: 'format', label: 'Format', type: 'string-enum', defaultValue: '', enum: ['', 'grid-round', 'avatar'] },
+          { name: 'dropdown_class', label: 'Dropdown Class', type: 'string' },
+        ],
+        'wc-dropdown-item': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+        ],
+        'wc-emoji': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'quick_emojis', label: 'Quick Emojis', type: 'string' },
+          { name: 'picker_only', label: 'Picker Only?', type: 'boolean' },
+          { name: 'trigger_emoji', label: 'Trigger Emoji', type: 'string' },
+          { name: 'hover_target', label: 'Hover Target', type: 'string' },
+        ],
+        'wc-event-handler': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'event_name', label: 'Event Name', type: 'string', isLabel: true },
+          { name: 'action', label: 'Action', type: 'string-enum', defaultValue: '', enum: ['add-class', 'remove-class', 'toggle-class', 'add-item', 'remove-item', 'click'] },
+          { name: 'action_target', label: 'Action Target', type: 'string', isSubLabel: true },
+        ],
+        'wc-fa-icon': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'name', label: 'Icon Name', type: 'string', isLabel: true },
+          { name: 'icon_style', label: 'Icon Style', type: 'string-enum', defaultValue: 'solid', enum: ['solid', 'regular', 'light', 'thin', 'duotone', 'duotone-regular', 'duotone-light', 'duotone-thin', 'brands'] },
+          { name: 'size', label: 'Size', type: 'string', defaultValue: '1rem' },
+          { name: 'color', label: 'Color', type: 'string' },
+          { name: 'spin', label: 'Spin?', type: 'boolean' },
+          { name: 'pulse', label: 'Pulse?', type: 'boolean' },
+          { name: 'rotate', label: 'Rotate', type: 'string' },
+          { name: 'flip', label: 'Flip', type: 'string-enum', defaultValue: '', enum: ['', 'horizontal', 'vertical', 'both'] },
+        ],
+        'wc-field': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'label', label: 'Label', type: 'string', isLabel: true },
+          { name: 'label_class', label: 'Label Class', type: 'string' },
+          { name: 'value', label: 'Value', type: 'string', isSubLabel: true },
+          { name: 'value_class', label: 'Value Class', type: 'string' },
+          { name: 'link', label: 'Link', type: 'string' },
+          { name: 'text_align', label: 'Text Align', type: 'string-enum', defaultValue: '', enum: ['', 'left', 'center', 'right'] },
+        ],
+        'wc-flip-box': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'flip_on', label: 'Flip On', type: 'string-enum', defaultValue: 'hover', enum: ['hover', 'click'] },
+          { name: 'flip_icon', label: 'Flip Icon', type: 'string' },
+        ],
+        'wc-google-address': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'name', label: 'Name', type: 'string', isLabel: true },
+          { name: 'lbl_label', label: 'Label', type: 'string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'value', label: 'Value', type: 'string' },
+          { name: 'api_key', label: 'API Key', type: 'string' },
+          { name: 'address_group', label: 'Address Group', type: 'string' },
+          { name: 'target_map', label: 'Target Map', type: 'string' },
+          { name: 'countries', label: 'Countries', type: 'string' },
+          { name: 'required', label: 'Required?', type: 'boolean' },
+          { name: 'disabled', label: 'Disabled?', type: 'boolean' },
+        ],
+        'wc-google-map': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'api_key', label: 'API Key', type: 'string' },
+          { name: 'lat', label: 'Latitude', type: 'string', isLabel: true },
+          { name: 'lng', label: 'Longitude', type: 'string', isSubLabel: true },
+          { name: 'address', label: 'Address', type: 'string' },
+          { name: 'title', label: 'Title', type: 'string' },
+          { name: 'zoom', label: 'Zoom', type: 'string', defaultValue: '12' },
+          { name: 'map_type', label: 'Map Type', type: 'string-enum', defaultValue: 'roadmap', enum: ['roadmap', 'satellite', 'hybrid', 'terrain'] },
+          { name: 'draggable', label: 'Draggable?', type: 'boolean' },
+          { name: 'scrollwheel', label: 'Scroll Wheel?', type: 'boolean' },
+          { name: 'disable_default_ui', label: 'Disable Default UI?', type: 'boolean' },
+        ],
+        'wc-icon': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'name', label: 'Icon Name', type: 'string', isLabel: true },
+          { name: 'icon_style', label: 'Icon Style', type: 'string-enum', defaultValue: 'solid', enum: ['solid', 'regular', 'light', 'thin', 'duotone', 'duotone-regular', 'duotone-light', 'duotone-thin', 'brands'] },
+          { name: 'size', label: 'Size', type: 'string', defaultValue: '1rem' },
+          { name: 'color', label: 'Color', type: 'string' },
+          { name: 'spin', label: 'Spin?', type: 'boolean' },
+          { name: 'pulse', label: 'Pulse?', type: 'boolean' },
+          { name: 'base_path', label: 'Base Path', type: 'string' },
+        ],
+        'wc-menu': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'path', label: 'Path', type: 'string', isLabel: true },
+          { name: 'wrap', label: 'Wrap?', type: 'boolean' },
+        ],
+        'wc-vin-decoder': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'css', label: 'CSS', type: 'string' },
+          { name: 'name', label: 'Name', type: 'string', isLabel: true },
+          { name: 'lbl_label', label: 'Label', type: 'string' },
+          { name: 'value', label: 'Value', type: 'string' },
+          { name: 'placeholder', label: 'Placeholder', type: 'string' },
+          { name: 'api_url', label: 'API URL', type: 'string' },
+          { name: 'database_endpoint', label: 'Database Endpoint', type: 'string' },
+          { name: 'vin_group', label: 'VIN Group', type: 'string', isSubLabel: true },
+          { name: 'vehicle_type', label: 'Vehicle Type', type: 'string-enum', defaultValue: 'auto', enum: ['auto', 'motorcycle'] },
+          { name: 'required', label: 'Required?', type: 'boolean' },
+          { name: 'disabled', label: 'Disabled?', type: 'boolean' },
+        ],
+        'wc-vin-listener': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'vin_group', label: 'VIN Group', type: 'string', isLabel: true },
+          { name: 'array_fields', label: 'Array Fields', type: 'string' },
+        ],
+        'wc-visibility-change': [
+          { name: 'id', label: 'ID', type: 'string', isReadonly: true },
+          { name: 'type', label: 'Type', type: 'string', isReadonly: true },
+          { name: 'hx_verb', label: 'HX Verb', type: 'string-enum', defaultValue: 'GET', enum: ['GET', 'POST', 'PUT', 'DELETE'] },
+          { name: 'hx_url', label: 'HX URL', type: 'string', isLabel: true },
+          { name: 'hx_target', label: 'HX Target', type: 'string' },
+          { name: 'hx_swap', label: 'HX Swap', type: 'string' },
+          { name: 'hx_indicator', label: 'HX Indicator', type: 'string' },
+          { name: 'hx_push_url', label: 'HX Push URL', type: 'string' },
+          { name: 'hx_select', label: 'HX Select', type: 'string' },
+        ],
       };
       this.floatingToolbar = null;
       this.currentHoveredElement = null;
@@ -1062,12 +1305,12 @@ if (!customElements.get('wc-page-designer')) {
         // console.log('wc-page-designer:attributeChangedCallback - json-layout', this.jsonLayout);
       } else if (attrName === 'json-layout-fetch-url') {
         this.jsonLayoutFetchUrl = newValue;
-        const layoutEditor = this.querySelector('wc-code-mirror[name="jsonLayout"]');
+        const layoutEditor = this.querySelector('wc-code-mirror[name="json_layout"]');
         layoutEditor.setAttribute('fetch', this.jsonLayoutFetchUrl);
         // console.log('wc-page-designer:attributeChangedCallback - json-layout-fetch-url', this.jsonLayoutFetchUrl);
       } else if (attrName === 'json-schema-fetch-url') {
         this.jsonSchemaFetchUrl = newValue;
-        const schemaJson = this.querySelector('wc-code-mirror[name="jsonSchema"]');
+        const schemaJson = this.querySelector('wc-code-mirror[name="json_schema"]');
         schemaJson.setAttribute('fetch', this.jsonSchemaFetchUrl);
         // console.log('wc-page-designer:attributeChangedCallback - json-schema-fetch-url', this.jsonSchemaFetchUrl);
       }
@@ -1113,10 +1356,13 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="fieldset" draggable="true">Fieldset</div>
             <div class="element-item" data-element-type="wc-accordion" draggable="true">WC Accordion</div>
             <div class="element-item" data-element-type="wc-breadcrumb" draggable="true">WC Breadcrumb</div>
+            <div class="element-item" data-element-type="wc-dropdown" draggable="true">WC Dropdown</div>
+            <div class="element-item" data-element-type="wc-flip-box" draggable="true">WC Flip Box</div>
             <div class="element-item" data-element-type="wc-form" draggable="true">WC Form</div>
             <div class="element-item" data-element-type="wc-input-radio" draggable="true">WC Input Radio</div>
-            <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
+            <div class="element-item" data-element-type="wc-menu" draggable="true">WC Menu</div>
             <div class="element-item" data-element-type="wc-select" draggable="true">WC Select</div>
+            <div class="element-item" data-element-type="wc-select-multiple" draggable="true">WC Select Multiple</div>
             <div class="element-item" data-element-type="wc-sidebar" draggable="true">WC Sidebar</div>
             <div class="element-item" data-element-type="wc-sidenav" draggable="true">WC Sidenav</div>
             <div class="element-item" data-element-type="wc-slideshow" draggable="true">WC Slideshow</div>
@@ -1144,17 +1390,30 @@ if (!customElements.get('wc-page-designer')) {
           <div class="element-list p-2 flex flex-col min-h-0 overflow-scroll" id="form-elements">
             <div class="element-item" data-element-type="a" draggable="true">Anchor</div>
             <div class="element-item" data-element-type="hr" draggable="true">Horizontal Line</div>
-            <div class="element-item" data-element-type="wc-article-skeleton" draggable="true">WC Article Skeleton</div>
-            <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
-            <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
-            <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
             <div class="element-item" data-element-type="wc-accordion-option" draggable="true">WC Accordion Option</div>
-            <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Backgruond Image</div>
+            <div class="element-item" data-element-type="wc-address-listener" draggable="true">WC Address Listener</div>
+            <div class="element-item" data-element-type="wc-ai-bot" draggable="true">WC AI Bot</div>
+            <div class="element-item" data-element-type="wc-article-card" draggable="true">WC Article Card</div>
+            <div class="element-item" data-element-type="wc-article-skeleton" draggable="true">WC Article Skeleton</div>
+            <div class="element-item" data-element-type="wc-background-image" draggable="true">WC Background Image</div>
+            <div class="element-item" data-element-type="wc-behavior" draggable="true">WC Behavior</div>
             <div class="element-item" data-element-type="wc-breadcrumb-item" draggable="true">WC Breadcrumb Item</div>
+            <div class="element-item" data-element-type="wc-busy-indicator" draggable="true">WC Busy Indicator</div>
+            <div class="element-item" data-element-type="wc-card-skeleton" draggable="true">WC Card Skeleton</div>
+            <div class="element-item" data-element-type="wc-chart" draggable="true">WC Chart</div>
+            <div class="element-item" data-element-type="wc-chartjs" draggable="true">WC ChartJS</div>
             <div class="element-item" data-element-type="wc-code-mirror" draggable="true">WC Code Mirror</div>
             <div class="element-item" data-element-type="wc-contact-card" draggable="true">WC Contact Card</div>
             <div class="element-item" data-element-type="wc-contact-chip" draggable="true">WC Contact Chip</div>
+            <div class="element-item" data-element-type="wc-dropdown-item" draggable="true">WC Dropdown Item</div>
+            <div class="element-item" data-element-type="wc-emoji" draggable="true">WC Emoji</div>
+            <div class="element-item" data-element-type="wc-event-handler" draggable="true">WC Event Handler</div>
+            <div class="element-item" data-element-type="wc-fa-icon" draggable="true">WC FA Icon</div>
+            <div class="element-item" data-element-type="wc-field" draggable="true">WC Field</div>
+            <div class="element-item" data-element-type="wc-google-address" draggable="true">WC Google Address</div>
+            <div class="element-item" data-element-type="wc-google-map" draggable="true">WC Google Map</div>
             <div class="element-item" data-element-type="wc-hotkey" draggable="true">WC Hotkey</div>
+            <div class="element-item" data-element-type="wc-icon" draggable="true">WC Icon</div>
             <div class="element-item" data-element-type="wc-image" draggable="true">WC Image</div>
             <div class="element-item" data-element-type="wc-input" draggable="true">WC Input</div>
             <div class="element-item" data-element-type="wc-input-checkbox" draggable="true">WC Input Checkbox</div>
@@ -1169,22 +1428,28 @@ if (!customElements.get('wc-page-designer')) {
             <div class="element-item" data-element-type="wc-input-tel" draggable="true">WC Input Phone</div>
             <div class="element-item" data-element-type="wc-input-time" draggable="true">WC Input Time</div>
             <div class="element-item" data-element-type="wc-input-week" draggable="true">WC Input Week</div>
+            <div class="element-item" data-element-type="wc-javascript" draggable="true">WC JavaScript</div>
+            <div class="element-item" data-element-type="wc-list-skeleton" draggable="true">WC List Skeleton</div>
             <div class="element-item" data-element-type="wc-loader" draggable="true">WC Loader</div>
             <div class="element-item" data-element-type="wc-option" draggable="true">WC Option</div>
             <div class="element-item" data-element-type="wc-save-button" draggable="true">WC Save Button</div>
             <div class="element-item" data-element-type="wc-save-split-button" draggable="true">WC Save Split Button</div>
             <div class="element-item" data-element-type="wc-script" draggable="true">WC Script</div>
-            <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
-            <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-select-collection" draggable="true">WC Select Collection</div>
             <div class="element-item" data-element-type="wc-select-lookup" draggable="true">WC Select Lookup</div>
+            <div class="element-item" data-element-type="wc-select-multiple-collection" draggable="true">WC Select Multiple Collection</div>
+            <div class="element-item" data-element-type="wc-select-multiple-lookup" draggable="true">WC Select Multiple Lookup</div>
             <div class="element-item" data-element-type="wc-slideshow-image" draggable="true">WC Slideshow Image</div>
+            <div class="element-item" data-element-type="wc-table-skeleton" draggable="true">WC Table Skeleton</div>
             <div class="element-item" data-element-type="wc-tabulator-column" draggable="true">WC Tabulator Column</div>
             <div class="element-item" data-element-type="wc-tabulator-func" draggable="true">WC Tabulator Func</div>
             <div class="element-item" data-element-type="wc-tabulator-row-menu" draggable="true">WC Tabulator Row Menu</div>
             <div class="element-item" data-element-type="wc-textarea" draggable="true">WC Textarea</div>
             <div class="element-item" data-element-type="wc-theme-selector" draggable="true">WC Theme Selector</div>
             <div class="element-item" data-element-type="wc-timeline-option" draggable="true">WC Timeline Option</div>
+            <div class="element-item" data-element-type="wc-vin-decoder" draggable="true">WC VIN Decoder</div>
+            <div class="element-item" data-element-type="wc-vin-listener" draggable="true">WC VIN Listener</div>
+            <div class="element-item" data-element-type="wc-visibility-change" draggable="true">WC Visibility Change</div>
           </div>
         </wc-tab-item>
         <wc-tab-item class="" label="Fields">
@@ -1218,7 +1483,7 @@ if (!customElements.get('wc-page-designer')) {
           <div class="flex flex-col flex-1 min-h-0 overflow-scroll gap-2">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0"
               _="install HandleCodeMirrorTabChange end"
-              name="jsonSchema"
+              name="json_schema"
               line-numbers
               line-wrapper
               fold-gutter
@@ -1236,7 +1501,7 @@ if (!customElements.get('wc-page-designer')) {
           <div class="flex flex-col flex-1 min-h-0 min-w-0 overflow-scroll">
             <wc-code-mirror class="flex flex-col flex-1 min-h-0 min-w-0 w-full max-w-full box-border"
               _="install HandleCodeMirrorTabChange end"
-              name="jsonLayout"
+              name="json_layout"
               line-numbers
               line-wrapper
               fold-gutter
@@ -1651,7 +1916,7 @@ if (!customElements.get('wc-page-designer')) {
       this.renderedPreviewButton = document.querySelector('button[data-label="Preview"]');
       this.preRenderedPreviewButton = document.querySelector('button[data-label="Raw Preview"]');
       this.generateJsonButton = document.querySelector('button[data-label="Layout JSON"]');
-      this.jsonOutput = document.querySelector('wc-code-mirror[name="jsonLayout"]');
+      this.jsonOutput = document.querySelector('wc-code-mirror[name="json_layout"]');
       this.propId = document.getElementById('prop-id');
       this.propType = document.getElementById('prop-type');
       this.propLabel = document.getElementById('prop-label');
@@ -1661,7 +1926,7 @@ if (!customElements.get('wc-page-designer')) {
       this.savePropertiesButton = document.getElementById('save-properties');
       this.noSelectionPanel = document.getElementById('no-selection');
       this.elementPropertiesPanel = document.getElementById('element-properties');
-      this.schemaJson = document.querySelector('wc-code-mirror[name="jsonSchema"]');
+      this.schemaJson = document.querySelector('wc-code-mirror[name="json_schema"]');
       this.loadSchemaButton = document.getElementById('load-schema');
       this.addRuleButton = document.getElementById('add-rule');
       this.rulesList = document.getElementById('rules-list');
@@ -3036,8 +3301,11 @@ if (!customElements.get('wc-page-designer')) {
         'option',
         'wc-accordion',
         'wc-breadcrumb',
+        'wc-dropdown',
+        'wc-flip-box',
         'wc-form',
         'wc-input-radio',
+        'wc-menu',
         'wc-select',
         'wc-select-multiple',
         'wc-sidebar',
