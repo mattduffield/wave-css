@@ -1,0 +1,570 @@
+{
+  "meta": {
+    "name": "Wave CSS Knowledge Base",
+    "version": "1.0.0",
+    "description": "Structured documentation for Wave CSS web component library",
+    "lastUpdated": "2026-03-19"
+  },
+  "overview": {
+    "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
+    "architecture": {
+      "noShadowDOM": "Components use regular DOM with classList.add('contents') for CSS containment",
+      "inheritance": "All components extend WcBaseComponent or WcBaseFormComponent",
+      "cssVariables": "Extensive theming system using CSS custom properties",
+      "eventDriven": "Custom EventHub for inter-component communication",
+      "htmxIntegration": "Most components support HTMX attributes for server-driven interactions"
+    },
+    "lifecycle": [
+      "Constructor → _render() → connectedCallback() → _handleAttributeChange()",
+      "Pending attributes are stored until component is ready",
+      "Child components are detected and awaited before initialization completes"
+    ],
+    "buildOutput": {
+      "js": ["wave-css.min.js (ESM)", "wave-css.js (ESM)", "wave-helpers.js (IIFE)"],
+      "css": ["wave-css.min.css", "wave-css.css"]
+    }
+  },
+  "components": {
+    "layout": [
+      {
+        "name": "wc-sidebar",
+        "description": "Fixed sidebar navigation component",
+        "attributes": ["id", "class", "width", "push-target", "right-side", "auto-height", "background-color"],
+        "usage": "<wc-sidebar width=\"200px\" background-color=\"#111\">\n  <a href=\"#\">About</a>\n  <a href=\"#\">Services</a>\n  <a href=\"#\">Contact</a>\n</wc-sidebar>"
+      },
+      {
+        "name": "wc-sidenav",
+        "description": "Animated toggle-able side navigation with overlay, push, and open button",
+        "attributes": ["id", "class", "label", "width", "open-btn-class", "open", "open-top", "open-vertical-text", "push", "push-target", "overlay", "background-color", "auto-height", "relative", "close-btn-position", "no-tab"],
+        "events": {
+          "emits": ["sidenav:opened", "sidenav:closed"],
+          "listens": ["wc-sidenav:open", "wc-sidenav:close", "wc-sidenav:toggle"]
+        },
+        "usage": "<wc-sidenav label=\"MENU\" open-top=\"48px\" open-vertical-text push overlay>\n  <a href=\"#\">About</a>\n  <a href=\"#\">Services</a>\n  <a href=\"#\">Contact</a>\n</wc-sidenav>"
+      },
+      {
+        "name": "wc-div",
+        "description": "Enhanced div wrapper component",
+        "attributes": ["id", "class"],
+        "usage": "<wc-div class=\"p-4\">\n  <!-- content -->\n</wc-div>"
+      }
+    ],
+    "navigation": [
+      {
+        "name": "wc-menu",
+        "description": "Responsive navigation menu with HTMX support and mobile hamburger",
+        "attributes": ["id", "class", "path", "wrap"],
+        "events": {
+          "listens": ["wc-menu:click"]
+        },
+        "notes": "Uses declarative <option> children. Creates HTMX-powered links with hx-get, hx-target, hx-push-url.",
+        "usage": "<wc-menu id=\"menu\">\n  <option value=\"home\" selected>Home</option>\n  <option value=\"news\">News</option>\n  <option value=\"contact\">Contact</option>\n</wc-menu>"
+      },
+      {
+        "name": "wc-breadcrumb",
+        "description": "Breadcrumb navigation with HTMX routing and document title management",
+        "attributes": ["id", "class", "doc-title"],
+        "usage": "<wc-breadcrumb doc-title=\"My App\">\n  <wc-breadcrumb-item label=\"Home\" link=\"/\"></wc-breadcrumb-item>\n  <wc-breadcrumb-item label=\"Products\" link=\"/products\"></wc-breadcrumb-item>\n  <wc-breadcrumb-item label=\"Details\"></wc-breadcrumb-item>\n</wc-breadcrumb>"
+      },
+      {
+        "name": "wc-breadcrumb-item",
+        "description": "Individual breadcrumb item (semantic wrapper read by wc-breadcrumb parent)",
+        "attributes": ["id", "class", "label", "link"],
+        "usage": "<wc-breadcrumb-item label=\"Home\" link=\"/\"></wc-breadcrumb-item>"
+      },
+      {
+        "name": "wc-tab",
+        "description": "Tabbed interface with URL hash state, nested tab support, and contrast control",
+        "attributes": ["id", "class", "animate", "vertical", "contrast"],
+        "events": {
+          "emits": ["tabchange"],
+          "listens": ["wc-tab:click"]
+        },
+        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). Supports nested tabs with automatic contrast adjustment.",
+        "usage": "<wc-tab id=\"cities\" animate>\n  <wc-tab-item class=\"active\" label=\"London\">\n    <div class=\"p-4\"><h3>London</h3><p>Content...</p></div>\n  </wc-tab-item>\n  <wc-tab-item label=\"New York\">\n    <div class=\"p-4\"><h3>New York</h3><p>Content...</p></div>\n  </wc-tab-item>\n</wc-tab>"
+      },
+      {
+        "name": "wc-tab-item",
+        "description": "Individual tab content panel",
+        "attributes": ["id", "class", "label", "active"],
+        "methods": ["activate()"],
+        "usage": "<wc-tab-item label=\"Tab Name\" class=\"active\">\n  <div class=\"p-4\">Tab content here</div>\n</wc-tab-item>"
+      },
+      {
+        "name": "wc-dropdown",
+        "description": "Dropdown menu with CSS Anchor Positioning, search mode, and mobile fallback",
+        "attributes": ["id", "class", "label", "mode", "format", "dropdown-class"],
+        "events": {
+          "listens": ["wc-dropdown:open", "wc-dropdown:close", "wc-dropdown:toggle"]
+        },
+        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input.",
+        "usage": "<wc-dropdown label=\"Options\" mode=\"search\">\n  <a href=\"#about\">About</a>\n  <a href=\"#settings\">Settings</a>\n  <a href=\"#logout\">Logout</a>\n</wc-dropdown>"
+      },
+      {
+        "name": "wc-dropdown-item",
+        "description": "Semantic wrapper for dropdown items",
+        "attributes": [],
+        "usage": "<wc-dropdown-item><a href=\"#\">Link</a></wc-dropdown-item>"
+      }
+    ],
+    "form": [
+      {
+        "name": "wc-form",
+        "description": "Form wrapper that manages submission and temporarily enables disabled fields during submit",
+        "attributes": ["class"],
+        "passThruAttributes": ["id", "name", "method", "action", "hx-post", "hx-put", "hx-target", "hx-swap", "hx-push-url"],
+        "usage": "<wc-form id=\"myForm\" method=\"POST\" action=\"/submit\">\n  <wc-input name=\"username\" lbl-label=\"Username\" required></wc-input>\n  <wc-textarea name=\"notes\" lbl-label=\"Notes\" rows=\"4\"></wc-textarea>\n  <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n</wc-form>"
+      },
+      {
+        "name": "wc-input",
+        "description": "Text input supporting text, email, password, tel, search, number, date, currency, checkbox, radio, and toggle switch",
+        "attributes": ["name", "id", "class", "type", "value", "placeholder", "lbl-label", "lbl-class", "radio-group-class", "checked", "disabled", "readonly", "required", "autocomplete", "autofocus", "min", "max", "minlength", "maxlength", "pattern", "step", "multiple", "novalidate", "elt-class", "toggle-switch", "list", "auto-flex", "tooltip", "tooltip-position"],
+        "eventAttributes": ["onchange", "oninput", "onblur", "onfocus", "onkeydown", "onkeyup", "onkeypress", "onclick"],
+        "supportedTypes": ["text", "email", "password", "tel", "search", "number", "date", "time", "url", "range", "currency", "checkbox", "radio"],
+        "notes": "Radio buttons use <option> children. Toggle switch creates visual toggle UI. Password has visibility toggle. Currency/email/tel/search have built-in icons.",
+        "usage": {
+          "text": "<wc-input name=\"email\" type=\"email\" lbl-label=\"Email\" required placeholder=\"Enter email\"></wc-input>",
+          "radio": "<wc-input name=\"gender\" type=\"radio\" lbl-label=\"Gender\" value=\"male\" auto-flex>\n  <option value=\"male\">Male</option>\n  <option value=\"female\">Female</option>\n</wc-input>",
+          "toggle": "<wc-input name=\"active\" type=\"checkbox\" lbl-label=\"Active\" toggle-switch checked></wc-input>",
+          "password": "<wc-input name=\"pwd\" type=\"password\" lbl-label=\"Password\" required></wc-input>",
+          "currency": "<wc-input name=\"amount\" type=\"currency\" lbl-label=\"Amount\" placeholder=\"0.00\"></wc-input>",
+          "tooltip": "<wc-input name=\"code\" type=\"text\" lbl-label=\"Code\" tooltip=\"Enter 6-digit code\" tooltip-position=\"right\"></wc-input>"
+        }
+      },
+      {
+        "name": "wc-select",
+        "description": "Dropdown select with chip mode for multi-select, URL-based data loading, and keyboard navigation",
+        "attributes": ["name", "id", "class", "multiple", "value", "items", "url", "display-member", "value-member", "lbl-label", "disabled", "required", "autofocus", "autocomplete", "elt-class", "tooltip", "tooltip-position"],
+        "eventAttributes": ["onchange", "oninput", "onblur", "onfocus", "onkeydown", "onkeyup", "onkeypress", "onclick"],
+        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values.",
+        "usage": {
+          "standard": "<wc-select name=\"status\" lbl-label=\"Status\" required>\n  <option value=\"active\">Active</option>\n  <option value=\"inactive\">Inactive</option>\n</wc-select>",
+          "chip": "<wc-select name=\"tags\" lbl-label=\"Tags\" mode=\"chip\"\n  items='[{\"key\":\"JavaScript\",\"value\":\"js\"},{\"key\":\"React\",\"value\":\"react\"}]'>\n</wc-select>",
+          "url": "<wc-select name=\"dept\" lbl-label=\"Department\"\n  url=\"/api/departments\"\n  display-member=\"name\"\n  value-member=\"id\"\n  sort=\"asc\">\n</wc-select>",
+          "optgroups": "<wc-select name=\"fruit\" lbl-label=\"Fruit\">\n  <optgroup label=\"Citrus\">\n    <option value=\"orange\">Orange</option>\n    <option value=\"lemon\">Lemon</option>\n  </optgroup>\n  <optgroup label=\"Berries\">\n    <option value=\"blueberry\">Blueberry</option>\n  </optgroup>\n</wc-select>"
+        }
+      },
+      {
+        "name": "wc-textarea",
+        "description": "Multi-line text input with optional emoji shortcode autocomplete",
+        "attributes": ["name", "id", "class", "value", "rows", "cols", "placeholder", "lbl-label", "disabled", "readonly", "required", "autofocus", "elt-class", "emoji-shortcodes"],
+        "notes": "With emoji-shortcodes attribute, typing ':' triggers autocomplete popup for emoji insertion.",
+        "usage": "<wc-textarea name=\"message\" lbl-label=\"Message\" rows=\"5\" emoji-shortcodes placeholder=\"Type :smile: for emoji\"></wc-textarea>"
+      },
+      {
+        "name": "wc-field",
+        "description": "Read-only display field with optional clickable label link and HTMX support",
+        "attributes": ["id", "class", "label", "label-class", "value", "value-class", "link", "text-align", "hx-get", "hx-post", "hx-put", "hx-delete", "hx-patch", "hx-target", "hx-swap", "hx-trigger", "hx-indicator", "hx-push-url", "hx-vals", "hx-include", "hx-confirm"],
+        "notes": "NOT a form element. Display-only. Child elements take precedence over value attribute. Label can be a link via 'link' attribute or HTMX attributes.",
+        "usage": {
+          "simple": "<wc-field label=\"Status\" value=\"Active\"></wc-field>",
+          "link": "<wc-field label=\"Bill Plans\" link=\"/v/bill_plans/create\" value=\"Manage plans\"></wc-field>",
+          "content": "<wc-field label=\"Total\" value-class=\"text-2xl text-success\">\n  <strong>$1,234.56</strong>\n</wc-field>"
+        }
+      }
+    ],
+    "display": [
+      {
+        "name": "wc-accordion",
+        "description": "Collapsible content sections supporting single or multiple open panels",
+        "attributes": ["id", "class", "items", "allow-many"],
+        "events": {
+          "listens": ["wc-accordion:open", "wc-accordion:close", "wc-accordion:toggle"]
+        },
+        "notes": "Data via items JSON attribute or declarative <option> elements. HTMX support.",
+        "usage": "<wc-accordion allow-many>\n  <option value=\"Section 1\" selected>Content for section 1...</option>\n  <option value=\"Section 2\">Content for section 2...</option>\n</wc-accordion>"
+      },
+      {
+        "name": "wc-article-card",
+        "description": "Article card that fetches metadata from a URL endpoint",
+        "attributes": ["id", "class", "url", "img-url", "article-type"],
+        "notes": "Fetches from /api/article-metadata?url=... Returns title, description, imageUrl, publishDate, domain.",
+        "usage": "<wc-article-card url=\"https://example.com/article\" img-url=\"https://example.com/image.jpg\" article-type=\"technology\"></wc-article-card>"
+      },
+      {
+        "name": "wc-contact-card",
+        "description": "Contact information card with avatar image",
+        "attributes": ["id", "class", "gender", "contact-name", "contact-title"],
+        "usage": "<wc-contact-card gender=\"male\" contact-name=\"John Smith\" contact-title=\"Manager\"></wc-contact-card>"
+      },
+      {
+        "name": "wc-contact-chip",
+        "description": "Compact inline contact display with close button",
+        "attributes": ["id", "class", "gender", "person-name"],
+        "usage": "<wc-contact-chip gender=\"female\" person-name=\"Jane Doe\"></wc-contact-chip>"
+      },
+      {
+        "name": "wc-flip-box",
+        "description": "3D flippable content box with hover or click activation",
+        "attributes": ["id", "class", "flip-on", "flip-icon"],
+        "events": {
+          "emits": ["flip"]
+        },
+        "notes": "Uses slot='front' and slot='back' for content. flip-on='click' adds flip buttons; default is hover.",
+        "usage": "<wc-flip-box flip-on=\"click\" class=\"h-40 w-40\">\n  <div slot=\"front\" class=\"theme-coral-sunset dark\"><h2>Front</h2></div>\n  <div slot=\"back\" class=\"theme-royal-blue light\"><h2>Back</h2></div>\n</wc-flip-box>"
+      },
+      {
+        "name": "wc-google-map",
+        "description": "Google Maps integration with single/multiple pins and info windows",
+        "attributes": ["api-key", "lat", "lng", "address", "title", "zoom", "map-type", "center-lat", "center-lng", "draggable", "scrollwheel", "disable-default-ui", "class", "elt-class"],
+        "events": {
+          "emits": ["map-loaded", "pin-clicked", "map-clicked", "center-changed", "zoom-changed"]
+        },
+        "methods": ["addPin(lat, lng, address, title)", "clearPins()", "updatePins(pins)", "getMap()", "getMarkers()"],
+        "notes": "Multiple pins via <option data-lat data-lng data-title> children. Uses AdvancedMarkerElement.",
+        "usage": {
+          "single": "<wc-google-map api-key=\"YOUR_KEY\" lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-google-map>",
+          "multiple": "<wc-google-map api-key=\"YOUR_KEY\" zoom=\"10\">\n  <option data-lat=\"40.7128\" data-lng=\"-74.0060\" data-title=\"New York\"></option>\n  <option data-lat=\"34.0522\" data-lng=\"-118.2437\" data-title=\"Los Angeles\"></option>\n</wc-google-map>"
+        }
+      },
+      {
+        "name": "wc-image",
+        "description": "Enhanced image with optional modal overlay and hover effects",
+        "attributes": ["id", "class", "url", "caption", "modal", "hover-overlay", "hover-mode"],
+        "events": {
+          "listens": ["wc-image:show", "wc-image:hide"]
+        },
+        "notes": "hover-mode options: top, bottom, left, right. Modal creates full-screen overlay on click.",
+        "usage": "<wc-image url=\"image.jpg\" caption=\"Photo\" modal></wc-image>"
+      },
+      {
+        "name": "wc-background-image",
+        "description": "Background image container with parallax effect and caption",
+        "attributes": ["id", "class", "caption", "img-url", "min-height"],
+        "usage": "<wc-background-image caption=\"SCROLL DOWN\" img-url=\"parallax.jpg\" min-height=\"400px\"></wc-background-image>"
+      },
+      {
+        "name": "wc-timeline",
+        "description": "Vertical timeline with alternating left/right cards",
+        "attributes": ["id", "class", "items"],
+        "notes": "Data via items JSON or declarative <option> children. Cards alternate left/right with connecting arrows.",
+        "usage": "<wc-timeline>\n  <option value=\"2024\">Founded the company...</option>\n  <option value=\"2025\">Launched product v2...</option>\n  <option value=\"2026\">Expanded globally...</option>\n</wc-timeline>"
+      },
+      {
+        "name": "wc-slideshow",
+        "description": "Image slideshow with prev/next navigation and autoplay",
+        "attributes": ["id", "class", "max-image-height", "autoplay", "autoplay-interval"],
+        "events": {
+          "listens": ["wc-slideshow:next", "wc-slideshow:prev", "wc-slideshow:start", "wc-slideshow:stop"]
+        },
+        "usage": "<wc-slideshow autoplay autoplay-interval=\"3000\">\n  <wc-slideshow-image url=\"image1.jpg\" caption=\"Slide 1\"></wc-slideshow-image>\n  <wc-slideshow-image url=\"image2.jpg\" caption=\"Slide 2\"></wc-slideshow-image>\n</wc-slideshow>"
+      }
+    ],
+    "data": [
+      {
+        "name": "wc-tabulator",
+        "description": "Advanced data table powered by Tabulator.js with column definitions, row menus, pagination, and HTMX sync",
+        "attributes": ["id", "class", "data", "projection-fields"],
+        "events": {
+          "emits": ["wc-tabulator:ready", "wc-tabulator-ready"]
+        },
+        "notes": "Column definitions via <wc-tabulator-column> children. Custom functions via <wc-tabulator-func>. Row context menus via <wc-tabulator-row-menu>. Supports pagination, column resizing, movable columns, selectable rows, filters.",
+        "usage": "<wc-tabulator id=\"myTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Age\" field=\"age\" sorter=\"number\"></wc-tabulator-column>\n</wc-tabulator>"
+      }
+    ],
+    "interactive": [
+      {
+        "name": "wc-code-mirror",
+        "description": "Code editor integration using CodeMirror with dynamic themes, modes, and settings popover",
+        "attributes": ["id", "class", "height", "theme", "mode", "lbl-label", "lbl-class", "line-numbers", "line-wrapping", "fold-gutter", "tab-size", "indent-unit", "value", "disabled", "required", "fetch"],
+        "events": {
+          "emits": ["wc-code-mirror:ready", "fetch-complete"]
+        },
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL.",
+        "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
+      },
+      {
+        "name": "wc-ai-bot",
+        "description": "AI chatbot interface using WebLLM (MLC AI) for in-browser LLM inference",
+        "attributes": ["bot-id", "model", "system-prompt", "title", "placeholder", "theme", "position", "auto-open", "max-height", "temperature", "max-tokens", "debug", "check-gpu-compatibility", "force-enable"],
+        "events": {
+          "emits": ["bot:ready", "bot:message-sent", "bot:response-received", "bot:error", "bot:unsupported", "bot:conversation-cleared", "bot:closed"]
+        },
+        "themes": ["bubble (default, floating FAB)", "minimal (inline embedded)", "sidebar (full container)"],
+        "methods": ["sendMessage(text)", "clearConversation()", "exportConversation()", "setContext(systemPrompt)", "toggleMinimize()"],
+        "staticMethods": ["checkSystemSupport()", "getAvailableModels()", "clearStoredPreferences()"],
+        "notes": "Runs LLMs in browser via WebGPU. Auto-detects GPU capability. Supports streaming responses. Markdown rendering via marked library.",
+        "usage": "<wc-ai-bot model=\"Llama-3.2-3B-Instruct-q4f16_1-MLC\" system-prompt=\"You are a helpful assistant.\" title=\"AI Assistant\" theme=\"sidebar\"></wc-ai-bot>"
+      },
+      {
+        "name": "wc-hf-bot",
+        "description": "AI chatbot using Transformers.js (Hugging Face) for browser-based inference",
+        "attributes": ["bot-id", "model", "system-prompt", "title", "placeholder", "theme", "position", "auto-open", "max-height", "temperature", "max-tokens", "debug", "check-gpu-compatibility", "force-enable"],
+        "notes": "Same UI and API as wc-ai-bot but uses Hugging Face Transformers.js with ONNX/GGUF models.",
+        "usage": "<wc-hf-bot model=\"Xenova/distilgpt2\" system-prompt=\"You are helpful.\" title=\"HF Assistant\" theme=\"bubble\"></wc-hf-bot>"
+      }
+    ],
+    "buttons": [
+      {
+        "name": "wc-save-button",
+        "description": "Save button with form validation that triggers HTMX 'validated' event",
+        "attributes": ["form", "hx-include"],
+        "notes": "Validates form including hidden fields in accordions/tabs before triggering save.",
+        "usage": "<wc-save-button form=\"form#myForm\" hx-include=\"form#myForm\" save-url=\"/screen/contact/123\" label=\"Save\"></wc-save-button>"
+      },
+      {
+        "name": "wc-save-split-button",
+        "description": "Split button with Save, Save & New, and Save & Return options",
+        "attributes": ["form", "hx-include"],
+        "notes": "Handles HTMX redirect headers. save-url, save-new-url, save-return-url for each action.",
+        "usage": "<wc-save-split-button form=\"form#myForm\" save-url=\"/save\" save-new-url=\"/create\" save-return-url=\"/list\"></wc-save-split-button>"
+      },
+      {
+        "name": "wc-split-button",
+        "description": "Generic split button with dropdown for additional actions",
+        "attributes": ["btn-id", "btn-class", "btn-label", "split-class"],
+        "usage": "<wc-split-button label=\"Actions\">\n  <a class=\"btn\">Action 1</a>\n  <a class=\"btn\">Action 2</a>\n</wc-split-button>"
+      }
+    ],
+    "icons": [
+      {
+        "name": "wc-fa-icon",
+        "description": "Font Awesome icon wrapper",
+        "usage": "<wc-fa-icon class=\"fa-solid fa-home\"></wc-fa-icon>"
+      },
+      {
+        "name": "wc-icon",
+        "description": "Basic SVG icon component",
+        "usage": "<wc-icon name=\"home\"></wc-icon>"
+      }
+    ],
+    "skeleton": [
+      {
+        "name": "wc-loader",
+        "description": "Loading spinner with configurable size, speed, and thickness",
+        "attributes": ["id", "class", "size", "speed", "thickness"],
+        "events": {
+          "listens": ["wc-loader:show", "wc-loader:hide", "wc-loader:toggle"]
+        },
+        "usage": "<wc-loader size=\"20px\" speed=\"0.5s\" thickness=\"4px\"></wc-loader>"
+      },
+      {
+        "name": "wc-article-skeleton",
+        "description": "Article loading skeleton placeholder"
+      },
+      {
+        "name": "wc-card-skeleton",
+        "description": "Card loading skeleton placeholder"
+      },
+      {
+        "name": "wc-list-skeleton",
+        "description": "List loading skeleton placeholder"
+      },
+      {
+        "name": "wc-table-skeleton",
+        "description": "Table loading skeleton placeholder"
+      }
+    ],
+    "utility": [
+      {
+        "name": "wc-event-hub",
+        "description": "Global event broadcasting system. Singleton at window.wc.EventHub",
+        "methods": ["broadcast(eventName, selector, subSelector, custom)"],
+        "notes": "Central pub/sub for inter-component communication. Events dispatched on document.body and parent window.",
+        "usage": "wc.EventHub.broadcast('custom:event', ['wc-component#id'], { data: 'value' });"
+      },
+      {
+        "name": "wc-event-handler",
+        "description": "Declarative event handler that responds to custom events with DOM actions",
+        "attributes": ["event-name", "action", "action-target"],
+        "notes": "Actions: add-class, remove-class, toggle-class, add-item, remove-item, click",
+        "usage": "<wc-event-handler event-name=\"custom-event\" action=\"toggle-class\" action-target=\".my-element\"></wc-event-handler>"
+      },
+      {
+        "name": "wc-notify",
+        "description": "Toast notification system with stacking, auto-dismiss, and persistent options",
+        "attributes": ["delay", "position"],
+        "methods": ["showSuccess(message, delay, persist)", "showError(message, delay, persist)", "showInfo(message, delay, persist)", "showWarning(message, delay, persist)"],
+        "usage": "wc.Notify.showSuccess('Saved!', 3000);\nwc.Notify.showError('Failed!', 5000, true);"
+      },
+      {
+        "name": "wc-prompt",
+        "description": "Dialog system using SweetAlert2 and notie for banners, toasts, and modal dialogs",
+        "methods": ["banner(config)", "toast(config)", "success(config)", "error(config)", "warning(config)", "info(config)", "question(config)", "notify(config)", "notifyTemplate(config)", "fire(config)"],
+        "events": {
+          "listens": ["wc-prompt:banner", "wc-prompt:toast", "wc-prompt:success", "wc-prompt:error", "wc-prompt:warning", "wc-prompt:info", "wc-prompt:question", "wc-prompt:notify", "wc-prompt:notify-template"]
+        },
+        "usage": "wc.Prompt.success({ title: 'Done!', text: 'Record saved' });\nwc.Prompt.question({ title: 'Confirm?', text: 'Delete this record?', callback: (result) => {} });"
+      },
+      {
+        "name": "wc-theme-selector",
+        "description": "Interactive theme switcher with 40+ theme color palette and light/dark mode toggle",
+        "attributes": ["id", "class", "theme", "mode"],
+        "events": {
+          "emits": ["theme:change"]
+        },
+        "usage": "<wc-theme-selector></wc-theme-selector>"
+      },
+      {
+        "name": "wc-hotkey",
+        "description": "Keyboard shortcut binding that triggers click on target element",
+        "notes": "Parses key combinations like ctrl+s, alt+n. Triggers click on target selector.",
+        "usage": "<wc-hotkey keys=\"ctrl+s\" target=\"button[type='submit']\"></wc-hotkey>"
+      },
+      {
+        "name": "wc-link",
+        "description": "Dynamic CSS stylesheet loader. Prevents duplicates. Removes self after loading.",
+        "events": {
+          "emits": ["link-loaded", "link-error"]
+        },
+        "usage": "<wc-link url=\"https://example.com/styles.css\"></wc-link>"
+      },
+      {
+        "name": "wc-script",
+        "description": "Dynamic JavaScript loader. Prevents duplicates. Removes self after loading.",
+        "events": {
+          "emits": ["script-loaded", "script-error"]
+        },
+        "usage": "<wc-script src=\"https://example.com/script.js\"></wc-script>"
+      },
+      {
+        "name": "wc-javascript",
+        "description": "Inline JavaScript executor. Moves content to <script> tag in head.",
+        "usage": "<wc-javascript>\nconsole.log('Hello from inline script');\n</wc-javascript>"
+      },
+      {
+        "name": "wc-behavior",
+        "description": "HTMX attribute attachment - copies HTMX attributes to parent element",
+        "attributes": ["hx-get", "hx-post", "hx-put", "hx-delete", "hx-target", "hx-trigger", "hx-swap", "hx-select", "hx-push-url", "hx-vals", "hx-headers", "hx-indicator", "hx-params", "hx-ext", "hx-prompt", "hx-confirm", "hx-on", "hx-include"],
+        "usage": "<button>\n  <wc-behavior hx-post=\"/api/action\" hx-target=\"#result\" hx-swap=\"innerHTML\"></wc-behavior>\n  Click me\n</button>"
+      },
+      {
+        "name": "wc-mask-hub",
+        "description": "Input masking system using IMask library for phone, SSN, ZIP, date, currency formats",
+        "methods": ["phoneMaskElement(element)", "ssnMask(event)", "zipMask(event)", "zipPlus4Mask(event)", "dateMask(event)", "currencyMask(event)", "getUnmaskedValue(target)", "updateMaskValue(target, value)"],
+        "usage": "wc.MaskHub.phoneMaskElement(document.getElementById('phone'));"
+      },
+      {
+        "name": "wc-visibility-change",
+        "description": "Fires HTMX request when browser tab becomes visible (e.g., for auto-refresh)",
+        "attributes": ["hx-verb", "hx-url", "hx-target", "hx-swap", "hx-indicator", "hx-push-url", "hx-select"],
+        "usage": "<wc-visibility-change hx-verb=\"GET\" hx-url=\"/api/refresh\" hx-target=\"#content\" hx-swap=\"innerHTML\"></wc-visibility-change>"
+      }
+    ]
+  },
+  "themes": {
+    "description": "40+ predefined themes using oklch color space with automatic light/dark mode support",
+    "usage": "Apply theme class to <html> element or use <wc-theme> component",
+    "themeList": [
+      "theme-rose", "theme-petal", "theme-sunset", "theme-peach", "theme-fire",
+      "theme-desert", "theme-golden", "theme-honey", "theme-amber", "theme-olive",
+      "theme-moss", "theme-avocado", "theme-lime", "theme-fern", "theme-yellow",
+      "theme-meadow", "theme-cornsilk", "theme-sage", "theme-forest", "theme-jungle",
+      "theme-emerald", "theme-mint", "theme-turquoise", "theme-aqua", "theme-lagoon",
+      "theme-ice", "theme-ocean", "theme-azure", "theme-sky", "theme-midsky",
+      "theme-deepsky", "theme-royal", "theme-twilight", "theme-lavender", "theme-violet",
+      "theme-grape", "theme-plum", "theme-fuchsia", "theme-cottoncandy", "theme-blush",
+      "theme-bubblegum"
+    ],
+    "legacyThemes": [
+      "theme-coral-sunset", "theme-rose-gold", "theme-autumn-leaves", "theme-purple-haze",
+      "theme-lavender-fields", "theme-dracula", "theme-midnight-blue", "theme-royal-blue",
+      "theme-light", "theme-dark", "theme-solarized", "theme-ocean-blue", "theme-nord",
+      "theme-emerald-mist", "theme-forest-green", "theme-spring-meadow", "theme-mint-fresh",
+      "theme-lemon-twist", "theme-golden-sun", "theme-warm-autumn", "theme-burnt-orange",
+      "theme-taupe-dream", "theme-sandy-dune", "theme-steel-gray", "theme-slate-storm",
+      "theme-cool-gray", "theme-midnight-slate", "theme-midnight", "theme-day",
+      "theme-designer", "theme-designer-blue", "theme-designer-gray"
+    ],
+    "darkMode": "Add 'dark' class alongside theme class, or use @media (prefers-color-scheme: dark)",
+    "cssVariables": {
+      "core": ["--hue", "--swatch-1 through --swatch-13"],
+      "text": ["--text-1 through --text-13"],
+      "surface": ["--surface-1 through --surface-13"],
+      "component": ["--component-bg-color", "--component-color", "--component-border-color", "--component-placeholder-color", "--component-focus-border-color", "--component-focus-ring-color"],
+      "button": ["--button-bg-color", "--button-hover-bg-color", "--button-active-bg-color", "--button-color", "--button-border-color"],
+      "container": ["--container-bg-color", "--container-color", "--container-border-color"],
+      "card": ["--card-bg-color", "--card-color", "--card-border-color"]
+    }
+  },
+  "cssUtilities": {
+    "description": "3,700+ Tailwind-inspired utility classes with responsive breakpoints and pseudo-class variants",
+    "breakpoints": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1536px"
+    },
+    "categories": {
+      "layout": ["block", "inline", "inline-block", "inline-flex", "flex", "grid", "table", "hidden", "contents", "col", "col-1", "row"],
+      "flexbox": ["flex-row", "flex-col", "flex-row-reverse", "flex-col-reverse", "flex-1", "flex-2", "flex-auto", "flex-wrap", "flex-nowrap", "justify-start", "justify-center", "justify-end", "justify-between", "justify-around", "justify-evenly", "items-start", "items-center", "items-end", "items-stretch", "items-baseline"],
+      "grid": ["grid-1 through grid-6", "grid-cols-1 through grid-cols-6"],
+      "gap": ["gap-0 through gap-12 (0.25rem increments)", "gap-x-*", "gap-y-*"],
+      "spacing": {
+        "margin": "m-*, mx-*, my-*, mt-*, mr-*, mb-*, ml-* (0 to 64, also auto and negative)",
+        "padding": "p-*, px-*, py-*, pt-*, pr-*, pb-*, pl-* (0 to 64)"
+      },
+      "sizing": {
+        "width": "w-0 to w-64, w-full, w-screen, w-auto, w-1/2, w-1/3, w-2/3, w-3/4",
+        "height": "h-0 to h-64, h-full, h-screen, h-auto",
+        "minMax": "min-w-*, max-w-*, min-h-*, max-h-*"
+      },
+      "typography": {
+        "fontSize": ["text-xs", "text-sm", "text-base", "text-lg", "text-xl", "text-2xl through text-9xl"],
+        "fontWeight": ["font-thin(100)", "font-light(300)", "font-normal(400)", "font-medium(500)", "font-semibold(600)", "font-bold(700)", "font-extrabold(800)", "font-black(900)"],
+        "textAlign": ["text-left", "text-center", "text-right", "text-justify"],
+        "textTransform": ["uppercase", "lowercase", "capitalize", "normal-case"],
+        "textDecoration": ["underline", "line-through", "no-underline"]
+      },
+      "borders": {
+        "width": "border, border-0 through border-8",
+        "sides": "border-t, border-r, border-b, border-l",
+        "style": ["border-solid", "border-dashed", "border-dotted", "border-double", "border-none"],
+        "radius": ["rounded", "rounded-sm", "rounded-md", "rounded-lg", "rounded-xl", "rounded-2xl", "rounded-full", "rounded-t", "rounded-r", "rounded-b", "rounded-l"]
+      },
+      "position": ["static", "fixed", "absolute", "relative", "sticky", "top-*", "right-*", "bottom-*", "left-*", "inset-*"],
+      "effects": {
+        "opacity": "opacity-0 through opacity-100",
+        "shadow": ["shadow", "shadow-sm", "shadow-md", "shadow-lg", "shadow-xl", "shadow-2xl", "shadow-none"],
+        "animation": ["animate-spin", "animate-pulse"]
+      },
+      "colors": {
+        "families": ["slate", "gray", "zinc", "neutral", "stone", "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"],
+        "shades": ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"],
+        "usage": "bg-[color]-[shade], text-[color]-[shade], border-[color]-[shade]"
+      }
+    },
+    "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
+    "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95"
+  },
+  "eventHub": {
+    "description": "Central pub/sub system for inter-component communication",
+    "broadcastPattern": "wc.EventHub.broadcast(eventName, [selector], data)",
+    "commonEvents": {
+      "sidenav": ["wc-sidenav:open", "wc-sidenav:close", "wc-sidenav:toggle"],
+      "tab": ["wc-tab:click"],
+      "dropdown": ["wc-dropdown:open", "wc-dropdown:close", "wc-dropdown:toggle"],
+      "accordion": ["wc-accordion:open", "wc-accordion:close", "wc-accordion:toggle"],
+      "loader": ["wc-loader:show", "wc-loader:hide", "wc-loader:toggle"],
+      "image": ["wc-image:show", "wc-image:hide"],
+      "slideshow": ["wc-slideshow:next", "wc-slideshow:prev", "wc-slideshow:start", "wc-slideshow:stop"],
+      "menu": ["wc-menu:click"],
+      "prompt": ["wc-prompt:success", "wc-prompt:error", "wc-prompt:warning", "wc-prompt:info", "wc-prompt:question", "wc-prompt:banner", "wc-prompt:toast"],
+      "theme": ["theme:change"]
+    }
+  },
+  "patterns": {
+    "simplePageTemplate": "<!DOCTYPE html>\n<html lang=\"en\" class=\"theme-ocean\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>My Page</title>\n  <link rel=\"stylesheet\" href=\"/dist/wave-css.min.css\">\n</head>\n<body>\n  <div class=\"container mx-auto p-6\">\n    <h1>Hello Wave CSS!</h1>\n  </div>\n  <script type=\"module\" src=\"/dist/wave-css.min.js\"></script>\n</body>\n</html>",
+    "formTemplate": "<wc-form id=\"contactForm\" hx-post=\"/api/contacts\" hx-target=\"#result\">\n  <div class=\"col-1 gap-4\">\n    <wc-input name=\"first_name\" type=\"text\" lbl-label=\"First Name\" required></wc-input>\n    <wc-input name=\"last_name\" type=\"text\" lbl-label=\"Last Name\" required></wc-input>\n    <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\" required></wc-input>\n    <wc-input name=\"phone\" type=\"tel\" lbl-label=\"Phone\"></wc-input>\n    <wc-select name=\"status\" lbl-label=\"Status\" required>\n      <option value=\"active\">Active</option>\n      <option value=\"inactive\">Inactive</option>\n    </wc-select>\n    <wc-textarea name=\"notes\" lbl-label=\"Notes\" rows=\"4\"></wc-textarea>\n    <wc-save-button form=\"form#contactForm\" label=\"Save\"></wc-save-button>\n  </div>\n</wc-form>",
+    "tabbedLayoutTemplate": "<wc-tab id=\"mainTabs\" animate>\n  <wc-tab-item class=\"active\" label=\"Details\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"name\" lbl-label=\"Name\" required></wc-input>\n      <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\"></wc-input>\n    </div>\n  </wc-tab-item>\n  <wc-tab-item label=\"Settings\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"active\" type=\"checkbox\" lbl-label=\"Active\" toggle-switch></wc-input>\n      <wc-select name=\"role\" lbl-label=\"Role\">\n        <option value=\"admin\">Admin</option>\n        <option value=\"user\">User</option>\n      </wc-select>\n    </div>\n  </wc-tab-item>\n</wc-tab>",
+    "dataTableTemplate": "<wc-tabulator id=\"contactsTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Status\" field=\"status\" editor=\"select\" editor-params='{\"values\":[\"Active\",\"Inactive\"]}'></wc-tabulator-column>\n</wc-tabulator>",
+    "notificationPattern": "// Success notification\nwc.Notify.showSuccess('Record saved successfully!', 3000);\n\n// Error notification\nwc.Notify.showError('Failed to save record.', 5000, true);\n\n// Confirmation dialog\nwc.Prompt.question({\n  title: 'Delete Record?',\n  text: 'This action cannot be undone.',\n  callback: (result) => {\n    if (result.isConfirmed) {\n      // proceed with delete\n    }\n  }\n});"
+  },
+  "routing": {
+    "description": "Template-based routing used with Go Kart framework",
+    "patterns": {
+      "templateRoute": "/{routePrefix}/{template}/{id}",
+      "templateIdRoute": "/{routePrefix}/{template_id}?{id_name}={id}",
+      "screenRoute": "/screen/{template}/{id}",
+      "createRoute": "/screen/{template}/create",
+      "listRoute": "/screen/{template_list}/list",
+      "viewRoute": "/v/{slug}/{record_id}"
+    },
+    "examples": [
+      "/x/contact/123",
+      "/screen/contact/create",
+      "/screen/contact_list/list"
+    ]
+  }
+}

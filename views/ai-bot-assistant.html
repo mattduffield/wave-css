@@ -1,0 +1,53 @@
+<div id="page-contents" class="col-1 h-full overflow-hidden">
+  <div class="flex flex-row h-full overflow-hidden">
+
+    <!-- Sidebar with commands reference -->
+    <div class="w-64 p-4 border-r overflow-y-auto text-xs" style="border-color: var(--border-color);">
+      <h3 class="text-base font-bold mb-3">Commands</h3>
+      <ul class="col-1 gap-1 mb-4">
+        <li><code>/create-schema</code> — LiteSpec schema</li>
+        <li><code>/create-list</code> — List template (fast)</li>
+        <li><code>/create-edit</code> — Edit template (fast)</li>
+        <li><code>/create-template</code> — List or edit (slower)</li>
+        <li><code>/create-screen</code> — Full screen</li>
+        <li><code>/create-component</code> — Wave CSS component</li>
+        <li><code>/create-web-pilot</code> — Playwright script</li>
+        <li><code>/help</code> — Show all commands</li>
+      </ul>
+
+      <h3 class="text-base font-bold mb-3">Example Prompts</h3>
+      <ul class="col-1 gap-1 mb-4">
+        <li><code>/create-schema contact with name, email, phone, status</code></li>
+        <li><code>/create-list article with title, category, release date</code></li>
+        <li><code>/create-edit article with title, description, category</code></li>
+        <li><code>How do field rules work?</code></li>
+      </ul>
+
+      <h3 class="text-base font-bold mb-3">Notes</h3>
+      <ul class="col-1 gap-1">
+        <li>First load downloads model (~1-2 GB)</li>
+        <li>Commands select relevant KB sections to fit context</li>
+        <li>General questions use keyword matching</li>
+        <li>Set <code>debug="true"</code> to see context injection in console</li>
+      </ul>
+    </div>
+
+    <!-- Bot -->
+    <div class="flex-1">
+      <wc-ai-bot
+        mode="assistant"
+        model="Qwen2.5-Coder-3B-Instruct-q4f16_1-MLC"
+        context-window-size="12288"
+        context-urls="../docs/wave-css-knowledge.json,../docs/go-kart-knowledge.json,../docs/lite-spec-knowledge.json"
+        system-prompt="You are a development assistant expert in Go Kart, Wave CSS, and LiteSpec. Help users create schemas, templates, components, and web pilot scripts."
+        title="Dev Assistant"
+        theme="sidebar"
+        auto-open="true"
+        temperature="0.3"
+        max-tokens="4096"
+        debug="true">
+      </wc-ai-bot>
+    </div>
+
+  </div>
+</div>

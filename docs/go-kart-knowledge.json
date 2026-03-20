@@ -1,0 +1,543 @@
+{
+  "meta": {
+    "name": "Go Kart Knowledge Base",
+    "version": "2.0.0",
+    "description": "Structured documentation for the Go Kart low-code enterprise application framework — enriched with real template, field rule, and web pilot patterns",
+    "lastUpdated": "2026-03-19",
+    "supplementalFiles": {
+      "templateExamples": "docs/template-examples.json — 10 real templates (prospect, kanban, credential vault, etc.)",
+      "templateFragments": "docs/template-fragments.json — 11 reusable fragments (base, prospect_general, kanban_board_card, etc.)",
+      "webPilotExamples": "docs/web-pilot-examples.json — Full NC Auto web pilot chain (11 scripts)"
+    }
+  },
+  "overview": {
+    "description": "Go Kart is a low-code enterprise web application framework built with Go. It enables rapid development of database-driven applications through configuration stored in MongoDB collections rather than traditional code.",
+    "techStack": {
+      "language": "Go 1.23.3",
+      "router": "Chi (github.com/go-chi/chi)",
+      "database": "MongoDB (primary), PostgreSQL (optional)",
+      "templateEngine": "Pongo2 (Django/Jinja2-style syntax)",
+      "scriptEngine": "Goja (JavaScript VM in Go)",
+      "frontend": "HTMX, Hyperscript, Wave CSS web components",
+      "sessionStore": "MongoDB via scs/v2",
+      "fileStorage": "Cloudflare R2 / AWS S3",
+      "automation": "Playwright (via external Node.js service)",
+      "email": "Resend / SMTP",
+      "scheduling": "robfig/cron/v3"
+    },
+    "keyPrinciples": [
+      "Configuration over code — apps defined via MongoDB collections, not source files",
+      "Template-driven UI — screens are HTML templates with embedded JavaScript logic",
+      "Schema-driven data — JSON Schema (via LiteSpec DSL) defines validation, types, and UI",
+      "Template composition — {% include 'slug' %} for reusable fragments across screens",
+      "Field rules for interactivity — declarative client-side form behavior (visibility, sync, calculate)",
+      "HTMX for dynamic updates — partial page rendering without full reloads",
+      "Hyperscript for inline event handling — _=\"on click ... end\" syntax",
+      "Web Pilots for automation — composable Playwright scripts with {% include %} reuse"
+    ]
+  },
+  "architecture": {
+    "requestFlow": [
+      "1. HTTP request hits Chi router",
+      "2. Global middleware: Recoverer → Logger → Timeout → CORS → Session → CSRF",
+      "3. Route-specific middleware: Auth (for /x/ routes) → WithRequestDetails → ValidateRoutePrefix",
+      "4. WithRequestDetails loads: user, apps, template + depends, schema, lookups into context",
+      "5. Handler extracts slug and record_id from URL",
+      "6. Handler executes template's JavaScript code (runGet/runPost/runPut/runDelete) via Goja VM",
+      "7. JavaScript uses rdx.ConnName/rdx.DBName for DB access, form.* for submitted data",
+      "8. Template rendered with Pongo2 using returned data — {% include %} fragments resolved",
+      "9. If HTMX request (HX-Request header), wraps in partial-base; otherwise full base template"
+    ],
+    "routePatterns": {
+      "public": {
+        "description": "Unauthenticated routes under /v/",
+        "getPage": "GET /v/{slug}",
+        "getRecord": "GET /v/{slug}/{record_id}",
+        "getList": "GET /v/{slug}/list",
+        "createRecord": "POST /v/{slug}",
+        "updateRecord": "POST /v/{slug}/{record_id}",
+        "putRecord": "PUT /v/{slug}/{record_id}",
+        "deleteRecord": "DELETE /v/{slug}/{record_id}/delete/{index}"
+      },
+      "protected": {
+        "description": "Authenticated routes under /x/ — same patterns as /v/ but require login",
+        "getPage": "GET /x/{slug}",
+        "getRecord": "GET /x/{slug}/{record_id}",
+        "getList": "GET /x/{slug}/list"
+      },
+      "api": {
+        "tabulatorData": "GET /api/{collection} — paginated, sortable, filterable data for wc-tabulator",
+        "updateField": "POST /api/update-field-by-id/{collection}/{record_id}/{property}",
+        "listConnections": "GET /api/list-connections",
+        "listCollections": "GET /api/list-collections"
+      },
+      "views": {
+        "renderView": "GET /view/{view_id}",
+        "previewView": "GET /view/pre/{view_id}"
+      },
+      "email": {
+        "send": "POST /email/send/{record_id}",
+        "sendBatch": "POST /email/send-batch/{record_id}",
+        "preview": "GET /email/preview/{record_id}"
+      },
+      "schedule": {
+        "create": "POST /schedule/create",
+        "list": "GET /schedule/list",
+        "get": "GET /schedule/{id}",
+        "update": "PUT /schedule/{id}",
+        "delete": "DELETE /schedule/{id}",
+        "toggle": "POST /schedule/{id}/toggle",
+        "runNow": "POST /schedule/{id}/run",
+        "history": "GET /schedule/{id}/history"
+      },
+      "auth": {
+        "login": "GET/POST /user/login",
+        "logout": "GET /user/logout",
+        "passwordReset": "POST /user/password-reset"
+      }
+    },
+    "middleware": [
+      {"name": "CORS", "purpose": "Set cross-origin headers"},
+      {"name": "VaryHXRequest", "purpose": "Cache partial (HTMX) and full page separately"},
+      {"name": "SessionLoad", "purpose": "Initialize and persist MongoDB-backed sessions"},
+      {"name": "NoSurf", "purpose": "CSRF token validation on POST/PUT/DELETE"},
+      {"name": "Auth", "purpose": "Redirect unauthenticated users to login (for /x/ routes)"},
+      {"name": "APIKeyAuth", "purpose": "Validate X-API-Key header for programmatic API access"},
+      {"name": "WithRequestDetails", "purpose": "Load apps, templates + depends, schemas, lookups into request context"},
+      {"name": "ValidateRoutePrefix", "purpose": "Enforce public (/v/) vs protected (/x/) access"}
+    ]
+  },
+  "templateSystem": {
+    "description": "Templates are the primary building blocks. Each has HTML content, JavaScript logic, optional field rules, and supports composition via {% include %}.",
+    "templateTypes": {
+      "standard": "Full page screens — forms, lists, dashboards (74 in production)",
+      "fragment": "Reusable partial content included by other templates (40 in production)",
+      "base": "Layout wrappers — base, partial-base, login_base, email_base (7 in production)",
+      "email": "Email templates rendered with record data (23 in production)",
+      "data": "Data-only endpoints returning JSON (1 in production)",
+      "report": "Report/chart templates (1 in production)"
+    },
+    "composition": {
+      "description": "Templates support composition via {% include %} and {% extends %} for code reuse",
+      "extends": "{% extends \"__template_name__\" %} — Every standard template extends a base template. The base is resolved at render time.",
+      "blocks": "{% block pageContent %}...{% endblock %} — Define content regions within base templates. Also: {% block css %}, {% block title %}",
+      "include": "{% include \"slug\" %} — Include another template's content inline. The included template has access to the same context variables.",
+      "conditionalInclude": "{% if condition %}{% include \"slug_a\" %}{% elif other %}{% include \"slug_b\" %}{% endif %}",
+      "depends": "The 'depends' field lists template slugs that must be loaded. Common pattern: ['base', 'loader', 'partial-base']. The system also auto-detects {% include %} references.",
+      "realExample": "The 'prospect' template includes 5 fragments: meta_fields, prospect_general, prospect_member, prospect_vehicle, prospect_rental_info. Each fragment is a self-contained UI section that can be maintained independently.",
+      "kanbanExample": "The 'kanban_board' template includes 'kanban_board_card' inside a {% for %} loop — same card fragment rendered for each ticket in each lane."
+    },
+    "codeTab": {
+      "description": "Server-side JavaScript executed in Goja VM. Define lifecycle functions. Use rdx.ConnName and rdx.DBName for database access (preferred over raw session calls).",
+      "functions": {
+        "runGet": "Executed on GET requests — load record and related data for display",
+        "runPost": "Executed on POST requests — create or update records from form submission",
+        "runPut": "Executed on PUT requests — update existing records from form submission",
+        "runDelete": "Executed on DELETE requests — remove records or array items",
+        "runList": "Executed on GET /list — load multiple records for table view"
+      },
+      "contextObject": {
+        "rdx.ConnName": "Current database connection name (PREFERRED — shorthand for session lookup)",
+        "rdx.DBName": "Current database name (PREFERRED — shorthand for session lookup)",
+        "ctx.DB": "Database operations object",
+        "ctx.App.Session": "Session management (for manual session reads/writes)",
+        "ctx.Request": "HTTP request object (access URL, headers, query params)",
+        "ctx.RecordID": "Current record ID from URL path",
+        "ctx.RecordIndex": "Array item index for delete operations",
+        "ctx.Slug": "Current template slug",
+        "ctx.SchemaSlug": "Associated schema slug",
+        "ctx.Username": "Current authenticated username",
+        "ctx.ExtractQueryParams(keys)": "Extract URL query params as override map for CreateNewWithOverrides",
+        "form.*": "Form field values from POST/PUT body (e.g., form.first_name, form.email)",
+        "ObjectIDFromHex(id)": "Convert string ID to MongoDB ObjectID for queries"
+      },
+      "databaseOperations": {
+        "FindByID": "ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, id)",
+        "Find": "ctx.DB.Find(rdx.ConnName, rdx.DBName, collection, filter, sort, projection, skip, limit)",
+        "FindOne": "ctx.DB.FindOne(rdx.ConnName, rdx.DBName, collection, filter)",
+        "UpdateByID": "ctx.DB.UpdateByID(rdx.ConnName, rdx.DBName, collection, id, data, arrayFields)",
+        "CreateNew": "ctx.DB.CreateNew(rdx.ConnName, rdx.DBName, schemaSlug) — create blank record from schema defaults",
+        "CreateNewWithOverrides": "ctx.DB.CreateNewWithOverrides(rdx.ConnName, rdx.DBName, schemaSlug, username, overrides) — create with query param overrides",
+        "SaveAndValidate": "ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, collection, id, form, schemaSlug, tagFields, arrayFields) — validate against schema before saving",
+        "DeleteByID": "ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, collection, id)",
+        "Insert": "ctx.DB.Insert(rdx.ConnName, rdx.DBName, collection, document)"
+      },
+      "examples": {
+        "simpleGet": "function runGet() {\n  let collection = 'contacts';\n  if (ctx.RecordID === 'create') {\n    let record = ctx.DB.CreateNew(rdx.ConnName, rdx.DBName, 'contact_schema');\n    return {record};\n  }\n  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, ctx.RecordID);\n  return {record};\n}",
+        "simplePost": "function runPost() {\n  let collection = 'contacts';\n  let id = ctx.RecordID;\n  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, collection, id, form, 'contact_schema', ['tags'], ['tags']);\n  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, id);\n  ctx.App.Session.Put(ctx.Request.Context(), 'flash', 'Save successful!');\n  return {record};\n}",
+        "simpleList": "function runList() {\n  let collection = 'contacts';\n  let records = ctx.DB.Find(rdx.ConnName, rdx.DBName, collection, {}, 10);\n  return {records};\n}",
+        "advancedGet": "function runGet() {\n  const state = ctx.Request.URL.Query().Get('address.state') || 'nc';\n  let schemaSlug = `prospect_${state.toLowerCase()}`;\n  let referrals = ctx.DB.Find(rdx.ConnName, rdx.DBName, '_referral', {referral_source_type: 'dealer'}) || [];\n  let scripts = ctx.DB.Find(rdx.ConnName, rdx.DBName, '_web_pilot', {tags: {\"$all\": [`AUTO-${state}`]}}, null, {slug: 1}, 0, 20) || [];\n  if (ctx.RecordID === 'create') {\n    let overrides = ctx.ExtractQueryParams(['address.state', 'quote.insurance_type']);\n    let record = ctx.DB.CreateNewWithOverrides(rdx.ConnName, rdx.DBName, schemaSlug, ctx.Username, overrides);\n    return {record, referrals, web_pilot_runs: [], scripts};\n  }\n  let id = ctx.RecordID;\n  let dataObjID = ObjectIDFromHex(id);\n  let web_pilot_runs = ctx.DB.Find(rdx.ConnName, rdx.DBName, '_web_pilot_run', {data_id: dataObjID}) || [];\n  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, 'prospect', id);\n  return {record, referrals, web_pilot_runs, scripts};\n}",
+        "arrayDelete": "function runDelete() {\n  let collection = 'prospect';\n  let id = ctx.RecordID;\n  let index = ctx.RecordIndex;\n  let arrayField = ctx.Request.URL.Query().Get('array_field');\n  if (arrayField && index !== '') {\n    const ALLOWED_ARRAY_FIELDS = ['household_members', 'household_vehicles'];\n    if (!ALLOWED_ARRAY_FIELDS.includes(arrayField)) throw new Error('Deletion not allowed');\n    let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, id);\n    let arr = record[arrayField];\n    arr.splice(parseInt(index, 10), 1);\n    let updateDoc = {};\n    updateDoc[arrayField] = arr;\n    ctx.DB.UpdateByID(rdx.ConnName, rdx.DBName, collection, id, updateDoc, null);\n    return {success: true};\n  }\n  ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, collection, id);\n  return {success: true};\n}"
+      }
+    },
+    "contentTab": {
+      "description": "HTML template markup using Pongo2 (Django/Jinja2 syntax). Uses Wave CSS components for UI.",
+      "pongo2Syntax": {
+        "variable": "{{ Record.field_name }}",
+        "nestedVariable": "{{ Record.address.street }}",
+        "filter": "{{ Record.status|upper }} or {{ Data.results|json }}",
+        "conditional": "{% if Record.status == \"active\" %}...{% elif Record.status == \"pending\" %}...{% else %}...{% endif %}",
+        "loop": "{% for item in Data.items %}...{% endfor %}",
+        "loopIndex": "{{ forloop.Counter0 }} (0-based) or {{ forloop.Counter }} (1-based)",
+        "include": "{% include \"template_slug\" %}",
+        "extends": "{% extends \"__template_name__\" %}",
+        "block": "{% block pageContent %}...{% endblock %}",
+        "customFilters": "{{ QueryParams|getparam:\"address.state\" }} and {{ QueryParams|querystring }}"
+      },
+      "standardPageStructure": "{% extends \"__template_name__\" %}\n\n{% block css %}\n{% endblock %}\n\n{% block pageContent %}\n<wc-article-skeleton\n  _=\"on load WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500) end\">\n</wc-article-skeleton>\n\n<div class=\"page-content relative flex flex-col flex-1 py-2 px-3 gap-2 hidden\">\n  <div class=\"header-content flex flex-row gap-3 justify-between items-center\">\n    <wc-breadcrumb>...</wc-breadcrumb>\n    <wc-save-split-button ...></wc-save-split-button>\n  </div>\n  <wc-form class=\"form-content col-1 gap-3 text-xs overflow-auto\" ...>\n    {% include \"meta_fields\" %}\n    <!-- form fields -->\n  </wc-form>\n</div>\n{% endblock %}",
+      "formPattern": "<wc-form class=\"form-content col-1 gap-3 text-xs overflow-auto\"\n  method=\"{{ FormMethod }}\"\n  id=\"myForm\"\n  action=\"/v/slug/{{ RecordID }}\"\n  hx-{{ FormMethod }}=\"/x/slug/{{ RecordID }}\"\n  >\n  {% include \"meta_fields\" %}\n  <div class=\"grid-1 sm:grid-2 md:grid-4 gap-2 px-5 py-2\">\n    <wc-input name=\"first_name\" type=\"text\" lbl-label=\"First Name\" value=\"{{ Record.first_name }}\" required></wc-input>\n  </div>\n</wc-form>",
+      "dynamicAddPattern": "<a href=\"/x/fragment_slug/create{{QueryParams|querystring}}\"\n  hx-get=\"/x/fragment_slug/create{{QueryParams|querystring}}\"\n  hx-target=\".container-class\"\n  hx-swap=\"beforeend\"\n  hx-vals='js:{index: countElements(\".item-class\")}'\n  hx-indicator=\"#content-loader\">\n  Add Item\n</a>",
+      "htmxPatterns": {
+        "saveForm": "hx-{{ FormMethod }}=\"/x/slug/{{ RecordID }}\" hx-target=\"#viewport\" hx-push-url=\"true\"",
+        "loadFragment": "hx-get=\"/x/fragment/create{{QueryParams|querystring}}\" hx-target=\".container\" hx-swap=\"beforeend\"",
+        "deleteItem": "hx-delete=\"/x/slug/{{ RecordID }}/delete/{{ index }}?array_field=field_name\" hx-headers='{\"X-CSRF-Token\": \"{{ CSRFToken }}\"}' hx-swap=\"none\"",
+        "navigation": "hx-get=\"/x/slug/{{ record._id|objectid }}\" hx-target=\"#viewport\" hx-swap=\"innerHTML transition:true\" hx-push-url=\"true\""
+      },
+      "hyperscriptPatterns": {
+        "loadSkeleton": "_=\"on load WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500) end\"",
+        "confirmDelete": "_=\"on click set result to wc.Prompt.question({'title': 'Confirm Remove?', 'text': 'Are you sure?'}) if result trigger 'confirm:delete' end end on htmx:afterRequest if detail.successful then set elem to the closest <.item/> transition the elem's opacity to 0 then settle then remove the elem end\"",
+        "setActive": "_=\"on click remove .active from <.item.active/> add .active to closest .item\""
+      }
+    },
+    "templateData": {
+      "description": "Data available in Pongo2 template rendering context",
+      "fields": {
+        "Record": "Current record data (bson.M) — access nested fields: Record.address.street",
+        "Data": "Additional data from code tab return — e.g., Data.referrals, Data.scripts",
+        "RecordID": "Current record ID from URL",
+        "Schema": "JSONSchema with field definitions",
+        "Template": "Current TemplateBuilder — Template.RoutePrevTemplateSlug for back navigation",
+        "Templates": "All loaded templates (including depends)",
+        "Lookups": "Map of lookup name → lookup data",
+        "CSRFToken": "CSRF protection token — required in hx-headers for DELETE requests",
+        "User": "Current authenticated user object",
+        "UserProfile": "Current user's profile/role",
+        "CurrentApp": "Active application",
+        "Apps": "All accessible applications",
+        "IsAuthenticated": "Auth status (0 or 1)",
+        "IsHTMX": "Whether request is HTMX partial",
+        "FormMethod": "HTTP method lowercase — used in hx-{{ FormMethod }} for dynamic verb",
+        "QueryParams": "URL query parameters — use {{ QueryParams|getparam:\"key\" }} and {{ QueryParams|querystring }}"
+      }
+    },
+    "generation": {
+      "description": "Auto-generate templates from schemas",
+      "formGeneration": "GenerateTemplateBySchema() — creates form HTML with Wave CSS components from schema properties",
+      "tableGeneration": "GenerateTableBySchema() — creates wc-tabulator with columns from schema properties",
+      "schemaGeneration": "GenerateSchema() — creates blank record with default values from schema"
+    }
+  },
+  "fieldRules": {
+    "description": "Declarative client-side form behavior engine. Controls field visibility, required state, value syncing, calculations, dynamic options, and more. Defined in template's field_rules JSON property.",
+    "location": "Stored in _template_builder.field_rules as JSON string. Parsed and initialized by FieldRulesEngine on page load.",
+    "initialization": "In the Content tab <script> block or inline:\nwindow.rulesEngine = new FieldRulesEngine(fieldRulesJSON);\nwindow.rulesEngine.init();",
+    "targeting": {
+      "byName": "\"field_name\" — targets input with name=\"field_name\" and its wc-* wrapper",
+      "byNestedName": "\"address.street\" — targets nested field inputs",
+      "byClass": "\".section-class\" — targets elements with that CSS class",
+      "byId": "\"#element-id\" — targets specific element by ID",
+      "byWildcard": "\".member-title-*\" or \"household_members.*.first_name\" — wildcard * matches array indices for repeating sections"
+    },
+    "ruleTypes": {
+      "visible": {
+        "description": "Show/hide field or section based on condition",
+        "simple": "\"visible\": { \"when\": \"field_name\", \"equals\": \"value\" }",
+        "withIn": "\"visible\": { \"when\": \"field_name\", \"in\": [\"val1\", \"val2\"] }",
+        "withNotIn": "\"visible\": { \"when\": \"field_name\", \"notIn\": [\"\", \"no\"] }"
+      },
+      "required": {
+        "description": "Make field required based on condition — same syntax as visible",
+        "example": "\"required\": { \"when\": \"has_prior_coverage\", \"equals\": \"yes\" }"
+      },
+      "clearWhenHidden": {
+        "description": "Clear field value when it becomes hidden (boolean)",
+        "example": "\"clearWhenHidden\": true"
+      },
+      "syncWith": {
+        "description": "Bidirectional sync between fields. Changes to either field update the other.",
+        "example": "\"first_name\": { \"syncWith\": \"household_members.0.first_name\" }",
+        "notes": "Uses dot notation for nested/array fields. Index 0 = first array item."
+      },
+      "setValue": {
+        "description": "Set field value based on condition. Supports copyFrom for copying another field's value.",
+        "copyFrom": "\"setValue\": { \"when\": \"mailing_same_as_physical\", \"equals\": \"yes\", \"copyFrom\": \"address.street\" }",
+        "copyOnChange": "\"setValue\": { \"when\": { \"and\": [{ \"field\": \"state\", \"in\": [\"NC\",\"SC\"] }, { \"field\": \"bi\", \"isEmpty\": false }] }, \"copyFrom\": \"liability_limits.bi\", \"copyOnChange\": true }",
+        "setOnLoad": "\"setValue\": { \"value\": \"{quote.effective_date} < today() ? today() : {quote.effective_date}\", \"setOnLoad\": true }",
+        "notes": "Supports compound 'and' conditions with field/equals/in/isEmpty checks"
+      },
+      "setText": {
+        "description": "Set element text content from field values using template string",
+        "example": "\"#title-content\": { \"setText\": { \"fields\": { \"first\": \"first_name\", \"last\": \"last_name\" }, \"template\": \"{first} {last}\", \"default\": \"New Prospect\" } }",
+        "wildcard": "\".member-title-*\": { \"setText\": { \"fields\": { \"first_name\": \"household_members.*.first_name\", \"last_name\": \"household_members.*.last_name\" }, \"template\": \"{first_name} {last_name}\", \"default\": \"\" } }"
+      },
+      "calculate": {
+        "description": "Calculate and set values on target fields when source field changes",
+        "example": "\"household_members.*.birth_date\": { \"calculate\": { \"targets\": [{ \"field\": \"household_members.*.driver.license_date\", \"expression\": \"addYears({value}, 16)\" }, { \"field\": \"household_members.*.driver.license_age\", \"expression\": \"16\" }] } }",
+        "functions": ["addYears({value}, n)", "yearsDiff({value}, today())", "today()", "arithmetic expressions"],
+        "notes": "Wildcard * in field paths matches the same array index as the source field"
+      },
+      "updateOptions": {
+        "description": "Dynamically rebuild select/dropdown options from an array field's data",
+        "example": "\"household_vehicles.*.assigned_driver\": { \"updateOptions\": { \"sourceArray\": \"household_members\", \"valueTemplate\": \"{index+1}\", \"textTemplate\": \"{index+1} - {first_name} {last_name}\", \"defaultOption\": { \"value\": \"\", \"text\": \"Choose...\" } } }",
+        "notes": "Rebuilds options whenever the source array changes. Useful for assigning drivers to vehicles."
+      }
+    },
+    "conditionOperators": {
+      "equals": "Exact value match — \"equals\": \"yes\"",
+      "notEquals": "Not equal — \"notEquals\": \"no\"",
+      "in": "Value in array — \"in\": [\"NC\", \"SC\"]",
+      "notIn": "Value not in array — \"notIn\": [\"\", \"no\", \"student_in_state\"]",
+      "isEmpty": "Check if field is empty — \"isEmpty\": false",
+      "greaterThan": "Numeric gt",
+      "lessThan": "Numeric lt",
+      "greaterThanOrEqual": "Numeric gte",
+      "lessThanOrEqual": "Numeric lte",
+      "compoundAnd": "\"when\": { \"and\": [{ \"field\": \"state\", \"in\": [\"NC\",\"SC\"] }, { \"field\": \"bi\", \"isEmpty\": false }] }"
+    },
+    "realWorldExample": {
+      "description": "From the prospect template — shows syncWith, setValue with copyFrom, compound conditions, wildcard targeting, calculate, updateOptions, and setText",
+      "syncFields": "first_name syncs with household_members.0.first_name (and last_name, middle_initial, suffix)",
+      "mailingAddress": "When mailing_same_as_physical='yes', all mailing_address.* fields copyFrom address.* fields",
+      "liabilityLimits": "When state is NC/SC and bi limit is set, umbi copies from bi with copyOnChange",
+      "memberTitles": ".member-title-* uses setText with wildcard to show 'First Last' for each household member",
+      "driverAssignment": "household_vehicles.*.assigned_driver uses updateOptions from household_members array",
+      "birthDateCalc": "household_members.*.birth_date calculates license_date (addYears 16) and license_age"
+    }
+  },
+  "webPilots": {
+    "description": "Browser automation system using Playwright. Scripts are stored in _web_pilot collection. Support composition via {% include %} and data loading via code tab — same patterns as templates.",
+    "architecture": {
+      "collection": "_web_pilot — stores script definitions with 'script' and 'code' fields",
+      "scheduleCollection": "_web_pilot_schedule — cron-based scheduling",
+      "runCollection": "_web_pilot_run — execution history with status, logs, screenshots",
+      "executor": "External Node.js Playwright service at PW_EXECUTE_URL"
+    },
+    "scriptStructure": {
+      "code": "Pre-execution JavaScript — loads data, credentials, and sets up context object before script runs. Uses same DB operations: load(), loadMany(), getCredentials().",
+      "script": "Playwright automation code — uses page.goto(), page.fill(), page.click(), page.screenshot(), etc. Supports Pongo2 template syntax for data injection.",
+      "composition": "{% include 'page_script_slug' %} — include other web pilot scripts inline. {% if data.state == 'NC' %}{% include 'nc_version' %}{% elif data.state == 'SC' %}{% include 'sc_version' %}{% endif %}"
+    },
+    "codeTabPattern": "// Code tab loads data and credentials before script executes\nasync function getData() {\n  const data = await load('prospect', params.data_id);\n  let state = data?.address?.state?.toLowerCase() || 'nc';\n  const carrierLookup = await loadMany(`_carrier_nat_gen_${state}`, {}, 100);\n  const credentials = await getCredentials('nat_gen');\n  return { credentials, data, carrierLookup };\n}\ncontext = await getData();\n\n// Helper function for mapping source data to carrier form fields\ncontext.mapSourceToTarget = function(category, sourceKey, targetProp='value') {\n  const lookupDoc = context.carrierLookup?.find(l => l.name === category);\n  if (!lookupDoc) return '';\n  const targetItem = lookupDoc.item_list.find(item => item.key === sourceKey);\n  return targetItem ? targetItem[targetProp] : '';\n};",
+    "scriptPatterns": {
+      "navigation": "await page.goto('{{ credentials.login_url }}');\nawait page.waitForLoadState();",
+      "formFilling": "await page.fill('#fieldId', '{{ data.first_name }}');",
+      "selectOption": "await page.selectOption('#stateSelect', '{{ data.address.state }}');",
+      "clickAndWait": "await page.click('#submitBtn');\nawait page.waitForLoadState();",
+      "screenshot": "await page.screenshot();",
+      "logging": "await log('Step:', 'description');",
+      "setProp": "await setProp('data.carrier', 'Nat Gen');",
+      "authCheck": "const authCheck = await Promise.race([\n  page.locator('#authenticatedElement').waitFor({state: 'visible', timeout: 5000}).then(() => 'authenticated'),\n  page.locator('#loginButton').waitFor({state: 'visible', timeout: 5000}).then(() => 'needs_login')\n]).catch(() => 'needs_login');",
+      "lookupMapping": "const mappedValue = context.mapSourceToTarget('coverage_category', sourceValue);\nawait page.selectOption('#field', mappedValue);"
+    },
+    "compositionExample": {
+      "description": "The nat_gen orchestrator script demonstrates the full composition pattern — loads data in code tab, then conditionally includes page scripts based on state",
+      "flow": [
+        "1. Code tab: Load prospect data, carrier lookup, credentials → context object",
+        "2. Script: Navigate to carrier login URL",
+        "3. Auth check: Race between authenticated element and login button",
+        "4. If needs login: {% include 'nat_gen_login_page' %}",
+        "5. {% include 'nat_gen_dashboard_page' %} — start new quote",
+        "6. State-conditional: {% if data.address.state == 'NC' %}{% include 'nat_gen_named_insured_page_nc' %}{% endif %}",
+        "7. Continue through: drivers → vehicles → underwriting → coverages → bill_plans",
+        "8. Screenshots after each page for audit trail"
+      ],
+      "totalScripts": "88 web pilot scripts in production, organized by carrier and page"
+    },
+    "executionConfig": {
+      "username": "User context for the automation",
+      "playwright_env": "Target environment (production, staging)",
+      "headless": "Run without visible browser window",
+      "debug": "Enable debug logging",
+      "data_collection": "Source collection for record data (e.g., 'prospect')",
+      "data_id": "Source record ID to automate against"
+    }
+  },
+  "coreModels": {
+    "app": {
+      "description": "Top-level organizational container grouping related templates with navigation and permissions",
+      "collection": "_app_builder",
+      "fields": {
+        "name": "Display name",
+        "slug": "URL identifier",
+        "items": "Array of NavItem (navigation menu entries)",
+        "permissions": "Array of permission strings for access control",
+        "icon": "UI icon identifier",
+        "is_active": "Boolean enable/disable"
+      },
+      "navItem": {
+        "name": "Display name",
+        "slug": "Template slug (typically the list view slug)",
+        "url": "Template URL",
+        "route_prefix": "'v' (public) or 'x' (protected)",
+        "permissions": "Array of permission strings",
+        "icon": "Menu icon (wc-fa-icon name)"
+      }
+    },
+    "templateBuilder": {
+      "description": "Screen/page definition with HTML template, JavaScript logic, and field rules",
+      "collection": "_template_builder",
+      "fields": {
+        "name": "Display name",
+        "slug": "URL identifier — used in routes: /x/{slug} or /v/{slug}",
+        "schema": "Reference to schema slug for data validation",
+        "schema_slug": "Schema slug (same as schema field)",
+        "content": "HTML/Pongo2 template markup (the Template tab)",
+        "code": "JavaScript business logic (the Code tab)",
+        "field_rules": "JSON defining client-side field behavior",
+        "collection_name": "Primary MongoDB collection this template operates on",
+        "collections": "Array of additional MongoDB collection names",
+        "lookups": "Array of lookup names for dropdown data",
+        "depends": "Array of dependent template slugs — typically ['base', 'loader', 'partial-base']",
+        "route_prefix": "'v' (public) or 'x' (protected)",
+        "route_record_id": "Dynamic record ID parameter",
+        "template_type": "'standard', 'fragment', 'base', 'email', 'data', 'report'",
+        "route_prev_template_slug": "List view slug for back navigation",
+        "route_next_template_slug": "Next screen in workflow",
+        "is_core": "Boolean — core system template vs user-created",
+        "is_active": "Boolean enable/disable"
+      }
+    },
+    "schemaBuilder": {
+      "description": "Data schema definition — JSON Schema with UI extensions. Created via LiteSpec DSL or manual JSON.",
+      "collection": "_schema_builder",
+      "fields": {
+        "name": "Display name",
+        "slug": "Unique identifier (referenced by template's schema field)",
+        "json_schema": "JSON Schema definition (stored as JSON string)",
+        "functions": "JavaScript functions for schema-level operations",
+        "ui_layout": "UI configuration",
+        "schema_depends": "Dependencies on other schemas"
+      }
+    },
+    "user": {
+      "description": "User account with authentication and permissions",
+      "collection": "_user",
+      "fields": {
+        "username": "Login identifier",
+        "email": "Email address",
+        "password": "Bcrypt hashed password",
+        "permissions": "Array of permission strings",
+        "user_profile": "Reference to UserProfile slug",
+        "default_app": "Default app slug on login",
+        "is_active": "Boolean"
+      }
+    },
+    "userProfile": {
+      "description": "Role configuration with permissions and custom navigation",
+      "collection": "_user_profile_manager",
+      "fields": {
+        "name": "Role name",
+        "permissions": "Array of permission strings",
+        "default_app": "Default app for this role",
+        "links": "Array of custom navigation links",
+        "is_active": "Boolean"
+      }
+    },
+    "schedule": {
+      "description": "Web Pilot scheduled automation task",
+      "collection": "_web_pilot_schedule",
+      "fields": {
+        "name": "Schedule name",
+        "script_id": "Reference to _web_pilot record",
+        "script_slug": "Script URL identifier",
+        "cron": "Cron expression (with seconds support)",
+        "timezone": "IANA timezone string",
+        "execution_mode": "'concurrent' or 'serial'",
+        "execution_config": "Object with username, playwright_env, headless, debug, data_collection, data_id",
+        "is_active": "Boolean",
+        "run_count": "Total executions",
+        "failure_count": "Failed executions"
+      }
+    }
+  },
+  "mongodbCollections": {
+    "system": {
+      "_template_builder": "Screen/page template definitions (146 in production)",
+      "_schema_builder": "Data schema definitions",
+      "_app_builder": "Application/module configurations",
+      "_lookup": "Lookup/dropdown list data",
+      "_user": "User accounts",
+      "_user_profile_manager": "User role/permission profiles",
+      "_web_pilot": "Web pilot script definitions (88 in production)",
+      "_web_pilot_schedule": "Automation schedule definitions",
+      "_web_pilot_run": "Automation execution history",
+      "_layout_builder": "Page layout definitions",
+      "_referral": "Referral source data",
+      "_carrier_nat_gen_nc": "Carrier-specific lookup mappings (per state)"
+    },
+    "notes": "Custom business data collections are user-defined. Referenced in template 'collections' field. Each collection can have its own schema via _schema_builder."
+  },
+  "patterns": {
+    "simpleFormScreen": {
+      "description": "A basic CRUD form screen for editing a single record",
+      "depends": ["base", "loader", "partial-base"],
+      "content": "{% extends '__template_name__' %} with {% block pageContent %}, wc-breadcrumb, wc-form with hx-{{ FormMethod }}, wc-input/select/textarea fields, {% include 'meta_fields' %}, wc-save-split-button",
+      "code": "runGet() with CreateNew for 'create' or FindByID for existing. runPut() with SaveAndValidate. runPost() same as runPut. runDelete() for record or array item removal.",
+      "fieldRules": "Conditional visibility/required, syncWith for related fields, setValue with copyFrom"
+    },
+    "listScreen": {
+      "description": "A table view showing multiple records with sorting, filtering, and pagination",
+      "depends": ["base", "loader", "partial-base"],
+      "content": "wc-breadcrumb, 'Add New' button with hx-get to /x/{slug}/create, wc-tabulator with wc-tabulator-column children. Link formatter on primary column.",
+      "code": "runList() is typically minimal — TabulatorApi at /api/{collection} handles data loading automatically."
+    },
+    "composedFormScreen": {
+      "description": "A complex form with tabbed sections, each tab including a reusable fragment",
+      "example": "prospect template — includes prospect_general, prospect_member (repeating), prospect_vehicle (repeating), prospect_rental_info",
+      "content": "wc-tab with wc-tab-item wrapping {% include %} fragments. Dynamic add buttons with hx-get to fragment/create, hx-target='.container', hx-swap='beforeend'",
+      "fragments": "Each fragment is a standalone template with its own content (and optionally code). Fragments render inline within the parent form."
+    },
+    "kanbanBoard": {
+      "description": "A drag-and-drop kanban board with lanes and cards",
+      "content": "Lanes as div.kanban-lane with data-status, card fragment included in {% for ticket in Data.status_list %} loop",
+      "code": "runGet() loads tickets grouped by status into Data.backlog, Data.current_sprint, etc. runDelete() removes tickets."
+    },
+    "webPilotAutomation": {
+      "description": "Multi-page browser automation composing page scripts with state-conditional logic",
+      "orchestrator": "Main script loads data in code tab, navigates to carrier URL, conditionally includes page scripts based on data state/type",
+      "pageScripts": "Self-contained page automation — fill forms, select options, click buttons, screenshot",
+      "lookupMapping": "mapSourceToTarget() function maps internal data values to carrier-specific form values using _carrier_* collections"
+    }
+  },
+  "developmentWorkflow": {
+    "steps": [
+      "1. Create Schema via LiteSpec DSL — define fields, types, validation, UI properties",
+      "2. Create Template in _template_builder — set slug, schema, route prefix, depends: ['base','loader','partial-base']",
+      "3. Write Content Tab — {% extends '__template_name__' %}, {% block pageContent %}, Wave CSS components, {% include %} fragments",
+      "4. Write Code Tab — runGet() with rdx.ConnName/rdx.DBName, runPut() with SaveAndValidate, runDelete()",
+      "5. Define Field Rules — syncWith, setValue/copyFrom, visible/required conditions, calculate, updateOptions",
+      "6. Create fragments for reusable sections — meta_fields, repeating items, shared UI blocks",
+      "7. Create List Template — wc-tabulator, link formatter columns, Add New button",
+      "8. Create App — group form + list templates as NavItems with permissions",
+      "9. Create Lookups for dropdown data in _lookup collection",
+      "10. Test: /x/{slug}/create for new record, /x/{slug}/{id} for existing, /x/{slug}_list/list for table"
+    ],
+    "conventions": {
+      "slugNaming": "entity_name for form, entity_name_list for list view",
+      "fragmentNaming": "entity_name_section for fragments (e.g., prospect_general, prospect_member)",
+      "routePrefix": "Use /x/ for authenticated screens (most common), /v/ for public-facing",
+      "queryParams": "Pass state context via query params: ?address.state=NC&quote.insurance_type=auto",
+      "metaFields": "Always {% include 'meta_fields' %} in forms for created_by/modified_by tracking"
+    }
+  },
+  "configuration": {
+    "envVariables": {
+      "PORT": "Server port (default :8080)",
+      "DATABASE_NAME": "MongoDB database name",
+      "DEFAULT_CONNECTION_NAME": "Active database connection name",
+      "DEV_DATABASE_CONNECTION": "Development MongoDB URI",
+      "PROD_DATABASE_CONNECTION": "Production MongoDB URI",
+      "PW_EXECUTE_URL": "Playwright service URL for web pilots",
+      "API_SECRET_KEY": "API authentication key",
+      "SMTP_HOST": "Email SMTP host",
+      "SMTP_PORT": "Email SMTP port",
+      "SMTP_USERNAME": "Email username",
+      "SMTP_PASSWORD": "Email password",
+      "R2_BUCKET_NAME": "Cloudflare R2 bucket",
+      "R2_ACCESS_KEY_ID": "R2 access key",
+      "R2_SECRET_ACCESS_KEY": "R2 secret key",
+      "DISABLE_CACHE": "Disable template caching (dev)",
+      "DEBUG_MODE": "Enable debug logging"
+    }
+  }
+}

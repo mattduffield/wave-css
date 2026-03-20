@@ -293,3 +293,29 @@ http://localhost:3015/views/index.html
 3. Use CSS variables for theming
 4. Document complex logic with comments
 5. Add examples for new components
+
+## Knowledge Bases
+
+Structured JSON knowledge bases exist for this project and its related projects. Read the relevant ones when generating code, answering questions, or using slash commands.
+
+- **Wave CSS**: `docs/wave-css-knowledge.json` (37.7 KB) — component catalog, attributes, CSS utilities, themes
+- **Go Kart**: `/Users/matthewduffield/Documents/_learn/go-kart/docs/go-kart-knowledge.json` (38.7 KB) — template system, code tab patterns, field rules, web pilots
+- **LiteSpec**: `/Users/matthewduffield/Documents/_dev/lite-spec/docs/lite-spec-knowledge.json` (16.5 KB) — schema DSL syntax, attributes, conditional validation
+
+### Real Production Examples (read for accurate pattern matching)
+- **Template examples**: `/Users/matthewduffield/Documents/_learn/go-kart/docs/template-examples.json` — 10 real templates (prospect, kanban, credential vault)
+- **Template fragments**: `/Users/matthewduffield/Documents/_learn/go-kart/docs/template-fragments.json` — 11 reusable fragments (base, meta_fields, prospect_general)
+- **Web pilot examples**: `/Users/matthewduffield/Documents/_learn/go-kart/docs/web-pilot-examples.json` — Full NC Auto chain (11 Playwright scripts)
+
+### When to read knowledge bases
+- `/create-schema` — reads LiteSpec knowledge
+- `/create-template` — reads Go Kart + Wave CSS + real examples
+- `/create-screen` — reads all three + real examples
+- `/create-component` — reads Wave CSS knowledge + base component source
+- `/create-web-pilot` — reads Go Kart knowledge + web pilot examples
+
+### Project relationships
+- **Go Kart** uses Wave CSS components for its frontend UI
+- **Go Kart** uses LiteSpec to define schemas that drive dynamic form/table generation
+- **Wave CSS** is the standalone component library
+- **LiteSpec** is the standalone schema DSL (consumed by Go Kart's schema builder)

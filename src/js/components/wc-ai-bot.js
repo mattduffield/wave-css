@@ -19,6 +19,7 @@ if (!customElements.get('wc-ai-bot')) {
     static get observedAttributes() {
       return [
         'bot-id',
+        'mode',
         'model',
         'system-prompt',
         'title',
@@ -31,9 +32,319 @@ if (!customElements.get('wc-ai-bot')) {
         'max-tokens',
         'debug',
         'check-gpu-compatibility',
-        'force-enable'
+        'force-enable',
+        'context-urls',
+        'context-window-size'
       ];
     }
+
+    // Command definitions for assistant mode
+    // Each command maps to the knowledge base sections it needs
+    static ASSISTANT_COMMANDS = {
+      '/create-schema': {
+        description: 'Generate a LiteSpec schema definition',
+        sections: {},
+        systemPrompt: `You are a LiteSpec schema expert. Generate LiteSpec DSL schema definitions and explain your design choices.
+
+CRITICAL SYNTAX RULES — follow EXACTLY:
+- Block format: model Name object { ... } or def Name object { ... }
+- NO "fields:" keyword — fields go directly inside braces
+- Date fields are: string @format(date-time) @default("") — NOT "date-time" as a type
+- ALL string fields must have @default("")
+- Closing brace } on its own line
+- @can, @if, @sort, @breadcrumb go on their own lines inside the block (no field name prefix)
+- Do NOT include @ui annotations — layout is handled separately in views
+
+CORRECT EXAMPLE — follow this structure exactly:
+
+def Address object {
+  street: string @required @minLength(1) @maxLength(25) @default("")
+  city: string @required @minLength(1) @maxLength(25) @default("")
+  state: string @required @default("")
+  postal_code: string @required @minLength(1) @maxLength(12) @default("")
+  @can(view: "@self", add: "admin editor", edit: "admin editor", delete: "@self agent")
+}
+
+def Member object {
+  first_name: string @required @minLength(2) @maxLength(10) @default("")
+  middle_initial: string @minLength(1) @maxLength(3) @default("")
+  last_name: string @minLength(2) @maxLength(10) @default("")
+  @can(view: "@self", add: "admin editor", edit: "admin editor", delete: "@self agent")
+}
+
+model Client object {
+  first_name: string @required @minLength(2) @maxLength(10) @default("")
+  last_name: string @required @minLength(2) @maxLength(10) @default("")
+  email: string @email @default("")
+  phone_number: string @default("")
+  gender: string @required @enum(male,female) @default("")
+  age: integer @minimum(14) @exclusiveMaximum(130)
+  license_date: string @format(date-time) @default("")
+  address: object @ref(Address) @required
+  household_members: array(@ref(Member)) @minItems(0) @uniqueItems
+  household_income: number @required @minimum(30000) @maximum(999999) @can(view: "finance", edit: "finance")
+  tags: array(string) @uniqueItems @can(view: "admin", add: "admin", edit: "admin", delete: "admin")
+  created_by: string @default("")
+  created_date: string @format(date-time) @default("")
+  modified_by: string @default("")
+  modified_date: string @format(date-time) @default("")
+  is_active: boolean @required @default(true)
+
+  @if(age: @minimum(16), @required(license_date))
+  @if(gender: @enum("male", "female"), @required(tags))
+  @if(modified_by: @minLength(1) @maxLength(99), @required(modified_date))
+  @can(view: "@self admin", add: "admin", edit: "admin editor", delete: "admin")
+}
+
+KEY PATTERNS:
+- Nested objects: address: object @ref(Address) @required
+- Arrays of objects: items: array(@ref(TypeName)) @minItems(0) @uniqueItems
+- Arrays of primitives: tags: array(string) @uniqueItems
+- Field-level permissions inline: salary: number @can(view: "finance", edit: "finance")
+- Collection-level permissions on own line: @can(view: "@self admin", add: "admin", edit: "admin editor", delete: "admin")
+- Conditional rules: @if(field: @condition, @required(other_field))
+- Always include audit fields: created_by, created_date, modified_by, modified_date, is_active
+- Always include: @if(modified_by: @minLength(1) @maxLength(99), @required(modified_date))
+- Integers and numbers do NOT get @default("")
+- @sort(created_date, desc) and @breadcrumb(display_field, - EntityName) are optional but recommended
+
+After generating the schema, briefly explain your design choices.`
+      },
+      '/create-template': {
+        description: 'Generate a Go Kart template — say "list" or "edit" or both',
+        sections: {},
+        systemPrompt: `You are a Go Kart template expert. The user will ask for a "list" template, an "edit/form" template, or both. Generate Content tab (HTML) and Code tab (JavaScript). Use /create-list or /create-edit for faster, focused generation.
+The model name = collection name = schema slug (e.g., model Article → collection "article").
+
+RULES:
+- List slug: COLLECTION_list. Edit slug: COLLECTION.
+- List: wc-table-skeleton + wc-tabulator with ajax-url, linkFormatter columns, header-filter on all columns
+- Edit: wc-article-skeleton + wc-form with hx-{{FormMethod}}, meta_fields, wc-save-split-button, wc-hotkey
+- Code: rdx.ConnName/rdx.DBName, SaveAndValidate, CreateNew for "create"
+- depends: ["base", "loader", "partial-base"]
+- After generating, list the template properties needed (slug, schema, route_prefix, depends, template_type, route_prev/next_template_slug)`
+      },
+      '/create-list': {
+        description: 'Generate a Go Kart list template',
+        sections: {},
+        systemPrompt: `You are a Go Kart template expert. Generate a LIST template with Content tab (HTML) and Code tab (JavaScript).
+The model name = collection name = schema slug (e.g., model Article → collection "article").
+List slug convention: COLLECTION_list (e.g., article_list).
+
+=== EXAMPLE (Content Tab) ===
+{% extends "__template_name__" %}
+{% block pageContent %}
+<wc-table-skeleton _="on 'wc-tabulator:ready' from body
+                      WaveHelpers.waitForThenHideAndShow('#table-skeleton', '.page-content', 3000, 500)
+                   end">
+</wc-table-skeleton>
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-1 hidden">
+  <wc-breadcrumb>
+    <wc-breadcrumb-item label="" link="/{{ Template.RoutePrefix }}/home"></wc-breadcrumb-item>
+    <wc-breadcrumb-item label="Article" link=""></wc-breadcrumb-item>
+  </wc-breadcrumb>
+  <div class="card">
+    <div class="flex flex-col flex-1" hx-boost="true" hx-target="#viewport" hx-swap="innerHTML transition:true" hx-push-url="true" hx-indicator="#content-loader">
+      <div class="row justify-end items-center mb-2">
+        <a class="underline cursor-pointer" href="/{{ Template.RoutePrefix }}/{{ Template.RouteNextTemplateSlug }}/create">Add New</a>
+      </div>
+      <div class="row gap-4">
+        <wc-tabulator class="w-full rounded" id="article-table"
+          ajax-url="/api/article?schema_slug={{Template.Schema}}"
+          initial-sort='[{"column":"modified_date","dir":"desc"}]'
+          placeholder="No Data Available" movable-columns="true"
+          row-height="40" pagination pagination-size="16" pagination-counter="rows"
+          header-visible="true" layout="fitColumns">
+          <wc-tabulator-func name="onDelete">
+            (result) => { wc.Prompt.toast({title: 'Delete successful!', type: 'success'}); }
+          </wc-tabulator-func>
+          <wc-tabulator-column field="title" title="Title"
+            header-filter="input" header-filter-func="starts" header-menu="headerMenu"
+            formatter="linkFormatter"
+            formatter-params='{ "routePrefix": "{{ Template.RoutePrefix }}", "template": "{{ Template.RouteNextTemplateSlug }}", "url": "urlFormatter" }'
+            visible="true"></wc-tabulator-column>
+          <wc-tabulator-column field="category" title="Category"
+            header-filter="input" header-filter-func="starts" header-menu="headerMenu"
+            formatter="linkFormatter"
+            formatter-params='{ "routePrefix": "{{ Template.RoutePrefix }}", "template": "{{ Template.RouteNextTemplateSlug }}", "url": "urlFormatter" }'
+            visible="true"></wc-tabulator-column>
+          <wc-tabulator-column field="modified_date" title="Modified Date"
+            header-filter="input" header-filter-func="starts" header-menu="headerMenu"
+            formatter="linkDateTimeFormatter"
+            formatter-params='{ "routePrefix": "{{ Template.RoutePrefix }}", "template": "{{ Template.RouteNextTemplateSlug }}", "url": "urlFormatter" }'
+            visible="true"></wc-tabulator-column>
+          <wc-tabulator-column field="is_active" title="Is Active?"
+            formatter="tickCross" header-filter="tickCross"
+            header-filter-params='{"tristate":true}' header-menu="headerMenu"
+            visible="false"></wc-tabulator-column>
+        </wc-tabulator>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+=== EXAMPLE (Code Tab) ===
+function runList() {
+  let records = [];
+  return {records};
+}
+
+=== RULES ===
+- Replace "article" with the actual collection name from the user's request
+- Replace "Article" with the display name
+- ajax-url="/api/COLLECTION?schema_slug={{Template.Schema}}"
+- Every column needs: header-filter="input", header-filter-func="starts", header-menu="headerMenu"
+- Link columns: formatter="linkFormatter" with formatter-params containing routePrefix, template, url: "urlFormatter"
+- Date columns: formatter="linkDateTimeFormatter"
+- Boolean columns: formatter="tickCross", header-filter="tickCross", header-filter-params='{"tristate":true}'
+- depends: ["base", "loader", "partial-base"]
+- After generating, list template properties: slug, schema, route_prefix, depends, template_type, route_next_template_slug`
+      },
+      '/create-edit': {
+        description: 'Generate a Go Kart edit/form template',
+        sections: {},
+        systemPrompt: `You are a Go Kart template expert. Generate an EDIT/FORM template with Content tab (HTML) and Code tab (JavaScript).
+The model name = collection name = schema slug (e.g., model Article → collection "article").
+Edit slug convention: COLLECTION (e.g., article). List slug: COLLECTION_list.
+
+=== EXAMPLE (Content Tab) ===
+{% extends "__template_name__" %}
+{% block css %}{% endblock %}
+{% block pageContent %}
+<wc-article-skeleton _="on load WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500) end"></wc-article-skeleton>
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/v/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="Article" link="/x/{{ Template.RoutePrevTemplateSlug }}/list"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="{{ Record.title }}" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+    <div class="flex flex-row items-center gap-3">
+      <wc-save-split-button method="{{ FormMethod }}" form="form#article" hx-include="form#article"
+        save-url="/x/article/{{ RecordID }}" save-new-url="/x/article/create"
+        save-return-url="/x/article_list/list">
+      </wc-save-split-button>
+    </div>
+  </div>
+  <wc-tab class="col-1 mt-2 mb-4" animate="">
+    <wc-tab-item class="active" label="General">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        <wc-form class="col gap-3" method="{{ FormMethod }}" id="article" hx-{{FormMethod}}="/x/article/{{ RecordID }}">
+          {% include "meta_fields" %}
+          <div class="row gap-4">
+            <wc-input name="title" lbl-label="Title" class="col-1" value="{{ Record.title }}" required></wc-input>
+            <wc-select name="category" lbl-label="Category" class="col-1" value="{{ Record.category }}" required>
+              <option value="">Choose...</option>
+              <option value="news">News</option>
+              <option value="blog">Blog</option>
+              <option value="tutorial">Tutorial</option>
+              <option value="announcement">Announcement</option>
+            </wc-select>
+          </div>
+          <div class="row gap-4">
+            <wc-input name="release_date" lbl-label="Release Date" class="col-1" type="date" value="{{ Record.release_date }}"></wc-input>
+            <wc-input name="is_active" lbl-label="Is Active" class="col" type="checkbox" toggle-switch {% if Record.is_active %} checked="" {% endif %}></wc-input>
+          </div>
+          <hr class="my-4" />
+          <div class="row gap-4">
+            <wc-textarea name="description" lbl-label="Description" class="col-1" rows="6">{{ Record.description }}</wc-textarea>
+          </div>
+          <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
+        </wc-form>
+      </div>
+    </wc-tab-item>
+    <wc-tab-item label="Change Log">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        {% if RecordID != "create" %}
+        <div hx-get="/x/change_log?collection=article&original_id={{ RecordID }}" hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
+          Loading change history...
+        </div>
+        {% else %}
+        <div class="text-center p-4 text-muted">Save the record to view change history</div>
+        {% endif %}
+      </div>
+    </wc-tab-item>
+  </wc-tab>
+</div>
+{% endblock %}
+
+=== EXAMPLE (Code Tab) ===
+function runGet() {
+  let collection = 'article';
+  if (ctx.RecordID === 'create') {
+    let record = ctx.DB.CreateNew(rdx.ConnName, rdx.DBName, 'article');
+    return {record};
+  }
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, ctx.RecordID);
+  return {record};
+}
+function runPut() {
+  let collection = 'article';
+  let id = ctx.RecordID;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, collection, id, form, 'article', [], []);
+  if (id === '') { id = ctx.RecordID; }
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, id);
+  ctx.App.Session.Put(ctx.Request.Context(), 'flash', 'Save successful!');
+  return {record};
+}
+function runPost() {
+  let collection = 'article';
+  let id = ctx.RecordID;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, collection, id, form, 'article', [], []);
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, collection, id);
+  ctx.App.Session.Put(ctx.Request.Context(), 'flash', 'Save successful!');
+  return {record};
+}
+function runDelete() {
+  let collection = 'article';
+  let id = ctx.RecordID;
+  ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, collection, id);
+  return {success: true};
+}
+
+=== RULES ===
+- Replace "article" with the actual collection name throughout ALL code
+- Replace "Article" with the display name
+- LAYOUT: Always wrap form in wc-tab with "General" and "Change Log" tabs. Use "row gap-4" for horizontal field pairs with "col-1" on each field. Use "hr class=my-4" between sections. Use fieldset with legend for nested objects. Use wc-textarea full-width in its own row for long text.
+- Use rdx.ConnName/rdx.DBName — NEVER raw session calls
+- In SaveAndValidate, the schema slug must be the collection name as a string like 'article' — NOT a variable name. The last two args are arrays for tag and array fields, use [] if none.
+- depends: ["base", "loader", "partial-base"]
+- Always include wc-hotkey keys="ctrl+s" and {% include "meta_fields" %}
+- Component mapping: string→wc-input, email→wc-input type="email", enum→wc-select with options, boolean→wc-input type="checkbox" toggle-switch, multiline→wc-textarea (full width), date→wc-input type="date", tel→wc-input type="tel", currency→wc-input type="currency"
+- After generating, list template properties: slug, schema, route_prefix, depends, template_type, route_prev_template_slug`
+      },
+      '/create-screen': {
+        description: 'Generate full screen: schema + form + list + field rules',
+        sections: {},
+        systemPrompt: `You are a Go Kart full-stack expert. Generate a complete screen: LiteSpec schema, form template (Content + Code tabs), list template, and field rules. Follow all LiteSpec and Go Kart conventions. Use Wave CSS components for the UI.`
+      },
+      '/create-component': {
+        description: 'Generate a new Wave CSS web component',
+        sections: {},
+        systemPrompt: `You are a Wave CSS component expert. Generate new web components following the library architecture:
+- Extend WcBaseComponent (or WcBaseFormComponent for form inputs)
+- No Shadow DOM — use regular DOM with classList.add('contents')
+- Define static get is(), observedAttributes, _render(), _handleAttributeChange(), _applyStyle()
+- Support HTMX via htmx.process(this)
+- Use CSS variables for theming`
+      },
+      '/create-web-pilot': {
+        description: 'Generate a Playwright automation script chain',
+        sections: {},
+        systemPrompt: `You are a Go Kart Web Pilot expert. Generate Playwright automation scripts using the composition pattern:
+- Code tab: load data via load(), loadMany(), getCredentials(). Set up context.mapSourceToTarget() for value mapping.
+- Script tab: page.goto(), page.fill(), page.selectOption(), page.click(), page.screenshot()
+- Composition: {% include 'page_script_slug' %} with {% if %} for state/type variations
+- Auth check: Promise.race pattern for login detection
+- Naming: {carrier}_{page}_{state} (e.g., nat_gen_drivers_page_nc)`
+      },
+      '/help': {
+        description: 'Show available commands',
+        sections: {},
+        systemPrompt: ''
+      }
+    };
 
     // Known hardware configurations
     static KNOWN_CAPABLE_CONFIGS = [
@@ -74,7 +385,12 @@ if (!customElements.get('wc-ai-bot')) {
       this._modelProgress = 0;
       this._isUnsupported = false;
       this._unsupportedReason = '';
-      
+
+      // Assistant mode state
+      this._knowledgeBases = {};       // Loaded KB data keyed by name
+      this._knowledgeBasesLoaded = false;
+      this._activeCommand = null;      // Current command being processed
+
       // Bind methods
       this._handleSend = this._handleSend.bind(this);
       this._handleKeydown = this._handleKeydown.bind(this);
@@ -198,6 +514,11 @@ if (!customElements.get('wc-ai-bot')) {
         }
       }
       
+      // Load knowledge bases for assistant mode
+      if (this._isAssistantMode()) {
+        await this._loadKnowledgeBases();
+      }
+
       // Auto-open if specified
       if (this.getAttribute('auto-open') === 'true') {
         this._isMinimized = false;
@@ -206,7 +527,7 @@ if (!customElements.get('wc-ai-bot')) {
           this._fab.style.display = 'none';
         }
       }
-      
+
       // Add initial message
       this._addMessage('bot', this._getWelcomeMessage());
     }
@@ -342,6 +663,37 @@ if (!customElements.get('wc-ai-bot')) {
         .wc-ai-bot-message-bubble pre code {
           background: none;
           padding: 0;
+        }
+
+        /* Code block copy button */
+        .wc-ai-bot-code-wrapper {
+          position: relative;
+        }
+
+        .wc-ai-bot-copy-btn {
+          position: absolute;
+          top: 0.375rem;
+          right: 0.375rem;
+          background: rgba(255, 255, 255, 0.15);
+          border: none;
+          border-radius: 0.25rem;
+          color: inherit;
+          cursor: pointer;
+          padding: 0.25rem 0.375rem;
+          opacity: 0;
+          transition: opacity 0.2s, background 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1;
+        }
+
+        .wc-ai-bot-code-wrapper:hover .wc-ai-bot-copy-btn {
+          opacity: 1;
+        }
+
+        .wc-ai-bot-copy-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
 
         /* Transparent background for loading bubbles */
@@ -748,13 +1100,163 @@ if (!customElements.get('wc-ai-bot')) {
       });
       
       try {
-        await engine.reload(modelName);
+        // Build model config overrides
+        const overrides = {};
+        const ctxSize = parseInt(this.getAttribute('context-window-size') || '0');
+        if (ctxSize > 0) {
+          overrides.context_window_size = ctxSize;
+          if (this.getAttribute('debug') === 'true') {
+            console.log(`[wc-ai-bot] Overriding context_window_size to ${ctxSize}`);
+          }
+        }
+
+        if (Object.keys(overrides).length > 0) {
+          await engine.reload(modelName, overrides);
+        } else {
+          await engine.reload(modelName);
+        }
         if (progressTimeout) clearTimeout(progressTimeout);
         return engine;
       } catch (error) {
         if (progressTimeout) clearTimeout(progressTimeout);
         throw error;
       }
+    }
+
+    // --- Assistant Mode Methods ---
+
+    _isAssistantMode() {
+      return this.getAttribute('mode') === 'assistant';
+    }
+
+    async _loadKnowledgeBases() {
+      const urls = this.getAttribute('context-urls');
+      if (!urls) return;
+
+      const urlList = urls.split(',').map(u => u.trim()).filter(Boolean);
+      this._updateStatus('Loading knowledge bases...');
+
+      for (const url of urlList) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            console.warn(`[wc-ai-bot] Failed to load KB from ${url}: ${response.status}`);
+            continue;
+          }
+          const data = await response.json();
+          // Derive name from the meta field or filename
+          const name = data?.meta?.name?.toLowerCase().replace(/\s+knowledge\s+base/i, '').replace(/\s+/g, '-') ||
+                       url.split('/').pop().replace('.json', '');
+          this._knowledgeBases[name] = data;
+
+          if (this.getAttribute('debug') === 'true') {
+            const size = JSON.stringify(data).length;
+            console.log(`[wc-ai-bot] Loaded KB "${name}" from ${url} (${(size/1024).toFixed(1)} KB)`);
+          }
+        } catch (error) {
+          console.error(`[wc-ai-bot] Error loading KB from ${url}:`, error);
+        }
+      }
+
+      this._knowledgeBasesLoaded = Object.keys(this._knowledgeBases).length > 0;
+      if (this._knowledgeBasesLoaded) {
+        const names = Object.keys(this._knowledgeBases).join(', ');
+        this._updateStatus('');
+        if (this.getAttribute('debug') === 'true') {
+          console.log(`[wc-ai-bot] Knowledge bases loaded: ${names}`);
+        }
+      }
+    }
+
+    _parseCommand(message) {
+      const trimmed = message.trim();
+      if (!trimmed.startsWith('/')) return null;
+
+      const spaceIdx = trimmed.indexOf(' ');
+      const cmd = spaceIdx === -1 ? trimmed : trimmed.substring(0, spaceIdx);
+      const args = spaceIdx === -1 ? '' : trimmed.substring(spaceIdx + 1).trim();
+
+      const commandDef = WcAiBot.ASSISTANT_COMMANDS[cmd];
+      if (!commandDef) return null;
+
+      return { command: cmd, args, definition: commandDef };
+    }
+
+    _buildAssistantContext(commandDef) {
+      // Select relevant sections from loaded knowledge bases
+      const contextParts = [];
+      const sectionMap = commandDef?.sections || {};
+
+      for (const [kbName, sectionNames] of Object.entries(sectionMap)) {
+        const kb = this._knowledgeBases[kbName];
+        if (!kb) continue;
+
+        for (const sectionName of sectionNames) {
+          const section = kb[sectionName];
+          if (section) {
+            const json = JSON.stringify(section, null, 2);
+            contextParts.push(`### ${kbName} — ${sectionName}\n${json}`);
+          }
+        }
+      }
+
+      return contextParts.join('\n\n');
+    }
+
+    _getCommandHelpText() {
+      const commands = WcAiBot.ASSISTANT_COMMANDS;
+      const lines = ['**Available Commands:**\n'];
+      for (const [cmd, def] of Object.entries(commands)) {
+        if (cmd === '/help') continue;
+        lines.push(`- \`${cmd}\` — ${def.description}`);
+      }
+      lines.push('');
+      lines.push('**Usage:** Type a command followed by a description:');
+      lines.push('```');
+      lines.push('/create-schema contact with first name, last name, email, phone, status');
+      lines.push('/create-list article with title, category, release date, is active');
+      lines.push('/create-edit article with title, description, release date, category');
+      lines.push('/create-template article list and edit templates');
+      lines.push('/create-screen ticket tracker with title, priority, assignee, status');
+      lines.push('```');
+      lines.push('');
+      lines.push('**Tip:** Use `/create-list` and `/create-edit` for faster generation than `/create-template`.');
+      lines.push('');
+      lines.push('You can also ask general questions — relevant knowledge will be injected automatically.');
+      return lines.join('\n');
+    }
+
+    _matchKnowledgeByKeywords(message) {
+      // For non-command messages in assistant mode, match KB sections by keywords
+      const lower = message.toLowerCase();
+      const sections = {};
+
+      // Keyword → KB section mapping
+      const keywordMap = [
+        { keywords: ['schema', 'litespec', '@required', '@enum', '@if', 'def ', 'model '], kb: 'lite-spec', sections: ['syntax', 'attributes', 'conditionalValidation'] },
+        { keywords: ['template', 'content tab', 'code tab', 'runget', 'runpost', 'runput', 'rundelete', 'rdx.', 'saveandvalidate'], kb: 'go-kart', sections: ['templateSystem', 'patterns'] },
+        { keywords: ['field rule', 'fieldrule', 'syncwith', 'setvalue', 'settext', 'calculate', 'updateoptions', 'visible', 'required when'], kb: 'go-kart', sections: ['fieldRules'] },
+        { keywords: ['web pilot', 'webpilot', 'playwright', 'automation', 'script', 'carrier', 'schedule'], kb: 'go-kart', sections: ['webPilots'] },
+        { keywords: ['component', 'wc-', 'wave css', 'wavecss', 'wc-input', 'wc-select', 'wc-form', 'wc-tab', 'wc-tabulator'], kb: 'wave-css', sections: ['components', 'overview'] },
+        { keywords: ['theme', 'css variable', 'color', 'dark mode', 'light mode'], kb: 'wave-css', sections: ['themes', 'cssUtilities'] },
+        { keywords: ['route', 'htmx', 'hx-get', 'hx-post', 'middleware', 'auth'], kb: 'go-kart', sections: ['architecture'] },
+        { keywords: ['app', 'navigation', 'permission', 'user profile', 'collection'], kb: 'go-kart', sections: ['coreModels', 'mongodbCollections'] },
+      ];
+
+      for (const mapping of keywordMap) {
+        if (mapping.keywords.some(kw => lower.includes(kw))) {
+          if (!sections[mapping.kb]) sections[mapping.kb] = new Set();
+          mapping.sections.forEach(s => sections[mapping.kb].add(s));
+        }
+      }
+
+      // Convert Sets to arrays
+      const result = {};
+      for (const [kb, sectionSet] of Object.entries(sections)) {
+        result[kb] = Array.from(sectionSet);
+      }
+
+      return Object.keys(result).length > 0 ? { sections: result } : null;
     }
 
     _handleAttributeChange(name, newValue, oldValue) {
@@ -776,7 +1278,26 @@ if (!customElements.get('wc-ai-bot')) {
     _handleSend() {
       const message = this._input.value.trim();
       if (!message || !this._isModelReady || this._isLoading) return;
-      
+
+      // In assistant mode, intercept /commands
+      if (this._isAssistantMode()) {
+        const parsed = this._parseCommand(message);
+        if (parsed) {
+          if (parsed.command === '/help') {
+            this._input.value = '';
+            this._adjustInputHeight();
+            this._addMessage('user', message);
+            this._addMessage('bot', this._getCommandHelpText());
+            return;
+          }
+          // Store the active command for _prepareMessages to use
+          this._activeCommand = parsed;
+        } else {
+          // Not a command — try keyword matching for context injection
+          this._activeCommand = this._matchKnowledgeByKeywords(message);
+        }
+      }
+
       this._sendMessage(message);
     }
 
@@ -875,13 +1396,53 @@ if (!customElements.get('wc-ai-bot')) {
     }
 
     _prepareMessages(userMessage) {
-      const systemPrompt = this.getAttribute('system-prompt') || 
+      let systemPrompt = this.getAttribute('system-prompt') ||
         'You are a helpful AI assistant. Be concise and friendly in your responses.';
-      
+
+      // In assistant mode, build enhanced system prompt with knowledge base context
+      if (this._isAssistantMode() && this._activeCommand) {
+        const cmd = this._activeCommand;
+        const def = cmd.definition || cmd; // command definition or keyword match result
+
+        // Build context from knowledge bases
+        const kbContext = this._buildAssistantContext(def);
+
+        // Use command-specific system prompt if available, otherwise use attribute
+        const cmdSystemPrompt = def.systemPrompt || systemPrompt;
+
+        if (kbContext) {
+          // Guard: limit KB context to ~8KB to stay within context window
+          const maxContextChars = 8000;
+          const trimmedContext = kbContext.length > maxContextChars
+            ? kbContext.substring(0, maxContextChars) + '\n\n[...truncated to fit context window]'
+            : kbContext;
+          systemPrompt = `${cmdSystemPrompt}\n\n## Reference Documentation\n\n${trimmedContext}`;
+
+          if (this.getAttribute('debug') === 'true' && kbContext.length > maxContextChars) {
+            console.log(`[wc-ai-bot] KB context truncated from ${(kbContext.length/1024).toFixed(1)} KB to ${(maxContextChars/1024).toFixed(1)} KB`);
+          }
+        } else {
+          systemPrompt = cmdSystemPrompt;
+        }
+
+        // For commands, rewrite the user message to include args
+        if (cmd.command && cmd.args) {
+          userMessage = `${cmd.command}: ${cmd.args}`;
+        }
+
+        if (this.getAttribute('debug') === 'true') {
+          const contextSize = kbContext ? kbContext.length : 0;
+          console.log(`[wc-ai-bot] Assistant mode — command: ${cmd.command || 'keyword-match'}, context: ${(contextSize/1024).toFixed(1)} KB`);
+        }
+
+        // Clear active command after use
+        this._activeCommand = null;
+      }
+
       const messages = [
         { role: 'system', content: systemPrompt }
       ];
-      
+
       // Add conversation history (last 10 messages for context)
       const history = this._messages.slice(-10);
       history.forEach(msg => {
@@ -892,10 +1453,10 @@ if (!customElements.get('wc-ai-bot')) {
           });
         }
       });
-      
+
       // Add current message
       messages.push({ role: 'user', content: userMessage });
-      
+
       return messages;
     }
 
@@ -919,6 +1480,7 @@ if (!customElements.get('wc-ai-bot')) {
         if (role === 'bot' && markedModule && markedModule.marked) {
           const html = markedModule.marked.parse(content);
           bubbleEl.innerHTML = html;
+          this._addCopyButtons(bubbleEl);
           if (this.getAttribute('debug') === 'true') {
             console.log('[wc-ai-bot] Parsed HTML:', html);
           }
@@ -926,7 +1488,7 @@ if (!customElements.get('wc-ai-bot')) {
           bubbleEl.textContent = content;
         }
       }
-      
+
       messageEl.appendChild(bubbleEl);
       this._messagesContainer.appendChild(messageEl);
       
@@ -948,6 +1510,7 @@ if (!customElements.get('wc-ai-bot')) {
           if (markedModule && markedModule.marked) {
             const html = markedModule.marked.parse(content);
             bubbleEl.innerHTML = html;
+            this._addCopyButtons(bubbleEl);
             if (this.getAttribute('debug') === 'true') {
               console.log('[wc-ai-bot] Updated HTML:', html);
             }
@@ -968,6 +1531,36 @@ if (!customElements.get('wc-ai-bot')) {
       this._messagesContainer.scrollTop = this._messagesContainer.scrollHeight;
     }
 
+    _addCopyButtons(containerEl) {
+      const preBlocks = containerEl.querySelectorAll('pre');
+      preBlocks.forEach(pre => {
+        // Skip if already has a copy button
+        if (pre.querySelector('.wc-ai-bot-copy-btn')) return;
+
+        // Wrap pre in a relative container
+        const wrapper = document.createElement('div');
+        wrapper.className = 'wc-ai-bot-code-wrapper';
+        pre.parentNode.insertBefore(wrapper, pre);
+        wrapper.appendChild(pre);
+
+        const btn = document.createElement('button');
+        btn.className = 'wc-ai-bot-copy-btn';
+        btn.title = 'Copy to clipboard';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+        btn.addEventListener('click', () => {
+          const code = pre.querySelector('code');
+          const text = code ? code.textContent : pre.textContent;
+          navigator.clipboard.writeText(text).then(() => {
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+              btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            }, 2000);
+          });
+        });
+        wrapper.appendChild(btn);
+      });
+    }
+
     _updateStatus(status, type = 'info') {
       if (this._statusBar) {
         this._statusBar.textContent = status;
@@ -984,6 +1577,13 @@ if (!customElements.get('wc-ai-bot')) {
 
     _getWelcomeMessage() {
       const title = this.getAttribute('title') || 'AI Assistant';
+      if (this._isAssistantMode()) {
+        const kbNames = Object.keys(this._knowledgeBases);
+        const kbInfo = kbNames.length > 0
+          ? `I have knowledge loaded for: **${kbNames.join(', ')}**.`
+          : 'No knowledge bases loaded yet.';
+        return `Hello! I'm ${title} running in **assistant mode**. ${kbInfo}\n\nType \`/help\` to see available commands, or ask me anything about these projects.`;
+      }
       return `Hello! I'm ${title}. How can I help you today?`;
     }
 
