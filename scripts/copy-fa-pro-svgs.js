@@ -76,6 +76,7 @@ const ICON_ALIASES = {
   "photo-o": "image",
   pictures: "images",
   photos: "images",
+  "magic-wand-sparkles": "wand-magic-sparkles",
 };
 
 // Icons you want to copy (add more as needed)
@@ -603,6 +604,7 @@ const ICONS_TO_COPY = [
   "compress",
   "inbox",
   "flask",
+  "wand-magic-sparkles",
   // Add more icon names here
 ];
 
