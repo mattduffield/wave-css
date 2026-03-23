@@ -29,6 +29,7 @@ import './wc-fa-icon.js';
 import './wc-image.js';
 import './wc-menu.js';
 import './wc-page-designer.js';
+import './wc-live-designer.js';
 import './wc-save-button.js';
 import './wc-save-split-button.js';
 import './wc-split-button.js';

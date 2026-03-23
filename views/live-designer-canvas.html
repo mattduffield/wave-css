@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Designer Canvas</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--surface-1);
+      color: var(--text-1);
+    }
+
+    /* Editor canvas root */
+    #editor-canvas {
+      min-height: 100vh;
+      padding: 1rem;
+      position: relative;
+    }
+
+    /* Empty state */
+    #editor-canvas:empty::after {
+      content: 'Drag components here to start designing';
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+      color: var(--text-8);
+      font-size: 0.875rem;
+      border: 2px dashed var(--surface-6);
+      border-radius: 0.5rem;
+      margin: 2rem;
+    }
+
+    /* Selection overlay */
+    .designer-selected {
+      outline: 2px solid #3b82f6 !important;
+      outline-offset: 2px;
+    }
+
+    .designer-hovered:not(.designer-selected) {
+      outline: 1px dashed #60a5fa !important;
+      outline-offset: 1px;
+    }
+
+    /* Drop indicators */
+    .designer-drop-before {
+      border-top: 3px solid #3b82f6 !important;
+    }
+
+    .designer-drop-after {
+      border-bottom: 3px solid #3b82f6 !important;
+    }
+
+    .designer-drop-inside {
+      background: rgba(59, 130, 246, 0.05) !important;
+      outline: 2px dashed #3b82f6 !important;
+    }
+
+    /* Component label badge */
+    .designer-label {
+      position: absolute;
+      top: -18px;
+      left: 0;
+      background: #3b82f6;
+      color: white;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px 3px 0 0;
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    /* Scope binding indicator */
+    .designer-scope-badge {
+      position: absolute;
+      top: -18px;
+      right: 0;
+      background: #8b5cf6;
+      color: white;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px 3px 0 0;
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    /* Make all designer-managed elements position relative for badges */
+    [data-designer-id] {
+      position: relative;
+    }
+
+    /* Floating toolbar */
+    #floating-toolbar {
+      position: absolute;
+      display: none;
+      background: #1e293b;
+      border-radius: 0.375rem;
+      padding: 0.25rem;
+      gap: 0.125rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    #floating-toolbar.visible {
+      display: flex;
+    }
+
+    #floating-toolbar button {
+      background: transparent;
+      border: none;
+      color: #e2e8f0;
+      cursor: pointer;
+      padding: 0.25rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    #floating-toolbar button:hover {
+      background: #334155;
+    }
+
+    #floating-toolbar .separator {
+      width: 1px;
+      height: 16px;
+      background: #475569;
+      margin: 0 0.125rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor-canvas"></div>
+
+  <!-- Floating toolbar for selected element -->
+  <div id="floating-toolbar">
+    <button data-action="move-up" title="Move Up">↑</button>
+    <button data-action="move-down" title="Move Down">↓</button>
+    <div class="separator"></div>
+    <button data-action="duplicate" title="Duplicate">⧉</button>
+    <button data-action="delete" title="Delete">✕</button>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    /**
+     * Editor Bridge — runs inside the iframe canvas.
+     * Communicates with the parent wc-live-designer via postMessage.
+     */
+    (function() {
+      const canvas = document.getElementById('editor-canvas');
+      const toolbar = document.getElementById('floating-toolbar');
+      let selectedId = null;
+      let componentRegistry = new Map(); // designerId → { element, type, properties }
+      let sampleData = {};
+      let idCounter = 0;
+
+      // --- Utility ---
+
+      function generateId() {
+        return `d${Date.now().toString(36)}${(idCounter++).toString(36)}`;
+      }
+
+      function getNestedValue(obj, path) {
+        return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
+      }
+
+      // --- Component Management ---
+
+      function addComponent(type, parentId, position, properties = {}) {
+        const el = document.createElement(type);
+        const designerId = generateId();
+        el.setAttribute('data-designer-id', designerId);
+
+        // Apply properties
+        for (const [key, value] of Object.entries(properties)) {
+          if (key === 'scope') {
+            el.setAttribute('data-scope', value);
+          } else if (key === 'css') {
+            if (value) el.className = value;
+          } else if (key === 'content') {
+            el.textContent = value;
+          } else if (key === 'innerHTML') {
+            el.innerHTML = value;
+          } else {
+            // Convert underscores to hyphens for HTML attributes
+            const attrName = key.replace(/_/g, '-');
+            el.setAttribute(attrName, value);
+          }
+        }
+
+        // Apply sample data if scope is set
+        if (properties.scope && sampleData) {
+          applySampleData(el, properties.scope, type);
+        }
+
+        // Insert into DOM
+        const parent = parentId
+          ? canvas.querySelector(`[data-designer-id="${parentId}"]`) || canvas
+          : canvas;
+
+        if (position != null && position < parent.children.length) {
+          parent.insertBefore(el, parent.children[position]);
+        } else {
+          parent.appendChild(el);
+        }
+
+        // Register
+        componentRegistry.set(designerId, {
+          element: el,
+          type,
+          properties: { ...properties }
+        });
+
+        // Wire up interactions
+        wireElementInteractions(el, designerId);
+
+        // Notify parent
+        postToParent('componentAdded', { designerId, type, properties });
+
+        return designerId;
+      }
+
+      function removeComponent(designerId) {
+        const entry = componentRegistry.get(designerId);
+        if (!entry) return;
+        entry.element.remove();
+        componentRegistry.delete(designerId);
+        if (selectedId === designerId) {
+          selectedId = null;
+          toolbar.classList.remove('visible');
+          postToParent('componentDeselected', {});
+        }
+        postToParent('componentRemoved', { designerId });
+      }
+
+      function updateProperty(designerId, propName, value) {
+        const entry = componentRegistry.get(designerId);
+        if (!entry) return;
+        const el = entry.element;
+
+        if (propName === 'scope') {
+          el.setAttribute('data-scope', value);
+          entry.properties.scope = value;
+          applySampleData(el, value, entry.type);
+          updateBadges(el, entry);
+        } else if (propName === 'css') {
+          el.className = value || '';
+          entry.properties.css = value;
+        } else if (propName === 'content') {
+          el.textContent = value;
+          entry.properties.content = value;
+        } else {
+          const attrName = propName.replace(/_/g, '-');
+          if (value === '' || value === false || value == null) {
+            el.removeAttribute(attrName);
+          } else if (value === true) {
+            el.setAttribute(attrName, '');
+          } else {
+            el.setAttribute(attrName, value);
+          }
+          entry.properties[propName] = value;
+        }
+      }
+
+      function moveComponent(designerId, direction) {
+        const entry = componentRegistry.get(designerId);
+        if (!entry) return;
+        const el = entry.element;
+        const parent = el.parentElement;
+
+        if (direction === 'up' && el.previousElementSibling) {
+          parent.insertBefore(el, el.previousElementSibling);
+        } else if (direction === 'down' && el.nextElementSibling) {
+          parent.insertBefore(el.nextElementSibling, el);
+        }
+
+        positionToolbar(el);
+      }
+
+      function duplicateComponent(designerId) {
+        const entry = componentRegistry.get(designerId);
+        if (!entry) return;
+        const parent = entry.element.parentElement;
+        const position = Array.from(parent.children).indexOf(entry.element) + 1;
+        const parentDesignerId = parent.getAttribute('data-designer-id') || null;
+        addComponent(entry.type, parentDesignerId, position, { ...entry.properties });
+      }
+
+      // --- Sample Data ---
+
+      function applySampleData(el, scope, type) {
+        if (!scope || !sampleData) return;
+        const value = getNestedValue(sampleData, scope);
+        if (value === '' || value === undefined) return;
+
+        const tagName = (type || el.tagName).toLowerCase();
+
+        if (tagName === 'wc-input') {
+          const inputType = el.getAttribute('type');
+          if (inputType === 'checkbox') {
+            if (value) el.setAttribute('checked', '');
+            else el.removeAttribute('checked');
+          } else {
+            el.setAttribute('value', String(value));
+          }
+        } else if (tagName === 'wc-select') {
+          el.setAttribute('value', String(value));
+        } else if (tagName === 'wc-textarea') {
+          el.textContent = String(value);
+        } else if (tagName === 'wc-field') {
+          el.setAttribute('value', String(value));
+        } else {
+          el.setAttribute('value', String(value));
+        }
+      }
+
+      function setSampleData(data) {
+        sampleData = data || {};
+        // Re-apply to all scoped components
+        for (const [id, entry] of componentRegistry) {
+          const scope = entry.properties.scope || entry.element.getAttribute('data-scope');
+          if (scope) {
+            applySampleData(entry.element, scope, entry.type);
+          }
+        }
+      }
+
+      // --- Selection & Interaction ---
+
+      function wireElementInteractions(el, designerId) {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          selectComponent(designerId);
+        });
+
+        el.addEventListener('mouseenter', () => {
+          if (designerId !== selectedId) {
+            el.classList.add('designer-hovered');
+          }
+        });
+
+        el.addEventListener('mouseleave', () => {
+          el.classList.remove('designer-hovered');
+        });
+      }
+
+      function selectComponent(designerId) {
+        // Deselect previous
+        if (selectedId) {
+          const prev = componentRegistry.get(selectedId);
+          if (prev) prev.element.classList.remove('designer-selected');
+        }
+
+        selectedId = designerId;
+        const entry = componentRegistry.get(designerId);
+        if (!entry) return;
+
+        entry.element.classList.add('designer-selected');
+        positionToolbar(entry.element);
+        toolbar.classList.add('visible');
+
+        // Gather current properties from DOM
+        const props = { ...entry.properties };
+        props.scope = entry.element.getAttribute('data-scope') || '';
+        props.css = entry.element.className.replace('designer-selected', '').replace('designer-hovered', '').trim();
+
+        postToParent('componentSelected', {
+          designerId,
+          type: entry.type,
+          properties: props
+        });
+      }
+
+      function deselectAll() {
+        if (selectedId) {
+          const prev = componentRegistry.get(selectedId);
+          if (prev) prev.element.classList.remove('designer-selected');
+          selectedId = null;
+          toolbar.classList.remove('visible');
+          postToParent('componentDeselected', {});
+        }
+      }
+
+      function positionToolbar(el) {
+        const rect = el.getBoundingClientRect();
+        toolbar.style.top = `${rect.top - 32 + window.scrollY}px`;
+        toolbar.style.left = `${rect.left + window.scrollX}px`;
+      }
+
+      // --- Badges ---
+
+      function updateBadges(el, entry) {
+        // Remove old badges
+        el.querySelectorAll('.designer-label, .designer-scope-badge').forEach(b => b.remove());
+
+        // Type label
+        const label = document.createElement('span');
+        label.className = 'designer-label';
+        label.textContent = entry.type;
+        el.appendChild(label);
+
+        // Scope badge
+        const scope = entry.properties.scope || el.getAttribute('data-scope');
+        if (scope) {
+          const badge = document.createElement('span');
+          badge.className = 'designer-scope-badge';
+          badge.textContent = scope;
+          el.appendChild(badge);
+        }
+      }
+
+      // --- Serialization ---
+
+      function serializeTree() {
+        return serializeChildren(canvas);
+      }
+
+      function serializeChildren(parent) {
+        const elements = [];
+        for (const child of parent.children) {
+          const designerId = child.getAttribute('data-designer-id');
+          if (!designerId) continue;
+          const entry = componentRegistry.get(designerId);
+          if (!entry) continue;
+
+          const node = {
+            type: entry.type,
+            designerId,
+            ...entry.properties,
+          };
+
+          // Check for nested children
+          const nested = serializeChildren(child);
+          if (nested.length > 0) {
+            node.children = nested;
+          }
+
+          elements.push(node);
+        }
+        return elements;
+      }
+
+      // --- Theme ---
+
+      function setTheme(theme) {
+        document.documentElement.className = theme;
+      }
+
+      // --- postMessage Communication ---
+
+      function postToParent(action, data) {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ source: 'editor-bridge', action, ...data }, '*');
+        }
+      }
+
+      window.addEventListener('message', (e) => {
+        if (!e.data || e.data.source !== 'live-designer') return;
+        const { action } = e.data;
+
+        switch (action) {
+          case 'addComponent':
+            addComponent(e.data.type, e.data.parentId, e.data.position, e.data.properties || {});
+            break;
+          case 'removeComponent':
+            removeComponent(e.data.designerId);
+            break;
+          case 'updateProperty':
+            updateProperty(e.data.designerId, e.data.propName, e.data.value);
+            break;
+          case 'moveComponent':
+            moveComponent(e.data.designerId, e.data.direction);
+            break;
+          case 'duplicateComponent':
+            duplicateComponent(e.data.designerId);
+            break;
+          case 'setSampleData':
+            setSampleData(e.data.data);
+            break;
+          case 'setTheme':
+            setTheme(e.data.theme);
+            break;
+          case 'getTree':
+            postToParent('treeResponse', { tree: serializeTree() });
+            break;
+          case 'clear':
+            canvas.innerHTML = '';
+            componentRegistry.clear();
+            selectedId = null;
+            toolbar.classList.remove('visible');
+            break;
+        }
+      });
+
+      // Click on canvas background deselects
+      canvas.addEventListener('click', (e) => {
+        if (e.target === canvas) deselectAll();
+      });
+
+      // Floating toolbar actions
+      toolbar.addEventListener('click', (e) => {
+        const action = e.target.closest('button')?.dataset.action;
+        if (!action || !selectedId) return;
+
+        switch (action) {
+          case 'move-up': moveComponent(selectedId, 'up'); break;
+          case 'move-down': moveComponent(selectedId, 'down'); break;
+          case 'duplicate': duplicateComponent(selectedId); break;
+          case 'delete': removeComponent(selectedId); break;
+        }
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (!selectedId) return;
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          // Don't delete if user is typing in an input
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          e.preventDefault();
+          removeComponent(selectedId);
+        } else if (e.key === 'Escape') {
+          deselectAll();
+        }
+      });
+
+      // Notify parent that canvas is ready
+      postToParent('canvasReady', {});
+    })();
+  </script>
+</body>
+</html>
