@@ -11508,7 +11508,7 @@ if (!customElements.get("wc-page-designer")) {
 if (!customElements.get("wc-live-designer")) {
   class WcLiveDesigner extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "canvas-url", "theme"];
+      return ["id", "class", "canvas-url", "theme", "api-base-url"];
     }
     static get is() {
       return "wc-live-designer";
@@ -11541,6 +11541,143 @@ if (!customElements.get("wc-live-designer")) {
       { name: "Nest Hub", width: 1024, height: 600, dpr: 2, type: "other" },
       { name: "Nest Hub Max", width: 1280, height: 800, dpr: 2, type: "other" }
     ];
+    // Edit-mode CSS — injected into iframe to make containers visible
+    static EDIT_MODE_CSS = `
+      /* === CRITICAL: Override display:contents on ALL designer elements === */
+      /* The .contents class is added by WcBaseComponent to every component */
+      [data-designer-id].contents {
+        display: block !important;
+      }
+
+      /* === Container styling === */
+      wc-form[data-designer-id],
+      wc-div[data-designer-id],
+      wc-tab[data-designer-id],
+      wc-tab-item[data-designer-id],
+      wc-accordion[data-designer-id],
+      wc-dropdown[data-designer-id],
+      wc-sidebar[data-designer-id],
+      wc-sidenav[data-designer-id],
+      wc-slideshow[data-designer-id],
+      wc-split-button[data-designer-id],
+      wc-flip-box[data-designer-id],
+      wc-menu[data-designer-id],
+      div[data-designer-id],
+      fieldset[data-designer-id] {
+        display: block !important;
+        min-height: 120px !important;
+        border: 1px dashed rgba(0, 120, 255, 0.3) !important;
+        border-radius: 4px !important;
+        padding: 28px 12px 12px 12px !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+        background: rgba(0, 120, 255, 0.02) !important;
+      }
+
+      /* Container inner elements (like <form class="wc-form">) also need block display */
+      wc-form[data-designer-id] > .wc-form,
+      wc-div[data-designer-id] > .wc-div {
+        display: block !important;
+        min-height: 80px !important;
+      }
+
+      /* Containers without designer children show a hint */
+      wc-form[data-designer-id]:not(:has(> [data-designer-id])),
+      wc-div[data-designer-id]:not(:has(> [data-designer-id])),
+      wc-tab[data-designer-id]:not(:has(> [data-designer-id])),
+      wc-tab-item[data-designer-id]:not(:has(> [data-designer-id])),
+      div[data-designer-id]:not(:has(> [data-designer-id])),
+      fieldset[data-designer-id]:not(:has(> [data-designer-id])) {
+        min-height: 120px !important;
+      }
+      /* The inner form/div also gets the hint */
+      wc-form[data-designer-id]:not(:has([data-designer-id])) > .wc-form::after,
+      wc-div[data-designer-id]:not(:has([data-designer-id])) > .wc-div::after {
+        content: 'Drop components here' !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 60px !important;
+        color: rgba(0, 120, 255, 0.3) !important;
+        font-size: 12px !important;
+        font-family: system-ui, sans-serif !important;
+      }
+
+      /* === Container type labels via ::before === */
+      wc-form[data-designer-id]::before { content: "FORM" !important; }
+      wc-div[data-designer-id]::before { content: "DIV" !important; }
+      wc-tab[data-designer-id]::before { content: "TABS" !important; }
+      wc-tab-item[data-designer-id]::before { content: "TAB ITEM" !important; }
+      wc-accordion[data-designer-id]::before { content: "ACCORDION" !important; }
+      wc-dropdown[data-designer-id]::before { content: "DROPDOWN" !important; }
+      wc-sidebar[data-designer-id]::before { content: "SIDEBAR" !important; }
+      wc-sidenav[data-designer-id]::before { content: "SIDENAV" !important; }
+      wc-slideshow[data-designer-id]::before { content: "SLIDESHOW" !important; }
+      wc-split-button[data-designer-id]::before { content: "SPLIT BUTTON" !important; }
+      wc-flip-box[data-designer-id]::before { content: "FLIP BOX" !important; }
+      wc-menu[data-designer-id]::before { content: "MENU" !important; }
+      div[data-designer-id]::before { content: "DIV" !important; }
+      fieldset[data-designer-id]::before { content: "FIELDSET" !important; }
+
+      /* Label style for all containers */
+      wc-form[data-designer-id]::before, wc-div[data-designer-id]::before,
+      wc-tab[data-designer-id]::before, wc-tab-item[data-designer-id]::before,
+      wc-accordion[data-designer-id]::before, wc-dropdown[data-designer-id]::before,
+      wc-sidebar[data-designer-id]::before, wc-sidenav[data-designer-id]::before,
+      wc-slideshow[data-designer-id]::before, wc-split-button[data-designer-id]::before,
+      wc-flip-box[data-designer-id]::before, wc-menu[data-designer-id]::before,
+      div[data-designer-id]::before, fieldset[data-designer-id]::before {
+        position: absolute !important;
+        top: 6px !important;
+        left: 8px !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        color: rgba(0, 120, 255, 0.6) !important;
+        background: #ffffff !important;
+        padding: 1px 6px !important;
+        line-height: 16px !important;
+        border-radius: 2px !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+      }
+
+      /* === Non-container elements render normally === */
+      wc-input[data-designer-id], wc-select[data-designer-id],
+      wc-textarea[data-designer-id], wc-field[data-designer-id],
+      wc-fa-icon[data-designer-id], wc-icon[data-designer-id],
+      wc-image[data-designer-id], wc-loader[data-designer-id],
+      wc-save-button[data-designer-id], wc-save-split-button[data-designer-id],
+      wc-hotkey[data-designer-id], wc-code-mirror[data-designer-id],
+      wc-tabulator[data-designer-id], wc-chart[data-designer-id],
+      wc-chartjs[data-designer-id], wc-google-map[data-designer-id],
+      wc-ai-bot[data-designer-id], wc-breadcrumb[data-designer-id],
+      hr[data-designer-id] {
+        display: revert !important;
+        min-height: revert !important;
+        border: revert !important;
+        padding: revert !important;
+        background: revert !important;
+        position: relative !important;
+      }
+      wc-input[data-designer-id]::before, wc-select[data-designer-id]::before,
+      wc-textarea[data-designer-id]::before, wc-field[data-designer-id]::before,
+      wc-fa-icon[data-designer-id]::before, wc-icon[data-designer-id]::before,
+      hr[data-designer-id]::before, wc-save-button[data-designer-id]::before,
+      wc-save-split-button[data-designer-id]::before {
+        display: none !important;
+      }
+
+      /* === Prevent form interaction at design time === */
+      [data-designer-id] input,
+      [data-designer-id] select,
+      [data-designer-id] textarea,
+      [data-designer-id] button {
+        pointer-events: none !important;
+      }
+    `;
     // Component palette items
     static CONTAINERS = [
       { type: "div", label: "Div" },
@@ -11550,36 +11687,78 @@ if (!customElements.get("wc-live-designer")) {
       { type: "wc-tab-item", label: "Tab Item" },
       { type: "wc-accordion", label: "Accordion" },
       { type: "wc-dropdown", label: "Dropdown" },
+      { type: "wc-flip-box", label: "Flip Box" },
+      { type: "wc-menu", label: "Menu" },
       { type: "wc-sidebar", label: "Sidebar" },
-      { type: "wc-sidenav", label: "Sidenav" }
+      { type: "wc-sidenav", label: "Sidenav" },
+      { type: "wc-slideshow", label: "Slideshow" },
+      { type: "wc-split-button", label: "Split Button" }
     ];
     static ELEMENTS = [
-      { type: "wc-input", label: "Input", icon: "input-text" },
-      { type: "wc-select", label: "Select", icon: "list-dropdown" },
-      { type: "wc-textarea", label: "Textarea", icon: "align-left" },
-      { type: "wc-field", label: "Field (display)", icon: "tag" },
-      { type: "wc-input", label: "Checkbox", icon: "square-check", defaults: { type: "checkbox", "toggle-switch": "" } },
-      { type: "wc-input", label: "Email", icon: "envelope", defaults: { type: "email" } },
-      { type: "wc-input", label: "Phone", icon: "phone", defaults: { type: "tel" } },
-      { type: "wc-input", label: "Date", icon: "calendar", defaults: { type: "date" } },
-      { type: "wc-input", label: "Number", icon: "hashtag", defaults: { type: "number" } },
-      { type: "wc-input", label: "Currency", icon: "dollar-sign", defaults: { type: "currency" } },
-      { type: "hr", label: "Divider" },
-      { type: "wc-fa-icon", label: "Icon" },
+      // Form inputs
+      { type: "wc-input", label: "Input" },
+      { type: "wc-input", label: "Checkbox", defaults: { type: "checkbox", "toggle-switch": "" } },
+      { type: "wc-input", label: "Email", defaults: { type: "email" } },
+      { type: "wc-input", label: "Phone", defaults: { type: "tel" } },
+      { type: "wc-input", label: "Date", defaults: { type: "date" } },
+      { type: "wc-input", label: "Number", defaults: { type: "number" } },
+      { type: "wc-input", label: "Currency", defaults: { type: "currency" } },
+      { type: "wc-input", label: "Password", defaults: { type: "password" } },
+      { type: "wc-input", label: "Radio", defaults: { type: "radio", "radio-group-class": "row modern" } },
+      { type: "wc-input", label: "Range", defaults: { type: "range" } },
+      { type: "wc-select", label: "Select" },
+      { type: "wc-textarea", label: "Textarea" },
+      // Display
+      { type: "wc-field", label: "Field (display)" },
+      { type: "wc-fa-icon", label: "FA Icon" },
+      { type: "wc-icon", label: "Icon" },
+      { type: "wc-image", label: "Image" },
+      { type: "wc-background-image", label: "Background Image" },
+      { type: "wc-contact-card", label: "Contact Card" },
+      { type: "wc-contact-chip", label: "Contact Chip" },
+      { type: "wc-article-card", label: "Article Card" },
+      // Navigation
+      { type: "wc-breadcrumb", label: "Breadcrumb" },
+      { type: "wc-breadcrumb-item", label: "Breadcrumb Item" },
+      { type: "wc-dropdown-item", label: "Dropdown Item" },
+      { type: "wc-slideshow-image", label: "Slideshow Image" },
+      { type: "wc-accordion-option", label: "Accordion Option" },
+      { type: "wc-timeline", label: "Timeline" },
+      { type: "wc-timeline-option", label: "Timeline Option" },
+      // Buttons
       { type: "wc-save-split-button", label: "Save Split Button" },
       { type: "wc-save-button", label: "Save Button" },
-      { type: "wc-hotkey", label: "Hotkey" },
-      { type: "wc-breadcrumb", label: "Breadcrumb" },
-      { type: "wc-loader", label: "Loader" },
-      { type: "wc-article-skeleton", label: "Article Skeleton" },
-      { type: "wc-table-skeleton", label: "Table Skeleton" },
-      { type: "wc-code-mirror", label: "Code Mirror" },
+      // Data
       { type: "wc-tabulator", label: "Tabulator" },
-      { type: "wc-image", label: "Image" },
-      { type: "wc-google-map", label: "Google Map" },
+      { type: "wc-tabulator-column", label: "Tabulator Column" },
       { type: "wc-chart", label: "Chart" },
       { type: "wc-chartjs", label: "ChartJS" },
-      { type: "wc-ai-bot", label: "AI Bot" }
+      // Code & editors
+      { type: "wc-code-mirror", label: "Code Mirror" },
+      // Maps & address
+      { type: "wc-google-map", label: "Google Map" },
+      { type: "wc-google-address", label: "Google Address" },
+      // Skeletons & loading
+      { type: "wc-article-skeleton", label: "Article Skeleton" },
+      { type: "wc-table-skeleton", label: "Table Skeleton" },
+      { type: "wc-card-skeleton", label: "Card Skeleton" },
+      { type: "wc-list-skeleton", label: "List Skeleton" },
+      { type: "wc-loader", label: "Loader" },
+      { type: "wc-busy-indicator", label: "Busy Indicator" },
+      // Utility
+      { type: "hr", label: "Divider" },
+      { type: "wc-hotkey", label: "Hotkey" },
+      { type: "wc-behavior", label: "Behavior" },
+      { type: "wc-event-handler", label: "Event Handler" },
+      { type: "wc-visibility-change", label: "Visibility Change" },
+      { type: "wc-emoji", label: "Emoji" },
+      { type: "wc-script", label: "Script" },
+      { type: "wc-javascript", label: "JavaScript" },
+      // Specialized
+      { type: "wc-vin-decoder", label: "VIN Decoder" },
+      { type: "wc-address-listener", label: "Address Listener" },
+      { type: "wc-ai-bot", label: "AI Bot" },
+      { type: "wc-theme-selector", label: "Theme Selector" }
     ];
     constructor() {
       super();
@@ -11644,45 +11823,68 @@ if (!customElements.get("wc-live-designer")) {
 
           <!-- Main Content -->
           <div class="flex flex-row flex-1 min-h-0">
-            <!-- Left Panel: Palette (resizable) -->
-            <div class="ld-palette flex flex-col" style="width: 220px; min-width: 160px; max-width: 400px; background: var(--surface-2); border-right: 1px solid var(--surface-5); overflow: hidden; resize: horizontal;">
-              <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate>
+            <!-- Left Panel: Palette -->
+            <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow: hidden;">
+              <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate tab-overflow="scroll">
                 <wc-tab-item class="active" label="Containers">
-                  <input class="ld-palette-search" type="search" placeholder="Filter..." style="margin: 4px; padding: 4px 8px; background: var(--surface-3); color: var(--text-1); border: 1px solid var(--surface-5); border-radius: 4px; font-size: 11px;" />
-                  <div class="flex flex-col gap-1 p-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
-                    ${WcLiveDesigner.CONTAINERS.map((c) => `
-                      <div class="ld-palette-item" data-type="${c.type}" draggable="true">${c.label}</div>
-                    `).join("")}
+                  <div class="ld-palette-tab-content">
+                    <input class="ld-palette-search" type="search" placeholder="Filter..." />
+                    <div class="ld-palette-scroll">
+                      ${WcLiveDesigner.CONTAINERS.map((c) => `
+                        <div class="ld-palette-item" data-type="${c.type}" draggable="true">${c.label}</div>
+                      `).join("")}
+                    </div>
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Elements">
-                  <input class="ld-palette-search" type="search" placeholder="Filter..." style="margin: 4px; padding: 4px 8px; background: var(--surface-3); color: var(--text-1); border: 1px solid var(--surface-5); border-radius: 4px; font-size: 11px;" />
-                  <div class="flex flex-col gap-1 p-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
-                    ${WcLiveDesigner.ELEMENTS.map((c) => `
-                      <div class="ld-palette-item" data-type="${c.type}" ${c.defaults ? `data-defaults='${JSON.stringify(c.defaults)}'` : ""} draggable="true">${c.label}</div>
-                    `).join("")}
+                  <div class="ld-palette-tab-content">
+                    <input class="ld-palette-search" type="search" placeholder="Filter..." />
+                    <div class="ld-palette-scroll">
+                      ${WcLiveDesigner.ELEMENTS.map((c) => `
+                        <div class="ld-palette-item" data-type="${c.type}" ${c.defaults ? `data-defaults='${JSON.stringify(c.defaults)}'` : ""} draggable="true">${c.label}</div>
+                      `).join("")}
+                    </div>
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Fields">
-                  <div class="flex flex-col gap-1 p-2">
-                    <select class="ld-schema-select" style="background: var(--surface-3); color: var(--text-1); border: 1px solid var(--surface-5); border-radius: 4px; padding: 4px 8px; font-size: 11px; width: 100%;">
+                  <div class="ld-palette-tab-content">
+                    <select class="ld-schema-select" style="width: 100%; margin-bottom: 4px;">
                       <option value="">Select a schema...</option>
                     </select>
-                    <div class="ld-fields flex flex-col gap-1 overflow-y-auto" style="max-height: calc(100vh - 180px);">
-                    </div>
+                    <div class="ld-fields ld-palette-scroll"></div>
+                  </div>
+                </wc-tab-item>
+                <wc-tab-item label="Layers">
+                  <div class="ld-palette-tab-content">
+                    <div class="ld-layer-tree ld-palette-scroll"></div>
                   </div>
                 </wc-tab-item>
               </wc-tab>
             </div>
 
-            <!-- Center: Canvas -->
-            <div class="ld-canvas-area flex flex-col flex-1 items-center justify-start overflow-auto" style="background: var(--surface-1);">
-              <iframe class="ld-canvas-iframe" src="${canvasUrl}" style="background: var(--surface-1); border: none; transition: width 0.3s, height 0.3s;"></iframe>
+            <!-- Left Resize Handle -->
+            <div class="ld-resize-handle" data-resize="left" title="Drag to resize">\u22EE</div>
+
+            <!-- Center: Visual + Source tabs -->
+            <div class="ld-canvas-area flex flex-col flex-1 overflow-hidden" style="background: var(--surface-1);">
+              <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate>
+                <wc-tab-item class="active" label="Visual">
+                  <div class="ld-canvas-visual flex-1 flex items-center justify-start overflow-auto" style="height: 100%;">
+                    <iframe class="ld-canvas-iframe" src="${canvasUrl}" style="border: none; box-shadow: 0 1px 8px rgba(0,0,0,0.15); margin: 8px; transition: width 0.3s, height 0.3s;"></iframe>
+                  </div>
+                </wc-tab-item>
+                <wc-tab-item label="Source">
+                  <div class="ld-source-panel flex flex-col flex-1 min-h-0" style="height: 100%;"></div>
+                </wc-tab-item>
+              </wc-tab>
             </div>
 
-            <!-- Right Panel: Properties (resizable) -->
-            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); border-left: 1px solid var(--surface-5); overflow-y: auto; resize: horizontal; direction: rtl;">
-              <div style="direction: ltr;">
+            <!-- Right Resize Handle -->
+            <div class="ld-resize-handle" data-resize="right" title="Drag to resize">\u22EE</div>
+
+            <!-- Right Panel: Properties -->
+            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); overflow-y: auto;">
+              <div>
                 <div class="ld-props-empty p-4 text-center" style="color: var(--text-6); font-size: 12px;">
                   Select a component to edit its properties
                 </div>
@@ -11694,6 +11896,10 @@ if (!customElements.get("wc-live-designer")) {
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Breadcrumb bar -->
+          <div class="ld-breadcrumb" style="background: var(--surface-2); border-top: 1px solid var(--surface-5); padding: 4px 12px; font-size: 11px; font-family: system-ui, sans-serif; color: var(--text-6); min-height: 24px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
           </div>
         </div>
       `;
@@ -11736,6 +11942,7 @@ if (!customElements.get("wc-live-designer")) {
         .ld-palette-item:active { opacity: 0.6; }
         .ld-bp:hover { background: var(--surface-4) !important; color: var(--text-2) !important; }
         .ld-settings-btn:hover { background: var(--surface-4) !important; }
+        .ld-canvas-dragover { outline: 2px dashed #3b82f6; outline-offset: -4px; background: rgba(59, 130, 246, 0.03) !important; }
         .ld-props-panel .ld-prop-row { display: flex; flex-direction: column; gap: 2px; }
         .ld-props-panel .ld-prop-row label { font-size: 11px; color: var(--text-5); font-weight: 500; }
         .ld-props-panel .ld-prop-row input,
@@ -11744,10 +11951,71 @@ if (!customElements.get("wc-live-designer")) {
           background: var(--surface-3); color: var(--text-1); border: 1px solid var(--surface-5);
           border-radius: 4px; padding: 4px 8px; font-size: 12px; font-family: inherit;
         }
-        /* Resizable panel handles */
-        .ld-palette { overflow: hidden; }
-        .ld-palette::-webkit-resizer { background: var(--surface-5); }
-        .ld-properties::-webkit-resizer { background: var(--surface-5); }
+        /* Palette tab content \u2014 flex column, search stays fixed, items scroll */
+        .ld-palette-tab-content {
+          display: flex; flex-direction: column;
+          height: 100%; min-height: 0; overflow: hidden;
+          padding: 4px; gap: 4px;
+        }
+        .ld-palette-search {
+          flex-shrink: 0;
+          padding: 4px 8px; font-size: 11px;
+          background: var(--surface-3); color: var(--text-1);
+          border: 1px solid var(--surface-5); border-radius: 4px;
+        }
+        .ld-palette-scroll {
+          flex: 1; overflow-y: auto; min-height: 0;
+          display: flex; flex-direction: column; gap: 1px; padding: 2px 0;
+        }
+        .ld-schema-select {
+          flex-shrink: 0;
+          background: var(--surface-3); color: var(--text-1);
+          border: 1px solid var(--surface-5); border-radius: 4px;
+          padding: 4px 8px; font-size: 11px;
+        }
+
+        /* Layer tree */
+        .ld-layer-tree { font-size: 12px; }
+        .ld-layer-node {
+          display: flex; align-items: center; gap: 4px;
+          padding: 4px 4px 4px calc(8px + var(--depth, 0) * 16px);
+          cursor: pointer; border-radius: 3px; white-space: nowrap;
+          color: var(--text-3); user-select: none;
+        }
+        .ld-layer-node:hover { background: var(--surface-3); }
+        .ld-layer-node.active { background: rgba(59, 151, 227, 0.15); color: #3b97e3; }
+        .ld-layer-node .ld-layer-icon { font-size: 10px; width: 14px; text-align: center; opacity: 0.6; }
+        .ld-layer-node .ld-layer-type { font-weight: 500; }
+        .ld-layer-node .ld-layer-scope { color: var(--text-6); font-size: 10px; }
+
+        /* Breadcrumb */
+        .ld-breadcrumb a { color: var(--text-5); text-decoration: none; cursor: pointer; }
+        .ld-breadcrumb a:hover { color: #3b97e3; text-decoration: underline; }
+        .ld-breadcrumb .ld-bc-current { color: #3b97e3; font-weight: 600; }
+        .ld-breadcrumb .ld-bc-sep { color: var(--text-8); margin: 0 2px; }
+
+        /* Drag resize handles */
+        .ld-resize-handle {
+          width: 8px;
+          cursor: col-resize;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          user-select: none;
+          color: var(--text-8);
+          font-size: 14px;
+          letter-spacing: -2px;
+          transition: color 0.2s, background 0.2s;
+        }
+        .ld-resize-handle:hover {
+          color: var(--text-4);
+          background: var(--surface-4);
+        }
+        .ld-resize-handle:active {
+          color: var(--text-2);
+          background: var(--surface-5);
+        }
       `;
       this.loadStyle("wc-live-designer-style", style);
     }
@@ -11798,6 +12066,46 @@ if (!customElements.get("wc-live-designer")) {
           this._updateDeviceLabel("Responsive", `${w}px`);
         });
       });
+      this.querySelectorAll(".ld-resize-handle").forEach((handle) => {
+        let startX, startWidth, targetPanel;
+        const iframe = this.querySelector(".ld-canvas-iframe");
+        handle.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          startX = e.clientX;
+          const side = handle.dataset.resize;
+          targetPanel = side === "left" ? this.querySelector(".ld-palette") : this.querySelector(".ld-properties");
+          startWidth = targetPanel.offsetWidth;
+          iframe.style.pointerEvents = "none";
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+          const onMouseMove = (e2) => {
+            const delta = e2.clientX - startX;
+            const newWidth = side === "left" ? startWidth + delta : startWidth - delta;
+            const min = parseInt(targetPanel.style.minWidth) || 160;
+            const max = parseInt(targetPanel.style.maxWidth) || 500;
+            targetPanel.style.width = Math.max(min, Math.min(max, newWidth)) + "px";
+          };
+          const onMouseUp = () => {
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+            iframe.style.pointerEvents = "";
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+          };
+          document.addEventListener("mousemove", onMouseMove);
+          document.addEventListener("mouseup", onMouseUp);
+        });
+      });
+      const centerArea = this.querySelector(".ld-canvas-area");
+      centerArea?.addEventListener("tabchange", async (e) => {
+        const label = e.detail?.label;
+        console.log("[wc-live-designer] Tab changed to:", label);
+        if (label === "Source") {
+          await this._updateSourceView();
+        } else if (label === "Visual") {
+          await this._applySourceToCanvas();
+        }
+      });
       this.querySelectorAll(".ld-palette-search").forEach((search) => {
         search.addEventListener("input", (e) => {
           const query = e.target.value.trim().toLowerCase();
@@ -11824,32 +12132,13 @@ if (!customElements.get("wc-live-designer")) {
           const defaults = item.dataset.defaults ? JSON.parse(item.dataset.defaults) : {};
           e.dataTransfer.setData("application/json", JSON.stringify({ type, defaults }));
           e.dataTransfer.effectAllowed = "copy";
+          const ghost = document.createElement("div");
+          ghost.textContent = item.textContent;
+          ghost.style.cssText = "position:fixed;top:-100px;left:-100px;padding:6px 12px;background:#3b97e3;color:#fff;border-radius:4px;font-size:12px;font-family:system-ui,sans-serif;z-index:9999;pointer-events:none;";
+          document.body.appendChild(ghost);
+          e.dataTransfer.setDragImage(ghost, 0, 0);
+          setTimeout(() => ghost.remove(), 0);
         });
-      });
-      const canvasArea = this.querySelector(".ld-canvas-area");
-      canvasArea?.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-      });
-      canvasArea?.addEventListener("drop", (e) => {
-        e.preventDefault();
-        try {
-          const payload = JSON.parse(e.dataTransfer.getData("application/json"));
-          if (payload.type) {
-            const properties = { ...payload.defaults };
-            if (!properties["lbl-label"] && payload.type.startsWith("wc-input")) {
-              properties["lbl-label"] = "New Field";
-            }
-            this._postToCanvas("addComponent", {
-              type: payload.type,
-              parentId: null,
-              position: null,
-              properties
-            });
-          }
-        } catch (err) {
-          console.warn("[wc-live-designer] Drop error:", err);
-        }
       });
     }
     _unWireEvents() {
@@ -11917,12 +12206,17 @@ if (!customElements.get("wc-live-designer")) {
       }
     }
     // --- Schema Loading ---
+    _getApiBase() {
+      return this.getAttribute("api-base-url") || "";
+    }
     async _loadSchemaList(selectEl) {
       try {
-        const response = await fetch("/api/_schema_builder?size=100&page=1");
+        const response = await fetch(`${this._getApiBase()}/api/_schema_builder?size=100&page=1`);
         if (!response.ok) return;
         const data = await response.json();
-        const schemas = data.data || [];
+        const schemas = (data.data || []).sort(
+          (a, b) => (a.name || a.slug).localeCompare(b.name || b.slug)
+        );
         for (const schema of schemas) {
           const opt = document.createElement("option");
           opt.value = schema.slug;
@@ -11938,22 +12232,21 @@ if (!customElements.get("wc-live-designer")) {
       if (!fieldsContainer) return;
       fieldsContainer.innerHTML = '<div style="color: var(--text-6); padding: 4px;">Loading...</div>';
       try {
-        const response = await fetch(`/api/_schema_builder?size=1&page=1&filter_field=slug&filter_type=%3D&filter_value=${schemaSlug}`);
+        const response = await fetch(`${this._getApiBase()}/api/_schema_builder/slug/${schemaSlug}/json_schema`);
         if (!response.ok) {
           fieldsContainer.innerHTML = '<div style="color: var(--text-6);">Failed to load schema</div>';
           return;
         }
-        const data = await response.json();
-        const schemas = data.data || [];
-        if (schemas.length === 0) {
-          fieldsContainer.innerHTML = '<div style="color: var(--text-6);">Schema not found</div>';
-          return;
+        let responseData = await response.json();
+        let jsonSchema = responseData.result !== void 0 ? responseData.result : responseData;
+        while (typeof jsonSchema === "string") {
+          try {
+            jsonSchema = JSON.parse(jsonSchema);
+          } catch (e) {
+            break;
+          }
         }
-        const schemaRecord = schemas[0];
-        let jsonSchema;
-        try {
-          jsonSchema = typeof schemaRecord.json_schema === "string" ? JSON.parse(schemaRecord.json_schema) : schemaRecord.json_schema;
-        } catch (e) {
+        if (typeof jsonSchema === "string") {
           fieldsContainer.innerHTML = '<div style="color: var(--text-6);">Invalid schema JSON</div>';
           return;
         }
@@ -11978,6 +12271,12 @@ if (!customElements.get("wc-live-designer")) {
             const defaults = JSON.parse(item.dataset.defaults);
             e.dataTransfer.setData("application/json", JSON.stringify({ type, defaults }));
             e.dataTransfer.effectAllowed = "copy";
+            const ghost = document.createElement("div");
+            ghost.textContent = item.textContent;
+            ghost.style.cssText = "position:fixed;top:-100px;left:-100px;padding:6px 12px;background:#3b97e3;color:#fff;border-radius:4px;font-size:12px;font-family:system-ui,sans-serif;z-index:9999;pointer-events:none;";
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, 0, 0);
+            setTimeout(() => ghost.remove(), 0);
           });
           fieldsContainer.appendChild(item);
         }
@@ -12016,6 +12315,12 @@ if (!customElements.get("wc-live-designer")) {
       } else if (name.includes("phone") || name.includes("tel")) {
         defaults.type = "tel";
       } else if (prop.enum && prop.enum.length > 0) {
+        const options = prop.enum.map(
+          (v) => `<option value="${v}">${this._toProper(v)}</option>`
+        ).join("\n          ");
+        defaults.innerHTML = `<option value="">Choose...</option>
+          ${options}`;
+        defaults["data-enum"] = prop.enum.join(",");
       } else if (prop.type === "array" && prop.items?.type === "string") {
         defaults.mode = "chip";
         defaults.multiple = "";
@@ -12046,28 +12351,344 @@ if (!customElements.get("wc-live-designer")) {
             this._postToCanvas("setSampleData", { data: this._sampleData });
           }
           break;
-        case "componentSelected":
+        case "select":
           this._selectedComponent = {
             designerId: e.data.designerId,
             type: e.data.type,
             properties: e.data.properties
           };
           this._showPropertyPanel(e.data.type, e.data.properties, e.data.designerId);
+          this._updateBreadcrumb(e.data.ancestors || [], e.data.designerId, e.data.type);
+          this.querySelectorAll(".ld-layer-node.active").forEach((n) => n.classList.remove("active"));
+          const activeNode = this.querySelector(`.ld-layer-node[data-layer-id="${e.data.designerId}"]`);
+          if (activeNode) activeNode.classList.add("active");
           break;
-        case "componentDeselected":
+        case "deselect":
           this._selectedComponent = null;
           this._hidePropertyPanel();
+          this._clearBreadcrumb();
+          this.querySelectorAll(".ld-layer-node.active").forEach((n) => n.classList.remove("active"));
           break;
         case "componentAdded":
         case "componentRemoved":
+          this._updateLayerTree();
           break;
         case "treeResponse":
+          this._renderLayerTree(e.data.tree || []);
           if (this._treeCallback) {
             this._treeCallback(e.data.tree);
             this._treeCallback = null;
           }
           break;
+        case "htmlResponse":
+          if (this._htmlCallback) {
+            this._htmlCallback(e.data.html);
+            this._htmlCallback = null;
+          }
+          break;
       }
+    }
+    // --- Source View ---
+    async _updateSourceView() {
+      try {
+        const rawHTML = await this.getHTML();
+        if (!rawHTML) return;
+        const pongo2HTML = this.transformToPongo2(rawHTML);
+        const panel = this.querySelector(".ld-source-panel");
+        if (!panel) return;
+        const formattedHTML = this._formatHTML(pongo2HTML);
+        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2"></wc-code-mirror>`;
+        const editor = panel.querySelector(".ld-source-editor");
+        const waitForEditor = setInterval(() => {
+          if (editor?.editor) {
+            clearInterval(waitForEditor);
+            editor.value = formattedHTML;
+            setTimeout(() => editor.refresh?.(), 100);
+          }
+        }, 100);
+        setTimeout(() => clearInterval(waitForEditor), 5e3);
+      } catch (err) {
+        console.error("[wc-live-designer] Error updating source view:", err);
+      }
+    }
+    _formatHTML(html) {
+      const tab = "  ";
+      let indent = 0;
+      let formatted = "";
+      const inlineTags = /* @__PURE__ */ new Set(["option", "span", "label", "a", "strong", "em", "b", "i"]);
+      const maxLineLength = 100;
+      const tokens = html.replace(/>\s*</g, ">\n<").split("\n");
+      for (let token of tokens) {
+        token = token.trim();
+        if (!token) continue;
+        if (token.match(/^<\/\w/)) {
+          indent = Math.max(0, indent - 1);
+          formatted += tab.repeat(indent) + token + "\n";
+        } else if (token.match(/\/>$/)) {
+          formatted += this._formatTag(token, indent, tab, maxLineLength) + "\n";
+        } else if (token.match(/^<\w/)) {
+          formatted += this._formatTag(token, indent, tab, maxLineLength) + "\n";
+          const tagMatch = token.match(/^<(\w[\w-]*)/);
+          if (tagMatch && !inlineTags.has(tagMatch[1].toLowerCase())) {
+            if (!token.match(new RegExp(`</${tagMatch[1]}>`))) {
+              indent++;
+            }
+          }
+        } else {
+          formatted += tab.repeat(indent) + token + "\n";
+        }
+      }
+      return formatted.trim();
+    }
+    _formatTag(tag, indent, tab, maxLineLength) {
+      const match = tag.match(/^(<\/?[\w-]+)([\s\S]*?)(\/?>)$/);
+      if (!match) return tab.repeat(indent) + tag;
+      const tagOpen = match[1];
+      const attrStr = match[2].trim();
+      const tagClose = match[3];
+      if (!attrStr) return tab.repeat(indent) + tagOpen + tagClose;
+      const attrs = [];
+      const attrRegex = /([\w][\w:.-]*)(?:="([^"]*)")?/g;
+      let m;
+      while ((m = attrRegex.exec(attrStr)) !== null) {
+        attrs.push(m[2] !== void 0 ? `${m[1]}="${m[2]}"` : m[1]);
+      }
+      const singleLine = tab.repeat(indent) + tagOpen + " " + attrs.join(" ") + tagClose;
+      if (singleLine.length <= maxLineLength) {
+        return singleLine;
+      }
+      const contIndent = tab.repeat(indent + 2);
+      const lines = [];
+      let currentLine = tab.repeat(indent) + tagOpen;
+      for (const attr of attrs) {
+        const test = currentLine + " " + attr;
+        if (test.length > maxLineLength && currentLine !== tab.repeat(indent) + tagOpen) {
+          lines.push(currentLine);
+          currentLine = contIndent + attr;
+        } else {
+          currentLine += " " + attr;
+        }
+      }
+      lines.push(currentLine + tagClose);
+      return lines.join("\n");
+    }
+    async _applySourceToCanvas() {
+      const sourceEditor = this.querySelector(".ld-source-editor");
+      if (!sourceEditor) return;
+      const editedHTML = sourceEditor.value || sourceEditor.getAttribute("value") || "";
+      if (!editedHTML.trim()) return;
+      console.log("[wc-live-designer] Source \u2192 Visual sync (placeholder):", editedHTML.length, "chars");
+    }
+    // --- Form Integration ---
+    /**
+     * Get the generated content, code, and field rules for form submission.
+     * Call this before the template form submits to inject the designer's output.
+     *
+     * @param {Object} options
+     * @param {string} options.slug - Template slug (for form ID, URLs)
+     * @param {string} options.collectionName - Collection name
+     * @param {string} options.schemaSlug - Schema slug
+     * @param {string} options.routePrefix - 'x' or 'v'
+     * @param {string} options.prevTemplateSlug - List template slug
+     * @returns {Promise<{ content: string, code: string, field_rules: string }>}
+     */
+    async getFormData(options = {}) {
+      const rawHTML = await this.getHTML();
+      const formHTML = this.transformToPongo2(rawHTML);
+      const slug = options.slug || "template";
+      const collectionName = options.collectionName || slug;
+      const schemaSlug = options.schemaSlug || slug;
+      const routePrefix = options.routePrefix || "x";
+      const prevTemplateSlug = options.prevTemplateSlug || `${slug}_list`;
+      const content = `{% extends "__template_name__" %}
+
+{% block css %}
+{% endblock %}
+
+{% block pageContent %}
+<wc-article-skeleton
+  _="on load
+      WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500)
+    end">
+</wc-article-skeleton>
+
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="${this._toProper(slug)}" link="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+    <div class="flex flex-row items-center gap-3">
+      <wc-save-split-button
+        method="{{FormMethod}}"
+        form="form#${slug}"
+        hx-include="form#${slug}"
+        save-url="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
+        save-new-url="/{{Template.RoutePrefix}}/${slug}/create"
+        save-return-url="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list">
+      </wc-save-split-button>
+    </div>
+  </div>
+
+  <wc-tab class="col-1 mt-2 mb-4" animate="">
+    <wc-tab-item class="active" label="General">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        <wc-form class="col gap-3"
+          method="{{FormMethod}}"
+          id="${slug}"
+          action="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
+          hx-{{FormMethod}}="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}">
+          {% include "meta_fields" %}
+          ${formHTML}
+          <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
+        </wc-form>
+      </div>
+    </wc-tab-item>
+    <wc-tab-item label="Change Log">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        {% if RecordID != "create" %}
+        <div hx-get="/{{Template.RoutePrefix}}/change_log?collection=${collectionName}&original_id={{RecordID}}"
+             hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
+          Loading change history...
+        </div>
+        {% else %}
+        <div class="text-center p-4 text-muted">Save the record to view change history</div>
+        {% endif %}
+      </div>
+    </wc-tab-item>
+  </wc-tab>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}`;
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const code = `/**
+* Generated by wc-live-designer
+* Timestamp: ${now}
+*/
+
+function runGet() {
+  if (ctx.RecordID == "create") {
+    let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+    let record = ctx.DB.CreateNew(rdx.ConnName, rdx.DBName, schemaSlug);
+    return {record};
+  } else {
+    let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+    return {record};
+  }
+}
+
+function runPut() {
+  let id = ctx.RecordID;
+  let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
+  if (id === "") { id = ctx.RecordID; }
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
+  return {record};
+}
+
+function runPost() {
+  let id = ctx.RecordID;
+  let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
+  return {record};
+}
+
+function runDelete() {
+  ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+}`;
+      return { content, code, field_rules: "" };
+    }
+    // --- Layer Tree ---
+    _updateLayerTree() {
+      this._postToCanvas("getTree", {});
+    }
+    _renderLayerTree(tree) {
+      const container2 = this.querySelector(".ld-layer-tree");
+      if (!container2) return;
+      container2.innerHTML = "";
+      this._renderLayerNodes(container2, tree, 0);
+    }
+    _renderLayerNodes(container2, nodes, depth) {
+      const icons = {
+        "wc-form": "\u{1F4CB}",
+        "wc-input": "\u2338",
+        "wc-select": "\u25A4",
+        "wc-textarea": "\u{1F4DD}",
+        "wc-field": "\u{1F3F7}",
+        "wc-tab": "\u{1F4D1}",
+        "wc-tab-item": "\u{1F4C4}",
+        "div": "\u25A1",
+        "fieldset": "\u25A2",
+        "wc-accordion": "\u25A6",
+        "wc-dropdown": "\u25BE",
+        "wc-fa-icon": "\u2605",
+        "wc-icon": "\u2605",
+        "wc-image": "\u{1F5BC}",
+        "wc-tabulator": "\u25A6",
+        "wc-code-mirror": "\u2328",
+        "hr": "\u2015",
+        "wc-save-button": "\u{1F4BE}",
+        "wc-save-split-button": "\u{1F4BE}",
+        "wc-breadcrumb": "\u203A",
+        "wc-loader": "\u27F3",
+        "wc-hotkey": "\u2318"
+      };
+      for (const node of nodes) {
+        const row = document.createElement("div");
+        row.className = "ld-layer-node";
+        row.style.setProperty("--depth", depth);
+        row.setAttribute("data-layer-id", node.designerId);
+        if (this._selectedComponent?.designerId === node.designerId) {
+          row.classList.add("active");
+        }
+        const icon = icons[node.type] || "\u25C7";
+        const scope = node.scope ? `[${node.scope}]` : "";
+        const typeName = node.type.replace("wc-", "");
+        row.innerHTML = `
+          <span class="ld-layer-icon">${icon}</span>
+          <span class="ld-layer-type">${typeName}</span>
+          <span class="ld-layer-scope">${scope}</span>
+        `;
+        row.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this._postToCanvas("selectById", { designerId: node.designerId });
+        });
+        container2.appendChild(row);
+        if (node.children && node.children.length > 0) {
+          this._renderLayerNodes(container2, node.children, depth + 1);
+        }
+      }
+    }
+    // --- Breadcrumb ---
+    _updateBreadcrumb(ancestors, currentId, currentType) {
+      const bar = this.querySelector(".ld-breadcrumb");
+      if (!bar) return;
+      let html = "";
+      for (const anc of ancestors) {
+        const label = anc.scope ? `${anc.type}[${anc.scope}]` : anc.type;
+        const isCurrent = anc.designerId === currentId;
+        if (isCurrent) {
+          html += `<span class="ld-bc-current">${label}</span>`;
+        } else {
+          html += `<a data-select-id="${anc.designerId}">${label}</a><span class="ld-bc-sep">\u203A</span>`;
+        }
+      }
+      bar.innerHTML = html;
+      bar.querySelectorAll("a[data-select-id]").forEach((a) => {
+        a.addEventListener("click", () => {
+          this._postToCanvas("selectById", { designerId: a.dataset.selectId });
+        });
+      });
+    }
+    _clearBreadcrumb() {
+      const bar = this.querySelector(".ld-breadcrumb");
+      if (bar) bar.innerHTML = "";
     }
     // --- Property Panel ---
     _showPropertyPanel(type, properties, designerId) {
@@ -12096,16 +12717,37 @@ if (!customElements.get("wc-live-designer")) {
           options: ["text", "email", "tel", "date", "number", "currency", "checkbox", "password", "search", "url"]
         });
         commonProps.push({ name: "placeholder", label: "Placeholder", type: "text", value: properties.placeholder || "" });
-        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required || false });
-        commonProps.push({ name: "toggle-switch", label: "Toggle Switch", type: "checkbox", value: properties["toggle-switch"] != null });
+        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
+        commonProps.push({ name: "toggle-switch", label: "Toggle Switch", type: "checkbox", value: properties["toggle-switch"] != null && properties["toggle-switch"] !== false });
       } else if (type === "wc-select") {
-        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required || false });
-        commonProps.push({ name: "multiple", label: "Multiple", type: "checkbox", value: properties.multiple || false });
+        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
+        let dataSource = "enum";
+        if (properties.url) dataSource = "url";
+        else if (properties["data-lookup"]) dataSource = "lookup";
+        else if (properties.items) dataSource = "items";
+        else if (properties["data-url-template"]) dataSource = "url-template";
+        commonProps.push({
+          name: "data-source",
+          label: "Data Source",
+          type: "select",
+          value: dataSource,
+          options: ["enum", "lookup", "collection", "url", "url-template", "items"]
+        });
+        commonProps.push({ name: "placeholder-option", label: "Placeholder", type: "text", value: properties["placeholder-option"] || "Choose..." });
         commonProps.push({ name: "mode", label: "Mode", type: "select", value: properties.mode || "", options: ["", "chip"] });
-        commonProps.push({ name: "data-lookup", label: "Lookup", type: "text", value: properties["data-lookup"] || "" });
+        commonProps.push({ name: "multiple", label: "Multiple", type: "checkbox", value: properties.multiple != null && properties.multiple !== false });
+        commonProps.push({ name: "allow-dynamic", label: "Allow Dynamic", type: "checkbox", value: properties["allow-dynamic"] != null && properties["allow-dynamic"] !== false });
+        commonProps.push({ name: "data-lookup", label: "Lookup Name", type: "text", value: properties["data-lookup"] || "" });
+        commonProps.push({ name: "url", label: "URL", type: "text", value: properties.url || "" });
+        commonProps.push({ name: "display-member", label: "Display Member", type: "text", value: properties["display-member"] || "" });
+        commonProps.push({ name: "value-member", label: "Value Member", type: "text", value: properties["value-member"] || "" });
+        commonProps.push({ name: "data-url-template", label: "URL Template", type: "text", value: properties["data-url-template"] || "" });
+        commonProps.push({ name: "data-url-depends", label: "Depends On", type: "text", value: properties["data-url-depends"] || "" });
+        commonProps.push({ name: "items", label: "Items (JSON)", type: "text", value: properties.items || "" });
+        commonProps.push({ name: "data-enum", label: "Enum Values", type: "text", value: properties["data-enum"] || "" });
       } else if (type === "wc-textarea") {
         commonProps.push({ name: "rows", label: "Rows", type: "number", value: properties.rows || "4" });
-        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required || false });
+        commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
       } else if (type === "wc-field") {
         commonProps.push({ name: "label", label: "Label", type: "text", value: properties.label || "" });
         commonProps.push({ name: "value", label: "Value", type: "text", value: properties.value || "" });
@@ -12199,6 +12841,247 @@ if (!customElements.get("wc-live-designer")) {
     clear() {
       this._postToCanvas("clear", {});
       this._hidePropertyPanel();
+    }
+    /**
+     * Get raw HTML from the canvas (with editor attributes stripped).
+     * @returns {Promise<string>}
+     */
+    getHTML() {
+      return new Promise((resolve) => {
+        this._htmlCallback = resolve;
+        this._postToCanvas("getHTML", {});
+        setTimeout(() => {
+          if (this._htmlCallback) {
+            this._htmlCallback("");
+            this._htmlCallback = null;
+          }
+        }, 2e3);
+      });
+    }
+    /**
+     * Transform raw canvas HTML into Pongo2 template content.
+     * Replaces sample data values with {{ Record.field }} expressions.
+     * @param {string} rawHTML - HTML from getHTML()
+     * @returns {string} Pongo2 template content
+     */
+    transformToPongo2(rawHTML) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${rawHTML}</div>`, "text/html");
+      const root = doc.body.firstElementChild;
+      root.querySelectorAll("[data-scope]").forEach((el) => {
+        const scope = el.getAttribute("data-scope");
+        const tag = el.tagName.toLowerCase();
+        if (tag === "wc-input") {
+          const inputType = el.getAttribute("type");
+          if (inputType === "checkbox") {
+            el.removeAttribute("checked");
+            const currentAttrs = el.outerHTML;
+            el.setAttribute("data-pongo2-checked", `{% if Record.${scope} %} checked {% endif %}`);
+          } else if (inputType === "currency") {
+            el.setAttribute("value", `{{ Record.${scope}|floatformat:2 }}`);
+          } else {
+            el.setAttribute("value", `{{ Record.${scope} }}`);
+          }
+        } else if (tag === "wc-select") {
+          el.setAttribute("value", `{{ Record.${scope} }}`);
+          const lookup = el.getAttribute("data-lookup");
+          if (lookup) {
+            el.innerHTML = `<option value="">Choose...</option>
+        {% set ${scope.split(".").pop()} = Record.${scope} %}
+        {% for item in Lookups.${lookup}.item_list %}
+        <option value="{{item.value}}"{% if ${scope.split(".").pop()} == item.value %} selected{% endif %}>{{item.key}}</option>
+        {% endfor %}`;
+          }
+        } else if (tag === "wc-textarea") {
+          el.setAttribute("value", `{{ Record.${scope} }}`);
+        } else if (tag === "wc-field") {
+          el.setAttribute("value", `{{ Record.${scope} }}`);
+        } else {
+          el.setAttribute("value", `{{ Record.${scope} }}`);
+        }
+      });
+      let html = root.innerHTML;
+      html = html.replace(/data-pongo2-checked="([^"]+)"/g, (match, pongo2) => {
+        return pongo2;
+      });
+      return html;
+    }
+    /**
+     * Generate a complete _template_builder document from the current canvas state.
+     * @param {Object} options
+     * @param {string} options.name - Template display name
+     * @param {string} options.slug - Template slug
+     * @param {string} options.collectionName - MongoDB collection name
+     * @param {string} options.schemaSlug - Schema slug
+     * @param {string} [options.routePrefix='x'] - Route prefix
+     * @param {string} [options.prevTemplateSlug=''] - Previous template slug (list view)
+     * @returns {Promise<Object>} Complete _template_builder document
+     */
+    async generateTemplateDocument(options) {
+      const {
+        name,
+        slug,
+        collectionName,
+        schemaSlug,
+        routePrefix = "x",
+        prevTemplateSlug = `${slug}_list`
+      } = options;
+      const rawHTML = await this.getHTML();
+      const formHTML = this.transformToPongo2(rawHTML);
+      const content = `{% extends "__template_name__" %}
+
+{% block css %}
+{% endblock %}
+
+{% block pageContent %}
+<wc-article-skeleton
+  _="on load
+      WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500)
+    end">
+</wc-article-skeleton>
+
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="${name}" link="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+    <div class="flex flex-row items-center gap-3">
+      <wc-save-split-button
+        method="{{FormMethod}}"
+        form="form#${slug}"
+        hx-include="form#${slug}"
+        save-url="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
+        save-new-url="/{{Template.RoutePrefix}}/${slug}/create"
+        save-return-url="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list">
+      </wc-save-split-button>
+    </div>
+  </div>
+
+  <wc-tab class="col-1 mt-2 mb-4" animate="">
+    <wc-tab-item class="active" label="General">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        <wc-form class="col gap-3"
+          method="{{FormMethod}}"
+          id="${slug}"
+          action="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
+          hx-{{FormMethod}}="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}">
+          {% include "meta_fields" %}
+          ${formHTML}
+          <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
+        </wc-form>
+      </div>
+    </wc-tab-item>
+    <wc-tab-item label="Change Log">
+      <div class="col-1 gap-2 pt-2 pb-5 px-5">
+        {% if RecordID != "create" %}
+        <div hx-get="/{{Template.RoutePrefix}}/change_log?collection=${collectionName}&original_id={{RecordID}}"
+             hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
+          Loading change history...
+        </div>
+        {% else %}
+        <div class="text-center p-4 text-muted">Save the record to view change history</div>
+        {% endif %}
+      </div>
+    </wc-tab-item>
+  </wc-tab>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}`;
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const code = `/**
+* Generated by wc-live-designer
+* Timestamp: ${now}
+*/
+
+function runGet() {
+  if (ctx.RecordID == "create") {
+    let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+    let record = ctx.DB.CreateNew(rdx.ConnName, rdx.DBName, schemaSlug);
+    return {record};
+  } else {
+    let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+    return {record};
+  }
+}
+
+function runPut() {
+  let id = ctx.RecordID;
+  let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
+  if (id === "") { id = ctx.RecordID; }
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
+  return {record};
+}
+
+function runPost() {
+  let id = ctx.RecordID;
+  let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
+  id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
+  return {record};
+}
+
+function runDelete() {
+  ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+}`;
+      return {
+        name,
+        slug,
+        collection_name: collectionName,
+        schema: schemaSlug,
+        schema_slug: schemaSlug,
+        template_type: "standard",
+        screen_type: "standard",
+        route_prefix: routePrefix,
+        route_record_id: "true",
+        route_next_template_slug: "",
+        route_next_screen_slug: "",
+        route_prev_template_slug: prevTemplateSlug,
+        route_prev_screen_slug: prevTemplateSlug,
+        depend_full_request: "base",
+        depend_partial_request: "partial-base",
+        depends: ["base", "loader", "partial-base"],
+        collections: [],
+        lookups: [],
+        content,
+        code,
+        field_rules: "",
+        reference_key: collectionName,
+        record_status: "Development",
+        version_number: "0.01",
+        designed_with: "visual",
+        is_base: false,
+        is_core: false,
+        is_active: true,
+        preview_toggle: "off",
+        drag_toggle: "off",
+        created_by: "",
+        created_date: now,
+        modified_by: "",
+        modified_date: now
+      };
+    }
+    /**
+     * Save the designed template to the server via the configured API base URL.
+     * @param {Object} options - Same as generateTemplateDocument options
+     * @param {string} [endpoint='/api/update-field-by-id/_template_builder'] - API endpoint path
+     * @returns {Promise<Object>} API response
+     */
+    async save(options, endpoint = "/api/update-field-by-id/_template_builder") {
+      const doc = await this.generateTemplateDocument(options);
+      const apiBase = this._getApiBase();
+      const response = await fetch(`${apiBase}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(doc)
+      });
+      return { success: response.ok, document: doc };
     }
     _handleAttributeChange(name, newValue) {
       if (name === "theme" && this._canvasReady) {
@@ -13914,7 +14797,7 @@ customElements.define("wc-tab-item", WcTabItem);
 // src/js/components/wc-tab.js
 var WcTab = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "animate", "vertical", "contrast"];
+    return ["id", "class", "animate", "vertical", "contrast", "tab-overflow"];
   }
   constructor() {
     super();
@@ -14188,6 +15071,35 @@ var WcTab = class extends WcBaseComponent {
         overflow: initial;
         border-right: none;
       }
+      /* Tab overflow: scroll \u2014 horizontal scroll with hidden scrollbar */
+      wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+      }
+      wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      /* Tab overflow: wrap \u2014 tabs wrap to multiple lines */
+      wc-tab[tab-overflow="wrap"] .wc-tab .tab-nav {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+
+      /* Tab overflow: scroll-wrap \u2014 scroll on small widths, wrap when space allows */
+      wc-tab[tab-overflow="scroll-wrap"] .wc-tab .tab-nav {
+        flex-wrap: wrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      wc-tab[tab-overflow="scroll-wrap"] .wc-tab .tab-nav::-webkit-scrollbar {
+        display: none;
+      }
+
       wc-tab .wc-tab .tab-nav .tab-link {
         background-color: transparent;
         border: none;

@@ -92,7 +92,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcTab extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'animate', 'vertical', 'contrast'];
+    return ['id', 'class', 'animate', 'vertical', 'contrast', 'tab-overflow'];
   }
 
   constructor() {
@@ -448,6 +448,35 @@ class WcTab extends WcBaseComponent {
         overflow: initial;
         border-right: none;
       }
+      /* Tab overflow: scroll — horizontal scroll with hidden scrollbar */
+      wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+      }
+      wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      /* Tab overflow: wrap — tabs wrap to multiple lines */
+      wc-tab[tab-overflow="wrap"] .wc-tab .tab-nav {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+
+      /* Tab overflow: scroll-wrap — scroll on small widths, wrap when space allows */
+      wc-tab[tab-overflow="scroll-wrap"] .wc-tab .tab-nav {
+        flex-wrap: wrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      wc-tab[tab-overflow="scroll-wrap"] .wc-tab .tab-nav::-webkit-scrollbar {
+        display: none;
+      }
+
       wc-tab .wc-tab .tab-nav .tab-link {
         background-color: transparent;
         border: none;

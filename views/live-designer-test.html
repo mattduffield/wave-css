@@ -1,12 +1,23 @@
-<div id="page-contents" class="col-1 h-full overflow-hidden">
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Designer</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body { margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+  </style>
+</head>
+<body>
   <wc-live-designer
     canvas-url="./live-designer-canvas.html"
     api-base-url="http://localhost:8080"
     theme="theme-ocean dark">
   </wc-live-designer>
 
+  <script type="module" src="../dist/wave-css.min.js"></script>
   <script>
-    // Set sample data after the designer loads
     setTimeout(() => {
       const designer = document.querySelector('wc-live-designer');
       if (designer) {
@@ -43,4 +54,7 @@
       }
     }, 2000);
   </script>
-</div>
+
+  <wc-event-hub></wc-event-hub>
+</body>
+</html>
