@@ -11910,9 +11910,14 @@ if (!customElements.get("wc-live-designer")) {
       this._wireEvents();
       const iframe = this.querySelector(".ld-canvas-iframe");
       if (iframe) {
+        const src = iframe.dataset.src;
+        console.log("[wc-live-designer] iframe found, data-src:", src);
         setTimeout(() => {
-          iframe.src = iframe.dataset.src;
+          console.log("[wc-live-designer] setting iframe.src to:", src);
+          iframe.src = src;
         }, 500);
+      } else {
+        console.warn("[wc-live-designer] iframe NOT found after _render");
       }
       this._applyDevice(this._currentDevice);
     }

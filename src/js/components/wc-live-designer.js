@@ -430,7 +430,14 @@ if (!customElements.get('wc-live-designer')) {
       // in-flight load. Wait for DOM to settle before setting src.
       const iframe = this.querySelector('.ld-canvas-iframe');
       if (iframe) {
-        setTimeout(() => { iframe.src = iframe.dataset.src; }, 500);
+        const src = iframe.dataset.src;
+        console.log('[wc-live-designer] iframe found, data-src:', src);
+        setTimeout(() => {
+          console.log('[wc-live-designer] setting iframe.src to:', src);
+          iframe.src = src;
+        }, 500);
+      } else {
+        console.warn('[wc-live-designer] iframe NOT found after _render');
       }
 
       // Set initial responsive mode
