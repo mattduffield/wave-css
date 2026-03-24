@@ -282,6 +282,9 @@ if (!customElements.get('wc-live-designer')) {
       this._rotated = false;
 
       this._handleMessage = this._handleMessage.bind(this);
+      this._lastSourceHTML = '';
+      this._lastEditedSourceHTML = '';
+      this._sourceEditorReady = false;
     }
 
     async _render() {
@@ -644,15 +647,24 @@ if (!customElements.get('wc-live-designer')) {
         });
       });
 
-      // Visual ↔ Source tab sync — listen on the center area for bubbled tabchange events
+      // Visual ↔ Source tab sync
       const centerArea = this.querySelector('.ld-canvas-area');
       centerArea?.addEventListener('tabchange', async (e) => {
         const label = e.detail?.label;
-        console.log('[wc-live-designer] Tab changed to:', label);
         if (label === 'Source') {
+          // Clear selection and property panel when switching to Source
+          this._selectedComponent = null;
+          this._hidePropertyPanel();
+          this._clearBreadcrumb();
+          this._postToCanvas('clear-selection', {});
           await this._updateSourceView();
         } else if (label === 'Visual') {
-          await this._applySourceToCanvas();
+          // Use the last tracked value from the editor's change event
+          const editedHTML = this._lastEditedSourceHTML;
+          if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
+            this._lastSourceHTML = editedHTML;
+            await this.loadHTML(editedHTML);
+          }
         }
       });
 
@@ -1012,27 +1024,30 @@ if (!customElements.get('wc-live-designer')) {
         const rawHTML = await this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
+        const formattedHTML = this._formatHTML(pongo2HTML);
+        this._lastSourceHTML = formattedHTML;
 
         const panel = this.querySelector('.ld-source-panel');
         if (!panel) return;
 
-        // Format the HTML for readability
-        const formattedHTML = this._formatHTML(pongo2HTML);
+        // Recreate editor each time — wc-code-mirror loses its editor instance
+        // when the tab hides because _render/connectedCallback may re-trigger
+        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2" value=""></wc-code-mirror>`;
+        const cmEl = panel.querySelector('.ld-source-editor');
 
-        // Create editor via innerHTML (avoids constructor error from createElement)
-        // Set value as text content between tags — wc-code-mirror reads firstContent
-        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2"></wc-code-mirror>`;
-
-        // Wait for the editor to initialize, then set value
-        const editor = panel.querySelector('.ld-source-editor');
-        const waitForEditor = setInterval(() => {
-          if (editor?.editor) {
-            clearInterval(waitForEditor);
-            editor.value = formattedHTML;
-            setTimeout(() => editor.refresh?.(), 100);
+        const setEditorValue = () => {
+          if (cmEl.editor) {
+            cmEl.editor.setValue(formattedHTML);
+            setTimeout(() => cmEl.editor?.refresh(), 50);
+            // Track changes in the editor so we always have the latest value
+            cmEl.editor.on('change', () => {
+              this._lastEditedSourceHTML = cmEl.editor.getValue();
+            });
+          } else {
+            setTimeout(setEditorValue, 100);
           }
-        }, 100);
-        setTimeout(() => clearInterval(waitForEditor), 5000);
+        };
+        setEditorValue();
       } catch (err) {
         console.error('[wc-live-designer] Error updating source view:', err);
       }
@@ -1126,18 +1141,196 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     async _applySourceToCanvas() {
-      // Read the edited HTML from the source editor
-      const sourceEditor = this.querySelector('.ld-source-editor');
-      if (!sourceEditor) return;
+      // Read current value from wc-code-mirror using its value getter
+      const cmEl = this.querySelector('.ld-source-editor');
+      if (!cmEl) return;
 
-      // Get the current value from CodeMirror
-      const editedHTML = sourceEditor.value || sourceEditor.getAttribute('value') || '';
-      if (!editedHTML.trim()) return;
+      const html = cmEl.value; // Uses the getter: this.editor?.getValue()
+      if (!html?.trim()) return;
 
-      // TODO: Parse the Pongo2 HTML back, replace {{ Record.x }} with sample data,
-      // and re-render in the canvas. For now, this is a placeholder.
-      // Full implementation requires parsing Pongo2 expressions back to data-scope attributes.
-      console.log('[wc-live-designer] Source → Visual sync (placeholder):', editedHTML.length, 'chars');
+      // Only rebuild if the source was actually changed
+      if (html.trim() === this._lastSourceHTML?.trim()) {
+        return; // No changes — skip rebuild
+      }
+
+      // Source was edited — update stored HTML and rebuild canvas
+      this._lastSourceHTML = html;
+      await this.loadHTML(html);
+    }
+
+    /**
+     * Load HTML into the canvas — parses component tags and creates them.
+     * Handles both raw HTML (from Source tab) and Pongo2 templates (from _template_builder).
+     * Converts {{ Record.field }} expressions to data-scope + sample data.
+     *
+     * @param {string} html - HTML string with Wave CSS component tags
+     */
+    async loadHTML(html) {
+      // Clear the canvas and wait for it to complete
+      this._postToCanvas('clear', {});
+      await new Promise(r => setTimeout(r, 300));
+
+      // Parse HTML into DOM
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      const root = doc.body.firstElementChild;
+
+      if (!root) return;
+
+      // Walk the DOM tree and create components
+      await this._loadChildren(root, null);
+    }
+
+    async _loadChildren(parentEl, parentDesignerId) {
+      for (const child of parentEl.children) {
+        const tag = child.tagName.toLowerCase();
+
+        // Skip non-component elements (text nodes, labels, etc.)
+        // Only process known Wave CSS components and HTML containers
+        if (!this._isDesignerComponent(tag)) continue;
+
+        // Extract properties from attributes
+        const properties = {};
+        for (const attr of child.attributes) {
+          const name = attr.name;
+          // Skip style and Wave CSS internal attributes
+          if (name === 'style' || name === 'data-wc-id') continue;
+          if (name === 'class') {
+            const cls = attr.value.replace(/\bcontents\b/g, '').trim();
+            if (cls) properties.css = cls;
+            continue;
+          }
+
+          let value = attr.value;
+
+          // Convert Pongo2 expressions to data-scope
+          const pongo2Match = value.match(/\{\{\s*Record\.(\S+)\s*\}\}/);
+          if (pongo2Match) {
+            const fieldName = pongo2Match[1];
+            properties.scope = fieldName;
+            // Replace with sample data if available
+            const sampleValue = this._getSampleValue(fieldName);
+            if (sampleValue !== undefined && sampleValue !== '') {
+              value = String(sampleValue);
+            }
+          }
+
+          // Also check for floatformat filter: {{ Record.field|floatformat:2 }}
+          const floatMatch = value.match(/\{\{\s*Record\.(\S+)\|floatformat:\d+\s*\}\}/);
+          if (floatMatch) {
+            properties.scope = floatMatch[1];
+            const sampleValue = this._getSampleValue(floatMatch[1]);
+            if (sampleValue !== undefined) value = String(sampleValue);
+          }
+
+          // Convert Pongo2 conditional checked: {% if Record.field %} checked {% endif %}
+          if (name === 'checked' || value.includes('{% if Record.')) {
+            // This is a boolean binding — skip the Pongo2, set scope
+            const boolMatch = value.match(/Record\.(\S+)/);
+            if (boolMatch) {
+              properties.scope = boolMatch[1];
+              const sampleValue = this._getSampleValue(boolMatch[1]);
+              if (sampleValue) properties.checked = '';
+            }
+            continue;
+          }
+
+          // Skip Pongo2 template tags that aren't values
+          if (value.includes('{%') || value.includes('{{')) continue;
+
+          if (value === '') {
+            properties[name] = '';
+          } else {
+            properties[name] = value;
+          }
+        }
+
+        // Extract data-scope if explicitly set
+        if (child.hasAttribute('data-scope')) {
+          properties.scope = child.getAttribute('data-scope');
+        }
+
+        // For wc-select with options, extract innerHTML
+        if (tag === 'wc-select' && child.children.length > 0) {
+          const options = [];
+          for (const opt of child.querySelectorAll('option')) {
+            // Skip Pongo2 loop options
+            if (opt.textContent.includes('{{')) continue;
+            options.push(opt.outerHTML);
+          }
+          if (options.length > 0) {
+            properties.innerHTML = options.join('\n');
+          }
+        }
+
+        // For wc-input with type="radio" and option children
+        if (tag === 'wc-input' && child.querySelectorAll('option').length > 0) {
+          const options = [];
+          for (const opt of child.querySelectorAll('option')) {
+            if (opt.textContent.includes('{{')) continue;
+            options.push(opt.outerHTML);
+          }
+          if (options.length > 0) {
+            properties.innerHTML = options.join('\n');
+          }
+        }
+
+        // Determine the component type
+        const type = tag;
+        const isContainer = [
+          'div', 'fieldset', 'wc-form', 'wc-tab', 'wc-tab-item',
+          'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
+          'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
+        ].includes(type);
+
+        // Send to iframe
+        this._postToCanvas('addComponent', {
+          type,
+          parentId: parentDesignerId,
+          position: null,
+          properties,
+        });
+
+        // Wait for component to be created
+        await new Promise(r => setTimeout(r, 150));
+
+        // If container, get its designerId and recurse into children
+        if (isContainer && child.children.length > 0) {
+          // Get the latest tree to find the designerId of the just-created component
+          const tree = await this.getTree();
+          const lastComponent = this._findLastComponentInTree(tree, type);
+          if (lastComponent) {
+            await this._loadChildren(child, lastComponent.designerId);
+          }
+        }
+      }
+
+      // Refresh layer tree
+      this._updateLayerTree();
+    }
+
+    _isDesignerComponent(tag) {
+      if (tag.startsWith('wc-')) return true;
+      if (['div', 'fieldset', 'hr'].includes(tag)) return true;
+      return false;
+    }
+
+    _getSampleValue(fieldName) {
+      if (!this._sampleData || !fieldName) return undefined;
+      return fieldName.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : undefined, this._sampleData);
+    }
+
+    _findLastComponentInTree(tree, type) {
+      // Walk the tree depth-first and find the last component matching the type
+      let found = null;
+      function walk(nodes) {
+        for (const node of nodes) {
+          if (node.type === type) found = node;
+          if (node.children) walk(node.children);
+        }
+      }
+      walk(tree);
+      return found;
     }
 
     // --- Form Integration ---
@@ -1472,7 +1665,9 @@ function runDelete() {
 
         // Wire change events
         const input = row.querySelector('[data-prop]');
-        input?.addEventListener('change', () => {
+        // Use 'input' for text fields (fires on every keystroke) and 'change' for selects/checkboxes
+        const eventType = (input?.type === 'checkbox' || input?.tagName === 'SELECT') ? 'change' : 'input';
+        input?.addEventListener(eventType, () => {
           const val = input.type === 'checkbox' ? input.checked : input.value;
           this._postToCanvas('updateProperty', {
             designerId,

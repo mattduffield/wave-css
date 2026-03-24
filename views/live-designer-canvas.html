@@ -746,26 +746,30 @@
         const entry = componentRegistry.get(designerId);
         if (!entry) continue;
 
-        // Collect the element's own attributes (excluding designer internals)
+        // Build attributes from entry.properties (source of truth)
+        // NOT from DOM attributes (which get polluted by component internals)
         const attrs = [];
-        for (const attr of child.attributes) {
-          const name = attr.name;
-          // Skip designer-specific attributes
-          if (name === 'data-designer-id' || name === 'data-designer-container' ||
-              name === 'data-designer-label' || name === 'data-designer-label-badge' ||
-              name === 'style') continue;
-          // Skip the 'contents' class
-          if (name === 'class') {
-            const cls = attr.value.replace(/\bcontents\b/g, '')
-              .replace(/\bdesigner-selected\b/g, '')
-              .replace(/\bdrop-target\b/g, '').trim();
-            if (cls) attrs.push(`class="${cls}"`);
-            continue;
-          }
-          if (attr.value === '') {
-            attrs.push(name);
-          } else {
-            attrs.push(`${name}="${attr.value}"`);
+        const skipProps = new Set(['scope', 'css', 'content', 'innerHTML']);
+
+        // Add css as class if set
+        if (entry.properties.css) {
+          attrs.push(`class="${entry.properties.css}"`);
+        }
+
+        // Add data-scope
+        const scope = entry.properties.scope || child.getAttribute('data-scope');
+        if (scope) {
+          attrs.push(`data-scope="${scope}"`);
+        }
+
+        // Add all other stored properties as attributes
+        for (const [key, value] of Object.entries(entry.properties)) {
+          if (skipProps.has(key)) continue;
+          if (key.startsWith('data-designer') || key === 'data-wc-id') continue;
+          if (value === '' || value === true) {
+            attrs.push(key);
+          } else if (value !== false && value != null) {
+            attrs.push(`${key}="${value}"`);
           }
         }
 
@@ -829,6 +833,9 @@
           if (e.data.designerId && componentRegistry.has(e.data.designerId)) {
             selectComponent(e.data.designerId);
           }
+          break;
+        case 'clear-selection':
+          deselectAll();
           break;
         case 'setPreviewMode':
           if (e.data.enabled) {

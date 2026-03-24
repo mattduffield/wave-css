@@ -11769,6 +11769,9 @@ if (!customElements.get("wc-live-designer")) {
       this._currentZoom = "fit";
       this._rotated = false;
       this._handleMessage = this._handleMessage.bind(this);
+      this._lastSourceHTML = "";
+      this._lastEditedSourceHTML = "";
+      this._sourceEditorReady = false;
     }
     async _render() {
       this.classList.add("contents");
@@ -12099,11 +12102,18 @@ if (!customElements.get("wc-live-designer")) {
       const centerArea = this.querySelector(".ld-canvas-area");
       centerArea?.addEventListener("tabchange", async (e) => {
         const label = e.detail?.label;
-        console.log("[wc-live-designer] Tab changed to:", label);
         if (label === "Source") {
+          this._selectedComponent = null;
+          this._hidePropertyPanel();
+          this._clearBreadcrumb();
+          this._postToCanvas("clear-selection", {});
           await this._updateSourceView();
         } else if (label === "Visual") {
-          await this._applySourceToCanvas();
+          const editedHTML = this._lastEditedSourceHTML;
+          if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
+            this._lastSourceHTML = editedHTML;
+            await this.loadHTML(editedHTML);
+          }
         }
       });
       this.querySelectorAll(".ld-palette-search").forEach((search) => {
@@ -12394,19 +12404,24 @@ if (!customElements.get("wc-live-designer")) {
         const rawHTML = await this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
+        const formattedHTML = this._formatHTML(pongo2HTML);
+        this._lastSourceHTML = formattedHTML;
         const panel = this.querySelector(".ld-source-panel");
         if (!panel) return;
-        const formattedHTML = this._formatHTML(pongo2HTML);
-        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2"></wc-code-mirror>`;
-        const editor = panel.querySelector(".ld-source-editor");
-        const waitForEditor = setInterval(() => {
-          if (editor?.editor) {
-            clearInterval(waitForEditor);
-            editor.value = formattedHTML;
-            setTimeout(() => editor.refresh?.(), 100);
+        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2" value=""></wc-code-mirror>`;
+        const cmEl = panel.querySelector(".ld-source-editor");
+        const setEditorValue = () => {
+          if (cmEl.editor) {
+            cmEl.editor.setValue(formattedHTML);
+            setTimeout(() => cmEl.editor?.refresh(), 50);
+            cmEl.editor.on("change", () => {
+              this._lastEditedSourceHTML = cmEl.editor.getValue();
+            });
+          } else {
+            setTimeout(setEditorValue, 100);
           }
-        }, 100);
-        setTimeout(() => clearInterval(waitForEditor), 5e3);
+        };
+        setEditorValue();
       } catch (err) {
         console.error("[wc-live-designer] Error updating source view:", err);
       }
@@ -12473,11 +12488,152 @@ if (!customElements.get("wc-live-designer")) {
       return lines.join("\n");
     }
     async _applySourceToCanvas() {
-      const sourceEditor = this.querySelector(".ld-source-editor");
-      if (!sourceEditor) return;
-      const editedHTML = sourceEditor.value || sourceEditor.getAttribute("value") || "";
-      if (!editedHTML.trim()) return;
-      console.log("[wc-live-designer] Source \u2192 Visual sync (placeholder):", editedHTML.length, "chars");
+      const cmEl = this.querySelector(".ld-source-editor");
+      if (!cmEl) return;
+      const html = cmEl.value;
+      if (!html?.trim()) return;
+      if (html.trim() === this._lastSourceHTML?.trim()) {
+        return;
+      }
+      this._lastSourceHTML = html;
+      await this.loadHTML(html);
+    }
+    /**
+     * Load HTML into the canvas — parses component tags and creates them.
+     * Handles both raw HTML (from Source tab) and Pongo2 templates (from _template_builder).
+     * Converts {{ Record.field }} expressions to data-scope + sample data.
+     *
+     * @param {string} html - HTML string with Wave CSS component tags
+     */
+    async loadHTML(html) {
+      this._postToCanvas("clear", {});
+      await new Promise((r) => setTimeout(r, 300));
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+      const root = doc.body.firstElementChild;
+      if (!root) return;
+      await this._loadChildren(root, null);
+    }
+    async _loadChildren(parentEl, parentDesignerId) {
+      for (const child of parentEl.children) {
+        const tag = child.tagName.toLowerCase();
+        if (!this._isDesignerComponent(tag)) continue;
+        const properties = {};
+        for (const attr of child.attributes) {
+          const name = attr.name;
+          if (name === "style" || name === "data-wc-id") continue;
+          if (name === "class") {
+            const cls = attr.value.replace(/\bcontents\b/g, "").trim();
+            if (cls) properties.css = cls;
+            continue;
+          }
+          let value = attr.value;
+          const pongo2Match = value.match(/\{\{\s*Record\.(\S+)\s*\}\}/);
+          if (pongo2Match) {
+            const fieldName = pongo2Match[1];
+            properties.scope = fieldName;
+            const sampleValue = this._getSampleValue(fieldName);
+            if (sampleValue !== void 0 && sampleValue !== "") {
+              value = String(sampleValue);
+            }
+          }
+          const floatMatch = value.match(/\{\{\s*Record\.(\S+)\|floatformat:\d+\s*\}\}/);
+          if (floatMatch) {
+            properties.scope = floatMatch[1];
+            const sampleValue = this._getSampleValue(floatMatch[1]);
+            if (sampleValue !== void 0) value = String(sampleValue);
+          }
+          if (name === "checked" || value.includes("{% if Record.")) {
+            const boolMatch = value.match(/Record\.(\S+)/);
+            if (boolMatch) {
+              properties.scope = boolMatch[1];
+              const sampleValue = this._getSampleValue(boolMatch[1]);
+              if (sampleValue) properties.checked = "";
+            }
+            continue;
+          }
+          if (value.includes("{%") || value.includes("{{")) continue;
+          if (value === "") {
+            properties[name] = "";
+          } else {
+            properties[name] = value;
+          }
+        }
+        if (child.hasAttribute("data-scope")) {
+          properties.scope = child.getAttribute("data-scope");
+        }
+        if (tag === "wc-select" && child.children.length > 0) {
+          const options = [];
+          for (const opt of child.querySelectorAll("option")) {
+            if (opt.textContent.includes("{{")) continue;
+            options.push(opt.outerHTML);
+          }
+          if (options.length > 0) {
+            properties.innerHTML = options.join("\n");
+          }
+        }
+        if (tag === "wc-input" && child.querySelectorAll("option").length > 0) {
+          const options = [];
+          for (const opt of child.querySelectorAll("option")) {
+            if (opt.textContent.includes("{{")) continue;
+            options.push(opt.outerHTML);
+          }
+          if (options.length > 0) {
+            properties.innerHTML = options.join("\n");
+          }
+        }
+        const type = tag;
+        const isContainer = [
+          "div",
+          "fieldset",
+          "wc-form",
+          "wc-tab",
+          "wc-tab-item",
+          "wc-accordion",
+          "wc-dropdown",
+          "wc-flip-box",
+          "wc-menu",
+          "wc-sidebar",
+          "wc-sidenav",
+          "wc-slideshow",
+          "wc-split-button"
+        ].includes(type);
+        this._postToCanvas("addComponent", {
+          type,
+          parentId: parentDesignerId,
+          position: null,
+          properties
+        });
+        await new Promise((r) => setTimeout(r, 150));
+        if (isContainer && child.children.length > 0) {
+          const tree = await this.getTree();
+          const lastComponent = this._findLastComponentInTree(tree, type);
+          if (lastComponent) {
+            await this._loadChildren(child, lastComponent.designerId);
+          }
+        }
+      }
+      this._updateLayerTree();
+    }
+    _isDesignerComponent(tag) {
+      if (tag.startsWith("wc-")) return true;
+      if (["div", "fieldset", "hr"].includes(tag)) return true;
+      return false;
+    }
+    _getSampleValue(fieldName) {
+      if (!this._sampleData || !fieldName) return void 0;
+      return fieldName.split(".").reduce((o, k) => o && o[k] !== void 0 ? o[k] : void 0, this._sampleData);
+    }
+    _findLastComponentInTree(tree, type) {
+      let found = null;
+      function walk(nodes) {
+        for (const node of nodes) {
+          if (node.type === type) found = node;
+          if (node.children) walk(node.children);
+        }
+      }
+      walk(tree);
+      return found;
     }
     // --- Form Integration ---
     /**
@@ -12794,7 +12950,8 @@ function runDelete() {
           `;
         }
         const input2 = row.querySelector("[data-prop]");
-        input2?.addEventListener("change", () => {
+        const eventType = input2?.type === "checkbox" || input2?.tagName === "SELECT" ? "change" : "input";
+        input2?.addEventListener(eventType, () => {
           const val = input2.type === "checkbox" ? input2.checked : input2.value;
           this._postToCanvas("updateProperty", {
             designerId,
