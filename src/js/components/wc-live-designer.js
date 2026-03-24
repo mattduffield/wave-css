@@ -388,7 +388,7 @@ if (!customElements.get('wc-live-designer')) {
               <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate>
                 <wc-tab-item class="active" label="Visual">
                   <div class="ld-canvas-visual flex-1 flex items-center justify-start overflow-auto" style="height: 100%;">
-                    <iframe class="ld-canvas-iframe" src="${canvasUrl}" style="border: none; box-shadow: 0 1px 8px rgba(0,0,0,0.15); margin: 8px; transition: width 0.3s, height 0.3s;"></iframe>
+                    <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; box-shadow: 0 1px 8px rgba(0,0,0,0.15); margin: 8px; transition: width 0.3s, height 0.3s;"></iframe>
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Source">
@@ -424,6 +424,26 @@ if (!customElements.get('wc-live-designer')) {
 
       this._applyStyle();
       this._wireEvents();
+
+      // Defer iframe load until the component is visible — if it's inside a
+      // hidden tab, the browser cancels the request. Use IntersectionObserver
+      // to detect when the component becomes visible, then set the iframe src.
+      const iframe = this.querySelector('.ld-canvas-iframe');
+      if (iframe) {
+        const src = iframe.dataset.src;
+        if (iframe.offsetParent !== null) {
+          // Already visible — load immediately
+          iframe.src = src;
+        } else {
+          const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+              iframe.src = src;
+              observer.disconnect();
+            }
+          });
+          observer.observe(iframe);
+        }
+      }
 
       // Set initial responsive mode
       this._applyDevice(this._currentDevice);
