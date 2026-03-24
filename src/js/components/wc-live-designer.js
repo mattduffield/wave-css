@@ -288,6 +288,11 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     async _render() {
+      // Guard against multiple renders — HTMX insertion and wc-tab-item
+      // reparenting can trigger connectedCallback multiple times.
+      if (this._rendered) return;
+      this._rendered = true;
+
       this.classList.add('contents');
       const canvasUrl = this.getAttribute('canvas-url') || './live-designer-canvas.html';
       const theme = this.getAttribute('theme') || 'theme-ocean dark';
