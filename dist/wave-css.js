@@ -11910,43 +11910,9 @@ if (!customElements.get("wc-live-designer")) {
       this._wireEvents();
       const iframe = this.querySelector(".ld-canvas-iframe");
       if (iframe) {
-        const src = iframe.dataset.src;
-        const loadIframe = () => {
-          if (iframe.getAttribute("src") === src) return;
-          iframe.src = src;
-        };
-        const isVisible = () => {
-          let el = iframe;
-          while (el) {
-            const style = getComputedStyle(el);
-            if (style.display === "none") return false;
-            el = el.parentElement;
-          }
-          return true;
-        };
-        if (isVisible()) {
-          loadIframe();
-        } else {
-          const onTabChange = () => {
-            setTimeout(() => {
-              if (isVisible()) {
-                cleanup();
-                loadIframe();
-              }
-            }, 50);
-          };
-          const fallbackInterval = setInterval(() => {
-            if (isVisible()) {
-              cleanup();
-              loadIframe();
-            }
-          }, 500);
-          const cleanup = () => {
-            document.removeEventListener("tabchange", onTabChange, true);
-            clearInterval(fallbackInterval);
-          };
-          document.addEventListener("tabchange", onTabChange, true);
-        }
+        setTimeout(() => {
+          iframe.src = iframe.dataset.src;
+        }, 500);
       }
       this._applyDevice(this._currentDevice);
     }

@@ -425,54 +425,12 @@ if (!customElements.get('wc-live-designer')) {
       this._applyStyle();
       this._wireEvents();
 
-      // Defer iframe load until the component is visible — if it's inside a
-      // hidden tab, the browser cancels the request.
+      // Defer iframe src — parent components (wc-tab-item) reparent children
+      // during initialization which disconnects the iframe and cancels any
+      // in-flight load. Wait for DOM to settle before setting src.
       const iframe = this.querySelector('.ld-canvas-iframe');
       if (iframe) {
-        const src = iframe.dataset.src;
-        const loadIframe = () => {
-          if (iframe.getAttribute('src') === src) return; // Already loaded
-          iframe.src = src;
-        };
-
-        // Check if visible by walking up to see if any ancestor is hidden
-        const isVisible = () => {
-          let el = iframe;
-          while (el) {
-            const style = getComputedStyle(el);
-            if (style.display === 'none') return false;
-            el = el.parentElement;
-          }
-          return true;
-        };
-
-        if (isVisible()) {
-          loadIframe();
-        } else {
-          // Listen for any tabchange event that might reveal this component
-          const onTabChange = () => {
-            setTimeout(() => {
-              if (isVisible()) {
-                cleanup();
-                loadIframe();
-              }
-            }, 50);
-          };
-          // Fallback: check periodically in case we become visible without
-          // a tabchange (e.g., page refresh with tab already selected,
-          // or parent container revealed by skeleton/animation)
-          const fallbackInterval = setInterval(() => {
-            if (isVisible()) {
-              cleanup();
-              loadIframe();
-            }
-          }, 500);
-          const cleanup = () => {
-            document.removeEventListener('tabchange', onTabChange, true);
-            clearInterval(fallbackInterval);
-          };
-          document.addEventListener('tabchange', onTabChange, true);
-        }
+        setTimeout(() => { iframe.src = iframe.dataset.src; }, 500);
       }
 
       // Set initial responsive mode
