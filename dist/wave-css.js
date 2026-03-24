@@ -12171,7 +12171,6 @@ if (!customElements.get("wc-live-designer")) {
       window.removeEventListener("message", this._handleMessage);
     }
     disconnectedCallback() {
-      this._unWireEvents();
     }
     // --- Responsive Controls ---
     _updateDeviceLabel(name, size) {

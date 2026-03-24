@@ -745,7 +745,10 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     disconnectedCallback() {
-      this._unWireEvents();
+      // Do NOT remove the message listener here — reparenting by wc-tab-item
+      // causes disconnect/reconnect, and removing the listener means we miss
+      // the canvasReady message from the iframe. The bound reference prevents
+      // duplicate listeners when addEventListener is called again.
     }
 
     // --- Responsive Controls ---
