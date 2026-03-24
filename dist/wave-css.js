@@ -12401,6 +12401,7 @@ if (!customElements.get("wc-live-designer")) {
     // --- Source View ---
     async _updateSourceView() {
       try {
+        await new Promise((r) => setTimeout(r, 50));
         const rawHTML = await this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
@@ -12442,10 +12443,13 @@ if (!customElements.get("wc-live-designer")) {
         } else if (token.match(/\/>$/)) {
           formatted += this._formatTag(token, indent, tab, maxLineLength) + "\n";
         } else if (token.match(/^<\w/)) {
-          formatted += this._formatTag(token, indent, tab, maxLineLength) + "\n";
           const tagMatch = token.match(/^<(\w[\w-]*)/);
-          if (tagMatch && !inlineTags.has(tagMatch[1].toLowerCase())) {
-            if (!token.match(new RegExp(`</${tagMatch[1]}>`))) {
+          const tagName = tagMatch ? tagMatch[1].toLowerCase() : "";
+          if (tagName && token.includes(`</${tagName}>`)) {
+            formatted += tab.repeat(indent) + token + "\n";
+          } else {
+            formatted += this._formatTag(token, indent, tab, maxLineLength) + "\n";
+            if (tagName && !inlineTags.has(tagName)) {
               indent++;
             }
           }
@@ -13028,27 +13032,85 @@ function runDelete() {
       root.querySelectorAll("[data-scope]").forEach((el) => {
         const scope = el.getAttribute("data-scope");
         const tag = el.tagName.toLowerCase();
+        const fieldName = scope.split(".").pop();
         if (tag === "wc-input") {
           const inputType = el.getAttribute("type");
           if (inputType === "checkbox") {
             el.removeAttribute("checked");
-            const currentAttrs = el.outerHTML;
             el.setAttribute("data-pongo2-checked", `{% if Record.${scope} %} checked {% endif %}`);
           } else if (inputType === "currency") {
             el.setAttribute("value", `{{ Record.${scope}|floatformat:2 }}`);
+          } else if (inputType === "radio") {
+            const lookup = el.getAttribute("data-lookup");
+            if (lookup) {
+              el.setAttribute("value", `{{Record.${scope}}}`);
+              el.innerHTML = `
+{% set ${fieldName} = coalesce(Record, "${scope}", "") %}
+{% for item in Lookups.${lookup}.item_list %}
+<option value="{{item.value}}"{% if ${fieldName} == item.value %} checked{% endif %}>{{item.key}}</option>
+{% endfor %}`;
+            } else {
+              el.setAttribute("value", `{{ Record.${scope} }}`);
+            }
           } else {
             el.setAttribute("value", `{{ Record.${scope} }}`);
           }
         } else if (tag === "wc-select") {
-          el.setAttribute("value", `{{ Record.${scope} }}`);
+          const dataSource = el.getAttribute("data-source") || "";
           const lookup = el.getAttribute("data-lookup");
-          if (lookup) {
-            el.innerHTML = `<option value="">Choose...</option>
-        {% set ${scope.split(".").pop()} = Record.${scope} %}
-        {% for item in Lookups.${lookup}.item_list %}
-        <option value="{{item.value}}"{% if ${scope.split(".").pop()} == item.value %} selected{% endif %}>{{item.key}}</option>
-        {% endfor %}`;
+          const url = el.getAttribute("url");
+          const urlTemplate = el.getAttribute("data-url-template");
+          const items = el.getAttribute("items");
+          const mode = el.getAttribute("mode");
+          const allowDynamic = el.hasAttribute("allow-dynamic");
+          const placeholder = el.getAttribute("placeholder-option") || "Choose...";
+          if (url || dataSource === "url") {
+            el.setAttribute("value", `{{ Record.${scope} }}`);
+          } else if (urlTemplate || dataSource === "url-template") {
+          } else if (lookup || dataSource === "lookup") {
+            el.removeAttribute("value");
+            el.innerHTML = `
+<option value="">${placeholder}</option>
+{% set ${fieldName} = Record.${scope} %}
+{% for item in Lookups.${lookup}.item_list %}
+<option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.key}}</option>
+{% endfor %}`;
+          } else if (dataSource === "collection") {
+            const collection = el.getAttribute("data-collection") || "";
+            const displayMember = el.getAttribute("display-member") || "name";
+            const valueMember = el.getAttribute("value-member") || "slug";
+            el.removeAttribute("value");
+            el.innerHTML = `
+<option value="">${placeholder}</option>
+{% set ${fieldName} = Record.${scope} %}
+{% for item in TemplateCollections.${collection} %}
+<option value="{{item.${valueMember}}}"{% if ${fieldName} == item.${valueMember} %} selected{% endif %}>{{item.${displayMember}}}</option>
+{% endfor %}`;
+          } else if (items || dataSource === "items") {
+            el.setAttribute("value", `{{ Record.${scope} }}`);
+          } else if (mode === "chip" && allowDynamic) {
+            el.removeAttribute("value");
+            el.innerHTML = `
+{% for tag in Record.${scope} %}
+<option value="{{tag}}" selected>{{tag}}</option>
+{% endfor %}`;
+          } else if (mode === "chip") {
+            if (lookup) {
+              el.removeAttribute("value");
+              el.innerHTML = `
+{% set ${fieldName} = Record.${scope} %}
+{% for item in Lookups.${lookup}.item_list %}
+<option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.value}}</option>
+{% endfor %}`;
+            } else {
+              el.setAttribute("value", `{{ Record.${scope} }}`);
+            }
+          } else {
+            el.setAttribute("value", `{{ Record.${scope} }}`);
           }
+          el.removeAttribute("data-source");
+          el.removeAttribute("placeholder-option");
+          el.removeAttribute("data-enum");
         } else if (tag === "wc-textarea") {
           el.setAttribute("value", `{{ Record.${scope} }}`);
         } else if (tag === "wc-field") {
@@ -13056,6 +13118,7 @@ function runDelete() {
         } else {
           el.setAttribute("value", `{{ Record.${scope} }}`);
         }
+        el.removeAttribute("data-scope");
       });
       let html = root.innerHTML;
       html = html.replace(/data-pongo2-checked="([^"]+)"/g, (match, pongo2) => {

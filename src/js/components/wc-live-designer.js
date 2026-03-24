@@ -1021,6 +1021,11 @@ if (!customElements.get('wc-live-designer')) {
 
     async _updateSourceView() {
       try {
+        // Wait for the Source tab to become visible — wc-tab propagates the
+        // active class to the inner div asynchronously via attributeChangedCallback,
+        // and CodeMirror needs a visible container to initialize properly.
+        await new Promise(r => setTimeout(r, 50));
+
         const rawHTML = await this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
@@ -1078,10 +1083,16 @@ if (!customElements.get('wc-live-designer')) {
         }
         // Opening tag
         else if (token.match(/^<\w/)) {
-          formatted += this._formatTag(token, indent, tab, maxLineLength) + '\n';
           const tagMatch = token.match(/^<(\w[\w-]*)/);
-          if (tagMatch && !inlineTags.has(tagMatch[1].toLowerCase())) {
-            if (!token.match(new RegExp(`</${tagMatch[1]}>`))) {
+          const tagName = tagMatch ? tagMatch[1].toLowerCase() : '';
+
+          // Inline tags with content + closing tag on same line (e.g. <option value="">Text</option>)
+          // Output as-is with indentation — don't run through _formatTag which mangles text content
+          if (tagName && token.includes(`</${tagName}>`)) {
+            formatted += tab.repeat(indent) + token + '\n';
+          } else {
+            formatted += this._formatTag(token, indent, tab, maxLineLength) + '\n';
+            if (tagName && !inlineTags.has(tagName)) {
               indent++;
             }
           }
@@ -1754,38 +1765,108 @@ function runDelete() {
       root.querySelectorAll('[data-scope]').forEach(el => {
         const scope = el.getAttribute('data-scope');
         const tag = el.tagName.toLowerCase();
+        const fieldName = scope.split('.').pop();
 
         if (tag === 'wc-input') {
           const inputType = el.getAttribute('type');
+
           if (inputType === 'checkbox') {
-            // Boolean binding
+            // Boolean: {% if Record.field %} checked {% endif %}
             el.removeAttribute('checked');
-            // Insert Pongo2 conditional — we'll use a marker that gets replaced
-            const currentAttrs = el.outerHTML;
             el.setAttribute('data-pongo2-checked', `{% if Record.${scope} %} checked {% endif %}`);
+
           } else if (inputType === 'currency') {
+            // Currency: {{ Record.field|floatformat:2 }}
             el.setAttribute('value', `{{ Record.${scope}|floatformat:2 }}`);
+
+          } else if (inputType === 'radio') {
+            // Radio with lookup
+            const lookup = el.getAttribute('data-lookup');
+            if (lookup) {
+              el.setAttribute('value', `{{Record.${scope}}}`);
+              el.innerHTML = `\n{% set ${fieldName} = coalesce(Record, "${scope}", "") %}\n{% for item in Lookups.${lookup}.item_list %}\n<option value="{{item.value}}"{% if ${fieldName} == item.value %} checked{% endif %}>{{item.key}}</option>\n{% endfor %}`;
+            } else {
+              el.setAttribute('value', `{{ Record.${scope} }}`);
+            }
+
           } else {
+            // Standard input: {{ Record.field }}
             el.setAttribute('value', `{{ Record.${scope} }}`);
           }
+
         } else if (tag === 'wc-select') {
-          el.setAttribute('value', `{{ Record.${scope} }}`);
-          // If it has a data-lookup, transform to Pongo2 for loop
+          // Determine data source from attributes
+          const dataSource = el.getAttribute('data-source') || '';
           const lookup = el.getAttribute('data-lookup');
-          if (lookup) {
-            el.innerHTML = `<option value="">Choose...</option>
-        {% set ${scope.split('.').pop()} = Record.${scope} %}
-        {% for item in Lookups.${lookup}.item_list %}
-        <option value="{{item.value}}"{% if ${scope.split('.').pop()} == item.value %} selected{% endif %}>{{item.key}}</option>
-        {% endfor %}`;
+          const url = el.getAttribute('url');
+          const urlTemplate = el.getAttribute('data-url-template');
+          const items = el.getAttribute('items');
+          const mode = el.getAttribute('mode');
+          const allowDynamic = el.hasAttribute('allow-dynamic');
+          const placeholder = el.getAttribute('placeholder-option') || 'Choose...';
+
+          if (url || dataSource === 'url') {
+            // Pattern 2: Collection URL — wc-select handles natively
+            el.setAttribute('value', `{{ Record.${scope} }}`);
+            // Remove sample options, keep url/display-member/value-member attributes
+
+          } else if (urlTemplate || dataSource === 'url-template') {
+            // Pattern 7: Chip + URL Template (dependent select)
+            // Keep data-url-template and data-url-depends attributes as-is
+
+          } else if (lookup || dataSource === 'lookup') {
+            // Pattern 1: Lookup — most common
+            el.removeAttribute('value');
+            el.innerHTML = `\n<option value="">${placeholder}</option>\n{% set ${fieldName} = Record.${scope} %}\n{% for item in Lookups.${lookup}.item_list %}\n<option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.key}}</option>\n{% endfor %}`;
+
+          } else if (dataSource === 'collection') {
+            // Pattern 3: Collection Loop via TemplateCollections
+            const collection = el.getAttribute('data-collection') || '';
+            const displayMember = el.getAttribute('display-member') || 'name';
+            const valueMember = el.getAttribute('value-member') || 'slug';
+            el.removeAttribute('value');
+            el.innerHTML = `\n<option value="">${placeholder}</option>\n{% set ${fieldName} = Record.${scope} %}\n{% for item in TemplateCollections.${collection} %}\n<option value="{{item.${valueMember}}}"{% if ${fieldName} == item.${valueMember} %} selected{% endif %}>{{item.${displayMember}}}</option>\n{% endfor %}`;
+
+          } else if (items || dataSource === 'items') {
+            // Pattern 5: Items JSON — keep items attribute as-is
+            el.setAttribute('value', `{{ Record.${scope} }}`);
+
+          } else if (mode === 'chip' && allowDynamic) {
+            // Pattern 6: Chip + Dynamic (tags)
+            el.removeAttribute('value');
+            el.innerHTML = `\n{% for tag in Record.${scope} %}\n<option value="{{tag}}" selected>{{tag}}</option>\n{% endfor %}`;
+
+          } else if (mode === 'chip') {
+            // Chip with lookup
+            if (lookup) {
+              el.removeAttribute('value');
+              el.innerHTML = `\n{% set ${fieldName} = Record.${scope} %}\n{% for item in Lookups.${lookup}.item_list %}\n<option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.value}}</option>\n{% endfor %}`;
+            } else {
+              el.setAttribute('value', `{{ Record.${scope} }}`);
+            }
+
+          } else {
+            // Pattern 4: Static enum — keep existing options, add value binding
+            el.setAttribute('value', `{{ Record.${scope} }}`);
           }
+
+          // Clean up designer-only attributes from output
+          el.removeAttribute('data-source');
+          el.removeAttribute('placeholder-option');
+          el.removeAttribute('data-enum');
+
         } else if (tag === 'wc-textarea') {
           el.setAttribute('value', `{{ Record.${scope} }}`);
+
         } else if (tag === 'wc-field') {
           el.setAttribute('value', `{{ Record.${scope} }}`);
+
         } else {
           el.setAttribute('value', `{{ Record.${scope} }}`);
         }
+
+        // Remove data-scope from output — it's a designer-only attribute
+        el.removeAttribute('data-scope');
       });
 
       let html = root.innerHTML;

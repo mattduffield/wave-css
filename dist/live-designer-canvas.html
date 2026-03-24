@@ -783,20 +783,12 @@
           const childHTML = extractChildren(innerEl);
           html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
         } else if (entry.type === 'wc-select' || entry.type === 'wc-input') {
-          // For select/input with options, extract only <option> children
-          const options = [];
-          child.querySelectorAll(':scope option, :scope > option').forEach(opt => {
-            // Only get direct option children, not from rendered inner select
-            if (opt.closest('[data-designer-id]') === child || opt.parentElement.tagName === 'WC-SELECT') {
-              const val = opt.getAttribute('value') || '';
-              const text = opt.textContent.trim();
-              if (val !== undefined) {
-                options.push(`<option value="${val}">${text}</option>`);
-              }
-            }
-          });
-          if (options.length > 0) {
-            html += `<${tag}${attrStr}>\n${options.join('\n')}\n</${tag}>`;
+          // Use stored innerHTML from registry (source of truth) — never
+          // query the rendered DOM, because wc-select creates an inner
+          // <select> that duplicates the original <option> children.
+          const stored = entry.properties.innerHTML;
+          if (stored) {
+            html += `<${tag}${attrStr}>\n${stored}\n</${tag}>`;
           } else {
             html += `<${tag}${attrStr}></${tag}>`;
           }
