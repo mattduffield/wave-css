@@ -453,10 +453,23 @@ if (!customElements.get('wc-live-designer')) {
           const onTabChange = () => {
             setTimeout(() => {
               if (isVisible()) {
-                document.removeEventListener('tabchange', onTabChange, true);
+                cleanup();
                 loadIframe();
               }
             }, 50);
+          };
+          // Fallback: check periodically in case we become visible without
+          // a tabchange (e.g., page refresh with tab already selected,
+          // or parent container revealed by skeleton/animation)
+          const fallbackInterval = setInterval(() => {
+            if (isVisible()) {
+              cleanup();
+              loadIframe();
+            }
+          }, 500);
+          const cleanup = () => {
+            document.removeEventListener('tabchange', onTabChange, true);
+            clearInterval(fallbackInterval);
           };
           document.addEventListener('tabchange', onTabChange, true);
         }
