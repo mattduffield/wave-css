@@ -11508,7 +11508,7 @@ if (!customElements.get("wc-page-designer")) {
 if (!customElements.get("wc-live-designer")) {
   class WcLiveDesigner extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "canvas-url", "theme", "api-base-url"];
+      return ["id", "class", "canvas-url", "theme", "api-base-url", "schema"];
     }
     static get is() {
       return "wc-live-designer";
@@ -11916,13 +11916,9 @@ if (!customElements.get("wc-live-designer")) {
       const iframe = this.querySelector(".ld-canvas-iframe");
       if (iframe) {
         const src = iframe.dataset.src;
-        console.log("[wc-live-designer] iframe found, data-src:", src);
         setTimeout(() => {
-          console.log("[wc-live-designer] setting iframe.src to:", src);
           iframe.src = src;
         }, 500);
-      } else {
-        console.warn("[wc-live-designer] iframe NOT found after _render");
       }
       this._applyDevice(this._currentDevice);
     }
@@ -12380,6 +12376,16 @@ if (!customElements.get("wc-live-designer")) {
           this._postToCanvas("setTheme", { theme });
           if (Object.keys(this._sampleData).length > 0) {
             this._postToCanvas("setSampleData", { data: this._sampleData });
+          }
+          const schemaSlug = this.getAttribute("schema");
+          if (schemaSlug) {
+            const schemaSelect = this.querySelector(".ld-schema-select");
+            if (schemaSelect) {
+              this._loadSchemaList(schemaSelect).then(() => {
+                schemaSelect.value = schemaSlug;
+                this._loadSchemaFields(schemaSlug);
+              });
+            }
           }
           break;
         case "select":

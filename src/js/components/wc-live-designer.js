@@ -14,7 +14,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-live-designer')) {
   class WcLiveDesigner extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'canvas-url', 'theme', 'api-base-url'];
+      return ['id', 'class', 'canvas-url', 'theme', 'api-base-url', 'schema'];
     }
 
     static get is() {
@@ -441,13 +441,7 @@ if (!customElements.get('wc-live-designer')) {
       const iframe = this.querySelector('.ld-canvas-iframe');
       if (iframe) {
         const src = iframe.dataset.src;
-        console.log('[wc-live-designer] iframe found, data-src:', src);
-        setTimeout(() => {
-          console.log('[wc-live-designer] setting iframe.src to:', src);
-          iframe.src = src;
-        }, 500);
-      } else {
-        console.warn('[wc-live-designer] iframe NOT found after _render');
+        setTimeout(() => { iframe.src = src; }, 500);
       }
 
       // Set initial responsive mode
@@ -1003,6 +997,18 @@ if (!customElements.get('wc-live-designer')) {
           this._postToCanvas('setTheme', { theme });
           if (Object.keys(this._sampleData).length > 0) {
             this._postToCanvas('setSampleData', { data: this._sampleData });
+          }
+          // Auto-load schema if attribute is set
+          const schemaSlug = this.getAttribute('schema');
+          if (schemaSlug) {
+            const schemaSelect = this.querySelector('.ld-schema-select');
+            if (schemaSelect) {
+              // Load schema list first, then select and load fields
+              this._loadSchemaList(schemaSelect).then(() => {
+                schemaSelect.value = schemaSlug;
+                this._loadSchemaFields(schemaSlug);
+              });
+            }
           }
           break;
 
