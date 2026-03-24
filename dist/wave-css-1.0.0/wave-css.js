@@ -12216,8 +12216,14 @@ if (!customElements.get("wc-live-designer")) {
     _applyZoom() {
       const iframe = this.querySelector(".ld-canvas-iframe");
       const canvasArea = this.querySelector(".ld-canvas-area");
+      if (!iframe || !canvasArea) return;
       if (this._currentZoom === "fit") {
         const areaRect = canvasArea.getBoundingClientRect();
+        if (areaRect.width < 50 || areaRect.height < 50) {
+          iframe.style.transform = "";
+          iframe.style.transformOrigin = "";
+          return;
+        }
         const iframeW = parseInt(iframe.style.width) || areaRect.width;
         const iframeH = parseInt(iframe.style.height) || areaRect.height;
         const scaleX = (areaRect.width - 32) / iframeW;
