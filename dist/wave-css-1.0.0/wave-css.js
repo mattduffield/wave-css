@@ -11912,19 +11912,30 @@ if (!customElements.get("wc-live-designer")) {
       if (iframe) {
         const src = iframe.dataset.src;
         const loadIframe = () => {
-          if (!iframe.src || iframe.src === "about:blank") {
-            iframe.src = src;
-          }
+          if (iframe.getAttribute("src") === src) return;
+          iframe.src = src;
         };
-        if (this.offsetWidth > 0 && this.offsetHeight > 0) {
+        const isVisible = () => {
+          let el = iframe;
+          while (el) {
+            const style = getComputedStyle(el);
+            if (style.display === "none") return false;
+            el = el.parentElement;
+          }
+          return true;
+        };
+        if (isVisible()) {
           loadIframe();
         } else {
-          const parentTabItem = this.closest("wc-tab-item");
-          if (parentTabItem) {
-            parentTabItem.addEventListener("tabchange", loadIframe, { once: true });
-          } else {
-            loadIframe();
-          }
+          const onTabChange = () => {
+            setTimeout(() => {
+              if (isVisible()) {
+                document.removeEventListener("tabchange", onTabChange, true);
+                loadIframe();
+              }
+            }, 50);
+          };
+          document.addEventListener("tabchange", onTabChange, true);
         }
       }
       this._applyDevice(this._currentDevice);

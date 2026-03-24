@@ -426,29 +426,39 @@ if (!customElements.get('wc-live-designer')) {
       this._wireEvents();
 
       // Defer iframe load until the component is visible — if it's inside a
-      // hidden tab, the browser cancels the request. IntersectionObserver
-      // doesn't work inside display:none containers, so we check visibility
-      // directly and fall back to listening for the parent tab's tabchange event.
+      // hidden tab, the browser cancels the request.
       const iframe = this.querySelector('.ld-canvas-iframe');
       if (iframe) {
         const src = iframe.dataset.src;
         const loadIframe = () => {
-          if (!iframe.src || iframe.src === 'about:blank') {
-            iframe.src = src;
-          }
+          if (iframe.getAttribute('src') === src) return; // Already loaded
+          iframe.src = src;
         };
-        // Check if already visible (not inside a hidden tab)
-        if (this.offsetWidth > 0 && this.offsetHeight > 0) {
+
+        // Check if visible by walking up to see if any ancestor is hidden
+        const isVisible = () => {
+          let el = iframe;
+          while (el) {
+            const style = getComputedStyle(el);
+            if (style.display === 'none') return false;
+            el = el.parentElement;
+          }
+          return true;
+        };
+
+        if (isVisible()) {
           loadIframe();
         } else {
-          // Listen for parent tab activation
-          const parentTabItem = this.closest('wc-tab-item');
-          if (parentTabItem) {
-            parentTabItem.addEventListener('tabchange', loadIframe, { once: true });
-          } else {
-            // No parent tab — load immediately
-            loadIframe();
-          }
+          // Listen for any tabchange event that might reveal this component
+          const onTabChange = () => {
+            setTimeout(() => {
+              if (isVisible()) {
+                document.removeEventListener('tabchange', onTabChange, true);
+                loadIframe();
+              }
+            }, 50);
+          };
+          document.addEventListener('tabchange', onTabChange, true);
         }
       }
 
