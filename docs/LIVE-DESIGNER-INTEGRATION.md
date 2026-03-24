@@ -7,7 +7,7 @@ The `wc-live-designer` replaces the `wc-code-mirror` in the Template edit view's
 ## Files Needed in Go Kart
 
 1. **`wave-css.min.js` / `wave-css.min.css`** — already loaded
-2. **`live-designer-canvas.html`** — copy from `wave-css/views/live-designer-canvas.html` to Go Kart's `static/views/` directory
+2. **`live-designer-canvas.html`** — included in the `dist/` folder alongside the other Wave CSS assets. No manual copying needed — it deploys with the dist folder.
 
 ## Usage in Template Edit View
 

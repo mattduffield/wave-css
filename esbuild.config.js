@@ -84,3 +84,14 @@ if (fs.existsSync(iconsSource)) {
   copyRecursiveSync(iconsSource, iconsTarget);
   console.log('SVG icons copied to dist/assets/icons');
 }
+
+// Copy live-designer-canvas.html to dist with adjusted paths
+const canvasSource = path.join(__dirname, 'views/live-designer-canvas.html');
+const canvasDist = path.join(__dirname, 'dist/live-designer-canvas.html');
+if (fs.existsSync(canvasSource)) {
+  let canvasHTML = fs.readFileSync(canvasSource, 'utf8');
+  // Adjust paths from views/ (../dist/) to dist/ (same directory)
+  canvasHTML = canvasHTML.replace(/\.\.\/dist\//g, './');
+  fs.writeFileSync(canvasDist, canvasHTML);
+  console.log('Live designer canvas copied to dist/live-designer-canvas.html');
+}
