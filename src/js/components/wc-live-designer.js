@@ -977,6 +977,112 @@ if (!customElements.get('wc-live-designer')) {
         .join(' ');
     }
 
+    async _generateSampleFromSchema(schemaSlug) {
+      try {
+        const response = await fetch(`${this._getApiBase()}/api/_schema_builder/slug/${schemaSlug}/json_schema`);
+        if (!response.ok) return;
+
+        let responseData = await response.json();
+        let jsonSchema = responseData.result !== undefined ? responseData.result : responseData;
+        while (typeof jsonSchema === 'string') {
+          try { jsonSchema = JSON.parse(jsonSchema); } catch (e) { break; }
+        }
+        if (!jsonSchema?.properties) return;
+
+        const sample = {};
+        for (const [name, prop] of Object.entries(jsonSchema.properties)) {
+          sample[name] = this._generateFieldValue(name, prop);
+        }
+
+        this.setSampleData(sample);
+      } catch (err) {
+        console.warn('[wc-live-designer] Could not generate sample data:', err);
+      }
+    }
+
+    _generateFieldValue(name, prop) {
+      // System/meta fields
+      if (name === '_id') return '507f1f77bcf86cd799439011';
+      if (name === 'created_by' || name === 'modified_by') return 'admin';
+      if (name === 'created_date') return '2026-01-15T10:30:00Z';
+      if (name === 'modified_date') return new Date().toISOString();
+
+      // Enum — pick the first value
+      if (prop.enum?.length > 0) return prop.enum[0];
+
+      // Boolean
+      if (prop.type === 'boolean') return true;
+
+      // Number / Integer
+      if (prop.type === 'integer') {
+        if (name.includes('age')) return 32;
+        if (name.includes('count') || name.includes('quantity')) return 5;
+        if (name.includes('version')) return 1;
+        return 42;
+      }
+      if (prop.type === 'number') {
+        if (name.includes('amount') || name.includes('price') || name.includes('cost')) return 1500.00;
+        if (name.includes('rate') || name.includes('percent')) return 7.5;
+        return 100.00;
+      }
+
+      // Array
+      if (prop.type === 'array') {
+        if (prop.items?.type === 'object' && prop.items?.properties) {
+          const item = {};
+          for (const [k, v] of Object.entries(prop.items.properties)) {
+            item[k] = this._generateFieldValue(k, v);
+          }
+          return [item, { ...item }];
+        }
+        return ['item1', 'item2'];
+      }
+
+      // Object
+      if (prop.type === 'object' && prop.properties) {
+        const obj = {};
+        for (const [k, v] of Object.entries(prop.properties)) {
+          obj[k] = this._generateFieldValue(k, v);
+        }
+        return obj;
+      }
+
+      // String — infer realistic values from field name
+      if (prop.format === 'date-time' || name.includes('date')) return '2026-03-24';
+      if (prop.format === 'email' || name.includes('email')) return 'jane.doe@example.com';
+      if (name.includes('phone') || name.includes('tel')) return '(555) 123-4567';
+      if (name.includes('url') || name.includes('website') || name.includes('link')) return 'https://example.com';
+
+      // Name fields
+      if (name === 'first_name') return 'Jane';
+      if (name === 'last_name') return 'Doe';
+      if (name === 'middle_initial' || name === 'middle_name') return 'M';
+      if (name === 'name' || name === 'full_name') return 'Jane Doe';
+      if (name === 'username') return 'janedoe';
+
+      // Address fields
+      if (name === 'street' || name.includes('address')) return '123 Main Street';
+      if (name === 'city') return 'Charlotte';
+      if (name === 'state') return 'NC';
+      if (name === 'zip' || name.includes('postal')) return '28202';
+      if (name === 'country') return 'US';
+
+      // Common fields
+      if (name === 'title') return 'Sample Title';
+      if (name === 'slug') return 'sample-title';
+      if (name === 'description' || name === 'summary') return 'This is a sample description for design-time preview.';
+      if (name === 'notes' || name === 'comments' || name === 'bio') return 'Some sample notes...';
+      if (name === 'category' || name === 'type') return 'general';
+      if (name === 'status' || name === 'record_status') return 'active';
+      if (name === 'gender') return 'female';
+      if (name === 'company' || name === 'organization') return 'Acme Corp';
+      if (name === 'department') return 'Engineering';
+      if (name === 'role' || name === 'job_title' || name === 'position') return 'Developer';
+
+      // Fallback — use the field name as title case
+      return this._toProper(name);
+    }
+
     // --- iframe Communication ---
 
     _postToCanvas(action, data = {}) {
@@ -1003,11 +1109,14 @@ if (!customElements.get('wc-live-designer')) {
           if (schemaSlug) {
             const schemaSelect = this.querySelector('.ld-schema-select');
             if (schemaSelect) {
-              // Load schema list first, then select and load fields
               this._loadSchemaList(schemaSelect).then(() => {
                 schemaSelect.value = schemaSlug;
                 this._loadSchemaFields(schemaSlug);
               });
+            }
+            // If no sample data was loaded from the API, generate from schema
+            if (Object.keys(this._sampleData).length === 0) {
+              this._generateSampleFromSchema(schemaSlug);
             }
           }
           break;
