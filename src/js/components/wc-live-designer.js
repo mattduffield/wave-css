@@ -482,7 +482,7 @@ if (!customElements.get('wc-live-designer')) {
 
     _applyStyle() {
       const style = `
-        wc-live-designer { display: contents; }
+        wc-live-designer { display: flex; flex-direction: column; flex: 1 1 0%; min-height: 0; }
         .ld-palette-item {
           padding: 6px 10px; background: var(--surface-3); border-radius: 4px;
           cursor: grab; font-size: 12px; user-select: none;
