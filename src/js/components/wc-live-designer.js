@@ -293,12 +293,17 @@ if (!customElements.get('wc-live-designer')) {
       if (this._rendered) return;
       this._rendered = true;
 
-      this.classList.add('contents');
+      // Do NOT use display:contents — this component needs to be a real layout
+      // box so that style="height:..." from the host page works correctly.
+      this.style.display = 'flex';
+      this.style.flexDirection = 'column';
+      this.style.flex = '1 1 0%';
+      this.style.minHeight = '0';
       const canvasUrl = this.getAttribute('canvas-url') || './live-designer-canvas.html';
       const theme = this.getAttribute('theme') || 'theme-ocean dark';
 
       this.innerHTML = `
-        <div class="wc-live-designer flex flex-col h-screen">
+        <div class="wc-live-designer flex flex-col h-full">
           <!-- Slim Toolbar -->
           <div class="ld-toolbar flex items-center gap-2 px-3 py-1" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-5); min-height: 32px;">
             <button class="ld-settings-btn" title="Responsive Settings" style="background: var(--surface-3); border: 1px solid var(--surface-5); border-radius: 4px; padding: 2px 8px; cursor: pointer; color: var(--text-1); font-size: 11px; display: flex; align-items: center; gap: 4px;">
