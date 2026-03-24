@@ -11911,16 +11911,20 @@ if (!customElements.get("wc-live-designer")) {
       const iframe = this.querySelector(".ld-canvas-iframe");
       if (iframe) {
         const src = iframe.dataset.src;
-        if (iframe.offsetParent !== null) {
-          iframe.src = src;
+        const loadIframe = () => {
+          if (!iframe.src || iframe.src === "about:blank") {
+            iframe.src = src;
+          }
+        };
+        if (this.offsetWidth > 0 && this.offsetHeight > 0) {
+          loadIframe();
         } else {
-          const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-              iframe.src = src;
-              observer.disconnect();
-            }
-          });
-          observer.observe(iframe);
+          const parentTabItem = this.closest("wc-tab-item");
+          if (parentTabItem) {
+            parentTabItem.addEventListener("tabchange", loadIframe, { once: true });
+          } else {
+            loadIframe();
+          }
         }
       }
       this._applyDevice(this._currentDevice);

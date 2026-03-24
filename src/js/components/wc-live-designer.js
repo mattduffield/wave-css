@@ -426,22 +426,29 @@ if (!customElements.get('wc-live-designer')) {
       this._wireEvents();
 
       // Defer iframe load until the component is visible — if it's inside a
-      // hidden tab, the browser cancels the request. Use IntersectionObserver
-      // to detect when the component becomes visible, then set the iframe src.
+      // hidden tab, the browser cancels the request. IntersectionObserver
+      // doesn't work inside display:none containers, so we check visibility
+      // directly and fall back to listening for the parent tab's tabchange event.
       const iframe = this.querySelector('.ld-canvas-iframe');
       if (iframe) {
         const src = iframe.dataset.src;
-        if (iframe.offsetParent !== null) {
-          // Already visible — load immediately
-          iframe.src = src;
+        const loadIframe = () => {
+          if (!iframe.src || iframe.src === 'about:blank') {
+            iframe.src = src;
+          }
+        };
+        // Check if already visible (not inside a hidden tab)
+        if (this.offsetWidth > 0 && this.offsetHeight > 0) {
+          loadIframe();
         } else {
-          const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-              iframe.src = src;
-              observer.disconnect();
-            }
-          });
-          observer.observe(iframe);
+          // Listen for parent tab activation
+          const parentTabItem = this.closest('wc-tab-item');
+          if (parentTabItem) {
+            parentTabItem.addEventListener('tabchange', loadIframe, { once: true });
+          } else {
+            // No parent tab — load immediately
+            loadIframe();
+          }
         }
       }
 
