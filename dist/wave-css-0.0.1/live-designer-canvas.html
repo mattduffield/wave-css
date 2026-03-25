@@ -871,6 +871,24 @@
           }
           postToParent('treeLoaded', {});
           break;
+        case 'appendTree':
+          // Add nodes to canvas without clearing — used by presets
+          function appendNodes(nodes, parentId) {
+            for (const node of nodes) {
+              const { componentType, type, designerId, children, ...properties } = node;
+              const compType = componentType || type;
+              // Don't reuse saved designerIds for presets — always generate new ones
+              const newId = addComponent(compType, parentId, null, { ...properties, type });
+              if (children && children.length > 0) {
+                appendNodes(children, newId);
+              }
+            }
+          }
+          if (e.data.tree && Array.isArray(e.data.tree)) {
+            appendNodes(e.data.tree, e.data.parentId || null);
+          }
+          postToParent('treeAppended', {});
+          break;
       }
     });
 

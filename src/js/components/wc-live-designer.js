@@ -272,6 +272,188 @@ if (!customElements.get('wc-live-designer')) {
       { type: 'wc-theme-selector', label: 'Theme Selector' },
     ];
 
+    // Preset groups — each is a mini component tree that gets appended to the canvas
+    static PRESETS = [
+      // --- Page Starters ---
+      { label: 'Standard Edit Page', category: 'page', description: 'Skeleton + breadcrumb + save + form + tabs + hotkey',
+        tree: [
+          { componentType: 'wc-article-skeleton', _: 'on load\n      call WaveHelpers.waitForThenHideAndShow(\'wc-article-skeleton .wc-article-skeleton\', \'.page-content\', 3000, 500)\n    end' },
+          { componentType: 'div', css: 'page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden', children: [
+            { componentType: 'div', css: 'flex flex-row gap-3 justify-between items-center', children: [
+              { componentType: 'wc-breadcrumb', children: [
+                { componentType: 'wc-breadcrumb-item', label: '', link: '/{{Template.RoutePrefix}}/home' },
+                { componentType: 'wc-breadcrumb-item', label: '{{Template.Name}}', link: '/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list' },
+                { componentType: 'wc-breadcrumb-item', label: '{{Record.slug}}', link: '' },
+              ]},
+              { componentType: 'div', css: 'flex flex-row items-center gap-3', children: [
+                { componentType: 'wc-save-split-button', method: '{{FormMethod}}', 'hx-include': 'form#{{Template.Slug}}',
+                  'save-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+                  'save-new-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/create',
+                  'save-return-url': '/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list' },
+              ]},
+            ]},
+            { componentType: 'wc-tab', css: 'col-1 mt-2 mb-4', animate: '', children: [
+              { componentType: 'wc-tab-item', css: 'active', label: 'General', children: [
+                { componentType: 'div', css: 'col-1 gap-2 pt-2 pb-5 px-5', children: [
+                  { componentType: 'wc-form', css: 'col gap-3', method: '{{FormMethod}}', id: '{{Template.Slug}}',
+                    action: '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+                    'hx-{{FormMethod}}': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}' },
+                ]},
+              ]},
+              { componentType: 'wc-tab-item', label: 'Change Log', children: [
+                { componentType: 'div', css: 'col-1 gap-2 pt-2 pb-5 px-5' },
+              ]},
+            ]},
+            { componentType: 'wc-hotkey', keys: 'ctrl+s', target: 'button.save-btn' },
+          ]},
+        ],
+      },
+      { label: 'Simple Form Page', category: 'page', description: 'Skeleton + breadcrumb + save + form',
+        tree: [
+          { componentType: 'wc-article-skeleton', _: 'on load\n      call WaveHelpers.waitForThenHideAndShow(\'wc-article-skeleton .wc-article-skeleton\', \'.page-content\', 3000, 500)\n    end' },
+          { componentType: 'div', css: 'page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden', children: [
+            { componentType: 'div', css: 'flex flex-row gap-3 justify-between items-center', children: [
+              { componentType: 'wc-breadcrumb', children: [
+                { componentType: 'wc-breadcrumb-item', label: '', link: '/{{Template.RoutePrefix}}/home' },
+                { componentType: 'wc-breadcrumb-item', label: '{{Template.Name}}', link: '' },
+              ]},
+              { componentType: 'div', css: 'flex flex-row items-center gap-3', children: [
+                { componentType: 'wc-save-split-button', method: '{{FormMethod}}', 'hx-include': 'form#{{Template.Slug}}',
+                  'save-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+                  'save-new-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/create',
+                  'save-return-url': '/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list' },
+              ]},
+            ]},
+            { componentType: 'wc-form', css: 'col gap-3 pt-2 pb-5 px-5', method: '{{FormMethod}}', id: '{{Template.Slug}}',
+              action: '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+              'hx-{{FormMethod}}': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}' },
+            { componentType: 'wc-hotkey', keys: 'ctrl+s', target: 'button.save-btn' },
+          ]},
+        ],
+      },
+      { label: 'List Page', category: 'page', description: 'Skeleton + breadcrumb + tabulator',
+        tree: [
+          { componentType: 'wc-article-skeleton', _: 'on load\n      call WaveHelpers.waitForThenHideAndShow(\'wc-article-skeleton .wc-article-skeleton\', \'.page-content\', 3000, 500)\n    end' },
+          { componentType: 'div', css: 'page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden', children: [
+            { componentType: 'div', css: 'flex flex-row gap-3 justify-between items-center', children: [
+              { componentType: 'wc-breadcrumb', children: [
+                { componentType: 'wc-breadcrumb-item', label: '', link: '/{{Template.RoutePrefix}}/home' },
+                { componentType: 'wc-breadcrumb-item', label: '{{Template.Name}}', link: '' },
+              ]},
+            ]},
+            { componentType: 'wc-tabulator', 'ajax-url': '/api/{{Template.CollectionName}}', pagination: '' },
+          ]},
+        ],
+      },
+      // --- Layouts ---
+      { label: '2 Column', category: 'layout', description: 'Two equal columns',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+          ]},
+        ],
+      },
+      { label: '3 Column', category: 'layout', description: 'Three equal columns',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+          ]},
+        ],
+      },
+      { label: '4 Column', category: 'layout', description: 'Four equal columns',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+            { componentType: 'div', css: 'col-1' },
+          ]},
+        ],
+      },
+      { label: 'Sidebar + Content', category: 'layout', description: 'Left sidebar with main content area',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'div', css: 'flex flex-col', style: 'width: 250px; min-width: 200px;' },
+            { componentType: 'div', css: 'col-1' },
+          ]},
+        ],
+      },
+      // --- Component Groups ---
+      { label: 'Navigation Bar', category: 'group', description: 'Breadcrumb + save button row',
+        tree: [
+          { componentType: 'div', css: 'flex flex-row gap-3 justify-between items-center', children: [
+            { componentType: 'wc-breadcrumb', children: [
+              { componentType: 'wc-breadcrumb-item', label: '', link: '/{{Template.RoutePrefix}}/home' },
+              { componentType: 'wc-breadcrumb-item', label: '{{Template.Name}}', link: '' },
+            ]},
+            { componentType: 'div', css: 'flex flex-row items-center gap-3', children: [
+              { componentType: 'wc-save-split-button', method: '{{FormMethod}}', 'hx-include': 'form#{{Template.Slug}}',
+                'save-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+                'save-new-url': '/{{Template.RoutePrefix}}/{{Template.Slug}}/create',
+                'save-return-url': '/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list' },
+            ]},
+          ]},
+        ],
+      },
+      { label: 'Tab with Change Log', category: 'group', description: 'Tab container with General + Change Log tabs',
+        tree: [
+          { componentType: 'wc-tab', css: 'col-1 mt-2 mb-4', animate: '', children: [
+            { componentType: 'wc-tab-item', css: 'active', label: 'General', children: [
+              { componentType: 'div', css: 'col-1 gap-2 pt-2 pb-5 px-5' },
+            ]},
+            { componentType: 'wc-tab-item', label: 'Change Log', children: [
+              { componentType: 'div', css: 'col-1 gap-2 pt-2 pb-5 px-5' },
+            ]},
+          ]},
+        ],
+      },
+      { label: 'Form with Meta Fields', category: 'group', description: 'wc-form configured for HTMX submission',
+        tree: [
+          { componentType: 'wc-form', css: 'col gap-3', method: '{{FormMethod}}', id: '{{Template.Slug}}',
+            action: '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}',
+            'hx-{{FormMethod}}': '/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}' },
+        ],
+      },
+      { label: 'Article Skeleton', category: 'group', description: 'Loading skeleton with transition',
+        tree: [
+          { componentType: 'wc-article-skeleton', _: 'on load\n      call WaveHelpers.waitForThenHideAndShow(\'wc-article-skeleton .wc-article-skeleton\', \'.page-content\', 3000, 500)\n    end' },
+        ],
+      },
+      // --- Form Patterns ---
+      { label: 'Name Fields', category: 'form', description: 'First, Middle Initial, Last name in a row',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'wc-input', name: 'first_name', 'lbl-label': 'First Name', required: '', scope: 'first_name' },
+            { componentType: 'wc-input', name: 'middle_initial', 'lbl-label': 'M.I.', css: 'flex flex-col', style: 'max-width: 80px;', scope: 'middle_initial' },
+            { componentType: 'wc-input', name: 'last_name', 'lbl-label': 'Last Name', required: '', scope: 'last_name' },
+          ]},
+        ],
+      },
+      { label: 'Address Block', category: 'form', description: 'Street, City, State, Zip layout',
+        tree: [
+          { componentType: 'div', css: 'col gap-2', children: [
+            { componentType: 'wc-input', name: 'street', 'lbl-label': 'Street', css: 'col-1', scope: 'street' },
+            { componentType: 'div', css: 'row gap-4', children: [
+              { componentType: 'wc-input', name: 'city', 'lbl-label': 'City', css: 'col-1', scope: 'city' },
+              { componentType: 'wc-input', name: 'state', 'lbl-label': 'State', css: 'flex flex-col', style: 'max-width: 100px;', scope: 'state' },
+              { componentType: 'wc-input', name: 'postal_code', 'lbl-label': 'Zip', css: 'flex flex-col', style: 'max-width: 120px;', scope: 'postal_code' },
+            ]},
+          ]},
+        ],
+      },
+      { label: 'Contact Fields', category: 'form', description: 'Email + phone in a row',
+        tree: [
+          { componentType: 'div', css: 'row gap-4', children: [
+            { componentType: 'wc-input', name: 'email', 'lbl-label': 'Email', type: 'email', css: 'col-1', scope: 'email' },
+            { componentType: 'wc-input', name: 'phone_number', 'lbl-label': 'Phone', type: 'tel', css: 'col-1', scope: 'phone_number' },
+          ]},
+        ],
+      },
+    ];
+
     constructor() {
       super();
       this._canvasReady = false;
@@ -382,6 +564,14 @@ if (!customElements.get('wc-live-designer')) {
                     <div class="ld-fields ld-palette-scroll"></div>
                   </div>
                 </wc-tab-item>
+                <wc-tab-item label="Presets">
+                  <div class="ld-palette-tab-content">
+                    <input class="ld-palette-search" type="search" placeholder="Filter..." />
+                    <div class="ld-presets ld-palette-scroll">
+                      ${this._buildPresetItems()}
+                    </div>
+                  </div>
+                </wc-tab-item>
                 <wc-tab-item label="Layers">
                   <div class="ld-palette-tab-content">
                     <div class="ld-layer-tree ld-palette-scroll"></div>
@@ -474,6 +664,36 @@ if (!customElements.get('wc-live-designer')) {
       return html;
     }
 
+    _buildPresetItems() {
+      const categories = { page: 'Page Starters', layout: 'Layouts', group: 'Component Groups', form: 'Form Patterns' };
+      const grouped = {};
+      for (const preset of WcLiveDesigner.PRESETS) {
+        const cat = preset.category || 'other';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(preset);
+      }
+
+      let html = '';
+      for (const [cat, label] of Object.entries(categories)) {
+        if (!grouped[cat]) continue;
+        html += `<div style="font-size: 10px; color: var(--text-6); font-weight: 600; padding: 6px 4px 2px; text-transform: uppercase; letter-spacing: 0.5px;">${label}</div>`;
+        for (let i = 0; i < grouped[cat].length; i++) {
+          const preset = grouped[cat][i];
+          const idx = WcLiveDesigner.PRESETS.indexOf(preset);
+          html += `<div class="ld-palette-item ld-preset-item" data-preset-index="${idx}" title="${preset.description || ''}" style="cursor: pointer;">${preset.label}</div>`;
+        }
+      }
+      return html;
+    }
+
+    _appendPreset(presetIndex) {
+      const preset = WcLiveDesigner.PRESETS[presetIndex];
+      if (!preset || !preset.tree) return;
+      this._postToCanvas('appendTree', { tree: preset.tree, parentId: null });
+      // Refresh layers after a delay to let components render
+      setTimeout(() => this._updateLayerTree(), 500);
+    }
+
     _applyStyle() {
       const style = `
         wc-live-designer { display: flex; flex-direction: column; flex: 1 1 0%; min-height: 0; }
@@ -483,6 +703,8 @@ if (!customElements.get('wc-live-designer')) {
         }
         .ld-palette-item:hover { background: var(--surface-4) !important; }
         .ld-palette-item:active { opacity: 0.6; }
+        .ld-preset-item { cursor: pointer !important; border-left: 3px solid var(--primary, #3b97e3); }
+        .ld-preset-item:hover { border-left-color: var(--primary-light, #5bb0f0) !important; }
         .ld-bp:hover { background: var(--surface-4) !important; color: var(--text-2) !important; }
         .ld-settings-btn:hover { background: var(--surface-4) !important; }
         .ld-canvas-dragover { outline: 2px dashed #3b82f6; outline-offset: -4px; background: rgba(59, 130, 246, 0.03) !important; }
@@ -729,6 +951,18 @@ if (!customElements.get('wc-live-designer')) {
           setTimeout(() => ghost.remove(), 0);
 
           // Keep iframe pointer-events ENABLED so it receives the drop
+        });
+      });
+
+      // Preset click handlers — click to append the preset tree to canvas
+      this.querySelectorAll('.ld-preset-item').forEach(item => {
+        // Prevent drag on presets — they use click, not drag
+        item.draggable = false;
+        item.addEventListener('click', () => {
+          const idx = parseInt(item.dataset.presetIndex);
+          if (!isNaN(idx)) {
+            this._appendPreset(idx);
+          }
         });
       });
 
@@ -1205,6 +1439,10 @@ if (!customElements.get('wc-live-designer')) {
         case 'treeLoaded':
           this._updateLayerTree();
           break;
+
+        case 'treeAppended':
+          this._updateLayerTree();
+          break;
       }
     }
 
@@ -1539,97 +1777,133 @@ if (!customElements.get('wc-live-designer')) {
 
     /**
      * Get the generated content, code, and field rules for form submission.
-     * Call this before the template form submits to inject the designer's output.
+     * Output is determined by templateType — the canvas content is always
+     * the single source of truth (no hard-coded structure injected).
      *
      * @param {Object} options
-     * @param {string} options.slug - Template slug (for form ID, URLs)
+     * @param {string} options.slug - Template slug
      * @param {string} options.collectionName - Collection name
      * @param {string} options.schemaSlug - Schema slug
      * @param {string} options.routePrefix - 'x' or 'v'
-     * @param {string} options.prevTemplateSlug - List template slug
-     * @returns {Promise<{ content: string, code: string, field_rules: string }>}
+     * @param {string} options.prevTemplateSlug - Previous (list) template slug for back navigation
+     * @param {string} options.nextTemplateSlug - Next (edit) template slug for record navigation
+     * @param {string} options.templateType - 'standard', 'fragment', 'email', 'data', 'report'
+     * @returns {Promise<{ content: string, code: string, field_rules: string, tree: string }>}
      */
     async getFormData(options = {}) {
       const rawHTML = await this.getHTML();
       const formHTML = this.transformToPongo2(rawHTML);
+      const formatted = this._formatHTML(formHTML);
 
       const slug = options.slug || 'template';
       const collectionName = options.collectionName || slug;
       const schemaSlug = options.schemaSlug || slug;
       const routePrefix = options.routePrefix || 'x';
-      const prevTemplateSlug = options.prevTemplateSlug || `${slug}_list`;
+      const prevTemplateSlug = options.prevTemplateSlug || '';
+      const nextTemplateSlug = options.nextTemplateSlug || '';
+      const templateType = options.templateType || 'standard';
 
-      // Wrap in standard template structure
-      const content = `{% extends "__template_name__" %}
+      const content = this._wrapContent(formatted, templateType);
+      const code = this._generateCode(templateType);
+
+      const tree = await this.getTree();
+      return { content, code, field_rules: '', tree: JSON.stringify(tree) };
+    }
+
+    /**
+     * Wrap canvas HTML with the appropriate boilerplate for the template type.
+     * The canvas content is never modified — only the wrapper changes.
+     */
+    _wrapContent(formHTML, templateType) {
+      switch (templateType) {
+        case 'fragment':
+          // Fragments are raw HTML — no extends, no blocks
+          return formHTML;
+
+        case 'email':
+          // Email templates are standalone HTML
+          return formHTML;
+
+        case 'data':
+          // Data templates have no HTML
+          return '';
+
+        case 'report':
+          // Reports use standard block wrapper
+          return `{% extends "__template_name__" %}
 
 {% block css %}
 {% endblock %}
 
 {% block pageContent %}
-<wc-article-skeleton
-  _="on load
-      WaveHelpers.waitForThenHideAndShow('#article-skeleton', '.page-content', 3000, 500)
-    end">
-</wc-article-skeleton>
-
-<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
-  <div class="flex flex-row gap-3 justify-between items-center">
-    <wc-breadcrumb>
-      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
-      <wc-breadcrumb-item label="${this._toProper(slug)}" link="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list"></wc-breadcrumb-item>
-      <wc-breadcrumb-item label="" link=""></wc-breadcrumb-item>
-    </wc-breadcrumb>
-    <div class="flex flex-row items-center gap-3">
-      <wc-save-split-button
-        method="{{FormMethod}}"
-        form="form#${slug}"
-        hx-include="form#${slug}"
-        save-url="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
-        save-new-url="/{{Template.RoutePrefix}}/${slug}/create"
-        save-return-url="/{{Template.RoutePrefix}}/${prevTemplateSlug}/list">
-      </wc-save-split-button>
-    </div>
-  </div>
-
-  <wc-tab class="col-1 mt-2 mb-4" animate="">
-    <wc-tab-item class="active" label="General">
-      <div class="col-1 gap-2 pt-2 pb-5 px-5">
-        <wc-form class="col gap-3"
-          method="{{FormMethod}}"
-          id="${slug}"
-          action="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}"
-          hx-{{FormMethod}}="/{{Template.RoutePrefix}}/${slug}/{{RecordID}}">
-          {% include "meta_fields" %}
-          ${formHTML}
-          <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
-        </wc-form>
-      </div>
-    </wc-tab-item>
-    <wc-tab-item label="Change Log">
-      <div class="col-1 gap-2 pt-2 pb-5 px-5">
-        {% if RecordID != "create" %}
-        <div hx-get="/{{Template.RoutePrefix}}/change_log?collection=${collectionName}&original_id={{RecordID}}"
-             hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
-          Loading change history...
-        </div>
-        {% else %}
-        <div class="text-center p-4 text-muted">Save the record to view change history</div>
-        {% endif %}
-      </div>
-    </wc-tab-item>
-  </wc-tab>
-</div>
+${formHTML}
 {% endblock %}
 
 {% block js %}
 {% endblock %}`;
 
-      // Generate code tab
+        case 'standard':
+        default:
+          // Standard templates extend base with pageContent block
+          return `{% extends "__template_name__" %}
+
+{% block css %}
+{% endblock %}
+
+{% block pageContent %}
+${formHTML}
+{% endblock %}
+
+{% block js %}
+{% endblock %}`;
+      }
+    }
+
+    /**
+     * Generate the code tab based on template type.
+     */
+    _generateCode(templateType) {
       const now = new Date().toISOString();
-      const code = `/**
-* Generated by wc-live-designer
-* Timestamp: ${now}
-*/
+      const header = `/**\n* Generated by wc-live-designer\n* Timestamp: ${now}\n*/`;
+
+      switch (templateType) {
+        case 'fragment':
+          // Fragments typically have minimal or no code
+          return `${header}
+
+function runGet() {
+  return {};
+}`;
+
+        case 'email':
+          return `${header}
+
+function runGet() {
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  return {record};
+}`;
+
+        case 'data':
+          return `${header}
+
+function runGet() {
+  return {};
+}
+
+function runPost() {
+  return {};
+}`;
+
+        case 'report':
+          return `${header}
+
+function runGet() {
+  return {};
+}`;
+
+        case 'standard':
+        default:
+          return `${header}
 
 function runGet() {
   if (ctx.RecordID == "create") {
@@ -1647,7 +1921,7 @@ function runPut() {
   let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
   id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
   if (id === "") { id = ctx.RecordID; }
-  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, id);
   ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
   return {record};
 }
@@ -1656,17 +1930,15 @@ function runPost() {
   let id = ctx.RecordID;
   let schemaSlug = rdx.AppData.SchemaBuilder && rdx.AppData.SchemaBuilder.Slug ? rdx.AppData.SchemaBuilder.Slug : rdx.AppData.Template.Schema;
   id = ctx.DB.SaveAndValidate(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID, form, schemaSlug, [], []);
-  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
+  let record = ctx.DB.FindByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, id);
   ctx.App.Session.Put(ctx.Request.Context(), "flash", "Save successful!");
-  return {record};
+  return {id, record};
 }
 
 function runDelete() {
   ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
 }`;
-
-      const tree = await this.getTree();
-      return { content, code, field_rules: '', tree: JSON.stringify(tree) };
+      }
     }
 
     // --- Layer Tree ---
