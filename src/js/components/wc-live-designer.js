@@ -1527,7 +1527,7 @@ if (!customElements.get('wc-live-designer')) {
       let found = null;
       function walk(nodes) {
         for (const node of nodes) {
-          if (node.type === type) found = node;
+          if ((node.componentType || node.type) === type) found = node;
           if (node.children) walk(node.children);
         }
       }
@@ -1695,6 +1695,7 @@ function runDelete() {
       };
 
       for (const node of nodes) {
+        const compType = node.componentType || node.type || '';
         const row = document.createElement('div');
         row.className = 'ld-layer-node';
         row.style.setProperty('--depth', depth);
@@ -1704,9 +1705,9 @@ function runDelete() {
           row.classList.add('active');
         }
 
-        const icon = icons[node.type] || '◇';
+        const icon = icons[compType] || '◇';
         const scope = node.scope ? `[${node.scope}]` : '';
-        const typeName = node.type.replace('wc-', '');
+        const typeName = compType.replace('wc-', '');
 
         row.innerHTML = `
           <span class="ld-layer-icon">${icon}</span>
