@@ -11541,133 +11541,57 @@ if (!customElements.get("wc-live-designer")) {
       { name: "Nest Hub", width: 1024, height: 600, dpr: 2, type: "other" },
       { name: "Nest Hub Max", width: 1280, height: 800, dpr: 2, type: "other" }
     ];
-    // Edit-mode CSS — injected into iframe to make containers visible
+    // Edit-mode CSS — injected into iframe for designer affordances.
+    // Components render naturally — their own CSS handles display.
+    // Designer adds: hover outlines, drop hints, subtle labels.
     static EDIT_MODE_CSS = `
-      /* === CRITICAL: Override display:contents on ALL designer elements === */
-      /* The .contents class is added by WcBaseComponent to every component */
-      [data-designer-id].contents {
-        display: block !important;
-      }
-
-      /* === Container styling === */
-      wc-form[data-designer-id],
-      wc-div[data-designer-id],
-      wc-tab[data-designer-id],
-      wc-tab-item[data-designer-id],
-      wc-accordion[data-designer-id],
-      wc-dropdown[data-designer-id],
-      wc-sidebar[data-designer-id],
-      wc-sidenav[data-designer-id],
-      wc-slideshow[data-designer-id],
-      wc-split-button[data-designer-id],
-      wc-flip-box[data-designer-id],
-      wc-menu[data-designer-id],
-      div[data-designer-id],
-      fieldset[data-designer-id] {
-        display: block !important;
-        min-height: 120px !important;
-        border: 1px dashed rgba(0, 120, 255, 0.3) !important;
-        border-radius: 4px !important;
-        padding: 28px 12px 12px 12px !important;
+      /* === All designer elements get position for selection outline === */
+      [data-designer-id] {
         position: relative !important;
-        box-sizing: border-box !important;
-        background: rgba(0, 120, 255, 0.02) !important;
       }
 
-      /* Container inner elements (like <form class="wc-form">) also need block display */
-      wc-form[data-designer-id] > .wc-form,
-      wc-div[data-designer-id] > .wc-div {
+      /* === display:contents override \u2014 only for simple wrapper components === */
+      /* Components that manage child visibility (wc-tab, wc-tab-item,
+         wc-accordion, wc-dropdown) keep display:contents so their
+         internal rendering works naturally (tabs switch, accordions fold). */
+      div[data-designer-id].contents,
+      wc-form[data-designer-id].contents,
+      wc-breadcrumb[data-designer-id].contents,
+      fieldset[data-designer-id].contents {
         display: block !important;
-        min-height: 80px !important;
       }
 
-      /* Containers without designer children show a hint */
-      wc-form[data-designer-id]:not(:has(> [data-designer-id])),
-      wc-div[data-designer-id]:not(:has(> [data-designer-id])),
-      wc-tab[data-designer-id]:not(:has(> [data-designer-id])),
-      wc-tab-item[data-designer-id]:not(:has(> [data-designer-id])),
-      div[data-designer-id]:not(:has(> [data-designer-id])),
-      fieldset[data-designer-id]:not(:has(> [data-designer-id])) {
-        min-height: 120px !important;
+      /* === Subtle hover outline on all designer elements === */
+      [data-designer-id]:hover {
+        outline: 1px dashed rgba(0, 120, 255, 0.3) !important;
+        outline-offset: -1px !important;
       }
-      /* The inner form/div also gets the hint */
-      wc-form[data-designer-id]:not(:has([data-designer-id])) > .wc-form::after,
-      wc-div[data-designer-id]:not(:has([data-designer-id])) > .wc-div::after {
+
+      /* === Empty containers: min-height + drop hint === */
+      [data-designer-container]:not(:has([data-designer-id]))::after {
         content: 'Drop components here' !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         min-height: 60px !important;
-        color: rgba(0, 120, 255, 0.3) !important;
-        font-size: 12px !important;
+        color: rgba(0, 120, 255, 0.25) !important;
+        font-size: 11px !important;
         font-family: system-ui, sans-serif !important;
       }
 
-      /* === Container type labels via ::before === */
-      wc-form[data-designer-id]::before { content: "FORM" !important; }
-      wc-div[data-designer-id]::before { content: "DIV" !important; }
-      wc-tab[data-designer-id]::before { content: "TABS" !important; }
-      wc-tab-item[data-designer-id]::before { content: "TAB ITEM" !important; }
-      wc-accordion[data-designer-id]::before { content: "ACCORDION" !important; }
-      wc-dropdown[data-designer-id]::before { content: "DROPDOWN" !important; }
-      wc-sidebar[data-designer-id]::before { content: "SIDEBAR" !important; }
-      wc-sidenav[data-designer-id]::before { content: "SIDENAV" !important; }
-      wc-slideshow[data-designer-id]::before { content: "SLIDESHOW" !important; }
-      wc-split-button[data-designer-id]::before { content: "SPLIT BUTTON" !important; }
-      wc-flip-box[data-designer-id]::before { content: "FLIP BOX" !important; }
-      wc-menu[data-designer-id]::before { content: "MENU" !important; }
-      div[data-designer-id]::before { content: "DIV" !important; }
-      fieldset[data-designer-id]::before { content: "FIELDSET" !important; }
-
-      /* Label style for all containers */
-      wc-form[data-designer-id]::before, wc-div[data-designer-id]::before,
-      wc-tab[data-designer-id]::before, wc-tab-item[data-designer-id]::before,
-      wc-accordion[data-designer-id]::before, wc-dropdown[data-designer-id]::before,
-      wc-sidebar[data-designer-id]::before, wc-sidenav[data-designer-id]::before,
-      wc-slideshow[data-designer-id]::before, wc-split-button[data-designer-id]::before,
-      wc-flip-box[data-designer-id]::before, wc-menu[data-designer-id]::before,
-      div[data-designer-id]::before, fieldset[data-designer-id]::before {
-        position: absolute !important;
-        top: 6px !important;
-        left: 8px !important;
-        font-size: 10px !important;
-        font-weight: 600 !important;
-        font-family: system-ui, -apple-system, sans-serif !important;
-        letter-spacing: 0.5px !important;
-        text-transform: uppercase !important;
-        color: rgba(0, 120, 255, 0.6) !important;
-        background: #ffffff !important;
-        padding: 1px 6px !important;
-        line-height: 16px !important;
-        border-radius: 2px !important;
-        pointer-events: none !important;
-        z-index: 1 !important;
-      }
-
-      /* === Non-container elements render normally === */
-      wc-input[data-designer-id], wc-select[data-designer-id],
-      wc-textarea[data-designer-id], wc-field[data-designer-id],
-      wc-fa-icon[data-designer-id], wc-icon[data-designer-id],
-      wc-image[data-designer-id], wc-loader[data-designer-id],
-      wc-save-button[data-designer-id], wc-save-split-button[data-designer-id],
-      wc-hotkey[data-designer-id], wc-code-mirror[data-designer-id],
-      wc-tabulator[data-designer-id], wc-chart[data-designer-id],
-      wc-chartjs[data-designer-id], wc-google-map[data-designer-id],
-      wc-ai-bot[data-designer-id], wc-breadcrumb[data-designer-id],
-      hr[data-designer-id] {
-        display: revert !important;
-        min-height: revert !important;
-        border: revert !important;
-        padding: revert !important;
-        background: revert !important;
-        position: relative !important;
-      }
-      wc-input[data-designer-id]::before, wc-select[data-designer-id]::before,
-      wc-textarea[data-designer-id]::before, wc-field[data-designer-id]::before,
-      wc-fa-icon[data-designer-id]::before, wc-icon[data-designer-id]::before,
-      hr[data-designer-id]::before, wc-save-button[data-designer-id]::before,
-      wc-save-split-button[data-designer-id]::before {
-        display: none !important;
+      /* Empty inner wrappers also show drop hint */
+      [data-designer-container] > .wc-form:not(:has([data-designer-id]))::after,
+      [data-designer-container] > .wc-div:not(:has([data-designer-id]))::after,
+      [data-designer-container] > .wc-tab > .tab-body:not(:has([data-designer-id]))::after,
+      [data-designer-container] > .wc-tab-item:not(:has([data-designer-id]))::after {
+        content: 'Drop components here' !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 60px !important;
+        color: rgba(0, 120, 255, 0.2) !important;
+        font-size: 11px !important;
+        font-family: system-ui, sans-serif !important;
       }
 
       /* === Prevent form interaction at design time === */
@@ -11760,13 +11684,14 @@ if (!customElements.get("wc-live-designer")) {
       { type: "wc-ai-bot", label: "AI Bot" },
       { type: "wc-theme-selector", label: "Theme Selector" }
     ];
-    // Preset groups — each is a mini component tree that gets appended to the canvas
+    // Preset groups — each is a mini component tree that gets appended to the canvas.
+    // Modeled after real production Go Kart templates (client, prospect, kanban patterns).
     static PRESETS = [
       // --- Page Starters ---
       {
         label: "Standard Edit Page",
         category: "page",
-        description: "Skeleton + breadcrumb + save + form + tabs + hotkey",
+        description: "Skeleton + nav + tabs(General + Change Log) + form + hotkey",
         tree: [
           { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" },
           { componentType: "div", css: "page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden", children: [
@@ -11774,7 +11699,7 @@ if (!customElements.get("wc-live-designer")) {
               { componentType: "wc-breadcrumb", children: [
                 { componentType: "wc-breadcrumb-item", label: "", link: "/{{Template.RoutePrefix}}/home" },
                 { componentType: "wc-breadcrumb-item", label: "{{Template.Name}}", link: "/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list" },
-                { componentType: "wc-breadcrumb-item", label: "{{Record.slug}}", link: "" }
+                { componentType: "wc-breadcrumb-item", label: "", link: "" }
               ] },
               { componentType: "div", css: "flex flex-row items-center gap-3", children: [
                 {
@@ -11796,22 +11721,24 @@ if (!customElements.get("wc-live-designer")) {
                     method: "{{FormMethod}}",
                     id: "{{Template.Slug}}",
                     action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                    "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}"
+                    "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
+                    children: [
+                      { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
+                    ]
                   }
                 ] }
               ] },
               { componentType: "wc-tab-item", label: "Change Log", children: [
                 { componentType: "div", css: "col-1 gap-2 pt-2 pb-5 px-5" }
               ] }
-            ] },
-            { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
+            ] }
           ] }
         ]
       },
       {
         label: "Simple Form Page",
         category: "page",
-        description: "Skeleton + breadcrumb + save + form",
+        description: "Skeleton + nav + form + hotkey (no tabs)",
         tree: [
           { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" },
           { componentType: "div", css: "page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden", children: [
@@ -11837,9 +11764,11 @@ if (!customElements.get("wc-live-designer")) {
               method: "{{FormMethod}}",
               id: "{{Template.Slug}}",
               action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-              "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}"
-            },
-            { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
+              "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
+              children: [
+                { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
+              ]
+            }
           ] }
         ]
       },
@@ -12227,7 +12156,8 @@ if (!customElements.get("wc-live-designer")) {
     _appendPreset(presetIndex) {
       const preset = WcLiveDesigner.PRESETS[presetIndex];
       if (!preset || !preset.tree) return;
-      this._postToCanvas("appendTree", { tree: preset.tree, parentId: null });
+      const parentId = this._selectedComponent?.designerId || null;
+      this._postToCanvas("appendTree", { tree: preset.tree, parentId });
       setTimeout(() => this._updateLayerTree(), 500);
     }
     _applyStyle() {
@@ -12449,7 +12379,20 @@ if (!customElements.get("wc-live-designer")) {
         });
       });
       this.querySelectorAll(".ld-preset-item").forEach((item) => {
-        item.draggable = false;
+        item.draggable = true;
+        item.addEventListener("dragstart", (e) => {
+          const idx = parseInt(item.dataset.presetIndex);
+          const preset = WcLiveDesigner.PRESETS[idx];
+          if (!preset) return;
+          e.dataTransfer.setData("application/json", JSON.stringify({ preset: true, tree: preset.tree }));
+          e.dataTransfer.effectAllowed = "copy";
+          const ghost = document.createElement("div");
+          ghost.textContent = preset.label;
+          ghost.style.cssText = "position:fixed;top:-100px;left:-100px;padding:6px 12px;background:#e6a23c;color:#fff;border-radius:4px;font-size:12px;font-family:system-ui,sans-serif;z-index:9999;pointer-events:none;";
+          document.body.appendChild(ghost);
+          e.dataTransfer.setDragImage(ghost, 0, 0);
+          setTimeout(() => ghost.remove(), 0);
+        });
         item.addEventListener("click", () => {
           const idx = parseInt(item.dataset.presetIndex);
           if (!isNaN(idx)) {
@@ -13047,7 +12990,8 @@ if (!customElements.get("wc-live-designer")) {
           "wc-sidebar",
           "wc-sidenav",
           "wc-slideshow",
-          "wc-split-button"
+          "wc-split-button",
+          "wc-breadcrumb"
         ].includes(type);
         this._postToCanvas("addComponent", {
           type,
@@ -13143,18 +13087,23 @@ ${formHTML}
 {% block js %}
 {% endblock %}`;
         case "standard":
-        default:
+        default: {
+          const withMetaFields = formHTML.replace(
+            /(<wc-form[^>]*>)/g,
+            '$1\n  {% include "meta_fields" %}'
+          );
           return `{% extends "__template_name__" %}
 
 {% block css %}
 {% endblock %}
 
 {% block pageContent %}
-${formHTML}
+${withMetaFields}
 {% endblock %}
 
 {% block js %}
 {% endblock %}`;
+        }
       }
     }
     /**

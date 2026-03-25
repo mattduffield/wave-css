@@ -15,56 +15,68 @@
     }
 
     /* ===============================================
-       EDIT MODE — container visibility + overlays
-       All inside the iframe for reliable positioning
+       EDIT MODE — natural rendering + subtle affordances
+       Components render as they would in production.
+       Designer adds: hover outlines, drop hints, labels.
        =============================================== */
 
-    /* Generic container override via attribute */
-    [data-designer-container] {
-      display: block !important;
-      min-height: 60px;
-      border: 1px dashed rgba(100, 170, 255, 0.4);
-      border-radius: 4px;
-      padding: 28px 10px 10px 10px;
+    /* All designer elements need position:relative for selection outline */
+    [data-designer-id] {
       position: relative;
-      box-sizing: border-box;
     }
 
-    /* Also force inner wrappers of containers to block */
-    [data-designer-container] > .wc-form,
-    [data-designer-container] > .wc-div {
+    /* display:contents elements need a box for selection/drop — BUT
+       let components that manage their own child visibility (wc-tab,
+       wc-tab-item, wc-accordion, wc-dropdown) keep their natural display.
+       We only force display:block on simple wrappers like div, wc-form. */
+    div[data-designer-id].contents,
+    wc-form[data-designer-id].contents,
+    wc-breadcrumb[data-designer-id].contents,
+    fieldset[data-designer-id].contents {
       display: block !important;
-      min-height: 40px;
     }
 
-    /* Containers without designer children show hint */
+    /* wc-tab, wc-tab-item, wc-accordion, wc-dropdown, etc. render naturally.
+       Their .contents class still needs a box for the label badge, but
+       we do NOT override display — let the component handle show/hide. */
+    wc-tab[data-designer-id].contents,
+    wc-tab-item[data-designer-id].contents,
+    wc-accordion[data-designer-id].contents,
+    wc-dropdown[data-designer-id].contents,
+    wc-sidebar[data-designer-id].contents,
+    wc-sidenav[data-designer-id].contents,
+    wc-slideshow[data-designer-id].contents,
+    wc-split-button[data-designer-id].contents,
+    wc-flip-box[data-designer-id].contents,
+    wc-menu[data-designer-id].contents {
+      display: contents !important;
+    }
+
+    /* Subtle hover outline on all designer elements */
+    [data-designer-id]:hover {
+      outline: 1px dashed rgba(100, 170, 255, 0.3);
+      outline-offset: -1px;
+    }
+
+    /* Empty containers: min-height so they are droppable + hint text */
     [data-designer-container]:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
       min-height: 60px;
-      color: rgba(100, 170, 255, 0.4);
-      font-size: 12px; font-family: system-ui, sans-serif;
+      color: rgba(100, 170, 255, 0.3);
+      font-size: 11px; font-family: system-ui, sans-serif;
     }
 
-    /* Container type label */
-    [data-designer-container]::before {
-      content: attr(data-designer-label);
-      position: absolute; top: 5px; left: 8px;
-      font-size: 9px; font-weight: 600;
-      font-family: system-ui, sans-serif;
-      letter-spacing: 0.5px; text-transform: uppercase;
-      color: rgba(100, 170, 255, 0.6);
-      padding: 0 4px; line-height: 16px; border-radius: 2px;
-      pointer-events: none; z-index: 1;
-    }
-
-    /* Override display:contents from .contents class on ALL designer elements */
-    [data-designer-id].contents {
-      display: block !important;
-    }
-    /* Ensure all designer elements can show outlines (need a box model) */
-    [data-designer-id] {
-      position: relative;
+    /* Empty inner wrappers also show drop hint */
+    [data-designer-container] > .wc-form:not(:has([data-designer-id]))::after,
+    [data-designer-container] > .wc-div:not(:has([data-designer-id]))::after,
+    [data-designer-container] > .wc-tab > .tab-body:not(:has([data-designer-id]))::after,
+    [data-designer-container] > .wc-tab-item:not(:has([data-designer-id]))::after {
+      content: 'Drop components here';
+      display: flex; justify-content: center; align-items: center;
+      min-height: 60px;
+      color: rgba(100, 170, 255, 0.25);
+      font-size: 11px; font-family: system-ui, sans-serif;
     }
 
     /* Prevent form interaction at design time */
@@ -186,6 +198,7 @@
       'div', 'fieldset', 'wc-form', 'wc-tab', 'wc-tab-item',
       'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
       'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
+      'wc-breadcrumb',
     ]);
 
     const CONTAINER_LABELS = {
@@ -194,10 +207,34 @@
       'wc-dropdown': 'DROPDOWN', 'wc-flip-box': 'FLIP BOX', 'wc-menu': 'MENU',
       'wc-sidebar': 'SIDEBAR', 'wc-sidenav': 'SIDENAV',
       'wc-slideshow': 'SLIDESHOW', 'wc-split-button': 'SPLIT BUTTON',
+      'wc-breadcrumb': 'BREADCRUMB',
     };
 
     function generateId() { return `d${Date.now().toString(36)}${(idCounter++).toString(36)}`; }
     function isContainer(type) { return CONTAINER_TYPES.has(type); }
+
+    // Resolve the inner content element for a container component.
+    // Each Wave CSS component wraps its children in a specific inner element.
+    // MUST use :scope > to avoid matching deeply nested descendants.
+    function getInnerElement(el, type) {
+      switch (type) {
+        case 'wc-tab':        return el.querySelector(':scope > .wc-tab > .tab-body') || el;
+        case 'wc-tab-item':   return el.querySelector(':scope > .wc-tab-item') || el;
+        case 'wc-form':       return el.querySelector(':scope > .wc-form') || el;
+        case 'wc-breadcrumb': return el.querySelector(':scope > .wc-breadcrumb') || el;
+        case 'div':           return el.querySelector(':scope > .wc-div') || el;
+        case 'wc-accordion':  return el.querySelector(':scope > .wc-accordion') || el;
+        case 'wc-dropdown':   return el.querySelector(':scope > .wc-dropdown') || el;
+        case 'wc-sidebar':    return el.querySelector(':scope > .wc-sidebar') || el;
+        case 'wc-sidenav':    return el.querySelector(':scope > .wc-sidenav') || el;
+        case 'wc-flip-box':   return el.querySelector(':scope > .wc-flip-box') || el;
+        case 'wc-menu':       return el.querySelector(':scope > .wc-menu') || el;
+        case 'wc-slideshow':  return el.querySelector(':scope > .wc-slideshow') || el;
+        case 'wc-split-button': return el.querySelector(':scope > .wc-split-button') || el;
+        case 'fieldset':      return el;
+        default:              return el;
+      }
+    }
     function getNestedValue(obj, path) {
       return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
     }
@@ -227,6 +264,12 @@
           attrs += ` data-scope="${value}"`;
         } else if (key === 'css') {
           if (value) attrs += ` class="${value}"`;
+        } else if (key === 'style') {
+          // Style is set directly, not transformed
+          attrs += ` style="${String(value).replace(/"/g, '&quot;')}"`;
+        } else if (key === '_') {
+          // Hyperscript attribute — keep as underscore, don't transform
+          attrs += ` _="${String(value).replace(/"/g, '&quot;')}"`;
         } else if (key === 'content') {
           textContent = value;
         } else if (key === 'innerHTML') {
@@ -261,10 +304,9 @@
       if (parentId) {
         const parentComp = canvas.querySelector(`[data-designer-id="${parentId}"]`);
         if (parentComp) {
-          // Drop into the inner content element if one exists (e.g., <form class="wc-form">)
-          parentEl = parentComp.querySelector('.wc-form') ||
-                     parentComp.querySelector('.wc-div') ||
-                     parentComp;
+          // Drop into the inner content element based on component type
+          const parentEntry = componentRegistry.get(parentId);
+          parentEl = parentEntry ? getInnerElement(parentComp, parentEntry.type) : parentComp;
         } else {
           parentEl = canvas;
         }
@@ -637,10 +679,25 @@
 
       try {
         const payload = JSON.parse(jsonData);
-        if (!payload.type) return;
 
-        // Use the saved position from the last dragover, not a fresh calculation
-        addComponent(payload.type, savedParentId, savedPosition, payload.defaults || {});
+        if (payload.preset && payload.tree) {
+          // Preset drop — append tree at the drop position
+          function appendPresetNodes(nodes, parentId) {
+            for (const node of nodes) {
+              const { componentType, type, children, ...properties } = node;
+              const compType = componentType || type;
+              const newId = addComponent(compType, parentId, null, properties);
+              if (children && children.length > 0) {
+                appendPresetNodes(children, newId);
+              }
+            }
+          }
+          appendPresetNodes(payload.tree, savedParentId);
+          postToParent('treeAppended', {});
+        } else if (payload.type) {
+          // Single component drop
+          addComponent(payload.type, savedParentId, savedPosition, payload.defaults || {});
+        }
       } catch (err) {
         console.error('[canvas] Drop error:', err);
       }
@@ -669,9 +726,8 @@
       // This MUST match what addComponent() uses for insertion
       let parentEl;
       if (containerEl) {
-        parentEl = containerEl.querySelector('.wc-form') ||
-                   containerEl.querySelector('.wc-div') ||
-                   containerEl;
+        const containerEntry = componentRegistry.get(parentId);
+        parentEl = containerEntry ? getInnerElement(containerEl, containerEntry.type) : containerEl;
       } else {
         parentEl = canvas;
       }
@@ -724,8 +780,7 @@
         if (!entry) continue;
         const node = { ...entry.properties, componentType: entry.type, designerId };
         if (isContainer(node.componentType)) {
-          // Look for children in inner wrapper or directly
-          const innerEl = child.querySelector('.wc-form') || child.querySelector('.wc-div') || child;
+          const innerEl = getInnerElement(child, node.componentType);
           const nested = serializeChildren(innerEl);
           if (nested.length > 0) node.children = nested;
         }
@@ -780,8 +835,7 @@
 
         // For containers, recurse into children
         if (isContainer(entry.type)) {
-          // Look for children in inner wrapper or directly
-          const innerEl = child.querySelector('.wc-form') || child.querySelector('.wc-div') || child;
+          const innerEl = getInnerElement(child, entry.type);
           const childHTML = extractChildren(innerEl);
           html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
         } else if (entry.type === 'wc-select' || entry.type === 'wc-input') {
@@ -854,40 +908,45 @@
           componentRegistry.clear();
           selectedId = null;
           toolbar.classList.remove('visible');
-          function loadNodes(nodes, parentId) {
+          // Async — each component needs time to render its internal DOM
+          // (e.g., wc-tab creates .tab-body, wc-form creates .wc-form)
+          // before children can be inserted into it.
+          async function loadNodes(nodes, parentId) {
             for (const node of nodes) {
-              // componentType is the canonical component name (e.g. 'wc-input')
-              // 'type' in properties is the input type (e.g. 'date', 'checkbox')
               const { componentType, type, designerId, children, ...properties } = node;
               const compType = componentType || type;
               const newId = addComponent(compType, parentId, null, { ...properties, type, _designerId: designerId });
               if (children && children.length > 0) {
-                loadNodes(children, newId || designerId);
+                // Wait for the parent component to render its internal structure
+                await new Promise(r => setTimeout(r, 150));
+                await loadNodes(children, newId || designerId);
               }
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
-            loadNodes(e.data.tree, null);
+            loadNodes(e.data.tree, null).then(() => {
+              postToParent('treeLoaded', {});
+            });
           }
-          postToParent('treeLoaded', {});
           break;
         case 'appendTree':
           // Add nodes to canvas without clearing — used by presets
-          function appendNodes(nodes, parentId) {
+          async function appendNodes(nodes, parentId) {
             for (const node of nodes) {
               const { componentType, type, designerId, children, ...properties } = node;
               const compType = componentType || type;
-              // Don't reuse saved designerIds for presets — always generate new ones
               const newId = addComponent(compType, parentId, null, { ...properties, type });
               if (children && children.length > 0) {
-                appendNodes(children, newId);
+                await new Promise(r => setTimeout(r, 150));
+                await appendNodes(children, newId);
               }
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
-            appendNodes(e.data.tree, e.data.parentId || null);
+            appendNodes(e.data.tree, e.data.parentId || null).then(() => {
+              postToParent('treeAppended', {});
+            });
           }
-          postToParent('treeAppended', {});
           break;
       }
     });
