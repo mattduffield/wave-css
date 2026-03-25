@@ -207,7 +207,9 @@
     // =============================================
 
     function addComponent(type, parentId, position, properties = {}) {
-      const designerId = generateId();
+      // Use provided _designerId (for loadTree) or generate a new one
+      const designerId = properties._designerId || generateId();
+      delete properties._designerId;
       const container = isContainer(type);
 
       // Build attribute string
@@ -720,8 +722,8 @@
         if (!designerId) continue;
         const entry = componentRegistry.get(designerId);
         if (!entry) continue;
-        const node = { type: entry.type, designerId, ...entry.properties };
-        if (isContainer(entry.type)) {
+        const node = { ...entry.properties, componentType: entry.type, designerId };
+        if (isContainer(node.componentType)) {
           // Look for children in inner wrapper or directly
           const innerEl = child.querySelector('.wc-form') || child.querySelector('.wc-div') || child;
           const nested = serializeChildren(innerEl);
@@ -845,6 +847,29 @@
           componentRegistry.clear();
           selectedId = null;
           toolbar.classList.remove('visible');
+          break;
+        case 'loadTree':
+          // Clear and rebuild canvas from saved tree
+          canvas.innerHTML = '';
+          componentRegistry.clear();
+          selectedId = null;
+          toolbar.classList.remove('visible');
+          function loadNodes(nodes, parentId) {
+            for (const node of nodes) {
+              // componentType is the canonical component name (e.g. 'wc-input')
+              // 'type' in properties is the input type (e.g. 'date', 'checkbox')
+              const { componentType, type, designerId, children, ...properties } = node;
+              const compType = componentType || type;
+              const newId = addComponent(compType, parentId, null, { ...properties, type, _designerId: designerId });
+              if (children && children.length > 0) {
+                loadNodes(children, newId || designerId);
+              }
+            }
+          }
+          if (e.data.tree && Array.isArray(e.data.tree)) {
+            loadNodes(e.data.tree, null);
+          }
+          postToParent('treeLoaded', {});
           break;
       }
     });

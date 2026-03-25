@@ -917,7 +917,29 @@ if (!customElements.get('wc-live-designer')) {
       }
     }
 
+    /**
+     * Resolve anyOf patterns from LiteSpec into a flat property descriptor.
+     * E.g., { anyOf: [{type:"string",format:"date-time"},{type:"string",enum:[""]}] }
+     * becomes { type:"string", format:"date-time" }
+     */
+    _resolveAnyOf(prop) {
+      if (!prop.anyOf || !Array.isArray(prop.anyOf)) return prop;
+      // Pick the most descriptive variant (one with format, enum, or specific type)
+      for (const variant of prop.anyOf) {
+        if (variant.format) return { ...prop, ...variant, anyOf: undefined };
+        if (variant.enum && variant.enum.length > 0 && !(variant.enum.length === 1 && variant.enum[0] === '')) {
+          return { ...prop, ...variant, anyOf: undefined };
+        }
+      }
+      // Fall back to first variant with a type
+      for (const variant of prop.anyOf) {
+        if (variant.type) return { ...prop, ...variant, anyOf: undefined };
+      }
+      return prop;
+    }
+
     _inferComponentType(name, prop) {
+      prop = this._resolveAnyOf(prop);
       // System fields
       if (['_id', 'created_by', 'created_date', 'modified_by', 'modified_date'].includes(name)) return 'wc-input';
       if (prop.type === 'boolean') return 'wc-input';
@@ -934,6 +956,7 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     _inferDefaults(name, prop, isRequired) {
+      prop = this._resolveAnyOf(prop);
       const defaults = { name, 'lbl-label': this._toProper(name) };
       if (isRequired) defaults.required = '';
 
@@ -1001,6 +1024,7 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     _generateFieldValue(name, prop) {
+      prop = this._resolveAnyOf(prop);
       // System/meta fields
       if (name === '_id') return '507f1f77bcf86cd799439011';
       if (name === 'created_by' || name === 'modified_by') return 'admin';
@@ -1119,6 +1143,19 @@ if (!customElements.get('wc-live-designer')) {
               this._generateSampleFromSchema(schemaSlug);
             }
           }
+          // Load saved content if provided
+          if (this._savedContent) {
+            const formHTML = this._extractFormContent(this._savedContent);
+            if (formHTML) {
+              setTimeout(() => this.loadHTML(formHTML), 500);
+            }
+          }
+          // Load pending tree if queued before canvas was ready
+          if (this._pendingTree) {
+            const tree = this._pendingTree;
+            this._pendingTree = null;
+            setTimeout(() => this.loadTree(tree), 600);
+          }
           break;
 
         case 'select':
@@ -1163,6 +1200,10 @@ if (!customElements.get('wc-live-designer')) {
             this._htmlCallback(e.data.html);
             this._htmlCallback = null;
           }
+          break;
+
+        case 'treeLoaded':
+          this._updateLayerTree();
           break;
       }
     }
@@ -1624,7 +1665,8 @@ function runDelete() {
   ctx.DB.DeleteByID(rdx.ConnName, rdx.DBName, rdx.AppData.Template.CollectionName, ctx.RecordID);
 }`;
 
-      return { content, code, field_rules: '' };
+      const tree = await this.getTree();
+      return { content, code, field_rules: '', tree: JSON.stringify(tree) };
     }
 
     // --- Layer Tree ---
@@ -1849,6 +1891,45 @@ function runDelete() {
     // --- Public API ---
 
     /**
+     * Set the saved template content to reload into the canvas.
+     * Call this before the canvas is ready — it will load when canvasReady fires.
+     * @param {string} content - Full Pongo2 template content from Record.content
+     */
+    setContent(content) {
+      this._savedContent = content;
+      if (this._canvasReady) {
+        const formHTML = this._extractFormContent(content);
+        if (formHTML) {
+          this.loadHTML(formHTML);
+        }
+      }
+    }
+
+    /**
+     * Extract the designed form components from a full Pongo2 template.
+     * Looks for content between {% include "meta_fields" %} and <wc-hotkey
+     * inside the wc-form block.
+     */
+    _extractFormContent(content) {
+      if (!content) return '';
+
+      // Find the form content between meta_fields include and wc-hotkey
+      const metaMatch = content.indexOf('{% include "meta_fields" %}');
+      if (metaMatch === -1) return '';
+
+      const startIdx = metaMatch + '{% include "meta_fields" %}'.length;
+
+      // Find the closing marker — wc-hotkey or </wc-form>
+      let endIdx = content.indexOf('<wc-hotkey', startIdx);
+      if (endIdx === -1) {
+        endIdx = content.indexOf('</wc-form>', startIdx);
+      }
+      if (endIdx === -1) return '';
+
+      return content.substring(startIdx, endIdx).trim();
+    }
+
+    /**
      * Set sample data for design-time preview.
      */
     setSampleData(data) {
@@ -1856,6 +1937,27 @@ function runDelete() {
       if (this._canvasReady) {
         this._postToCanvas('setSampleData', { data });
       }
+    }
+
+    /**
+     * Load a saved component tree into the canvas.
+     * Accepts the same JSON array returned by getTree().
+     * @param {Array} tree - Serialized component tree
+     */
+    async loadTree(tree) {
+      if (!tree || !Array.isArray(tree) || tree.length === 0) return;
+
+      if (!this._canvasReady) {
+        // Queue for when canvas is ready
+        this._pendingTree = tree;
+        return;
+      }
+
+      this._postToCanvas('loadTree', { tree });
+
+      // Wait for tree to be rebuilt, then refresh layer tree
+      await new Promise(r => setTimeout(r, 300 + tree.length * 100));
+      this._updateLayerTree();
     }
 
     /**
@@ -1914,6 +2016,7 @@ function runDelete() {
 
       root.querySelectorAll('[data-scope]').forEach(el => {
         const scope = el.getAttribute('data-scope');
+        if (!scope) return;
         const tag = el.tagName.toLowerCase();
         const fieldName = scope.split('.').pop();
 

@@ -1,6 +1,6 @@
 {
   "name": "wave-css",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "esbuild.config.js",
   "scripts": {
     "build": "node esbuild.config.js && npm run build:icons",
