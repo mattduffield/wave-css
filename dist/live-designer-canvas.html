@@ -58,54 +58,15 @@
       outline-offset: -1px;
     }
 
-    /* Empty containers: min-height + drop hint using theme variables */
-    [data-designer-container]:not(:has([data-designer-id])) {
+    /* === Universal drop target ===
+       Each container's inner element is marked with data-drop-target
+       by addComponent(). One rule handles all container types.
+       Only the actual drop target shows the hint — never the outer
+       custom element or intermediate wrappers. No duplication. */
+    [data-drop-target]:not(:has([data-designer-id])) {
       min-height: 100px;
     }
-    [data-designer-container]:not(:has([data-designer-id]))::after {
-      content: 'Drop components here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-
-    /* Inner wrappers — only show hint on the INNERMOST empty container,
-       not parent wrappers that contain another container child */
-    .wc-form:not(:has([data-designer-id])) {
-      min-height: 100px;
-    }
-    .wc-form:not(:has([data-designer-id]))::after {
-      content: 'Drop form fields here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-    .wc-tab-item:not(:has([data-designer-id])) {
-      min-height: 100px;
-    }
-    .wc-tab-item:not(:has([data-designer-id]))::after {
-      content: 'Drop components here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-    /* Div wrappers that CONTAIN a form or other container — suppress their hint */
-    .wc-div:has(.wc-form, [data-designer-container])::after {
-      display: none !important;
-    }
-    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container])) {
-      min-height: 100px;
-    }
-    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container]))::after {
+    [data-drop-target]:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
       min-height: 100px;
@@ -402,6 +363,16 @@
 
       // Register
       componentRegistry.set(designerId, { element: el, type, properties: { ...properties } });
+
+      // Mark the inner drop target for containers — the ONE element where
+      // children are actually placed. This is universal: one CSS rule using
+      // [data-drop-target] handles all container types consistently.
+      if (container) {
+        setTimeout(() => {
+          const inner = getInnerElement(el, type);
+          if (inner) inner.setAttribute('data-drop-target', type);
+        }, 100);
+      }
 
       // Apply sample data
       setTimeout(() => {

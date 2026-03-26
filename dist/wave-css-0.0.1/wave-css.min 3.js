@@ -1847,23 +1847,6 @@ function Ue(u){return u.tagName.includes("-")}function Be(){return"xxxx-xxxx-xxx
         outline-offset: -1px !important;
       }
 
-      /* === Universal drop target hint === */
-      [data-drop-target]:not(:has([data-designer-id])) {
-        min-height: 100px !important;
-      }
-      [data-drop-target]:not(:has([data-designer-id]))::after {
-        content: 'Drop components here' !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        min-height: 100px !important;
-        color: var(--text-6, #888) !important;
-        font-size: 12px !important;
-        font-family: system-ui, sans-serif !important;
-        border: 1px dashed var(--surface-5, #444) !important;
-        border-radius: 4px !important;
-      }
-
       /* === Design time: hidden class should not hide content === */
       [data-designer-id].hidden {
         display: flex !important;
