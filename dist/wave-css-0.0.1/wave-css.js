@@ -1131,9 +1131,10 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
 if (document.documentElement?.hasAttribute?.("data-designer")) {
   const _nativeRemoveAttr = HTMLElement.prototype.removeAttribute;
   WcBaseComponent.prototype.removeAttribute = function(name) {
-    const observed = this.constructor.observedAttributes;
-    if (observed && observed.includes(name)) return;
-    _nativeRemoveAttr.call(this, name);
+    if (name.startsWith("data-wc-") || name === "style") {
+      _nativeRemoveAttr.call(this, name);
+      return;
+    }
   };
 }
 
@@ -12992,25 +12993,16 @@ if (!customElements.get("wc-live-designer")) {
       await this.loadHTML(html);
     }
     /**
-     * Load HTML into the canvas — parses component tags and creates them.
-     * Handles both raw HTML (from Source tab) and Pongo2 templates (from _template_builder).
-     * Converts {{ Record.field }} expressions to data-scope + sample data.
+     * Load HTML into the canvas — converts Pongo2 templates back to
+     * canvas-friendly HTML and renders via innerHTML (V2 architecture).
      *
-     * @param {string} html - HTML string with Wave CSS component tags
+     * @param {string} html - HTML string, may contain Pongo2 expressions
      */
     async loadHTML(html) {
-      this._postToCanvas("showLoading", {});
-      this._postToCanvas("clear", {});
-      await new Promise((r) => setTimeout(r, 300));
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
-      const root = doc.body.firstElementChild;
-      if (!root) {
-        this._postToCanvas("hideLoading", {});
-        return;
-      }
-      await this._loadChildren(root, null);
-      this._postToCanvas("hideLoading", {});
+      if (!html?.trim()) return;
+      let canvasHTML = html.replace(/\{%\s*extends\s+[^%]*%\}/g, "").replace(/\{%\s*block\s+\w+\s*%\}/g, "").replace(/\{%\s*endblock\s*%\}/g, "").replace(/\{%\s*include\s+[^%]*%\}/g, "").trim();
+      canvasHTML = this._reversePongo2(canvasHTML);
+      this._postToCanvas("renderHTML", { html: canvasHTML });
     }
     async _loadChildren(parentEl, parentDesignerId) {
       for (const child of parentEl.children) {
@@ -13748,7 +13740,11 @@ function runDelete() {
         }
       );
       result = result.replace(/\{%[\s\S]*?%\}/g, "");
-      result = result.replace(/\{\{[\s\S]*?\}\}/g, "");
+      result = result.replace(/\{\{([^}]+)\}\}/g, (match, content) => {
+        const trimmed = content.trim();
+        if (/^[A-Z]/.test(trimmed)) return match;
+        return "";
+      });
       return result;
     }
     /**

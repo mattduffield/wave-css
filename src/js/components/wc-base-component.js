@@ -192,15 +192,20 @@ export class WcBaseComponent extends HTMLElement {
 
 }
 
-// Designer mode: prevent component lifecycle from stripping observed attributes
+// Designer mode: prevent component lifecycle from stripping ANY attributes
 // off the outer element. The property panel and extractCleanHTML need to read them.
+// Many components remove attributes not in observedAttributes (e.g., wc-form removes
+// method, id, action after passing them to the inner <form>).
 // The canvas updateProperty handler uses HTMLElement.prototype.removeAttribute
 // directly to bypass this guard for legitimate property panel removals.
 if (document.documentElement?.hasAttribute?.('data-designer')) {
   const _nativeRemoveAttr = HTMLElement.prototype.removeAttribute;
   WcBaseComponent.prototype.removeAttribute = function(name) {
-    const observed = this.constructor.observedAttributes;
-    if (observed && observed.includes(name)) return;
-    _nativeRemoveAttr.call(this, name);
+    // Allow removal of internal/designer attributes
+    if (name.startsWith('data-wc-') || name === 'style') {
+      _nativeRemoveAttr.call(this, name);
+      return;
+    }
+    // Block all other removals — attributes must stay for the property panel
   };
 }

@@ -228,7 +228,6 @@
       'div', 'fieldset', 'wc-form', 'wc-tab', 'wc-tab-item',
       'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
       'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
-      'wc-breadcrumb',
     ]);
     // Components whose children are declarative (not drop targets) now
     // expose getDesignerHTML() method — no hardcoded set needed.
@@ -282,6 +281,13 @@
                 inner.setAttribute('data-drop-target', tag);
                 // wc- containers: their content areas may have internal HTML elements
                 scan(inner, tag.startsWith('wc-'));
+              }
+            } else if (typeof child.getDesignerHTML === 'function') {
+              // Non-container components with declarative children (e.g., wc-breadcrumb)
+              // Scan to register child WC elements but don't mark as drop target
+              const inner = getInnerElement(child, tag);
+              if (inner && inner !== child) {
+                scan(inner, true);
               }
             }
           } else if (HTML_TAGS.has(tag) && !insideWC) {
@@ -440,7 +446,7 @@
       }, 500);
     }
 
-    function scanNewChildren(parent) {
+    function scanNewChildren(parent, insideWC = false) {
       for (const child of parent.children) {
         const tag = child.tagName.toLowerCase();
 
@@ -448,28 +454,39 @@
         const isInternal = (tag === 'div' || tag === 'span' || tag === 'label' || tag === 'form') &&
           Array.from(child.classList).some(c => c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body');
         if (isInternal) {
-          scanNewChildren(child);
+          scanNewChildren(child, insideWC);
           continue;
         }
 
-        if ((WC_TAGS.has(tag) || HTML_TAGS.has(tag)) && !child.hasAttribute('data-designer-id')) {
+        if (WC_TAGS.has(tag) && !child.hasAttribute('data-designer-id')) {
           registerElement(child, tag);
           if (isContainer(tag)) {
             const inner = getInnerElement(child, tag);
             if (inner) {
               inner.setAttribute('data-drop-target', tag);
-              scanNewChildren(inner);
+              scanNewChildren(inner, tag.startsWith('wc-'));
+            }
+          } else if (typeof child.getDesignerHTML === 'function') {
+            const inner = getInnerElement(child, tag);
+            if (inner && inner !== child) {
+              scanNewChildren(inner, true);
             }
           }
-        } else if ((tag === 'div' || tag === 'fieldset') && !child.hasAttribute('data-designer-id')) {
-          // Only register non-internal divs
+        } else if (HTML_TAGS.has(tag) && !insideWC && !child.hasAttribute('data-designer-id')) {
+          // Only register HTML elements when NOT inside a wc- container
           registerElement(child, tag);
-          if (isContainer(tag)) {
-            const inner = getInnerElement(child, tag);
-            if (inner) {
-              inner.setAttribute('data-drop-target', tag);
-              scanNewChildren(inner);
+        } else if ((tag === 'div' || tag === 'fieldset') && !child.hasAttribute('data-designer-id')) {
+          if (!insideWC) {
+            registerElement(child, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(child, tag);
+              if (inner) {
+                inner.setAttribute('data-drop-target', tag);
+                scanNewChildren(inner, false);
+              }
             }
+          } else {
+            scanNewChildren(child, insideWC);
           }
         }
       }

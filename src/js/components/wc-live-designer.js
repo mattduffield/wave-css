@@ -1509,28 +1509,28 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     /**
-     * Load HTML into the canvas — parses component tags and creates them.
-     * Handles both raw HTML (from Source tab) and Pongo2 templates (from _template_builder).
-     * Converts {{ Record.field }} expressions to data-scope + sample data.
+     * Load HTML into the canvas — converts Pongo2 templates back to
+     * canvas-friendly HTML and renders via innerHTML (V2 architecture).
      *
-     * @param {string} html - HTML string with Wave CSS component tags
+     * @param {string} html - HTML string, may contain Pongo2 expressions
      */
     async loadHTML(html) {
-      this._postToCanvas('showLoading', {});
-      this._postToCanvas('clear', {});
-      await new Promise(r => setTimeout(r, 300));
+      if (!html?.trim()) return;
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-      const root = doc.body.firstElementChild;
+      // Strip Pongo2 block wrappers ({% extends %}, {% block %}, {% endblock %}, {% include %})
+      // to get just the component HTML
+      let canvasHTML = html
+        .replace(/\{%\s*extends\s+[^%]*%\}/g, '')
+        .replace(/\{%\s*block\s+\w+\s*%\}/g, '')
+        .replace(/\{%\s*endblock\s*%\}/g, '')
+        .replace(/\{%\s*include\s+[^%]*%\}/g, '')
+        .trim();
 
-      if (!root) {
-        this._postToCanvas('hideLoading', {});
-        return;
-      }
+      // Reverse Pongo2 data expressions to data-scope + sample data
+      canvasHTML = this._reversePongo2(canvasHTML);
 
-      await this._loadChildren(root, null);
-      this._postToCanvas('hideLoading', {});
+      // Send to canvas as one innerHTML operation
+      this._postToCanvas('renderHTML', { html: canvasHTML });
     }
 
     async _loadChildren(parentEl, parentDesignerId) {
@@ -2390,8 +2390,14 @@ function runDelete() {
       // 4. Strip Pongo2 block tags ({% set %}, {% for %}, {% endfor %}, {% extends %}, {% block %}, {% endblock %}, {% include %})
       result = result.replace(/\{%[\s\S]*?%\}/g, '');
 
-      // 5. Strip remaining {{ }} expressions (e.g., {{item.value}} inside loops)
-      result = result.replace(/\{\{[\s\S]*?\}\}/g, '');
+      // 5. Strip loop variable expressions (e.g., {{item.value}}, {{tag}})
+      // Preserve Go Kart template variables that start with uppercase
+      // (e.g., {{Template.Name}}, {{FormMethod}}, {{RecordID}})
+      result = result.replace(/\{\{([^}]+)\}\}/g, (match, content) => {
+        const trimmed = content.trim();
+        if (/^[A-Z]/.test(trimmed)) return match;
+        return '';
+      });
 
       return result;
     }
