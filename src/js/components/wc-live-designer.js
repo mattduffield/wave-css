@@ -149,12 +149,18 @@ if (!customElements.get('wc-live-designer')) {
       wc-card-skeleton[data-designer-id]::after { content: '⏳ Card Skeleton' !important; }
       wc-list-skeleton[data-designer-id]::after { content: '⏳ List Skeleton' !important; }
 
-      /* === Prevent form interaction at design time === */
+      /* === Prevent form interaction at design time — but allow tab nav buttons === */
       [data-designer-id] input,
       [data-designer-id] select,
-      [data-designer-id] textarea,
-      [data-designer-id] button {
+      [data-designer-id] textarea {
         pointer-events: none !important;
+      }
+      [data-designer-id] button:not(.tab-link) {
+        pointer-events: none !important;
+      }
+      .tab-nav .tab-link {
+        pointer-events: all !important;
+        cursor: pointer !important;
       }
     `;
 

@@ -58,32 +58,50 @@
       outline-offset: -1px;
     }
 
-    /* Empty containers: min-height so they are droppable + hint text */
-    [data-designer-container]:not(:has([data-designer-id])) {
-      min-height: 80px;
+    /* Empty containers: min-height so they are droppable + hint text.
+       Treat containers with only invisible children (wc-hotkey, wc-behavior,
+       wc-event-handler, wc-visibility-change) as "empty" for drop hints. */
+    [data-designer-container]:not(:has([data-designer-id])),
+    [data-designer-container]:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
+      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
+      wc-form[data-designer-id], wc-tab[data-designer-id], wc-tab-item[data-designer-id],
+      fieldset[data-designer-id], wc-tabulator[data-designer-id], wc-breadcrumb[data-designer-id],
+      wc-save-split-button[data-designer-id], wc-save-button[data-designer-id],
+      wc-fa-icon[data-designer-id], wc-image[data-designer-id], hr[data-designer-id])) {
+      min-height: 100px;
     }
-    [data-designer-container]:not(:has([data-designer-id]))::after {
+    [data-designer-container]:not(:has([data-designer-id]))::after,
+    [data-designer-container]:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
+      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
+      wc-form[data-designer-id], wc-tab[data-designer-id], wc-tab-item[data-designer-id],
+      fieldset[data-designer-id], wc-tabulator[data-designer-id], wc-breadcrumb[data-designer-id],
+      wc-save-split-button[data-designer-id], wc-save-button[data-designer-id],
+      wc-fa-icon[data-designer-id], wc-image[data-designer-id], hr[data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
-      min-height: 80px;
+      min-height: 100px;
       color: rgba(100, 170, 255, 0.3);
       font-size: 11px; font-family: system-ui, sans-serif;
       border: 1px dashed rgba(100, 170, 255, 0.2);
       border-radius: 4px;
     }
 
-    /* Empty inner wrappers also show drop hint */
-    .wc-form:not(:has([data-designer-id])),
+    /* Inner wrappers */
+    .wc-form:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
+      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
+      fieldset[data-designer-id])),
     .wc-div:not(:has([data-designer-id])),
     .wc-tab-item:not(:has([data-designer-id])) {
-      min-height: 80px;
+      min-height: 100px;
     }
-    .wc-form:not(:has([data-designer-id]))::after,
+    .wc-form:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
+      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
+      fieldset[data-designer-id]))::after,
     .wc-div:not(:has([data-designer-id]))::after,
     .wc-tab-item:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
-      min-height: 80px;
+      min-height: 100px;
       color: rgba(100, 170, 255, 0.25);
       font-size: 11px; font-family: system-ui, sans-serif;
       border: 1px dashed rgba(100, 170, 255, 0.15);
@@ -131,11 +149,12 @@
       font-family: system-ui, sans-serif;
     }
 
-    /* Prevent form interaction at design time */
+    /* Prevent form interaction at design time — but allow tab nav buttons */
     [data-designer-id] input,
     [data-designer-id] select,
-    [data-designer-id] textarea,
-    [data-designer-id] button { pointer-events: none; }
+    [data-designer-id] textarea { pointer-events: none; }
+    [data-designer-id] button:not(.tab-link) { pointer-events: none; }
+    .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
 
     /* Full page preview mode — enable all interactions, hide edit chrome */
     .preview-mode [data-designer-id] input,
@@ -749,7 +768,7 @@
             setTimeout(() => {
               refreshTabs();
               postToParent('treeAppended', {});
-            }, 1500);
+            }, 800);
           });
         } else if (payload.type) {
           // Single component drop
@@ -981,14 +1000,11 @@
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
-            console.log('[canvas] loadTree: starting with', e.data.tree.length, 'root nodes');
             loadNodes(e.data.tree, null).then(() => {
-              console.log('[canvas] loadTree: loadNodes complete, scheduling refreshTabs');
               setTimeout(() => {
-                console.log('[canvas] loadTree: running refreshTabs now');
                 refreshTabs();
                 postToParent('treeLoaded', {});
-              }, 1500);
+              }, 800);
             }).catch(err => {
               console.error('[canvas] loadTree error:', err);
             });
@@ -1008,14 +1024,11 @@
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
-            console.log('[canvas] appendTree: starting with', e.data.tree.length, 'root nodes');
             appendNodes(e.data.tree, e.data.parentId || null).then(() => {
-              console.log('[canvas] appendTree: complete, scheduling refreshTabs in 1500ms');
               setTimeout(() => {
-                console.log('[canvas] appendTree: running refreshTabs now');
                 refreshTabs();
                 postToParent('treeAppended', {});
-              }, 1500);
+              }, 800);
             }).catch(err => {
               console.error('[canvas] appendTree error:', err);
             });
