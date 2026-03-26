@@ -12829,10 +12829,7 @@ if (!customElements.get("wc-live-designer")) {
             }
           }
           if (this._savedContent) {
-            const formHTML = this._extractFormContent(this._savedContent);
-            if (formHTML) {
-              this._postToCanvas("renderHTML", { html: formHTML });
-            }
+            this.loadHTML(this._savedContent);
           }
           if (this._pendingHTML) {
             this._postToCanvas("renderHTML", { html: this._pendingHTML });

@@ -1286,12 +1286,9 @@ if (!customElements.get('wc-live-designer')) {
               this._generateSampleFromSchema(schemaSlug);
             }
           }
-          // Load saved content — render directly via innerHTML
+          // Load saved content via loadHTML (strips Pongo2 wrappers, reverses expressions)
           if (this._savedContent) {
-            const formHTML = this._extractFormContent(this._savedContent);
-            if (formHTML) {
-              this._postToCanvas('renderHTML', { html: formHTML });
-            }
+            this.loadHTML(this._savedContent);
           }
           // Load pending HTML if queued before canvas was ready
           if (this._pendingHTML) {
