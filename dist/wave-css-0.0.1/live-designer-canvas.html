@@ -1015,9 +1015,6 @@
         if (!tabNav || !tabBody) return;
         const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
         console.log('[canvas] refreshTabs: found', tabItems.length, 'tab-items, existing buttons:', tabNav.querySelectorAll('.tab-link').length);
-
-        // Rebuild buttons from current tab-items
-        const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
         tabNav.innerHTML = '';
         tabItems.forEach((item, i) => {
           const label = item.getAttribute('label') || `Tab ${i + 1}`;
