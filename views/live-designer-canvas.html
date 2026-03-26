@@ -966,12 +966,12 @@
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
             loadNodes(e.data.tree, null).then(() => {
-              // Delay refreshTabs — wc-tab's own _render may still be queued
-              // and would overwrite our rebuilt buttons
+              // Delay refreshTabs — wc-tab's _restoreTabsWhenReady waits up
+              // to 750ms+ before activating tabs, so we must run after that
               setTimeout(() => {
                 refreshTabs();
                 postToParent('treeLoaded', {});
-              }, 500);
+              }, 1500);
             });
           }
           break;
@@ -993,7 +993,7 @@
               setTimeout(() => {
                 refreshTabs();
                 postToParent('treeAppended', {});
-              }, 500);
+              }, 1500);
             });
           }
           break;
