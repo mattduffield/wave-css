@@ -103,6 +103,41 @@ if (!customElements.get('wc-live-designer')) {
         font-family: system-ui, sans-serif !important;
       }
 
+      /* === Design time: hidden class should not hide content === */
+      [data-designer-id].hidden {
+        display: flex !important;
+        visibility: visible !important;
+      }
+
+      /* Skeletons: compact static indicator in designer */
+      wc-article-skeleton[data-designer-id] .wc-article-skeleton,
+      wc-table-skeleton[data-designer-id] .wc-table-skeleton,
+      wc-card-skeleton[data-designer-id] .wc-card-skeleton,
+      wc-list-skeleton[data-designer-id] .wc-list-skeleton {
+        display: none !important;
+      }
+      wc-article-skeleton[data-designer-id],
+      wc-table-skeleton[data-designer-id],
+      wc-card-skeleton[data-designer-id],
+      wc-list-skeleton[data-designer-id] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        background: var(--surface-3, #2a2a3a) !important;
+        border: 1px dashed rgba(0, 120, 255, 0.3) !important;
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        font-size: 11px !important;
+        color: rgba(0, 120, 255, 0.5) !important;
+        font-family: system-ui, sans-serif !important;
+      }
+      wc-article-skeleton[data-designer-id]::after { content: '⏳ Article Skeleton' !important; }
+      wc-table-skeleton[data-designer-id]::after { content: '⏳ Table Skeleton' !important; }
+      wc-card-skeleton[data-designer-id]::after { content: '⏳ Card Skeleton' !important; }
+      wc-list-skeleton[data-designer-id]::after { content: '⏳ List Skeleton' !important; }
+
       /* === Prevent form interaction at design time === */
       [data-designer-id] input,
       [data-designer-id] select,

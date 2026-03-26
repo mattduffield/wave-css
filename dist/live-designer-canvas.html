@@ -79,6 +79,47 @@
       font-size: 11px; font-family: system-ui, sans-serif;
     }
 
+    /* Design time: the 'hidden' utility class should not hide content.
+       Skeletons use hidden + JS transition, but in the designer we show everything. */
+    [data-designer-id].hidden {
+      display: flex !important;
+      visibility: visible !important;
+    }
+
+    /* Skeletons: render as compact static indicators in the designer.
+       Hide the animated skeleton content and show a simple label instead. */
+    wc-article-skeleton[data-designer-id] .wc-article-skeleton,
+    wc-table-skeleton[data-designer-id] .wc-table-skeleton,
+    wc-card-skeleton[data-designer-id] .wc-card-skeleton,
+    wc-list-skeleton[data-designer-id] .wc-list-skeleton {
+      display: none !important;
+    }
+    wc-article-skeleton[data-designer-id],
+    wc-table-skeleton[data-designer-id],
+    wc-card-skeleton[data-designer-id],
+    wc-list-skeleton[data-designer-id] {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px !important;
+      max-height: 32px !important;
+      background: var(--surface-3, #2a2a3a) !important;
+      border: 1px dashed rgba(100, 170, 255, 0.3) !important;
+      border-radius: 4px !important;
+      overflow: hidden !important;
+    }
+    wc-article-skeleton[data-designer-id]::after { content: '⏳ Article Skeleton'; }
+    wc-table-skeleton[data-designer-id]::after { content: '⏳ Table Skeleton'; }
+    wc-card-skeleton[data-designer-id]::after { content: '⏳ Card Skeleton'; }
+    wc-list-skeleton[data-designer-id]::after { content: '⏳ List Skeleton'; }
+    wc-article-skeleton[data-designer-id]::after,
+    wc-table-skeleton[data-designer-id]::after,
+    wc-card-skeleton[data-designer-id]::after,
+    wc-list-skeleton[data-designer-id]::after {
+      font-size: 11px; color: rgba(100, 170, 255, 0.6);
+      font-family: system-ui, sans-serif;
+    }
+
     /* Prevent form interaction at design time */
     [data-designer-id] input,
     [data-designer-id] select,
@@ -925,6 +966,7 @@
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
             loadNodes(e.data.tree, null).then(() => {
+              refreshTabs();
               postToParent('treeLoaded', {});
             });
           }
@@ -944,12 +986,53 @@
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
             appendNodes(e.data.tree, e.data.parentId || null).then(() => {
+              refreshTabs();
               postToParent('treeAppended', {});
             });
           }
           break;
       }
     });
+
+    // After tree loading, wc-tab components need their button bars rebuilt
+    // because tab-items were added after the tab initially rendered.
+    function refreshTabs() {
+      canvas.querySelectorAll('wc-tab[data-designer-id]').forEach(tab => {
+        const wcTab = tab.querySelector(':scope > .wc-tab');
+        if (!wcTab) return;
+        const tabNav = wcTab.querySelector(':scope > .tab-nav');
+        const tabBody = wcTab.querySelector(':scope > .tab-body');
+        if (!tabNav || !tabBody) return;
+
+        // Rebuild buttons from current tab-items
+        const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
+        tabNav.innerHTML = '';
+        tabItems.forEach((item, i) => {
+          const label = item.getAttribute('label') || `Tab ${i + 1}`;
+          const btn = document.createElement('button');
+          btn.className = 'tab-link' + (item.classList.contains('active') ? ' active' : '');
+          btn.dataset.label = label;
+          btn.textContent = label;
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Deactivate all
+            tabNav.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+            tabItems.forEach(ti => {
+              ti.classList.remove('active');
+              const inner = ti.querySelector(':scope > .wc-tab-item');
+              if (inner) inner.classList.remove('active');
+            });
+            // Activate clicked
+            btn.classList.add('active');
+            item.classList.add('active');
+            const inner = item.querySelector(':scope > .wc-tab-item');
+            if (inner) inner.classList.add('active');
+          });
+          tabNav.appendChild(btn);
+        });
+      });
+    }
 
     // Keyboard
     document.addEventListener('keydown', (e) => {
