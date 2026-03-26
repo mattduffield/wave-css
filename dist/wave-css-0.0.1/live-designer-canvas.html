@@ -966,8 +966,12 @@
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
             loadNodes(e.data.tree, null).then(() => {
-              refreshTabs();
-              postToParent('treeLoaded', {});
+              // Delay refreshTabs — wc-tab's own _render may still be queued
+              // and would overwrite our rebuilt buttons
+              setTimeout(() => {
+                refreshTabs();
+                postToParent('treeLoaded', {});
+              }, 500);
             });
           }
           break;
@@ -986,8 +990,10 @@
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
             appendNodes(e.data.tree, e.data.parentId || null).then(() => {
-              refreshTabs();
-              postToParent('treeAppended', {});
+              setTimeout(() => {
+                refreshTabs();
+                postToParent('treeAppended', {});
+              }, 500);
             });
           }
           break;
