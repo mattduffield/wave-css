@@ -72,6 +72,10 @@ class WcFlipBox extends WcBaseComponent {
     // console.log('connectedCallback:wc-flip-box');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-flip-box') || this;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

@@ -136,6 +136,31 @@ if (!customElements.get('wc-sidenav')) {
       // console.log('connectedCallback:wc-sidenav');
     }
 
+    getInnerContainer() {
+      return this.querySelector(':scope > .wc-sidenav') || this;
+    }
+
+    getDesignerHTML() {
+      const container = this.querySelector('.wc-sidenav');
+      if (!container) return null;
+      // Exclude rendered chrome (closebtn) - only get original content children
+      const children = container.querySelectorAll(':scope > *:not(.closebtn)');
+      if (children.length === 0) return null;
+      return Array.from(children).map(child => {
+        const tag = child.tagName.toLowerCase();
+        const attrs = [];
+        for (const attr of child.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.name === 'style') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
+        return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+      }).join('\n');
+    }
+
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();

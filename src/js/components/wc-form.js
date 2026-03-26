@@ -47,12 +47,16 @@ class WcForm extends WcBaseComponent {
     // console.log('connectedCallback:wc-form');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-form') || this;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {  
+  _handleAttributeChange(attrName, newValue) {
     if (attrName === 'test') {
       // Do nothing...
     } else {

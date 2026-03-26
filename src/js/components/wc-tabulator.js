@@ -306,6 +306,46 @@ if (!customElements.get('wc-tabulator')) {
       // console.log('conntectedCallback:wc-tabulator');
     }
 
+    getDesignerHTML() {
+      const parts = [];
+      const columns = this.querySelectorAll('wc-tabulator-column');
+      columns.forEach(col => {
+        const attrs = [];
+        for (const attr of col.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        parts.push(`<wc-tabulator-column${attrs.length ? ' ' + attrs.join(' ') : ''}></wc-tabulator-column>`);
+      });
+      const funcs = this.querySelectorAll('wc-tabulator-func');
+      funcs.forEach(fn => {
+        const attrs = [];
+        for (const attr of fn.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const content = fn.textContent.trim();
+        parts.push(`<wc-tabulator-func${attrs.length ? ' ' + attrs.join(' ') : ''}>${content}</wc-tabulator-func>`);
+      });
+      const rowMenus = this.querySelectorAll('wc-tabulator-row-menu');
+      rowMenus.forEach(rm => {
+        const attrs = [];
+        for (const attr of rm.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const content = rm.textContent.trim();
+        parts.push(`<wc-tabulator-row-menu${attrs.length ? ' ' + attrs.join(' ') : ''}>${content}</wc-tabulator-row-menu>`);
+      });
+      return parts.length > 0 ? parts.join('\n') : null;
+    }
+
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();

@@ -43,12 +43,30 @@ if (!customElements.get('wc-breadcrumb')) {
       this._applyStyle();
     }
 
+    getInnerContainer() {
+      return this.querySelector(':scope > .wc-breadcrumb') || this;
+    }
+
+    getDesignerHTML() {
+      const items = this.querySelectorAll('wc-breadcrumb-item');
+      return Array.from(items).map(item => {
+        const attrs = [];
+        for (const attr of item.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        return `<wc-breadcrumb-item ${attrs.join(' ')}></wc-breadcrumb-item>`;
+      }).join('\n');
+    }
+
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
     }
 
-    _handleAttributeChange(attrName, newValue) {    
+    _handleAttributeChange(attrName, newValue) {
       if (attrName === 'items') {
         // Do nothing...
       } else {
@@ -68,8 +86,39 @@ if (!customElements.get('wc-breadcrumb')) {
     }
 
     _createElement() {
-      const markup = [];
       const crumbs = this._getBreadcrumbItems();
+
+      // In designer mode, keep wc-breadcrumb-item elements in the DOM
+      // so they are selectable and their properties can be edited.
+      if (WcBreadcrumb.designerMode) {
+        this.componentElement.className = 'wc-breadcrumb flex flex-row items-center px-2 gap-2';
+        // Move breadcrumb-item elements into the wrapper and style them
+        const items = this.querySelectorAll('wc-breadcrumb-item');
+        items.forEach((item, index) => {
+          item.style.display = 'inline-flex';
+          item.style.alignItems = 'center';
+          item.style.cursor = 'pointer';
+          if (index > 0) {
+            const sep = document.createElement('span');
+            sep.textContent = '>';
+            sep.style.color = 'var(--text-6)';
+            sep.style.margin = '0 2px';
+            this.componentElement.appendChild(sep);
+          }
+          const label = item.getAttribute('label') || '';
+          const link = item.getAttribute('link') || '';
+          if (index === 0 && link) {
+            // Home icon placeholder
+            item.textContent = '🏠';
+          } else {
+            item.textContent = label || '…';
+          }
+          this.componentElement.appendChild(item);
+        });
+        return;
+      }
+
+      const markup = [];
       crumbs.forEach((item, index) => {
         if (index == 0) {
           markup.push(`

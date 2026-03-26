@@ -55,6 +55,30 @@ if (!customElements.get('wc-split-button')) {
       // console.log('connectedCallback:wc-split-button');
     }
 
+    getInnerContainer() {
+      return this.querySelector(':scope > .wc-split-button') || this;
+    }
+
+    getDesignerHTML() {
+      const dropdownContent = this.querySelector('.dropdown-content');
+      if (!dropdownContent) return null;
+      const children = dropdownContent.querySelectorAll(':scope > *');
+      if (children.length === 0) return null;
+      return Array.from(children).map(child => {
+        const tag = child.tagName.toLowerCase();
+        const attrs = [];
+        for (const attr of child.attributes) {
+          if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+          if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.name === 'style') continue;
+          if (attr.value === '') attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
+        return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+      }).join('\n');
+    }
+
     disconnectedCallback() {
       this._unWireEvents();
     }

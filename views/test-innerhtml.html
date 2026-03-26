@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>innerHTML Rendering Test</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body style="padding: 20px;">
+  <h3>innerHTML Rendering Test</h3>
+  <p>This page tests if Wave CSS components render correctly when inserted via innerHTML.</p>
+  <hr>
+  <div id="canvas" style="border: 2px solid #333; padding: 16px; margin-top: 16px;"></div>
+  <hr>
+  <pre id="results" style="color: #0f0; background: #111; padding: 16px; margin-top: 16px;"></pre>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    const log = (msg) => {
+      document.getElementById('results').textContent += msg + '\n';
+    };
+
+    // Wait for wave-css to load
+    setTimeout(() => {
+      log('Setting innerHTML...');
+      const canvas = document.getElementById('canvas');
+
+      canvas.innerHTML = `
+        <wc-article-skeleton></wc-article-skeleton>
+        <div class="page-content flex flex-col flex-1 py-2 px-3 gap-2">
+          <div class="flex flex-row gap-3 justify-between items-center">
+            <wc-breadcrumb>
+              <wc-breadcrumb-item label="Home" link="#"></wc-breadcrumb-item>
+              <wc-breadcrumb-item label="Articles" link="#"></wc-breadcrumb-item>
+              <wc-breadcrumb-item label="Edit" link=""></wc-breadcrumb-item>
+            </wc-breadcrumb>
+            <div class="flex flex-row items-center gap-3">
+              <wc-save-split-button method="put"></wc-save-split-button>
+            </div>
+          </div>
+          <wc-tab class="col-1 mt-2 mb-4" animate>
+            <wc-tab-item class="active" label="General">
+              <wc-form class="col gap-3 p-4" id="article">
+                <div class="row gap-4">
+                  <wc-input name="title" lbl-label="Title" class="col-1" required value="Sample Title"></wc-input>
+                  <wc-input name="author" lbl-label="Author" class="col-1" value="Jane Doe"></wc-input>
+                </div>
+                <wc-textarea name="description" lbl-label="Description" rows="3" value="A sample description."></wc-textarea>
+                <div class="row gap-4">
+                  <wc-select name="category" lbl-label="Category" class="col-1">
+                    <option value="">Choose...</option>
+                    <option value="news">News</option>
+                    <option value="tech">Technology</option>
+                  </wc-select>
+                  <wc-input name="date" lbl-label="Publish Date" type="date" class="col-1" value="2026-03-25"></wc-input>
+                </div>
+                <wc-input name="is_active" lbl-label="Active?" type="checkbox" toggle-switch checked></wc-input>
+                <button class="btn btn-primary">Submit</button>
+                <a href="#" class="underline">View article</a>
+                <h3>Section Title</h3>
+                <p>Some paragraph text here.</p>
+              </wc-form>
+            </wc-tab-item>
+            <wc-tab-item label="Change Log">
+              <div class="p-4">
+                <p>Change log content goes here.</p>
+              </div>
+            </wc-tab-item>
+          </wc-tab>
+        </div>
+      `;
+
+      log('innerHTML set. Waiting for components to render...');
+
+      // Check results after components have time to initialize
+      setTimeout(() => {
+        log('\n=== RENDER RESULTS ===');
+
+        // Check each component type rendered its internal structure
+        const checks = [
+          ['wc-article-skeleton', '.wc-article-skeleton', 'Article Skeleton'],
+          ['wc-breadcrumb', '.wc-breadcrumb', 'Breadcrumb'],
+          ['wc-breadcrumb-item', null, 'Breadcrumb Items (count)'],
+          ['wc-save-split-button', '.wc-save-split-button', 'Save Split Button'],
+          ['wc-tab', '.wc-tab', 'Tab Container'],
+          ['wc-tab .tab-nav', null, 'Tab Navigation'],
+          ['wc-tab .tab-body', null, 'Tab Body'],
+          ['wc-tab-item', '.wc-tab-item', 'Tab Item'],
+          ['wc-form', '.wc-form', 'Form'],
+          ['wc-input', 'input', 'Input (rendered)'],
+          ['wc-textarea', 'textarea', 'Textarea (rendered)'],
+          ['wc-select', 'select', 'Select (rendered)'],
+          ['button', null, 'Button'],
+          ['a', null, 'Link'],
+          ['h3', null, 'Heading'],
+          ['p', null, 'Paragraph'],
+        ];
+
+        for (const [selector, innerSelector, label] of checks) {
+          const el = canvas.querySelector(selector);
+          if (!el) {
+            log(`✗ ${label}: NOT FOUND (${selector})`);
+            continue;
+          }
+          if (innerSelector) {
+            const inner = el.querySelector(innerSelector);
+            log(`${inner ? '✓' : '✗'} ${label}: ${inner ? 'rendered' : 'inner element missing'}`);
+          } else if (selector === 'wc-breadcrumb-item') {
+            const count = canvas.querySelectorAll('wc-breadcrumb-item').length;
+            log(`${count === 3 ? '✓' : '✗'} ${label}: ${count}`);
+          } else if (selector === 'wc-tab .tab-nav') {
+            const nav = canvas.querySelector('.tab-nav');
+            const btns = nav?.querySelectorAll('.tab-link');
+            log(`${btns?.length === 2 ? '✓' : '✗'} ${label}: ${btns?.length || 0} buttons`);
+          } else if (selector === 'wc-tab .tab-body') {
+            const body = canvas.querySelector('.tab-body');
+            const items = body?.querySelectorAll(':scope > wc-tab-item');
+            log(`${items?.length === 2 ? '✓' : '✗'} ${label}: ${items?.length || 0} tab items`);
+          } else {
+            log(`✓ ${label}: found`);
+          }
+        }
+
+        // Check tab switching works
+        const tabBtns = canvas.querySelectorAll('.tab-link');
+        log(`\n=== TAB SWITCHING ===`);
+        log(`Tab buttons: ${tabBtns.length}`);
+        if (tabBtns.length >= 2) {
+          tabBtns[1].click();
+          setTimeout(() => {
+            const activeItem = canvas.querySelector('wc-tab-item .wc-tab-item.active');
+            const changeLogVisible = activeItem?.textContent.includes('Change log');
+            log(`After clicking "Change Log": ${changeLogVisible ? '✓ visible' : '✗ not visible'}`);
+
+            // Switch back
+            tabBtns[0].click();
+            setTimeout(() => {
+              const formVisible = canvas.querySelector('wc-form');
+              log(`After clicking "General": ${formVisible ? '✓ form visible' : '✗ form not visible'}`);
+              log('\n=== TEST COMPLETE ===');
+            }, 300);
+          }, 300);
+        }
+      }, 2000);
+    }, 1000);
+  </script>
+</body>
+</html>

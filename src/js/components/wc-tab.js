@@ -135,6 +135,10 @@ class WcTab extends WcBaseComponent {
     // console.log('connectedCallback:wc-tab');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-tab > .tab-body') || this;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

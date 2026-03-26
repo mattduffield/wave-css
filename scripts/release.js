@@ -5,29 +5,37 @@ const pkg = require('../package.json');
 const version = pkg.version;
 const distDir = path.join(__dirname, '..', 'dist');
 const releaseDir = path.join(distDir, `wave-css-${version}`);
+const goKartDir = path.join(__dirname, '..', '..', '..', '_learn', 'go-kart', 'static', 'js', `wave-css-${version}`);
 
-if (fs.existsSync(releaseDir)) {
-  console.error(`Release ${version} already exists at dist/wave-css-${version}/`);
-  console.error('Bump the version in package.json before creating a new release.');
-  process.exit(1);
-}
-
-function copyRecursiveSync(src, dest) {
+// Copy directory recursively
+function copyDir(src, dest, skipVersionedDirs = false) {
   const stats = fs.statSync(src);
   if (stats.isDirectory()) {
-    // Skip versioned release directories to avoid nesting
-    if (path.basename(src).startsWith('wave-css-')) return;
+    if (skipVersionedDirs && path.basename(src).startsWith('wave-css-')) return;
     fs.mkdirSync(dest, { recursive: true });
     for (const child of fs.readdirSync(src)) {
-      copyRecursiveSync(path.join(src, child), path.join(dest, child));
+      copyDir(path.join(src, child), path.join(dest, child), skipVersionedDirs);
     }
   } else {
     fs.copyFileSync(src, dest);
   }
 }
 
+// Build release
+if (fs.existsSync(releaseDir)) {
+  fs.rmSync(releaseDir, { recursive: true });
+}
 fs.mkdirSync(releaseDir, { recursive: true });
-copyRecursiveSync(distDir, releaseDir);
+copyDir(distDir, releaseDir, true);  // Skip nested wave-css-* dirs
+console.log(`✓ Release ${version} created at dist/wave-css-${version}/`);
 
-console.log(`\n✓ Release ${version} created at dist/wave-css-${version}/`);
-console.log(`\nTo copy to Go Kart:\n  cp -r dist/wave-css-${version}/* /path/to/go-kart/static/dist/`);
+// Auto-copy to Go Kart
+if (fs.existsSync(path.dirname(goKartDir))) {
+  if (fs.existsSync(goKartDir)) {
+    fs.rmSync(goKartDir, { recursive: true });
+  }
+  copyDir(releaseDir, goKartDir, false);  // Copy everything, no skipping
+  console.log(`✓ Copied to Go Kart at ${goKartDir}`);
+} else {
+  console.log(`\nTo copy to Go Kart:\n  cp -r dist/wave-css-${version}/* /path/to/go-kart/static/js/wave-css-${version}/`);
+}

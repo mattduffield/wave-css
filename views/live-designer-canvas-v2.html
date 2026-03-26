@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="theme-ocean" data-designer>
+<html lang="en" class="theme-ocean">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -108,20 +108,13 @@
       display: contents !important;
     }
 
-    /* Prevent ALL form/link interaction — except tab buttons */
+    /* Prevent form interaction — but allow tab buttons and designer elements */
     [data-designer-id] input:not([data-designer-id]),
     [data-designer-id] select:not([data-designer-id]),
     [data-designer-id] textarea:not([data-designer-id]) { pointer-events: none; }
     [data-designer-id] button:not(.tab-link):not([data-designer-id]) { pointer-events: none; }
-    [data-designer-id] a { pointer-events: none; }
+    [data-designer-id] a:not([data-designer-id]) { pointer-events: none; }
     .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
-
-    /* Prevent dropdowns/popups from opening in designer mode */
-    wc-save-split-button[data-designer-id] .wc-save-split-button .split-dropdown,
-    wc-dropdown[data-designer-id] .wc-dropdown .dropdown-content,
-    wc-split-button[data-designer-id] .wc-split-button .split-dropdown {
-      display: none !important;
-    }
 
     /* Drop indicator line */
     .drop-indicator {
@@ -225,8 +218,6 @@
       'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
       'wc-breadcrumb',
     ]);
-    // Components whose children are declarative (not drop targets) now
-    // expose getDesignerHTML() method — no hardcoded set needed.
     const UTILITY_TYPES = new Set([
       'wc-hotkey', 'wc-behavior', 'wc-event-handler', 'wc-visibility-change',
       'wc-script', 'wc-javascript', 'wc-event-hub', 'wc-mask-hub',
@@ -238,16 +229,25 @@
 
     // =============================================
     // INNER ELEMENT RESOLUTION
-    // Uses the component's getInnerContainer() method if available,
-    // falling back to the element itself for plain HTML elements.
     // =============================================
     function getInnerElement(el, type) {
-      // Web components expose getInnerContainer() — use it
-      if (typeof el.getInnerContainer === 'function') {
-        return el.getInnerContainer();
+      switch (type) {
+        case 'wc-tab':        return el.querySelector(':scope > .wc-tab > .tab-body') || el;
+        case 'wc-tab-item':   return el.querySelector(':scope > .wc-tab-item') || el;
+        case 'wc-form':       return el.querySelector(':scope > .wc-form') || el;
+        case 'wc-breadcrumb': return el.querySelector(':scope > .wc-breadcrumb') || el;
+        case 'div':           return el.querySelector(':scope > .wc-div') || el;
+        case 'wc-accordion':  return el.querySelector(':scope > .wc-accordion') || el;
+        case 'wc-dropdown':   return el.querySelector(':scope > .wc-dropdown') || el;
+        case 'wc-sidebar':    return el.querySelector(':scope > .wc-sidebar') || el;
+        case 'wc-sidenav':    return el.querySelector(':scope > .wc-sidenav') || el;
+        case 'wc-flip-box':   return el.querySelector(':scope > .wc-flip-box') || el;
+        case 'wc-menu':       return el.querySelector(':scope > .wc-menu') || el;
+        case 'wc-slideshow':  return el.querySelector(':scope > .wc-slideshow') || el;
+        case 'wc-split-button': return el.querySelector(':scope > .wc-split-button') || el;
+        case 'fieldset':      return el;
+        default:              return el;
       }
-      // Plain HTML elements (fieldset, div without wc-div) — self
-      return el;
     }
 
     // =============================================
@@ -259,46 +259,37 @@
     function scanAndRegister() {
       registry.clear();
 
-      // insideWC: true when scanning inside a wc- container's content area.
-      // In that context, only register wc- elements (user-placed components),
-      // NOT generic HTML elements (which are internal to the component).
-      function scan(parent, insideWC = false) {
+      function scan(parent) {
         for (const child of parent.children) {
           const tag = child.tagName.toLowerCase();
 
-          // Skip badge spans
-          if (child.hasAttribute('data-designer-label-badge')) continue;
-
-          if (WC_TAGS.has(tag)) {
+          if (WC_TAGS.has(tag) || HTML_TAGS.has(tag)) {
             registerElement(child, tag);
+            // For containers, recurse into their content area
             if (isContainer(tag)) {
               const inner = getInnerElement(child, tag);
               if (inner) {
                 inner.setAttribute('data-drop-target', tag);
-                // wc- containers: their content areas may have internal HTML elements
-                scan(inner, tag.startsWith('wc-'));
+                scan(inner);
               }
             }
-          } else if (HTML_TAGS.has(tag) && !insideWC) {
-            // Only register HTML elements when NOT inside a wc- container
-            // (inside wc- containers, HTML elements are internal component DOM)
-            registerElement(child, tag);
           } else if (tag === 'div' || tag === 'fieldset') {
+            // div/fieldset — register if NOT an internal wrapper
             const isInternal = Array.from(child.classList).some(c =>
               c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
             );
-            if (!isInternal && !insideWC) {
+            if (!isInternal) {
               registerElement(child, tag);
               if (isContainer(tag)) {
                 const inner = getInnerElement(child, tag);
                 if (inner) {
                   inner.setAttribute('data-drop-target', tag);
-                  scan(inner, false); // User-placed divs can contain HTML elements
+                  scan(inner);
                 }
               }
             } else {
-              // Internal wrapper or div inside wc- — scan children but don't register
-              scan(child, insideWC);
+              // Internal wrapper — skip registration but scan children
+              scan(child);
             }
           } else {
             // Unknown element — scan children in case designer elements are nested
@@ -357,9 +348,6 @@
         const text = textNodes.map(n => n.textContent).join('').trim();
         if (text) properties.content = text;
       }
-
-      // Components with getDesignerHTML() handle their own child extraction.
-      // No need to store _declaredHTML — the component knows its own markup.
 
       registry.set(id, { element: el, type, properties });
     }
@@ -425,11 +413,8 @@
               if (inner) inner.setAttribute('data-drop-target', tag);
             }
           }
+          // Scan children of newly inserted elements
           scanNewChildren(el);
-        }
-        // Apply sample data to newly inserted elements
-        if (Object.keys(sampleData).length > 0) {
-          applySampleDataToAll();
         }
         postToParent('componentInserted', {});
       }, 500);
@@ -482,8 +467,6 @@
     function extractChildren(parent) {
       let html = '';
       for (const child of parent.children) {
-        // Skip badge spans and other designer-internal elements
-        if (child.hasAttribute('data-designer-label-badge')) continue;
         const id = child.getAttribute('data-designer-id');
         if (!id) continue;
         const entry = registry.get(id);
@@ -492,8 +475,7 @@
         const tag = entry.type;
         const attrs = [];
         const skipAttrs = new Set(['data-designer-id', 'data-designer-container', 'data-designer-utility',
-          'data-designer-label', 'data-designer-label-badge', 'data-designer-selected',
-          'data-drop-target', 'data-wc-id', 'style']);
+          'data-designer-label', 'data-drop-target', 'data-wc-id', 'style']);
 
         // Rebuild attributes from DOM (live state)
         for (const attr of child.attributes) {
@@ -519,9 +501,14 @@
           const inner = getInnerElement(child, tag);
           const childHTML = inner ? extractChildren(inner) : '';
           html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
-        } else if (typeof child.getDesignerHTML === 'function' && child.getDesignerHTML() !== null) {
-          // Component provides its own clean child markup (breadcrumb, select, radio)
-          html += `<${tag}${attrStr}>\n${child.getDesignerHTML()}\n</${tag}>`;
+        } else if (tag === 'wc-select' || tag === 'wc-input') {
+          // Use stored innerHTML from properties for options
+          const stored = entry.properties.innerHTML;
+          if (stored) {
+            html += `<${tag}${attrStr}>\n${stored}\n</${tag}>`;
+          } else {
+            html += `<${tag}${attrStr}></${tag}>`;
+          }
         } else if (HTML_TAGS.has(tag)) {
           // Native elements — include text content
           const content = entry.properties.content || '';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="theme-ocean">
+<html lang="en" class="theme-ocean" data-designer>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,8 @@
   <style>
     body { margin: 0; padding: 0; min-height: 100vh; }
     #editor-canvas { min-height: 100vh; padding: 1rem; position: relative; }
+
+    /* Empty canvas hint */
     #editor-canvas:not(:has([data-designer-id]))::after {
       content: 'Drag components here to start designing';
       display: flex; justify-content: center; align-items: center;
@@ -15,20 +17,76 @@
     }
 
     /* ===============================================
-       EDIT MODE — natural rendering + subtle affordances
-       Components render as they would in production.
-       Designer adds: hover outlines, drop hints, labels.
+       DESIGNER MODE — natural rendering + affordances
+       Components render exactly as they would in production.
+       Designer adds: hover outlines, drop hints, selection.
        =============================================== */
 
-    /* All designer elements need position:relative for selection outline */
-    [data-designer-id] {
-      position: relative;
+    /* All designer elements are selectable */
+    [data-designer-id] { position: relative; cursor: pointer; }
+    [data-designer-id]:hover { outline: 1px dashed var(--surface-5, #555); outline-offset: -1px; }
+
+    /* Selected element */
+    [data-designer-id].designer-selected {
+      outline: 2px solid #3b97e3 !important;
+      outline-offset: 2px !important;
     }
 
-    /* display:contents elements need a box for selection/drop — BUT
-       let components that manage their own child visibility (wc-tab,
-       wc-tab-item, wc-accordion, wc-dropdown) keep their natural display.
-       We only force display:block on simple wrappers like div, wc-form. */
+    /* Universal drop target — marked by scanAndRegister */
+    [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility]))) {
+      min-height: 100px;
+    }
+    [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility])))::after {
+      content: 'Drop components here';
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100px;
+      color: var(--text-6, #888);
+      font-size: 12px; font-family: system-ui, sans-serif;
+      border: 1px dashed var(--surface-5, #444);
+      border-radius: 4px;
+    }
+
+    /* All drop targets get subtle boundary */
+    [data-drop-target] {
+      border: 1px dashed rgba(120, 160, 220, 0.4);
+      border-radius: 4px;
+      padding: 8px;
+      min-height: 40px;
+      background: rgba(120, 160, 220, 0.03);
+    }
+
+    /* Skeletons: compact static indicator */
+    wc-article-skeleton[data-designer-id] .wc-article-skeleton,
+    wc-table-skeleton[data-designer-id] .wc-table-skeleton,
+    wc-card-skeleton[data-designer-id] .wc-card-skeleton,
+    wc-list-skeleton[data-designer-id] .wc-list-skeleton {
+      display: none !important;
+    }
+    wc-article-skeleton[data-designer-id],
+    wc-table-skeleton[data-designer-id],
+    wc-card-skeleton[data-designer-id],
+    wc-list-skeleton[data-designer-id] {
+      display: flex !important; align-items: center; justify-content: center;
+      min-height: 32px !important; max-height: 32px !important;
+      background: var(--surface-3) !important;
+      border: 1px dashed var(--surface-5) !important;
+      border-radius: 4px !important; overflow: hidden !important;
+    }
+    wc-article-skeleton[data-designer-id]::after { content: '⏳ Article Skeleton'; }
+    wc-table-skeleton[data-designer-id]::after { content: '⏳ Table Skeleton'; }
+    wc-card-skeleton[data-designer-id]::after,
+    wc-list-skeleton[data-designer-id]::after { content: '⏳ Skeleton'; }
+    wc-article-skeleton[data-designer-id]::after,
+    wc-table-skeleton[data-designer-id]::after,
+    wc-card-skeleton[data-designer-id]::after,
+    wc-list-skeleton[data-designer-id]::after {
+      font-size: 11px; color: var(--text-5, #999); font-family: system-ui, sans-serif;
+    }
+
+    /* Hidden class override — skeletons hide page-content, but in designer show everything */
+    [data-designer-id].hidden { display: flex !important; visibility: visible !important; }
+
+    /* Simple wrapper components need display:block (they use display:contents normally) */
     div[data-designer-id].contents,
     wc-form[data-designer-id].contents,
     wc-breadcrumb[data-designer-id].contents,
@@ -36,9 +94,7 @@
       display: block !important;
     }
 
-    /* wc-tab, wc-tab-item, wc-accordion, wc-dropdown, etc. render naturally.
-       Their .contents class still needs a box for the label badge, but
-       we do NOT override display — let the component handle show/hide. */
+    /* Interactive components (tabs, accordion, etc.) keep display:contents — they manage their own visibility */
     wc-tab[data-designer-id].contents,
     wc-tab-item[data-designer-id].contents,
     wc-accordion[data-designer-id].contents,
@@ -52,114 +108,32 @@
       display: contents !important;
     }
 
-    /* Subtle hover outline on all designer elements */
-    [data-designer-id]:hover {
-      outline: 1px dashed var(--surface-5, #555);
-      outline-offset: -1px;
-    }
-
-    /* === Universal drop target ===
-       Each container's inner element is marked with data-drop-target
-       by addComponent(). One rule handles all container types.
-       Only the actual drop target shows the hint — never the outer
-       custom element or intermediate wrappers. No duplication. */
-    [data-drop-target]:not(:has([data-designer-id])) {
-      min-height: 100px;
-    }
-    [data-drop-target]:not(:has([data-designer-id]))::after {
-      content: 'Drop components here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-
-    /* Design time: the 'hidden' utility class should not hide content.
-       Skeletons use hidden + JS transition, but in the designer we show everything. */
-    [data-designer-id].hidden {
-      display: flex !important;
-      visibility: visible !important;
-    }
-
-    /* Skeletons: render as compact static indicators in the designer.
-       Hide the animated skeleton content and show a simple label instead. */
-    wc-article-skeleton[data-designer-id] .wc-article-skeleton,
-    wc-table-skeleton[data-designer-id] .wc-table-skeleton,
-    wc-card-skeleton[data-designer-id] .wc-card-skeleton,
-    wc-list-skeleton[data-designer-id] .wc-list-skeleton {
-      display: none !important;
-    }
-    wc-article-skeleton[data-designer-id],
-    wc-table-skeleton[data-designer-id],
-    wc-card-skeleton[data-designer-id],
-    wc-list-skeleton[data-designer-id] {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      min-height: 32px !important;
-      max-height: 32px !important;
-      background: var(--surface-3) !important;
-      border: 1px dashed var(--surface-5) !important;
-      border-radius: 4px !important;
-      overflow: hidden !important;
-    }
-    wc-article-skeleton[data-designer-id]::after { content: '⏳ Article Skeleton'; }
-    wc-table-skeleton[data-designer-id]::after { content: '⏳ Table Skeleton'; }
-    wc-card-skeleton[data-designer-id]::after { content: '⏳ Card Skeleton'; }
-    wc-list-skeleton[data-designer-id]::after { content: '⏳ List Skeleton'; }
-    wc-article-skeleton[data-designer-id]::after,
-    wc-table-skeleton[data-designer-id]::after,
-    wc-card-skeleton[data-designer-id]::after,
-    wc-list-skeleton[data-designer-id]::after {
-      font-size: 11px; color: var(--text-5, #999);
-      font-family: system-ui, sans-serif;
-    }
-
-    /* Prevent form interaction at design time — but allow tab nav buttons */
-    [data-designer-id] input,
-    [data-designer-id] select,
-    [data-designer-id] textarea { pointer-events: none; }
-    [data-designer-id] button:not(.tab-link) { pointer-events: none; }
+    /* Prevent ALL form/link interaction — except tab buttons */
+    [data-designer-id] input:not([data-designer-id]),
+    [data-designer-id] select:not([data-designer-id]),
+    [data-designer-id] textarea:not([data-designer-id]) { pointer-events: none; }
+    [data-designer-id] button:not(.tab-link):not([data-designer-id]) { pointer-events: none; }
+    [data-designer-id] a { pointer-events: none; }
     .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
 
-    /* Full page preview mode — enable all interactions, hide edit chrome */
-    .preview-mode [data-designer-id] input,
-    .preview-mode [data-designer-id] select,
-    .preview-mode [data-designer-id] textarea,
-    .preview-mode [data-designer-id] button { pointer-events: all !important; }
-    .preview-mode [data-designer-id]:hover { outline: none !important; }
-    .preview-mode [data-designer-id].designer-selected { outline: none !important; }
-    .preview-mode [data-designer-container] { border-color: transparent !important; }
-    .preview-mode [data-designer-container]::before { display: none !important; }
-    .preview-mode [data-designer-container]:not(:has([data-designer-id]))::after { display: none !important; }
-    .preview-mode [data-designer-label-badge] { display: none !important; }
-    .preview-mode #floating-toolbar { display: none !important; }
-
-    /* Spacing between designer elements so hover outlines don't overlap */
-    [data-designer-id] + [data-designer-id] {
-      margin-top: 4px;
+    /* Prevent dropdowns/popups from opening in designer mode */
+    wc-save-split-button[data-designer-id] .wc-save-split-button .split-dropdown,
+    wc-dropdown[data-designer-id] .wc-dropdown .dropdown-content,
+    wc-split-button[data-designer-id] .wc-split-button .split-dropdown {
+      display: none !important;
     }
 
-    /* ---- Selection & hover (all inside iframe) ---- */
-    [data-designer-id]:hover {
-      outline: 1px solid rgba(100, 170, 255, 0.5);
-      outline-offset: 2px;
-    }
-    [data-designer-id].designer-selected,
-    .designer-selected[data-designer-id],
-    .contents.designer-selected[data-designer-id] {
-      outline: 2px solid #3b97e3 !important;
-      outline-offset: 2px !important;
-      box-shadow: 0 0 0 4px rgba(59, 151, 227, 0.15) !important;
-      border: 2px solid #3b97e3 !important;
-    }
-    [data-designer-id].designer-selected > [data-designer-label-badge] {
-      display: block;
+    /* Drop indicator line */
+    .drop-indicator {
+      height: 3px; background: #3b97e3; border-radius: 2px;
+      margin: 2px 0; pointer-events: none;
     }
 
-    /* Badge shown on selected element */
+    /* Spacing between designer elements */
+    [data-designer-id] + [data-designer-id] { margin-top: 4px; }
+
+    /* Selected badge */
+    [data-designer-id].designer-selected > [data-designer-label-badge] { display: block; }
     [data-designer-label-badge] {
       display: none;
       position: absolute; top: -20px; left: 0; z-index: 100;
@@ -169,43 +143,35 @@
       pointer-events: none;
     }
 
-    /* Drop indicator */
-    .drop-indicator {
-      height: 3px; background: #3b97e3; border-radius: 2px;
-      margin: 2px 0; pointer-events: none;
-      position: relative;
-    }
-    .drop-indicator::before, .drop-indicator::after {
-      content: ''; position: absolute; top: -3px;
-      width: 8px; height: 8px; border-radius: 50%; background: #3b97e3;
-    }
-    .drop-indicator::before { left: -4px; }
-    .drop-indicator::after { right: -4px; }
-
-    /* Container drop highlight */
-    [data-designer-container].drop-target {
-      background: rgba(59, 130, 246, 0.06);
-      border-color: rgba(100, 170, 255, 0.7);
-    }
-
     /* Floating toolbar */
     #floating-toolbar {
-      position: absolute; display: none;
-      background: #ffffff; border-radius: 6px;
-      padding: 4px; gap: 2px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-      z-index: 200; flex-direction: row; align-items: center;
+      display: none; position: absolute; z-index: 200;
+      background: var(--surface-1, #1a1a2e); border: 1px solid var(--surface-5, #444);
+      border-radius: 6px; padding: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-size: 14px;
     }
-    #floating-toolbar.visible { display: flex; }
+    #floating-toolbar.visible { display: flex; align-items: center; gap: 2px; }
     #floating-toolbar button {
-      background: transparent; border: none; color: #555;
+      background: transparent; border: none; color: var(--text-3, #ccc);
       cursor: pointer; padding: 4px 8px; border-radius: 4px;
       font-size: 14px; font-family: system-ui, sans-serif;
     }
-    #floating-toolbar button:hover { background: #f0f0f0; color: #3b97e3; }
-    #floating-toolbar .sep { width: 1px; height: 16px; background: #e0e0e0; margin: 0 2px; }
+    #floating-toolbar button:hover { background: var(--surface-3, #333); }
+    #floating-toolbar .sep { width: 1px; height: 20px; background: var(--surface-5, #444); }
+
+    /* Preview mode */
+    .preview-mode [data-designer-id] input,
+    .preview-mode [data-designer-id] select,
+    .preview-mode [data-designer-id] textarea,
+    .preview-mode [data-designer-id] button { pointer-events: all !important; }
+    .preview-mode [data-designer-id]:hover { outline: none !important; }
+    .preview-mode [data-designer-id].designer-selected { outline: none !important; }
+    .preview-mode [data-designer-label-badge] { display: none !important; }
+    .preview-mode #floating-toolbar { display: none !important; }
+
+    /* Drag-over highlight */
+    .ld-canvas-dragover { outline: 2px dashed #3b82f6; outline-offset: -4px; }
   </style>
-  <!-- Edit-mode CSS injected by parent will go here -->
 </head>
 <body>
   <div id="editor-canvas"></div>
@@ -222,130 +188,210 @@
 
   <script type="module" src="./wave-css.min.js"></script>
   <script>
-  (function() {
+    // =============================================
+    // STATE
+    // =============================================
     const canvas = document.getElementById('editor-canvas');
     const toolbar = document.getElementById('floating-toolbar');
-    let componentRegistry = new Map();
-    let sampleData = {};
+    const registry = new Map();  // designerId → { element, type, properties }
     let selectedId = null;
     let idCounter = 0;
+    let sampleData = {};
+    let previewingId = null;
     let dropIndicator = null;
     let lastDropPosition = null;
     let lastDropParentId = null;
 
+    // Component categories
+    const WC_TAGS = new Set([
+      'wc-input', 'wc-select', 'wc-textarea', 'wc-field',
+      'wc-form', 'wc-tab', 'wc-tab-item', 'wc-breadcrumb', 'wc-breadcrumb-item',
+      'wc-save-split-button', 'wc-save-button', 'wc-article-skeleton',
+      'wc-table-skeleton', 'wc-card-skeleton', 'wc-list-skeleton',
+      'wc-tabulator', 'wc-tabulator-column', 'wc-fa-icon', 'wc-image',
+      'wc-hotkey', 'wc-behavior', 'wc-event-handler', 'wc-code-mirror',
+      'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
+      'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
+      'wc-loader', 'wc-contact-card', 'wc-contact-chip', 'wc-article-card',
+      'wc-timeline', 'wc-google-map', 'wc-google-address',
+      'wc-script', 'wc-javascript', 'wc-visibility-change',
+    ]);
+    const HTML_TAGS = new Set([
+      'button', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'label', 'hr', 'img',
+    ]);
     const CONTAINER_TYPES = new Set([
       'div', 'fieldset', 'wc-form', 'wc-tab', 'wc-tab-item',
       'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
       'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
       'wc-breadcrumb',
     ]);
-
-    const CONTAINER_LABELS = {
-      'div': 'DIV', 'fieldset': 'FIELDSET', 'wc-form': 'FORM',
-      'wc-tab': 'TABS', 'wc-tab-item': 'TAB ITEM', 'wc-accordion': 'ACCORDION',
-      'wc-dropdown': 'DROPDOWN', 'wc-flip-box': 'FLIP BOX', 'wc-menu': 'MENU',
-      'wc-sidebar': 'SIDEBAR', 'wc-sidenav': 'SIDENAV',
-      'wc-slideshow': 'SLIDESHOW', 'wc-split-button': 'SPLIT BUTTON',
-      'wc-breadcrumb': 'BREADCRUMB',
-    };
+    // Components whose children are declarative (not drop targets) now
+    // expose getDesignerHTML() method — no hardcoded set needed.
+    const UTILITY_TYPES = new Set([
+      'wc-hotkey', 'wc-behavior', 'wc-event-handler', 'wc-visibility-change',
+      'wc-script', 'wc-javascript', 'wc-event-hub', 'wc-mask-hub',
+    ]);
 
     function generateId() { return `d${Date.now().toString(36)}${(idCounter++).toString(36)}`; }
+    function isDesignerTag(tag) { return WC_TAGS.has(tag) || HTML_TAGS.has(tag) || tag === 'div' || tag === 'fieldset'; }
     function isContainer(type) { return CONTAINER_TYPES.has(type); }
 
-    // Resolve the inner content element for a container component.
-    // Each Wave CSS component wraps its children in a specific inner element.
-    // MUST use :scope > to avoid matching deeply nested descendants.
+    // =============================================
+    // INNER ELEMENT RESOLUTION
+    // Uses the component's getInnerContainer() method if available,
+    // falling back to the element itself for plain HTML elements.
+    // =============================================
     function getInnerElement(el, type) {
-      switch (type) {
-        case 'wc-tab':        return el.querySelector(':scope > .wc-tab > .tab-body') || el;
-        case 'wc-tab-item':   return el.querySelector(':scope > .wc-tab-item') || el;
-        case 'wc-form':       return el.querySelector(':scope > .wc-form') || el;
-        case 'wc-breadcrumb': return el.querySelector(':scope > .wc-breadcrumb') || el;
-        case 'div':           return el.querySelector(':scope > .wc-div') || el;
-        case 'wc-accordion':  return el.querySelector(':scope > .wc-accordion') || el;
-        case 'wc-dropdown':   return el.querySelector(':scope > .wc-dropdown') || el;
-        case 'wc-sidebar':    return el.querySelector(':scope > .wc-sidebar') || el;
-        case 'wc-sidenav':    return el.querySelector(':scope > .wc-sidenav') || el;
-        case 'wc-flip-box':   return el.querySelector(':scope > .wc-flip-box') || el;
-        case 'wc-menu':       return el.querySelector(':scope > .wc-menu') || el;
-        case 'wc-slideshow':  return el.querySelector(':scope > .wc-slideshow') || el;
-        case 'wc-split-button': return el.querySelector(':scope > .wc-split-button') || el;
-        case 'fieldset':      return el;
-        default:              return el;
+      // Web components expose getInnerContainer() — use it
+      if (typeof el.getInnerContainer === 'function') {
+        return el.getInnerContainer();
       }
-    }
-    function getNestedValue(obj, path) {
-      return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
+      // Plain HTML elements (fieldset, div without wc-div) — self
+      return el;
     }
 
     // =============================================
-    // COMPONENT CREATION
+    // CORE: SCAN AND REGISTER
+    // After innerHTML renders components naturally,
+    // this walks the DOM and registers each designer
+    // element for selection, drag, and property editing.
     // =============================================
+    function scanAndRegister() {
+      registry.clear();
 
-    function addComponent(type, parentId, position, properties = {}) {
-      // Use provided _designerId (for loadTree) or generate a new one
-      const designerId = properties._designerId || generateId();
-      delete properties._designerId;
-      const container = isContainer(type);
+      // insideWC: true when scanning inside a wc- container's content area.
+      // In that context, only register wc- elements (user-placed components),
+      // NOT generic HTML elements (which are internal to the component).
+      function scan(parent, insideWC = false) {
+        for (const child of parent.children) {
+          const tag = child.tagName.toLowerCase();
 
-      // Build attribute string
-      let attrs = `data-designer-id="${designerId}"`;
-      if (container) {
-        attrs += ` data-designer-container="true"`;
-        attrs += ` data-designer-label="${CONTAINER_LABELS[type] || type.toUpperCase()}"`;
-      }
+          // Skip badge spans
+          if (child.hasAttribute('data-designer-label-badge')) continue;
 
-      let textContent = '';
-      let innerHTMLContent = null;
-
-      for (const [key, value] of Object.entries(properties)) {
-        if (key === 'scope') {
-          attrs += ` data-scope="${value}"`;
-        } else if (key === 'css') {
-          if (value) attrs += ` class="${value}"`;
-        } else if (key === 'style') {
-          // Style is set directly, not transformed
-          attrs += ` style="${String(value).replace(/"/g, '&quot;')}"`;
-        } else if (key === '_') {
-          // Hyperscript attribute — keep as underscore, don't transform
-          attrs += ` _="${String(value).replace(/"/g, '&quot;')}"`;
-        } else if (key === 'content') {
-          textContent = value;
-        } else if (key === 'innerHTML') {
-          innerHTMLContent = value;
-        } else if (value === '' || value === true) {
-          attrs += ` ${key.replace(/_/g, '-')}`;
-        } else if (value !== false && value != null) {
-          attrs += ` ${key.replace(/_/g, '-')}="${String(value).replace(/"/g, '&quot;')}"`;
+          if (WC_TAGS.has(tag)) {
+            registerElement(child, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(child, tag);
+              if (inner) {
+                inner.setAttribute('data-drop-target', tag);
+                // wc- containers: their content areas may have internal HTML elements
+                scan(inner, tag.startsWith('wc-'));
+              }
+            }
+          } else if (HTML_TAGS.has(tag) && !insideWC) {
+            // Only register HTML elements when NOT inside a wc- container
+            // (inside wc- containers, HTML elements are internal component DOM)
+            registerElement(child, tag);
+          } else if (tag === 'div' || tag === 'fieldset') {
+            const isInternal = Array.from(child.classList).some(c =>
+              c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
+            );
+            if (!isInternal && !insideWC) {
+              registerElement(child, tag);
+              if (isContainer(tag)) {
+                const inner = getInnerElement(child, tag);
+                if (inner) {
+                  inner.setAttribute('data-drop-target', tag);
+                  scan(inner, false); // User-placed divs can contain HTML elements
+                }
+              }
+            } else {
+              // Internal wrapper or div inside wc- — scan children but don't register
+              scan(child, insideWC);
+            }
+          } else {
+            // Unknown element — scan children in case designer elements are nested
+            scan(child);
+          }
         }
       }
 
-      // Create via innerHTML — include innerHTMLContent in the initial parse
-      // so the component's constructor sees the children during initialization
-      const childContent = innerHTMLContent || textContent;
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = `<${type} ${attrs}>${childContent}</${type}>`;
-      const el = wrapper.firstElementChild;
+      scan(canvas);
+      postToParent('registryBuilt', { count: registry.size });
+    }
 
-      if (!el) {
-        console.error(`[canvas] Failed to create: ${type}`);
-        return null;
+    function registerElement(el, type) {
+      // Assign ID if not already present
+      let id = el.getAttribute('data-designer-id');
+      if (!id) {
+        id = generateId();
+        el.setAttribute('data-designer-id', id);
       }
 
-      // Add a selected-state badge element inside the component
-      const badge = document.createElement('span');
-      badge.setAttribute('data-designer-label-badge', '');
-      badge.textContent = type;
-      el.appendChild(badge);
+      // Mark containers
+      if (isContainer(type)) {
+        el.setAttribute('data-designer-container', 'true');
+      }
 
-      // Find the drop target — the actual content area inside the parent
+      // Mark utility elements
+      if (UTILITY_TYPES.has(type)) {
+        el.setAttribute('data-designer-utility', '');
+      }
+
+      // Add badge for selection
+      if (!el.querySelector(':scope > [data-designer-label-badge]')) {
+        const badge = document.createElement('span');
+        badge.setAttribute('data-designer-label-badge', '');
+        badge.textContent = type;
+        el.appendChild(badge);
+      }
+
+      // Build properties from current attributes
+      const properties = {};
+      for (const attr of el.attributes) {
+        const name = attr.name;
+        if (name.startsWith('data-designer') || name === 'data-wc-id' || name === 'data-drop-target') continue;
+        if (name === 'class') {
+          const cls = attr.value.replace(/\bcontents\b/g, '').replace(/\bdesigner-selected\b/g, '').trim();
+          if (cls) properties.css = cls;
+          continue;
+        }
+        if (name === 'style') continue;
+        properties[name] = attr.value;
+      }
+
+      // Extract text content for native elements
+      if (HTML_TAGS.has(type)) {
+        const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === 3);
+        const text = textNodes.map(n => n.textContent).join('').trim();
+        if (text) properties.content = text;
+      }
+
+      // Components with getDesignerHTML() handle their own child extraction.
+      // No need to store _declaredHTML — the component knows its own markup.
+
+      registry.set(id, { element: el, type, properties });
+    }
+
+    // =============================================
+    // RENDER HTML — the core operation
+    // Sets innerHTML, waits for components to render,
+    // then scans and registers everything.
+    // =============================================
+    function renderHTML(html) {
+      selectedId = null;
+      toolbar.classList.remove('visible');
+      canvas.innerHTML = html;
+      // Components render synchronously via innerHTML — connectedCallbacks fire in tree order.
+      // Give a small delay for async component internals (tab body creation, etc.)
+      setTimeout(() => {
+        scanAndRegister();
+        // Apply sample data to all scoped elements
+        if (Object.keys(sampleData).length > 0) {
+          applySampleDataToAll();
+        }
+      }, 500);
+    }
+
+    // Insert HTML at a specific position inside a parent
+    function insertHTMLAt(html, parentId, position) {
       let parentEl;
       if (parentId) {
         const parentComp = canvas.querySelector(`[data-designer-id="${parentId}"]`);
         if (parentComp) {
-          // Drop into the inner content element based on component type
-          const parentEntry = componentRegistry.get(parentId);
-          parentEl = parentEntry ? getInnerElement(parentComp, parentEntry.type) : parentComp;
+          const entry = registry.get(parentId);
+          parentEl = entry ? getInnerElement(parentComp, entry.type) : parentComp;
         } else {
           parentEl = canvas;
         }
@@ -353,44 +399,221 @@
         parentEl = canvas;
       }
 
-      // Insert at position among designer children
+      // Find insertion point among existing designer children
       const children = Array.from(parentEl.children).filter(c => c.hasAttribute('data-designer-id'));
-      if (position != null && position < children.length) {
-        parentEl.insertBefore(el, children[position]);
-      } else {
-        parentEl.appendChild(el);
-      }
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
 
-      // Register
-      componentRegistry.set(designerId, { element: el, type, properties: { ...properties } });
-
-      // Mark the inner drop target for containers — the ONE element where
-      // children are actually placed. This is universal: one CSS rule using
-      // [data-drop-target] handles all container types consistently.
-      if (container) {
-        setTimeout(() => {
-          const inner = getInnerElement(el, type);
-          if (inner) inner.setAttribute('data-drop-target', type);
-        }, 100);
-      }
-
-      // Apply sample data
-      setTimeout(() => {
-        const scope = properties.scope || el.getAttribute('data-scope');
-        if (scope && Object.keys(sampleData).length > 0) {
-          applySampleData(el, scope, type);
+      // Insert each new element at position
+      const newElements = Array.from(tempDiv.children);
+      for (const el of newElements) {
+        if (position != null && position < children.length) {
+          parentEl.insertBefore(el, children[position]);
+        } else {
+          parentEl.appendChild(el);
         }
-      }, 200);
+      }
 
-      postToParent('componentAdded', { designerId, type, properties });
-      return designerId;
+      // Wait for new components to render, then register them
+      setTimeout(() => {
+        for (const el of newElements) {
+          const tag = el.tagName.toLowerCase();
+          if (isDesignerTag(tag)) {
+            registerElement(el, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(el, tag);
+              if (inner) inner.setAttribute('data-drop-target', tag);
+            }
+          }
+          scanNewChildren(el);
+        }
+        // Apply sample data to newly inserted elements
+        if (Object.keys(sampleData).length > 0) {
+          applySampleDataToAll();
+        }
+        postToParent('componentInserted', {});
+      }, 500);
     }
 
-    function removeComponent(designerId) {
-      const entry = componentRegistry.get(designerId);
+    function scanNewChildren(parent) {
+      for (const child of parent.children) {
+        const tag = child.tagName.toLowerCase();
+
+        // Skip internal wrappers created by components
+        const isInternal = (tag === 'div' || tag === 'span' || tag === 'label' || tag === 'form') &&
+          Array.from(child.classList).some(c => c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body');
+        if (isInternal) {
+          scanNewChildren(child);
+          continue;
+        }
+
+        if ((WC_TAGS.has(tag) || HTML_TAGS.has(tag)) && !child.hasAttribute('data-designer-id')) {
+          registerElement(child, tag);
+          if (isContainer(tag)) {
+            const inner = getInnerElement(child, tag);
+            if (inner) {
+              inner.setAttribute('data-drop-target', tag);
+              scanNewChildren(inner);
+            }
+          }
+        } else if ((tag === 'div' || tag === 'fieldset') && !child.hasAttribute('data-designer-id')) {
+          // Only register non-internal divs
+          registerElement(child, tag);
+          if (isContainer(tag)) {
+            const inner = getInnerElement(child, tag);
+            if (inner) {
+              inner.setAttribute('data-drop-target', tag);
+              scanNewChildren(inner);
+            }
+          }
+        }
+      }
+    }
+
+    // =============================================
+    // EXTRACT CLEAN HTML
+    // Walks the registry and builds clean HTML without
+    // designer attributes. This is the Source view content.
+    // =============================================
+    function extractCleanHTML() {
+      return extractChildren(canvas);
+    }
+
+    function extractChildren(parent) {
+      let html = '';
+      for (const child of parent.children) {
+        // Skip badge spans and other designer-internal elements
+        if (child.hasAttribute('data-designer-label-badge')) continue;
+        const id = child.getAttribute('data-designer-id');
+        if (!id) continue;
+        const entry = registry.get(id);
+        if (!entry) continue;
+
+        const tag = entry.type;
+        const attrs = [];
+        const skipAttrs = new Set(['data-designer-id', 'data-designer-container', 'data-designer-utility',
+          'data-designer-label', 'data-designer-label-badge', 'data-designer-selected',
+          'data-drop-target', 'data-wc-id', 'style']);
+
+        // Rebuild attributes from DOM (live state)
+        for (const attr of child.attributes) {
+          if (skipAttrs.has(attr.name)) continue;
+          if (attr.name === 'class') {
+            const cls = attr.value.replace(/\bcontents\b/g, '').replace(/\bdesigner-selected\b/g, '').trim();
+            if (cls) attrs.push(`class="${cls}"`);
+            continue;
+          }
+          if (attr.value === '') {
+            attrs.push(attr.name);
+          } else {
+            attrs.push(`${attr.name}="${attr.value}"`);
+          }
+        }
+
+        const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
+
+        // Handle different element types
+        if (tag === 'hr') {
+          html += `<${tag}${attrStr}>`;
+        } else if (isContainer(tag)) {
+          const inner = getInnerElement(child, tag);
+          const childHTML = inner ? extractChildren(inner) : '';
+          html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
+        } else if (typeof child.getDesignerHTML === 'function' && child.getDesignerHTML() !== null) {
+          // Component provides its own clean child markup (breadcrumb, select, radio)
+          html += `<${tag}${attrStr}>\n${child.getDesignerHTML()}\n</${tag}>`;
+        } else if (HTML_TAGS.has(tag)) {
+          // Native elements — include text content
+          const content = entry.properties.content || '';
+          html += `<${tag}${attrStr}>${content}</${tag}>`;
+        } else {
+          html += `<${tag}${attrStr}></${tag}>`;
+        }
+      }
+      return html;
+    }
+
+    // =============================================
+    // SELECTION
+    // =============================================
+    function selectComponent(designerId) {
+      deselectAll();
+      const entry = registry.get(designerId);
       if (!entry) return;
+
+      selectedId = designerId;
+      // Use inline style for selection — classList doesn't work on display:contents elements
+      entry.element.style.outline = '2px solid #3b97e3';
+      entry.element.style.outlineOffset = '2px';
+      entry.element.setAttribute('data-designer-selected', '');
+      positionToolbar(entry.element);
+
+      // Read live properties from DOM
+      const liveProps = {};
+      for (const attr of entry.element.attributes) {
+        if (attr.name.startsWith('data-designer') || attr.name === 'data-wc-id' || attr.name === 'data-drop-target') continue;
+        if (attr.name === 'class') {
+          liveProps.css = attr.value.replace(/\bcontents\b/g, '').replace(/\bdesigner-selected\b/g, '').trim();
+          continue;
+        }
+        liveProps[attr.name] = attr.value;
+      }
+      if (HTML_TAGS.has(entry.type)) {
+        const textNodes = Array.from(entry.element.childNodes).filter(n => n.nodeType === 3);
+        liveProps.content = textNodes.map(n => n.textContent).join('').trim();
+      }
+
+      // Build ancestor chain for breadcrumb
+      const ancestors = [];
+      let el = entry.element.parentElement;
+      while (el && el !== canvas) {
+        const pid = el.getAttribute?.('data-designer-id');
+        if (pid && registry.has(pid)) {
+          ancestors.unshift({ designerId: pid, type: registry.get(pid).type });
+        }
+        el = el.parentElement;
+      }
+
+      postToParent('select', {
+        designerId, type: entry.type, properties: liveProps, ancestors
+      });
+    }
+
+    function deselectAll() {
+      if (selectedId) {
+        const entry = registry.get(selectedId);
+        if (entry) {
+          entry.element.style.outline = '';
+          entry.element.style.outlineOffset = '';
+          entry.element.removeAttribute('data-designer-selected');
+        }
+      }
+      selectedId = null;
+      toolbar.classList.remove('visible');
+      postToParent('deselect', {});
+    }
+
+    function positionToolbar(el) {
+      const rect = el.getBoundingClientRect();
+      toolbar.classList.add('visible');
+      toolbar.style.left = `${rect.left + window.scrollX}px`;
+      toolbar.style.top = `${rect.top + window.scrollY - 32}px`;
+      if (rect.top < 40) {
+        toolbar.style.top = `${rect.bottom + window.scrollY + 4}px`;
+      }
+    }
+
+    // =============================================
+    // COMPONENT OPERATIONS
+    // =============================================
+    function removeComponent(designerId) {
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      // Remove badge
+      const badge = entry.element.querySelector(':scope > [data-designer-label-badge]');
+      if (badge) badge.remove();
       entry.element.remove();
-      componentRegistry.delete(designerId);
+      registry.delete(designerId);
       if (selectedId === designerId) {
         selectedId = null;
         toolbar.classList.remove('visible');
@@ -399,33 +622,8 @@
       postToParent('deselect', {});
     }
 
-    function updateProperty(designerId, propName, value) {
-      const entry = componentRegistry.get(designerId);
-      if (!entry) return;
-      const el = entry.element;
-
-      if (propName === 'scope') {
-        el.setAttribute('data-scope', value);
-        entry.properties.scope = value;
-        applySampleData(el, value, entry.type);
-      } else if (propName === 'css') {
-        // Preserve designer classes
-        const designerClasses = [];
-        if (el.classList.contains('designer-selected')) designerClasses.push('designer-selected');
-        if (el.classList.contains('contents')) designerClasses.push('contents');
-        el.className = [value, ...designerClasses].filter(Boolean).join(' ');
-        entry.properties.css = value;
-      } else {
-        const attrName = propName.replace(/_/g, '-');
-        if (value === '' || value === true) el.setAttribute(attrName, '');
-        else if (value === false || value == null) el.removeAttribute(attrName);
-        else el.setAttribute(attrName, value);
-        entry.properties[propName] = value;
-      }
-    }
-
     function moveComponent(designerId, direction) {
-      const entry = componentRegistry.get(designerId);
+      const entry = registry.get(designerId);
       if (!entry) return;
       const el = entry.element;
       if (direction === 'up' && el.previousElementSibling?.hasAttribute('data-designer-id')) {
@@ -437,273 +635,145 @@
     }
 
     function duplicateComponent(designerId) {
-      const entry = componentRegistry.get(designerId);
+      const entry = registry.get(designerId);
       if (!entry) return;
-      const parent = entry.element.parentElement;
-      const siblings = Array.from(parent.children).filter(c => c.hasAttribute('data-designer-id'));
-      const position = siblings.indexOf(entry.element) + 1;
-      // Find the designer parent ID
-      const parentDesigner = parent.closest('[data-designer-id]');
-      const parentDesignerId = parentDesigner?.getAttribute('data-designer-id') || null;
-      addComponent(entry.type, parentDesignerId, position, { ...entry.properties });
+      const clone = entry.element.cloneNode(true);
+      clone.removeAttribute('data-designer-id');
+      clone.classList.remove('designer-selected');
+      // Remove old badge
+      const oldBadge = clone.querySelector(':scope > [data-designer-label-badge]');
+      if (oldBadge) oldBadge.remove();
+      entry.element.after(clone);
+      // Register the clone
+      setTimeout(() => {
+        registerElement(clone, entry.type);
+        scanNewChildren(clone);
+        postToParent('componentInserted', {});
+      }, 300);
+    }
+
+    function updateProperty(designerId, propName, value) {
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      const el = entry.element;
+
+      if (propName === 'scope') {
+        el.setAttribute('data-scope', value);
+        entry.properties.scope = value;
+      } else if (propName === 'css') {
+        const keepClasses = ['contents', 'designer-selected'];
+        const keep = keepClasses.filter(c => el.classList.contains(c));
+        el.className = [value, ...keep].filter(Boolean).join(' ');
+        entry.properties.css = value;
+      } else if (propName === 'content') {
+        // For native elements, update text content
+        const textNode = Array.from(el.childNodes).find(n => n.nodeType === 3);
+        if (textNode) {
+          textNode.textContent = value;
+        } else {
+          el.prepend(document.createTextNode(value));
+        }
+        entry.properties.content = value;
+      } else {
+        const attrName = propName.replace(/_/g, '-');
+        if (value === '' || value === true) el.setAttribute(attrName, '');
+        else if (value === false || value == null) el.removeAttribute(attrName);
+        else el.setAttribute(attrName, value);
+        entry.properties[propName] = value;
+      }
     }
 
     // =============================================
     // SAMPLE DATA
     // =============================================
+    function setSampleData(data) {
+      sampleData = data;
+      applySampleDataToAll();
+    }
 
-    function applySampleData(el, scope, type) {
-      if (!scope || !sampleData || Object.keys(sampleData).length === 0) return;
-      const value = getNestedValue(sampleData, scope);
-      if (value === '' || value === undefined || value === null) return;
-      const tag = (type || el.tagName).toLowerCase();
-
-      if (tag === 'wc-input') {
-        if (el.getAttribute('type') === 'checkbox') {
-          if (value) el.setAttribute('checked', ''); else el.removeAttribute('checked');
-        } else {
+    function applySampleDataToAll() {
+      canvas.querySelectorAll('[data-scope]').forEach(el => {
+        const scope = el.getAttribute('data-scope');
+        const value = getNestedValue(sampleData, scope);
+        if (value === undefined || value === '') return;
+        const tag = el.tagName.toLowerCase();
+        if (tag === 'wc-input' || tag === 'wc-textarea') {
+          el.setAttribute('value', String(value));
+        } else if (tag === 'wc-select') {
+          el.setAttribute('value', String(value));
+        } else if (tag === 'wc-field') {
           el.setAttribute('value', String(value));
         }
-      } else if (tag === 'wc-select') {
-        el.setAttribute('value', String(value));
-      } else if (tag === 'wc-textarea') {
-        el.setAttribute('value', String(value));
-      } else if (tag === 'wc-field') {
-        el.setAttribute('value', String(value));
-      }
+      });
     }
 
-    function setSampleData(data) {
-      sampleData = data || {};
-      for (const [id, entry] of componentRegistry) {
-        const scope = entry.properties.scope || entry.element.getAttribute('data-scope');
-        if (scope) applySampleData(entry.element, scope, entry.type);
-      }
+    function getNestedValue(obj, path) {
+      return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
     }
 
     // =============================================
-    // SELECTION — all inside iframe
+    // SERIALIZATION (for getTree compatibility)
     // =============================================
+    function serializeTree() {
+      return serializeChildren(canvas);
+    }
 
-    function selectComponent(designerId) {
-      // Deselect previous and always exit preview
-      exitPreview();
-      if (selectedId) {
-        const prev = componentRegistry.get(selectedId);
-        if (prev) {
-          prev.element.classList.remove('designer-selected');
-          prev.element.style.outline = '';
-          prev.element.style.outlineOffset = '';
-          prev.element.style.boxShadow = '';
-        }
-      }
-
-      selectedId = designerId;
-      const entry = componentRegistry.get(designerId);
-      if (!entry) return;
-
-      entry.element.classList.add('designer-selected');
-      // Apply selection styles via inline style (CSS classes don't work on display:contents elements)
-      entry.element.style.outline = '2px solid #3b97e3';
-      entry.element.style.outlineOffset = '2px';
-      entry.element.style.boxShadow = '0 0 0 4px rgba(59, 151, 227, 0.15)';
-      entry.element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      positionToolbar(entry.element);
-      toolbar.classList.add('visible');
-
-      // Show/hide preview button based on element type
-      const previewBtn = toolbar.querySelector('[data-action="preview"]');
-      const previewableTypes = new Set([
-        'wc-input', 'wc-select', 'wc-textarea', 'wc-code-mirror',
-        'wc-google-address', 'wc-vin-decoder', 'wc-ai-bot',
-      ]);
-      if (previewBtn) {
-        const showPreview = previewableTypes.has(entry.type);
-        previewBtn.style.display = showPreview ? '' : 'none';
-        // Also hide the separator after it if preview is hidden
-        const nextSep = previewBtn.nextElementSibling;
-        if (nextSep?.classList.contains('sep')) {
-          nextSep.style.display = showPreview ? '' : 'none';
-        }
-      }
-
-      // Build ancestor path
-      const ancestors = [];
-      let current = entry.element;
-      while (current && current !== canvas) {
-        if (current.hasAttribute('data-designer-id')) {
-          const aid = current.getAttribute('data-designer-id');
-          const aEntry = componentRegistry.get(aid);
-          if (aEntry) {
-            ancestors.unshift({
-              designerId: aid,
-              type: aEntry.type,
-              scope: current.getAttribute('data-scope') || ''
-            });
+    function serializeChildren(parent) {
+      const elements = [];
+      for (const child of parent.children) {
+        const id = child.getAttribute('data-designer-id');
+        if (!id) continue;
+        const entry = registry.get(id);
+        if (!entry) continue;
+        const node = { ...entry.properties, componentType: entry.type, designerId: id };
+        if (isContainer(entry.type)) {
+          const inner = getInnerElement(child, entry.type);
+          if (inner) {
+            const nested = serializeChildren(inner);
+            if (nested.length > 0) node.children = nested;
           }
         }
-        current = current.parentElement;
+        elements.push(node);
       }
-
-      // Send to parent — read live attributes from DOM
-      const el = entry.element;
-      const props = { ...entry.properties };
-      props.scope = el.getAttribute('data-scope') || '';
-      props.name = el.getAttribute('name') || props.name || '';
-      props['lbl-label'] = el.getAttribute('lbl-label') || props['lbl-label'] || '';
-      props.required = el.hasAttribute('required');
-      props.multiple = el.hasAttribute('multiple');
-      props['toggle-switch'] = el.hasAttribute('toggle-switch');
-      props['allow-dynamic'] = el.hasAttribute('allow-dynamic');
-      props.type = el.getAttribute('type') || props.type || '';
-      props.mode = el.getAttribute('mode') || props.mode || '';
-      props.placeholder = el.getAttribute('placeholder') || props.placeholder || '';
-      props.rows = el.getAttribute('rows') || props.rows || '';
-      props.url = el.getAttribute('url') || props.url || '';
-      props['display-member'] = el.getAttribute('display-member') || props['display-member'] || '';
-      props['value-member'] = el.getAttribute('value-member') || props['value-member'] || '';
-      props['data-lookup'] = el.getAttribute('data-lookup') || props['data-lookup'] || '';
-      props['data-enum'] = el.getAttribute('data-enum') || props['data-enum'] || '';
-      props['data-url-template'] = el.getAttribute('data-url-template') || props['data-url-template'] || '';
-      props['data-url-depends'] = el.getAttribute('data-url-depends') || props['data-url-depends'] || '';
-      props.items = el.getAttribute('items') || props.items || '';
-
-      postToParent('select', { designerId, type: entry.type, properties: props, ancestors });
+      return elements;
     }
 
-    function deselectAll() {
-      exitPreview();
-      if (selectedId) {
-        const prev = componentRegistry.get(selectedId);
-        if (prev) {
-          prev.element.classList.remove('designer-selected');
-          prev.element.style.outline = '';
-          prev.element.style.outlineOffset = '';
-          prev.element.style.boxShadow = '';
-        }
-        selectedId = null;
-        toolbar.classList.remove('visible');
-        postToParent('deselect', {});
-      }
-    }
-
-    function positionToolbar(el) {
-      const rect = el.getBoundingClientRect();
-      const toolbarH = 32;
-      const toolbarW = 160; // approximate toolbar width
-
-      let top = rect.top - toolbarH - 4 + window.scrollY;
-      if (top < 0) top = rect.bottom + 4 + window.scrollY;
-
-      // Keep toolbar within viewport horizontally
-      let left = rect.right - toolbarW + window.scrollX;
-      const maxLeft = document.documentElement.clientWidth - toolbarW - 8;
-      if (left > maxLeft) left = maxLeft;
-      if (left < 8) left = 8;
-
-      toolbar.style.top = top + 'px';
-      toolbar.style.left = left + 'px';
-    }
-
-    // Click handler
-    canvas.addEventListener('click', (e) => {
-      // If clicking inside a previewing element, don't interfere
-      const previewingEl = previewingId ? componentRegistry.get(previewingId)?.element : null;
-      if (previewingEl && previewingEl.contains(e.target)) {
-        return; // Let the native interaction happen
-      }
-
-      const el = e.target.closest('[data-designer-id]');
-      if (!el) {
-        deselectAll();
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      selectComponent(el.getAttribute('data-designer-id'));
-    });
-
-    // Toolbar actions
-    let previewingId = null;
-
+    // =============================================
+    // PREVIEW MODE
+    // =============================================
     function setPreviewEnabled(el, enabled) {
-      // Set pointer-events on every form-interactive descendant
-      const targets = el.querySelectorAll('input, select, textarea, button, [role="listbox"], [role="option"]');
-      targets.forEach(t => {
-        t.style.pointerEvents = enabled ? 'all' : '';
-      });
-      // Also set on the element itself and all descendants
       el.style.pointerEvents = enabled ? 'all' : '';
-      el.querySelectorAll('*').forEach(child => {
+      el.querySelectorAll('input, select, textarea, button, a').forEach(child => {
         child.style.pointerEvents = enabled ? 'all' : '';
       });
     }
 
     function exitPreview() {
       if (previewingId) {
-        const prev = componentRegistry.get(previewingId);
-        if (prev) {
-          prev.element.classList.remove('previewing');
-          setPreviewEnabled(prev.element, false);
+        const entry = registry.get(previewingId);
+        if (entry) {
+          entry.element.classList.remove('previewing');
+          setPreviewEnabled(entry.element, false);
         }
         previewingId = null;
+        const previewBtn = toolbar.querySelector('[data-action="preview"]');
+        if (previewBtn) {
+          previewBtn.textContent = '▶';
+          previewBtn.title = 'Preview this component';
+        }
       }
-      const previewBtn = toolbar.querySelector('[data-action="preview"]');
-      if (previewBtn) { previewBtn.textContent = '▶'; previewBtn.title = 'Preview this component'; }
     }
 
-    toolbar.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      const action = btn?.dataset.action;
-      if (!action || !selectedId) return;
-      e.stopPropagation();
-      switch (action) {
-        case 'preview':
-          const entry = componentRegistry.get(selectedId);
-          if (!entry) break;
-          if (previewingId === selectedId) {
-            exitPreview();
-          } else {
-            exitPreview();
-            entry.element.classList.add('previewing');
-            setPreviewEnabled(entry.element, true);
-            previewingId = selectedId;
-            btn.textContent = '✎';
-            btn.title = 'Back to design mode';
-          }
-          break;
-        case 'move-up': moveComponent(selectedId, 'up'); break;
-        case 'move-down': moveComponent(selectedId, 'down'); break;
-        case 'duplicate': duplicateComponent(selectedId); break;
-        case 'delete': removeComponent(selectedId); break;
-      }
-    });
-
     // =============================================
-    // DRAG & DROP — all inside iframe
+    // DRAG & DROP
     // =============================================
-
-    // Accept drops from parent via native drag (parent disables iframe pointer-events,
-    // then re-enables just before drop). This doesn't work well cross-frame.
-    // INSTEAD: parent sends component data via postMessage and we handle positioning.
-
-    // Accept native drops for when iframe pointer-events are enabled
     canvas.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
-
-      // Find deepest container under cursor and show indicator
-      removeDropIndicator();
-      clearDropTargets();
       const target = findDropTarget(e.clientX, e.clientY);
-
-      // Save for the drop event
       lastDropPosition = target.position;
       lastDropParentId = target.parentId;
-
-      if (target.container) {
-        target.container.classList.add('drop-target');
-      }
+      if (target.container) target.container.classList.add('drop-target');
       showDropIndicator(target.parentEl, target.position);
     });
 
@@ -716,8 +786,6 @@
 
     canvas.addEventListener('drop', (e) => {
       e.preventDefault();
-
-      // Remove indicator BEFORE calculating position so it doesn't shift elements
       const savedPosition = lastDropPosition;
       const savedParentId = lastDropParentId;
       removeDropIndicator();
@@ -729,28 +797,12 @@
       try {
         const payload = JSON.parse(jsonData);
 
-        if (payload.preset && payload.tree) {
-          // Preset drop — async append with delays for component rendering
-          async function appendPresetNodes(nodes, parentId) {
-            for (const node of nodes) {
-              const { componentType, type, children, ...properties } = node;
-              const compType = componentType || type;
-              const newId = addComponent(compType, parentId, null, { ...properties, type });
-              if (children && children.length > 0) {
-                await new Promise(r => setTimeout(r, 150));
-                await appendPresetNodes(children, newId);
-              }
-            }
-          }
-          appendPresetNodes(payload.tree, savedParentId).then(() => {
-            setTimeout(() => {
-              refreshTabs();
-              postToParent('treeAppended', {});
-            }, 800);
-          });
-        } else if (payload.type) {
-          // Single component drop
-          addComponent(payload.type, savedParentId, savedPosition, payload.defaults || {});
+        if (payload.preset && payload.html) {
+          // Preset drop — insert full HTML at drop position
+          insertHTMLAt(payload.html, savedParentId, savedPosition);
+        } else if (payload.type && payload.html) {
+          // Single element drop — insert HTML at position
+          insertHTMLAt(payload.html, savedParentId, savedPosition);
         }
       } catch (err) {
         console.error('[canvas] Drop error:', err);
@@ -759,12 +811,8 @@
 
     function findDropTarget(clientX, clientY) {
       const elemAtPoint = document.elementFromPoint(clientX, clientY);
-
-      // Walk up to find the nearest designer container
       let containerEl = elemAtPoint?.closest('[data-designer-container]');
-      let parentId = null;
 
-      // If we didn't directly hit a container, check if we hit an inner wrapper
       if (!containerEl && elemAtPoint) {
         const designerParent = elemAtPoint.closest('[data-designer-id]');
         if (designerParent?.hasAttribute('data-designer-container')) {
@@ -772,33 +820,31 @@
         }
       }
 
-      if (containerEl) {
-        parentId = containerEl.getAttribute('data-designer-id');
-      }
-
-      // Resolve parentEl to the actual insertion target (inner wrapper if present)
-      // This MUST match what addComponent() uses for insertion
+      let parentId = containerEl?.getAttribute('data-designer-id') || null;
       let parentEl;
       if (containerEl) {
-        const containerEntry = componentRegistry.get(parentId);
-        parentEl = containerEntry ? getInnerElement(containerEl, containerEntry.type) : containerEl;
+        const entry = registry.get(parentId);
+        parentEl = entry ? getInnerElement(containerEl, entry.type) : containerEl;
       } else {
         parentEl = canvas;
       }
 
-      // Calculate position among designer children of the insertion target
+      // Calculate position
       const children = Array.from(parentEl.children).filter(c => c.hasAttribute('data-designer-id'));
       let position = children.length;
       for (let i = 0; i < children.length; i++) {
         const rect = children[i].getBoundingClientRect();
-        if (rect.height === 0) continue;
-        if (clientY < rect.top + rect.height / 2) { position = i; break; }
+        if (clientY < rect.top + rect.height / 2) {
+          position = i;
+          break;
+        }
       }
 
-      return { container: containerEl, parentEl, parentId, position, clientY };
+      return { container: containerEl, parentEl, parentId, position };
     }
 
-    function showDropIndicator(parentEl, position, clientY) {
+    function showDropIndicator(parentEl, position) {
+      removeDropIndicator();
       dropIndicator = document.createElement('div');
       dropIndicator.className = 'drop-indicator';
       const children = Array.from(parentEl.children).filter(c => c.hasAttribute('data-designer-id'));
@@ -820,101 +866,64 @@
     }
 
     // =============================================
-    // SERIALIZATION
+    // CLICK HANDLING — selection
     // =============================================
-
-    function serializeTree() { return serializeChildren(canvas); }
-
-    function serializeChildren(parent) {
-      const elements = [];
-      for (const child of parent.children) {
-        const designerId = child.getAttribute('data-designer-id');
-        if (!designerId) continue;
-        const entry = componentRegistry.get(designerId);
-        if (!entry) continue;
-        const node = { ...entry.properties, componentType: entry.type, designerId };
-        if (isContainer(node.componentType)) {
-          const innerEl = getInnerElement(child, node.componentType);
-          const nested = serializeChildren(innerEl);
-          if (nested.length > 0) node.children = nested;
+    canvas.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-designer-id]');
+      if (target && target !== canvas) {
+        e.stopPropagation();
+        const id = target.getAttribute('data-designer-id');
+        if (id && registry.has(id)) {
+          selectComponent(id);
         }
-        elements.push(node);
+      } else {
+        deselectAll();
       }
-      return elements;
-    }
+    });
 
-    function extractHTML() {
-      // Build clean HTML from the component registry — only output the
-      // component tags with their attributes, not the internal rendered DOM.
-      return extractChildren(canvas);
-    }
-
-    function extractChildren(parent) {
-      let html = '';
-      for (const child of parent.children) {
-        const designerId = child.getAttribute('data-designer-id');
-        if (!designerId) continue;
-        const entry = componentRegistry.get(designerId);
-        if (!entry) continue;
-
-        // Build attributes from entry.properties (source of truth)
-        // NOT from DOM attributes (which get polluted by component internals)
-        const attrs = [];
-        const skipProps = new Set(['scope', 'css', 'content', 'innerHTML']);
-
-        // Add css as class if set
-        if (entry.properties.css) {
-          attrs.push(`class="${entry.properties.css}"`);
-        }
-
-        // Add data-scope
-        const scope = entry.properties.scope || child.getAttribute('data-scope');
-        if (scope) {
-          attrs.push(`data-scope="${scope}"`);
-        }
-
-        // Add all other stored properties as attributes
-        for (const [key, value] of Object.entries(entry.properties)) {
-          if (skipProps.has(key)) continue;
-          if (key.startsWith('data-designer') || key === 'data-wc-id') continue;
-          if (value === '' || value === true) {
-            attrs.push(key);
-          } else if (value !== false && value != null) {
-            attrs.push(`${key}="${value}"`);
-          }
-        }
-
-        const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
-        const tag = entry.type;
-
-        // For containers, recurse into children
-        if (isContainer(entry.type)) {
-          const innerEl = getInnerElement(child, entry.type);
-          const childHTML = extractChildren(innerEl);
-          html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
-        } else if (entry.type === 'wc-select' || entry.type === 'wc-input') {
-          // Use stored innerHTML from registry (source of truth) — never
-          // query the rendered DOM, because wc-select creates an inner
-          // <select> that duplicates the original <option> children.
-          const stored = entry.properties.innerHTML;
-          if (stored) {
-            html += `<${tag}${attrStr}>\n${stored}\n</${tag}>`;
+    // =============================================
+    // TOOLBAR ACTIONS
+    // =============================================
+    toolbar.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      const action = btn?.dataset.action;
+      if (!action || !selectedId) return;
+      e.stopPropagation();
+      switch (action) {
+        case 'preview':
+          const entry = registry.get(selectedId);
+          if (!entry) break;
+          if (previewingId === selectedId) {
+            exitPreview();
           } else {
-            html += `<${tag}${attrStr}></${tag}>`;
+            exitPreview();
+            entry.element.classList.add('previewing');
+            setPreviewEnabled(entry.element, true);
+            previewingId = selectedId;
+            btn.textContent = '✎';
+            btn.title = 'Back to design mode';
           }
-        } else if (entry.type === 'hr') {
-          html += `<${tag}${attrStr}>`;
-        } else {
-          html += `<${tag}${attrStr}></${tag}>`;
-        }
+          break;
+        case 'move-up': moveComponent(selectedId, 'up'); break;
+        case 'move-down': moveComponent(selectedId, 'down'); break;
+        case 'duplicate': duplicateComponent(selectedId); break;
+        case 'delete': removeComponent(selectedId); break;
       }
-      return html;
-    }
+    });
 
     // =============================================
-    // COMMUNICATION
+    // KEYBOARD
     // =============================================
+    document.addEventListener('keydown', (e) => {
+      if (!selectedId) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeComponent(selectedId); }
+      else if (e.key === 'Escape') deselectAll();
+    });
 
+    // =============================================
+    // COMMUNICATION — parent ↔ iframe
+    // =============================================
     function postToParent(action, data) {
       if (window.parent !== window) {
         window.parent.postMessage({ source: 'editor-bridge', action, ...data }, '*');
@@ -924,164 +933,55 @@
     window.addEventListener('message', (e) => {
       if (!e.data || e.data.source !== 'live-designer') return;
       switch (e.data.action) {
-        case 'addComponent': addComponent(e.data.type, e.data.parentId, e.data.position, e.data.properties || {}); break;
-        case 'removeComponent': removeComponent(e.data.designerId); break;
-        case 'updateProperty': updateProperty(e.data.designerId, e.data.propName, e.data.value); break;
-        case 'moveComponent': moveComponent(e.data.designerId, e.data.direction); break;
-        case 'duplicateComponent': duplicateComponent(e.data.designerId); break;
-        case 'setSampleData': setSampleData(e.data.data); break;
-        case 'setTheme': document.documentElement.className = e.data.theme; break;
+        case 'renderHTML':
+          renderHTML(e.data.html || '');
+          break;
+        case 'insertHTML':
+          insertHTMLAt(e.data.html, e.data.parentId || null, e.data.position || null);
+          break;
+        case 'getHTML':
+          postToParent('htmlResponse', { html: extractCleanHTML() });
+          break;
+        case 'getTree':
+          postToParent('treeResponse', { tree: serializeTree() });
+          break;
+        case 'removeComponent':
+          removeComponent(e.data.designerId);
+          break;
+        case 'updateProperty':
+          updateProperty(e.data.designerId, e.data.propName, e.data.value);
+          break;
+        case 'moveComponent':
+          moveComponent(e.data.designerId, e.data.direction);
+          break;
+        case 'duplicateComponent':
+          duplicateComponent(e.data.designerId);
+          break;
+        case 'setSampleData':
+          setSampleData(e.data.data);
+          break;
+        case 'setTheme':
+          document.documentElement.className = e.data.theme;
+          break;
         case 'selectById':
-          if (e.data.designerId && componentRegistry.has(e.data.designerId)) {
+          if (e.data.designerId && registry.has(e.data.designerId)) {
             selectComponent(e.data.designerId);
           }
           break;
         case 'clear-selection':
           deselectAll();
           break;
-        case 'setPreviewMode':
-          if (e.data.enabled) {
-            // Enable all form interactions — user can click, type, open selects
-            document.getElementById('editor-canvas').classList.add('preview-mode');
-            deselectAll();
-          } else {
-            document.getElementById('editor-canvas').classList.remove('preview-mode');
-          }
-          break;
-        case 'getTree': postToParent('treeResponse', { tree: serializeTree() }); break;
-        case 'getHTML': postToParent('htmlResponse', { html: extractHTML() }); break;
         case 'clear':
           canvas.innerHTML = '';
-          componentRegistry.clear();
+          registry.clear();
           selectedId = null;
           toolbar.classList.remove('visible');
-          break;
-        case 'loadTree':
-          // Clear and rebuild canvas from saved tree
-          canvas.innerHTML = '';
-          componentRegistry.clear();
-          selectedId = null;
-          toolbar.classList.remove('visible');
-          // Async — each component needs time to render its internal DOM
-          // (e.g., wc-tab creates .tab-body, wc-form creates .wc-form)
-          // before children can be inserted into it.
-          async function loadNodes(nodes, parentId) {
-            for (const node of nodes) {
-              const { componentType, type, designerId, children, ...properties } = node;
-              const compType = componentType || type;
-              const newId = addComponent(compType, parentId, null, { ...properties, type, _designerId: designerId });
-              if (children && children.length > 0) {
-                // Wait for the parent component to render its internal structure
-                await new Promise(r => setTimeout(r, 150));
-                await loadNodes(children, newId || designerId);
-              }
-            }
-          }
-          if (e.data.tree && Array.isArray(e.data.tree)) {
-            loadNodes(e.data.tree, null).then(() => {
-              setTimeout(() => {
-                refreshTabs();
-                postToParent('treeLoaded', {});
-              }, 800);
-            }).catch(err => {
-              console.error('[canvas] loadTree error:', err);
-            });
-          }
-          break;
-        case 'appendTree':
-          // Add nodes to canvas without clearing — used by presets
-          async function appendNodes(nodes, parentId) {
-            for (const node of nodes) {
-              const { componentType, type, designerId, children, ...properties } = node;
-              const compType = componentType || type;
-              const newId = addComponent(compType, parentId, null, { ...properties, type });
-              if (children && children.length > 0) {
-                await new Promise(r => setTimeout(r, 150));
-                await appendNodes(children, newId);
-              }
-            }
-          }
-          if (e.data.tree && Array.isArray(e.data.tree)) {
-            appendNodes(e.data.tree, e.data.parentId || null).then(() => {
-              setTimeout(() => {
-                refreshTabs();
-                postToParent('treeAppended', {});
-              }, 800);
-            }).catch(err => {
-              console.error('[canvas] appendTree error:', err);
-            });
-          }
           break;
       }
     });
 
-    // After tree loading, wc-tab components need their button bars rebuilt
-    // because tab-items were added after the tab initially rendered.
-    function refreshTabs() {
-      canvas.querySelectorAll('wc-tab[data-designer-id]').forEach(tab => {
-        const wcTab = tab.querySelector(':scope > .wc-tab');
-        if (!wcTab) return;
-        const tabNav = wcTab.querySelector(':scope > .tab-nav');
-        const tabBody = wcTab.querySelector(':scope > .tab-body');
-        if (!tabNav || !tabBody) return;
-
-        const tabItems = Array.from(tabBody.querySelectorAll(':scope > wc-tab-item'));
-        if (tabItems.length === 0) return;
-
-        // Rebuild buttons from tab-items
-        tabNav.innerHTML = '';
-        let hasActive = false;
-
-        tabItems.forEach((item, i) => {
-          const label = item.getAttribute('label') || `Tab ${i + 1}`;
-          const isActive = item.classList.contains('active') ||
-                           item.querySelector(':scope > .wc-tab-item.active');
-          if (isActive) hasActive = true;
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'tab-link' + (isActive ? ' active' : '');
-          btn.dataset.label = label;
-          btn.textContent = label;
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // Deactivate all
-            tabNav.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
-            tabItems.forEach(ti => {
-              ti.classList.remove('active');
-              const inner = ti.querySelector(':scope > .wc-tab-item');
-              if (inner) inner.classList.remove('active');
-            });
-            // Activate clicked
-            btn.classList.add('active');
-            item.classList.add('active');
-            const inner = item.querySelector(':scope > .wc-tab-item');
-            if (inner) inner.classList.add('active');
-          });
-          tabNav.appendChild(btn);
-        });
-
-        // If no tab was active, activate the first one
-        if (!hasActive) {
-          const firstBtn = tabNav.querySelector('.tab-link');
-          if (firstBtn) firstBtn.click();
-        }
-      });
-    }
-
-    // Keyboard
-    document.addEventListener('keydown', (e) => {
-      if (!selectedId) return;
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeComponent(selectedId); }
-      else if (e.key === 'Escape') deselectAll();
-      else if (e.key === 'ArrowUp' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); moveComponent(selectedId, 'up'); }
-      else if (e.key === 'ArrowDown' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); moveComponent(selectedId, 'down'); }
-    });
-
+    // Signal ready
     postToParent('canvasReady', {});
-  })();
   </script>
 </body>
 </html>

@@ -51,12 +51,19 @@ class WcTimeline extends WcBaseComponent {
     // console.log('connectedCallback:wc-timeline');
   }
 
+  getDesignerHTML() {
+    // Timeline is driven by option elements or items attribute,
+    // both of which are consumed during render. Return null since
+    // the items attribute on the host element handles serialization.
+    return null;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {    
+  _handleAttributeChange(attrName, newValue) {
     if (attrName === 'items') {
       if (typeof newValue === 'string') {
         this._items = JSON.parse(newValue);

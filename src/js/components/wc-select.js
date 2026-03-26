@@ -68,6 +68,13 @@ class WcSelect extends WcBaseFormComponent {
     // console.log('connectedCallback:wc-select');
   }
 
+  getDesignerHTML() {
+    // Return options from the inner select element
+    const innerSelect = this.querySelector('select');
+    if (!innerSelect) return null;
+    return Array.from(innerSelect.querySelectorAll('option')).map(opt => opt.outerHTML).join('\n');
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

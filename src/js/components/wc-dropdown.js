@@ -58,12 +58,37 @@ class WcDropdown extends WcBaseComponent {
     // console.log('connectedCallback:wc-dropdown');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-dropdown') || this;
+  }
+
+  getDesignerHTML() {
+    const dropdownContent = this.querySelector('.dropdown-content');
+    if (!dropdownContent) return null;
+    const children = dropdownContent.querySelectorAll(':scope > *:not(.component)');
+    if (children.length === 0) return null;
+    return Array.from(children).map(child => {
+      const tag = child.tagName.toLowerCase();
+      const attrs = [];
+      for (const attr of child.attributes) {
+        if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
+        if (attr.name === 'class' && attr.value === 'contents') continue;
+        if (attr.name === 'style') continue;
+        if (attr.value === '') attrs.push(attr.name);
+        else attrs.push(`${attr.name}="${attr.value}"`);
+      }
+      const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
+      if (tag === 'hr') return `<hr${attrStr}>`;
+      return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+    }).join('\n');
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {    
+  _handleAttributeChange(attrName, newValue) {
     if (attrName === 'label') {
       // Do nothing...
     } else if (attrName === 'dropdown-class') {

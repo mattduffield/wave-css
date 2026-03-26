@@ -58,6 +58,10 @@ class WcTabItem extends WcBaseComponent {
     // console.log('connectedCallback:wc-tab-item');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-tab-item') || this;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

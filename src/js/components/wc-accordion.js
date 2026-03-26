@@ -51,12 +51,23 @@ if (!customElements.get('wc-accordion')) {
       // console.log('connectedCallback:wc-accordion', this._items);
     }
 
+    getInnerContainer() {
+      return this.querySelector(':scope > .wc-accordion') || this;
+    }
+
+    getDesignerHTML() {
+      // Accordion is driven by the items attribute or option elements,
+      // both of which are consumed during render. Return null since
+      // the items attribute on the host element handles serialization.
+      return null;
+    }
+
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
     }
 
-    _handleAttributeChange(attrName, newValue) {    
+    _handleAttributeChange(attrName, newValue) {
       if (attrName === 'items') {
         if (typeof newValue === 'string') {
           this._items = JSON.parse(newValue);

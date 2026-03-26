@@ -211,6 +211,13 @@ class WcInput extends WcBaseFormComponent {
     // console.log('connectedCallback:wc-input');
   }
 
+  getDesignerHTML() {
+    if (this.getAttribute('type') !== 'radio') return null;
+    const options = this.querySelectorAll('option');
+    if (options.length === 0) return null;
+    return Array.from(options).map(opt => opt.outerHTML).join('\n');
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

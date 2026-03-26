@@ -38,12 +38,16 @@ class WcDiv extends WcBaseComponent {
     this._applyStyle();
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-div') || this;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
   }
 
-  _handleAttributeChange(attrName, newValue) {    
+  _handleAttributeChange(attrName, newValue) {
     if (attrName === 'items') {
       if (typeof newValue === 'string') {
         this._items = JSON.parse(newValue);

@@ -49,6 +49,17 @@ class WcMenu extends WcBaseComponent {
     // console.log('connectedCallback:wc-menu');
   }
 
+  getInnerContainer() {
+    return this.querySelector(':scope > .wc-menu') || this;
+  }
+
+  getDesignerHTML() {
+    // Menu is driven by option elements or items attribute,
+    // both of which are consumed during render. Return null since
+    // the items attribute on the host element handles serialization.
+    return null;
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();

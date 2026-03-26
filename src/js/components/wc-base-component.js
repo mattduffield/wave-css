@@ -3,6 +3,34 @@ import { generateUniqueId, loadCSS, loadScript, loadLibrary, loadStyle } from '.
 
 export class WcBaseComponent extends HTMLElement {
 
+  /**
+   * Returns true when the component is running inside the designer canvas.
+   * Components can check this to skip behaviors that don't apply at design time
+   * (Hyperscript execution, HTMX processing, navigation, etc.)
+   */
+  static get designerMode() {
+    return document.documentElement.hasAttribute('data-designer');
+  }
+
+  /**
+   * Returns the inner container element where designer children are placed.
+   * Override in subclasses that wrap children in an inner element.
+   * Default: returns the componentElement or self.
+   */
+  getInnerContainer() {
+    return this.componentElement || this;
+  }
+
+  /**
+   * Returns clean HTML of this component's declared children.
+   * Override in subclasses whose rendered DOM differs from the declared markup
+   * (e.g., wc-breadcrumb renders <a> tags from wc-breadcrumb-item declarations).
+   * Default: returns null (use extractChildren recursion instead).
+   */
+  getDesignerHTML() {
+    return null;
+  }
+
   constructor() {
     super();
     this._wcId = generateUniqueId();

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Designer Canvas</title>
-  <link rel="stylesheet" href="./wave-css.min.css">
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
   <style>
     body { margin: 0; padding: 0; min-height: 100vh; }
     #editor-canvas { min-height: 100vh; padding: 1rem; position: relative; }
@@ -58,54 +58,21 @@
       outline-offset: -1px;
     }
 
-    /* Empty containers: min-height + drop hint using theme variables */
-    [data-designer-container]:not(:has([data-designer-id])) {
-      min-height: 100px;
-    }
-    [data-designer-container]:not(:has([data-designer-id]))::after {
-      content: 'Drop components here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
+    /* === Universal drop target ===
+       Every container's inner element is marked with data-drop-target.
+       All drop targets get a subtle boundary so users can see where to drop.
+       Empty ones also get hint text. */
+    [data-drop-target] {
+      border: 1px dashed rgba(120, 160, 220, 0.4);
       border-radius: 4px;
+      padding: 8px;
+      min-height: 40px;
+      background: rgba(120, 160, 220, 0.03);
     }
-
-    /* Inner wrappers — only show hint on the INNERMOST empty container,
-       not parent wrappers that contain another container child */
-    .wc-form:not(:has([data-designer-id])) {
+    [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility]))) {
       min-height: 100px;
     }
-    .wc-form:not(:has([data-designer-id]))::after {
-      content: 'Drop form fields here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-    .wc-tab-item:not(:has([data-designer-id])) {
-      min-height: 100px;
-    }
-    .wc-tab-item:not(:has([data-designer-id]))::after {
-      content: 'Drop components here';
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100px;
-      color: var(--text-6, #888);
-      font-size: 12px; font-family: system-ui, sans-serif;
-      border: 1px dashed var(--surface-5, #444);
-      border-radius: 4px;
-    }
-    /* Div wrappers that CONTAIN a form or other container — suppress their hint */
-    .wc-div:has(.wc-form, [data-designer-container])::after {
-      display: none !important;
-    }
-    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container])) {
-      min-height: 100px;
-    }
-    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container]))::after {
+    [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility])))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
       min-height: 100px;
@@ -156,11 +123,14 @@
       font-family: system-ui, sans-serif;
     }
 
-    /* Prevent form interaction at design time — but allow tab nav buttons */
-    [data-designer-id] input,
-    [data-designer-id] select,
-    [data-designer-id] textarea { pointer-events: none; }
-    [data-designer-id] button:not(.tab-link) { pointer-events: none; }
+    /* Prevent form interaction at design time — but allow:
+       - tab nav buttons (.tab-link)
+       - elements that ARE designer components (have data-designer-id) */
+    [data-designer-id] input:not([data-designer-id]),
+    [data-designer-id] select:not([data-designer-id]),
+    [data-designer-id] textarea:not([data-designer-id]) { pointer-events: none; }
+    [data-designer-id] button:not(.tab-link):not([data-designer-id]) { pointer-events: none; }
+    [data-designer-id] a:not([data-designer-id]) { pointer-events: none; }
     .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
 
     /* Full page preview mode — enable all interactions, hide edit chrome */
@@ -249,6 +219,14 @@
 <body>
   <div id="editor-canvas"></div>
 
+  <div id="designer-loading" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:var(--surface-2, #1a1a2e); padding:16px 32px; border-radius:8px; color:var(--text-3, #ccc); font-size:14px; font-family:system-ui,sans-serif; display:flex; align-items:center; gap:10px;">
+      <span style="animation:spin 1s linear infinite; display:inline-block;">⟳</span>
+      Building components...
+    </div>
+  </div>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
   <div id="floating-toolbar">
     <button data-action="preview" title="Preview this component">▶</button>
     <div class="sep"></div>
@@ -259,16 +237,27 @@
     <button data-action="delete" title="Delete">✕</button>
   </div>
 
-  <script type="module" src="./wave-css.min.js"></script>
+  <script type="module" src="../dist/wave-css.min.js"></script>
   <script>
   (function() {
     const canvas = document.getElementById('editor-canvas');
     const toolbar = document.getElementById('floating-toolbar');
+    const loadingOverlay = document.getElementById('designer-loading');
     let componentRegistry = new Map();
     let sampleData = {};
     let selectedId = null;
     let idCounter = 0;
+
+    function showLoading() { loadingOverlay.style.display = 'flex'; }
+    function hideLoading() { loadingOverlay.style.display = 'none'; }
     let dropIndicator = null;
+
+    // Utility (invisible) components — these don't render visually.
+    // The drop hint CSS ignores them when checking if a container is "empty".
+    const UTILITY_TYPES = new Set([
+      'wc-hotkey', 'wc-behavior', 'wc-event-handler', 'wc-visibility-change',
+      'wc-script', 'wc-javascript', 'wc-event-hub', 'wc-mask-hub',
+    ]);
     let lastDropPosition = null;
     let lastDropParentId = null;
 
@@ -371,6 +360,12 @@
         return null;
       }
 
+      // Mark utility (invisible) components so CSS can ignore them
+      // when determining if a container is "empty" for drop hints
+      if (UTILITY_TYPES.has(type)) {
+        el.setAttribute('data-designer-utility', '');
+      }
+
       // Add a selected-state badge element inside the component
       const badge = document.createElement('span');
       badge.setAttribute('data-designer-label-badge', '');
@@ -402,6 +397,16 @@
 
       // Register
       componentRegistry.set(designerId, { element: el, type, properties: { ...properties } });
+
+      // Mark the inner drop target for containers — the ONE element where
+      // children are actually placed. This is universal: one CSS rule using
+      // [data-drop-target] handles all container types consistently.
+      if (container) {
+        setTimeout(() => {
+          const inner = getInnerElement(el, type);
+          if (inner) inner.setAttribute('data-drop-target', type);
+        }, 100);
+      }
 
       // Apply sample data
       setTimeout(() => {
@@ -759,7 +764,7 @@
         const payload = JSON.parse(jsonData);
 
         if (payload.preset && payload.tree) {
-          // Preset drop — async append with delays for component rendering
+          showLoading();
           async function appendPresetNodes(nodes, parentId) {
             for (const node of nodes) {
               const { componentType, type, children, ...properties } = node;
@@ -774,6 +779,7 @@
           appendPresetNodes(payload.tree, savedParentId).then(() => {
             setTimeout(() => {
               refreshTabs();
+              hideLoading();
               postToParent('treeAppended', {});
             }, 800);
           });
@@ -934,7 +940,9 @@
         } else if (entry.type === 'hr') {
           html += `<${tag}${attrStr}>`;
         } else {
-          html += `<${tag}${attrStr}></${tag}>`;
+          // Include text content for native HTML elements (button, a, h1, p, etc.)
+          const textContent = entry.properties.content || '';
+          html += `<${tag}${attrStr}>${textContent}</${tag}>`;
         }
       }
       return html;
@@ -979,6 +987,8 @@
           break;
         case 'getTree': postToParent('treeResponse', { tree: serializeTree() }); break;
         case 'getHTML': postToParent('htmlResponse', { html: extractHTML() }); break;
+        case 'showLoading': showLoading(); break;
+        case 'hideLoading': hideLoading(); break;
         case 'clear':
           canvas.innerHTML = '';
           componentRegistry.clear();
@@ -986,7 +996,7 @@
           toolbar.classList.remove('visible');
           break;
         case 'loadTree':
-          // Clear and rebuild canvas from saved tree
+          showLoading();
           canvas.innerHTML = '';
           componentRegistry.clear();
           selectedId = null;
@@ -1010,15 +1020,17 @@
             loadNodes(e.data.tree, null).then(() => {
               setTimeout(() => {
                 refreshTabs();
+                hideLoading();
                 postToParent('treeLoaded', {});
               }, 800);
             }).catch(err => {
               console.error('[canvas] loadTree error:', err);
+              hideLoading();
             });
           }
           break;
         case 'appendTree':
-          // Add nodes to canvas without clearing — used by presets
+          showLoading();
           async function appendNodes(nodes, parentId) {
             for (const node of nodes) {
               const { componentType, type, designerId, children, ...properties } = node;
@@ -1034,10 +1046,12 @@
             appendNodes(e.data.tree, e.data.parentId || null).then(() => {
               setTimeout(() => {
                 refreshTabs();
+                hideLoading();
                 postToParent('treeAppended', {});
               }, 800);
             }).catch(err => {
               console.error('[canvas] appendTree error:', err);
+              hideLoading();
             });
           }
           break;

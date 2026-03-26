@@ -978,6 +978,31 @@ if (!window.WcIconConfig) {
 
 // src/js/components/wc-base-component.js
 var WcBaseComponent = class extends HTMLElement {
+  /**
+   * Returns true when the component is running inside the designer canvas.
+   * Components can check this to skip behaviors that don't apply at design time
+   * (Hyperscript execution, HTMX processing, navigation, etc.)
+   */
+  static get designerMode() {
+    return document.documentElement.hasAttribute("data-designer");
+  }
+  /**
+   * Returns the inner container element where designer children are placed.
+   * Override in subclasses that wrap children in an inner element.
+   * Default: returns the componentElement or self.
+   */
+  getInnerContainer() {
+    return this.componentElement || this;
+  }
+  /**
+   * Returns clean HTML of this component's declared children.
+   * Override in subclasses whose rendered DOM differs from the declared markup
+   * (e.g., wc-breadcrumb renders <a> tags from wc-breadcrumb-item declarations).
+   * Default: returns null (use extractChildren recursion instead).
+   */
+  getDesignerHTML() {
+    return null;
+  }
   constructor() {
     super();
     this._wcId = generateUniqueId2();
@@ -1296,6 +1321,12 @@ if (!customElements.get("wc-accordion")) {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
+    }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-accordion") || this;
+    }
+    getDesignerHTML() {
+      return null;
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -1857,6 +1888,22 @@ if (!customElements.get("wc-breadcrumb")) {
       super.connectedCallback();
       this._applyStyle();
     }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-breadcrumb") || this;
+    }
+    getDesignerHTML() {
+      const items = this.querySelectorAll("wc-breadcrumb-item");
+      return Array.from(items).map((item) => {
+        const attrs = [];
+        for (const attr of item.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        return `<wc-breadcrumb-item ${attrs.join(" ")}></wc-breadcrumb-item>`;
+      }).join("\n");
+    }
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
@@ -1878,8 +1925,33 @@ if (!customElements.get("wc-breadcrumb")) {
       return result;
     }
     _createElement() {
-      const markup = [];
       const crumbs = this._getBreadcrumbItems();
+      if (WcBreadcrumb.designerMode) {
+        this.componentElement.className = "wc-breadcrumb flex flex-row items-center px-2 gap-2";
+        const items = this.querySelectorAll("wc-breadcrumb-item");
+        items.forEach((item, index) => {
+          item.style.display = "inline-flex";
+          item.style.alignItems = "center";
+          item.style.cursor = "pointer";
+          if (index > 0) {
+            const sep = document.createElement("span");
+            sep.textContent = ">";
+            sep.style.color = "var(--text-6)";
+            sep.style.margin = "0 2px";
+            this.componentElement.appendChild(sep);
+          }
+          const label = item.getAttribute("label") || "";
+          const link = item.getAttribute("link") || "";
+          if (index === 0 && link) {
+            item.textContent = "\u{1F3E0}";
+          } else {
+            item.textContent = label || "\u2026";
+          }
+          this.componentElement.appendChild(item);
+        });
+        return;
+      }
+      const markup = [];
       crumbs.forEach((item, index) => {
         if (index == 0) {
           markup.push(`
@@ -3233,6 +3305,9 @@ var WcDiv = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
   }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-div") || this;
+  }
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
@@ -3330,6 +3405,29 @@ var WcDropdown = class extends WcBaseComponent {
     this.classList.remove("hidden");
     this.componentElement.classList.remove("hidden");
     this._wireEvents();
+  }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-dropdown") || this;
+  }
+  getDesignerHTML() {
+    const dropdownContent = this.querySelector(".dropdown-content");
+    if (!dropdownContent) return null;
+    const children = dropdownContent.querySelectorAll(":scope > *:not(.component)");
+    if (children.length === 0) return null;
+    return Array.from(children).map((child) => {
+      const tag = child.tagName.toLowerCase();
+      const attrs = [];
+      for (const attr of child.attributes) {
+        if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+        if (attr.name === "class" && attr.value === "contents") continue;
+        if (attr.name === "style") continue;
+        if (attr.value === "") attrs.push(attr.name);
+        else attrs.push(`${attr.name}="${attr.value}"`);
+      }
+      const attrStr = attrs.length ? " " + attrs.join(" ") : "";
+      if (tag === "hr") return `<hr${attrStr}>`;
+      return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+    }).join("\n");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -4561,6 +4659,9 @@ var WcFlipBox = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
+  }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-flip-box") || this;
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -7791,6 +7892,12 @@ var WcMenu = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
+  }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-menu") || this;
+  }
+  getDesignerHTML() {
+    return null;
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -11567,11 +11674,18 @@ if (!customElements.get("wc-live-designer")) {
         outline-offset: -1px !important;
       }
 
-      /* === Universal drop target hint === */
-      [data-drop-target]:not(:has([data-designer-id])) {
+      /* === Universal drop target === */
+      [data-drop-target] {
+        border: 1px dashed rgba(120, 160, 220, 0.4) !important;
+        border-radius: 4px !important;
+        padding: 8px !important;
+        min-height: 40px !important;
+        background: rgba(120, 160, 220, 0.03) !important;
+      }
+      [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility]))) {
         min-height: 100px !important;
       }
-      [data-drop-target]:not(:has([data-designer-id]))::after {
+      [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility])))::after {
         content: 'Drop components here' !important;
         display: flex !important;
         justify-content: center !important;
@@ -11619,13 +11733,18 @@ if (!customElements.get("wc-live-designer")) {
       wc-card-skeleton[data-designer-id]::after { content: '\u23F3 Card Skeleton' !important; }
       wc-list-skeleton[data-designer-id]::after { content: '\u23F3 List Skeleton' !important; }
 
-      /* === Prevent form interaction at design time \u2014 but allow tab nav buttons === */
-      [data-designer-id] input,
-      [data-designer-id] select,
-      [data-designer-id] textarea {
+      /* === Prevent form interaction at design time \u2014 but allow:
+         - tab nav buttons (.tab-link)
+         - elements that ARE designer components (have data-designer-id) === */
+      [data-designer-id] input:not([data-designer-id]),
+      [data-designer-id] select:not([data-designer-id]),
+      [data-designer-id] textarea:not([data-designer-id]) {
         pointer-events: none !important;
       }
-      [data-designer-id] button:not(.tab-link) {
+      [data-designer-id] button:not(.tab-link):not([data-designer-id]) {
+        pointer-events: none !important;
+      }
+      [data-designer-id] a:not([data-designer-id]) {
         pointer-events: none !important;
       }
       .tab-nav .tab-link {
@@ -11633,337 +11752,214 @@ if (!customElements.get("wc-live-designer")) {
         cursor: pointer !important;
       }
     `;
-    // Component palette items
+    // Component palette — each item defines its HTML so it renders visibly when dropped.
+    // No tree objects, no incremental building. Just HTML → innerHTML → done.
     static CONTAINERS = [
-      { type: "div", label: "Div" },
-      { type: "fieldset", label: "Fieldset" },
-      { type: "wc-form", label: "Form" },
-      { type: "wc-tab", label: "Tab Container" },
-      { type: "wc-tab-item", label: "Tab Item" },
-      { type: "wc-accordion", label: "Accordion" },
-      { type: "wc-dropdown", label: "Dropdown" },
-      { type: "wc-flip-box", label: "Flip Box" },
-      { type: "wc-menu", label: "Menu" },
-      { type: "wc-sidebar", label: "Sidebar" },
-      { type: "wc-sidenav", label: "Sidenav" },
-      { type: "wc-slideshow", label: "Slideshow" },
-      { type: "wc-split-button", label: "Split Button" }
+      { label: "Div", html: '<div class="col gap-2 p-2"></div>' },
+      { label: "Fieldset", html: '<fieldset class="col gap-2 p-4 border border-solid rounded-md"><legend>Fieldset</legend></fieldset>' },
+      { label: "Form", html: '<wc-form class="col gap-3" id="form" method="put"></wc-form>' },
+      { label: "Tab Container", html: '<wc-tab class="col-1" animate><wc-tab-item class="active" label="Tab 1"><div class="p-4"></div></wc-tab-item><wc-tab-item label="Tab 2"><div class="p-4"></div></wc-tab-item></wc-tab>' },
+      { label: "Tab Item", html: '<wc-tab-item label="New Tab"><div class="p-4"></div></wc-tab-item>' },
+      { label: "Accordion", html: "<wc-accordion></wc-accordion>" },
+      { label: "Dropdown", html: '<wc-dropdown label="Dropdown"></wc-dropdown>' },
+      { label: "Flip Box", html: "<wc-flip-box></wc-flip-box>" },
+      { label: "Menu", html: "<wc-menu></wc-menu>" },
+      { label: "Sidebar", html: '<wc-sidebar label="Sidebar" width="300px"></wc-sidebar>' },
+      { label: "Sidenav", html: "<wc-sidenav></wc-sidenav>" },
+      { label: "Slideshow", html: "<wc-slideshow></wc-slideshow>" },
+      { label: "Split Button", html: "<wc-split-button></wc-split-button>" }
     ];
     static ELEMENTS = [
-      // Form inputs
-      { type: "wc-input", label: "Input" },
-      { type: "wc-input", label: "Checkbox", defaults: { type: "checkbox", "toggle-switch": "" } },
-      { type: "wc-input", label: "Email", defaults: { type: "email" } },
-      { type: "wc-input", label: "Phone", defaults: { type: "tel" } },
-      { type: "wc-input", label: "Date", defaults: { type: "date" } },
-      { type: "wc-input", label: "Number", defaults: { type: "number" } },
-      { type: "wc-input", label: "Currency", defaults: { type: "currency" } },
-      { type: "wc-input", label: "Password", defaults: { type: "password" } },
-      { type: "wc-input", label: "Radio", defaults: { type: "radio", "radio-group-class": "row modern" } },
-      { type: "wc-input", label: "Range", defaults: { type: "range" } },
-      { type: "wc-select", label: "Select" },
-      { type: "wc-textarea", label: "Textarea" },
+      // Form inputs — every element has visible defaults
+      { label: "Text Input", html: '<wc-input name="field" lbl-label="Text Field"></wc-input>' },
+      { label: "Checkbox", html: '<wc-input name="is_active" lbl-label="Is Active?" type="checkbox" toggle-switch></wc-input>' },
+      { label: "Email", html: '<wc-input name="email" lbl-label="Email" type="email"></wc-input>' },
+      { label: "Phone", html: '<wc-input name="phone" lbl-label="Phone" type="tel"></wc-input>' },
+      { label: "Date", html: '<wc-input name="date" lbl-label="Date" type="date"></wc-input>' },
+      { label: "Number", html: '<wc-input name="quantity" lbl-label="Number" type="number"></wc-input>' },
+      { label: "Currency", html: '<wc-input name="amount" lbl-label="Amount" type="currency"></wc-input>' },
+      { label: "Password", html: '<wc-input name="password" lbl-label="Password" type="password"></wc-input>' },
+      { label: "Radio", html: '<wc-input name="option" lbl-label="Option" type="radio" radio-group-class="row modern"><option value="a">Option A</option><option value="b">Option B</option></wc-input>' },
+      { label: "Range", html: '<wc-input name="range" lbl-label="Range" type="range"></wc-input>' },
+      { label: "Select", html: '<wc-select name="select" lbl-label="Select"><option value="">Choose...</option><option value="a">Option A</option><option value="b">Option B</option></wc-select>' },
+      { label: "Textarea", html: '<wc-textarea name="notes" lbl-label="Notes" rows="4"></wc-textarea>' },
+      // HTML basics
+      { label: "Button", html: '<button class="btn btn-primary">Button</button>' },
+      { label: "Link", html: '<a href="#" class="underline">Link text</a>' },
+      { label: "Heading 1", html: "<h1>Heading 1</h1>" },
+      { label: "Heading 2", html: "<h2>Heading 2</h2>" },
+      { label: "Heading 3", html: "<h3>Heading 3</h3>" },
+      { label: "Paragraph", html: "<p>Paragraph text goes here.</p>" },
+      { label: "Divider", html: "<hr>" },
       // Display
-      { type: "wc-field", label: "Field (display)" },
-      { type: "wc-fa-icon", label: "FA Icon" },
-      { type: "wc-icon", label: "Icon" },
-      { type: "wc-image", label: "Image" },
-      { type: "wc-background-image", label: "Background Image" },
-      { type: "wc-contact-card", label: "Contact Card" },
-      { type: "wc-contact-chip", label: "Contact Chip" },
-      { type: "wc-article-card", label: "Article Card" },
+      { label: "Field (display)", html: '<wc-field label="Field" value="Value"></wc-field>' },
+      { label: "FA Icon", html: '<wc-fa-icon name="star" icon-style="solid" size="1.5rem"></wc-fa-icon>' },
+      { label: "Image", html: '<wc-image src="" alt="Image" class="w-full"></wc-image>' },
       // Navigation
-      { type: "wc-breadcrumb", label: "Breadcrumb" },
-      { type: "wc-breadcrumb-item", label: "Breadcrumb Item" },
-      { type: "wc-dropdown-item", label: "Dropdown Item" },
-      { type: "wc-slideshow-image", label: "Slideshow Image" },
-      { type: "wc-accordion-option", label: "Accordion Option" },
-      { type: "wc-timeline", label: "Timeline" },
-      { type: "wc-timeline-option", label: "Timeline Option" },
+      { label: "Breadcrumb", html: '<wc-breadcrumb><wc-breadcrumb-item label="Home" link="#"></wc-breadcrumb-item><wc-breadcrumb-item label="Page" link=""></wc-breadcrumb-item></wc-breadcrumb>' },
+      { label: "Breadcrumb Item", html: '<wc-breadcrumb-item label="Page" link="#"></wc-breadcrumb-item>' },
       // Buttons
-      { type: "wc-save-split-button", label: "Save Split Button" },
-      { type: "wc-save-button", label: "Save Button" },
+      { label: "Save Split Button", html: '<wc-save-split-button method="{{FormMethod}}"></wc-save-split-button>' },
+      { label: "Save Button", html: '<wc-save-button method="{{FormMethod}}"></wc-save-button>' },
       // Data
-      { type: "wc-tabulator", label: "Tabulator" },
-      { type: "wc-tabulator-column", label: "Tabulator Column" },
-      { type: "wc-chart", label: "Chart" },
-      { type: "wc-chartjs", label: "ChartJS" },
-      // Code & editors
-      { type: "wc-code-mirror", label: "Code Mirror" },
-      // Maps & address
-      { type: "wc-google-map", label: "Google Map" },
-      { type: "wc-google-address", label: "Google Address" },
-      // Skeletons & loading
-      { type: "wc-article-skeleton", label: "Article Skeleton" },
-      { type: "wc-table-skeleton", label: "Table Skeleton" },
-      { type: "wc-card-skeleton", label: "Card Skeleton" },
-      { type: "wc-list-skeleton", label: "List Skeleton" },
-      { type: "wc-loader", label: "Loader" },
-      { type: "wc-busy-indicator", label: "Busy Indicator" },
+      { label: "Tabulator", html: '<wc-tabulator ajax-url="/api/collection" pagination></wc-tabulator>' },
+      // Skeletons
+      { label: "Article Skeleton", html: "<wc-article-skeleton></wc-article-skeleton>" },
+      { label: "Loader", html: "<wc-loader></wc-loader>" },
       // Utility
-      { type: "hr", label: "Divider" },
-      { type: "wc-hotkey", label: "Hotkey" },
-      { type: "wc-behavior", label: "Behavior" },
-      { type: "wc-event-handler", label: "Event Handler" },
-      { type: "wc-visibility-change", label: "Visibility Change" },
-      { type: "wc-emoji", label: "Emoji" },
-      { type: "wc-script", label: "Script" },
-      { type: "wc-javascript", label: "JavaScript" },
-      // Specialized
-      { type: "wc-vin-decoder", label: "VIN Decoder" },
-      { type: "wc-address-listener", label: "Address Listener" },
-      { type: "wc-ai-bot", label: "AI Bot" },
-      { type: "wc-theme-selector", label: "Theme Selector" }
+      { label: "Hotkey", html: '<wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>' }
     ];
-    // Preset groups — each is a mini component tree that gets appended to the canvas.
-    // Modeled after real production Go Kart templates (client, prospect, kanban patterns).
+    // Presets — complete HTML strings, rendered via innerHTML in one paint.
+    // Modeled after real production Go Kart templates.
     static PRESETS = [
       // --- Page Starters ---
       {
         label: "Standard Edit Page",
         category: "page",
-        description: "Skeleton + nav + tabs(General + Change Log) + form + hotkey",
-        tree: [
-          { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" },
-          { componentType: "div", css: "page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden", children: [
-            { componentType: "div", css: "flex flex-row gap-3 justify-between items-center", children: [
-              { componentType: "wc-breadcrumb", children: [
-                { componentType: "wc-breadcrumb-item", label: "", link: "/{{Template.RoutePrefix}}/home" },
-                { componentType: "wc-breadcrumb-item", label: "{{Template.Name}}", link: "/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list" },
-                { componentType: "wc-breadcrumb-item", label: "", link: "" }
-              ] },
-              { componentType: "div", css: "flex flex-row items-center gap-3", children: [
-                {
-                  componentType: "wc-save-split-button",
-                  method: "{{FormMethod}}",
-                  "hx-include": "form#{{Template.Slug}}",
-                  "save-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                  "save-new-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/create",
-                  "save-return-url": "/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"
-                }
-              ] }
-            ] },
-            { componentType: "wc-tab", css: "col-1 mt-2 mb-4", animate: "", children: [
-              { componentType: "wc-tab-item", css: "active", label: "General", children: [
-                {
-                  componentType: "wc-form",
-                  css: "col gap-3 pt-2 pb-5 px-5",
-                  method: "{{FormMethod}}",
-                  id: "{{Template.Slug}}",
-                  action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                  "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                  children: [
-                    { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
-                  ]
-                }
-              ] },
-              { componentType: "wc-tab-item", label: "Change Log" }
-            ] }
-          ] }
-        ]
+        description: "Skeleton + nav + tabs + form + hotkey",
+        html: `<wc-article-skeleton _="on load
+      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)
+    end"></wc-article-skeleton>
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="{{Template.Name}}" link="/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+    <div class="flex flex-row items-center gap-3">
+      <wc-save-split-button method="{{FormMethod}}" hx-include="form#{{Template.Slug}}" save-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}" save-new-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/create" save-return-url="/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"></wc-save-split-button>
+    </div>
+  </div>
+  <wc-tab class="col-1 mt-2 mb-4" animate>
+    <wc-tab-item class="active" label="General">
+      <wc-form class="col gap-3 pt-2 pb-5 px-5" method="{{FormMethod}}" id="{{Template.Slug}}" action="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}">
+        <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
+      </wc-form>
+    </wc-tab-item>
+    <wc-tab-item label="Change Log">
+      <div class="p-4"></div>
+    </wc-tab-item>
+  </wc-tab>
+</div>`
       },
       {
         label: "Simple Form Page",
         category: "page",
-        description: "Skeleton + nav + form + hotkey (no tabs)",
-        tree: [
-          { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" },
-          { componentType: "div", css: "page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden", children: [
-            { componentType: "div", css: "flex flex-row gap-3 justify-between items-center", children: [
-              { componentType: "wc-breadcrumb", children: [
-                { componentType: "wc-breadcrumb-item", label: "", link: "/{{Template.RoutePrefix}}/home" },
-                { componentType: "wc-breadcrumb-item", label: "{{Template.Name}}", link: "" }
-              ] },
-              { componentType: "div", css: "flex flex-row items-center gap-3", children: [
-                {
-                  componentType: "wc-save-split-button",
-                  method: "{{FormMethod}}",
-                  "hx-include": "form#{{Template.Slug}}",
-                  "save-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                  "save-new-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/create",
-                  "save-return-url": "/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"
-                }
-              ] }
-            ] },
-            {
-              componentType: "wc-form",
-              css: "col gap-3 pt-2 pb-5 px-5",
-              method: "{{FormMethod}}",
-              id: "{{Template.Slug}}",
-              action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-              "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-              children: [
-                { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
-              ]
-            }
-          ] }
-        ]
+        description: "Skeleton + nav + form (no tabs)",
+        html: `<wc-article-skeleton _="on load
+      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)
+    end"></wc-article-skeleton>
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="{{Template.Name}}" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+    <div class="flex flex-row items-center gap-3">
+      <wc-save-split-button method="{{FormMethod}}" hx-include="form#{{Template.Slug}}" save-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}" save-new-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/create" save-return-url="/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"></wc-save-split-button>
+    </div>
+  </div>
+  <wc-form class="col gap-3 pt-2 pb-5 px-5" method="{{FormMethod}}" id="{{Template.Slug}}" action="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}">
+    <wc-hotkey keys="ctrl+s" target="button.save-btn"></wc-hotkey>
+  </wc-form>
+</div>`
       },
       {
         label: "List Page",
         category: "page",
         description: "Skeleton + breadcrumb + tabulator",
-        tree: [
-          { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" },
-          { componentType: "div", css: "page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden", children: [
-            { componentType: "div", css: "flex flex-row gap-3 justify-between items-center", children: [
-              { componentType: "wc-breadcrumb", children: [
-                { componentType: "wc-breadcrumb-item", label: "", link: "/{{Template.RoutePrefix}}/home" },
-                { componentType: "wc-breadcrumb-item", label: "{{Template.Name}}", link: "" }
-              ] }
-            ] },
-            { componentType: "wc-tabulator", "ajax-url": "/api/{{Template.CollectionName}}", pagination: "" }
-          ] }
-        ]
+        html: `<wc-article-skeleton _="on load
+      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)
+    end"></wc-article-skeleton>
+<div class="page-content flex flex-col flex-1 py-2 px-3 gap-2 hidden">
+  <div class="flex flex-row gap-3 justify-between items-center">
+    <wc-breadcrumb>
+      <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+      <wc-breadcrumb-item label="{{Template.Name}}" link=""></wc-breadcrumb-item>
+    </wc-breadcrumb>
+  </div>
+  <wc-tabulator ajax-url="/api/{{Template.CollectionName}}" pagination></wc-tabulator>
+</div>`
       },
       // --- Layouts ---
       {
         label: "2 Column",
         category: "layout",
         description: "Two equal columns",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" }
-          ] }
-        ]
+        html: '<div class="row gap-4"><div class="col-1"></div><div class="col-1"></div></div>'
       },
       {
         label: "3 Column",
         category: "layout",
         description: "Three equal columns",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" }
-          ] }
-        ]
+        html: '<div class="row gap-4"><div class="col-1"></div><div class="col-1"></div><div class="col-1"></div></div>'
       },
       {
         label: "4 Column",
         category: "layout",
         description: "Four equal columns",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" },
-            { componentType: "div", css: "col-1" }
-          ] }
-        ]
+        html: '<div class="row gap-4"><div class="col-1"></div><div class="col-1"></div><div class="col-1"></div><div class="col-1"></div></div>'
       },
       {
         label: "Sidebar + Content",
         category: "layout",
-        description: "Left sidebar with main content area",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "div", css: "flex flex-col", style: "width: 250px; min-width: 200px;" },
-            { componentType: "div", css: "col-1" }
-          ] }
-        ]
+        description: "Left sidebar with main content",
+        html: '<div class="row gap-4"><div class="flex flex-col" style="width: 250px; min-width: 200px;"></div><div class="col-1"></div></div>'
       },
       // --- Component Groups ---
       {
         label: "Navigation Bar",
         category: "group",
         description: "Breadcrumb + save button row",
-        tree: [
-          { componentType: "div", css: "flex flex-row gap-3 justify-between items-center", children: [
-            { componentType: "wc-breadcrumb", children: [
-              { componentType: "wc-breadcrumb-item", label: "", link: "/{{Template.RoutePrefix}}/home" },
-              { componentType: "wc-breadcrumb-item", label: "{{Template.Name}}", link: "" }
-            ] },
-            { componentType: "div", css: "flex flex-row items-center gap-3", children: [
-              {
-                componentType: "wc-save-split-button",
-                method: "{{FormMethod}}",
-                "hx-include": "form#{{Template.Slug}}",
-                "save-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                "save-new-url": "/{{Template.RoutePrefix}}/{{Template.Slug}}/create",
-                "save-return-url": "/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"
-              }
-            ] }
-          ] }
-        ]
+        html: `<div class="flex flex-row gap-3 justify-between items-center">
+  <wc-breadcrumb>
+    <wc-breadcrumb-item label="" link="/{{Template.RoutePrefix}}/home"></wc-breadcrumb-item>
+    <wc-breadcrumb-item label="{{Template.Name}}" link=""></wc-breadcrumb-item>
+  </wc-breadcrumb>
+  <div class="flex flex-row items-center gap-3">
+    <wc-save-split-button method="{{FormMethod}}" hx-include="form#{{Template.Slug}}" save-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}" save-new-url="/{{Template.RoutePrefix}}/{{Template.Slug}}/create" save-return-url="/{{Template.RoutePrefix}}/{{Template.RoutePrevTemplateSlug}}/list"></wc-save-split-button>
+  </div>
+</div>`
       },
       {
         label: "Tab with Change Log",
         category: "group",
-        description: "Tab container with General + Change Log tabs",
-        tree: [
-          { componentType: "wc-tab", css: "col-1 mt-2 mb-4", animate: "", children: [
-            { componentType: "wc-tab-item", css: "active", label: "General", children: [
-              { componentType: "div", css: "col-1 gap-2 pt-2 pb-5 px-5" }
-            ] },
-            { componentType: "wc-tab-item", label: "Change Log", children: [
-              { componentType: "div", css: "col-1 gap-2 pt-2 pb-5 px-5" }
-            ] }
-          ] }
-        ]
+        description: "Tab with General + Change Log",
+        html: '<wc-tab class="col-1 mt-2 mb-4" animate><wc-tab-item class="active" label="General"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item><wc-tab-item label="Change Log"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item></wc-tab>'
       },
       {
-        label: "Form with Meta Fields",
+        label: "Form",
         category: "group",
-        description: "wc-form configured for HTMX submission",
-        tree: [
-          {
-            componentType: "wc-form",
-            css: "col gap-3",
-            method: "{{FormMethod}}",
-            id: "{{Template.Slug}}",
-            action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-            "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}"
-          }
-        ]
+        description: "Form configured for HTMX",
+        html: '<wc-form class="col gap-3" method="{{FormMethod}}" id="{{Template.Slug}}" action="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}"></wc-form>'
       },
       {
         label: "Article Skeleton",
         category: "group",
-        description: "Loading skeleton with transition",
-        tree: [
-          { componentType: "wc-article-skeleton", _: "on load\n      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)\n    end" }
-        ]
+        description: "Loading skeleton",
+        html: `<wc-article-skeleton _="on load
+      call WaveHelpers.waitForThenHideAndShow('wc-article-skeleton .wc-article-skeleton', '.page-content', 3000, 500)
+    end"></wc-article-skeleton>`
       },
       // --- Form Patterns ---
       {
         label: "Name Fields",
         category: "form",
-        description: "First, Middle Initial, Last name in a row",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "wc-input", name: "first_name", "lbl-label": "First Name", required: "", scope: "first_name" },
-            { componentType: "wc-input", name: "middle_initial", "lbl-label": "M.I.", css: "flex flex-col", style: "max-width: 80px;", scope: "middle_initial" },
-            { componentType: "wc-input", name: "last_name", "lbl-label": "Last Name", required: "", scope: "last_name" }
-          ] }
-        ]
+        description: "First, M.I., Last in a row",
+        html: '<div class="row gap-4"><wc-input name="first_name" lbl-label="First Name" required></wc-input><wc-input name="middle_initial" lbl-label="M.I." class="flex flex-col" style="max-width: 80px;"></wc-input><wc-input name="last_name" lbl-label="Last Name" required></wc-input></div>'
       },
       {
         label: "Address Block",
         category: "form",
-        description: "Street, City, State, Zip layout",
-        tree: [
-          { componentType: "div", css: "col gap-2", children: [
-            { componentType: "wc-input", name: "street", "lbl-label": "Street", css: "col-1", scope: "street" },
-            { componentType: "div", css: "row gap-4", children: [
-              { componentType: "wc-input", name: "city", "lbl-label": "City", css: "col-1", scope: "city" },
-              { componentType: "wc-input", name: "state", "lbl-label": "State", css: "flex flex-col", style: "max-width: 100px;", scope: "state" },
-              { componentType: "wc-input", name: "postal_code", "lbl-label": "Zip", css: "flex flex-col", style: "max-width: 120px;", scope: "postal_code" }
-            ] }
-          ] }
-        ]
+        description: "Street, City, State, Zip",
+        html: '<div class="col gap-2"><wc-input name="street" lbl-label="Street" class="col-1"></wc-input><div class="row gap-4"><wc-input name="city" lbl-label="City" class="col-1"></wc-input><wc-input name="state" lbl-label="State" class="flex flex-col" style="max-width: 100px;"></wc-input><wc-input name="postal_code" lbl-label="Zip" class="flex flex-col" style="max-width: 120px;"></wc-input></div></div>'
       },
       {
         label: "Contact Fields",
         category: "form",
         description: "Email + phone in a row",
-        tree: [
-          { componentType: "div", css: "row gap-4", children: [
-            { componentType: "wc-input", name: "email", "lbl-label": "Email", type: "email", css: "col-1", scope: "email" },
-            { componentType: "wc-input", name: "phone_number", "lbl-label": "Phone", type: "tel", css: "col-1", scope: "phone_number" }
-          ] }
-        ]
+        html: '<div class="row gap-4"><wc-input name="email" lbl-label="Email" type="email" class="col-1"></wc-input><wc-input name="phone_number" lbl-label="Phone" type="tel" class="col-1"></wc-input></div>'
       }
     ];
     constructor() {
@@ -12045,7 +12041,7 @@ if (!customElements.get("wc-live-designer")) {
                     <input class="ld-palette-search" type="search" placeholder="Filter..." />
                     <div class="ld-palette-scroll">
                       ${WcLiveDesigner.CONTAINERS.map((c) => `
-                        <div class="ld-palette-item" data-type="${c.type}" draggable="true">${c.label}</div>
+                        <div class="ld-palette-item" data-html='${c.html.replace(/'/g, "&#39;")}' draggable="true">${c.label}</div>
                       `).join("")}
                     </div>
                   </div>
@@ -12055,7 +12051,7 @@ if (!customElements.get("wc-live-designer")) {
                     <input class="ld-palette-search" type="search" placeholder="Filter..." />
                     <div class="ld-palette-scroll">
                       ${WcLiveDesigner.ELEMENTS.map((c) => `
-                        <div class="ld-palette-item" data-type="${c.type}" ${c.defaults ? `data-defaults='${JSON.stringify(c.defaults)}'` : ""} draggable="true">${c.label}</div>
+                        <div class="ld-palette-item" data-html='${c.html.replace(/'/g, "&#39;")}' draggable="true">${c.label}</div>
                       `).join("")}
                     </div>
                   </div>
@@ -12096,7 +12092,7 @@ if (!customElements.get("wc-live-designer")) {
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Source">
-                  <div class="ld-source-panel flex flex-col flex-1 min-h-0" style="height: 100%;"></div>
+                  <div class="ld-source-panel flex flex-col flex-1 min-h-0" style="height: 100%; overflow: hidden;"></div>
                 </wc-tab-item>
               </wc-tab>
             </div>
@@ -12274,6 +12270,23 @@ if (!customElements.get("wc-live-designer")) {
           color: var(--text-2);
           background: var(--surface-5);
         }
+
+        /* Source editor \u2014 must stay within the view, never overflow */
+        .ld-source-panel {
+          overflow: hidden !important;
+        }
+        .ld-source-panel .ld-source-editor {
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+        .ld-source-panel .ld-source-editor .wc-code-mirror {
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+        .ld-source-panel .ld-source-editor .wc-code-mirror .CodeMirror {
+          height: 100% !important;
+        }
       `;
       this.loadStyle("wc-live-designer-style", style);
     }
@@ -12367,7 +12380,7 @@ if (!customElements.get("wc-live-designer")) {
           const editedHTML = this._lastEditedSourceHTML;
           if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
             this._lastSourceHTML = editedHTML;
-            await this.loadHTML(editedHTML);
+            this._postToCanvas("renderHTML", { html: editedHTML });
           }
         }
       });
@@ -12391,11 +12404,11 @@ if (!customElements.get("wc-live-designer")) {
           }
         });
       }
-      this.querySelectorAll(".ld-palette-item").forEach((item) => {
+      this.querySelectorAll(".ld-palette-item:not(.ld-preset-item)").forEach((item) => {
         item.addEventListener("dragstart", (e) => {
-          const type = item.dataset.type;
-          const defaults = item.dataset.defaults ? JSON.parse(item.dataset.defaults) : {};
-          e.dataTransfer.setData("application/json", JSON.stringify({ type, defaults }));
+          const html = item.dataset.html;
+          if (!html) return;
+          e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html }));
           e.dataTransfer.effectAllowed = "copy";
           const ghost = document.createElement("div");
           ghost.textContent = item.textContent;
@@ -12411,7 +12424,7 @@ if (!customElements.get("wc-live-designer")) {
           const idx = parseInt(item.dataset.presetIndex);
           const preset = WcLiveDesigner.PRESETS[idx];
           if (!preset) return;
-          e.dataTransfer.setData("application/json", JSON.stringify({ preset: true, tree: preset.tree }));
+          e.dataTransfer.setData("application/json", JSON.stringify({ preset: true, html: preset.html }));
           e.dataTransfer.effectAllowed = "copy";
           const ghost = document.createElement("div");
           ghost.textContent = preset.label;
@@ -12424,6 +12437,42 @@ if (!customElements.get("wc-live-designer")) {
     }
     _unWireEvents() {
       window.removeEventListener("message", this._handleMessage);
+    }
+    /**
+     * Build an HTML string from a component type and properties object.
+     * Used by the Fields tab to convert schema-inferred defaults into HTML for drag-drop.
+     */
+    _buildElementHTML(type, props) {
+      const attrs = [];
+      let content = "";
+      let innerHTML = "";
+      for (const [key, value] of Object.entries(props)) {
+        if (key === "css") {
+          attrs.push(`class="${value}"`);
+          continue;
+        }
+        if (key === "content") {
+          content = value;
+          continue;
+        }
+        if (key === "innerHTML") {
+          innerHTML = value;
+          continue;
+        }
+        if (key === "scope") {
+          attrs.push(`data-scope="${value}"`);
+          continue;
+        }
+        if (value === "" || value === true) {
+          attrs.push(key);
+        } else if (value !== false && value != null) {
+          attrs.push(`${key}="${value}"`);
+        }
+      }
+      const attrStr = attrs.length ? " " + attrs.join(" ") : "";
+      const body = innerHTML || content;
+      if (type === "hr") return `<hr${attrStr}>`;
+      return `<${type}${attrStr}>${body}</${type}>`;
     }
     disconnectedCallback() {
     }
@@ -12555,7 +12604,8 @@ if (!customElements.get("wc-live-designer")) {
           item.addEventListener("dragstart", (e) => {
             const type = item.dataset.type;
             const defaults = JSON.parse(item.dataset.defaults);
-            e.dataTransfer.setData("application/json", JSON.stringify({ type, defaults }));
+            const html = this._buildElementHTML(type, defaults);
+            e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html }));
             e.dataTransfer.effectAllowed = "copy";
             const ghost = document.createElement("div");
             ghost.textContent = item.textContent;
@@ -12757,13 +12807,12 @@ if (!customElements.get("wc-live-designer")) {
           if (this._savedContent) {
             const formHTML = this._extractFormContent(this._savedContent);
             if (formHTML) {
-              setTimeout(() => this.loadHTML(formHTML), 500);
+              this._postToCanvas("renderHTML", { html: formHTML });
             }
           }
-          if (this._pendingTree) {
-            const tree = this._pendingTree;
-            this._pendingTree = null;
-            setTimeout(() => this.loadTree(tree), 600);
+          if (this._pendingHTML) {
+            this._postToCanvas("renderHTML", { html: this._pendingHTML });
+            this._pendingHTML = null;
           }
           break;
         case "select":
@@ -12802,9 +12851,9 @@ if (!customElements.get("wc-live-designer")) {
           }
           break;
         case "treeLoaded":
-          this._updateLayerTree();
-          break;
         case "treeAppended":
+        case "registryBuilt":
+        case "componentInserted":
           this._updateLayerTree();
           break;
       }
@@ -12820,15 +12869,21 @@ if (!customElements.get("wc-live-designer")) {
         this._lastSourceHTML = formattedHTML;
         const panel = this.querySelector(".ld-source-panel");
         if (!panel) return;
-        panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 120px)" tab-size="2" value=""></wc-code-mirror>`;
-        const cmEl = panel.querySelector(".ld-source-editor");
+        let cmEl = panel.querySelector(".ld-source-editor");
+        if (!cmEl) {
+          panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="100%" tab-size="2" value="" style="flex: 1; min-height: 0; overflow: hidden;"></wc-code-mirror>`;
+          cmEl = panel.querySelector(".ld-source-editor");
+        }
         const setEditorValue = () => {
           if (cmEl.editor) {
             cmEl.editor.setValue(formattedHTML);
             setTimeout(() => cmEl.editor?.refresh(), 50);
-            cmEl.editor.on("change", () => {
-              this._lastEditedSourceHTML = cmEl.editor.getValue();
-            });
+            if (!cmEl._changeWired) {
+              cmEl._changeWired = true;
+              cmEl.editor.on("change", () => {
+                this._lastEditedSourceHTML = cmEl.editor.getValue();
+              });
+            }
           } else {
             setTimeout(setEditorValue, 100);
           }
@@ -12921,13 +12976,18 @@ if (!customElements.get("wc-live-designer")) {
      * @param {string} html - HTML string with Wave CSS component tags
      */
     async loadHTML(html) {
+      this._postToCanvas("showLoading", {});
       this._postToCanvas("clear", {});
       await new Promise((r) => setTimeout(r, 300));
       const parser = new DOMParser();
       const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
       const root = doc.body.firstElementChild;
-      if (!root) return;
+      if (!root) {
+        this._postToCanvas("hideLoading", {});
+        return;
+      }
       await this._loadChildren(root, null);
+      this._postToCanvas("hideLoading", {});
     }
     async _loadChildren(parentEl, parentDesignerId) {
       for (const child of parentEl.children) {
@@ -12976,6 +13036,11 @@ if (!customElements.get("wc-live-designer")) {
         }
         if (child.hasAttribute("data-scope")) {
           properties.scope = child.getAttribute("data-scope");
+        }
+        const nativeTextElements = /* @__PURE__ */ new Set(["button", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "label"]);
+        if (nativeTextElements.has(tag)) {
+          const text = child.textContent.trim();
+          if (text) properties.content = text;
         }
         if (tag === "wc-select" && child.children.length > 0) {
           const options = [];
@@ -13033,7 +13098,7 @@ if (!customElements.get("wc-live-designer")) {
     }
     _isDesignerComponent(tag) {
       if (tag.startsWith("wc-")) return true;
-      if (["div", "fieldset", "hr"].includes(tag)) return true;
+      if (["div", "fieldset", "hr", "button", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "label", "img"].includes(tag)) return true;
       return false;
     }
     _getSampleValue(fieldName) {
@@ -13304,12 +13369,26 @@ function runDelete() {
       typeEl.textContent = type;
       idEl.textContent = designerId;
       fieldsEl.innerHTML = "";
-      const commonProps = [
-        { name: "scope", label: "Data Scope", type: "text", value: properties.scope || "" },
-        { name: "name", label: "Name", type: "text", value: properties.name || "" },
-        { name: "lbl-label", label: "Label", type: "text", value: properties["lbl-label"] || "" },
-        { name: "css", label: "CSS Classes", type: "text", value: properties.css || "" }
-      ];
+      const nativeElements = /* @__PURE__ */ new Set(["button", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "label", "img", "hr"]);
+      const isNative = nativeElements.has(type);
+      const commonProps = [];
+      if (!isNative) {
+        commonProps.push({ name: "scope", label: "Data Scope", type: "text", value: properties.scope || "" });
+        commonProps.push({ name: "name", label: "Name", type: "text", value: properties.name || "" });
+        commonProps.push({ name: "lbl-label", label: "Label", type: "text", value: properties["lbl-label"] || "" });
+      } else {
+        commonProps.push({ name: "content", label: "Text Content", type: "text", value: properties.content || "" });
+      }
+      commonProps.push({ name: "css", label: "CSS Classes", type: "text", value: properties.css || "" });
+      if (type === "a") {
+        commonProps.push({ name: "href", label: "URL", type: "text", value: properties.href || "" });
+        commonProps.push({ name: "target", label: "Target", type: "select", value: properties.target || "", options: ["", "_blank", "_self"] });
+      } else if (type === "img") {
+        commonProps.push({ name: "src", label: "Source URL", type: "text", value: properties.src || "" });
+        commonProps.push({ name: "alt", label: "Alt Text", type: "text", value: properties.alt || "" });
+      } else if (type === "button") {
+        commonProps.push({ name: "type", label: "Type", type: "select", value: properties.type || "button", options: ["button", "submit", "reset"] });
+      }
       if (type === "wc-input") {
         commonProps.push({
           name: "type",
@@ -14260,6 +14339,28 @@ if (!customElements.get("wc-split-button")) {
       this._applyStyle();
       this._wireEvents();
     }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-split-button") || this;
+    }
+    getDesignerHTML() {
+      const dropdownContent = this.querySelector(".dropdown-content");
+      if (!dropdownContent) return null;
+      const children = dropdownContent.querySelectorAll(":scope > *");
+      if (children.length === 0) return null;
+      return Array.from(children).map((child) => {
+        const tag = child.tagName.toLowerCase();
+        const attrs = [];
+        for (const attr of child.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.name === "style") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const attrStr = attrs.length ? " " + attrs.join(" ") : "";
+        return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+      }).join("\n");
+    }
     disconnectedCallback() {
       this._unWireEvents();
     }
@@ -14419,6 +14520,28 @@ var WcSidebar = class extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+  }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-sidebar") || this;
+  }
+  getDesignerHTML() {
+    const container2 = this.querySelector(".wc-sidebar");
+    if (!container2) return null;
+    const children = container2.querySelectorAll(":scope > *");
+    if (children.length === 0) return null;
+    return Array.from(children).map((child) => {
+      const tag = child.tagName.toLowerCase();
+      const attrs = [];
+      for (const attr of child.attributes) {
+        if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+        if (attr.name === "class" && attr.value === "contents") continue;
+        if (attr.name === "style") continue;
+        if (attr.value === "") attrs.push(attr.name);
+        else attrs.push(`${attr.name}="${attr.value}"`);
+      }
+      const attrStr = attrs.length ? " " + attrs.join(" ") : "";
+      return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+    }).join("\n");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -14591,6 +14714,28 @@ if (!customElements.get("wc-sidenav")) {
           }
         }
       }
+    }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-sidenav") || this;
+    }
+    getDesignerHTML() {
+      const container2 = this.querySelector(".wc-sidenav");
+      if (!container2) return null;
+      const children = container2.querySelectorAll(":scope > *:not(.closebtn)");
+      if (children.length === 0) return null;
+      return Array.from(children).map((child) => {
+        const tag = child.tagName.toLowerCase();
+        const attrs = [];
+        for (const attr of child.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.name === "style") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const attrStr = attrs.length ? " " + attrs.join(" ") : "";
+        return `<${tag}${attrStr}>${child.textContent}</${tag}>`;
+      }).join("\n");
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -15102,6 +15247,9 @@ if (!customElements.get("wc-slideshow")) {
       this._applyStyle();
       this._wireEvents();
     }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-slideshow") || this;
+    }
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
@@ -15414,6 +15562,9 @@ var WcTabItem = class extends WcBaseComponent {
     this._applyStyle();
     this._wireEvents();
   }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-tab-item") || this;
+  }
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
@@ -15536,6 +15687,9 @@ var WcTab = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
     this._wireEvents();
+  }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-tab > .tab-body") || this;
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -16382,6 +16536,45 @@ if (!customElements.get("wc-tabulator")) {
       super.connectedCallback();
       this._applyStyle();
       this._setupFormSync();
+    }
+    getDesignerHTML() {
+      const parts = [];
+      const columns = this.querySelectorAll("wc-tabulator-column");
+      columns.forEach((col) => {
+        const attrs = [];
+        for (const attr of col.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        parts.push(`<wc-tabulator-column${attrs.length ? " " + attrs.join(" ") : ""}></wc-tabulator-column>`);
+      });
+      const funcs = this.querySelectorAll("wc-tabulator-func");
+      funcs.forEach((fn) => {
+        const attrs = [];
+        for (const attr of fn.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const content = fn.textContent.trim();
+        parts.push(`<wc-tabulator-func${attrs.length ? " " + attrs.join(" ") : ""}>${content}</wc-tabulator-func>`);
+      });
+      const rowMenus = this.querySelectorAll("wc-tabulator-row-menu");
+      rowMenus.forEach((rm) => {
+        const attrs = [];
+        for (const attr of rm.attributes) {
+          if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
+          if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.value === "") attrs.push(attr.name);
+          else attrs.push(`${attr.name}="${attr.value}"`);
+        }
+        const content = rm.textContent.trim();
+        parts.push(`<wc-tabulator-row-menu${attrs.length ? " " + attrs.join(" ") : ""}>${content}</wc-tabulator-row-menu>`);
+      });
+      return parts.length > 0 ? parts.join("\n") : null;
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -18197,6 +18390,9 @@ var WcTimeline = class extends WcBaseComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+  }
+  getDesignerHTML() {
+    return null;
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -24732,6 +24928,9 @@ var WcForm = class extends WcBaseComponent {
     super.connectedCallback();
     this._applyStyle();
   }
+  getInnerContainer() {
+    return this.querySelector(":scope > .wc-form") || this;
+  }
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
@@ -25024,6 +25223,12 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+  }
+  getDesignerHTML() {
+    if (this.getAttribute("type") !== "radio") return null;
+    const options = this.querySelectorAll("option");
+    if (options.length === 0) return null;
+    return Array.from(options).map((opt) => opt.outerHTML).join("\n");
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -26109,6 +26314,11 @@ var WcSelect = class extends WcBaseFormComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+  }
+  getDesignerHTML() {
+    const innerSelect = this.querySelector("select");
+    if (!innerSelect) return null;
+    return Array.from(innerSelect.querySelectorAll("option")).map((opt) => opt.outerHTML).join("\n");
   }
   disconnectedCallback() {
     super.disconnectedCallback();

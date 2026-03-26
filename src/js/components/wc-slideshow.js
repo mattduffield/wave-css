@@ -59,6 +59,10 @@ if (!customElements.get('wc-slideshow')) {
       // console.log('connectedCallback:wc-slideshow');
     }
 
+    getInnerContainer() {
+      return this.querySelector(':scope > .wc-slideshow') || this;
+    }
+
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
