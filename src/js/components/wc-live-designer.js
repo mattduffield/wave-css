@@ -922,11 +922,9 @@ if (!customElements.get('wc-live-designer')) {
         });
       });
 
-      // Preset handlers — drag to position on canvas, or click to append
+      // Preset handlers — drag only (same workflow as single components)
       this.querySelectorAll('.ld-preset-item').forEach(item => {
         item.draggable = true;
-
-        // Drag: same workflow as single components
         item.addEventListener('dragstart', (e) => {
           const idx = parseInt(item.dataset.presetIndex);
           const preset = WcLiveDesigner.PRESETS[idx];
@@ -940,14 +938,6 @@ if (!customElements.get('wc-live-designer')) {
           document.body.appendChild(ghost);
           e.dataTransfer.setDragImage(ghost, 0, 0);
           setTimeout(() => ghost.remove(), 0);
-        });
-
-        // Click: append to selected component or canvas root
-        item.addEventListener('click', () => {
-          const idx = parseInt(item.dataset.presetIndex);
-          if (!isNaN(idx)) {
-            this._appendPreset(idx);
-          }
         });
       });
 

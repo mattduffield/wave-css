@@ -12428,12 +12428,6 @@ if (!customElements.get("wc-live-designer")) {
           e.dataTransfer.setDragImage(ghost, 0, 0);
           setTimeout(() => ghost.remove(), 0);
         });
-        item.addEventListener("click", () => {
-          const idx = parseInt(item.dataset.presetIndex);
-          if (!isNaN(idx)) {
-            this._appendPreset(idx);
-          }
-        });
       });
     }
     _unWireEvents() {

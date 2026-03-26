@@ -722,19 +722,24 @@
         const payload = JSON.parse(jsonData);
 
         if (payload.preset && payload.tree) {
-          // Preset drop — append tree at the drop position
-          function appendPresetNodes(nodes, parentId) {
+          // Preset drop — async append with delays for component rendering
+          async function appendPresetNodes(nodes, parentId) {
             for (const node of nodes) {
               const { componentType, type, children, ...properties } = node;
               const compType = componentType || type;
-              const newId = addComponent(compType, parentId, null, properties);
+              const newId = addComponent(compType, parentId, null, { ...properties, type });
               if (children && children.length > 0) {
-                appendPresetNodes(children, newId);
+                await new Promise(r => setTimeout(r, 150));
+                await appendPresetNodes(children, newId);
               }
             }
           }
-          appendPresetNodes(payload.tree, savedParentId);
-          postToParent('treeAppended', {});
+          appendPresetNodes(payload.tree, savedParentId).then(() => {
+            setTimeout(() => {
+              refreshTabs();
+              postToParent('treeAppended', {});
+            }, 1500);
+          });
         } else if (payload.type) {
           // Single component drop
           addComponent(payload.type, savedParentId, savedPosition, payload.defaults || {});
