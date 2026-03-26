@@ -965,13 +965,16 @@
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
+            console.log('[canvas] loadTree: starting with', e.data.tree.length, 'root nodes');
             loadNodes(e.data.tree, null).then(() => {
-              // Delay refreshTabs — wc-tab's _restoreTabsWhenReady waits up
-              // to 750ms+ before activating tabs, so we must run after that
+              console.log('[canvas] loadTree: loadNodes complete, scheduling refreshTabs');
               setTimeout(() => {
+                console.log('[canvas] loadTree: running refreshTabs now');
                 refreshTabs();
                 postToParent('treeLoaded', {});
               }, 1500);
+            }).catch(err => {
+              console.error('[canvas] loadTree error:', err);
             });
           }
           break;
