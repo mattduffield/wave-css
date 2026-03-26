@@ -77,30 +77,41 @@ if (!customElements.get('wc-live-designer')) {
       }
 
       /* === Empty containers: min-height + drop hint === */
+      [data-designer-container]:not(:has([data-designer-id])) {
+        min-height: 80px !important;
+      }
       [data-designer-container]:not(:has([data-designer-id]))::after {
         content: 'Drop components here' !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        min-height: 60px !important;
+        min-height: 80px !important;
         color: rgba(0, 120, 255, 0.25) !important;
         font-size: 11px !important;
         font-family: system-ui, sans-serif !important;
+        border: 1px dashed rgba(0, 120, 255, 0.15) !important;
+        border-radius: 4px !important;
       }
 
-      /* Empty inner wrappers also show drop hint */
-      [data-designer-container] > .wc-form:not(:has([data-designer-id]))::after,
-      [data-designer-container] > .wc-div:not(:has([data-designer-id]))::after,
-      [data-designer-container] > .wc-tab > .tab-body:not(:has([data-designer-id]))::after,
-      [data-designer-container] > .wc-tab-item:not(:has([data-designer-id]))::after {
+      /* Empty inner wrappers */
+      .wc-form:not(:has([data-designer-id])),
+      .wc-div:not(:has([data-designer-id])),
+      .wc-tab-item:not(:has([data-designer-id])) {
+        min-height: 80px !important;
+      }
+      .wc-form:not(:has([data-designer-id]))::after,
+      .wc-div:not(:has([data-designer-id]))::after,
+      .wc-tab-item:not(:has([data-designer-id]))::after {
         content: 'Drop components here' !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        min-height: 60px !important;
+        min-height: 80px !important;
         color: rgba(0, 120, 255, 0.2) !important;
         font-size: 11px !important;
         font-family: system-ui, sans-serif !important;
+        border: 1px dashed rgba(0, 120, 255, 0.1) !important;
+        border-radius: 4px !important;
       }
 
       /* === Design time: hidden class should not hide content === */
@@ -1332,7 +1343,10 @@ if (!customElements.get('wc-live-designer')) {
       switch (action) {
         case 'canvasReady':
           this._canvasReady = true;
-          const theme = this.getAttribute('theme') || 'theme-ocean dark';
+          // Inherit theme from parent page if not explicitly set
+          const theme = this.getAttribute('theme') ||
+                        document.documentElement.className ||
+                        'theme-ocean dark';
           this._postToCanvas('setTheme', { theme });
           if (Object.keys(this._sampleData).length > 0) {
             this._postToCanvas('setSampleData', { data: this._sampleData });

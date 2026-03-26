@@ -59,24 +59,35 @@
     }
 
     /* Empty containers: min-height so they are droppable + hint text */
+    [data-designer-container]:not(:has([data-designer-id])) {
+      min-height: 80px;
+    }
     [data-designer-container]:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
-      min-height: 60px;
+      min-height: 80px;
       color: rgba(100, 170, 255, 0.3);
       font-size: 11px; font-family: system-ui, sans-serif;
+      border: 1px dashed rgba(100, 170, 255, 0.2);
+      border-radius: 4px;
     }
 
     /* Empty inner wrappers also show drop hint */
-    [data-designer-container] > .wc-form:not(:has([data-designer-id]))::after,
-    [data-designer-container] > .wc-div:not(:has([data-designer-id]))::after,
-    [data-designer-container] > .wc-tab > .tab-body:not(:has([data-designer-id]))::after,
-    [data-designer-container] > .wc-tab-item:not(:has([data-designer-id]))::after {
+    .wc-form:not(:has([data-designer-id])),
+    .wc-div:not(:has([data-designer-id])),
+    .wc-tab-item:not(:has([data-designer-id])) {
+      min-height: 80px;
+    }
+    .wc-form:not(:has([data-designer-id]))::after,
+    .wc-div:not(:has([data-designer-id]))::after,
+    .wc-tab-item:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
-      min-height: 60px;
+      min-height: 80px;
       color: rgba(100, 170, 255, 0.25);
       font-size: 11px; font-family: system-ui, sans-serif;
+      border: 1px dashed rgba(100, 170, 255, 0.15);
+      border-radius: 4px;
     }
 
     /* Design time: the 'hidden' utility class should not hide content.
@@ -1016,23 +1027,29 @@
     // After tree loading, wc-tab components need their button bars rebuilt
     // because tab-items were added after the tab initially rendered.
     function refreshTabs() {
-      const tabs = canvas.querySelectorAll('wc-tab[data-designer-id]');
-      console.log('[canvas] refreshTabs: found', tabs.length, 'wc-tab elements');
-      tabs.forEach(tab => {
+      canvas.querySelectorAll('wc-tab[data-designer-id]').forEach(tab => {
         const wcTab = tab.querySelector(':scope > .wc-tab');
-        console.log('[canvas] refreshTabs: wcTab inner div:', !!wcTab);
         if (!wcTab) return;
         const tabNav = wcTab.querySelector(':scope > .tab-nav');
         const tabBody = wcTab.querySelector(':scope > .tab-body');
-        console.log('[canvas] refreshTabs: tabNav:', !!tabNav, 'tabBody:', !!tabBody);
         if (!tabNav || !tabBody) return;
-        const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
-        console.log('[canvas] refreshTabs: found', tabItems.length, 'tab-items, existing buttons:', tabNav.querySelectorAll('.tab-link').length);
+
+        const tabItems = Array.from(tabBody.querySelectorAll(':scope > wc-tab-item'));
+        if (tabItems.length === 0) return;
+
+        // Rebuild buttons from tab-items
         tabNav.innerHTML = '';
+        let hasActive = false;
+
         tabItems.forEach((item, i) => {
           const label = item.getAttribute('label') || `Tab ${i + 1}`;
+          const isActive = item.classList.contains('active') ||
+                           item.querySelector(':scope > .wc-tab-item.active');
+          if (isActive) hasActive = true;
+
           const btn = document.createElement('button');
-          btn.className = 'tab-link' + (item.classList.contains('active') ? ' active' : '');
+          btn.type = 'button';
+          btn.className = 'tab-link' + (isActive ? ' active' : '');
           btn.dataset.label = label;
           btn.textContent = label;
           btn.addEventListener('click', (e) => {
@@ -1053,6 +1070,12 @@
           });
           tabNav.appendChild(btn);
         });
+
+        // If no tab was active, activate the first one
+        if (!hasActive) {
+          const firstBtn = tabNav.querySelector('.tab-link');
+          if (firstBtn) firstBtn.click();
+        }
       });
     }
 
