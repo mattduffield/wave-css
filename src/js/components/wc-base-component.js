@@ -112,9 +112,13 @@ export class WcBaseComponent extends HTMLElement {
         parts.forEach(part => {
           if (part) {
             this.componentElement.classList.add(part);
-            this.classList.remove(part);
+            // In designer mode, keep classes on the outer element so the
+            // property panel and extractCleanHTML can read them.
+            if (!WcBaseComponent.designerMode) {
+              this.classList.remove(part);
+            }
           }
-        });  
+        });
       }
     } else {
       this.componentElement.setAttribute(attrName, newValue);
@@ -126,8 +130,12 @@ export class WcBaseComponent extends HTMLElement {
       if (this.formElement && !this.formElement.hasAttribute('id')) {
         this.formElement.setAttribute('id', nameValue);
         this.formElement.setAttribute('name', nameValue);
-        this.removeAttribute('name');
-      }      
+        // In designer mode, keep name on the outer element so the property
+        // panel and extractCleanHTML can read it.
+        if (!WcBaseComponent.designerMode) {
+          this.removeAttribute('name');
+        }
+      }
     }
   }
 
@@ -182,4 +190,17 @@ export class WcBaseComponent extends HTMLElement {
     // Remove any base events.
   }
 
+}
+
+// Designer mode: prevent component lifecycle from stripping observed attributes
+// off the outer element. The property panel and extractCleanHTML need to read them.
+// The canvas updateProperty handler uses HTMLElement.prototype.removeAttribute
+// directly to bypass this guard for legitimate property panel removals.
+if (document.documentElement?.hasAttribute?.('data-designer')) {
+  const _nativeRemoveAttr = HTMLElement.prototype.removeAttribute;
+  WcBaseComponent.prototype.removeAttribute = function(name) {
+    const observed = this.constructor.observedAttributes;
+    if (observed && observed.includes(name)) return;
+    _nativeRemoveAttr.call(this, name);
+  };
 }

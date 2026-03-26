@@ -977,7 +977,7 @@ if (!window.WcIconConfig) {
 }
 
 // src/js/components/wc-base-component.js
-var WcBaseComponent = class extends HTMLElement {
+var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
   /**
    * Returns true when the component is running inside the designer canvas.
    * Components can check this to skip behaviors that don't apply at design time
@@ -1073,7 +1073,9 @@ var WcBaseComponent = class extends HTMLElement {
         parts.forEach((part) => {
           if (part) {
             this.componentElement.classList.add(part);
-            this.classList.remove(part);
+            if (!_WcBaseComponent.designerMode) {
+              this.classList.remove(part);
+            }
           }
         });
       }
@@ -1086,7 +1088,9 @@ var WcBaseComponent = class extends HTMLElement {
       if (this.formElement && !this.formElement.hasAttribute("id")) {
         this.formElement.setAttribute("id", nameValue);
         this.formElement.setAttribute("name", nameValue);
-        this.removeAttribute("name");
+        if (!_WcBaseComponent.designerMode) {
+          this.removeAttribute("name");
+        }
       }
     }
   }
@@ -1124,6 +1128,14 @@ var WcBaseComponent = class extends HTMLElement {
   _unWireEvents() {
   }
 };
+if (document.documentElement?.hasAttribute?.("data-designer")) {
+  const _nativeRemoveAttr = HTMLElement.prototype.removeAttribute;
+  WcBaseComponent.prototype.removeAttribute = function(name) {
+    const observed = this.constructor.observedAttributes;
+    if (observed && observed.includes(name)) return;
+    _nativeRemoveAttr.call(this, name);
+  };
+}
 
 // src/js/components/wc-base-form-component.js
 var WcBaseFormComponent = class extends WcBaseComponent {
@@ -1898,6 +1910,7 @@ if (!customElements.get("wc-breadcrumb")) {
         for (const attr of item.attributes) {
           if (attr.name === "data-wc-id" || attr.name.startsWith("data-designer")) continue;
           if (attr.name === "class" && attr.value === "contents") continue;
+          if (attr.name === "style") continue;
           if (attr.value === "") attrs.push(attr.name);
           else attrs.push(`${attr.name}="${attr.value}"`);
         }
@@ -5438,7 +5451,7 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
   static googlePlacesLoadPromise = null;
   constructor() {
     super();
-    this.passThruAttributes = ["name", "id", "value", "placeholder", "autocomplete"];
+    this.passThruAttributes = ["id", "value", "placeholder", "autocomplete"];
     this.passThruEmptyAttributes = ["disabled", "readonly", "required"];
     this.ignoreAttributes = [
       "lbl-class",
@@ -11664,7 +11677,12 @@ if (!customElements.get("wc-live-designer")) {
       div[data-designer-id].contents,
       wc-form[data-designer-id].contents,
       wc-breadcrumb[data-designer-id].contents,
-      fieldset[data-designer-id].contents {
+      fieldset[data-designer-id].contents,
+      wc-input[data-designer-id].contents,
+      wc-select[data-designer-id].contents,
+      wc-textarea[data-designer-id].contents,
+      wc-field[data-designer-id].contents,
+      wc-google-address[data-designer-id].contents {
         display: block !important;
       }
 
@@ -12276,16 +12294,20 @@ if (!customElements.get("wc-live-designer")) {
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor {
+          display: flex !important;
+          flex-direction: column !important;
           flex: 1 1 0% !important;
           min-height: 0 !important;
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor .wc-code-mirror {
-          height: 100% !important;
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor .wc-code-mirror .CodeMirror {
-          height: 100% !important;
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
         }
       `;
       this.loadStyle("wc-live-designer-style", style);
@@ -12380,7 +12402,8 @@ if (!customElements.get("wc-live-designer")) {
           const editedHTML = this._lastEditedSourceHTML;
           if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
             this._lastSourceHTML = editedHTML;
-            this._postToCanvas("renderHTML", { html: editedHTML });
+            const canvasHTML = this._reversePongo2(editedHTML);
+            this._postToCanvas("renderHTML", { html: canvasHTML });
           }
         }
       });
@@ -12871,7 +12894,7 @@ if (!customElements.get("wc-live-designer")) {
         if (!panel) return;
         let cmEl = panel.querySelector(".ld-source-editor");
         if (!cmEl) {
-          panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="100%" tab-size="2" value="" style="flex: 1; min-height: 0; overflow: hidden;"></wc-code-mirror>`;
+          panel.innerHTML = `<wc-code-mirror class="ld-source-editor flex flex-col flex-1 min-h-0" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 310px)" tab-size="2" value=""></wc-code-mirror>`;
           cmEl = panel.querySelector(".ld-source-editor");
         }
         const setEditorValue = () => {
@@ -13693,6 +13716,40 @@ function runDelete() {
         return pongo2;
       });
       return html;
+    }
+    /**
+     * Reverse Pongo2 template expressions back to canvas-friendly HTML.
+     * Converts {{ Record.field }} → data-scope="field" + sample data value.
+     * Used when switching from Source tab back to Visual tab.
+     * @param {string} html - HTML with Pongo2 expressions
+     * @returns {string} Clean HTML with data-scope attributes and sample values
+     */
+    _reversePongo2(html) {
+      let result = html;
+      result = result.replace(
+        /\{%\s*if\s+Record\.(\S+)\s*%\}\s*checked\s*\{%\s*endif\s*%\}/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `data-scope="${field}"${sample ? " checked" : ""}`;
+        }
+      );
+      result = result.replace(
+        /value="\{\{\s*Record\.(\S+)\|floatformat:\d+\s*\}\}"/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `value="${sample !== void 0 ? sample : ""}" data-scope="${field}"`;
+        }
+      );
+      result = result.replace(
+        /value="\{\{\s*Record\.(\S+)\s*\}\}"/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `value="${sample !== void 0 ? sample : ""}" data-scope="${field}"`;
+        }
+      );
+      result = result.replace(/\{%[\s\S]*?%\}/g, "");
+      result = result.replace(/\{\{[\s\S]*?\}\}/g, "");
+      return result;
     }
     /**
      * Generate a complete _template_builder document from the current canvas state.
@@ -26254,7 +26311,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
 customElements.define("wc-input", WcInput);
 
 // src/js/components/wc-select.js
-var WcSelect = class extends WcBaseFormComponent {
+var WcSelect = class _WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
     return [
       "name",
@@ -26551,7 +26608,9 @@ var WcSelect = class extends WcBaseFormComponent {
     } else {
       this.componentElement.appendChild(select);
     }
-    this.removeAttribute("name");
+    if (!_WcSelect.designerMode) {
+      this.removeAttribute("name");
+    }
     this.attachEventListeners();
   }
   _generateOptionsFromItems() {

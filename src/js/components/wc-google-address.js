@@ -71,7 +71,7 @@ class WcGoogleAddress extends WcBaseFormComponent {
   constructor() {
     super();
 
-    this.passThruAttributes = ['name', 'id', 'value', 'placeholder', 'autocomplete'];
+    this.passThruAttributes = ['id', 'value', 'placeholder', 'autocomplete'];
     this.passThruEmptyAttributes = ['disabled', 'readonly', 'required'];
     this.ignoreAttributes = ['lbl-class', 'lbl-label',
                              'api-key', 'address-group', 'target-map',

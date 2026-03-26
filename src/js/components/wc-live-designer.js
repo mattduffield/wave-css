@@ -66,7 +66,12 @@ if (!customElements.get('wc-live-designer')) {
       div[data-designer-id].contents,
       wc-form[data-designer-id].contents,
       wc-breadcrumb[data-designer-id].contents,
-      fieldset[data-designer-id].contents {
+      fieldset[data-designer-id].contents,
+      wc-input[data-designer-id].contents,
+      wc-select[data-designer-id].contents,
+      wc-textarea[data-designer-id].contents,
+      wc-field[data-designer-id].contents,
+      wc-google-address[data-designer-id].contents {
         display: block !important;
       }
 
@@ -639,16 +644,20 @@ if (!customElements.get('wc-live-designer')) {
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor {
+          display: flex !important;
+          flex-direction: column !important;
           flex: 1 1 0% !important;
           min-height: 0 !important;
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor .wc-code-mirror {
-          height: 100% !important;
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
           overflow: hidden !important;
         }
         .ld-source-panel .ld-source-editor .wc-code-mirror .CodeMirror {
-          height: 100% !important;
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
         }
       `;
       this.loadStyle('wc-live-designer-style', style);
@@ -773,8 +782,9 @@ if (!customElements.get('wc-live-designer')) {
           const editedHTML = this._lastEditedSourceHTML;
           if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
             this._lastSourceHTML = editedHTML;
-            // Render the edited HTML directly in the canvas — one innerHTML operation
-            this._postToCanvas('renderHTML', { html: editedHTML });
+            // Reverse Pongo2 expressions back to data-scope + sample data before rendering
+            const canvasHTML = this._reversePongo2(editedHTML);
+            this._postToCanvas('renderHTML', { html: canvasHTML });
           }
         }
       });
@@ -1362,7 +1372,7 @@ if (!customElements.get('wc-live-designer')) {
         // This matches how wc-code-mirror works in Go Kart's template edit tabs.
         let cmEl = panel.querySelector('.ld-source-editor');
         if (!cmEl) {
-          panel.innerHTML = `<wc-code-mirror class="ld-source-editor" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="100%" tab-size="2" value="" style="flex: 1; min-height: 0; overflow: hidden;"></wc-code-mirror>`;
+          panel.innerHTML = `<wc-code-mirror class="ld-source-editor flex flex-col flex-1 min-h-0" name="ld-source" mode="htmlmixed" theme="monokai" line-numbers line-wrapping height="calc(100vh - 310px)" tab-size="2" value=""></wc-code-mirror>`;
           cmEl = panel.querySelector('.ld-source-editor');
         }
 
@@ -2338,6 +2348,52 @@ function runDelete() {
       });
 
       return html;
+    }
+
+    /**
+     * Reverse Pongo2 template expressions back to canvas-friendly HTML.
+     * Converts {{ Record.field }} → data-scope="field" + sample data value.
+     * Used when switching from Source tab back to Visual tab.
+     * @param {string} html - HTML with Pongo2 expressions
+     * @returns {string} Clean HTML with data-scope attributes and sample values
+     */
+    _reversePongo2(html) {
+      let result = html;
+
+      // 1. Checkbox pattern: {% if Record.FIELD %} checked {% endif %}
+      result = result.replace(
+        /\{%\s*if\s+Record\.(\S+)\s*%\}\s*checked\s*\{%\s*endif\s*%\}/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `data-scope="${field}"${sample ? ' checked' : ''}`;
+        }
+      );
+
+      // 2. Currency: value="{{ Record.FIELD|floatformat:N }}"
+      result = result.replace(
+        /value="\{\{\s*Record\.(\S+)\|floatformat:\d+\s*\}\}"/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `value="${sample !== undefined ? sample : ''}" data-scope="${field}"`;
+        }
+      );
+
+      // 3. Standard value: value="{{ Record.FIELD }}"
+      result = result.replace(
+        /value="\{\{\s*Record\.(\S+)\s*\}\}"/g,
+        (match, field) => {
+          const sample = this._getSampleValue(field);
+          return `value="${sample !== undefined ? sample : ''}" data-scope="${field}"`;
+        }
+      );
+
+      // 4. Strip Pongo2 block tags ({% set %}, {% for %}, {% endfor %}, {% extends %}, {% block %}, {% endblock %}, {% include %})
+      result = result.replace(/\{%[\s\S]*?%\}/g, '');
+
+      // 5. Strip remaining {{ }} expressions (e.g., {{item.value}} inside loops)
+      result = result.replace(/\{\{[\s\S]*?\}\}/g, '');
+
+      return result;
     }
 
     /**

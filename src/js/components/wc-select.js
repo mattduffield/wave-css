@@ -354,7 +354,9 @@ class WcSelect extends WcBaseFormComponent {
       this.componentElement.appendChild(select);
     }
 
-    this.removeAttribute('name');
+    if (!WcSelect.designerMode) {
+      this.removeAttribute('name');
+    }
 
     this.attachEventListeners();
   }

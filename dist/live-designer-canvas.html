@@ -90,7 +90,12 @@
     div[data-designer-id].contents,
     wc-form[data-designer-id].contents,
     wc-breadcrumb[data-designer-id].contents,
-    fieldset[data-designer-id].contents {
+    fieldset[data-designer-id].contents,
+    wc-input[data-designer-id].contents,
+    wc-select[data-designer-id].contents,
+    wc-textarea[data-designer-id].contents,
+    wc-field[data-designer-id].contents,
+    wc-google-address[data-designer-id].contents {
       display: block !important;
     }
 
@@ -677,7 +682,7 @@
       } else {
         const attrName = propName.replace(/_/g, '-');
         if (value === '' || value === true) el.setAttribute(attrName, '');
-        else if (value === false || value == null) el.removeAttribute(attrName);
+        else if (value === false || value == null) HTMLElement.prototype.removeAttribute.call(el, attrName);
         else el.setAttribute(attrName, value);
         entry.properties[propName] = value;
       }

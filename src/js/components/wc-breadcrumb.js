@@ -54,6 +54,7 @@ if (!customElements.get('wc-breadcrumb')) {
         for (const attr of item.attributes) {
           if (attr.name === 'data-wc-id' || attr.name.startsWith('data-designer')) continue;
           if (attr.name === 'class' && attr.value === 'contents') continue;
+          if (attr.name === 'style') continue;
           if (attr.value === '') attrs.push(attr.name);
           else attrs.push(`${attr.name}="${attr.value}"`);
         }
