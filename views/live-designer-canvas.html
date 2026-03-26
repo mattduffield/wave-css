@@ -54,57 +54,64 @@
 
     /* Subtle hover outline on all designer elements */
     [data-designer-id]:hover {
-      outline: 1px dashed rgba(100, 170, 255, 0.3);
+      outline: 1px dashed var(--surface-5, #555);
       outline-offset: -1px;
     }
 
-    /* Empty containers: min-height so they are droppable + hint text.
-       Treat containers with only invisible children (wc-hotkey, wc-behavior,
-       wc-event-handler, wc-visibility-change) as "empty" for drop hints. */
-    [data-designer-container]:not(:has([data-designer-id])),
-    [data-designer-container]:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
-      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
-      wc-form[data-designer-id], wc-tab[data-designer-id], wc-tab-item[data-designer-id],
-      fieldset[data-designer-id], wc-tabulator[data-designer-id], wc-breadcrumb[data-designer-id],
-      wc-save-split-button[data-designer-id], wc-save-button[data-designer-id],
-      wc-fa-icon[data-designer-id], wc-image[data-designer-id], hr[data-designer-id])) {
+    /* Empty containers: min-height + drop hint using theme variables */
+    [data-designer-container]:not(:has([data-designer-id])) {
       min-height: 100px;
     }
-    [data-designer-container]:not(:has([data-designer-id]))::after,
-    [data-designer-container]:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
-      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
-      wc-form[data-designer-id], wc-tab[data-designer-id], wc-tab-item[data-designer-id],
-      fieldset[data-designer-id], wc-tabulator[data-designer-id], wc-breadcrumb[data-designer-id],
-      wc-save-split-button[data-designer-id], wc-save-button[data-designer-id],
-      wc-fa-icon[data-designer-id], wc-image[data-designer-id], hr[data-designer-id]))::after {
+    [data-designer-container]:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
       min-height: 100px;
-      color: rgba(100, 170, 255, 0.3);
-      font-size: 11px; font-family: system-ui, sans-serif;
-      border: 1px dashed rgba(100, 170, 255, 0.2);
+      color: var(--text-6, #888);
+      font-size: 12px; font-family: system-ui, sans-serif;
+      border: 1px dashed var(--surface-5, #444);
       border-radius: 4px;
     }
 
-    /* Inner wrappers */
-    .wc-form:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
-      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
-      fieldset[data-designer-id])),
-    .wc-div:not(:has([data-designer-id])),
+    /* Inner wrappers — only show hint on the INNERMOST empty container,
+       not parent wrappers that contain another container child */
+    .wc-form:not(:has([data-designer-id])) {
+      min-height: 100px;
+    }
+    .wc-form:not(:has([data-designer-id]))::after {
+      content: 'Drop form fields here';
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100px;
+      color: var(--text-6, #888);
+      font-size: 12px; font-family: system-ui, sans-serif;
+      border: 1px dashed var(--surface-5, #444);
+      border-radius: 4px;
+    }
     .wc-tab-item:not(:has([data-designer-id])) {
       min-height: 100px;
     }
-    .wc-form:not(:has(wc-input[data-designer-id], wc-select[data-designer-id],
-      wc-textarea[data-designer-id], wc-field[data-designer-id], div[data-designer-id],
-      fieldset[data-designer-id]))::after,
-    .wc-div:not(:has([data-designer-id]))::after,
     .wc-tab-item:not(:has([data-designer-id]))::after {
       content: 'Drop components here';
       display: flex; justify-content: center; align-items: center;
       min-height: 100px;
-      color: rgba(100, 170, 255, 0.25);
-      font-size: 11px; font-family: system-ui, sans-serif;
-      border: 1px dashed rgba(100, 170, 255, 0.15);
+      color: var(--text-6, #888);
+      font-size: 12px; font-family: system-ui, sans-serif;
+      border: 1px dashed var(--surface-5, #444);
+      border-radius: 4px;
+    }
+    /* Div wrappers that CONTAIN a form or other container — suppress their hint */
+    .wc-div:has(.wc-form, [data-designer-container])::after {
+      display: none !important;
+    }
+    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container])) {
+      min-height: 100px;
+    }
+    .wc-div:not(:has([data-designer-id])):not(:has(.wc-form, [data-designer-container]))::after {
+      content: 'Drop components here';
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100px;
+      color: var(--text-6, #888);
+      font-size: 12px; font-family: system-ui, sans-serif;
+      border: 1px dashed var(--surface-5, #444);
       border-radius: 4px;
     }
 
@@ -132,8 +139,8 @@
       justify-content: center;
       min-height: 32px !important;
       max-height: 32px !important;
-      background: var(--surface-3, #2a2a3a) !important;
-      border: 1px dashed rgba(100, 170, 255, 0.3) !important;
+      background: var(--surface-3) !important;
+      border: 1px dashed var(--surface-5) !important;
       border-radius: 4px !important;
       overflow: hidden !important;
     }
@@ -145,7 +152,7 @@
     wc-table-skeleton[data-designer-id]::after,
     wc-card-skeleton[data-designer-id]::after,
     wc-list-skeleton[data-designer-id]::after {
-      font-size: 11px; color: rgba(100, 170, 255, 0.6);
+      font-size: 11px; color: var(--text-5, #999);
       font-family: system-ui, sans-serif;
     }
 

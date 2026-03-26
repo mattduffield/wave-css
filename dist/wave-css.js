@@ -11561,48 +11561,10 @@ if (!customElements.get("wc-live-designer")) {
         display: block !important;
       }
 
-      /* === Subtle hover outline on all designer elements === */
+      /* === Subtle hover outline === */
       [data-designer-id]:hover {
-        outline: 1px dashed rgba(0, 120, 255, 0.3) !important;
+        outline: 1px dashed var(--surface-5, #555) !important;
         outline-offset: -1px !important;
-      }
-
-      /* === Empty containers: min-height + drop hint === */
-      [data-designer-container]:not(:has([data-designer-id])) {
-        min-height: 80px !important;
-      }
-      [data-designer-container]:not(:has([data-designer-id]))::after {
-        content: 'Drop components here' !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        min-height: 80px !important;
-        color: rgba(0, 120, 255, 0.25) !important;
-        font-size: 11px !important;
-        font-family: system-ui, sans-serif !important;
-        border: 1px dashed rgba(0, 120, 255, 0.15) !important;
-        border-radius: 4px !important;
-      }
-
-      /* Empty inner wrappers */
-      .wc-form:not(:has([data-designer-id])),
-      .wc-div:not(:has([data-designer-id])),
-      .wc-tab-item:not(:has([data-designer-id])) {
-        min-height: 80px !important;
-      }
-      .wc-form:not(:has([data-designer-id]))::after,
-      .wc-div:not(:has([data-designer-id]))::after,
-      .wc-tab-item:not(:has([data-designer-id]))::after {
-        content: 'Drop components here' !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        min-height: 80px !important;
-        color: rgba(0, 120, 255, 0.2) !important;
-        font-size: 11px !important;
-        font-family: system-ui, sans-serif !important;
-        border: 1px dashed rgba(0, 120, 255, 0.1) !important;
-        border-radius: 4px !important;
       }
 
       /* === Design time: hidden class should not hide content === */
@@ -11766,23 +11728,19 @@ if (!customElements.get("wc-live-designer")) {
             ] },
             { componentType: "wc-tab", css: "col-1 mt-2 mb-4", animate: "", children: [
               { componentType: "wc-tab-item", css: "active", label: "General", children: [
-                { componentType: "div", css: "col-1 gap-2 pt-2 pb-5 px-5", children: [
-                  {
-                    componentType: "wc-form",
-                    css: "col gap-3",
-                    method: "{{FormMethod}}",
-                    id: "{{Template.Slug}}",
-                    action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                    "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
-                    children: [
-                      { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
-                    ]
-                  }
-                ] }
+                {
+                  componentType: "wc-form",
+                  css: "col gap-3 pt-2 pb-5 px-5",
+                  method: "{{FormMethod}}",
+                  id: "{{Template.Slug}}",
+                  action: "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
+                  "hx-{{FormMethod}}": "/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}",
+                  children: [
+                    { componentType: "wc-hotkey", keys: "ctrl+s", target: "button.save-btn" }
+                  ]
+                }
               ] },
-              { componentType: "wc-tab-item", label: "Change Log", children: [
-                { componentType: "div", css: "col-1 gap-2 pt-2 pb-5 px-5" }
-              ] }
+              { componentType: "wc-tab-item", label: "Change Log" }
             ] }
           ] }
         ]
