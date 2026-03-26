@@ -992,11 +992,16 @@
             }
           }
           if (e.data.tree && Array.isArray(e.data.tree)) {
+            console.log('[canvas] appendTree: starting with', e.data.tree.length, 'root nodes');
             appendNodes(e.data.tree, e.data.parentId || null).then(() => {
+              console.log('[canvas] appendTree: complete, scheduling refreshTabs in 1500ms');
               setTimeout(() => {
+                console.log('[canvas] appendTree: running refreshTabs now');
                 refreshTabs();
                 postToParent('treeAppended', {});
               }, 1500);
+            }).catch(err => {
+              console.error('[canvas] appendTree error:', err);
             });
           }
           break;
