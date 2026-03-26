@@ -12830,8 +12830,10 @@ if (!customElements.get("wc-live-designer")) {
           }
           if (this._savedContent) {
             this.loadHTML(this._savedContent);
-          }
-          if (this._pendingHTML) {
+          } else if (this._pendingTree) {
+            this.loadTree(this._pendingTree);
+            this._pendingTree = null;
+          } else if (this._pendingHTML) {
             this._postToCanvas("renderHTML", { html: this._pendingHTML });
             this._pendingHTML = null;
           }
@@ -13512,10 +13514,7 @@ function runDelete() {
     setContent(content) {
       this._savedContent = content;
       if (this._canvasReady) {
-        const formHTML = this._extractFormContent(content);
-        if (formHTML) {
-          this.loadHTML(formHTML);
-        }
+        this.loadHTML(content);
       }
     }
     /**
@@ -13551,13 +13550,33 @@ function runDelete() {
      */
     async loadTree(tree) {
       if (!tree || !Array.isArray(tree) || tree.length === 0) return;
+      if (this._savedContent) return;
       if (!this._canvasReady) {
         this._pendingTree = tree;
         return;
       }
-      this._postToCanvas("loadTree", { tree });
-      await new Promise((r) => setTimeout(r, 300 + tree.length * 100));
-      this._updateLayerTree();
+      const html = this._treeToHTML(tree);
+      this._postToCanvas("renderHTML", { html });
+    }
+    _treeToHTML(tree) {
+      return tree.map((node) => {
+        const { componentType, designerId, children, css, content, scope, innerHTML, ...attrs } = node;
+        const tag = componentType;
+        let attrStr = "";
+        if (css) attrStr += ` class="${css}"`;
+        if (scope) attrStr += ` data-scope="${scope}"`;
+        for (const [key, value] of Object.entries(attrs)) {
+          if (key === "componentType" || key === "designerId") continue;
+          if (value === "" || value === true) attrStr += ` ${key}`;
+          else if (value !== false && value != null) attrStr += ` ${key}="${value}"`;
+        }
+        if (tag === "hr") return `<${tag}${attrStr}>`;
+        let childHTML = "";
+        if (innerHTML) childHTML += innerHTML;
+        if (children && children.length > 0) childHTML += this._treeToHTML(children);
+        if (content && !innerHTML) childHTML += content;
+        return `<${tag}${attrStr}>${childHTML}</${tag}>`;
+      }).join("\n");
     }
     /**
      * Get the serialized component tree from the canvas.

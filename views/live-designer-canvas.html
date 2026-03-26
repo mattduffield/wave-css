@@ -298,17 +298,18 @@
             const isInternal = Array.from(child.classList).some(c =>
               c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
             );
-            if (!isInternal && !insideWC) {
+            if (!isInternal) {
+              // User-placed div/fieldset — register even inside wc- containers
               registerElement(child, tag);
               if (isContainer(tag)) {
                 const inner = getInnerElement(child, tag);
                 if (inner) {
                   inner.setAttribute('data-drop-target', tag);
-                  scan(inner, false); // User-placed divs can contain HTML elements
+                  scan(inner, false);
                 }
               }
             } else {
-              // Internal wrapper or div inside wc- — scan children but don't register
+              // Internal wrapper (.wc-form, .tab-nav, etc.) — scan children but don't register
               scan(child, insideWC);
             }
           } else {
@@ -476,7 +477,10 @@
           // Only register HTML elements when NOT inside a wc- container
           registerElement(child, tag);
         } else if ((tag === 'div' || tag === 'fieldset') && !child.hasAttribute('data-designer-id')) {
-          if (!insideWC) {
+          const isInternal = Array.from(child.classList).some(c =>
+            c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
+          );
+          if (!isInternal) {
             registerElement(child, tag);
             if (isContainer(tag)) {
               const inner = getInnerElement(child, tag);
@@ -751,6 +755,13 @@
         if (isContainer(entry.type)) {
           const inner = getInnerElement(child, entry.type);
           if (inner) {
+            const nested = serializeChildren(inner);
+            if (nested.length > 0) node.children = nested;
+          }
+        } else if (typeof child.getDesignerHTML === 'function') {
+          // Non-container with declarative children (e.g., wc-breadcrumb)
+          const inner = getInnerElement(child, entry.type);
+          if (inner && inner !== child) {
             const nested = serializeChildren(inner);
             if (nested.length > 0) node.children = nested;
           }
