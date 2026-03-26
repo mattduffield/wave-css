@@ -1003,12 +1003,18 @@
     // After tree loading, wc-tab components need their button bars rebuilt
     // because tab-items were added after the tab initially rendered.
     function refreshTabs() {
-      canvas.querySelectorAll('wc-tab[data-designer-id]').forEach(tab => {
+      const tabs = canvas.querySelectorAll('wc-tab[data-designer-id]');
+      console.log('[canvas] refreshTabs: found', tabs.length, 'wc-tab elements');
+      tabs.forEach(tab => {
         const wcTab = tab.querySelector(':scope > .wc-tab');
+        console.log('[canvas] refreshTabs: wcTab inner div:', !!wcTab);
         if (!wcTab) return;
         const tabNav = wcTab.querySelector(':scope > .tab-nav');
         const tabBody = wcTab.querySelector(':scope > .tab-body');
+        console.log('[canvas] refreshTabs: tabNav:', !!tabNav, 'tabBody:', !!tabBody);
         if (!tabNav || !tabBody) return;
+        const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
+        console.log('[canvas] refreshTabs: found', tabItems.length, 'tab-items, existing buttons:', tabNav.querySelectorAll('.tab-link').length);
 
         // Rebuild buttons from current tab-items
         const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
