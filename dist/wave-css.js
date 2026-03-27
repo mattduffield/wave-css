@@ -1128,15 +1128,6 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
   _unWireEvents() {
   }
 };
-if (document.documentElement?.hasAttribute?.("data-designer")) {
-  const _nativeRemoveAttr = HTMLElement.prototype.removeAttribute;
-  WcBaseComponent.prototype.removeAttribute = function(name) {
-    if (name.startsWith("data-wc-") || name === "style") {
-      _nativeRemoveAttr.call(this, name);
-      return;
-    }
-  };
-}
 
 // src/js/components/wc-base-form-component.js
 var WcBaseFormComponent = class extends WcBaseComponent {

@@ -207,6 +207,50 @@
     let lastDropPosition = null;
     let lastDropParentId = null;
 
+    // =============================================
+    // ATTRIBUTE SNAPSHOT CAPTURE
+    // Components consume attributes during rendering (move to inner elements,
+    // remove from outer). Instead of blocking removal (which breaks visual
+    // rendering), we temporarily capture what's removed, let removal proceed,
+    // then merge captured values into the registry for extractCleanHTML/selectComponent.
+    // =============================================
+    const removedAttrs = new WeakMap(); // element → Map(attrName → attrValue)
+    let captureActive = false;
+
+    function captureRemovedAttributes() {
+      if (captureActive) return () => {};
+      captureActive = true;
+      const orig = HTMLElement.prototype.removeAttribute;
+      HTMLElement.prototype.removeAttribute = function(name) {
+        if (!name.startsWith('data-wc-') && name !== 'style' && !name.startsWith('data-designer')) {
+          const val = this.getAttribute(name);
+          if (val !== null) {
+            if (!removedAttrs.has(this)) removedAttrs.set(this, new Map());
+            removedAttrs.get(this).set(name, val);
+          }
+        }
+        orig.call(this, name);
+      };
+      return () => {
+        HTMLElement.prototype.removeAttribute = orig;
+        captureActive = false;
+      };
+    }
+
+    function mergeRemovedAttrs() {
+      for (const [id, entry] of registry) {
+        const removed = removedAttrs.get(entry.element);
+        if (!removed) continue;
+        for (const [name, value] of removed) {
+          if (name === 'class') continue; // Handled by classList guard in base component
+          // Only add if not already captured by registerElement
+          if (!(name in entry.properties)) {
+            entry.properties[name] = value;
+          }
+        }
+      }
+    }
+
     // Component categories
     const WC_TAGS = new Set([
       'wc-input', 'wc-select', 'wc-textarea', 'wc-field',
@@ -384,11 +428,23 @@
     function renderHTML(html) {
       selectedId = null;
       toolbar.classList.remove('visible');
-      canvas.innerHTML = html;
-      // Components render synchronously via innerHTML — connectedCallbacks fire in tree order.
+      // Capture attributes that components remove during rendering
+      const restoreCapture = captureRemovedAttributes();
+      // Parse in a disconnected div first — this ensures ALL child elements
+      // (options, breadcrumb-items, etc.) are created BEFORE custom element
+      // constructors fire. With direct canvas.innerHTML, constructors fire
+      // before children are parsed, causing wc-select to miss options, etc.
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      canvas.innerHTML = '';
+      while (tempDiv.firstChild) {
+        canvas.appendChild(tempDiv.firstChild);
+      }
       // Give a small delay for async component internals (tab body creation, etc.)
       setTimeout(() => {
         scanAndRegister();
+        restoreCapture();
+        mergeRemovedAttrs();
         // Apply sample data to all scoped elements
         if (Object.keys(sampleData).length > 0) {
           applySampleDataToAll();
@@ -416,8 +472,9 @@
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
 
-      // Insert each new element at position
+      // Insert each new element at position — capture attributes removed during rendering
       const newElements = Array.from(tempDiv.children);
+      const restoreCapture = captureRemovedAttributes();
       for (const el of newElements) {
         if (position != null && position < children.length) {
           parentEl.insertBefore(el, children[position]);
@@ -439,6 +496,8 @@
           }
           scanNewChildren(el);
         }
+        restoreCapture();
+        mergeRemovedAttrs();
         // Apply sample data to newly inserted elements
         if (Object.keys(sampleData).length > 0) {
           applySampleDataToAll();
@@ -517,22 +576,17 @@
 
         const tag = entry.type;
         const attrs = [];
-        const skipAttrs = new Set(['data-designer-id', 'data-designer-container', 'data-designer-utility',
-          'data-designer-label', 'data-designer-label-badge', 'data-designer-selected',
-          'data-drop-target', 'data-wc-id', 'style']);
 
-        // Rebuild attributes from DOM (live state)
-        for (const attr of child.attributes) {
-          if (skipAttrs.has(attr.name)) continue;
-          if (attr.name === 'class') {
-            const cls = attr.value.replace(/\bcontents\b/g, '').replace(/\bdesigner-selected\b/g, '').trim();
-            if (cls) attrs.push(`class="${cls}"`);
-            continue;
-          }
-          if (attr.value === '') {
-            attrs.push(attr.name);
-          } else {
-            attrs.push(`${attr.name}="${attr.value}"`);
+        // Use registry properties — includes both live DOM attrs AND captured
+        // removed attrs (method, id, action, etc. that components consumed)
+        const props = entry.properties;
+        if (props.css) attrs.push(`class="${props.css}"`);
+        for (const [key, value] of Object.entries(props)) {
+          if (key === 'css' || key === 'content') continue;
+          if (value === '' || value === true) {
+            attrs.push(key);
+          } else if (value !== false && value != null) {
+            attrs.push(`${key}="${value}"`);
           }
         }
 
@@ -550,7 +604,7 @@
           html += `<${tag}${attrStr}>\n${child.getDesignerHTML()}\n</${tag}>`;
         } else if (HTML_TAGS.has(tag)) {
           // Native elements — include text content
-          const content = entry.properties.content || '';
+          const content = props.content || '';
           html += `<${tag}${attrStr}>${content}</${tag}>`;
         } else {
           html += `<${tag}${attrStr}></${tag}>`;
@@ -574,16 +628,9 @@
       entry.element.setAttribute('data-designer-selected', '');
       positionToolbar(entry.element);
 
-      // Read live properties from DOM
-      const liveProps = {};
-      for (const attr of entry.element.attributes) {
-        if (attr.name.startsWith('data-designer') || attr.name === 'data-wc-id' || attr.name === 'data-drop-target') continue;
-        if (attr.name === 'class') {
-          liveProps.css = attr.value.replace(/\bcontents\b/g, '').replace(/\bdesigner-selected\b/g, '').trim();
-          continue;
-        }
-        liveProps[attr.name] = attr.value;
-      }
+      // Use registry properties — includes captured removed attributes
+      const liveProps = { ...entry.properties };
+      // For native HTML elements, get live text content
       if (HTML_TAGS.has(entry.type)) {
         const textNodes = Array.from(entry.element.childNodes).filter(n => n.nodeType === 3);
         liveProps.content = textNodes.map(n => n.textContent).join('').trim();
@@ -702,10 +749,16 @@
         entry.properties.content = value;
       } else {
         const attrName = propName.replace(/_/g, '-');
-        if (value === '' || value === true) el.setAttribute(attrName, '');
-        else if (value === false || value == null) HTMLElement.prototype.removeAttribute.call(el, attrName);
-        else el.setAttribute(attrName, value);
-        entry.properties[propName] = value;
+        if (value === '' || value === true) {
+          el.setAttribute(attrName, '');
+          entry.properties[propName] = value;
+        } else if (value === false || value == null) {
+          el.removeAttribute(attrName);
+          delete entry.properties[propName];
+        } else {
+          el.setAttribute(attrName, value);
+          entry.properties[propName] = value;
+        }
       }
     }
 
