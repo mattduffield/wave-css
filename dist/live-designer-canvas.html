@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Designer Canvas</title>
   <link rel="stylesheet" href="./wave-css.min.css">
+  <script>
+    // Derive icon bundle path from canvas location — works in both dev and Go Kart
+    const _dir = location.pathname.substring(0, location.pathname.lastIndexOf('/'));
+    window.WcIconConfig = {
+      bundleBaseUrl: _dir.includes('/static/js/')
+        ? _dir + '/assets/icon-bundles'
+        : '/dist/assets/icon-bundles',
+      preloadBundles: ['solid']
+    };
+  </script>
   <style>
     body { margin: 0; padding: 0; min-height: 100vh; }
     #editor-canvas { min-height: 100vh; padding: 1rem; position: relative; }
@@ -207,50 +217,6 @@
     let lastDropPosition = null;
     let lastDropParentId = null;
 
-    // =============================================
-    // ATTRIBUTE SNAPSHOT CAPTURE
-    // Components consume attributes during rendering (move to inner elements,
-    // remove from outer). Instead of blocking removal (which breaks visual
-    // rendering), we temporarily capture what's removed, let removal proceed,
-    // then merge captured values into the registry for extractCleanHTML/selectComponent.
-    // =============================================
-    const removedAttrs = new WeakMap(); // element → Map(attrName → attrValue)
-    let captureActive = false;
-
-    function captureRemovedAttributes() {
-      if (captureActive) return () => {};
-      captureActive = true;
-      const orig = HTMLElement.prototype.removeAttribute;
-      HTMLElement.prototype.removeAttribute = function(name) {
-        if (!name.startsWith('data-wc-') && name !== 'style' && !name.startsWith('data-designer')) {
-          const val = this.getAttribute(name);
-          if (val !== null) {
-            if (!removedAttrs.has(this)) removedAttrs.set(this, new Map());
-            removedAttrs.get(this).set(name, val);
-          }
-        }
-        orig.call(this, name);
-      };
-      return () => {
-        HTMLElement.prototype.removeAttribute = orig;
-        captureActive = false;
-      };
-    }
-
-    function mergeRemovedAttrs() {
-      for (const [id, entry] of registry) {
-        const removed = removedAttrs.get(entry.element);
-        if (!removed) continue;
-        for (const [name, value] of removed) {
-          if (name === 'class') continue; // Handled by classList guard in base component
-          // Only add if not already captured by registerElement
-          if (!(name in entry.properties)) {
-            entry.properties[name] = value;
-          }
-        }
-      }
-    }
-
     // Component categories
     const WC_TAGS = new Set([
       'wc-input', 'wc-select', 'wc-textarea', 'wc-field',
@@ -428,8 +394,6 @@
     function renderHTML(html) {
       selectedId = null;
       toolbar.classList.remove('visible');
-      // Capture attributes that components remove during rendering
-      const restoreCapture = captureRemovedAttributes();
       // Parse in a disconnected div first — this ensures ALL child elements
       // (options, breadcrumb-items, etc.) are created BEFORE custom element
       // constructors fire. With direct canvas.innerHTML, constructors fire
@@ -440,12 +404,10 @@
       while (tempDiv.firstChild) {
         canvas.appendChild(tempDiv.firstChild);
       }
-      // Give a small delay for async component internals (tab body creation, etc.)
+      // Components render naturally — NO overrides, NO attribute capture.
+      // Parent owns the source of truth (sourceDoc).
       setTimeout(() => {
         scanAndRegister();
-        restoreCapture();
-        mergeRemovedAttrs();
-        // Apply sample data to all scoped elements
         if (Object.keys(sampleData).length > 0) {
           applySampleDataToAll();
         }
@@ -472,9 +434,8 @@
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
 
-      // Insert each new element at position — capture attributes removed during rendering
+      // Insert each new element at position
       const newElements = Array.from(tempDiv.children);
-      const restoreCapture = captureRemovedAttributes();
       for (const el of newElements) {
         if (position != null && position < children.length) {
           parentEl.insertBefore(el, children[position]);
@@ -496,13 +457,11 @@
           }
           scanNewChildren(el);
         }
-        restoreCapture();
-        mergeRemovedAttrs();
-        // Apply sample data to newly inserted elements
         if (Object.keys(sampleData).length > 0) {
           applySampleDataToAll();
         }
-        postToParent('componentInserted', {});
+        // Notify parent with insertion info so it can sync sourceDoc
+        postToParent('componentInserted', { html, parentId, position });
       }, 500);
     }
 
@@ -518,7 +477,11 @@
           continue;
         }
 
-        if (WC_TAGS.has(tag) && !child.hasAttribute('data-designer-id')) {
+        // Elements may arrive pre-stamped with data-designer-id (from parent's drag handler).
+        // Register them regardless — they need registry entries for selection, containers, drop targets.
+        const registered = registry.has(child.getAttribute('data-designer-id'));
+
+        if (WC_TAGS.has(tag) && !registered) {
           registerElement(child, tag);
           if (isContainer(tag)) {
             const inner = getInnerElement(child, tag);
@@ -532,10 +495,9 @@
               scanNewChildren(inner, true);
             }
           }
-        } else if (HTML_TAGS.has(tag) && !insideWC && !child.hasAttribute('data-designer-id')) {
-          // Only register HTML elements when NOT inside a wc- container
+        } else if (HTML_TAGS.has(tag) && !insideWC && !registered) {
           registerElement(child, tag);
-        } else if ((tag === 'div' || tag === 'fieldset') && !child.hasAttribute('data-designer-id')) {
+        } else if ((tag === 'div' || tag === 'fieldset') && !registered) {
           const isInternal = Array.from(child.classList).some(c =>
             c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
           );
@@ -555,63 +517,7 @@
       }
     }
 
-    // =============================================
-    // EXTRACT CLEAN HTML
-    // Walks the registry and builds clean HTML without
-    // designer attributes. This is the Source view content.
-    // =============================================
-    function extractCleanHTML() {
-      return extractChildren(canvas);
-    }
-
-    function extractChildren(parent) {
-      let html = '';
-      for (const child of parent.children) {
-        // Skip badge spans and other designer-internal elements
-        if (child.hasAttribute('data-designer-label-badge')) continue;
-        const id = child.getAttribute('data-designer-id');
-        if (!id) continue;
-        const entry = registry.get(id);
-        if (!entry) continue;
-
-        const tag = entry.type;
-        const attrs = [];
-
-        // Use registry properties — includes both live DOM attrs AND captured
-        // removed attrs (method, id, action, etc. that components consumed)
-        const props = entry.properties;
-        if (props.css) attrs.push(`class="${props.css}"`);
-        for (const [key, value] of Object.entries(props)) {
-          if (key === 'css' || key === 'content') continue;
-          if (value === '' || value === true) {
-            attrs.push(key);
-          } else if (value !== false && value != null) {
-            attrs.push(`${key}="${value}"`);
-          }
-        }
-
-        const attrStr = attrs.length ? ' ' + attrs.join(' ') : '';
-
-        // Handle different element types
-        if (tag === 'hr') {
-          html += `<${tag}${attrStr}>`;
-        } else if (isContainer(tag)) {
-          const inner = getInnerElement(child, tag);
-          const childHTML = inner ? extractChildren(inner) : '';
-          html += `<${tag}${attrStr}>${childHTML}</${tag}>`;
-        } else if (typeof child.getDesignerHTML === 'function' && child.getDesignerHTML() !== null) {
-          // Component provides its own clean child markup (breadcrumb, select, radio)
-          html += `<${tag}${attrStr}>\n${child.getDesignerHTML()}\n</${tag}>`;
-        } else if (HTML_TAGS.has(tag)) {
-          // Native elements — include text content
-          const content = props.content || '';
-          html += `<${tag}${attrStr}>${content}</${tag}>`;
-        } else {
-          html += `<${tag}${attrStr}></${tag}>`;
-        }
-      }
-      return html;
-    }
+    // extractCleanHTML / serializeTree REMOVED — parent reads from sourceDoc
 
     // =============================================
     // SELECTION
@@ -628,14 +534,6 @@
       entry.element.setAttribute('data-designer-selected', '');
       positionToolbar(entry.element);
 
-      // Use registry properties — includes captured removed attributes
-      const liveProps = { ...entry.properties };
-      // For native HTML elements, get live text content
-      if (HTML_TAGS.has(entry.type)) {
-        const textNodes = Array.from(entry.element.childNodes).filter(n => n.nodeType === 3);
-        liveProps.content = textNodes.map(n => n.textContent).join('').trim();
-      }
-
       // Build ancestor chain for breadcrumb
       const ancestors = [];
       let el = entry.element.parentElement;
@@ -647,9 +545,8 @@
         el = el.parentElement;
       }
 
-      postToParent('select', {
-        designerId, type: entry.type, properties: liveProps, ancestors
-      });
+      // Parent reads properties from sourceDoc — canvas only sends IDs
+      postToParent('select', { designerId, type: entry.type, ancestors });
     }
 
     function deselectAll() {
@@ -705,60 +602,36 @@
         el.parentElement.insertBefore(el.nextElementSibling, el);
       }
       if (selectedId === designerId) positionToolbar(el);
+      // Notify parent to sync sourceDoc
+      postToParent('componentMoved', { designerId, direction });
     }
 
     function duplicateComponent(designerId) {
-      const entry = registry.get(designerId);
-      if (!entry) return;
-      const clone = entry.element.cloneNode(true);
-      clone.removeAttribute('data-designer-id');
-      clone.classList.remove('designer-selected');
-      // Remove old badge
-      const oldBadge = clone.querySelector(':scope > [data-designer-label-badge]');
-      if (oldBadge) oldBadge.remove();
-      entry.element.after(clone);
-      // Register the clone
-      setTimeout(() => {
-        registerElement(clone, entry.type);
-        scanNewChildren(clone);
-        postToParent('componentInserted', {});
-      }, 300);
+      // Delegate to parent — parent handles sourceDoc duplication and sends back stamped HTML
+      postToParent('duplicateRequest', { designerId });
     }
 
     function updateProperty(designerId, propName, value) {
+      // Visual feedback only — parent owns the source of truth (sourceDoc)
       const entry = registry.get(designerId);
       if (!entry) return;
       const el = entry.element;
 
       if (propName === 'scope') {
         el.setAttribute('data-scope', value);
-        entry.properties.scope = value;
       } else if (propName === 'css') {
         const keepClasses = ['contents', 'designer-selected'];
         const keep = keepClasses.filter(c => el.classList.contains(c));
         el.className = [value, ...keep].filter(Boolean).join(' ');
-        entry.properties.css = value;
       } else if (propName === 'content') {
-        // For native elements, update text content
         const textNode = Array.from(el.childNodes).find(n => n.nodeType === 3);
-        if (textNode) {
-          textNode.textContent = value;
-        } else {
-          el.prepend(document.createTextNode(value));
-        }
-        entry.properties.content = value;
+        if (textNode) textNode.textContent = value;
+        else el.prepend(document.createTextNode(value));
       } else {
         const attrName = propName.replace(/_/g, '-');
-        if (value === '' || value === true) {
-          el.setAttribute(attrName, '');
-          entry.properties[propName] = value;
-        } else if (value === false || value == null) {
-          el.removeAttribute(attrName);
-          delete entry.properties[propName];
-        } else {
-          el.setAttribute(attrName, value);
-          entry.properties[propName] = value;
-        }
+        if (value === '' || value === true) el.setAttribute(attrName, '');
+        else if (value === false || value == null) el.removeAttribute(attrName);
+        else el.setAttribute(attrName, value);
       }
     }
 
@@ -790,39 +663,7 @@
       return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
     }
 
-    // =============================================
-    // SERIALIZATION (for getTree compatibility)
-    // =============================================
-    function serializeTree() {
-      return serializeChildren(canvas);
-    }
-
-    function serializeChildren(parent) {
-      const elements = [];
-      for (const child of parent.children) {
-        const id = child.getAttribute('data-designer-id');
-        if (!id) continue;
-        const entry = registry.get(id);
-        if (!entry) continue;
-        const node = { ...entry.properties, componentType: entry.type, designerId: id };
-        if (isContainer(entry.type)) {
-          const inner = getInnerElement(child, entry.type);
-          if (inner) {
-            const nested = serializeChildren(inner);
-            if (nested.length > 0) node.children = nested;
-          }
-        } else if (typeof child.getDesignerHTML === 'function') {
-          // Non-container with declarative children (e.g., wc-breadcrumb)
-          const inner = getInnerElement(child, entry.type);
-          if (inner && inner !== child) {
-            const nested = serializeChildren(inner);
-            if (nested.length > 0) node.children = nested;
-          }
-        }
-        elements.push(node);
-      }
-      return elements;
-    }
+    // serializeTree REMOVED — parent reads from sourceDoc
 
     // =============================================
     // PREVIEW MODE
@@ -1025,12 +866,7 @@
         case 'insertHTML':
           insertHTMLAt(e.data.html, e.data.parentId || null, e.data.position || null);
           break;
-        case 'getHTML':
-          postToParent('htmlResponse', { html: extractCleanHTML() });
-          break;
-        case 'getTree':
-          postToParent('treeResponse', { tree: serializeTree() });
-          break;
+        // getHTML/getTree REMOVED — parent reads from sourceDoc
         case 'removeComponent':
           removeComponent(e.data.designerId);
           break;

@@ -112,11 +112,7 @@ export class WcBaseComponent extends HTMLElement {
         parts.forEach(part => {
           if (part) {
             this.componentElement.classList.add(part);
-            // In designer mode, keep classes on the outer element so the
-            // property panel and extractCleanHTML can read them.
-            if (!WcBaseComponent.designerMode) {
-              this.classList.remove(part);
-            }
+            this.classList.remove(part);
           }
         });
       }
@@ -130,11 +126,7 @@ export class WcBaseComponent extends HTMLElement {
       if (this.formElement && !this.formElement.hasAttribute('id')) {
         this.formElement.setAttribute('id', nameValue);
         this.formElement.setAttribute('name', nameValue);
-        // In designer mode, keep name on the outer element so the property
-        // panel and extractCleanHTML can read it.
-        if (!WcBaseComponent.designerMode) {
-          this.removeAttribute('name');
-        }
+        this.removeAttribute('name');
       }
     }
   }
@@ -192,9 +184,6 @@ export class WcBaseComponent extends HTMLElement {
 
 }
 
-// Designer mode attribute protection is handled by the canvas's snapshot approach:
-// 1. Targeted guards in _handleAttributeChange (class) and _handleNameToIdLinkage (name)
-//    keep those attributes on the outer element.
-// 2. The canvas temporarily captures other removed attributes (method, id, action, etc.)
-//    during rendering, then merges them into the registry for extractCleanHTML/selectComponent.
-// This lets components render normally while preserving attribute data for save.
+// Designer mode: components render 100% naturally — no overrides, no attribute guards.
+// The parent (wc-live-designer) maintains a sourceDoc (DOMParser Document) as the single
+// source of truth for all attribute data. The canvas is a pure render preview.

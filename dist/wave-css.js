@@ -977,7 +977,7 @@ if (!window.WcIconConfig) {
 }
 
 // src/js/components/wc-base-component.js
-var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
+var WcBaseComponent = class extends HTMLElement {
   /**
    * Returns true when the component is running inside the designer canvas.
    * Components can check this to skip behaviors that don't apply at design time
@@ -1073,9 +1073,7 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
         parts.forEach((part) => {
           if (part) {
             this.componentElement.classList.add(part);
-            if (!_WcBaseComponent.designerMode) {
-              this.classList.remove(part);
-            }
+            this.classList.remove(part);
           }
         });
       }
@@ -1088,9 +1086,7 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
       if (this.formElement && !this.formElement.hasAttribute("id")) {
         this.formElement.setAttribute("id", nameValue);
         this.formElement.setAttribute("name", nameValue);
-        if (!_WcBaseComponent.designerMode) {
-          this.removeAttribute("name");
-        }
+        this.removeAttribute("name");
       }
     }
   }
@@ -1128,6 +1124,506 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
   _unWireEvents() {
   }
 };
+
+// src/js/components/designer-bridge.js
+if (document.documentElement?.hasAttribute?.("data-designer")) {
+  (function() {
+    const WC_TAGS = /* @__PURE__ */ new Set([
+      "wc-input",
+      "wc-select",
+      "wc-textarea",
+      "wc-field",
+      "wc-form",
+      "wc-tab",
+      "wc-tab-item",
+      "wc-breadcrumb",
+      "wc-breadcrumb-item",
+      "wc-save-split-button",
+      "wc-save-button",
+      "wc-article-skeleton",
+      "wc-table-skeleton",
+      "wc-card-skeleton",
+      "wc-list-skeleton",
+      "wc-tabulator",
+      "wc-tabulator-column",
+      "wc-fa-icon",
+      "wc-image",
+      "wc-hotkey",
+      "wc-behavior",
+      "wc-event-handler",
+      "wc-code-mirror",
+      "wc-accordion",
+      "wc-dropdown",
+      "wc-flip-box",
+      "wc-menu",
+      "wc-sidebar",
+      "wc-sidenav",
+      "wc-slideshow",
+      "wc-split-button",
+      "wc-loader",
+      "wc-contact-card",
+      "wc-contact-chip",
+      "wc-article-card",
+      "wc-timeline",
+      "wc-google-map",
+      "wc-google-address",
+      "wc-script",
+      "wc-javascript",
+      "wc-visibility-change"
+    ]);
+    const HTML_TAGS = /* @__PURE__ */ new Set([
+      "button",
+      "a",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "span",
+      "label",
+      "hr",
+      "img"
+    ]);
+    const CONTAINER_TYPES = /* @__PURE__ */ new Set([
+      "div",
+      "fieldset",
+      "wc-form",
+      "wc-tab",
+      "wc-tab-item",
+      "wc-accordion",
+      "wc-dropdown",
+      "wc-flip-box",
+      "wc-menu",
+      "wc-sidebar",
+      "wc-sidenav",
+      "wc-slideshow",
+      "wc-split-button"
+    ]);
+    const UTILITY_TYPES = /* @__PURE__ */ new Set([
+      "wc-hotkey",
+      "wc-behavior",
+      "wc-event-handler",
+      "wc-visibility-change",
+      "wc-script",
+      "wc-javascript",
+      "wc-event-hub",
+      "wc-mask-hub"
+    ]);
+    const registry = /* @__PURE__ */ new Map();
+    let selectedId = null;
+    let idCounter = 0;
+    let dropIndicator = null;
+    let lastDropPosition = null;
+    let lastDropParentId = null;
+    function generateId() {
+      return `d${Date.now().toString(36)}${(idCounter++).toString(36)}`;
+    }
+    function isDesignerTag(tag) {
+      return WC_TAGS.has(tag) || HTML_TAGS.has(tag) || tag === "div" || tag === "fieldset";
+    }
+    function isContainer(type) {
+      return CONTAINER_TYPES.has(type);
+    }
+    function getInnerElement(el, type) {
+      if (typeof el.getInnerContainer === "function") return el.getInnerContainer();
+      return el;
+    }
+    const toolbar = document.createElement("div");
+    toolbar.id = "designer-toolbar";
+    toolbar.innerHTML = `
+      <button data-action="move-up" title="Move Up">\u2191</button>
+      <button data-action="move-down" title="Move Down">\u2193</button>
+      <div class="sep"></div>
+      <button data-action="duplicate" title="Duplicate">\u29C9</button>
+      <button data-action="delete" title="Delete">\u2715</button>
+    `;
+    document.body.appendChild(toolbar);
+    const viewport = document.querySelector("#viewport") || document.querySelector("main") || document.body;
+    function scanAndRegister() {
+      registry.clear();
+      function scan(parent, insideWC = false) {
+        for (const child of parent.children) {
+          const tag = child.tagName.toLowerCase();
+          if (child.hasAttribute("data-designer-label-badge")) continue;
+          if (WC_TAGS.has(tag)) {
+            registerElement(child, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(child, tag);
+              if (inner) {
+                inner.setAttribute("data-drop-target", tag);
+                scan(inner, tag.startsWith("wc-"));
+              }
+            } else if (typeof child.getDesignerHTML === "function") {
+              const inner = getInnerElement(child, tag);
+              if (inner && inner !== child) scan(inner, true);
+            }
+          } else if (HTML_TAGS.has(tag) && !insideWC) {
+            registerElement(child, tag);
+          } else if (tag === "div" || tag === "fieldset") {
+            const isInternal = Array.from(child.classList).some(
+              (c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link"
+            );
+            if (!isInternal) {
+              registerElement(child, tag);
+              if (isContainer(tag)) {
+                const inner = getInnerElement(child, tag);
+                if (inner) {
+                  inner.setAttribute("data-drop-target", tag);
+                  scan(inner, false);
+                }
+              }
+            } else {
+              scan(child, insideWC);
+            }
+          } else {
+            scan(child);
+          }
+        }
+      }
+      scan(viewport);
+      const elements = [];
+      registry.forEach((entry, id) => elements.push({ id, type: entry.type }));
+      postToParent("registryBuilt", { count: registry.size, elements });
+    }
+    function registerElement(el, type) {
+      if (registry.has(el.getAttribute("data-designer-id"))) return;
+      let id = el.getAttribute("data-designer-id");
+      if (!id) {
+        id = generateId();
+        el.setAttribute("data-designer-id", id);
+      }
+      if (isContainer(type)) el.setAttribute("data-designer-container", "true");
+      if (UTILITY_TYPES.has(type)) el.setAttribute("data-designer-utility", "");
+      if (!el.querySelector(":scope > [data-designer-label-badge]")) {
+        const badge = document.createElement("span");
+        badge.setAttribute("data-designer-label-badge", "");
+        badge.textContent = type;
+        el.appendChild(badge);
+      }
+      registry.set(id, { element: el, type });
+    }
+    function selectComponent(designerId) {
+      deselectAll();
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      selectedId = designerId;
+      entry.element.style.outline = "2px solid #3b97e3";
+      entry.element.style.outlineOffset = "2px";
+      entry.element.setAttribute("data-designer-selected", "");
+      positionToolbar(entry.element);
+      const ancestors = [];
+      let el = entry.element.parentElement;
+      while (el && el !== viewport && el !== document.body) {
+        const pid = el.getAttribute?.("data-designer-id");
+        if (pid && registry.has(pid)) ancestors.unshift({ designerId: pid, type: registry.get(pid).type });
+        el = el.parentElement;
+      }
+      const props = {};
+      const el2 = entry.element;
+      for (const attr of el2.attributes) {
+        const n = attr.name;
+        if (n.startsWith("data-designer") || n === "data-wc-id" || n === "data-drop-target" || n === "style") continue;
+        if (n === "class") {
+          props.css = attr.value.replace(/\bcontents\b/g, "").replace(/\bdesigner-selected\b/g, "").trim();
+          continue;
+        }
+        if (n === "data-scope") {
+          props.scope = attr.value;
+          continue;
+        }
+        props[n] = attr.value;
+      }
+      const formTags = /* @__PURE__ */ new Set(["wc-input", "wc-select", "wc-textarea", "wc-field", "wc-google-address"]);
+      if (!props.name && formTags.has(entry.type)) {
+        const formEl = el2.querySelector(":scope > .wc-" + entry.type.replace("wc-", "") + " > [form-element]") || el2.querySelector(":scope > * > input, :scope > * > select, :scope > * > textarea");
+        if (formEl?.name) props.name = formEl.name;
+      }
+      if (HTML_TAGS.has(entry.type)) {
+        const textNodes = Array.from(el2.childNodes).filter((n2) => n2.nodeType === 3);
+        props.content = textNodes.map((n2) => n2.textContent).join("").trim();
+      }
+      postToParent("select", { designerId, type: entry.type, ancestors, properties: props });
+    }
+    function deselectAll() {
+      if (selectedId) {
+        const entry = registry.get(selectedId);
+        if (entry) {
+          entry.element.style.outline = "";
+          entry.element.style.outlineOffset = "";
+          entry.element.removeAttribute("data-designer-selected");
+        }
+      }
+      selectedId = null;
+      toolbar.classList.remove("visible");
+      postToParent("deselect", {});
+    }
+    function positionToolbar(el) {
+      const rect = el.getBoundingClientRect();
+      toolbar.classList.add("visible");
+      toolbar.style.left = `${rect.left + window.scrollX}px`;
+      toolbar.style.top = `${rect.top + window.scrollY - 32}px`;
+      if (rect.top < 40) toolbar.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    }
+    function removeComponent(designerId) {
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      const badge = entry.element.querySelector(":scope > [data-designer-label-badge]");
+      if (badge) badge.remove();
+      entry.element.remove();
+      registry.delete(designerId);
+      if (selectedId === designerId) {
+        selectedId = null;
+        toolbar.classList.remove("visible");
+      }
+      postToParent("componentRemoved", { designerId });
+      postToParent("deselect", {});
+    }
+    function moveComponent(designerId, direction) {
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      const el = entry.element;
+      if (direction === "up" && el.previousElementSibling?.hasAttribute("data-designer-id"))
+        el.parentElement.insertBefore(el, el.previousElementSibling);
+      else if (direction === "down" && el.nextElementSibling?.hasAttribute("data-designer-id"))
+        el.parentElement.insertBefore(el.nextElementSibling, el);
+      if (selectedId === designerId) positionToolbar(el);
+      postToParent("componentMoved", { designerId, direction });
+    }
+    function duplicateComponent(designerId) {
+      postToParent("duplicateRequest", { designerId });
+    }
+    function updateProperty(designerId, propName, value) {
+      const entry = registry.get(designerId);
+      if (!entry) return;
+      const el = entry.element;
+      if (propName === "scope") el.setAttribute("data-scope", value);
+      else if (propName === "css") {
+        const keep = ["contents", "designer-selected"].filter((c) => el.classList.contains(c));
+        el.className = [value, ...keep].filter(Boolean).join(" ");
+      } else if (propName === "content") {
+        const tn = Array.from(el.childNodes).find((n) => n.nodeType === 3);
+        if (tn) tn.textContent = value;
+        else el.prepend(document.createTextNode(value));
+      } else {
+        const attr = propName.replace(/_/g, "-");
+        if (value === "" || value === true) el.setAttribute(attr, "");
+        else if (value === false || value == null) el.removeAttribute(attr);
+        else el.setAttribute(attr, value);
+      }
+    }
+    function insertHTMLAt(html, parentId, position, sourceHtml) {
+      let parentEl;
+      if (parentId) {
+        const parentComp = viewport.querySelector(`[data-designer-id="${parentId}"]`);
+        if (parentComp) {
+          const entry = registry.get(parentId);
+          parentEl = entry ? getInnerElement(parentComp, entry.type) : parentComp;
+        } else parentEl = viewport;
+      } else parentEl = viewport;
+      const children = Array.from(parentEl.children).filter((c) => c.hasAttribute("data-designer-id"));
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const newElements = Array.from(tempDiv.children);
+      for (const el of newElements) {
+        if (position != null && position < children.length) parentEl.insertBefore(el, children[position]);
+        else parentEl.appendChild(el);
+      }
+      setTimeout(() => {
+        for (const el of newElements) {
+          const tag = el.tagName.toLowerCase();
+          if (isDesignerTag(tag)) {
+            registerElement(el, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(el, tag);
+              if (inner) inner.setAttribute("data-drop-target", tag);
+            }
+          }
+          scanNewChildren(el);
+        }
+        postToParent("componentInserted", { html: sourceHtml || html, parentId, position });
+      }, 500);
+    }
+    function scanNewChildren(parent, insideWC = false) {
+      for (const child of parent.children) {
+        const tag = child.tagName.toLowerCase();
+        const isInternal = (tag === "div" || tag === "span" || tag === "label" || tag === "form") && Array.from(child.classList).some((c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body");
+        if (isInternal) {
+          scanNewChildren(child, insideWC);
+          continue;
+        }
+        const registered = registry.has(child.getAttribute("data-designer-id"));
+        if (WC_TAGS.has(tag) && !registered) {
+          registerElement(child, tag);
+          if (isContainer(tag)) {
+            const inner = getInnerElement(child, tag);
+            if (inner) {
+              inner.setAttribute("data-drop-target", tag);
+              scanNewChildren(inner, tag.startsWith("wc-"));
+            }
+          } else if (typeof child.getDesignerHTML === "function") {
+            const inner = getInnerElement(child, tag);
+            if (inner && inner !== child) scanNewChildren(inner, true);
+          }
+        } else if (HTML_TAGS.has(tag) && !insideWC && !registered) {
+          registerElement(child, tag);
+        } else if ((tag === "div" || tag === "fieldset") && !registered) {
+          const isInt = Array.from(child.classList).some((c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link");
+          if (!isInt) {
+            registerElement(child, tag);
+            if (isContainer(tag)) {
+              const inner = getInnerElement(child, tag);
+              if (inner) {
+                inner.setAttribute("data-drop-target", tag);
+                scanNewChildren(inner, false);
+              }
+            }
+          } else scanNewChildren(child, insideWC);
+        }
+      }
+    }
+    viewport.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      const target = findDropTarget(e.clientX, e.clientY);
+      lastDropPosition = target.position;
+      lastDropParentId = target.parentId;
+      if (target.container) target.container.classList.add("drop-target");
+      showDropIndicator(target.parentEl, target.position);
+    });
+    viewport.addEventListener("dragleave", (e) => {
+      if (!viewport.contains(e.relatedTarget)) {
+        removeDropIndicator();
+        clearDropTargets();
+      }
+    });
+    viewport.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const savedPosition = lastDropPosition;
+      const savedParentId = lastDropParentId;
+      removeDropIndicator();
+      clearDropTargets();
+      const jsonData = e.dataTransfer.getData("application/json");
+      if (!jsonData) return;
+      try {
+        const payload = JSON.parse(jsonData);
+        if (payload.html) insertHTMLAt(payload.html, savedParentId, savedPosition, payload.sourceHtml);
+      } catch (err) {
+        console.error("[designer-bridge] Drop error:", err);
+      }
+    });
+    function findDropTarget(clientX, clientY) {
+      const elemAtPoint = document.elementFromPoint(clientX, clientY);
+      let containerEl = elemAtPoint?.closest("[data-designer-container]");
+      if (!containerEl && elemAtPoint) {
+        const dp = elemAtPoint.closest("[data-designer-id]");
+        if (dp?.hasAttribute("data-designer-container")) containerEl = dp;
+      }
+      let parentId = containerEl?.getAttribute("data-designer-id") || null;
+      let parentEl;
+      if (containerEl) {
+        const entry = registry.get(parentId);
+        parentEl = entry ? getInnerElement(containerEl, entry.type) : containerEl;
+      } else parentEl = viewport;
+      const children = Array.from(parentEl.children).filter((c) => c.hasAttribute("data-designer-id"));
+      let position = children.length;
+      for (let i = 0; i < children.length; i++) {
+        const rect = children[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+          position = i;
+          break;
+        }
+      }
+      return { container: containerEl, parentEl, parentId, position };
+    }
+    function showDropIndicator(parentEl, position) {
+      removeDropIndicator();
+      dropIndicator = document.createElement("div");
+      dropIndicator.className = "drop-indicator";
+      const children = Array.from(parentEl.children).filter((c) => c.hasAttribute("data-designer-id"));
+      if (position < children.length) parentEl.insertBefore(dropIndicator, children[position]);
+      else parentEl.appendChild(dropIndicator);
+    }
+    function removeDropIndicator() {
+      if (dropIndicator?.parentNode) dropIndicator.remove();
+      dropIndicator = null;
+      document.querySelectorAll(".drop-indicator").forEach((el) => el.remove());
+    }
+    function clearDropTargets() {
+      document.querySelectorAll(".drop-target").forEach((el) => el.classList.remove("drop-target"));
+    }
+    viewport.addEventListener("click", (e) => {
+      const target = e.target.closest("[data-designer-id]");
+      if (target && target !== viewport) {
+        e.stopPropagation();
+        e.preventDefault();
+        const id = target.getAttribute("data-designer-id");
+        if (id && registry.has(id)) selectComponent(id);
+      } else deselectAll();
+    });
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      const action = btn?.dataset.action;
+      if (!action || !selectedId) return;
+      e.stopPropagation();
+      switch (action) {
+        case "move-up":
+          moveComponent(selectedId, "up");
+          break;
+        case "move-down":
+          moveComponent(selectedId, "down");
+          break;
+        case "duplicate":
+          duplicateComponent(selectedId);
+          break;
+        case "delete":
+          removeComponent(selectedId);
+          break;
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (!selectedId) return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        removeComponent(selectedId);
+      } else if (e.key === "Escape") deselectAll();
+    });
+    function postToParent(action, data) {
+      if (window.parent !== window)
+        window.parent.postMessage({ source: "editor-bridge", action, ...data }, "*");
+    }
+    window.addEventListener("message", (e) => {
+      if (!e.data || e.data.source !== "live-designer") return;
+      switch (e.data.action) {
+        case "insertHTML":
+          insertHTMLAt(e.data.html, e.data.parentId || null, e.data.position || null, e.data.sourceHtml);
+          break;
+        case "updateProperty":
+          updateProperty(e.data.designerId, e.data.propName, e.data.value);
+          break;
+        case "selectById":
+          if (e.data.designerId && registry.has(e.data.designerId)) selectComponent(e.data.designerId);
+          break;
+        case "clear-selection":
+          deselectAll();
+          break;
+      }
+    });
+    if (window.htmx) {
+      document.body.addEventListener("htmx:beforeRequest", (e) => {
+        e.preventDefault();
+        e.detail.xhr?.abort();
+      });
+      document.querySelectorAll("[hx-trigger]").forEach((el) => {
+        el.removeAttribute("hx-trigger");
+      });
+    }
+    setTimeout(() => scanAndRegister(), 500);
+    postToParent("canvasReady", {});
+  })();
+}
 
 // src/js/components/wc-base-form-component.js
 var WcBaseFormComponent = class extends WcBaseComponent {
@@ -11848,7 +12344,23 @@ if (!customElements.get("wc-live-designer")) {
       </wc-form>
     </wc-tab-item>
     <wc-tab-item label="Change Log">
-      <div class="p-4"></div>
+      {% if RecordID != "create" %}
+      <div id="change-log-tab"
+           hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}"
+           hx-trigger="revealed"
+           hx-swap="innerHTML"
+           hx-indicator="#content-loader"
+           hx-push-url="false">
+        <div class="flex items-center gap-2 text-gray-500 p-4">
+          <wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon>
+          Loading change history...
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center p-4 text-muted">
+        Save the record to view change history
+      </div>
+      {% endif %}
     </wc-tab-item>
   </wc-tab>
 </div>`
@@ -11936,7 +12448,7 @@ if (!customElements.get("wc-live-designer")) {
         label: "Tab with Change Log",
         category: "group",
         description: "Tab with General + Change Log",
-        html: '<wc-tab class="col-1 mt-2 mb-4" animate><wc-tab-item class="active" label="General"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item><wc-tab-item label="Change Log"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item></wc-tab>'
+        html: `<wc-tab class="col-1 mt-2 mb-4" animate><wc-tab-item class="active" label="General"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item><wc-tab-item label="Change Log">{% if RecordID != "create" %}<div id="change-log-tab" hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}" hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false"><div class="flex items-center gap-2 text-gray-500 p-4"><wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon> Loading change history...</div></div>{% else %}<div class="text-center p-4 text-muted">Save the record to view change history</div>{% endif %}</wc-tab-item></wc-tab>`
       },
       {
         label: "Form",
@@ -11972,6 +12484,66 @@ if (!customElements.get("wc-live-designer")) {
         html: '<div class="row gap-4"><wc-input name="email" lbl-label="Email" type="email" class="col-1"></wc-input><wc-input name="phone_number" lbl-label="Phone" type="tel" class="col-1"></wc-input></div>'
       }
     ];
+    // Tag sets for sourceDoc walking — same as canvas
+    static _WC_TAGS = /* @__PURE__ */ new Set([
+      "wc-input",
+      "wc-select",
+      "wc-textarea",
+      "wc-field",
+      "wc-form",
+      "wc-tab",
+      "wc-tab-item",
+      "wc-breadcrumb",
+      "wc-breadcrumb-item",
+      "wc-save-split-button",
+      "wc-save-button",
+      "wc-article-skeleton",
+      "wc-table-skeleton",
+      "wc-card-skeleton",
+      "wc-list-skeleton",
+      "wc-tabulator",
+      "wc-tabulator-column",
+      "wc-fa-icon",
+      "wc-image",
+      "wc-hotkey",
+      "wc-behavior",
+      "wc-event-handler",
+      "wc-code-mirror",
+      "wc-accordion",
+      "wc-dropdown",
+      "wc-flip-box",
+      "wc-menu",
+      "wc-sidebar",
+      "wc-sidenav",
+      "wc-slideshow",
+      "wc-split-button",
+      "wc-loader",
+      "wc-contact-card",
+      "wc-contact-chip",
+      "wc-article-card",
+      "wc-timeline",
+      "wc-google-map",
+      "wc-google-address",
+      "wc-script",
+      "wc-javascript",
+      "wc-visibility-change"
+    ]);
+    static _HTML_TAGS = /* @__PURE__ */ new Set([
+      "button",
+      "a",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "span",
+      "label",
+      "hr",
+      "img"
+    ]);
+    static _SKIP_TAGS = /* @__PURE__ */ new Set(["option", "optgroup"]);
     constructor() {
       super();
       this._canvasReady = false;
@@ -11984,6 +12556,261 @@ if (!customElements.get("wc-live-designer")) {
       this._lastSourceHTML = "";
       this._lastEditedSourceHTML = "";
       this._sourceEditorReady = false;
+      this._sourceDoc = null;
+      this._designerIdCounter = 0;
+    }
+    // =========================================================
+    // SOURCE DOCUMENT — single source of truth for all attributes
+    // =========================================================
+    _generateDesignerId() {
+      return `sd${Date.now().toString(36)}${(this._designerIdCounter++).toString(36)}`;
+    }
+    /**
+     * Parse HTML into a DOMParser Document and stamp data-designer-id
+     * on every designer-worthy element.
+     */
+    _initSourceDoc(html) {
+      const parser = new DOMParser();
+      this._sourceDoc = parser.parseFromString(`<body>${html}</body>`, "text/html");
+      this._stampDesignerIdsOnDoc(this._sourceDoc.body);
+    }
+    /**
+     * Walk a parent element and assign data-designer-id to all
+     * designer-worthy elements that don't already have one.
+     */
+    _stampDesignerIdsOnDoc(parent) {
+      for (const child of Array.from(parent.children)) {
+        const tag = child.tagName.toLowerCase();
+        if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
+        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
+        const isDiv = tag === "div" || tag === "fieldset";
+        if (isWC || isHTML || isDiv) {
+          if (!child.hasAttribute("data-designer-id")) {
+            child.setAttribute("data-designer-id", this._generateDesignerId());
+          }
+        }
+        this._stampDesignerIdsOnDoc(child);
+      }
+    }
+    /**
+     * Stamp designer IDs on an HTML string. Returns the stamped HTML.
+     * Used for drag & drop — IDs are assigned before insertion.
+     */
+    _stampDesignerIdsOnHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+      const wrapper = doc.body.firstElementChild;
+      this._stampDesignerIdsOnDoc(wrapper);
+      return wrapper.innerHTML;
+    }
+    /**
+     * Serialize sourceDoc innerHTML with data-designer-id intact.
+     * This is what gets sent to the canvas for rendering.
+     */
+    _sourceDocToCanvasHTML() {
+      if (!this._sourceDoc) return "";
+      return this._sourceDoc.body.innerHTML;
+    }
+    /**
+     * Serialize sourceDoc innerHTML WITHOUT designer attributes.
+     * This is the clean HTML for save / Source tab.
+     */
+    _getCleanHTMLFromSourceDoc() {
+      if (!this._sourceDoc) return "";
+      return this._sourceDoc.body.innerHTML;
+    }
+    /**
+     * Find a sourceDoc node by its designer ID.
+     */
+    _getSourceNode(designerId) {
+      if (!this._sourceDoc) return null;
+      return this._sourceDoc.querySelector(`[data-designer-id="${designerId}"]`);
+    }
+    /**
+     * Read properties from a sourceDoc node. Returns a properties object
+     * in the same format as the old registry properties.
+     */
+    _readPropertiesFromSourceNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return {};
+      const tag = el.tagName.toLowerCase();
+      const props = {};
+      for (const attr of el.attributes) {
+        const name = attr.name;
+        if (name === "data-designer-id") continue;
+        if (name === "class") {
+          props.css = attr.value;
+          continue;
+        }
+        if (name === "data-scope") {
+          props.scope = attr.value;
+          continue;
+        }
+        props[name] = attr.value;
+      }
+      if (WcLiveDesigner._HTML_TAGS.has(tag)) {
+        const textNodes = Array.from(el.childNodes).filter((n) => n.nodeType === 3);
+        props.content = textNodes.map((n) => n.textContent).join("").trim();
+      }
+      return props;
+    }
+    /**
+     * Update a property on a sourceDoc node.
+     */
+    _updateSourceDocProperty(designerId, propName, value) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return;
+      if (propName === "css") {
+        if (value) el.setAttribute("class", value);
+        else el.removeAttribute("class");
+      } else if (propName === "scope") {
+        if (value) el.setAttribute("data-scope", value);
+        else el.removeAttribute("data-scope");
+      } else if (propName === "content") {
+        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === 3);
+        if (textNode) textNode.textContent = value;
+        else el.prepend(el.ownerDocument.createTextNode(value));
+      } else {
+        const attrName = propName.replace(/_/g, "-");
+        if (value === "" || value === true) el.setAttribute(attrName, "");
+        else if (value === false || value == null) el.removeAttribute(attrName);
+        else el.setAttribute(attrName, String(value));
+      }
+    }
+    /**
+     * Remove a node from sourceDoc.
+     */
+    _removeSourceDocNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (el) el.remove();
+    }
+    /**
+     * Move a node up/down in sourceDoc.
+     */
+    _moveSourceDocNode(designerId, direction) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return;
+      if (direction === "up" && el.previousElementSibling) {
+        el.parentElement.insertBefore(el, el.previousElementSibling);
+      } else if (direction === "down" && el.nextElementSibling) {
+        el.parentElement.insertBefore(el.nextElementSibling, el);
+      }
+    }
+    /**
+     * Duplicate a node in sourceDoc. Returns the new stamped HTML for canvas insertion.
+     */
+    _duplicateSourceDocNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return null;
+      const clone = el.cloneNode(true);
+      clone.removeAttribute("data-designer-id");
+      clone.querySelectorAll("[data-designer-id]").forEach((c) => c.removeAttribute("data-designer-id"));
+      this._stampDesignerIdsOnDoc(clone.parentElement || clone);
+      if (!clone.hasAttribute("data-designer-id")) {
+        clone.setAttribute("data-designer-id", this._generateDesignerId());
+      }
+      el.after(clone);
+      return clone.outerHTML;
+    }
+    /**
+     * Insert HTML into sourceDoc at the specified parent/position.
+     * HTML should already have designer IDs stamped.
+     */
+    _insertIntoSourceDoc(html, parentDesignerId, position) {
+      if (!this._sourceDoc) return;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+      const newElements = Array.from(doc.body.firstElementChild.children);
+      let parent;
+      if (parentDesignerId) {
+        parent = this._sourceDoc.querySelector(`[data-designer-id="${parentDesignerId}"]`);
+      }
+      if (!parent) parent = this._sourceDoc.body;
+      const designerChildren = Array.from(parent.children).filter(
+        (c) => c.hasAttribute("data-designer-id")
+      );
+      for (const el of newElements) {
+        const imported = this._sourceDoc.importNode(el, true);
+        if (position != null && position < designerChildren.length) {
+          parent.insertBefore(imported, designerChildren[position]);
+        } else {
+          parent.appendChild(imported);
+        }
+      }
+    }
+    /**
+     * Build a serialized tree from sourceDoc (replaces async getTree).
+     */
+    _buildTreeFromSourceDoc(parent = null) {
+      const root = parent || (this._sourceDoc ? this._sourceDoc.body : null);
+      if (!root) return [];
+      const elements = [];
+      for (const child of root.children) {
+        if (!child.hasAttribute("data-designer-id")) continue;
+        const tag = child.tagName.toLowerCase();
+        const props = {};
+        for (const attr of child.attributes) {
+          if (attr.name === "data-designer-id") continue;
+          if (attr.name === "class") {
+            props.css = attr.value;
+            continue;
+          }
+          if (attr.name === "data-scope") {
+            props.scope = attr.value;
+            continue;
+          }
+          props[attr.name] = attr.value;
+        }
+        if (WcLiveDesigner._HTML_TAGS.has(tag)) {
+          const text = Array.from(child.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim();
+          if (text) props.content = text;
+        }
+        const node = { ...props, componentType: tag, designerId: child.getAttribute("data-designer-id") };
+        const nested = this._buildTreeFromSourceDoc(child);
+        if (nested.length > 0) node.children = nested;
+        elements.push(node);
+      }
+      return elements;
+    }
+    /**
+     * Strip Pongo2 markup for canvas rendering.
+     * The Visual canvas shows production-like output — no template tags visible.
+     * Source tab and sourceDoc keep the full Pongo2 markup.
+     */
+    _stripPongo2ForCanvas(html) {
+      let result = html;
+      result = result.replace(/\{%[\s\S]*?%\}/g, "");
+      result = result.replace(/\{\{([^}]+)\}\}/g, "");
+      return result;
+    }
+    /**
+     * Render sourceDoc to the canvas iframe.
+     * Strips Pongo2 markup so the Visual tab looks like production.
+     */
+    /**
+     * Collect designer-worthy elements from a DOM tree in depth-first order.
+     * Mirrors the bridge's scan() walk order so elements can be correlated by index.
+     */
+    _collectDesignerElements(parent, result = []) {
+      for (const child of parent.children) {
+        const tag = child.tagName.toLowerCase();
+        if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
+        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
+        const isDiv = tag === "div" || tag === "fieldset";
+        if (isWC || isHTML || isDiv) {
+          result.push(child);
+        }
+        this._collectDesignerElements(child, result);
+      }
+      return result;
+    }
+    _renderSourceDocToCanvas() {
+      if (!this._sourceDoc || !this._canvasReady) return;
+      const rawHTML = this._sourceDocToCanvasHTML();
+      const cleanHTML = this._stripPongo2ForCanvas(rawHTML);
+      this._postToCanvas("renderHTML", { html: cleanHTML });
     }
     async _render() {
       if (this._rendered) return;
@@ -12044,7 +12871,7 @@ if (!customElements.get("wc-live-designer")) {
           <!-- Main Content -->
           <div class="flex flex-row flex-1 min-h-0">
             <!-- Left Panel: Palette -->
-            <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow: hidden;">
+            <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow-y: auto; max-height: calc(100vh - 310px);">
               <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate tab-overflow="scroll">
                 <wc-tab-item class="active" label="Containers">
                   <div class="ld-palette-tab-content">
@@ -12097,8 +12924,12 @@ if (!customElements.get("wc-live-designer")) {
             <div class="ld-canvas-area flex flex-col flex-1 overflow-hidden" style="background: var(--surface-1);">
               <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate>
                 <wc-tab-item class="active" label="Visual">
-                  <div class="ld-canvas-visual flex-1 flex items-center justify-start overflow-auto" style="height: 100%;">
-                    <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; box-shadow: 0 1px 8px rgba(0,0,0,0.15); margin: 8px; transition: width 0.3s, height 0.3s;"></iframe>
+                  <div class="ld-canvas-visual flex-1 flex flex-col overflow-hidden" style="height: calc(100vh - 310px); position: relative;">
+                    <div class="ld-canvas-loading" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface-1, #111); z-index: 10; color: var(--text-6, #888); font-family: system-ui, sans-serif; gap: 12px;">
+                      <span style="animation: spin 1s linear infinite; display: inline-block; font-size: 48px;">\u27F3</span>
+                      <span style="font-size: 14px;">Loading preview...</span>
+                    </div>
+                    <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; flex: 1 1 0%; min-height: 0; width: 100%;"></iframe>
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Source">
@@ -12111,7 +12942,7 @@ if (!customElements.get("wc-live-designer")) {
             <div class="ld-resize-handle" data-resize="right" title="Drag to resize">\u22EE</div>
 
             <!-- Right Panel: Properties -->
-            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); overflow-y: auto;">
+            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); overflow-y: auto; max-height: calc(100vh - 310px);">
               <div>
                 <div class="ld-props-empty p-4 text-center" style="color: var(--text-6); font-size: 12px;">
                   Select a component to edit its properties
@@ -12251,6 +13082,7 @@ if (!customElements.get("wc-live-designer")) {
         .ld-layer-node .ld-layer-icon { font-size: 10px; width: 14px; text-align: center; opacity: 0.6; }
         .ld-layer-node .ld-layer-type { font-weight: 500; }
         .ld-layer-node .ld-layer-scope { color: var(--text-6); font-size: 10px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* Breadcrumb */
         .ld-breadcrumb a { color: var(--text-5); text-decoration: none; cursor: pointer; }
@@ -12394,8 +13226,10 @@ if (!customElements.get("wc-live-designer")) {
           const editedHTML = this._lastEditedSourceHTML;
           if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
             this._lastSourceHTML = editedHTML;
+            this._savedContent = editedHTML;
             const canvasHTML = this._reversePongo2(editedHTML);
-            this._postToCanvas("renderHTML", { html: canvasHTML });
+            this._initSourceDoc(canvasHTML);
+            this._renderSourceDocToCanvas();
           }
         }
       });
@@ -12423,7 +13257,9 @@ if (!customElements.get("wc-live-designer")) {
         item.addEventListener("dragstart", (e) => {
           const html = item.dataset.html;
           if (!html) return;
-          e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html }));
+          const stampedHTML = this._stampDesignerIdsOnHTML(html);
+          const canvasHTML = this._stripPongo2ForCanvas(stampedHTML);
+          e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html: canvasHTML, sourceHtml: stampedHTML }));
           e.dataTransfer.effectAllowed = "copy";
           const ghost = document.createElement("div");
           ghost.textContent = item.textContent;
@@ -12439,7 +13275,9 @@ if (!customElements.get("wc-live-designer")) {
           const idx = parseInt(item.dataset.presetIndex);
           const preset = WcLiveDesigner.PRESETS[idx];
           if (!preset) return;
-          e.dataTransfer.setData("application/json", JSON.stringify({ preset: true, html: preset.html }));
+          const stampedPresetHTML = this._stampDesignerIdsOnHTML(preset.html);
+          const canvasPresetHTML = this._stripPongo2ForCanvas(stampedPresetHTML);
+          e.dataTransfer.setData("application/json", JSON.stringify({ preset: true, html: canvasPresetHTML, sourceHtml: stampedPresetHTML }));
           e.dataTransfer.effectAllowed = "copy";
           const ghost = document.createElement("div");
           ghost.textContent = preset.label;
@@ -12620,7 +13458,8 @@ if (!customElements.get("wc-live-designer")) {
             const type = item.dataset.type;
             const defaults = JSON.parse(item.dataset.defaults);
             const html = this._buildElementHTML(type, defaults);
-            e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html }));
+            const stampedFieldHTML = this._stampDesignerIdsOnHTML(html);
+            e.dataTransfer.setData("application/json", JSON.stringify({ type: "element", html: stampedFieldHTML }));
             e.dataTransfer.effectAllowed = "copy";
             const ghost = document.createElement("div");
             ghost.textContent = item.textContent;
@@ -12801,6 +13640,8 @@ if (!customElements.get("wc-live-designer")) {
       switch (action) {
         case "canvasReady":
           this._canvasReady = true;
+          const loadingEl = this.querySelector(".ld-canvas-loading");
+          if (loadingEl) loadingEl.style.display = "none";
           const theme = this.getAttribute("theme") || document.documentElement.className || "theme-ocean dark";
           this._postToCanvas("setTheme", { theme });
           if (Object.keys(this._sampleData).length > 0) {
@@ -12819,23 +13660,24 @@ if (!customElements.get("wc-live-designer")) {
               this._generateSampleFromSchema(schemaSlug);
             }
           }
-          if (this._savedContent) {
-            this.loadHTML(this._savedContent);
+          if (this._savedContent && !this._sourceDoc) {
+            let canvasHTML = this._savedContent.replace(/\{%\s*extends\s+[^%]*%\}/g, "").replace(/\{%\s*block\s+\w+\s*%\}/g, "").replace(/\{%\s*endblock\s*%\}/g, "").replace(/\{%\s*include\s+[^%]*%\}/g, "").trim();
+            canvasHTML = this._reversePongo2(canvasHTML);
+            this._initSourceDoc(canvasHTML);
           } else if (this._pendingTree) {
-            this.loadTree(this._pendingTree);
+            const html = this._treeToHTML(this._pendingTree);
+            this._initSourceDoc(html);
             this._pendingTree = null;
-          } else if (this._pendingHTML) {
-            this._postToCanvas("renderHTML", { html: this._pendingHTML });
-            this._pendingHTML = null;
           }
           break;
         case "select":
+          const selectProps = e.data.properties || this._readPropertiesFromSourceNode(e.data.designerId);
           this._selectedComponent = {
             designerId: e.data.designerId,
             type: e.data.type,
-            properties: e.data.properties
+            properties: selectProps
           };
-          this._showPropertyPanel(e.data.type, e.data.properties, e.data.designerId);
+          this._showPropertyPanel(e.data.type, selectProps, e.data.designerId);
           this._updateBreadcrumb(e.data.ancestors || [], e.data.designerId, e.data.type);
           this.querySelectorAll(".ld-layer-node.active").forEach((n) => n.classList.remove("active"));
           const activeNode = this.querySelector(`.ld-layer-node[data-layer-id="${e.data.designerId}"]`);
@@ -12848,26 +13690,61 @@ if (!customElements.get("wc-live-designer")) {
           this.querySelectorAll(".ld-layer-node.active").forEach((n) => n.classList.remove("active"));
           break;
         case "componentAdded":
-        case "componentRemoved":
           this._updateLayerTree();
           break;
-        case "treeResponse":
-          this._renderLayerTree(e.data.tree || []);
-          if (this._treeCallback) {
-            this._treeCallback(e.data.tree);
-            this._treeCallback = null;
+        case "componentRemoved":
+          if (e.data.designerId) {
+            this._removeSourceDocNode(e.data.designerId);
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
           }
+          this._updateLayerTree();
           break;
-        case "htmlResponse":
-          if (this._htmlCallback) {
-            this._htmlCallback(e.data.html);
-            this._htmlCallback = null;
+        case "componentMoved":
+          if (e.data.designerId && e.data.direction) {
+            this._moveSourceDocNode(e.data.designerId, e.data.direction);
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
           }
+          this._updateLayerTree();
           break;
-        case "treeLoaded":
-        case "treeAppended":
-        case "registryBuilt":
         case "componentInserted":
+          if (e.data.html) {
+            if (!this._sourceDoc) {
+              const parser = new DOMParser();
+              this._sourceDoc = parser.parseFromString("<body></body>", "text/html");
+            }
+            this._insertIntoSourceDoc(e.data.html, e.data.parentId, e.data.position);
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
+          }
+          this._updateLayerTree();
+          break;
+        case "duplicateRequest":
+          if (e.data.designerId) {
+            const cloneHTML = this._duplicateSourceDocNode(e.data.designerId);
+            if (cloneHTML) {
+              const origNode = this._getSourceNode(e.data.designerId);
+              if (origNode) {
+                const parentNode = origNode.parentElement;
+                const parentId = parentNode?.getAttribute("data-designer-id") || null;
+                this._postToCanvas("insertHTML", { html: cloneHTML, parentId, position: null });
+              }
+            }
+          }
+          break;
+        case "registryBuilt":
+          if (e.data.elements && this._sourceDoc) {
+            this._bridgeToSourceMap = /* @__PURE__ */ new Map();
+            const sourceElements = this._collectDesignerElements(this._sourceDoc.body);
+            const bridgeElements = e.data.elements;
+            for (let i = 0; i < Math.min(sourceElements.length, bridgeElements.length); i++) {
+              if (sourceElements[i].tagName.toLowerCase() === bridgeElements[i].type) {
+                this._bridgeToSourceMap.set(bridgeElements[i].id, sourceElements[i]);
+                sourceElements[i].setAttribute("data-designer-id", bridgeElements[i].id);
+              }
+            }
+          }
           this._updateLayerTree();
           break;
       }
@@ -12875,12 +13752,13 @@ if (!customElements.get("wc-live-designer")) {
     // --- Source View ---
     async _updateSourceView() {
       try {
-        await new Promise((r) => setTimeout(r, 50));
-        const rawHTML = await this.getHTML();
+        const rawHTML = this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
-        const formattedHTML = this._formatHTML(pongo2HTML);
-        this._lastSourceHTML = formattedHTML;
+        const formattedInner = this._formatHTML(pongo2HTML);
+        const templateType = this.getAttribute("template-type") || "standard";
+        const fullTemplate = this._wrapContent(formattedInner, templateType);
+        this._lastSourceHTML = fullTemplate;
         const panel = this.querySelector(".ld-source-panel");
         if (!panel) return;
         let cmEl = panel.querySelector(".ld-source-editor");
@@ -12890,7 +13768,7 @@ if (!customElements.get("wc-live-designer")) {
         }
         const setEditorValue = () => {
           if (cmEl.editor) {
-            cmEl.editor.setValue(formattedHTML);
+            cmEl.editor.setValue(fullTemplate);
             setTimeout(() => cmEl.editor?.refresh(), 50);
             if (!cmEl._changeWired) {
               cmEl._changeWired = true;
@@ -12992,7 +13870,8 @@ if (!customElements.get("wc-live-designer")) {
       if (!html?.trim()) return;
       let canvasHTML = html.replace(/\{%\s*extends\s+[^%]*%\}/g, "").replace(/\{%\s*block\s+\w+\s*%\}/g, "").replace(/\{%\s*endblock\s*%\}/g, "").replace(/\{%\s*include\s+[^%]*%\}/g, "").trim();
       canvasHTML = this._reversePongo2(canvasHTML);
-      this._postToCanvas("renderHTML", { html: canvasHTML });
+      this._initSourceDoc(canvasHTML);
+      this._renderSourceDocToCanvas();
     }
     async _loadChildren(parentEl, parentDesignerId) {
       for (const child of parentEl.children) {
@@ -13137,10 +14016,7 @@ if (!customElements.get("wc-live-designer")) {
      * @param {string} options.templateType - 'standard', 'fragment', 'email', 'data', 'report'
      * @returns {Promise<{ content: string, code: string, field_rules: string, tree: string }>}
      */
-    async getFormData(options = {}) {
-      const rawHTML = await this.getHTML();
-      const formHTML = this.transformToPongo2(rawHTML);
-      const formatted = this._formatHTML(formHTML);
+    getFormData(options = {}) {
       const slug = options.slug || "template";
       const collectionName = options.collectionName || slug;
       const schemaSlug = options.schemaSlug || slug;
@@ -13148,9 +14024,21 @@ if (!customElements.get("wc-live-designer")) {
       const prevTemplateSlug = options.prevTemplateSlug || "";
       const nextTemplateSlug = options.nextTemplateSlug || "";
       const templateType = options.templateType || "standard";
-      const content = this._wrapContent(formatted, templateType);
+      let content;
+      if (this._lastEditedSourceHTML != null && this._lastEditedSourceHTML !== this._lastSourceHTML) {
+        content = this._lastEditedSourceHTML;
+        const canvasHTML = this._reversePongo2(
+          content.replace(/\{%\s*extends\s+[^%]*%\}/g, "").replace(/\{%\s*block\s+\w+\s*%\}/g, "").replace(/\{%\s*endblock\s*%\}/g, "").replace(/\{%\s*include\s+[^%]*%\}/g, "").trim()
+        );
+        this._initSourceDoc(canvasHTML);
+      } else {
+        const rawHTML = this.getHTML();
+        const formHTML = this.transformToPongo2(rawHTML);
+        const formatted = this._formatHTML(formHTML);
+        content = this._wrapContent(formatted, templateType);
+      }
       const code = this._generateCode(templateType);
-      const tree = await this.getTree();
+      const tree = this.getTree();
       return { content, code, field_rules: "", tree: JSON.stringify(tree) };
     }
     /**
@@ -13277,7 +14165,8 @@ function runDelete() {
     }
     // --- Layer Tree ---
     _updateLayerTree() {
-      this._postToCanvas("getTree", {});
+      const tree = this._buildTreeFromSourceDoc();
+      this._renderLayerTree(tree);
     }
     _renderLayerTree(tree) {
       const container2 = this.querySelector(".ld-layer-tree");
@@ -13394,6 +14283,7 @@ function runDelete() {
       } else if (type === "button") {
         commonProps.push({ name: "type", label: "Type", type: "select", value: properties.type || "button", options: ["button", "submit", "reset"] });
       }
+      const scopedValue = properties.scope ? `{{ Record.${properties.scope} }}` : properties.value || "";
       if (type === "wc-input") {
         commonProps.push({
           name: "type",
@@ -13402,10 +14292,12 @@ function runDelete() {
           value: properties.type || "text",
           options: ["text", "email", "tel", "date", "number", "currency", "checkbox", "password", "search", "url"]
         });
+        commonProps.push({ name: "value", label: "Value", type: "text", value: scopedValue });
         commonProps.push({ name: "placeholder", label: "Placeholder", type: "text", value: properties.placeholder || "" });
         commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
         commonProps.push({ name: "toggle-switch", label: "Toggle Switch", type: "checkbox", value: properties["toggle-switch"] != null && properties["toggle-switch"] !== false });
       } else if (type === "wc-select") {
+        commonProps.push({ name: "value", label: "Value", type: "text", value: scopedValue });
         commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
         let dataSource = "enum";
         if (properties.url) dataSource = "url";
@@ -13432,6 +14324,7 @@ function runDelete() {
         commonProps.push({ name: "items", label: "Items (JSON)", type: "text", value: properties.items || "" });
         commonProps.push({ name: "data-enum", label: "Enum Values", type: "text", value: properties["data-enum"] || "" });
       } else if (type === "wc-textarea") {
+        commonProps.push({ name: "value", label: "Value", type: "text", value: scopedValue });
         commonProps.push({ name: "rows", label: "Rows", type: "number", value: properties.rows || "4" });
         commonProps.push({ name: "required", label: "Required", type: "checkbox", value: properties.required != null && properties.required !== false });
       } else if (type === "wc-field") {
@@ -13483,11 +14376,19 @@ function runDelete() {
         const eventType = input2?.type === "checkbox" || input2?.tagName === "SELECT" ? "change" : "input";
         input2?.addEventListener(eventType, () => {
           const val = input2.type === "checkbox" ? input2.checked : input2.value;
-          this._postToCanvas("updateProperty", {
-            designerId,
-            propName: input2.dataset.prop,
-            value: val
-          });
+          const propName = input2.dataset.prop;
+          if (propName === "value") {
+            const match = val.match(/\{\{\s*Record\.(\S+)\s*\}\}/);
+            if (match) {
+              const newScope = match[1];
+              this._updateSourceDocProperty(designerId, "scope", newScope);
+              this._postToCanvas("updateProperty", { designerId, propName: "scope", value: newScope });
+              const scopeInput = fieldsEl.querySelector('[data-prop="scope"]');
+              if (scopeInput) scopeInput.value = newScope;
+            }
+          }
+          this._updateSourceDocProperty(designerId, propName, val);
+          this._postToCanvas("updateProperty", { designerId, propName, value: val });
         });
         fieldsEl.appendChild(row);
       }
@@ -13504,8 +14405,10 @@ function runDelete() {
      */
     setContent(content) {
       this._savedContent = content;
-      if (this._canvasReady) {
-        this.loadHTML(content);
+      const canvasHTML = (content || "").replace(/\{%\s*extends\s+[^%]*%\}/g, "").replace(/\{%\s*block\s+\w+\s*%\}/g, "").replace(/\{%\s*endblock\s*%\}/g, "").replace(/\{%\s*include\s+[^%]*%\}/g, "").trim();
+      if (canvasHTML) {
+        const reversed = this._reversePongo2(canvasHTML);
+        this._initSourceDoc(reversed);
       }
     }
     /**
@@ -13547,17 +14450,22 @@ function runDelete() {
         return;
       }
       const html = this._treeToHTML(tree);
-      this._postToCanvas("renderHTML", { html });
+      this._initSourceDoc(html);
+      this._renderSourceDocToCanvas();
     }
     _treeToHTML(tree) {
       return tree.map((node) => {
-        const { componentType, designerId, children, css, content, scope, innerHTML, ...attrs } = node;
+        const { componentType, children, css, content, scope, innerHTML, ...attrs } = node;
         const tag = componentType;
         let attrStr = "";
         if (css) attrStr += ` class="${css}"`;
         if (scope) attrStr += ` data-scope="${scope}"`;
         for (const [key, value] of Object.entries(attrs)) {
-          if (key === "componentType" || key === "designerId") continue;
+          if (key === "componentType") continue;
+          if (key === "designerId") {
+            if (value) attrStr += ` data-designer-id="${value}"`;
+            continue;
+          }
           if (value === "" || value === true) attrStr += ` ${key}`;
           else if (value !== false && value != null) attrStr += ` ${key}="${value}"`;
         }
@@ -13574,16 +14482,7 @@ function runDelete() {
      * @returns {Promise<Array>}
      */
     getTree() {
-      return new Promise((resolve) => {
-        this._treeCallback = resolve;
-        this._postToCanvas("getTree", {});
-        setTimeout(() => {
-          if (this._treeCallback) {
-            this._treeCallback([]);
-            this._treeCallback = null;
-          }
-        }, 2e3);
-      });
+      return this._buildTreeFromSourceDoc();
     }
     /**
      * Clear the canvas.
@@ -13597,16 +14496,7 @@ function runDelete() {
      * @returns {Promise<string>}
      */
     getHTML() {
-      return new Promise((resolve) => {
-        this._htmlCallback = resolve;
-        this._postToCanvas("getHTML", {});
-        setTimeout(() => {
-          if (this._htmlCallback) {
-            this._htmlCallback("");
-            this._htmlCallback = null;
-          }
-        }, 2e3);
-      });
+      return this._getCleanHTMLFromSourceDoc();
     }
     /**
      * Transform raw canvas HTML into Pongo2 template content.
@@ -13698,9 +14588,6 @@ function runDelete() {
           } else {
             el.setAttribute("value", `{{ Record.${scope} }}`);
           }
-          el.removeAttribute("data-source");
-          el.removeAttribute("placeholder-option");
-          el.removeAttribute("data-enum");
         } else if (tag === "wc-textarea") {
           el.setAttribute("value", `{{ Record.${scope} }}`);
         } else if (tag === "wc-field") {
@@ -13824,9 +14711,13 @@ function runDelete() {
     <wc-tab-item label="Change Log">
       <div class="col-1 gap-2 pt-2 pb-5 px-5">
         {% if RecordID != "create" %}
-        <div hx-get="/{{Template.RoutePrefix}}/change_log?collection=${collectionName}&original_id={{RecordID}}"
+        <div id="change-log-tab"
+             hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}"
              hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
-          Loading change history...
+          <div class="flex items-center gap-2 text-gray-500 p-4">
+            <wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon>
+            Loading change history...
+          </div>
         </div>
         {% else %}
         <div class="text-center p-4 text-muted">Save the record to view change history</div>

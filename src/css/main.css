@@ -14351,3 +14351,145 @@
 @layer wc.main {
     /* .hidden moved to wc.utility layer to come before wc.responsive */
 }
+
+/* ===============================================
+   DESIGNER MODE — activated by data-designer on <html>
+   Scoped so these styles are inert on normal pages.
+   =============================================== */
+html[data-designer] [data-designer-id] { position: relative; cursor: pointer; }
+html[data-designer] [data-designer-id]:hover { outline: 1px dashed var(--surface-5, #555); outline-offset: -1px; }
+html[data-designer] [data-designer-id].designer-selected {
+    outline: 2px solid #3b97e3 !important;
+    outline-offset: 2px !important;
+}
+
+/* Drop target — empty containers show hint */
+html[data-designer] [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility]))) { min-height: 100px; }
+html[data-designer] [data-drop-target]:not(:has([data-designer-id]:not([data-designer-utility])))::after {
+    content: 'Drop components here';
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100px;
+    color: var(--text-6, #888);
+    font-size: 12px; font-family: system-ui, sans-serif;
+    border: 1px dashed var(--surface-5, #444);
+    border-radius: 4px;
+}
+html[data-designer] [data-drop-target] {
+    border: 1px dashed rgba(120, 160, 220, 0.4);
+    border-radius: 4px;
+    padding: 8px;
+    min-height: 40px;
+    background: rgba(120, 160, 220, 0.03);
+}
+
+/* Skeletons: compact static indicator */
+html[data-designer] wc-article-skeleton[data-designer-id] .wc-article-skeleton,
+html[data-designer] wc-table-skeleton[data-designer-id] .wc-table-skeleton,
+html[data-designer] wc-card-skeleton[data-designer-id] .wc-card-skeleton,
+html[data-designer] wc-list-skeleton[data-designer-id] .wc-list-skeleton { display: none !important; }
+html[data-designer] wc-article-skeleton[data-designer-id],
+html[data-designer] wc-table-skeleton[data-designer-id],
+html[data-designer] wc-card-skeleton[data-designer-id],
+html[data-designer] wc-list-skeleton[data-designer-id] {
+    display: flex !important; align-items: center; justify-content: center;
+    min-height: 32px !important; max-height: 32px !important;
+    background: var(--surface-3) !important;
+    border: 1px dashed var(--surface-5) !important;
+    border-radius: 4px !important; overflow: hidden !important;
+}
+html[data-designer] wc-article-skeleton[data-designer-id]::after { content: '⏳ Article Skeleton'; }
+html[data-designer] wc-table-skeleton[data-designer-id]::after { content: '⏳ Table Skeleton'; }
+html[data-designer] wc-card-skeleton[data-designer-id]::after,
+html[data-designer] wc-list-skeleton[data-designer-id]::after { content: '⏳ Skeleton'; }
+html[data-designer] wc-article-skeleton[data-designer-id]::after,
+html[data-designer] wc-table-skeleton[data-designer-id]::after,
+html[data-designer] wc-card-skeleton[data-designer-id]::after,
+html[data-designer] wc-list-skeleton[data-designer-id]::after {
+    font-size: 11px; color: var(--text-5, #999); font-family: system-ui, sans-serif;
+}
+
+/* Hidden class override — show everything in designer */
+html[data-designer] [data-designer-id].hidden { display: flex !important; visibility: visible !important; }
+
+/* Form components use display:contents — override to block so outlines render */
+html[data-designer] wc-input[data-designer-id].contents,
+html[data-designer] wc-select[data-designer-id].contents,
+html[data-designer] wc-textarea[data-designer-id].contents,
+html[data-designer] wc-field[data-designer-id].contents,
+html[data-designer] wc-google-address[data-designer-id].contents,
+html[data-designer] wc-form[data-designer-id].contents,
+html[data-designer] wc-breadcrumb[data-designer-id].contents,
+html[data-designer] div[data-designer-id].contents,
+html[data-designer] fieldset[data-designer-id].contents { display: block !important; }
+
+/* Interactive components keep display:contents — they manage their own layout */
+html[data-designer] wc-tab[data-designer-id].contents,
+html[data-designer] wc-tab-item[data-designer-id].contents,
+html[data-designer] wc-accordion[data-designer-id].contents,
+html[data-designer] wc-dropdown[data-designer-id].contents,
+html[data-designer] wc-sidebar[data-designer-id].contents,
+html[data-designer] wc-sidenav[data-designer-id].contents,
+html[data-designer] wc-slideshow[data-designer-id].contents,
+html[data-designer] wc-split-button[data-designer-id].contents,
+html[data-designer] wc-flip-box[data-designer-id].contents,
+html[data-designer] wc-menu[data-designer-id].contents { display: contents !important; }
+
+/* Prevent form/link interaction — except tab buttons */
+html[data-designer] [data-designer-id] input:not([data-designer-id]),
+html[data-designer] [data-designer-id] select:not([data-designer-id]),
+html[data-designer] [data-designer-id] textarea:not([data-designer-id]) { pointer-events: none; }
+html[data-designer] [data-designer-id] button:not(.tab-link):not([data-designer-id]) { pointer-events: none; }
+html[data-designer] [data-designer-id] a { pointer-events: none; }
+html[data-designer] .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
+
+/* Prevent dropdowns/popups */
+html[data-designer] wc-save-split-button[data-designer-id] .wc-save-split-button .split-dropdown,
+html[data-designer] wc-dropdown[data-designer-id] .wc-dropdown .dropdown-content,
+html[data-designer] wc-split-button[data-designer-id] .wc-split-button .split-dropdown { display: none !important; }
+
+/* Drop indicator line */
+html[data-designer] .drop-indicator { height: 3px; background: #3b97e3; border-radius: 2px; margin: 2px 0; pointer-events: none; }
+
+/* Spacing between designer elements */
+html[data-designer] [data-designer-id] + [data-designer-id] { margin-top: 4px; }
+
+/* Selected badge */
+html[data-designer] [data-designer-id].designer-selected > [data-designer-label-badge] { display: block; }
+html[data-designer] [data-designer-label-badge] {
+    display: none;
+    position: absolute; top: -20px; left: 0; z-index: 100;
+    background: #3b97e3; color: #fff;
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    font-family: system-ui, sans-serif; white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Floating toolbar */
+html[data-designer] #designer-toolbar {
+    display: none; position: absolute; z-index: 200;
+    background: var(--surface-1, #1a1a2e); border: 1px solid var(--surface-5, #444);
+    border-radius: 6px; padding: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 14px;
+}
+html[data-designer] #designer-toolbar.visible { display: flex; align-items: center; gap: 2px; }
+html[data-designer] #designer-toolbar button {
+    background: transparent; border: none; color: var(--text-3, #ccc);
+    cursor: pointer; padding: 4px 8px; border-radius: 4px;
+    font-size: 14px; font-family: system-ui, sans-serif;
+}
+html[data-designer] #designer-toolbar button:hover { background: var(--surface-3, #333); }
+html[data-designer] #designer-toolbar .sep { width: 1px; height: 20px; background: var(--surface-5, #444); }
+
+/* Empty viewport hint — shows when no designer elements exist yet */
+html[data-designer] #viewport:not(:has([data-designer-id]))::after {
+    content: 'Drop components here to start designing';
+    display: flex; justify-content: center; align-items: center;
+    min-height: 300px; color: var(--text-6); font-size: 0.875rem;
+    border: 2px dashed var(--surface-5, #444); border-radius: 8px;
+    margin: 1rem;
+}
+html[data-designer] body { display: block !important; }
+html[data-designer] #viewport { min-height: 300px; }
+
+/* Drag-over highlight */
+html[data-designer] .ld-canvas-dragover { outline: 2px dashed #3b82f6; outline-offset: -4px; }

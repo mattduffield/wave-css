@@ -3,6 +3,7 @@ export { iconRegistry } from '../utils/icon-registry.js';
 export { DependencyManager } from '../utils/dependency-manager.js';
 export { WcIconConfig } from './wc-icon-config.js';
 import './wc-base-component.js';
+import './designer-bridge.js';
 import './wc-base-form-component.js';
 import './wc-accordion.js';
 import './wc-article-card.js';

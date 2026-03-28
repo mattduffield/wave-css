@@ -243,7 +243,23 @@ if (!customElements.get('wc-live-designer')) {
       </wc-form>
     </wc-tab-item>
     <wc-tab-item label="Change Log">
-      <div class="p-4"></div>
+      {% if RecordID != "create" %}
+      <div id="change-log-tab"
+           hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}"
+           hx-trigger="revealed"
+           hx-swap="innerHTML"
+           hx-indicator="#content-loader"
+           hx-push-url="false">
+        <div class="flex items-center gap-2 text-gray-500 p-4">
+          <wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon>
+          Loading change history...
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center p-4 text-muted">
+        Save the record to view change history
+      </div>
+      {% endif %}
     </wc-tab-item>
   </wc-tab>
 </div>` },
@@ -295,7 +311,7 @@ if (!customElements.get('wc-live-designer')) {
   </div>
 </div>` },
       { label: 'Tab with Change Log', category: 'group', description: 'Tab with General + Change Log',
-        html: '<wc-tab class="col-1 mt-2 mb-4" animate><wc-tab-item class="active" label="General"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item><wc-tab-item label="Change Log"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item></wc-tab>' },
+        html: `<wc-tab class="col-1 mt-2 mb-4" animate><wc-tab-item class="active" label="General"><div class="col-1 gap-2 pt-2 pb-5 px-5"></div></wc-tab-item><wc-tab-item label="Change Log">{% if RecordID != "create" %}<div id="change-log-tab" hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}" hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false"><div class="flex items-center gap-2 text-gray-500 p-4"><wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon> Loading change history...</div></div>{% else %}<div class="text-center p-4 text-muted">Save the record to view change history</div>{% endif %}</wc-tab-item></wc-tab>` },
       { label: 'Form', category: 'group', description: 'Form configured for HTMX',
         html: '<wc-form class="col gap-3" method="{{FormMethod}}" id="{{Template.Slug}}" action="/{{Template.RoutePrefix}}/{{Template.Slug}}/{{RecordID}}"></wc-form>' },
       { label: 'Article Skeleton', category: 'group', description: 'Loading skeleton',
@@ -308,6 +324,25 @@ if (!customElements.get('wc-live-designer')) {
       { label: 'Contact Fields', category: 'form', description: 'Email + phone in a row',
         html: '<div class="row gap-4"><wc-input name="email" lbl-label="Email" type="email" class="col-1"></wc-input><wc-input name="phone_number" lbl-label="Phone" type="tel" class="col-1"></wc-input></div>' },
     ];
+
+    // Tag sets for sourceDoc walking — same as canvas
+    static _WC_TAGS = new Set([
+      'wc-input', 'wc-select', 'wc-textarea', 'wc-field',
+      'wc-form', 'wc-tab', 'wc-tab-item', 'wc-breadcrumb', 'wc-breadcrumb-item',
+      'wc-save-split-button', 'wc-save-button', 'wc-article-skeleton',
+      'wc-table-skeleton', 'wc-card-skeleton', 'wc-list-skeleton',
+      'wc-tabulator', 'wc-tabulator-column', 'wc-fa-icon', 'wc-image',
+      'wc-hotkey', 'wc-behavior', 'wc-event-handler', 'wc-code-mirror',
+      'wc-accordion', 'wc-dropdown', 'wc-flip-box', 'wc-menu',
+      'wc-sidebar', 'wc-sidenav', 'wc-slideshow', 'wc-split-button',
+      'wc-loader', 'wc-contact-card', 'wc-contact-chip', 'wc-article-card',
+      'wc-timeline', 'wc-google-map', 'wc-google-address',
+      'wc-script', 'wc-javascript', 'wc-visibility-change',
+    ]);
+    static _HTML_TAGS = new Set([
+      'button', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'label', 'hr', 'img',
+    ]);
+    static _SKIP_TAGS = new Set(['option', 'optgroup']);
 
     constructor() {
       super();
@@ -322,6 +357,299 @@ if (!customElements.get('wc-live-designer')) {
       this._lastSourceHTML = '';
       this._lastEditedSourceHTML = '';
       this._sourceEditorReady = false;
+
+      // Source-of-truth: DOMParser document with clean HTML + designer IDs
+      this._sourceDoc = null;
+      this._designerIdCounter = 0;
+    }
+
+    // =========================================================
+    // SOURCE DOCUMENT — single source of truth for all attributes
+    // =========================================================
+
+    _generateDesignerId() {
+      return `sd${Date.now().toString(36)}${(this._designerIdCounter++).toString(36)}`;
+    }
+
+    /**
+     * Parse HTML into a DOMParser Document and stamp data-designer-id
+     * on every designer-worthy element.
+     */
+    _initSourceDoc(html) {
+      const parser = new DOMParser();
+      this._sourceDoc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
+      this._stampDesignerIdsOnDoc(this._sourceDoc.body);
+    }
+
+    /**
+     * Walk a parent element and assign data-designer-id to all
+     * designer-worthy elements that don't already have one.
+     */
+    _stampDesignerIdsOnDoc(parent) {
+      for (const child of Array.from(parent.children)) {
+        const tag = child.tagName.toLowerCase();
+        if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
+
+        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
+        const isDiv = tag === 'div' || tag === 'fieldset';
+
+        if (isWC || isHTML || isDiv) {
+          if (!child.hasAttribute('data-designer-id')) {
+            child.setAttribute('data-designer-id', this._generateDesignerId());
+          }
+        }
+        // Always recurse (designer elements can be nested at any depth)
+        this._stampDesignerIdsOnDoc(child);
+      }
+    }
+
+    /**
+     * Stamp designer IDs on an HTML string. Returns the stamped HTML.
+     * Used for drag & drop — IDs are assigned before insertion.
+     */
+    _stampDesignerIdsOnHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      const wrapper = doc.body.firstElementChild;
+      this._stampDesignerIdsOnDoc(wrapper);
+      return wrapper.innerHTML;
+    }
+
+    /**
+     * Serialize sourceDoc innerHTML with data-designer-id intact.
+     * This is what gets sent to the canvas for rendering.
+     */
+    _sourceDocToCanvasHTML() {
+      if (!this._sourceDoc) return '';
+      return this._sourceDoc.body.innerHTML;
+    }
+
+    /**
+     * Serialize sourceDoc innerHTML WITHOUT designer attributes.
+     * This is the clean HTML for save / Source tab.
+     */
+    _getCleanHTMLFromSourceDoc() {
+      if (!this._sourceDoc) return '';
+      // Keep data-designer-id in saved content — they survive Pongo2 rendering
+      // and ensure IDs match between sourceDoc and server-rendered iframe
+      return this._sourceDoc.body.innerHTML;
+    }
+
+    /**
+     * Find a sourceDoc node by its designer ID.
+     */
+    _getSourceNode(designerId) {
+      if (!this._sourceDoc) return null;
+      return this._sourceDoc.querySelector(`[data-designer-id="${designerId}"]`);
+    }
+
+    /**
+     * Read properties from a sourceDoc node. Returns a properties object
+     * in the same format as the old registry properties.
+     */
+    _readPropertiesFromSourceNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return {};
+
+      const tag = el.tagName.toLowerCase();
+      const props = {};
+
+      for (const attr of el.attributes) {
+        const name = attr.name;
+        if (name === 'data-designer-id') continue;
+        if (name === 'class') {
+          props.css = attr.value;
+          continue;
+        }
+        if (name === 'data-scope') {
+          props.scope = attr.value;
+          continue;
+        }
+        props[name] = attr.value;
+      }
+
+      // For native HTML elements, get text content
+      if (WcLiveDesigner._HTML_TAGS.has(tag)) {
+        const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === 3);
+        props.content = textNodes.map(n => n.textContent).join('').trim();
+      }
+
+      return props;
+    }
+
+    /**
+     * Update a property on a sourceDoc node.
+     */
+    _updateSourceDocProperty(designerId, propName, value) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return;
+
+      if (propName === 'css') {
+        if (value) el.setAttribute('class', value);
+        else el.removeAttribute('class');
+      } else if (propName === 'scope') {
+        if (value) el.setAttribute('data-scope', value);
+        else el.removeAttribute('data-scope');
+      } else if (propName === 'content') {
+        // For native elements, update text content
+        const textNode = Array.from(el.childNodes).find(n => n.nodeType === 3);
+        if (textNode) textNode.textContent = value;
+        else el.prepend(el.ownerDocument.createTextNode(value));
+      } else {
+        const attrName = propName.replace(/_/g, '-');
+        if (value === '' || value === true) el.setAttribute(attrName, '');
+        else if (value === false || value == null) el.removeAttribute(attrName);
+        else el.setAttribute(attrName, String(value));
+      }
+    }
+
+    /**
+     * Remove a node from sourceDoc.
+     */
+    _removeSourceDocNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (el) el.remove();
+    }
+
+    /**
+     * Move a node up/down in sourceDoc.
+     */
+    _moveSourceDocNode(designerId, direction) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return;
+      if (direction === 'up' && el.previousElementSibling) {
+        el.parentElement.insertBefore(el, el.previousElementSibling);
+      } else if (direction === 'down' && el.nextElementSibling) {
+        el.parentElement.insertBefore(el.nextElementSibling, el);
+      }
+    }
+
+    /**
+     * Duplicate a node in sourceDoc. Returns the new stamped HTML for canvas insertion.
+     */
+    _duplicateSourceDocNode(designerId) {
+      const el = this._getSourceNode(designerId);
+      if (!el) return null;
+      const clone = el.cloneNode(true);
+      // Re-stamp all designer IDs (clone has same IDs — need unique ones)
+      clone.removeAttribute('data-designer-id');
+      clone.querySelectorAll('[data-designer-id]').forEach(c => c.removeAttribute('data-designer-id'));
+      this._stampDesignerIdsOnDoc(clone.parentElement || clone);
+      // If clone has no parent (standalone), stamp it directly
+      if (!clone.hasAttribute('data-designer-id')) {
+        clone.setAttribute('data-designer-id', this._generateDesignerId());
+      }
+      el.after(clone);
+      return clone.outerHTML;
+    }
+
+    /**
+     * Insert HTML into sourceDoc at the specified parent/position.
+     * HTML should already have designer IDs stamped.
+     */
+    _insertIntoSourceDoc(html, parentDesignerId, position) {
+      if (!this._sourceDoc) return;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      const newElements = Array.from(doc.body.firstElementChild.children);
+
+      let parent;
+      if (parentDesignerId) {
+        parent = this._sourceDoc.querySelector(`[data-designer-id="${parentDesignerId}"]`);
+      }
+      if (!parent) parent = this._sourceDoc.body;
+
+      const designerChildren = Array.from(parent.children).filter(c =>
+        c.hasAttribute('data-designer-id')
+      );
+
+      for (const el of newElements) {
+        const imported = this._sourceDoc.importNode(el, true);
+        if (position != null && position < designerChildren.length) {
+          parent.insertBefore(imported, designerChildren[position]);
+        } else {
+          parent.appendChild(imported);
+        }
+      }
+    }
+
+    /**
+     * Build a serialized tree from sourceDoc (replaces async getTree).
+     */
+    _buildTreeFromSourceDoc(parent = null) {
+      const root = parent || (this._sourceDoc ? this._sourceDoc.body : null);
+      if (!root) return [];
+      const elements = [];
+
+      for (const child of root.children) {
+        if (!child.hasAttribute('data-designer-id')) continue;
+        const tag = child.tagName.toLowerCase();
+        const props = {};
+        for (const attr of child.attributes) {
+          if (attr.name === 'data-designer-id') continue;
+          if (attr.name === 'class') { props.css = attr.value; continue; }
+          if (attr.name === 'data-scope') { props.scope = attr.value; continue; }
+          props[attr.name] = attr.value;
+        }
+        if (WcLiveDesigner._HTML_TAGS.has(tag)) {
+          const text = Array.from(child.childNodes).filter(n => n.nodeType === 3)
+            .map(n => n.textContent).join('').trim();
+          if (text) props.content = text;
+        }
+
+        const node = { ...props, componentType: tag, designerId: child.getAttribute('data-designer-id') };
+        const nested = this._buildTreeFromSourceDoc(child);
+        if (nested.length > 0) node.children = nested;
+        elements.push(node);
+      }
+      return elements;
+    }
+
+    /**
+     * Strip Pongo2 markup for canvas rendering.
+     * The Visual canvas shows production-like output — no template tags visible.
+     * Source tab and sourceDoc keep the full Pongo2 markup.
+     */
+    _stripPongo2ForCanvas(html) {
+      let result = html;
+      // Strip {% %} tags (if/else/endif/for/endfor/set/include/extends/block/endblock)
+      result = result.replace(/\{%[\s\S]*?%\}/g, '');
+      // Strip {{ }} expressions (Template.Name, FormMethod, RecordID, etc.)
+      // These are Go Kart template variables — not needed for visual preview
+      result = result.replace(/\{\{([^}]+)\}\}/g, '');
+      return result;
+    }
+
+    /**
+     * Render sourceDoc to the canvas iframe.
+     * Strips Pongo2 markup so the Visual tab looks like production.
+     */
+    /**
+     * Collect designer-worthy elements from a DOM tree in depth-first order.
+     * Mirrors the bridge's scan() walk order so elements can be correlated by index.
+     */
+    _collectDesignerElements(parent, result = []) {
+      for (const child of parent.children) {
+        const tag = child.tagName.toLowerCase();
+        if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
+        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
+        const isDiv = tag === 'div' || tag === 'fieldset';
+        if (isWC || isHTML || isDiv) {
+          result.push(child);
+        }
+        // Always recurse — same as bridge scan
+        this._collectDesignerElements(child, result);
+      }
+      return result;
+    }
+
+    _renderSourceDocToCanvas() {
+      if (!this._sourceDoc || !this._canvasReady) return;
+      const rawHTML = this._sourceDocToCanvasHTML();
+      const cleanHTML = this._stripPongo2ForCanvas(rawHTML);
+      this._postToCanvas('renderHTML', { html: cleanHTML });
     }
 
     async _render() {
@@ -389,7 +717,7 @@ if (!customElements.get('wc-live-designer')) {
           <!-- Main Content -->
           <div class="flex flex-row flex-1 min-h-0">
             <!-- Left Panel: Palette -->
-            <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow: hidden;">
+            <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow-y: auto; max-height: calc(100vh - 310px);">
               <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate tab-overflow="scroll">
                 <wc-tab-item class="active" label="Containers">
                   <div class="ld-palette-tab-content">
@@ -442,8 +770,12 @@ if (!customElements.get('wc-live-designer')) {
             <div class="ld-canvas-area flex flex-col flex-1 overflow-hidden" style="background: var(--surface-1);">
               <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate>
                 <wc-tab-item class="active" label="Visual">
-                  <div class="ld-canvas-visual flex-1 flex items-center justify-start overflow-auto" style="height: 100%;">
-                    <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; box-shadow: 0 1px 8px rgba(0,0,0,0.15); margin: 8px; transition: width 0.3s, height 0.3s;"></iframe>
+                  <div class="ld-canvas-visual flex-1 flex flex-col overflow-hidden" style="height: calc(100vh - 310px); position: relative;">
+                    <div class="ld-canvas-loading" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface-1, #111); z-index: 10; color: var(--text-6, #888); font-family: system-ui, sans-serif; gap: 12px;">
+                      <span style="animation: spin 1s linear infinite; display: inline-block; font-size: 48px;">⟳</span>
+                      <span style="font-size: 14px;">Loading preview...</span>
+                    </div>
+                    <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; flex: 1 1 0%; min-height: 0; width: 100%;"></iframe>
                   </div>
                 </wc-tab-item>
                 <wc-tab-item label="Source">
@@ -456,7 +788,7 @@ if (!customElements.get('wc-live-designer')) {
             <div class="ld-resize-handle" data-resize="right" title="Drag to resize">⋮</div>
 
             <!-- Right Panel: Properties -->
-            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); overflow-y: auto;">
+            <div class="ld-properties flex flex-col" style="width: 280px; min-width: 200px; max-width: 500px; background: var(--surface-2); overflow-y: auto; max-height: calc(100vh - 310px);">
               <div>
                 <div class="ld-props-empty p-4 text-center" style="color: var(--text-6); font-size: 12px;">
                   Select a component to edit its properties
@@ -609,6 +941,7 @@ if (!customElements.get('wc-live-designer')) {
         .ld-layer-node .ld-layer-icon { font-size: 10px; width: 14px; text-align: center; opacity: 0.6; }
         .ld-layer-node .ld-layer-type { font-weight: 500; }
         .ld-layer-node .ld-layer-scope { color: var(--text-6); font-size: 10px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* Breadcrumb */
         .ld-breadcrumb a { color: var(--text-5); text-decoration: none; cursor: pointer; }
@@ -782,9 +1115,13 @@ if (!customElements.get('wc-live-designer')) {
           const editedHTML = this._lastEditedSourceHTML;
           if (editedHTML?.trim() && editedHTML.trim() !== this._lastSourceHTML?.trim()) {
             this._lastSourceHTML = editedHTML;
-            // Reverse Pongo2 expressions back to data-scope + sample data before rendering
+            // Update savedContent and rebuild sourceDoc
+            this._savedContent = editedHTML;
             const canvasHTML = this._reversePongo2(editedHTML);
-            this._postToCanvas('renderHTML', { html: canvasHTML });
+            this._initSourceDoc(canvasHTML);
+            // Reload the iframe to re-render with updated content
+            // For now, use renderHTML until server POST endpoint is ready
+            this._renderSourceDocToCanvas();
           }
         }
       });
@@ -818,7 +1155,9 @@ if (!customElements.get('wc-live-designer')) {
         item.addEventListener('dragstart', (e) => {
           const html = item.dataset.html;
           if (!html) return;
-          e.dataTransfer.setData('application/json', JSON.stringify({ type: 'element', html }));
+          const stampedHTML = this._stampDesignerIdsOnHTML(html);
+          const canvasHTML = this._stripPongo2ForCanvas(stampedHTML);
+          e.dataTransfer.setData('application/json', JSON.stringify({ type: 'element', html: canvasHTML, sourceHtml: stampedHTML }));
           e.dataTransfer.effectAllowed = 'copy';
           const ghost = document.createElement('div');
           ghost.textContent = item.textContent;
@@ -836,7 +1175,9 @@ if (!customElements.get('wc-live-designer')) {
           const idx = parseInt(item.dataset.presetIndex);
           const preset = WcLiveDesigner.PRESETS[idx];
           if (!preset) return;
-          e.dataTransfer.setData('application/json', JSON.stringify({ preset: true, html: preset.html }));
+          const stampedPresetHTML = this._stampDesignerIdsOnHTML(preset.html);
+          const canvasPresetHTML = this._stripPongo2ForCanvas(stampedPresetHTML);
+          e.dataTransfer.setData('application/json', JSON.stringify({ preset: true, html: canvasPresetHTML, sourceHtml: stampedPresetHTML }));
           e.dataTransfer.effectAllowed = 'copy';
 
           const ghost = document.createElement('div');
@@ -1038,7 +1379,8 @@ if (!customElements.get('wc-live-designer')) {
             const defaults = JSON.parse(item.dataset.defaults);
             // Build HTML tag from type and defaults
             const html = this._buildElementHTML(type, defaults);
-            e.dataTransfer.setData('application/json', JSON.stringify({ type: 'element', html }));
+            const stampedFieldHTML = this._stampDesignerIdsOnHTML(html);
+            e.dataTransfer.setData('application/json', JSON.stringify({ type: 'element', html: stampedFieldHTML }));
             e.dataTransfer.effectAllowed = 'copy';
 
             const ghost = document.createElement('div');
@@ -1263,6 +1605,9 @@ if (!customElements.get('wc-live-designer')) {
       switch (action) {
         case 'canvasReady':
           this._canvasReady = true;
+          // Hide loading overlay
+          const loadingEl = this.querySelector('.ld-canvas-loading');
+          if (loadingEl) loadingEl.style.display = 'none';
           // Inherit theme from parent page if not explicitly set
           const theme = this.getAttribute('theme') ||
                         document.documentElement.className ||
@@ -1286,28 +1631,33 @@ if (!customElements.get('wc-live-designer')) {
               this._generateSampleFromSchema(schemaSlug);
             }
           }
-          // Load saved content — only use ONE source, prioritized:
-          // 1. savedContent (complete Pongo2 template from setContent)
-          // 2. pendingTree (serialized tree from loadTree)
-          // 3. pendingHTML (raw HTML from direct renderHTML)
-          if (this._savedContent) {
-            this.loadHTML(this._savedContent);
+          // Build sourceDoc if not already built by setContent
+          if (this._savedContent && !this._sourceDoc) {
+            let canvasHTML = this._savedContent
+              .replace(/\{%\s*extends\s+[^%]*%\}/g, '')
+              .replace(/\{%\s*block\s+\w+\s*%\}/g, '')
+              .replace(/\{%\s*endblock\s*%\}/g, '')
+              .replace(/\{%\s*include\s+[^%]*%\}/g, '')
+              .trim();
+            canvasHTML = this._reversePongo2(canvasHTML);
+            this._initSourceDoc(canvasHTML);
           } else if (this._pendingTree) {
-            this.loadTree(this._pendingTree);
+            const html = this._treeToHTML(this._pendingTree);
+            this._initSourceDoc(html);
             this._pendingTree = null;
-          } else if (this._pendingHTML) {
-            this._postToCanvas('renderHTML', { html: this._pendingHTML });
-            this._pendingHTML = null;
           }
           break;
 
         case 'select':
+          // Use properties sent by the bridge (read from rendered DOM + inner elements)
+          // Falls back to sourceDoc if bridge didn't send properties
+          const selectProps = e.data.properties || this._readPropertiesFromSourceNode(e.data.designerId);
           this._selectedComponent = {
             designerId: e.data.designerId,
             type: e.data.type,
-            properties: e.data.properties
+            properties: selectProps
           };
-          this._showPropertyPanel(e.data.type, e.data.properties, e.data.designerId);
+          this._showPropertyPanel(e.data.type, selectProps, e.data.designerId);
           this._updateBreadcrumb(e.data.ancestors || [], e.data.designerId, e.data.type);
           // Highlight in layer tree
           this.querySelectorAll('.ld-layer-node.active').forEach(n => n.classList.remove('active'));
@@ -1323,32 +1673,77 @@ if (!customElements.get('wc-live-designer')) {
           break;
 
         case 'componentAdded':
-        case 'componentRemoved':
-          // Refresh layer tree
           this._updateLayerTree();
           break;
 
-        case 'treeResponse':
-          // Render the layer tree
-          this._renderLayerTree(e.data.tree || []);
-          // Also handle the getTree() promise callback
-          if (this._treeCallback) {
-            this._treeCallback(e.data.tree);
-            this._treeCallback = null;
+        case 'componentRemoved':
+          // Remove from sourceDoc, then refresh layer tree
+          if (e.data.designerId) {
+            this._removeSourceDocNode(e.data.designerId);
+            // Invalidate stale Source editor content so save uses sourceDoc
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
           }
+          this._updateLayerTree();
           break;
 
-        case 'htmlResponse':
-          if (this._htmlCallback) {
-            this._htmlCallback(e.data.html);
-            this._htmlCallback = null;
+        case 'componentMoved':
+          // Sync move in sourceDoc
+          if (e.data.designerId && e.data.direction) {
+            this._moveSourceDocNode(e.data.designerId, e.data.direction);
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
           }
+          this._updateLayerTree();
           break;
 
-        case 'treeLoaded':
-        case 'treeAppended':
-        case 'registryBuilt':
         case 'componentInserted':
+          // Sync insertion into sourceDoc
+          if (e.data.html) {
+            if (!this._sourceDoc) {
+              const parser = new DOMParser();
+              this._sourceDoc = parser.parseFromString('<body></body>', 'text/html');
+            }
+            this._insertIntoSourceDoc(e.data.html, e.data.parentId, e.data.position);
+            // Invalidate stale Source editor content so save uses sourceDoc
+            this._lastEditedSourceHTML = null;
+            this._lastSourceHTML = null;
+          }
+          this._updateLayerTree();
+          break;
+
+        case 'duplicateRequest':
+          // Handle duplication via sourceDoc
+          if (e.data.designerId) {
+            const cloneHTML = this._duplicateSourceDocNode(e.data.designerId);
+            if (cloneHTML) {
+              // Find the original element's parent and position for canvas insertion
+              const origNode = this._getSourceNode(e.data.designerId);
+              if (origNode) {
+                const parentNode = origNode.parentElement;
+                const parentId = parentNode?.getAttribute('data-designer-id') || null;
+                // Clone is already inserted after original in sourceDoc
+                // Tell canvas to insert the clone HTML after the original
+                this._postToCanvas('insertHTML', { html: cloneHTML, parentId, position: null });
+              }
+            }
+          }
+          break;
+
+        case 'registryBuilt':
+          // Map bridge IDs to sourceDoc elements by matching walk order
+          if (e.data.elements && this._sourceDoc) {
+            this._bridgeToSourceMap = new Map();
+            const sourceElements = this._collectDesignerElements(this._sourceDoc.body);
+            const bridgeElements = e.data.elements;
+            for (let i = 0; i < Math.min(sourceElements.length, bridgeElements.length); i++) {
+              if (sourceElements[i].tagName.toLowerCase() === bridgeElements[i].type) {
+                this._bridgeToSourceMap.set(bridgeElements[i].id, sourceElements[i]);
+                // Also stamp the bridge ID on the sourceDoc element for consistency
+                sourceElements[i].setAttribute('data-designer-id', bridgeElements[i].id);
+              }
+            }
+          }
           this._updateLayerTree();
           break;
       }
@@ -1358,13 +1753,15 @@ if (!customElements.get('wc-live-designer')) {
 
     async _updateSourceView() {
       try {
-        await new Promise(r => setTimeout(r, 50));
-
-        const rawHTML = await this.getHTML();
+        const rawHTML = this.getHTML();
         if (!rawHTML) return;
         const pongo2HTML = this.transformToPongo2(rawHTML);
-        const formattedHTML = this._formatHTML(pongo2HTML);
-        this._lastSourceHTML = formattedHTML;
+        const formattedInner = this._formatHTML(pongo2HTML);
+
+        // Show the FULL renderable template — exactly what gets saved
+        const templateType = this.getAttribute('template-type') || 'standard';
+        const fullTemplate = this._wrapContent(formattedInner, templateType);
+        this._lastSourceHTML = fullTemplate;
 
         const panel = this.querySelector('.ld-source-panel');
         if (!panel) return;
@@ -1379,7 +1776,7 @@ if (!customElements.get('wc-live-designer')) {
 
         const setEditorValue = () => {
           if (cmEl.editor) {
-            cmEl.editor.setValue(formattedHTML);
+            cmEl.editor.setValue(fullTemplate);
             setTimeout(() => cmEl.editor?.refresh(), 50);
             // Track changes — only wire once
             if (!cmEl._changeWired) {
@@ -1530,8 +1927,11 @@ if (!customElements.get('wc-live-designer')) {
       // Reverse Pongo2 data expressions to data-scope + sample data
       canvasHTML = this._reversePongo2(canvasHTML);
 
-      // Send to canvas as one innerHTML operation
-      this._postToCanvas('renderHTML', { html: canvasHTML });
+      // Build sourceDoc (source of truth) and stamp designer IDs
+      this._initSourceDoc(canvasHTML);
+
+      // Send stamped HTML to canvas for rendering
+      this._renderSourceDocToCanvas();
     }
 
     async _loadChildren(parentEl, parentDesignerId) {
@@ -1712,11 +2112,7 @@ if (!customElements.get('wc-live-designer')) {
      * @param {string} options.templateType - 'standard', 'fragment', 'email', 'data', 'report'
      * @returns {Promise<{ content: string, code: string, field_rules: string, tree: string }>}
      */
-    async getFormData(options = {}) {
-      const rawHTML = await this.getHTML();
-      const formHTML = this.transformToPongo2(rawHTML);
-      const formatted = this._formatHTML(formHTML);
-
+    getFormData(options = {}) {
       const slug = options.slug || 'template';
       const collectionName = options.collectionName || slug;
       const schemaSlug = options.schemaSlug || slug;
@@ -1725,10 +2121,30 @@ if (!customElements.get('wc-live-designer')) {
       const nextTemplateSlug = options.nextTemplateSlug || '';
       const templateType = options.templateType || 'standard';
 
-      const content = this._wrapContent(formatted, templateType);
-      const code = this._generateCode(templateType);
+      // If Source tab was edited, use that content directly — it's already
+      // the full Pongo2 template ({% extends %}, {{ Record.field }}, etc.)
+      let content;
+      if (this._lastEditedSourceHTML != null &&
+          this._lastEditedSourceHTML !== this._lastSourceHTML) {
+        content = this._lastEditedSourceHTML;
+        // Also rebuild sourceDoc from the edited source
+        const canvasHTML = this._reversePongo2(
+          content.replace(/\{%\s*extends\s+[^%]*%\}/g, '')
+            .replace(/\{%\s*block\s+\w+\s*%\}/g, '')
+            .replace(/\{%\s*endblock\s*%\}/g, '')
+            .replace(/\{%\s*include\s+[^%]*%\}/g, '')
+            .trim()
+        );
+        this._initSourceDoc(canvasHTML);
+      } else {
+        const rawHTML = this.getHTML();
+        const formHTML = this.transformToPongo2(rawHTML);
+        const formatted = this._formatHTML(formHTML);
+        content = this._wrapContent(formatted, templateType);
+      }
 
-      const tree = await this.getTree();
+      const code = this._generateCode(templateType);
+      const tree = this.getTree();
       return { content, code, field_rules: '', tree: JSON.stringify(tree) };
     }
 
@@ -1872,8 +2288,9 @@ function runDelete() {
     // --- Layer Tree ---
 
     _updateLayerTree() {
-      // Request tree from iframe
-      this._postToCanvas('getTree', {});
+      // Build tree directly from sourceDoc — no iframe round-trip
+      const tree = this._buildTreeFromSourceDoc();
+      this._renderLayerTree(tree);
     }
 
     _renderLayerTree(tree) {
@@ -2007,13 +2424,18 @@ function runDelete() {
       }
 
       // Type-specific properties for web components
+      // Show value as Pongo2 expression when data-scope exists (matches Source tab)
+      const scopedValue = properties.scope ? `{{ Record.${properties.scope} }}` : (properties.value || '');
+
       if (type === 'wc-input') {
         commonProps.push({ name: 'type', label: 'Input Type', type: 'select', value: properties.type || 'text',
           options: ['text', 'email', 'tel', 'date', 'number', 'currency', 'checkbox', 'password', 'search', 'url'] });
+        commonProps.push({ name: 'value', label: 'Value', type: 'text', value: scopedValue });
         commonProps.push({ name: 'placeholder', label: 'Placeholder', type: 'text', value: properties.placeholder || '' });
         commonProps.push({ name: 'required', label: 'Required', type: 'checkbox', value: properties.required != null && properties.required !== false });
         commonProps.push({ name: 'toggle-switch', label: 'Toggle Switch', type: 'checkbox', value: properties['toggle-switch'] != null && properties['toggle-switch'] !== false });
       } else if (type === 'wc-select') {
+        commonProps.push({ name: 'value', label: 'Value', type: 'text', value: scopedValue });
         commonProps.push({ name: 'required', label: 'Required', type: 'checkbox', value: properties.required != null && properties.required !== false });
 
         // Determine current data source from what's set
@@ -2040,6 +2462,7 @@ function runDelete() {
         commonProps.push({ name: 'items', label: 'Items (JSON)', type: 'text', value: properties.items || '' });
         commonProps.push({ name: 'data-enum', label: 'Enum Values', type: 'text', value: properties['data-enum'] || '' });
       } else if (type === 'wc-textarea') {
+        commonProps.push({ name: 'value', label: 'Value', type: 'text', value: scopedValue });
         commonProps.push({ name: 'rows', label: 'Rows', type: 'number', value: properties.rows || '4' });
         commonProps.push({ name: 'required', label: 'Required', type: 'checkbox', value: properties.required != null && properties.required !== false });
       } else if (type === 'wc-field') {
@@ -2091,11 +2514,26 @@ function runDelete() {
         const eventType = (input?.type === 'checkbox' || input?.tagName === 'SELECT') ? 'change' : 'input';
         input?.addEventListener(eventType, () => {
           const val = input.type === 'checkbox' ? input.checked : input.value;
-          this._postToCanvas('updateProperty', {
-            designerId,
-            propName: input.dataset.prop,
-            value: val
-          });
+          const propName = input.dataset.prop;
+
+          // When value is changed to a {{ Record.FIELD }} expression,
+          // also update data-scope to match (they're linked)
+          if (propName === 'value') {
+            const match = val.match(/\{\{\s*Record\.(\S+)\s*\}\}/);
+            if (match) {
+              const newScope = match[1];
+              this._updateSourceDocProperty(designerId, 'scope', newScope);
+              this._postToCanvas('updateProperty', { designerId, propName: 'scope', value: newScope });
+              // Update the Data Scope field in the panel if visible
+              const scopeInput = fieldsEl.querySelector('[data-prop="scope"]');
+              if (scopeInput) scopeInput.value = newScope;
+            }
+          }
+
+          // Update sourceDoc (source of truth) first
+          this._updateSourceDocProperty(designerId, propName, val);
+          // Then update canvas for visual feedback
+          this._postToCanvas('updateProperty', { designerId, propName, value: val });
         });
 
         fieldsEl.appendChild(row);
@@ -2116,8 +2554,17 @@ function runDelete() {
      */
     setContent(content) {
       this._savedContent = content;
-      if (this._canvasReady) {
-        this.loadHTML(content);
+      // Build sourceDoc from saved content — server already rendered the iframe,
+      // so we DON'T send renderHTML (that would replace the server output)
+      const canvasHTML = (content || '')
+        .replace(/\{%\s*extends\s+[^%]*%\}/g, '')
+        .replace(/\{%\s*block\s+\w+\s*%\}/g, '')
+        .replace(/\{%\s*endblock\s*%\}/g, '')
+        .replace(/\{%\s*include\s+[^%]*%\}/g, '')
+        .trim();
+      if (canvasHTML) {
+        const reversed = this._reversePongo2(canvasHTML);
+        this._initSourceDoc(reversed);
       }
     }
 
@@ -2170,21 +2617,27 @@ function runDelete() {
         return;
       }
 
-      // V2: convert tree to HTML and render via innerHTML
+      // Convert tree to HTML, build sourceDoc (source of truth), then render
       const html = this._treeToHTML(tree);
-      this._postToCanvas('renderHTML', { html });
+      this._initSourceDoc(html);
+      this._renderSourceDocToCanvas();
     }
 
     _treeToHTML(tree) {
       return tree.map(node => {
-        const { componentType, designerId, children, css, content, scope, innerHTML, ...attrs } = node;
+        const { componentType, children, css, content, scope, innerHTML, ...attrs } = node;
         const tag = componentType;
 
         let attrStr = '';
         if (css) attrStr += ` class="${css}"`;
         if (scope) attrStr += ` data-scope="${scope}"`;
         for (const [key, value] of Object.entries(attrs)) {
-          if (key === 'componentType' || key === 'designerId') continue;
+          if (key === 'componentType') continue;
+          // Include designerId as data-designer-id attribute
+          if (key === 'designerId') {
+            if (value) attrStr += ` data-designer-id="${value}"`;
+            continue;
+          }
           if (value === '' || value === true) attrStr += ` ${key}`;
           else if (value !== false && value != null) attrStr += ` ${key}="${value}"`;
         }
@@ -2205,17 +2658,8 @@ function runDelete() {
      * @returns {Promise<Array>}
      */
     getTree() {
-      return new Promise((resolve) => {
-        this._treeCallback = resolve;
-        this._postToCanvas('getTree', {});
-        // Timeout fallback
-        setTimeout(() => {
-          if (this._treeCallback) {
-            this._treeCallback([]);
-            this._treeCallback = null;
-          }
-        }, 2000);
-      });
+      // Synchronous read from sourceDoc — no iframe round-trip needed
+      return this._buildTreeFromSourceDoc();
     }
 
     /**
@@ -2231,16 +2675,8 @@ function runDelete() {
      * @returns {Promise<string>}
      */
     getHTML() {
-      return new Promise((resolve) => {
-        this._htmlCallback = resolve;
-        this._postToCanvas('getHTML', {});
-        setTimeout(() => {
-          if (this._htmlCallback) {
-            this._htmlCallback('');
-            this._htmlCallback = null;
-          }
-        }, 2000);
-      });
+      // Synchronous read from sourceDoc — no iframe round-trip needed
+      return this._getCleanHTMLFromSourceDoc();
     }
 
     /**
@@ -2344,9 +2780,9 @@ function runDelete() {
           }
 
           // Clean up designer-only attributes from output
-          el.removeAttribute('data-source');
-          el.removeAttribute('placeholder-option');
-          el.removeAttribute('data-enum');
+          // Keep data-source, placeholder-option, data-enum in output
+          // — they're needed by the designer property panel on reload
+          // and are harmless in production (wc-select ignores unknown attrs)
 
         } else if (tag === 'wc-textarea') {
           el.setAttribute('value', `{{ Record.${scope} }}`);
@@ -2497,9 +2933,13 @@ function runDelete() {
     <wc-tab-item label="Change Log">
       <div class="col-1 gap-2 pt-2 pb-5 px-5">
         {% if RecordID != "create" %}
-        <div hx-get="/{{Template.RoutePrefix}}/change_log?collection=${collectionName}&original_id={{RecordID}}"
+        <div id="change-log-tab"
+             hx-get="/{{Template.RoutePrefix}}/change_log?collection={{Template.Slug}}&original_id={{RecordID}}"
              hx-trigger="revealed" hx-swap="innerHTML" hx-indicator="#content-loader" hx-push-url="false">
-          Loading change history...
+          <div class="flex items-center gap-2 text-gray-500 p-4">
+            <wc-fa-icon name="spinner" class="fa-spin"></wc-fa-icon>
+            Loading change history...
+          </div>
         </div>
         {% else %}
         <div class="text-center p-4 text-muted">Save the record to view change history</div>
