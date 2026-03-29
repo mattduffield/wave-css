@@ -142,7 +142,7 @@ The build process (esbuild.config.js) generates:
 - `wc-theme`: Theme manager
 - `wc-prompt`: User prompt dialog
 - `wc-notify`: Notification system
-- `wc-page-designer`: Page design tool
+- `wc-live-designer`: Visual page builder with server-rendered iframe preview
 - `wc-template-preview`: Template preview
 
 ### Non-UI Components

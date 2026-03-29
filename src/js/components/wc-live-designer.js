@@ -343,6 +343,8 @@ if (!customElements.get('wc-live-designer')) {
       'button', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'label', 'hr', 'img',
     ]);
     static _SKIP_TAGS = new Set(['option', 'optgroup']);
+    // wc-select-safe is used in sourceDoc to preserve <option> children
+    static _SAFE_TAG_MAP = { 'wc-select-safe': 'wc-select' };
 
     constructor() {
       super();
@@ -376,8 +378,13 @@ if (!customElements.get('wc-live-designer')) {
      * on every designer-worthy element.
      */
     _initSourceDoc(html) {
+      // Use safe parsing to preserve <option> inside <wc-select>.
+      // Keep elements as wc-select-safe in sourceDoc — rename only on output.
+      const protected_ = html
+        .replace(/<wc-select\b/gi, '<wc-select-safe')
+        .replace(/<\/wc-select>/gi, '</wc-select-safe>');
       const parser = new DOMParser();
-      this._sourceDoc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
+      this._sourceDoc = parser.parseFromString(`<body>${protected_}</body>`, 'text/html');
       this._stampDesignerIdsOnDoc(this._sourceDoc.body);
     }
 
@@ -390,9 +397,10 @@ if (!customElements.get('wc-live-designer')) {
         const tag = child.tagName.toLowerCase();
         if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
 
-        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
-        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
-        const isDiv = tag === 'div' || tag === 'fieldset';
+        const realTag = WcLiveDesigner._SAFE_TAG_MAP[tag] || tag;
+        const isWC = WcLiveDesigner._WC_TAGS.has(realTag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(realTag);
+        const isDiv = realTag === 'div' || realTag === 'fieldset';
 
         if (isWC || isHTML || isDiv) {
           if (!child.hasAttribute('data-designer-id')) {
@@ -405,15 +413,36 @@ if (!customElements.get('wc-live-designer')) {
     }
 
     /**
+     * Safely parse HTML with DOMParser. Custom elements like wc-select
+     * are temporarily renamed so the HTML parser doesn't strip <option>
+     * children (which are only valid inside <select>/<datalist>).
+     */
+    _safeParse(html) {
+      // Protect wc-select options from being stripped by HTML parser
+      const protected_ = html
+        .replace(/<wc-select\b/gi, '<wc-select-safe')
+        .replace(/<\/wc-select>/gi, '</wc-select-safe>');
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${protected_}</div>`, 'text/html');
+      return doc;
+    }
+
+    _safeSerialize(doc) {
+      let html = doc.body.firstElementChild.innerHTML;
+      return html
+        .replace(/<wc-select-safe\b/gi, '<wc-select')
+        .replace(/<\/wc-select-safe>/gi, '</wc-select>');
+    }
+
+    /**
      * Stamp designer IDs on an HTML string. Returns the stamped HTML.
      * Used for drag & drop — IDs are assigned before insertion.
      */
     _stampDesignerIdsOnHTML(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      const doc = this._safeParse(html);
       const wrapper = doc.body.firstElementChild;
       this._stampDesignerIdsOnDoc(wrapper);
-      return wrapper.innerHTML;
+      return this._safeSerialize(doc);
     }
 
     /**
@@ -431,9 +460,10 @@ if (!customElements.get('wc-live-designer')) {
      */
     _getCleanHTMLFromSourceDoc() {
       if (!this._sourceDoc) return '';
-      // Keep data-designer-id in saved content — they survive Pongo2 rendering
-      // and ensure IDs match between sourceDoc and server-rendered iframe
-      return this._sourceDoc.body.innerHTML;
+      // Serialize and rename wc-select-safe back to wc-select
+      return this._sourceDoc.body.innerHTML
+        .replace(/<wc-select-safe\b/gi, '<wc-select')
+        .replace(/<\/wc-select-safe>/gi, '</wc-select>');
     }
 
     /**
@@ -550,8 +580,7 @@ if (!customElements.get('wc-live-designer')) {
      */
     _insertIntoSourceDoc(html, parentDesignerId, position) {
       if (!this._sourceDoc) return;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+      const doc = this._safeParse(html);
       const newElements = Array.from(doc.body.firstElementChild.children);
 
       let parent;
@@ -598,7 +627,17 @@ if (!customElements.get('wc-live-designer')) {
           if (text) props.content = text;
         }
 
-        const node = { ...props, componentType: tag, designerId: child.getAttribute('data-designer-id') };
+        const realTag = WcLiveDesigner._SAFE_TAG_MAP[tag] || tag;
+        const node = { ...props, componentType: realTag, designerId: child.getAttribute('data-designer-id') };
+
+        // Preserve <option> children for wc-select (they don't have designer IDs)
+        if (realTag === 'wc-select') {
+          const optionHTML = Array.from(child.children)
+            .filter(c => c.tagName.toLowerCase() === 'option')
+            .map(c => c.outerHTML).join('\n');
+          if (optionHTML) node.innerHTML = optionHTML;
+        }
+
         const nested = this._buildTreeFromSourceDoc(child);
         if (nested.length > 0) node.children = nested;
         elements.push(node);
@@ -633,9 +672,10 @@ if (!customElements.get('wc-live-designer')) {
       for (const child of parent.children) {
         const tag = child.tagName.toLowerCase();
         if (WcLiveDesigner._SKIP_TAGS.has(tag)) continue;
-        const isWC = WcLiveDesigner._WC_TAGS.has(tag);
-        const isHTML = WcLiveDesigner._HTML_TAGS.has(tag);
-        const isDiv = tag === 'div' || tag === 'fieldset';
+        const realTag = WcLiveDesigner._SAFE_TAG_MAP[tag] || tag;
+        const isWC = WcLiveDesigner._WC_TAGS.has(realTag);
+        const isHTML = WcLiveDesigner._HTML_TAGS.has(realTag);
+        const isDiv = realTag === 'div' || realTag === 'fieldset';
         if (isWC || isHTML || isDiv) {
           result.push(child);
         }
@@ -772,7 +812,7 @@ if (!customElements.get('wc-live-designer')) {
                 <wc-tab-item class="active" label="Visual">
                   <div class="ld-canvas-visual flex-1 flex flex-col overflow-hidden" style="height: calc(100vh - 310px); position: relative;">
                     <div class="ld-canvas-loading" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface-1, #111); z-index: 10; color: var(--text-6, #888); font-family: system-ui, sans-serif; gap: 12px;">
-                      <span style="animation: spin 1s linear infinite; display: inline-block; font-size: 48px;">⟳</span>
+                      <wc-fa-icon name="spinner" spin size="48px"></wc-fa-icon>
                       <span style="font-size: 14px;">Loading preview...</span>
                     </div>
                     <iframe class="ld-canvas-iframe" data-src="${canvasUrl}" style="border: none; flex: 1 1 0%; min-height: 0; width: 100%;"></iframe>
@@ -2466,6 +2506,12 @@ function runDelete() {
 
         let childHTML = '';
         if (innerHTML) childHTML += innerHTML;
+        // Generate options from data-enum if wc-select has no innerHTML
+        if (tag === 'wc-select' && !innerHTML && attrs['data-enum']) {
+          const enums = attrs['data-enum'].split(',');
+          childHTML += '<option value="">Choose...</option>\n' +
+            enums.map(v => `<option value="${v}">${v.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>`).join('\n');
+        }
         if (children && children.length > 0) childHTML += this._treeToHTML(children);
         if (content && !innerHTML) childHTML += content;
 
@@ -2506,8 +2552,7 @@ function runDelete() {
      * @returns {string} Pongo2 template content
      */
     transformToPongo2(rawHTML) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${rawHTML}</div>`, 'text/html');
+      const doc = this._safeParse(rawHTML);
       const root = doc.body.firstElementChild;
 
       root.querySelectorAll('[data-scope]').forEach(el => {
@@ -2618,7 +2663,7 @@ function runDelete() {
         el.removeAttribute('data-scope');
       });
 
-      let html = root.innerHTML;
+      let html = this._safeSerialize(doc);
 
       // Handle checkbox Pongo2 markers
       html = html.replace(/data-pongo2-checked="([^"]+)"/g, (match, pongo2) => {
