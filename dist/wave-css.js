@@ -1263,7 +1263,7 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
             registerElement(child, tag);
           } else if (tag === "div" || tag === "fieldset") {
             const isInternal = Array.from(child.classList).some(
-              (c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link"
+              (c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link" || c === "dropdown" || c === "dropdown-content" || c === "split-dropdown"
             );
             if (!isInternal) {
               registerElement(child, tag);
@@ -1469,7 +1469,7 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
         } else if (HTML_TAGS.has(tag) && !insideWC && !registered) {
           registerElement(child, tag);
         } else if ((tag === "div" || tag === "fieldset") && !registered) {
-          const isInt = Array.from(child.classList).some((c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link");
+          const isInt = Array.from(child.classList).some((c) => c.startsWith("wc-") || c === "tab-nav" || c === "tab-body" || c === "tab-link" || c === "dropdown" || c === "dropdown-content" || c === "split-dropdown");
           if (!isInt) {
             registerElement(child, tag);
             if (isContainer(tag)) {
@@ -13873,132 +13873,9 @@ if (!customElements.get("wc-live-designer")) {
       this._initSourceDoc(canvasHTML);
       this._renderSourceDocToCanvas();
     }
-    async _loadChildren(parentEl, parentDesignerId) {
-      for (const child of parentEl.children) {
-        const tag = child.tagName.toLowerCase();
-        if (!this._isDesignerComponent(tag)) continue;
-        const properties = {};
-        for (const attr of child.attributes) {
-          const name = attr.name;
-          if (name === "style" || name === "data-wc-id") continue;
-          if (name === "class") {
-            const cls = attr.value.replace(/\bcontents\b/g, "").trim();
-            if (cls) properties.css = cls;
-            continue;
-          }
-          let value = attr.value;
-          const pongo2Match = value.match(/\{\{\s*Record\.(\S+)\s*\}\}/);
-          if (pongo2Match) {
-            const fieldName = pongo2Match[1];
-            properties.scope = fieldName;
-            const sampleValue = this._getSampleValue(fieldName);
-            if (sampleValue !== void 0 && sampleValue !== "") {
-              value = String(sampleValue);
-            }
-          }
-          const floatMatch = value.match(/\{\{\s*Record\.(\S+)\|floatformat:\d+\s*\}\}/);
-          if (floatMatch) {
-            properties.scope = floatMatch[1];
-            const sampleValue = this._getSampleValue(floatMatch[1]);
-            if (sampleValue !== void 0) value = String(sampleValue);
-          }
-          if (name === "checked" || value.includes("{% if Record.")) {
-            const boolMatch = value.match(/Record\.(\S+)/);
-            if (boolMatch) {
-              properties.scope = boolMatch[1];
-              const sampleValue = this._getSampleValue(boolMatch[1]);
-              if (sampleValue) properties.checked = "";
-            }
-            continue;
-          }
-          if (value.includes("{%") || value.includes("{{")) continue;
-          if (value === "") {
-            properties[name] = "";
-          } else {
-            properties[name] = value;
-          }
-        }
-        if (child.hasAttribute("data-scope")) {
-          properties.scope = child.getAttribute("data-scope");
-        }
-        const nativeTextElements = /* @__PURE__ */ new Set(["button", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "label"]);
-        if (nativeTextElements.has(tag)) {
-          const text = child.textContent.trim();
-          if (text) properties.content = text;
-        }
-        if (tag === "wc-select" && child.children.length > 0) {
-          const options = [];
-          for (const opt of child.querySelectorAll("option")) {
-            if (opt.textContent.includes("{{")) continue;
-            options.push(opt.outerHTML);
-          }
-          if (options.length > 0) {
-            properties.innerHTML = options.join("\n");
-          }
-        }
-        if (tag === "wc-input" && child.querySelectorAll("option").length > 0) {
-          const options = [];
-          for (const opt of child.querySelectorAll("option")) {
-            if (opt.textContent.includes("{{")) continue;
-            options.push(opt.outerHTML);
-          }
-          if (options.length > 0) {
-            properties.innerHTML = options.join("\n");
-          }
-        }
-        const type = tag;
-        const isContainer = [
-          "div",
-          "fieldset",
-          "wc-form",
-          "wc-tab",
-          "wc-tab-item",
-          "wc-accordion",
-          "wc-dropdown",
-          "wc-flip-box",
-          "wc-menu",
-          "wc-sidebar",
-          "wc-sidenav",
-          "wc-slideshow",
-          "wc-split-button",
-          "wc-breadcrumb"
-        ].includes(type);
-        this._postToCanvas("addComponent", {
-          type,
-          parentId: parentDesignerId,
-          position: null,
-          properties
-        });
-        await new Promise((r) => setTimeout(r, 150));
-        if (isContainer && child.children.length > 0) {
-          const tree = await this.getTree();
-          const lastComponent = this._findLastComponentInTree(tree, type);
-          if (lastComponent) {
-            await this._loadChildren(child, lastComponent.designerId);
-          }
-        }
-      }
-      this._updateLayerTree();
-    }
-    _isDesignerComponent(tag) {
-      if (tag.startsWith("wc-")) return true;
-      if (["div", "fieldset", "hr", "button", "a", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "label", "img"].includes(tag)) return true;
-      return false;
-    }
     _getSampleValue(fieldName) {
       if (!this._sampleData || !fieldName) return void 0;
       return fieldName.split(".").reduce((o, k) => o && o[k] !== void 0 ? o[k] : void 0, this._sampleData);
-    }
-    _findLastComponentInTree(tree, type) {
-      let found = null;
-      function walk(nodes) {
-        for (const node of nodes) {
-          if ((node.componentType || node.type) === type) found = node;
-          if (node.children) walk(node.children);
-        }
-      }
-      walk(tree);
-      return found;
     }
     // --- Form Integration ---
     /**
@@ -14410,23 +14287,6 @@ function runDelete() {
         const reversed = this._reversePongo2(canvasHTML);
         this._initSourceDoc(reversed);
       }
-    }
-    /**
-     * Extract the designed form components from a full Pongo2 template.
-     * Looks for content between {% include "meta_fields" %} and <wc-hotkey
-     * inside the wc-form block.
-     */
-    _extractFormContent(content) {
-      if (!content) return "";
-      const metaMatch = content.indexOf('{% include "meta_fields" %}');
-      if (metaMatch === -1) return "";
-      const startIdx = metaMatch + '{% include "meta_fields" %}'.length;
-      let endIdx = content.indexOf("<wc-hotkey", startIdx);
-      if (endIdx === -1) {
-        endIdx = content.indexOf("</wc-form>", startIdx);
-      }
-      if (endIdx === -1) return "";
-      return content.substring(startIdx, endIdx).trim();
     }
     /**
      * Set sample data for design-time preview.

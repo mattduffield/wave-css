@@ -3,7 +3,7 @@
     "name": "Wave CSS Knowledge Base",
     "version": "1.0.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-03-19"
+    "lastUpdated": "2026-03-29"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -932,6 +932,53 @@
           "hx-select"
         ],
         "usage": "<wc-visibility-change hx-verb=\"GET\" hx-url=\"/api/refresh\" hx-target=\"#content\" hx-swap=\"innerHTML\"></wc-visibility-change>"
+      }
+    ],
+    "designer": [
+      {
+        "name": "wc-live-designer",
+        "description": "Visual page builder. Server-rendered iframe shows production-accurate preview. Source tab shows full Pongo2 template. Property panel reads from rendered DOM. sourceDoc (DOMParser Document) is source of truth for save.",
+        "attributes": [
+          "canvas-url",
+          "theme",
+          "api-base-url",
+          "schema"
+        ],
+        "architecture": {
+          "iframe": "Loads server-rendered page with ?designer=true. Go Kart adds data-designer to <html>.",
+          "designerBridge": "designer-bridge.js auto-initializes when html[data-designer] is detected. Handles selection, drag/drop, toolbar, postMessage.",
+          "designerCSS": "Scoped under html[data-designer] in wave-css.css. Selection outlines, drop targets, skeleton indicators, interaction blocking.",
+          "sourceDoc": "DOMParser Document maintained by parent. Source of truth for save. data-designer-id attributes persist across save/reload.",
+          "propertyPanel": "Reads from rendered DOM via bridge postMessage. Shows Pongo2 expressions for value bindings.",
+          "sourceTab": "Full Pongo2 template with {% extends %}, {% block %}, {{ Record.field }}, data-designer-id."
+        },
+        "postMessageProtocol": {
+          "iframeToParent": {
+            "source": "editor-bridge",
+            "actions": ["canvasReady", "select", "deselect", "componentRemoved", "componentMoved", "componentInserted", "duplicateRequest", "registryBuilt"]
+          },
+          "parentToIframe": {
+            "source": "live-designer",
+            "actions": ["insertHTML", "updateProperty", "selectById", "clear-selection"]
+          }
+        },
+        "presets": [
+          "Standard Edit Page — skeleton + nav + tabs + form + change log",
+          "Simple Form Page — skeleton + nav + form (no tabs)",
+          "List Page — skeleton + tabulator",
+          "2/3/4 Column layouts",
+          "Tab with Change Log",
+          "Form with HTMX",
+          "Navigation Bar",
+          "Name Fields / Address Block / Contact Fields patterns"
+        ],
+        "keyFiles": [
+          "src/js/components/wc-live-designer.js — parent component",
+          "src/js/components/designer-bridge.js — iframe bridge (auto-init)",
+          "src/css/main.css — designer CSS (bottom, scoped html[data-designer])",
+          "tests/designer-server-render-test.py — 21 Playwright integration tests"
+        ],
+        "usage": "<wc-live-designer canvas-url=\"/x/article/create?designer=true\" schema=\"article\" theme=\"theme-ocean dark\"></wc-live-designer>"
       }
     ]
   },

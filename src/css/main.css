@@ -14430,6 +14430,7 @@ html[data-designer] wc-dropdown[data-designer-id].contents,
 html[data-designer] wc-sidebar[data-designer-id].contents,
 html[data-designer] wc-sidenav[data-designer-id].contents,
 html[data-designer] wc-slideshow[data-designer-id].contents,
+html[data-designer] wc-save-split-button[data-designer-id].contents,
 html[data-designer] wc-split-button[data-designer-id].contents,
 html[data-designer] wc-flip-box[data-designer-id].contents,
 html[data-designer] wc-menu[data-designer-id].contents { display: contents !important; }
@@ -14443,7 +14444,9 @@ html[data-designer] [data-designer-id] a { pointer-events: none; }
 html[data-designer] .tab-nav .tab-link { pointer-events: all !important; cursor: pointer !important; }
 
 /* Prevent dropdowns/popups */
-html[data-designer] wc-save-split-button[data-designer-id] .wc-save-split-button .split-dropdown,
+/* save-split-button internal elements excluded from scan via isInternal check */
+
+html[data-designer] wc-save-split-button[data-designer-id] .wc-save-split-button .dropdown-content,
 html[data-designer] wc-dropdown[data-designer-id] .wc-dropdown .dropdown-content,
 html[data-designer] wc-split-button[data-designer-id] .wc-split-button .split-dropdown { display: none !important; }
 

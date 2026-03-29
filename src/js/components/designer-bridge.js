@@ -92,7 +92,7 @@ if (document.documentElement?.hasAttribute?.('data-designer')) {
             registerElement(child, tag);
           } else if (tag === 'div' || tag === 'fieldset') {
             const isInternal = Array.from(child.classList).some(c =>
-              c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link'
+              c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link' || c === 'dropdown' || c === 'dropdown-content' || c === 'split-dropdown'
             );
             if (!isInternal) {
               registerElement(child, tag);
@@ -313,7 +313,7 @@ if (document.documentElement?.hasAttribute?.('data-designer')) {
           registerElement(child, tag);
         } else if ((tag === 'div' || tag === 'fieldset') && !registered) {
           const isInt = Array.from(child.classList).some(c =>
-            c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link');
+            c.startsWith('wc-') || c === 'tab-nav' || c === 'tab-body' || c === 'tab-link' || c === 'dropdown' || c === 'dropdown-content' || c === 'split-dropdown');
           if (!isInt) {
             registerElement(child, tag);
             if (isContainer(tag)) {
