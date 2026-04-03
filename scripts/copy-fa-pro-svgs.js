@@ -616,6 +616,7 @@ const ICONS_TO_COPY = [
   "grip-lines-vertical",
   "grip",
   "grip-vertical",
+  "microscope",
   // Add more icon names here
 ];
 
