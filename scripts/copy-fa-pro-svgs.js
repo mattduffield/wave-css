@@ -3,7 +3,7 @@ const path = require("path");
 
 // IMPORTANT: Update this path to where you extracted Font Awesome Pro
 const FA_PRO_PATH =
-  "/Users/matthewduffield/Documents/_assets/fontawesome-pro-6.7.2-web"; // <-- UPDATE THIS!
+  "/Users/matthewduffield/Documents/_assets/fontawesome-pro-7.2.0-web";
 
 // Font Awesome icon aliases mapping
 const ICON_ALIASES = {
@@ -609,6 +609,7 @@ const ICONS_TO_COPY = [
   "align-left",
   "align-right",
   "align-center",
+  "layer-group",
   // Add more icon names here
 ];
 

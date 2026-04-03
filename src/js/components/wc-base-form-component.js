@@ -9,6 +9,12 @@ export class WcBaseFormComponent extends WcBaseComponent {
     this._value = ''; // Internal value for form element
   }
 
+  // Name getter — exposes the name attribute as a property
+  // so HTMX's hx-include can read it (HTMX checks element.name, not getAttribute)
+  get name() {
+    return this.getAttribute('name') || '';
+  }
+
   // Value getter and setter
   get value() {
     if (this._isCheckbox()) {

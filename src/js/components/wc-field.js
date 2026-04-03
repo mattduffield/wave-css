@@ -103,6 +103,15 @@ class WcField extends WcBaseComponent {
     super.disconnectedCallback();
   }
 
+  // Expose name/value as properties for HTMX hx-include compatibility
+  get name() {
+    return this.getAttribute('name') || '';
+  }
+
+  get value() {
+    return this.getAttribute('value') || '';
+  }
+
   _handleAttributeChange(attrName, newValue) {
     if (attrName === 'label') {
       // Re-render when label changes

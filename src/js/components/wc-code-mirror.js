@@ -77,6 +77,13 @@ if (!customElements.get('wc-code-mirror')) {
         const name = this.getAttribute('name');
         const lbl = this.querySelector(`label[for="${name}"]`);
         lbl?.classList.add(newValue);
+      } else if (attrName === 'value' && !this.editor) {
+        // Editor not initialized yet (deferred) — store for later
+        this._pendingValue = newValue;
+        return;
+      } else if (!this.editor) {
+        // Editor not initialized — skip attribute changes that require it
+        return;
       } else if (attrName === 'theme') {
         await this.loadTheme(newValue);
       } else if (attrName === 'mode') {
@@ -191,7 +198,40 @@ if (!customElements.get('wc-code-mirror')) {
       // Use dependency manager for CodeMirror core library
       await DependencyManager.load('CodeMirror');
 
-      // Render the editor and pass the initial value
+      // Only defer if inside a non-active wc-tab-item.
+      // Don't defer for skeleton-hidden content (active tab) — the existing
+      // cm.display() / cm.refresh() pattern handles that.
+      // Note: 'active' class is moved from outer element to inner .wc-tab-item div
+      // by _handleAttributeChange, so we check the inner element.
+      const tabItem = this.closest('wc-tab-item');
+      const innerTabDiv = tabItem?.querySelector('.wc-tab-item');
+      const isActiveTab = !tabItem || innerTabDiv?.classList.contains('active');
+      const shouldDefer = tabItem && !isActiveTab;
+
+      if (shouldDefer) {
+        this._pendingValue = initialValue;
+        this._deferredInit = true;
+        // Set form value now so hx-include can read it before editor initializes
+        this._internals.setFormValue(initialValue);
+        // Observe the inner componentElement (not 'this' which is display:contents
+        // and has no visual box for IntersectionObserver to detect)
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && this._deferredInit) {
+              this._deferredInit = false;
+              observer.disconnect();
+              const value = this._pendingValue ?? initialValue;
+              this.renderEditor(value).then(() => {
+                this._internals.setFormValue(value);
+              });
+            }
+          });
+        }, { threshold: 0.1 });
+        observer.observe(this.componentElement);
+        return;
+      }
+
+      // Element is visible — initialize immediately
       await this.renderEditor(initialValue);
 
       // Set the initial form value to the value from the attribute
@@ -322,14 +362,25 @@ if (!customElements.get('wc-code-mirror')) {
       }
     }
 
+    // Expose name as a property so HTMX's hx-include can read it
+    // (HTMX checks element.name, not getAttribute('name'))
+    get name() {
+      return this.getAttribute('name') || '';
+    }
+
     get value() {
-      return this.editor?.getValue() || ''; // Get the value from the form element (input, select, textarea, etc.)
+      if (this.editor) return this.editor.getValue();
+      return this._pendingValue || this.getAttribute('value') || '';
     }
 
     set value(val) {
       if (this.editor) {
         this.editor.setValue(val);
-        this._internals.setFormValue(val); // Set the form value in ElementInternals
+        this._internals.setFormValue(val);
+      } else {
+        // Editor not initialized yet — queue for when it initializes
+        this._pendingValue = val;
+        this._internals.setFormValue(val);
       }
     }
     

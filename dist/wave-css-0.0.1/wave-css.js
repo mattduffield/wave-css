@@ -1634,6 +1634,11 @@ var WcBaseFormComponent = class extends WcBaseComponent {
     this._internals = this.attachInternals();
     this._value = "";
   }
+  // Name getter — exposes the name attribute as a property
+  // so HTMX's hx-include can read it (HTMX checks element.name, not getAttribute)
+  get name() {
+    return this.getAttribute("name") || "";
+  }
   // Value getter and setter
   get value() {
     if (this._isCheckbox()) {
@@ -2731,6 +2736,11 @@ if (!customElements.get("wc-code-mirror")) {
         const name = this.getAttribute("name");
         const lbl = this.querySelector(`label[for="${name}"]`);
         lbl?.classList.add(newValue);
+      } else if (attrName === "value" && !this.editor) {
+        this._pendingValue = newValue;
+        return;
+      } else if (!this.editor) {
+        return;
       } else if (attrName === "theme") {
         await this.loadTheme(newValue);
       } else if (attrName === "mode") {
@@ -2832,6 +2842,29 @@ if (!customElements.get("wc-code-mirror")) {
       this.componentElement.appendChild(settingsPopover);
       const initialValue = this.getAttribute("value") || this.firstContent || "";
       await dependencyManager.load("CodeMirror");
+      const tabItem = this.closest("wc-tab-item");
+      const innerTabDiv = tabItem?.querySelector(".wc-tab-item");
+      const isActiveTab = !tabItem || innerTabDiv?.classList.contains("active");
+      const shouldDefer = tabItem && !isActiveTab;
+      if (shouldDefer) {
+        this._pendingValue = initialValue;
+        this._deferredInit = true;
+        this._internals.setFormValue(initialValue);
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && this._deferredInit) {
+              this._deferredInit = false;
+              observer.disconnect();
+              const value = this._pendingValue ?? initialValue;
+              this.renderEditor(value).then(() => {
+                this._internals.setFormValue(value);
+              });
+            }
+          });
+        }, { threshold: 0.1 });
+        observer.observe(this.componentElement);
+        return;
+      }
       await this.renderEditor(initialValue);
       this._internals.setFormValue(initialValue);
     }
@@ -3105,12 +3138,21 @@ if (!customElements.get("wc-code-mirror")) {
         settingsPopover.removeChild(settingsPopover.firstChild);
       }
     }
+    // Expose name as a property so HTMX's hx-include can read it
+    // (HTMX checks element.name, not getAttribute('name'))
+    get name() {
+      return this.getAttribute("name") || "";
+    }
     get value() {
-      return this.editor?.getValue() || "";
+      if (this.editor) return this.editor.getValue();
+      return this._pendingValue || this.getAttribute("value") || "";
     }
     set value(val) {
       if (this.editor) {
         this.editor.setValue(val);
+        this._internals.setFormValue(val);
+      } else {
+        this._pendingValue = val;
         this._internals.setFormValue(val);
       }
     }
@@ -4935,6 +4977,13 @@ var WcField = class extends WcBaseComponent {
   }
   disconnectedCallback() {
     super.disconnectedCallback();
+  }
+  // Expose name/value as properties for HTMX hx-include compatibility
+  get name() {
+    return this.getAttribute("name") || "";
+  }
+  get value() {
+    return this.getAttribute("value") || "";
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "label") {
