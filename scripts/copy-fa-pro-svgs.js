@@ -605,6 +605,10 @@ const ICONS_TO_COPY = [
   "inbox",
   "flask",
   "wand-magic-sparkles",
+  "magnifying-glass-chart",
+  "align-left",
+  "align-right",
+  "align-center",
   // Add more icon names here
 ];
 
