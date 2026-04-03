@@ -34,7 +34,8 @@ if (!customElements.get('wc-ai-bot')) {
         'check-gpu-compatibility',
         'force-enable',
         'context-urls',
-        'context-window-size'
+        'context-window-size',
+        'query-context'
       ];
     }
 
@@ -338,6 +339,49 @@ function runDelete() {
 - Composition: {% include 'page_script_slug' %} with {% if %} for state/type variations
 - Auth check: Promise.race pattern for login detection
 - Naming: {carrier}_{page}_{state} (e.g., nat_gen_drivers_page_nc)`
+      },
+      '/query': {
+        description: 'Generate a MongoDB query from natural language',
+        sections: {},
+        systemPrompt: `You are a MongoDB query expert. Generate MongoDB find queries or aggregation pipelines from natural language descriptions.
+
+OUTPUT FORMAT — always respond with valid JSON blocks:
+
+For FIND queries, output up to three labeled JSON blocks:
+\`\`\`query
+{ "field": "value" }
+\`\`\`
+\`\`\`projection
+{ "field": 1 }
+\`\`\`
+\`\`\`sort
+{ "field": 1 }
+\`\`\`
+
+For AGGREGATION pipelines, output a single JSON block:
+\`\`\`pipeline
+[
+  { "$match": { ... } },
+  { "$group": { ... } }
+]
+\`\`\`
+
+RULES:
+- Output ONLY valid MongoDB JSON — no JavaScript, no comments
+- Use standard MongoDB query operators: $gt, $gte, $lt, $lte, $in, $nin, $regex, $exists, $ne, $or, $and, $not, $elemMatch
+- For dates, use ISO 8601 strings: { "$gte": "2026-01-01T00:00:00Z" }
+- For case-insensitive text search, use $regex with $options: "i"
+- For "contains" searches, use $regex: "pattern"
+- For array fields, use $elemMatch for sub-document conditions
+- For counting, grouping, or "top N" requests, use an aggregation pipeline
+- Always include $match early in pipelines to reduce documents before grouping
+- Use $ifNull to handle missing array fields: { "$ifNull": ["$arrayField", []] }
+- Projection: use 1 to include, 0 to exclude. Don't mix include/exclude (except _id)
+- Sort: 1 for ascending, -1 for descending
+- CRITICAL: Always use the EXACT full dotted field path from the field list (e.g., "address.state" NOT "state", "contact.email" NOT "email"). Never shorten or simplify field paths.
+- After the JSON blocks, briefly explain what the query does
+
+If the user's request is ambiguous, generate the most likely interpretation and note your assumption.`
       },
       '/help': {
         description: 'Show available commands',
@@ -664,6 +708,31 @@ function runDelete() {
           background: none;
           padding: 0;
         }
+
+        /* Code block language labels */
+        .wc-ai-bot-message-bubble pre code[class*="language-"]::before {
+          display: block;
+          font-size: 0.625rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          opacity: 0.6;
+          margin-bottom: 0.25rem;
+          padding-bottom: 0.25rem;
+          border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        .wc-ai-bot-message-bubble pre code.language-query::before { content: 'Query'; }
+        .wc-ai-bot-message-bubble pre code.language-projection::before { content: 'Projection'; }
+        .wc-ai-bot-message-bubble pre code.language-sort::before { content: 'Sort'; }
+        .wc-ai-bot-message-bubble pre code.language-pipeline::before { content: 'Pipeline'; }
+        .wc-ai-bot-message-bubble pre code.language-javascript::before { content: 'JavaScript'; }
+        .wc-ai-bot-message-bubble pre code.language-json::before { content: 'JSON'; }
+        .wc-ai-bot-message-bubble pre code.language-html::before { content: 'HTML'; }
+        .wc-ai-bot-message-bubble pre code.language-css::before { content: 'CSS'; }
+        .wc-ai-bot-message-bubble pre code.language-go::before { content: 'Go'; }
+        .wc-ai-bot-message-bubble pre code.language-python::before { content: 'Python'; }
+        .wc-ai-bot-message-bubble pre code.language-bash::before { content: 'Bash'; }
+        .wc-ai-bot-message-bubble pre code.language-sql::before { content: 'SQL'; }
 
         /* Code block copy button */
         .wc-ai-bot-code-wrapper {
@@ -1218,9 +1287,11 @@ function runDelete() {
       lines.push('/create-edit article with title, description, release date, category');
       lines.push('/create-template article list and edit templates');
       lines.push('/create-screen ticket tracker with title, priority, assignee, status');
+      lines.push('/query Find all prospects in Oregon created this month sorted by last name');
       lines.push('```');
       lines.push('');
       lines.push('**Tip:** Use `/create-list` and `/create-edit` for faster generation than `/create-template`.');
+      lines.push('**Tip:** `/query` works best when the collection is selected — field names are injected automatically.');
       lines.push('');
       lines.push('You can also ask general questions — relevant knowledge will be injected automatically.');
       return lines.join('\n');
@@ -1425,6 +1496,21 @@ function runDelete() {
           systemPrompt = cmdSystemPrompt;
         }
 
+        // For /query command, inject query-context (collection field list) into system prompt
+        if (cmd.command === '/query') {
+          const queryContext = this.getAttribute('query-context');
+          if (queryContext) {
+            try {
+              const ctx = JSON.parse(queryContext);
+              const fieldLines = (ctx.fields || []).map(f => `- ${f.path} (${f.type})`).join('\n');
+              const collectionInfo = `\n\n## Collection Context\n\nCollection: **${ctx.collection || 'unknown'}**\n\nFields:\n${fieldLines}`;
+              systemPrompt += collectionInfo;
+            } catch (e) {
+              console.warn('[wc-ai-bot] Failed to parse query-context:', e);
+            }
+          }
+        }
+
         // For commands, rewrite the user message to include args
         if (cmd.command && cmd.args) {
           userMessage = `${cmd.command}: ${cmd.args}`;
@@ -1432,7 +1518,11 @@ function runDelete() {
 
         if (this.getAttribute('debug') === 'true') {
           const contextSize = kbContext ? kbContext.length : 0;
-          console.log(`[wc-ai-bot] Assistant mode — command: ${cmd.command || 'keyword-match'}, context: ${(contextSize/1024).toFixed(1)} KB`);
+          const queryCtxSize = (cmd.command === '/query') ? (this.getAttribute('query-context') || '').length : 0;
+          console.log(`[wc-ai-bot] Assistant mode — command: ${cmd.command || 'keyword-match'}, kb-context: ${(contextSize/1024).toFixed(1)} KB, query-context: ${(queryCtxSize/1024).toFixed(1)} KB`);
+          if (cmd.command === '/query') {
+            console.log(`[wc-ai-bot] System prompt length: ${systemPrompt.length} chars`);
+          }
         }
 
         // Clear active command after use
