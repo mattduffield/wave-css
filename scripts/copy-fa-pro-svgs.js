@@ -610,6 +610,12 @@ const ICONS_TO_COPY = [
   "align-right",
   "align-center",
   "layer-group",
+  "grip-dots",
+  "grip-dots-vertical",
+  "grip-lines",
+  "grip-lines-vertical",
+  "grip",
+  "grip-vertical",
   // Add more icon names here
 ];
 
