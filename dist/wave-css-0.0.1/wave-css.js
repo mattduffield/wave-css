@@ -19808,14 +19808,18 @@ if (!customElements.get("wc-hotkey")) {
     connectedCallback() {
       const keyCombination = this.getAttribute("keys") || "";
       const targetSelector = this.getAttribute("target") || "";
-      if (!keyCombination || !targetSelector) {
-        console.error('WcHotkey requires "keys" and "target" attributes.');
+      const action = this.getAttribute("action") || "";
+      if (!keyCombination || !targetSelector && !action) {
+        console.error('WcHotkey requires "keys" and either "target" or "action" attribute.');
         return;
       }
-      const targetElement = document.querySelector(targetSelector);
-      if (!targetElement) {
-        console.error(`Target element not found for selector: ${targetSelector}`);
-        return;
+      let targetElement = null;
+      if (targetSelector) {
+        targetElement = document.querySelector(targetSelector);
+        if (!targetElement) {
+          console.error(`Target element not found for selector: ${targetSelector}`);
+          return;
+        }
       }
       const keys = keyCombination.split("+");
       const keyMap = {
@@ -19828,7 +19832,15 @@ if (!customElements.get("wc-hotkey")) {
       const handleKeydown = (event) => {
         if (keyMap.metaKey === event.metaKey && keyMap.ctrlKey === event.ctrlKey && keyMap.shiftKey === event.shiftKey && keyMap.altKey === event.altKey && keyMap.key.toLowerCase() === event.key.toLowerCase()) {
           event.preventDefault();
-          targetElement.click();
+          if (targetElement) {
+            targetElement.click();
+          } else if (action) {
+            try {
+              new Function(action)();
+            } catch (e) {
+              console.error(`WcHotkey action error: ${e.message}`);
+            }
+          }
         }
       };
       document.addEventListener("keydown", handleKeydown);

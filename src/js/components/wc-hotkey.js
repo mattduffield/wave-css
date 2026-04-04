@@ -1,12 +1,14 @@
 /**
- * 
+ *
  *  Name: wc-hotkey
  *  Usage:
  *    <wc-hotkey keys="ctrl+s" target="button[type='submit']"></wc-hotkey>
- * 
- *  Description: 
+ *    <wc-hotkey keys="ctrl+enter" action="window.runQuery()"></wc-hotkey>
+ *
+ *  Description:
  *    The purpose of this component is to allow you to wire up keyboard mnemonics
- *    so that you can perform actions quicker.
+ *    so that you can perform actions quicker. Use `target` to click an element,
+ *    or `action` to execute a JavaScript expression directly.
  */
 
 if (!customElements.get('wc-hotkey')) {
@@ -19,16 +21,21 @@ if (!customElements.get('wc-hotkey')) {
     connectedCallback() {
         const keyCombination = this.getAttribute('keys') || '';
         const targetSelector = this.getAttribute('target') || '';
+        const action = this.getAttribute('action') || '';
 
-        if (!keyCombination || !targetSelector) {
-          console.error('WcHotkey requires "keys" and "target" attributes.');
+        if (!keyCombination || (!targetSelector && !action)) {
+          console.error('WcHotkey requires "keys" and either "target" or "action" attribute.');
           return;
         }
 
-        const targetElement = document.querySelector(targetSelector);
-        if (!targetElement) {
-          console.error(`Target element not found for selector: ${targetSelector}`);
-          return;
+        // Resolve target element if target attribute is set (takes precedence over action)
+        let targetElement = null;
+        if (targetSelector) {
+          targetElement = document.querySelector(targetSelector);
+          if (!targetElement) {
+            console.error(`Target element not found for selector: ${targetSelector}`);
+            return;
+          }
         }
 
         // Convert key combination to usable conditions
@@ -51,7 +58,15 @@ if (!customElements.get('wc-hotkey')) {
             (keyMap.key.toLowerCase() === event.key.toLowerCase())
           ) {
             event.preventDefault();
-            targetElement.click(); // Trigger the target element's action
+            if (targetElement) {
+              targetElement.click();
+            } else if (action) {
+              try {
+                new Function(action)();
+              } catch (e) {
+                console.error(`WcHotkey action error: ${e.message}`);
+              }
+            }
           }
         };
 
