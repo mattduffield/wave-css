@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-tree</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body { margin: 0; padding: 0; min-height: 100vh; }
+    .demo-section { margin-bottom: 2rem; }
+    .demo-section h3 { margin-bottom: 0.5rem; color: var(--text-3); }
+    .demo-section p { margin-bottom: 0.75rem; color: var(--text-5); font-size: 0.875rem; }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .demo-panel {
+      background: var(--surface-2);
+      border: 1px solid var(--surface-5);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .demo-panel-header {
+      padding: 0.5rem 0.75rem;
+      background: var(--surface-3);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-4);
+      border-bottom: 1px solid var(--surface-5);
+    }
+    .demo-panel-body {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .event-log {
+      font-family: monospace;
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--surface-1);
+      border: 1px solid var(--surface-5);
+      border-radius: 0.25rem;
+    }
+    .event-log div {
+      padding: 0.125rem 0;
+      border-bottom: 1px solid var(--surface-3);
+      color: var(--text-4);
+    }
+    @media (max-width: 768px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page-contents" class="p-6" style="max-width: 1200px; margin: 0 auto;">
+
+    <h1 class="text-2xl mb-2">wc-tree</h1>
+    <p class="text-sm mb-6" style="color: var(--text-5);">
+      A hierarchical tree component for navigation. Supports nested items, expand/collapse, icons, badges,
+      search filtering, lazy loading, keyboard navigation, and HTMX integration.
+    </p>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 1: Basic Tree -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Basic Tree</h3>
+      <p>Nested items with icons and badges. Click to select, click arrow to expand/collapse.</p>
+
+      <div class="demo-grid">
+        <div class="demo-panel">
+          <div class="demo-panel-header">Database Explorer</div>
+          <div class="demo-panel-body">
+            <wc-tree id="db-tree">
+              <wc-tree-item label="Development" icon="server" icon-style="duotone" expanded>
+                <wc-tree-item label="wec-dev" icon="database" icon-style="duotone" expanded>
+                  <wc-tree-item label="_app" icon="folder" badge="142"></wc-tree-item>
+                  <wc-tree-item label="_carrier_nat_gen_nc" icon="folder" badge="85"></wc-tree-item>
+                  <wc-tree-item label="_schema_builder" icon="folder" badge="38"></wc-tree-item>
+                  <wc-tree-item label="_template_builder" icon="folder" badge="67"></wc-tree-item>
+                  <wc-tree-item label="article" icon="folder" badge="12"></wc-tree-item>
+                  <wc-tree-item label="client" icon="folder" badge="3,241"></wc-tree-item>
+                  <wc-tree-item label="prospect" icon="folder" badge="49,197"></wc-tree-item>
+                  <wc-tree-item label="policy" icon="folder" badge="18,432"></wc-tree-item>
+                </wc-tree-item>
+                <wc-tree-item label="wec-test" icon="database" icon-style="duotone">
+                  <wc-tree-item label="prospect" icon="folder" badge="500"></wc-tree-item>
+                  <wc-tree-item label="policy" icon="folder" badge="200"></wc-tree-item>
+                </wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Production" icon="server" icon-style="duotone">
+                <wc-tree-item label="wec-prod" icon="database" icon-style="duotone">
+                  <wc-tree-item label="prospect" icon="folder" badge="128,932"></wc-tree-item>
+                  <wc-tree-item label="policy" icon="folder" badge="84,221"></wc-tree-item>
+                  <wc-tree-item label="claim" icon="folder" badge="12,847"></wc-tree-item>
+                </wc-tree-item>
+              </wc-tree-item>
+            </wc-tree>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm mb-2" style="color: var(--text-4);">Event Log</h4>
+          <div id="event-log-1" class="event-log">
+            <div style="color: var(--text-6);">Click items to see events...</div>
+          </div>
+          <pre class="mt-4" style="font-size: 0.7rem; color: var(--text-5); overflow-x: auto;"><code>&lt;wc-tree id="db-tree"&gt;
+  &lt;wc-tree-item label="Development" icon="server" expanded&gt;
+    &lt;wc-tree-item label="wec-dev" icon="database" expanded&gt;
+      &lt;wc-tree-item label="prospect" icon="folder" badge="49,197"&gt;
+      &lt;/wc-tree-item&gt;
+    &lt;/wc-tree-item&gt;
+  &lt;/wc-tree-item&gt;
+&lt;/wc-tree&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 2: Searchable Tree -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Searchable Tree</h3>
+      <p>Add <code>searchable</code> attribute to enable the filter input. Type to filter items by label.</p>
+
+      <div class="demo-grid">
+        <div class="demo-panel">
+          <div class="demo-panel-header">File Browser</div>
+          <div class="demo-panel-body">
+            <wc-tree id="file-tree" searchable>
+              <wc-tree-item label="src" icon="folder" expanded>
+                <wc-tree-item label="js" icon="folder" expanded>
+                  <wc-tree-item label="components" icon="folder" expanded>
+                    <wc-tree-item label="wc-tree.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-tree-item.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-input.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-select.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-form.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-tab.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="wc-accordion.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="index.js" icon="file-code"></wc-tree-item>
+                  </wc-tree-item>
+                  <wc-tree-item label="utils" icon="folder">
+                    <wc-tree-item label="helpers.js" icon="file-code"></wc-tree-item>
+                    <wc-tree-item label="icon-registry.js" icon="file-code"></wc-tree-item>
+                  </wc-tree-item>
+                </wc-tree-item>
+                <wc-tree-item label="css" icon="folder">
+                  <wc-tree-item label="main.css" icon="file-code"></wc-tree-item>
+                  <wc-tree-item label="base.css" icon="file-code"></wc-tree-item>
+                  <wc-tree-item label="color.css" icon="file-code"></wc-tree-item>
+                </wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="views" icon="folder">
+                <wc-tree-item label="index.html" icon="file"></wc-tree-item>
+                <wc-tree-item label="tree.html" icon="file"></wc-tree-item>
+                <wc-tree-item label="accordion.html" icon="file"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="docs" icon="folder">
+                <wc-tree-item label="wc-tree.md" icon="file-lines"></wc-tree-item>
+                <wc-tree-item label="wc-table.md" icon="file-lines"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="package.json" icon="file"></wc-tree-item>
+              <wc-tree-item label="README.md" icon="file-lines"></wc-tree-item>
+            </wc-tree>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm mb-2" style="color: var(--text-4);">Try filtering</h4>
+          <ul class="text-sm" style="color: var(--text-5); list-style: disc; padding-left: 1.5rem;">
+            <li>Type <strong>"wc-"</strong> to find all web components</li>
+            <li>Type <strong>"css"</strong> to find stylesheet files</li>
+            <li>Type <strong>"tree"</strong> to find tree-related files</li>
+            <li>Clear the input to show all items</li>
+          </ul>
+          <pre class="mt-4" style="font-size: 0.7rem; color: var(--text-5);"><code>&lt;wc-tree searchable&gt;
+  ...
+&lt;/wc-tree&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 3: Navigation Tree with HTMX -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Navigation Tree (HTMX)</h3>
+      <p>Tree items with HTMX attributes for server-driven navigation. Click an item to trigger an HTMX request.</p>
+
+      <div class="demo-grid">
+        <div class="demo-panel">
+          <div class="demo-panel-header">Application Navigator</div>
+          <div class="demo-panel-body">
+            <wc-tree id="nav-tree">
+              <wc-tree-item label="Schemas" icon="cube" icon-style="duotone" expanded>
+                <wc-tree-item label="prospect" icon="file-code"
+                              hx-get="#" hx-target="#nav-content" hx-swap="innerHTML">
+                </wc-tree-item>
+                <wc-tree-item label="policy" icon="file-code"
+                              hx-get="#" hx-target="#nav-content" hx-swap="innerHTML">
+                </wc-tree-item>
+                <wc-tree-item label="claim" icon="file-code"
+                              hx-get="#" hx-target="#nav-content" hx-swap="innerHTML">
+                </wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Templates" icon="rectangle-code" icon-style="duotone" expanded>
+                <wc-tree-item label="prospect_edit" icon="pen-to-square"></wc-tree-item>
+                <wc-tree-item label="prospect_list" icon="list"></wc-tree-item>
+                <wc-tree-item label="policy_edit" icon="pen-to-square"></wc-tree-item>
+                <wc-tree-item label="policy_list" icon="list"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Web Pilots" icon="arrow-progress" icon-style="duotone">
+                <wc-tree-item label="Nat Gen" icon="robot"></wc-tree-item>
+                <wc-tree-item label="Progressive" icon="robot"></wc-tree-item>
+                <wc-tree-item label="Safeco" icon="robot"></wc-tree-item>
+              </wc-tree-item>
+            </wc-tree>
+          </div>
+        </div>
+
+        <div>
+          <div id="nav-content" class="p-4" style="background: var(--surface-2); border-radius: 0.5rem; border: 1px solid var(--surface-5); min-height: 100px; color: var(--text-5); font-size: 0.875rem;">
+            Select an item from the tree to load content here.
+          </div>
+          <pre class="mt-4" style="font-size: 0.7rem; color: var(--text-5); overflow-x: auto;"><code>&lt;wc-tree-item label="prospect" icon="file-code"
+              hx-get="/api/schema/prospect"
+              hx-target="#content"
+              hx-swap="innerHTML"&gt;
+&lt;/wc-tree-item&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 4: Compact Tree -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Compact Tree &mdash; Sidebar Style</h3>
+      <p>A narrow tree suitable for sidebars. Combine with a fixed width container.</p>
+
+      <div class="demo-grid">
+        <div class="demo-panel" style="max-width: 280px;">
+          <div class="demo-panel-header">Sidebar</div>
+          <div class="demo-panel-body">
+            <wc-tree id="sidebar-tree" searchable>
+              <wc-tree-item label="Dashboard" icon="gauge" selected></wc-tree-item>
+              <wc-tree-item label="Contacts" icon="address-book" expanded>
+                <wc-tree-item label="All Contacts" icon="users"></wc-tree-item>
+                <wc-tree-item label="Leads" icon="user-plus" badge="12"></wc-tree-item>
+                <wc-tree-item label="Customers" icon="user-check" badge="847"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Deals" icon="dollar-sign" expanded>
+                <wc-tree-item label="Open" icon="circle" badge="23"></wc-tree-item>
+                <wc-tree-item label="Won" icon="circle-check" badge="156"></wc-tree-item>
+                <wc-tree-item label="Lost" icon="circle-xmark" badge="31"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Reports" icon="chart-line">
+                <wc-tree-item label="Revenue" icon="chart-area"></wc-tree-item>
+                <wc-tree-item label="Pipeline" icon="chart-bar"></wc-tree-item>
+                <wc-tree-item label="Activity" icon="chart-user"></wc-tree-item>
+              </wc-tree-item>
+              <wc-tree-item label="Settings" icon="gear">
+                <wc-tree-item label="Users" icon="users-gear"></wc-tree-item>
+                <wc-tree-item label="Permissions" icon="shield-check"></wc-tree-item>
+              </wc-tree-item>
+            </wc-tree>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm mb-2" style="color: var(--text-4);">Keyboard Navigation</h4>
+          <ul class="text-sm" style="color: var(--text-5); list-style: disc; padding-left: 1.5rem;">
+            <li><strong>&uarr;/&darr;</strong> &mdash; Move between items</li>
+            <li><strong>&rarr;</strong> &mdash; Expand node or move into children</li>
+            <li><strong>&larr;</strong> &mdash; Collapse node or move to parent</li>
+            <li><strong>Enter/Space</strong> &mdash; Select item</li>
+            <li>Focus an item first by clicking it, then use arrow keys</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Wire up event logging for the database tree
+    document.addEventListener('DOMContentLoaded', () => {
+      const dbTree = document.getElementById('db-tree');
+      const log = document.getElementById('event-log-1');
+
+      if (dbTree && log) {
+        dbTree.addEventListener('tree:item-click', (e) => {
+          const d = e.detail;
+          const entry = document.createElement('div');
+          entry.textContent = `click: ${d.label} (level ${d.level}${d.badge ? ', badge: ' + d.badge : ''})`;
+          log.prepend(entry);
+          if (log.children.length > 20) log.lastChild.remove();
+        });
+
+        dbTree.addEventListener('tree:item-dblclick', (e) => {
+          const d = e.detail;
+          const entry = document.createElement('div');
+          entry.style.color = 'var(--primary-color)';
+          entry.textContent = `dblclick: ${d.label}`;
+          log.prepend(entry);
+        });
+
+        dbTree.addEventListener('tree:item-context-menu', (e) => {
+          e.preventDefault();
+          const d = e.detail;
+          const entry = document.createElement('div');
+          entry.style.color = 'var(--warning-text-color, orange)';
+          entry.textContent = `context-menu: ${d.label} at (${d.x}, ${d.y})`;
+          log.prepend(entry);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

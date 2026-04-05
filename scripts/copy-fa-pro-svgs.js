@@ -610,6 +610,7 @@ const ICONS_TO_COPY = [
   "align-right",
   "align-center",
   "layer-group",
+  "plug",
   "grip-dots",
   "grip-dots-vertical",
   "grip-lines",
@@ -617,6 +618,8 @@ const ICONS_TO_COPY = [
   "grip",
   "grip-vertical",
   "microscope",
+  "cloud-arrow-up",
+  "plug",
   // Add more icon names here
 ];
 

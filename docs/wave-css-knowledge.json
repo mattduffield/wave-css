@@ -3,7 +3,7 @@
     "name": "Wave CSS Knowledge Base",
     "version": "1.0.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-03-29"
+    "lastUpdated": "2026-04-05"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -192,6 +192,45 @@
         "description": "Semantic wrapper for dropdown items",
         "attributes": [],
         "usage": "<wc-dropdown-item><a href=\"#\">Link</a></wc-dropdown-item>"
+      },
+      {
+        "name": "wc-tree",
+        "description": "Hierarchical tree component with nested items, expand/collapse, icons, badges, search, lazy loading, keyboard navigation, and HTMX support",
+        "attributes": [
+          "id",
+          "class",
+          "search",
+          "lazy-url"
+        ],
+        "events": {
+          "emits": [
+            "tree:select",
+            "tree:expand",
+            "tree:collapse"
+          ]
+        },
+        "notes": "Supports nested wc-tree-item children. Search attribute enables a filter input. lazy-url enables on-demand child loading. Full keyboard navigation (arrow keys, enter, space). HTMX attributes supported for server-driven interactions.",
+        "usage": "<wc-tree search>\n  <wc-tree-item label=\"Documents\" icon=\"fa-folder\" expanded>\n    <wc-tree-item label=\"Resume.pdf\" icon=\"fa-file\"></wc-tree-item>\n    <wc-tree-item label=\"Cover Letter.docx\" icon=\"fa-file\"></wc-tree-item>\n  </wc-tree-item>\n  <wc-tree-item label=\"Photos\" icon=\"fa-folder\" badge=\"12\">\n    <wc-tree-item label=\"Vacation\" icon=\"fa-folder\" lazy-url=\"/api/photos/vacation\"></wc-tree-item>\n  </wc-tree-item>\n</wc-tree>"
+      },
+      {
+        "name": "wc-tree-item",
+        "description": "Tree node used as a child of wc-tree or another wc-tree-item for nesting",
+        "attributes": [
+          "label",
+          "icon",
+          "icon-style",
+          "badge",
+          "expanded",
+          "selected",
+          "lazy-url",
+          "hx-get",
+          "hx-post",
+          "hx-target",
+          "hx-swap",
+          "hx-trigger",
+          "hx-push-url"
+        ],
+        "usage": "<wc-tree-item label=\"Node\" icon=\"fa-folder\" badge=\"3\" expanded>\n  <wc-tree-item label=\"Child\" icon=\"fa-file\" icon-style=\"color:red;\"></wc-tree-item>\n</wc-tree-item>"
       }
     ],
     "form": [
@@ -576,6 +615,49 @@
         },
         "notes": "Column definitions via <wc-tabulator-column> children. Custom functions via <wc-tabulator-func>. Row context menus via <wc-tabulator-row-menu>. Supports pagination, column resizing, movable columns, selectable rows, filters.",
         "usage": "<wc-tabulator id=\"myTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Age\" field=\"age\" sorter=\"number\"></wc-tabulator-column>\n</wc-tabulator>"
+      },
+      {
+        "name": "wc-table",
+        "description": "Lightweight data-driven table with sorting, row click events, auto-columns, and URL-based data loading",
+        "attributes": [
+          "id",
+          "class",
+          "url",
+          "items",
+          "striped",
+          "hoverable",
+          "bordered",
+          "borderless",
+          "size",
+          "fixed-header",
+          "clickable",
+          "auto-columns",
+          "empty-message",
+          "display-member"
+        ],
+        "events": {
+          "emits": [
+            "table:row-click",
+            "table:row-dblclick",
+            "table:sort"
+          ]
+        },
+        "notes": "Column definitions via <wc-table-col> children. auto-columns generates columns from data keys. url attribute fetches JSON data. items attribute accepts JSON array. clickable enables row click/dblclick events.",
+        "usage": "<wc-table url=\"/api/users\" striped hoverable clickable>\n  <wc-table-col field=\"name\" label=\"Name\" sortable></wc-table-col>\n  <wc-table-col field=\"email\" label=\"Email\" sortable></wc-table-col>\n  <wc-table-col field=\"role\" label=\"Role\" align=\"center\" width=\"120px\"></wc-table-col>\n</wc-table>"
+      },
+      {
+        "name": "wc-table-col",
+        "description": "Column definition for wc-table specifying field mapping, label, sorting, alignment, width, and formatting",
+        "attributes": [
+          "field",
+          "label",
+          "sortable",
+          "align",
+          "width",
+          "format",
+          "class"
+        ],
+        "usage": "<wc-table-col field=\"name\" label=\"Full Name\" sortable align=\"left\" width=\"200px\"></wc-table-col>"
       }
     ],
     "interactive": [
@@ -848,9 +930,14 @@
       },
       {
         "name": "wc-hotkey",
-        "description": "Keyboard shortcut binding that triggers click on target element",
-        "notes": "Parses key combinations like ctrl+s, alt+n. Triggers click on target selector.",
-        "usage": "<wc-hotkey keys=\"ctrl+s\" target=\"button[type='submit']\"></wc-hotkey>"
+        "description": "Keyboard shortcut binding that triggers click or custom action on target element",
+        "attributes": [
+          "keys",
+          "target",
+          "action"
+        ],
+        "notes": "Parses key combinations like ctrl+s, alt+n. Triggers click on target selector by default. The action attribute specifies a custom action instead of click.",
+        "usage": "<wc-hotkey keys=\"ctrl+s\" target=\"button[type='submit']\"></wc-hotkey>\n<wc-hotkey keys=\"alt+n\" target=\"#newBtn\" action=\"focus\"></wc-hotkey>"
       },
       {
         "name": "wc-link",

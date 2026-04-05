@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-table</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body { margin: 0; padding: 0; min-height: 100vh; }
+    .demo-section { margin-bottom: 2rem; }
+    .demo-section h3 { margin-bottom: 0.5rem; color: var(--text-3); }
+    .demo-section p { margin-bottom: 0.75rem; color: var(--text-5); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div id="page-contents" class="p-6" style="max-width: 1200px; margin: 0 auto;">
+
+    <h1 class="text-2xl mb-2">wc-table</h1>
+    <p class="text-sm mb-6" style="color: var(--text-5);">
+      A lightweight data-driven table component. Define columns with <code>&lt;wc-table-col&gt;</code>,
+      load data from a URL or static JSON. Uses the existing wc-table CSS classes internally.
+    </p>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 1: Static Data with Column Definitions -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Static Data with Column Definitions</h3>
+      <p>Data provided via <code>items</code> attribute. Columns defined with <code>&lt;wc-table-col&gt;</code>. Click headers to sort.</p>
+
+      <wc-table id="static-table" striped hoverable clickable
+                items='[
+                  {"first_name":"Jane","last_name":"Smith","email":"jane@acme.com","status":"active","deal_value":25000},
+                  {"first_name":"John","last_name":"Doe","email":"john@example.com","status":"pending","deal_value":12500},
+                  {"first_name":"Alice","last_name":"Johnson","email":"alice@corp.io","status":"active","deal_value":48000},
+                  {"first_name":"Bob","last_name":"Wilson","email":"bob@startup.co","status":"inactive","deal_value":0},
+                  {"first_name":"Carol","last_name":"Davis","email":"carol@agency.net","status":"active","deal_value":35000},
+                  {"first_name":"Dave","last_name":"Brown","email":"dave@tech.io","status":"pending","deal_value":8200}
+                ]'>
+        <wc-table-col field="first_name" label="First Name" sortable></wc-table-col>
+        <wc-table-col field="last_name" label="Last Name" sortable></wc-table-col>
+        <wc-table-col field="email" label="Email"></wc-table-col>
+        <wc-table-col field="status" label="Status" align="center" sortable></wc-table-col>
+        <wc-table-col field="deal_value" label="Deal Value" align="right" format="currency" sortable></wc-table-col>
+      </wc-table>
+
+      <pre class="mt-4" style="font-size: 0.7rem; color: var(--text-5); overflow-x: auto;"><code>&lt;wc-table striped hoverable clickable items='[...]'&gt;
+  &lt;wc-table-col field="first_name" label="First Name" sortable&gt;&lt;/wc-table-col&gt;
+  &lt;wc-table-col field="deal_value" label="Deal Value" align="right" format="currency" sortable&gt;&lt;/wc-table-col&gt;
+&lt;/wc-table&gt;</code></pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 2: Compact Table -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Compact Table (size="sm")</h3>
+      <p>Dense data view with smaller padding. Good for dashboards and data exploration.</p>
+
+      <wc-table size="sm" striped bordered
+                items='[
+                  {"collection":"prospect","count":49197,"size":"28.4 MB","indexes":8},
+                  {"collection":"policy","count":18432,"size":"12.1 MB","indexes":5},
+                  {"collection":"claim","count":12847,"size":"8.7 MB","indexes":4},
+                  {"collection":"client","count":3241,"size":"1.8 MB","indexes":3},
+                  {"collection":"_app","count":142,"size":"0.1 MB","indexes":2},
+                  {"collection":"_schema_builder","count":38,"size":"0.05 MB","indexes":2},
+                  {"collection":"_template_builder","count":67,"size":"0.2 MB","indexes":2}
+                ]'>
+        <wc-table-col field="collection" label="Collection" sortable></wc-table-col>
+        <wc-table-col field="count" label="Documents" align="right" format="number" sortable></wc-table-col>
+        <wc-table-col field="size" label="Size" align="right" sortable></wc-table-col>
+        <wc-table-col field="indexes" label="Indexes" align="center" sortable></wc-table-col>
+      </wc-table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 3: display-member shorthand -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Auto-Columns from display-member</h3>
+      <p>No <code>&lt;wc-table-col&gt;</code> needed. Just list field names in the <code>display-member</code> attribute.</p>
+
+      <wc-table striped hoverable
+                display-member="name,email,phone,city"
+                items='[
+                  {"name":"Jane Smith","email":"jane@acme.com","phone":"(555) 123-4567","city":"Portland"},
+                  {"name":"John Doe","email":"john@example.com","phone":"(555) 987-6543","city":"Seattle"},
+                  {"name":"Alice Johnson","email":"alice@corp.io","phone":"(555) 456-7890","city":"San Francisco"}
+                ]'>
+      </wc-table>
+
+      <pre class="mt-4" style="font-size: 0.7rem; color: var(--text-5);"><code>&lt;wc-table striped hoverable
+          display-member="name,email,phone,city"
+          items='[...]'&gt;
+&lt;/wc-table&gt;</code></pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 4: Empty State -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Empty State</h3>
+      <p>Custom message when no data is available.</p>
+
+      <wc-table striped empty-message="No prospects found. Try adjusting your filters."
+                items='[]'>
+        <wc-table-col field="name" label="Name"></wc-table-col>
+        <wc-table-col field="email" label="Email"></wc-table-col>
+        <wc-table-col field="status" label="Status"></wc-table-col>
+      </wc-table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 5: Dates and Formatting -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Date and Number Formatting</h3>
+      <p>Use <code>format</code> attribute on columns: <code>date</code>, <code>datetime</code>, <code>currency</code>, <code>number</code>, <code>boolean</code>.</p>
+
+      <wc-table striped hoverable
+                items='[
+                  {"name":"Q1 Report","created":"2026-01-15T10:30:00Z","amount":142500.50,"approved":true,"items":1247},
+                  {"name":"Q2 Report","created":"2026-04-01T09:00:00Z","amount":198750.00,"approved":true,"items":1583},
+                  {"name":"Q3 Report","created":"2026-07-01T14:15:00Z","amount":87200.75,"approved":false,"items":921},
+                  {"name":"Q4 Report","created":"2026-10-01T08:45:00Z","amount":0,"approved":false,"items":0}
+                ]'>
+        <wc-table-col field="name" label="Report" sortable></wc-table-col>
+        <wc-table-col field="created" label="Created" format="date" sortable></wc-table-col>
+        <wc-table-col field="amount" label="Amount" format="currency" align="right" sortable></wc-table-col>
+        <wc-table-col field="items" label="Items" format="number" align="right" sortable></wc-table-col>
+        <wc-table-col field="approved" label="Approved" format="boolean" align="center"></wc-table-col>
+      </wc-table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 6: Row Click Events -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Row Click Events</h3>
+      <p>Click a row to see the event data. Double-click for a different event.</p>
+
+      <wc-table id="click-table" striped hoverable clickable
+                items='[
+                  {"id":"001","name":"Acme Corp","industry":"Technology","revenue":5200000},
+                  {"id":"002","name":"GlobalTech","industry":"Manufacturing","revenue":12800000},
+                  {"id":"003","name":"SmartSoft","industry":"Software","revenue":3400000}
+                ]'>
+        <wc-table-col field="id" label="ID" width="60px"></wc-table-col>
+        <wc-table-col field="name" label="Company" sortable></wc-table-col>
+        <wc-table-col field="industry" label="Industry" sortable></wc-table-col>
+        <wc-table-col field="revenue" label="Revenue" format="currency" align="right" sortable></wc-table-col>
+      </wc-table>
+
+      <div id="click-output" class="mt-2 p-3" style="background: var(--surface-2); border-radius: 0.25rem; font-size: 0.8125rem; color: var(--text-5); min-height: 2rem;">
+        Click a row...
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE 7: Programmatic Data -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Programmatic Data Update</h3>
+      <p>Set data via JavaScript using the <code>.data</code> property or <code>.refresh()</code> method.</p>
+
+      <div class="flex flex-row gap-2 mb-2">
+        <button class="btn btn-sm" onclick="loadSampleData()">Load Sample Data</button>
+        <button class="btn btn-sm" onclick="clearData()">Clear</button>
+      </div>
+
+      <wc-table id="programmatic-table" striped hoverable
+                display-member="name,role,department">
+      </wc-table>
+    </div>
+
+    <wc-javascript>
+    // Row click events
+    const clickTable = document.getElementById('click-table');
+    const clickOutput = document.getElementById('click-output');
+    if (clickTable && clickOutput) {
+      clickTable.addEventListener('table:row-click', (e) => {
+        clickOutput.innerHTML = '<strong>Click:</strong> ' + JSON.stringify(e.detail.data);
+      });
+      clickTable.addEventListener('table:row-dblclick', (e) => {
+        clickOutput.innerHTML = '<strong>Double-click:</strong> ' + e.detail.data.name + ' (' + e.detail.data.industry + ')';
+      });
+    }
+
+    // Programmatic data
+    window.loadSampleData = function() {
+      const table = document.getElementById('programmatic-table');
+      table.data = [
+        { name: 'Alice Chen', role: 'Engineer', department: 'Engineering' },
+        { name: 'Bob Martinez', role: 'Designer', department: 'Product' },
+        { name: 'Carol Kim', role: 'Manager', department: 'Engineering' },
+        { name: 'Dave Patel', role: 'Analyst', department: 'Data' },
+        { name: 'Eve Thompson', role: 'Director', department: 'Operations' }
+      ];
+    };
+
+    window.clearData = function() {
+      const table = document.getElementById('programmatic-table');
+      table.data = [];
+    };
+    </wc-javascript>
+
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

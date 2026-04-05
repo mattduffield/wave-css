@@ -16021,6 +16021,967 @@ var WcTimeline = class extends WcBaseComponent {
 };
 customElements.define("wc-timeline", WcTimeline);
 
+// src/js/components/wc-tree-item.js
+if (!customElements.get("wc-tree-item")) {
+  class WcTreeItem extends WcBaseComponent {
+    static get observedAttributes() {
+      return [
+        "id",
+        "class",
+        "label",
+        "icon",
+        "icon-style",
+        "badge",
+        "expanded",
+        "selected",
+        "lazy-url",
+        "hx-get",
+        "hx-post",
+        "hx-target",
+        "hx-swap",
+        "hx-push-url",
+        "hx-indicator"
+      ];
+    }
+    static get is() {
+      return "wc-tree-item";
+    }
+    constructor() {
+      super();
+      this._lazyLoaded = false;
+      const compEl = this.querySelector(":scope > .wc-tree-item");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-tree-item");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    _render() {
+      if (this._rendered) return;
+      this._rendered = true;
+      super._render();
+      this._createElement();
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+    }
+    _createElement() {
+      const label = this.getAttribute("label") || "";
+      const icon = this.getAttribute("icon") || "";
+      const iconStyle = this.getAttribute("icon-style") || "solid";
+      const badge = this.getAttribute("badge") || "";
+      const expanded = this.hasAttribute("expanded");
+      const selected = this.hasAttribute("selected");
+      const hasChildren = this.querySelectorAll(":scope > wc-tree-item").length > 0;
+      const lazyUrl = this.getAttribute("lazy-url") || "";
+      const hasExpandable = hasChildren || lazyUrl;
+      const isSystem = label.startsWith("_");
+      let level = 0;
+      let parent = this.parentElement?.closest("wc-tree-item");
+      while (parent) {
+        level++;
+        parent = parent.parentElement?.closest("wc-tree-item");
+      }
+      this._level = level;
+      const row = document.createElement("div");
+      row.classList.add("tree-item-row");
+      if (selected) row.classList.add("selected");
+      if (isSystem) row.classList.add("system-item");
+      row.style.paddingLeft = `${level * 1.25}rem`;
+      row.setAttribute("tabindex", "0");
+      row.setAttribute("role", "treeitem");
+      row.setAttribute("aria-expanded", expanded ? "true" : "false");
+      const arrow = document.createElement("span");
+      arrow.classList.add("tree-item-arrow");
+      if (hasExpandable) {
+        arrow.innerHTML = `<wc-fa-icon name="chevron-right" size="0.625rem"></wc-fa-icon>`;
+        if (expanded) arrow.classList.add("expanded");
+      }
+      row.appendChild(arrow);
+      if (icon) {
+        const iconEl = document.createElement("span");
+        iconEl.classList.add("tree-item-icon");
+        iconEl.innerHTML = `<wc-fa-icon name="${icon}" icon-style="${iconStyle}" size="0.8125rem"></wc-fa-icon>`;
+        row.appendChild(iconEl);
+      }
+      const labelEl = document.createElement("span");
+      labelEl.classList.add("tree-item-label");
+      labelEl.textContent = label;
+      row.appendChild(labelEl);
+      if (badge) {
+        const badgeEl = document.createElement("span");
+        badgeEl.classList.add("tree-item-badge");
+        badgeEl.textContent = badge;
+        row.appendChild(badgeEl);
+      }
+      this.componentElement.appendChild(row);
+      const children = document.createElement("div");
+      children.classList.add("tree-item-children");
+      children.setAttribute("role", "group");
+      if (!expanded) children.style.display = "none";
+      const childItems = Array.from(this.querySelectorAll(":scope > wc-tree-item"));
+      childItems.forEach((child) => children.appendChild(child));
+      this.componentElement.appendChild(children);
+    }
+    get level() {
+      return this._level || 0;
+    }
+    get isExpanded() {
+      return this.hasAttribute("expanded");
+    }
+    toggle() {
+      if (this.isExpanded) {
+        this.collapse();
+      } else {
+        this.expand();
+      }
+    }
+    expand() {
+      this.setAttribute("expanded", "");
+      const children = this.componentElement?.querySelector(".tree-item-children");
+      const arrow = this.componentElement?.querySelector(".tree-item-arrow");
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (children) children.style.display = "";
+      if (arrow) arrow.classList.add("expanded");
+      if (row) row.setAttribute("aria-expanded", "true");
+      const lazyUrl = this.getAttribute("lazy-url");
+      if (lazyUrl && !this._lazyLoaded) {
+        this._lazyLoad(lazyUrl, children);
+      }
+    }
+    collapse() {
+      this.removeAttribute("expanded");
+      const children = this.componentElement?.querySelector(".tree-item-children");
+      const arrow = this.componentElement?.querySelector(".tree-item-arrow");
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (children) children.style.display = "none";
+      if (arrow) arrow.classList.remove("expanded");
+      if (row) row.setAttribute("aria-expanded", "false");
+    }
+    select() {
+      const tree = this.closest("wc-tree");
+      if (tree) {
+        tree.querySelectorAll(".tree-item-row.selected").forEach((r) => r.classList.remove("selected"));
+      }
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (row) row.classList.add("selected");
+      this.setAttribute("selected", "");
+    }
+    async _lazyLoad(url, container2) {
+      this._lazyLoaded = true;
+      const spinner = document.createElement("div");
+      spinner.classList.add("tree-item-loading");
+      spinner.style.paddingLeft = `${(this._level + 1) * 1.25}rem`;
+      spinner.innerHTML = `<wc-fa-icon name="spinner" spin size="0.75rem"></wc-fa-icon> <span>Loading...</span>`;
+      container2.appendChild(spinner);
+      container2.style.display = "";
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          const html = await response.text();
+          spinner.remove();
+          const temp = document.createElement("div");
+          temp.innerHTML = html;
+          while (temp.firstChild) {
+            container2.appendChild(temp.firstChild);
+          }
+          if (typeof htmx !== "undefined") {
+            htmx.process(container2);
+          }
+        } else {
+          spinner.innerHTML = `<span class="tree-item-error">Failed to load</span>`;
+        }
+      } catch (e) {
+        spinner.innerHTML = `<span class="tree-item-error">Error: ${e.message}</span>`;
+      }
+    }
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === "expanded") {
+        if (newValue !== null) this.expand();
+        else this.collapse();
+      } else if (attrName === "selected") {
+        if (newValue !== null) this.select();
+      } else if (attrName === "label") {
+        const labelEl = this.componentElement?.querySelector(".tree-item-label");
+        if (labelEl) labelEl.textContent = newValue || "";
+      } else if (attrName === "badge") {
+        let badgeEl = this.componentElement?.querySelector(".tree-item-badge");
+        if (newValue) {
+          if (!badgeEl) {
+            badgeEl = document.createElement("span");
+            badgeEl.classList.add("tree-item-badge");
+            this.componentElement?.querySelector(".tree-item-row")?.appendChild(badgeEl);
+          }
+          badgeEl.textContent = newValue;
+        } else if (badgeEl) {
+          badgeEl.remove();
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    _wireEvents() {
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (!row) return;
+      this._handleRowClick = (e) => {
+        const arrow = e.target.closest(".tree-item-arrow");
+        if (arrow && arrow.querySelector("wc-fa-icon")) {
+          e.stopPropagation();
+          this.toggle();
+          return;
+        }
+        this.select();
+        this.dispatchEvent(new CustomEvent("tree:item-click", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this
+          }
+        }));
+      };
+      this._handleRowDblClick = (e) => {
+        this.dispatchEvent(new CustomEvent("tree:item-dblclick", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this
+          }
+        }));
+      };
+      this._handleRowContextMenu = (e) => {
+        this.select();
+        this.dispatchEvent(new CustomEvent("tree:item-context-menu", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this,
+            x: e.clientX,
+            y: e.clientY
+          }
+        }));
+      };
+      this._handleKeydown = (e) => {
+        const tree = this.closest("wc-tree");
+        if (!tree) return;
+        switch (e.key) {
+          case "ArrowDown":
+            e.preventDefault();
+            tree._focusNext(this);
+            break;
+          case "ArrowUp":
+            e.preventDefault();
+            tree._focusPrev(this);
+            break;
+          case "ArrowRight":
+            e.preventDefault();
+            if (!this.isExpanded) this.expand();
+            else tree._focusNext(this);
+            break;
+          case "ArrowLeft":
+            e.preventDefault();
+            if (this.isExpanded) this.collapse();
+            else {
+              const parentItem = this.parentElement?.closest("wc-tree-item");
+              if (parentItem) {
+                const parentRow = parentItem.componentElement?.querySelector(".tree-item-row");
+                if (parentRow) parentRow.focus();
+              }
+            }
+            break;
+          case "Enter":
+          case " ":
+            e.preventDefault();
+            this.select();
+            row.click();
+            break;
+        }
+      };
+      row.addEventListener("click", this._handleRowClick);
+      row.addEventListener("dblclick", this._handleRowDblClick);
+      row.addEventListener("contextmenu", this._handleRowContextMenu);
+      row.addEventListener("keydown", this._handleKeydown);
+    }
+    _unWireEvents() {
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (!row) return;
+      if (this._handleRowClick) row.removeEventListener("click", this._handleRowClick);
+      if (this._handleRowDblClick) row.removeEventListener("dblclick", this._handleRowDblClick);
+      if (this._handleRowContextMenu) row.removeEventListener("contextmenu", this._handleRowContextMenu);
+      if (this._handleKeydown) row.removeEventListener("keydown", this._handleKeydown);
+    }
+    _applyStyle() {
+    }
+  }
+  customElements.define("wc-tree-item", WcTreeItem);
+}
+
+// src/js/components/wc-tree.js
+if (!customElements.get("wc-tree")) {
+  class WcTree extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class", "searchable"];
+    }
+    static get is() {
+      return "wc-tree";
+    }
+    constructor() {
+      super();
+      const compEl = this.querySelector(":scope > .wc-tree");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-tree");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    _render() {
+      if (this._rendered) return;
+      this._rendered = true;
+      super._render();
+      this._createElement();
+      if (typeof htmx !== "undefined") {
+        htmx.process(this);
+      }
+    }
+    _createElement() {
+      const searchable = this.hasAttribute("searchable");
+      if (searchable) {
+        const searchWrap = document.createElement("div");
+        searchWrap.classList.add("tree-search-wrap");
+        const searchInput = document.createElement("input");
+        searchInput.type = "search";
+        searchInput.classList.add("tree-search");
+        searchInput.placeholder = "Filter...";
+        searchInput.setAttribute("autocomplete", "off");
+        searchWrap.appendChild(searchInput);
+        this.componentElement.appendChild(searchWrap);
+      }
+      const content = document.createElement("div");
+      content.classList.add("tree-content");
+      content.setAttribute("role", "tree");
+      const items = Array.from(this.querySelectorAll(":scope > wc-tree-item"));
+      items.forEach((item) => content.appendChild(item));
+      this.componentElement.appendChild(content);
+    }
+    getInnerContainer() {
+      return this.querySelector(":scope > .wc-tree > .tree-content") || this;
+    }
+    // --- Keyboard Navigation ---
+    _getVisibleRows() {
+      return Array.from(this.querySelectorAll(".tree-item-row")).filter((row) => {
+        let el = row.closest("wc-tree-item");
+        let parent = el?.parentElement?.closest("wc-tree-item");
+        while (parent) {
+          if (!parent.isExpanded) return false;
+          parent = parent.parentElement?.closest("wc-tree-item");
+        }
+        if (row.closest(".tree-filtered-out")) return false;
+        return true;
+      });
+    }
+    _focusNext(currentItem) {
+      const rows = this._getVisibleRows();
+      const currentRow = currentItem.componentElement?.querySelector(".tree-item-row");
+      const idx = rows.indexOf(currentRow);
+      if (idx < rows.length - 1) {
+        rows[idx + 1].focus();
+      }
+    }
+    _focusPrev(currentItem) {
+      const rows = this._getVisibleRows();
+      const currentRow = currentItem.componentElement?.querySelector(".tree-item-row");
+      const idx = rows.indexOf(currentRow);
+      if (idx > 0) {
+        rows[idx - 1].focus();
+      }
+    }
+    // --- Search ---
+    _filterItems(query) {
+      const items = this.querySelectorAll("wc-tree-item");
+      const lowerQuery = query.toLowerCase();
+      items.forEach((item) => {
+        const label = (item.getAttribute("label") || "").toLowerCase();
+        const matches = !query || label.includes(lowerQuery);
+        if (matches) {
+          item.classList.remove("tree-filtered-out");
+          if (query) {
+            let parent = item.parentElement?.closest("wc-tree-item");
+            while (parent) {
+              parent.classList.remove("tree-filtered-out");
+              parent.expand();
+              parent = parent.parentElement?.closest("wc-tree-item");
+            }
+          }
+        } else {
+          item.classList.add("tree-filtered-out");
+        }
+      });
+    }
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === "searchable") {
+        this._render();
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    _wireEvents() {
+      const searchInput = this.componentElement?.querySelector(".tree-search");
+      if (searchInput) {
+        this._handleSearch = (e) => {
+          this._filterItems(e.target.value.trim());
+        };
+        searchInput.addEventListener("input", this._handleSearch);
+      }
+    }
+    _unWireEvents() {
+      const searchInput = this.componentElement?.querySelector(".tree-search");
+      if (searchInput && this._handleSearch) {
+        searchInput.removeEventListener("input", this._handleSearch);
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-tree {
+          display: contents;
+        }
+        .wc-tree {
+          display: flex;
+          flex-direction: column;
+          font-size: 0.8125rem;
+          overflow-y: auto;
+          user-select: none;
+        }
+
+        /* Search */
+        .tree-search-wrap {
+          padding: 0.375rem;
+          flex-shrink: 0;
+        }
+        .tree-search {
+          width: 100%;
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+          background: var(--surface-3, #2a2a2a);
+          color: var(--text-1, #eee);
+          border: 1px solid var(--surface-5, #444);
+          border-radius: 0.25rem;
+          outline: none;
+        }
+        .tree-search:focus {
+          border-color: var(--primary-color, #3b97e3);
+        }
+
+        /* Tree content */
+        .tree-content {
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        /* Tree item */
+        wc-tree-item {
+          display: contents;
+        }
+        .wc-tree-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Row */
+        .tree-item-row {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          padding: 0.25rem 0.5rem;
+          cursor: pointer;
+          border-left: 2px solid transparent;
+          transition: background-color 0.15s, border-color 0.15s;
+          outline: none;
+          min-height: 1.625rem;
+        }
+        .tree-item-row:hover {
+          background: var(--surface-3, rgba(255,255,255,0.05));
+        }
+        .tree-item-row:focus-visible {
+          border-left-color: var(--primary-color, #3b97e3);
+          background: var(--surface-3, rgba(255,255,255,0.05));
+        }
+        .tree-item-row.selected {
+          background: rgba(59, 151, 227, 0.15);
+          border-left-color: var(--primary-color, #3b97e3);
+        }
+
+        /* System items (names starting with _) */
+        .tree-item-row.system-item .tree-item-label {
+          font-style: italic;
+          opacity: 0.7;
+        }
+
+        /* Arrow */
+        .tree-item-arrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 0.875rem;
+          height: 0.875rem;
+          flex-shrink: 0;
+          transition: transform 0.2s ease;
+        }
+        .tree-item-arrow.expanded {
+          transform: rotate(90deg);
+        }
+
+        /* Icon */
+        .tree-item-icon {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          opacity: 0.8;
+        }
+
+        /* Label */
+        .tree-item-label {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        /* Badge */
+        .tree-item-badge {
+          font-size: 0.6875rem;
+          color: var(--text-6, #888);
+          flex-shrink: 0;
+          margin-left: auto;
+          padding-left: 0.5rem;
+        }
+
+        /* Children */
+        .tree-item-children {
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Loading */
+        .tree-item-loading {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+          color: var(--text-6, #888);
+        }
+        .tree-item-error {
+          color: var(--error-color, #e53935);
+          font-size: 0.75rem;
+        }
+
+        /* Filtered out */
+        .tree-filtered-out {
+          display: none !important;
+        }
+      `;
+      this.loadStyle("wc-tree-style", style);
+    }
+  }
+  customElements.define("wc-tree", WcTree);
+}
+
+// src/js/components/wc-table-col.js
+if (!customElements.get("wc-table-col")) {
+  class WcTableCol extends HTMLElement {
+    constructor() {
+      super();
+      this.style.display = "none";
+    }
+    static get observedAttributes() {
+      return ["field", "label", "sortable", "align", "width", "format", "class"];
+    }
+    get config() {
+      return {
+        field: this.getAttribute("field") || "",
+        label: this.getAttribute("label") || this.getAttribute("field") || "",
+        sortable: this.hasAttribute("sortable"),
+        align: this.getAttribute("align") || "left",
+        width: this.getAttribute("width") || "",
+        format: this.getAttribute("format") || "",
+        css: this.getAttribute("class") || ""
+      };
+    }
+  }
+  customElements.define("wc-table-col", WcTableCol);
+}
+
+// src/js/components/wc-table.js
+if (!customElements.get("wc-table")) {
+  class WcTable extends WcBaseComponent {
+    static get observedAttributes() {
+      return [
+        "id",
+        "class",
+        "url",
+        "items",
+        "striped",
+        "hoverable",
+        "bordered",
+        "borderless",
+        "size",
+        "fixed-header",
+        "clickable",
+        "auto-columns",
+        "empty-message",
+        "page-size",
+        "display-member"
+      ];
+    }
+    static get is() {
+      return "wc-table";
+    }
+    constructor() {
+      super();
+      this._data = [];
+      this._columns = [];
+      this._sortField = "";
+      this._sortDir = "";
+      this._currentPage = 0;
+      const compEl = this.querySelector(":scope > .wc-table-container");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-table-container");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._parseColumns();
+      const url = this.getAttribute("url");
+      const items = this.getAttribute("items");
+      if (url) {
+        await this._fetchData(url);
+      } else if (items) {
+        try {
+          this._data = JSON.parse(items);
+        } catch (e) {
+          console.error("[wc-table] Invalid items JSON:", e);
+          this._data = [];
+        }
+        this._renderTable();
+      } else {
+        this._renderTable();
+      }
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+    }
+    _render() {
+      super._render();
+    }
+    _parseColumns() {
+      const cols = this.querySelectorAll("wc-table-col");
+      this._columns = Array.from(cols).map((col) => {
+        if (typeof col.config === "object") return col.config;
+        return {
+          field: col.getAttribute("field") || "",
+          label: col.getAttribute("label") || col.getAttribute("field") || "",
+          sortable: col.hasAttribute("sortable"),
+          align: col.getAttribute("align") || "left",
+          width: col.getAttribute("width") || "",
+          format: col.getAttribute("format") || "",
+          css: col.getAttribute("class") || ""
+        };
+      }).filter((c) => c.field);
+      if (this._columns.length === 0) {
+        const displayMember = this.getAttribute("display-member");
+        if (displayMember) {
+          this._columns = displayMember.split(",").map((f) => {
+            const field = f.trim();
+            return {
+              field,
+              label: field.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+              sortable: true,
+              align: "left",
+              width: "",
+              format: "",
+              css: ""
+            };
+          });
+        }
+      }
+    }
+    async _fetchData(url) {
+      this.componentElement.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; padding: 2rem; gap: 0.5rem; color: var(--text-6);">
+          <wc-fa-icon name="spinner" spin size="1rem"></wc-fa-icon> Loading...
+        </div>`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        this._data = Array.isArray(data) ? data : data.items || data.results || data.data || [data];
+      } catch (e) {
+        console.error("[wc-table] Fetch error:", e);
+        this._data = [];
+        this.componentElement.innerHTML = `
+          <div style="padding: 1rem; color: var(--error-color, #e53935); font-size: 0.875rem;">
+            Failed to load data: ${e.message}
+          </div>`;
+        return;
+      }
+      if (this._columns.length === 0 && this._data.length > 0 && this.hasAttribute("auto-columns")) {
+        const keys = Object.keys(this._data[0]).filter((k) => !k.startsWith("_"));
+        this._columns = keys.map((field) => ({
+          field,
+          label: field.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          sortable: true,
+          align: "left",
+          width: "",
+          format: "",
+          css: ""
+        }));
+      }
+      this._renderTable();
+    }
+    _renderTable() {
+      const data = this._getSortedData();
+      const emptyMessage = this.getAttribute("empty-message") || "No data available";
+      const classes = ["wc-table"];
+      if (this.hasAttribute("striped")) classes.push("wc-table-striped");
+      if (this.hasAttribute("hoverable")) classes.push("wc-table-hover");
+      if (this.hasAttribute("bordered")) classes.push("wc-table-bordered");
+      if (this.hasAttribute("borderless")) classes.push("wc-table-borderless");
+      if (this.hasAttribute("clickable")) classes.push("wc-table-clickable");
+      const size = this.getAttribute("size");
+      if (size) classes.push(`wc-table-${size}`);
+      if (this.hasAttribute("fixed-header")) classes.push("wc-table-fixed-header");
+      const needsResponsive = this.hasAttribute("fixed-header");
+      let html = "";
+      if (needsResponsive) {
+        const maxH = this.getAttribute("max-height") || "500px";
+        html += `<div class="wc-table-responsive" style="max-height: ${maxH}; overflow-y: auto;">`;
+      }
+      html += `<table class="${classes.join(" ")}">`;
+      if (this._columns.length > 0) {
+        html += "<thead><tr>";
+        this._columns.forEach((col) => {
+          const alignClass = col.align !== "left" ? ` wc-text-${col.align}` : "";
+          const sortClass = col.sortable ? " wc-sortable" : "";
+          const sortDirClass = col.field === this._sortField ? this._sortDir === "asc" ? " wc-sort-asc" : " wc-sort-desc" : "";
+          const widthStyle = col.width ? ` style="width: ${col.width}"` : "";
+          html += `<th class="${alignClass}${sortClass}${sortDirClass}" data-field="${col.field}"${widthStyle}>${col.label}</th>`;
+        });
+        html += "</tr></thead>";
+      }
+      html += "<tbody>";
+      if (data.length === 0) {
+        const colspan = this._columns.length || 1;
+        html += `<tr class="wc-table-empty"><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: var(--text-6);">${emptyMessage}</td></tr>`;
+      } else {
+        data.forEach((row, idx) => {
+          html += `<tr data-row-index="${idx}">`;
+          if (this._columns.length > 0) {
+            this._columns.forEach((col) => {
+              const value = this._getNestedValue(row, col.field);
+              const formatted = this._formatValue(value, col.format);
+              const alignClass = col.align !== "left" ? ` class="wc-text-${col.align}"` : "";
+              const cssClass = col.css ? ` class="${col.css}"` : "";
+              const cls = alignClass || cssClass;
+              html += `<td${cls}>${formatted}</td>`;
+            });
+          } else {
+            Object.entries(row).forEach(([key, value]) => {
+              if (!key.startsWith("_")) {
+                html += `<td>${this._escapeHtml(String(value ?? ""))}</td>`;
+              }
+            });
+          }
+          html += "</tr>";
+        });
+      }
+      html += "</tbody></table>";
+      if (needsResponsive) html += "</div>";
+      if (data.length > 0) {
+        html += `<div class="wc-table-footer">${data.length} record${data.length !== 1 ? "s" : ""}</div>`;
+      }
+      this.componentElement.innerHTML = html;
+      this._wireTableEvents();
+    }
+    _getSortedData() {
+      if (!this._sortField) return [...this._data];
+      const field = this._sortField;
+      const dir = this._sortDir === "desc" ? -1 : 1;
+      return [...this._data].sort((a, b) => {
+        const va = this._getNestedValue(a, field);
+        const vb = this._getNestedValue(b, field);
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+      });
+    }
+    _getNestedValue(obj, path) {
+      if (!path) return "";
+      return path.split(".").reduce((o, k) => o && o[k] !== void 0 ? o[k] : "", obj);
+    }
+    _formatValue(value, format) {
+      if (value == null || value === "") return "";
+      if (format === "currency") {
+        const num = parseFloat(value);
+        return isNaN(num) ? value : `$${num.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      if (format === "date") {
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? value : d.toLocaleDateString();
+      }
+      if (format === "datetime") {
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? value : d.toLocaleString();
+      }
+      if (format === "number") {
+        const num = parseFloat(value);
+        return isNaN(num) ? value : num.toLocaleString();
+      }
+      if (format === "boolean") {
+        return value ? "Yes" : "No";
+      }
+      if (typeof value === "object") {
+        if (value.$oid) return value.$oid;
+        if (value.$date) return new Date(value.$date).toLocaleString();
+        return JSON.stringify(value);
+      }
+      return this._escapeHtml(String(value));
+    }
+    _escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    _wireTableEvents() {
+      const table = this.componentElement.querySelector("table");
+      if (!table) return;
+      table.querySelectorAll("th.wc-sortable").forEach((th) => {
+        th.addEventListener("click", () => {
+          const field = th.dataset.field;
+          if (this._sortField === field) {
+            this._sortDir = this._sortDir === "asc" ? "desc" : "asc";
+          } else {
+            this._sortField = field;
+            this._sortDir = "asc";
+          }
+          this.dispatchEvent(new CustomEvent("table:sort", {
+            bubbles: true,
+            detail: { field: this._sortField, direction: this._sortDir }
+          }));
+          this._renderTable();
+        });
+      });
+      table.querySelectorAll("tbody tr[data-row-index]").forEach((tr) => {
+        tr.addEventListener("click", () => {
+          const idx = parseInt(tr.dataset.rowIndex);
+          const data = this._getSortedData()[idx];
+          this.dispatchEvent(new CustomEvent("table:row-click", {
+            bubbles: true,
+            detail: { row: tr, index: idx, data }
+          }));
+        });
+        tr.addEventListener("dblclick", () => {
+          const idx = parseInt(tr.dataset.rowIndex);
+          const data = this._getSortedData()[idx];
+          this.dispatchEvent(new CustomEvent("table:row-dblclick", {
+            bubbles: true,
+            detail: { row: tr, index: idx, data }
+          }));
+        });
+      });
+    }
+    async _handleAttributeChange(attrName, newValue) {
+      if (attrName === "url" && newValue) {
+        await this._fetchData(newValue);
+      } else if (attrName === "items" && newValue) {
+        try {
+          this._data = JSON.parse(newValue);
+        } catch (e) {
+          this._data = [];
+        }
+        this._renderTable();
+      } else if (["striped", "hoverable", "bordered", "borderless", "size", "clickable"].includes(attrName)) {
+        this._renderTable();
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    // Public API
+    get data() {
+      return this._data;
+    }
+    set data(val) {
+      this._data = Array.isArray(val) ? val : [];
+      this._renderTable();
+    }
+    refresh() {
+      const url = this.getAttribute("url");
+      if (url) this._fetchData(url);
+      else this._renderTable();
+    }
+    _applyStyle() {
+      const style = `
+        wc-table { display: contents; }
+        .wc-table-container { display: flex; flex-direction: column; }
+        .wc-table-footer {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.75rem;
+          color: var(--text-6, #888);
+          border-top: 1px solid var(--component-border-color);
+          background: var(--surface-2);
+        }
+        .wc-table-fixed-header thead th {
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          background: var(--primary-bg-color);
+        }
+      `;
+      this.loadStyle("wc-table-component-style", style);
+    }
+  }
+  customElements.define("wc-table", WcTable);
+}
+
 // src/js/components/wc-ai-bot.js
 if (!customElements.get("wc-ai-bot")) {
   let webllmModule = null;

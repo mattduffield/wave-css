@@ -126,6 +126,14 @@ The build process (esbuild.config.js) generates:
 - `wc-save-split-button`: Split button with save options
 - `wc-split-button`: Generic split button
 
+### Navigation Components
+- `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support
+- `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url)
+
+### Data Components
+- `wc-table`: Lightweight data-driven table (url, items, sorting, formatting, events)
+- `wc-table-col`: Column definition for wc-table (field, label, sortable, align, format)
+
 ### AI/Bot Components
 - `wc-ai-bot`: AI chatbot interface
 - `wc-hf-bot`: Hugging Face bot interface
