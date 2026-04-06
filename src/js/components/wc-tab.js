@@ -92,7 +92,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcTab extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'animate', 'vertical', 'contrast', 'tab-overflow'];
+    return ['id', 'class', 'animate', 'vertical', 'contrast', 'tab-overflow', 'removable'];
   }
 
   constructor() {
@@ -151,6 +151,8 @@ class WcTab extends WcBaseComponent {
       // Do nothing...
     } else if (attrName === 'contrast') {
       this._updateContrast(newValue);
+    } else if (attrName === 'removable') {
+      this._updateRemovable();
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -172,12 +174,139 @@ class WcTab extends WcBaseComponent {
     }
   }
 
+  /**
+   * Add a new tab at runtime.
+   * @param {string} label - The tab label
+   * @param {string|HTMLElement} content - HTML string or element to place inside the tab
+   * @param {boolean} [activate=true] - Whether to activate the new tab after adding
+   */
+  addTab(label, content, activate = true) {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    const tabBody = this.querySelector(':scope > .wc-tab > .tab-body');
+    if (!tabNav || !tabBody) return;
+
+    // Create the button
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.classList.add('tab-link');
+    btn.textContent = label;
+    btn.dataset.label = label;
+    btn.addEventListener('click', this._handleClick.bind(this));
+
+    // Add close button if removable
+    if (this.hasAttribute('removable')) {
+      const closeBtn = this._createCloseButton(label);
+      btn.appendChild(closeBtn);
+    }
+
+    tabNav.appendChild(btn);
+
+    // Create the wc-tab-item
+    const tabItem = document.createElement('wc-tab-item');
+    tabItem.setAttribute('label', label);
+    if (typeof content === 'string') {
+      // Wait for the component to render, then set inner content
+      requestAnimationFrame(() => {
+        const inner = tabItem.querySelector('.wc-tab-item');
+        if (inner) {
+          inner.innerHTML = content;
+        }
+      });
+    } else if (content instanceof HTMLElement) {
+      requestAnimationFrame(() => {
+        const inner = tabItem.querySelector('.wc-tab-item');
+        if (inner) {
+          inner.appendChild(content);
+        }
+      });
+    }
+    tabBody.appendChild(tabItem);
+
+    // Dispatch tabadd event
+    const payload = { detail: { label }, bubbles: true, composed: true };
+    this.dispatchEvent(new CustomEvent('tabadd', payload));
+
+    // Activate the new tab
+    if (activate) {
+      requestAnimationFrame(() => btn.click());
+    }
+  }
+
+  /**
+   * Remove a tab by label.
+   * @param {string} label - The label of the tab to remove
+   */
+  removeTab(label) {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    const tabBody = this.querySelector(':scope > .wc-tab > .tab-body');
+    if (!tabNav || !tabBody) return;
+
+    const btn = tabNav.querySelector(`button.tab-link[data-label="${label}"]`);
+    const tabItems = tabBody.querySelectorAll(':scope > wc-tab-item');
+    const buttons = tabNav.querySelectorAll(':scope > button.tab-link');
+    const btnIndex = Array.from(buttons).indexOf(btn);
+
+    if (!btn || btnIndex === -1) return;
+
+    const tabItem = tabItems[btnIndex];
+    const wasActive = btn.classList.contains('active');
+
+    // Remove button and tab item
+    btn.remove();
+    if (tabItem) tabItem.remove();
+
+    // Dispatch tabremove event
+    const payload = { detail: { label }, bubbles: true, composed: true };
+    this.dispatchEvent(new CustomEvent('tabremove', payload));
+
+    // If the removed tab was active, activate an adjacent tab
+    if (wasActive) {
+      const remainingBtns = tabNav.querySelectorAll(':scope > button.tab-link');
+      if (remainingBtns.length > 0) {
+        // Activate the previous tab, or the first if we removed index 0
+        const newIndex = Math.min(btnIndex, remainingBtns.length - 1);
+        remainingBtns[newIndex].click();
+      }
+    }
+  }
+
+  _createCloseButton(label) {
+    const closeBtn = document.createElement('span');
+    closeBtn.classList.add('tab-close');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.title = `Close ${label}`;
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.removeTab(label);
+    });
+    return closeBtn;
+  }
+
+  _updateRemovable() {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (!tabNav) return;
+
+    const buttons = tabNav.querySelectorAll(':scope > button.tab-link');
+    const isRemovable = this.hasAttribute('removable');
+
+    buttons.forEach(btn => {
+      const existingClose = btn.querySelector('.tab-close');
+      if (isRemovable && !existingClose) {
+        const label = btn.dataset.label;
+        btn.appendChild(this._createCloseButton(label));
+      } else if (!isRemovable && existingClose) {
+        existingClose.remove();
+      }
+    });
+  }
+
   _render() {
     super._render();
     const innerEl = this.querySelector('.wc-tab > *');
     if (innerEl) {
       const btns = this.querySelectorAll('.tab-link');
-      btns.forEach(btn => btn.addEventListener('click', this._handleClick.bind(this)));      
+      btns.forEach(btn => btn.addEventListener('click', this._handleClick.bind(this)));
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
@@ -199,6 +328,8 @@ class WcTab extends WcBaseComponent {
     tabBody.classList.add('tab-body');
     const parts = Array.from(this.children).filter(p => !p.matches('wc-tab') && !p.matches('.wc-tab')); // Exclude nested wc-tab elements
 
+    const isRemovable = this.hasAttribute('removable');
+
     parts.forEach((p, idx) => {
       const tabItem = p.querySelector('.wc-tab-item');
       const btn = document.createElement('button');
@@ -209,8 +340,14 @@ class WcTab extends WcBaseComponent {
       if (hasActive) {
         btn.classList.add('active');
       }
-      btn.textContent = p.getAttribute('label') || `Label ${idx + 1}`;
-      btn.dataset.label = p.getAttribute('label') || `Label ${idx + 1}`;
+      const label = p.getAttribute('label') || `Label ${idx + 1}`;
+      btn.textContent = label;
+      btn.dataset.label = label;
+
+      if (isRemovable) {
+        btn.appendChild(this._createCloseButton(label));
+      }
+
       tabNav.appendChild(btn);
     });
     parts.forEach(p => {
@@ -491,6 +628,26 @@ class WcTab extends WcBaseComponent {
         padding: 10px 16px;
         user-select: none;
         transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      wc-tab .wc-tab .tab-nav .tab-link .tab-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 50%;
+        opacity: 0.5;
+        cursor: pointer;
+        transition: opacity 0.2s, background-color 0.2s;
+      }
+      wc-tab .wc-tab .tab-nav .tab-link .tab-close:hover {
+        opacity: 1;
+        background-color: rgba(0, 0, 0, 0.15);
       }
       wc-tab .wc-tab .tab-nav .tab-link.active,
       wc-tab .wc-tab .tab-nav .tab-link:hover {

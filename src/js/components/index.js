@@ -50,6 +50,7 @@ import './wc-tree-item.js';
 import './wc-tree.js';
 import './wc-table-col.js';
 import './wc-table.js';
+import './wc-split-pane.js';
 // import './wc-top-nav.js';
 import './wc-ai-bot.js';
 import './wc-hf-bot.js';

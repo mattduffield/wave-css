@@ -84,4 +84,65 @@
     </wc-tab-item>
   </wc-tab>
   -->
+
+  <h3 class="mt-6 mb-2 px-4">Removable Tabs</h3>
+  <wc-tab id="removable-tabs" class="p-4 mb-4" animate removable>
+    <wc-tab-item class="active" label="Dashboard">
+      <div class="col-1 gap-2 pt-2 pb-10 px-10">
+        <h3>Dashboard</h3>
+        <p>This is the dashboard tab. Try closing tabs with the x button.</p>
+      </div>
+    </wc-tab-item>
+    <wc-tab-item label="Reports">
+      <div class="col-1 gap-2 pt-2 pb-10 px-10">
+        <h3>Reports</h3>
+        <p>This is the reports tab. You can remove it by clicking the close button.</p>
+      </div>
+    </wc-tab-item>
+    <wc-tab-item label="Settings">
+      <div class="col-1 gap-2 pt-2 pb-10 px-10">
+        <h3>Settings</h3>
+        <p>This is the settings tab. It can also be removed at runtime.</p>
+      </div>
+    </wc-tab-item>
+  </wc-tab>
+
+  <h3 class="mt-6 mb-2 px-4">Add Tabs Dynamically</h3>
+  <div class="row gap-2 px-4 mb-4">
+    <button class="btn btn-primary" onclick="addDynamicTab()">Add Tab</button>
+    <button class="btn btn-secondary" onclick="removeDynamicTab()">Remove Active Tab</button>
+  </div>
+  <wc-tab id="dynamic-tabs" class="p-4 mb-4" animate removable>
+    <wc-tab-item class="active" label="Home">
+      <div class="col-1 gap-2 pt-2 pb-10 px-10">
+        <h3>Home</h3>
+        <p>Click "Add Tab" to add new tabs dynamically. Use the x buttons or "Remove Active Tab" to remove them.</p>
+      </div>
+    </wc-tab-item>
+  </wc-tab>
+
+  <wc-javascript>
+    <script>
+      let tabCounter = 0;
+      function addDynamicTab() {
+        const tab = document.getElementById('dynamic-tabs');
+        tabCounter++;
+        const label = `Tab ${tabCounter}`;
+        const content = `
+          <div class="col-1 gap-2 pt-2 pb-10 px-10">
+            <h3>${label}</h3>
+            <p>This tab was added dynamically at ${new Date().toLocaleTimeString()}.</p>
+          </div>
+        `;
+        tab.addTab(label, content);
+      }
+      function removeDynamicTab() {
+        const tab = document.getElementById('dynamic-tabs');
+        const activeBtn = tab.querySelector(':scope > .wc-tab > .tab-nav > button.tab-link.active');
+        if (activeBtn) {
+          tab.removeTab(activeBtn.dataset.label);
+        }
+      }
+    </script>
+  </wc-javascript>
 </div>

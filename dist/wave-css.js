@@ -13079,7 +13079,7 @@ customElements.define("wc-tab-item", WcTabItem);
 // src/js/components/wc-tab.js
 var WcTab = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "animate", "vertical", "contrast", "tab-overflow"];
+    return ["id", "class", "animate", "vertical", "contrast", "tab-overflow", "removable"];
   }
   constructor() {
     super();
@@ -13122,6 +13122,8 @@ var WcTab = class extends WcBaseComponent {
     } else if (attrName === "vertical") {
     } else if (attrName === "contrast") {
       this._updateContrast(newValue);
+    } else if (attrName === "removable") {
+      this._updateRemovable();
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -13136,6 +13138,105 @@ var WcTab = class extends WcBaseComponent {
         this.setAttribute("data-nesting-level", this.nestingLevel);
       }
     }
+  }
+  /**
+   * Add a new tab at runtime.
+   * @param {string} label - The tab label
+   * @param {string|HTMLElement} content - HTML string or element to place inside the tab
+   * @param {boolean} [activate=true] - Whether to activate the new tab after adding
+   */
+  addTab(label, content, activate = true) {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    const tabBody = this.querySelector(":scope > .wc-tab > .tab-body");
+    if (!tabNav || !tabBody) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.classList.add("tab-link");
+    btn.textContent = label;
+    btn.dataset.label = label;
+    btn.addEventListener("click", this._handleClick.bind(this));
+    if (this.hasAttribute("removable")) {
+      const closeBtn = this._createCloseButton(label);
+      btn.appendChild(closeBtn);
+    }
+    tabNav.appendChild(btn);
+    const tabItem = document.createElement("wc-tab-item");
+    tabItem.setAttribute("label", label);
+    if (typeof content === "string") {
+      requestAnimationFrame(() => {
+        const inner = tabItem.querySelector(".wc-tab-item");
+        if (inner) {
+          inner.innerHTML = content;
+        }
+      });
+    } else if (content instanceof HTMLElement) {
+      requestAnimationFrame(() => {
+        const inner = tabItem.querySelector(".wc-tab-item");
+        if (inner) {
+          inner.appendChild(content);
+        }
+      });
+    }
+    tabBody.appendChild(tabItem);
+    const payload = { detail: { label }, bubbles: true, composed: true };
+    this.dispatchEvent(new CustomEvent("tabadd", payload));
+    if (activate) {
+      requestAnimationFrame(() => btn.click());
+    }
+  }
+  /**
+   * Remove a tab by label.
+   * @param {string} label - The label of the tab to remove
+   */
+  removeTab(label) {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    const tabBody = this.querySelector(":scope > .wc-tab > .tab-body");
+    if (!tabNav || !tabBody) return;
+    const btn = tabNav.querySelector(`button.tab-link[data-label="${label}"]`);
+    const tabItems = tabBody.querySelectorAll(":scope > wc-tab-item");
+    const buttons = tabNav.querySelectorAll(":scope > button.tab-link");
+    const btnIndex = Array.from(buttons).indexOf(btn);
+    if (!btn || btnIndex === -1) return;
+    const tabItem = tabItems[btnIndex];
+    const wasActive = btn.classList.contains("active");
+    btn.remove();
+    if (tabItem) tabItem.remove();
+    const payload = { detail: { label }, bubbles: true, composed: true };
+    this.dispatchEvent(new CustomEvent("tabremove", payload));
+    if (wasActive) {
+      const remainingBtns = tabNav.querySelectorAll(":scope > button.tab-link");
+      if (remainingBtns.length > 0) {
+        const newIndex = Math.min(btnIndex, remainingBtns.length - 1);
+        remainingBtns[newIndex].click();
+      }
+    }
+  }
+  _createCloseButton(label) {
+    const closeBtn = document.createElement("span");
+    closeBtn.classList.add("tab-close");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.title = `Close ${label}`;
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.removeTab(label);
+    });
+    return closeBtn;
+  }
+  _updateRemovable() {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (!tabNav) return;
+    const buttons = tabNav.querySelectorAll(":scope > button.tab-link");
+    const isRemovable = this.hasAttribute("removable");
+    buttons.forEach((btn) => {
+      const existingClose = btn.querySelector(".tab-close");
+      if (isRemovable && !existingClose) {
+        const label = btn.dataset.label;
+        btn.appendChild(this._createCloseButton(label));
+      } else if (!isRemovable && existingClose) {
+        existingClose.remove();
+      }
+    });
   }
   _render() {
     super._render();
@@ -13158,6 +13259,7 @@ var WcTab = class extends WcBaseComponent {
     const tabBody = document.createElement("div");
     tabBody.classList.add("tab-body");
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-tab") && !p.matches(".wc-tab"));
+    const isRemovable = this.hasAttribute("removable");
     parts.forEach((p, idx) => {
       const tabItem = p.querySelector(".wc-tab-item");
       const btn = document.createElement("button");
@@ -13168,8 +13270,12 @@ var WcTab = class extends WcBaseComponent {
       if (hasActive) {
         btn.classList.add("active");
       }
-      btn.textContent = p.getAttribute("label") || `Label ${idx + 1}`;
-      btn.dataset.label = p.getAttribute("label") || `Label ${idx + 1}`;
+      const label = p.getAttribute("label") || `Label ${idx + 1}`;
+      btn.textContent = label;
+      btn.dataset.label = label;
+      if (isRemovable) {
+        btn.appendChild(this._createCloseButton(label));
+      }
       tabNav.appendChild(btn);
     });
     parts.forEach((p) => {
@@ -13395,6 +13501,26 @@ var WcTab = class extends WcBaseComponent {
         padding: 10px 16px;
         user-select: none;
         transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      wc-tab .wc-tab .tab-nav .tab-link .tab-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 50%;
+        opacity: 0.5;
+        cursor: pointer;
+        transition: opacity 0.2s, background-color 0.2s;
+      }
+      wc-tab .wc-tab .tab-nav .tab-link .tab-close:hover {
+        opacity: 1;
+        background-color: rgba(0, 0, 0, 0.15);
       }
       wc-tab .wc-tab .tab-nav .tab-link.active,
       wc-tab .wc-tab .tab-nav .tab-link:hover {
@@ -16980,6 +17106,482 @@ if (!customElements.get("wc-table")) {
     }
   }
   customElements.define("wc-table", WcTable);
+}
+
+// src/js/components/wc-split-pane.js
+if (!customElements.get("wc-split-start")) {
+  class WcSplitStart extends HTMLElement {
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      if (!this.classList.contains("wc-split-start")) {
+        this.classList.add("wc-split-start");
+      }
+    }
+  }
+  customElements.define("wc-split-start", WcSplitStart);
+}
+if (!customElements.get("wc-split-end")) {
+  class WcSplitEnd extends HTMLElement {
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      if (!this.classList.contains("wc-split-end")) {
+        this.classList.add("wc-split-end");
+      }
+    }
+  }
+  customElements.define("wc-split-end", WcSplitEnd);
+}
+if (!customElements.get("wc-split-pane")) {
+  class WcSplitPane extends WcBaseComponent {
+    static get observedAttributes() {
+      return [
+        "id",
+        "class",
+        "direction",
+        "initial-size",
+        "min-size",
+        "max-size",
+        "divider-width",
+        "collapsible",
+        "collapsed",
+        "persist-key"
+      ];
+    }
+    static get is() {
+      return "wc-split-pane";
+    }
+    constructor() {
+      super();
+      this._isDragging = false;
+      this._currentSize = 0;
+      this._isCollapsed = false;
+      const compEl = this.querySelector(":scope > .wc-split-pane");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-split-pane");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      if (!this._rendered) {
+        this._rendered = true;
+        this._createElement();
+        this._wireEvents();
+      }
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    _createElement() {
+      const direction = this.getAttribute("direction") || "horizontal";
+      const isHorizontal = direction === "horizontal";
+      const dividerWidth = parseInt(this.getAttribute("divider-width") || "4", 10);
+      const collapsible = this.hasAttribute("collapsible");
+      const startCollapsed = this.hasAttribute("collapsed");
+      let initialSize = this.getAttribute("initial-size") || "250px";
+      const persistKey = this.getAttribute("persist-key");
+      if (persistKey) {
+        const saved = localStorage.getItem(`wc-split-pane:${persistKey}`);
+        if (saved) {
+          try {
+            const state = JSON.parse(saved);
+            initialSize = state.size || initialSize;
+            if (state.collapsed !== void 0) this._isCollapsed = state.collapsed;
+          } catch (e) {
+          }
+        }
+      }
+      if (startCollapsed) this._isCollapsed = true;
+      this._initialSizeStr = initialSize;
+      this._direction = direction;
+      this._dividerWidth = dividerWidth;
+      this._persistKey = persistKey;
+      this.componentElement.style.display = "flex";
+      this.componentElement.style.flexDirection = isHorizontal ? "row" : "column";
+      this.componentElement.style.width = "100%";
+      this.componentElement.style.height = "100%";
+      this.componentElement.style.overflow = "hidden";
+      const startEl = this.querySelector(":scope > wc-split-start") || this.querySelector("wc-split-start");
+      const endEl = this.querySelector(":scope > wc-split-end") || this.querySelector("wc-split-end");
+      if (!startEl || !endEl) {
+        console.error("[wc-split-pane] Requires <wc-split-start> and <wc-split-end> children.");
+        return;
+      }
+      startEl.style.overflow = "auto";
+      startEl.style.flexShrink = "0";
+      startEl.style.display = "flex";
+      startEl.style.flexDirection = "column";
+      if (isHorizontal) {
+        startEl.style.width = this._isCollapsed ? "0px" : initialSize;
+        startEl.style.height = "100%";
+      } else {
+        startEl.style.height = this._isCollapsed ? "0px" : initialSize;
+        startEl.style.width = "100%";
+      }
+      if (this._isCollapsed) startEl.style.overflow = "hidden";
+      this._startEl = startEl;
+      const divider = document.createElement("div");
+      divider.classList.add("wc-split-divider");
+      divider.setAttribute("role", "separator");
+      divider.setAttribute("aria-orientation", isHorizontal ? "vertical" : "horizontal");
+      divider.setAttribute("tabindex", "0");
+      if (isHorizontal) {
+        divider.style.width = `${dividerWidth}px`;
+        divider.style.cursor = "col-resize";
+      } else {
+        divider.style.height = `${dividerWidth}px`;
+        divider.style.cursor = "row-resize";
+      }
+      if (collapsible) {
+        const collapseBtn = document.createElement("button");
+        collapseBtn.classList.add("wc-split-collapse-btn");
+        collapseBtn.type = "button";
+        collapseBtn.setAttribute("aria-label", "Toggle panel");
+        this._updateCollapseIcon(collapseBtn);
+        divider.appendChild(collapseBtn);
+        this._collapseBtn = collapseBtn;
+      }
+      this._divider = divider;
+      endEl.style.flex = "1";
+      endEl.style.overflow = "auto";
+      endEl.style.display = "flex";
+      endEl.style.flexDirection = "column";
+      endEl.style.minWidth = "0";
+      endEl.style.minHeight = "0";
+      this._endEl = endEl;
+      this.componentElement.innerHTML = "";
+      this.componentElement.appendChild(startEl);
+      this.componentElement.appendChild(divider);
+      this.componentElement.appendChild(endEl);
+      requestAnimationFrame(() => {
+        const isH = this._direction === "horizontal";
+        this._currentSize = isH ? startEl.offsetWidth : startEl.offsetHeight;
+        this._updateAria();
+      });
+    }
+    _updateCollapseIcon(btn) {
+      const isH = this._direction === "horizontal";
+      if (this._isCollapsed) {
+        btn.innerHTML = isH ? "&#9654;" : "&#9660;";
+        btn.title = "Expand panel";
+      } else {
+        btn.innerHTML = isH ? "&#9664;" : "&#9650;";
+        btn.title = "Collapse panel";
+      }
+    }
+    _updateAria() {
+      if (!this._divider) return;
+      const minSize = parseInt(this.getAttribute("min-size") || "100", 10);
+      const maxSize = this._getMaxSizePx();
+      this._divider.setAttribute("aria-valuenow", Math.round(this._currentSize));
+      this._divider.setAttribute("aria-valuemin", minSize);
+      this._divider.setAttribute("aria-valuemax", maxSize);
+    }
+    _getMaxSizePx() {
+      const maxStr = this.getAttribute("max-size") || "50%";
+      const isH = this._direction === "horizontal";
+      const containerSize = isH ? this.componentElement.offsetWidth : this.componentElement.offsetHeight;
+      if (maxStr.endsWith("%")) {
+        return containerSize * parseFloat(maxStr) / 100;
+      }
+      return parseInt(maxStr, 10);
+    }
+    _clampSize(size) {
+      const minSize = parseInt(this.getAttribute("min-size") || "100", 10);
+      const maxSize = this._getMaxSizePx();
+      return Math.max(minSize, Math.min(maxSize, size));
+    }
+    _setSize(size, animate = false) {
+      if (!this._startEl) return;
+      const isH = this._direction === "horizontal";
+      const prop = isH ? "width" : "height";
+      const clamped = this._clampSize(size);
+      this._currentSize = clamped;
+      if (animate) {
+        this._startEl.style.transition = `${prop} 200ms ease`;
+        setTimeout(() => {
+          this._startEl.style.transition = "";
+        }, 250);
+      }
+      this._startEl.style[prop] = `${clamped}px`;
+      this._startEl.style.overflow = "auto";
+      this._isCollapsed = false;
+      this._updateAria();
+      if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
+    }
+    _collapse(animate = true) {
+      if (!this._startEl) return;
+      const isH = this._direction === "horizontal";
+      const prop = isH ? "width" : "height";
+      if (!this._isCollapsed) {
+        this._sizeBeforeCollapse = this._currentSize;
+      }
+      if (animate) {
+        this._startEl.style.transition = `${prop} 200ms ease`;
+        setTimeout(() => {
+          this._startEl.style.transition = "";
+        }, 250);
+      }
+      this._startEl.style[prop] = "0px";
+      this._startEl.style.overflow = "hidden";
+      this._isCollapsed = true;
+      if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
+      this._persist();
+      this.dispatchEvent(new CustomEvent("split-pane:collapse", {
+        bubbles: true,
+        detail: { collapsed: true }
+      }));
+    }
+    _expand(animate = true) {
+      const size = this._sizeBeforeCollapse || parseInt(this._initialSizeStr, 10) || 250;
+      this._setSize(size, animate);
+      this._isCollapsed = false;
+      if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
+      this._persist();
+      this.dispatchEvent(new CustomEvent("split-pane:collapse", {
+        bubbles: true,
+        detail: { collapsed: false }
+      }));
+    }
+    toggle() {
+      if (this._isCollapsed) this._expand();
+      else this._collapse();
+    }
+    _persist() {
+      if (!this._persistKey) return;
+      const state = {
+        size: `${this._currentSize}px`,
+        collapsed: this._isCollapsed
+      };
+      localStorage.setItem(`wc-split-pane:${this._persistKey}`, JSON.stringify(state));
+    }
+    _wireEvents() {
+      if (!this._divider) return;
+      this._onMouseDown = (e) => {
+        if (e.target.closest(".wc-split-collapse-btn")) return;
+        e.preventDefault();
+        this._isDragging = true;
+        document.body.style.userSelect = "none";
+        document.body.style.cursor = this._direction === "horizontal" ? "col-resize" : "row-resize";
+        this._divider.classList.add("active");
+        const isH = this._direction === "horizontal";
+        const rect = this.componentElement.getBoundingClientRect();
+        this._dragStartPos = isH ? e.clientX : e.clientY;
+        this._dragStartSize = this._currentSize;
+      };
+      this._onMouseMove = (e) => {
+        if (!this._isDragging) return;
+        const isH = this._direction === "horizontal";
+        const currentPos = isH ? e.clientX : e.clientY;
+        const delta = currentPos - this._dragStartPos;
+        const newSize = this._dragStartSize + delta;
+        this._setSize(newSize);
+      };
+      this._onMouseUp = () => {
+        if (!this._isDragging) return;
+        this._isDragging = false;
+        document.body.style.userSelect = "";
+        document.body.style.cursor = "";
+        this._divider.classList.remove("active");
+        this._persist();
+        const containerSize = this._direction === "horizontal" ? this.componentElement.offsetWidth : this.componentElement.offsetHeight;
+        const percentage = (this._currentSize / containerSize * 100).toFixed(1);
+        this.dispatchEvent(new CustomEvent("split-pane:resize", {
+          bubbles: true,
+          detail: { size: `${this._currentSize}px`, percentage: `${percentage}%` }
+        }));
+      };
+      if (this._collapseBtn) {
+        this._onCollapseClick = (e) => {
+          e.stopPropagation();
+          this.toggle();
+        };
+        this._collapseBtn.addEventListener("click", this._onCollapseClick);
+      }
+      this._onKeyDown = (e) => {
+        const step = e.shiftKey ? 50 : 10;
+        const isH = this._direction === "horizontal";
+        switch (e.key) {
+          case "ArrowLeft":
+            if (isH) {
+              e.preventDefault();
+              this._setSize(this._currentSize - step);
+              this._persist();
+            }
+            break;
+          case "ArrowRight":
+            if (isH) {
+              e.preventDefault();
+              this._setSize(this._currentSize + step);
+              this._persist();
+            }
+            break;
+          case "ArrowUp":
+            if (!isH) {
+              e.preventDefault();
+              this._setSize(this._currentSize - step);
+              this._persist();
+            }
+            break;
+          case "ArrowDown":
+            if (!isH) {
+              e.preventDefault();
+              this._setSize(this._currentSize + step);
+              this._persist();
+            }
+            break;
+          case "Home":
+            e.preventDefault();
+            this._setSize(parseInt(this.getAttribute("min-size") || "100", 10));
+            this._persist();
+            break;
+          case "End":
+            e.preventDefault();
+            this._setSize(this._getMaxSizePx());
+            this._persist();
+            break;
+          case "Enter":
+            if (this.hasAttribute("collapsible")) {
+              e.preventDefault();
+              this.toggle();
+            }
+            break;
+        }
+      };
+      this._onTouchStart = (e) => {
+        if (e.target.closest(".wc-split-collapse-btn")) return;
+        const touch = e.touches[0];
+        this._isDragging = true;
+        const isH = this._direction === "horizontal";
+        this._dragStartPos = isH ? touch.clientX : touch.clientY;
+        this._dragStartSize = this._currentSize;
+        this._divider.classList.add("active");
+      };
+      this._onTouchMove = (e) => {
+        if (!this._isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const isH = this._direction === "horizontal";
+        const currentPos = isH ? touch.clientX : touch.clientY;
+        const delta = currentPos - this._dragStartPos;
+        this._setSize(this._dragStartSize + delta);
+      };
+      this._onTouchEnd = () => {
+        if (!this._isDragging) return;
+        this._isDragging = false;
+        this._divider.classList.remove("active");
+        this._persist();
+      };
+      this._divider.addEventListener("mousedown", this._onMouseDown);
+      document.addEventListener("mousemove", this._onMouseMove);
+      document.addEventListener("mouseup", this._onMouseUp);
+      this._divider.addEventListener("keydown", this._onKeyDown);
+      this._divider.addEventListener("touchstart", this._onTouchStart, { passive: false });
+      document.addEventListener("touchmove", this._onTouchMove, { passive: false });
+      document.addEventListener("touchend", this._onTouchEnd);
+    }
+    _unWireEvents() {
+      if (this._onMouseMove) document.removeEventListener("mousemove", this._onMouseMove);
+      if (this._onMouseUp) document.removeEventListener("mouseup", this._onMouseUp);
+      if (this._onTouchMove) document.removeEventListener("touchmove", this._onTouchMove);
+      if (this._onTouchEnd) document.removeEventListener("touchend", this._onTouchEnd);
+    }
+    _handleAttributeChange(attrName, newValue) {
+      if (attrName === "collapsed") {
+        if (newValue !== null) this._collapse(false);
+        else this._expand(false);
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-split-pane { display: contents; }
+
+        .wc-split-pane {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        .wc-split-divider {
+          flex-shrink: 0;
+          background: var(--split-pane-divider-bg, var(--border-color, #374151));
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.15s;
+          z-index: 1;
+        }
+        .wc-split-divider:hover {
+          background: var(--split-pane-divider-hover-bg, var(--primary-color, #6366f1));
+        }
+        .wc-split-divider.active {
+          background: var(--split-pane-divider-active-bg, var(--primary-color, #6366f1));
+        }
+        .wc-split-divider:focus-visible {
+          outline: 2px solid var(--primary-color, #6366f1);
+          outline-offset: -2px;
+        }
+
+        .wc-split-collapse-btn {
+          position: absolute;
+          background: var(--surface-3, #333);
+          border: 1px solid var(--surface-5, #555);
+          color: var(--text-4, #aaa);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 3px;
+          padding: 0;
+          line-height: 1;
+          z-index: 2;
+          transition: background-color 0.15s, color 0.15s;
+        }
+        .wc-split-collapse-btn:hover {
+          background: var(--primary-color, #6366f1);
+          color: #fff;
+          border-color: var(--primary-color, #6366f1);
+        }
+
+        /* Horizontal divider collapse button */
+        .wc-split-pane[style*="flex-direction: row"] > .wc-split-divider .wc-split-collapse-btn,
+        .wc-split-pane:not([style*="flex-direction"]) > .wc-split-divider .wc-split-collapse-btn {
+          width: 12px;
+          height: 28px;
+          font-size: 8px;
+        }
+
+        /* Vertical divider collapse button */
+        .wc-split-pane[style*="flex-direction: column"] > .wc-split-divider .wc-split-collapse-btn {
+          width: 28px;
+          height: 12px;
+          font-size: 8px;
+        }
+
+        wc-split-start, wc-split-end {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          min-height: 0;
+        }
+      `;
+      this.loadStyle("wc-split-pane-style", style);
+    }
+  }
+  customElements.define("wc-split-pane", WcSplitPane);
 }
 
 // src/js/components/wc-ai-bot.js
