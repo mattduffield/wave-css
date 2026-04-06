@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal dark">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - Split Pane</title>
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .demo-panel {
+      padding: 1rem;
+    }
+    .demo-container {
+      border: 1px solid var(--card-border-color);
+      border-radius: 4px;
+      height: 300px;
+    }
+    .demo-container-tall {
+      border: 1px solid var(--card-border-color);
+      border-radius: 4px;
+      height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-contents">
+    <div class="my-2 px-4">
+
+      <h2 class="mb-2">Split Pane</h2>
+      <p class="mb-4">
+        A resizable split panel with a draggable divider. Supports horizontal and vertical layouts,
+        collapsible panes, localStorage persistence, and nesting.
+      </p>
+
+      <!-- Basic Horizontal -->
+      <h3 class="mb-2">Basic Horizontal Split</h3>
+      <p class="mb-2">Drag the divider to resize. Default horizontal (left/right) layout.</p>
+      <div class="demo-container mb-6">
+        <wc-split-pane initial-size="250px" min-size="150px" max-size="50%">
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Left Panel</h4>
+              <p>This is the start (left) pane. Drag the divider to resize.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Right Panel</h4>
+              <p>This is the end (right) pane. It fills the remaining space.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Collapsible Horizontal -->
+      <h3 class="mb-2">Collapsible Split</h3>
+      <p class="mb-2">Click the collapse button on the divider to toggle the left panel.</p>
+      <div class="demo-container mb-6">
+        <wc-split-pane initial-size="200px" min-size="100px" max-size="400px" collapsible>
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Collapsible Panel</h4>
+              <p>This panel can be collapsed and expanded via the button on the divider.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Main Content</h4>
+              <p>When the left panel is collapsed, this area takes the full width.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Starts Collapsed -->
+      <h3 class="mb-2">Initially Collapsed</h3>
+      <p class="mb-2">This split pane starts with the left panel collapsed.</p>
+      <div class="demo-container mb-6">
+        <wc-split-pane initial-size="200px" min-size="100px" max-size="400px" collapsible collapsed>
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Hidden Panel</h4>
+              <p>Click the expand button on the divider to reveal this panel.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Full Width Content</h4>
+              <p>This content area starts at full width. Expand the left panel to see the split.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Vertical Split -->
+      <h3 class="mb-2">Vertical Split</h3>
+      <p class="mb-2">Top/bottom layout using <code>direction="vertical"</code>.</p>
+      <div class="demo-container mb-6">
+        <wc-split-pane direction="vertical" initial-size="120px" min-size="80px" max-size="50%" collapsible>
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Top Panel</h4>
+              <p>Drag the horizontal divider to resize vertically.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Bottom Panel</h4>
+              <p>This fills the remaining vertical space.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Nested Split -->
+      <h3 class="mb-2">Nested Split Panes</h3>
+      <p class="mb-2">A horizontal split with a vertical split nested inside the right panel.</p>
+      <div class="demo-container-tall mb-6">
+        <wc-split-pane initial-size="200px" min-size="120px" max-size="400px" collapsible>
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Sidebar</h4>
+              <p>Navigation or file tree goes here.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <wc-split-pane direction="vertical" initial-size="180px" min-size="80px" max-size="60%" collapsible>
+              <wc-split-start>
+                <div class="demo-panel">
+                  <h4>Editor Area</h4>
+                  <p>Main content or editor panel.</p>
+                </div>
+              </wc-split-start>
+              <wc-split-end>
+                <div class="demo-panel">
+                  <h4>Terminal / Output</h4>
+                  <p>Bottom panel for terminal, logs, or output.</p>
+                </div>
+              </wc-split-end>
+            </wc-split-pane>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Persist Key -->
+      <h3 class="mb-2">Persistent Size (localStorage)</h3>
+      <p class="mb-2">
+        Uses <code>persist-key="demo-split"</code> to save/restore size across page reloads.
+      </p>
+      <div class="demo-container mb-6">
+        <wc-split-pane initial-size="300px" min-size="150px" max-size="50%" collapsible persist-key="demo-split">
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Persistent Panel</h4>
+              <p>Resize this, then reload the page — the size is remembered.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Content Area</h4>
+              <p>The divider position persists via localStorage.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane>
+      </div>
+
+      <!-- Keyboard -->
+      <h3 class="mb-2">Keyboard Navigation</h3>
+      <p class="mb-4">
+        Click the divider to focus it, then use:
+      </p>
+      <ul class="mb-4 ml-4" style="list-style: disc;">
+        <li><strong>Arrow Left/Right</strong> — resize horizontal split (10px steps)</li>
+        <li><strong>Arrow Up/Down</strong> — resize vertical split (10px steps)</li>
+        <li><strong>Shift + Arrow</strong> — resize in 50px steps</li>
+        <li><strong>Home</strong> — shrink to minimum size</li>
+        <li><strong>End</strong> — expand to maximum size</li>
+        <li><strong>Enter</strong> — toggle collapse (if collapsible)</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <wc-mask-hub></wc-mask-hub>
+  <wc-prompt></wc-prompt>
+  <script type="module" src="./index.js"></script>
+</body>
+</html>

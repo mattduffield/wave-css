@@ -152,6 +152,7 @@ if (!customElements.get('wc-tree-item')) {
     }
 
     expand() {
+      if (this.hasAttribute('expanded')) return; // Already expanded, prevent recursion
       this.setAttribute('expanded', '');
       const children = this.componentElement?.querySelector('.tree-item-children');
       const arrow = this.componentElement?.querySelector('.tree-item-arrow');
@@ -168,6 +169,7 @@ if (!customElements.get('wc-tree-item')) {
     }
 
     collapse() {
+      if (!this.hasAttribute('expanded')) return; // Already collapsed, prevent recursion
       this.removeAttribute('expanded');
       const children = this.componentElement?.querySelector('.tree-item-children');
       const arrow = this.componentElement?.querySelector('.tree-item-arrow');
@@ -177,11 +179,36 @@ if (!customElements.get('wc-tree-item')) {
       if (row) row.setAttribute('aria-expanded', 'false');
     }
 
+    _applyExpandedState(expanded) {
+      const children = this.componentElement?.querySelector('.tree-item-children');
+      const arrow = this.componentElement?.querySelector('.tree-item-arrow');
+      const row = this.componentElement?.querySelector('.tree-item-row');
+      if (expanded) {
+        if (children) children.style.display = '';
+        if (arrow) arrow.classList.add('expanded');
+        if (row) row.setAttribute('aria-expanded', 'true');
+
+        // Lazy load if needed
+        const lazyUrl = this.getAttribute('lazy-url');
+        if (lazyUrl && !this._lazyLoaded) {
+          this._lazyLoad(lazyUrl, children);
+        }
+      } else {
+        if (children) children.style.display = 'none';
+        if (arrow) arrow.classList.remove('expanded');
+        if (row) row.setAttribute('aria-expanded', 'false');
+      }
+    }
+
     select() {
+      if (this.hasAttribute('selected')) return; // Already selected, prevent recursion
       // Deselect siblings
       const tree = this.closest('wc-tree');
       if (tree) {
         tree.querySelectorAll('.tree-item-row.selected').forEach(r => r.classList.remove('selected'));
+        tree.querySelectorAll('wc-tree-item[selected]').forEach(item => {
+          if (item !== this) item.removeAttribute('selected');
+        });
       }
       const row = this.componentElement?.querySelector('.tree-item-row');
       if (row) row.classList.add('selected');
@@ -224,10 +251,22 @@ if (!customElements.get('wc-tree-item')) {
 
     _handleAttributeChange(attrName, newValue) {
       if (attrName === 'expanded') {
-        if (newValue !== null) this.expand();
-        else this.collapse();
+        // expand()/collapse() already have guards, but call the DOM update logic directly
+        // to avoid the guard rejecting since the attribute is already set by the time we get here
+        this._applyExpandedState(newValue !== null);
       } else if (attrName === 'selected') {
-        if (newValue !== null) this.select();
+        if (newValue !== null) {
+          // Apply selection DOM updates directly without calling select() to avoid recursion
+          const tree = this.closest('wc-tree');
+          if (tree) {
+            tree.querySelectorAll('.tree-item-row.selected').forEach(r => r.classList.remove('selected'));
+            tree.querySelectorAll('wc-tree-item[selected]').forEach(item => {
+              if (item !== this) item.removeAttribute('selected');
+            });
+          }
+          const row = this.componentElement?.querySelector('.tree-item-row');
+          if (row) row.classList.add('selected');
+        }
       } else if (attrName === 'label') {
         const labelEl = this.componentElement?.querySelector('.tree-item-label');
         if (labelEl) labelEl.textContent = newValue || '';

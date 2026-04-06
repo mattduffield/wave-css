@@ -50,6 +50,7 @@ if (!customElements.get('wc-split-pane')) {
 
     constructor() {
       super();
+      this.childComponentSelector = 'wc-split-start';
       this._isDragging = false;
       this._currentSize = 0;
       this._isCollapsed = false;
@@ -67,11 +68,6 @@ if (!customElements.get('wc-split-pane')) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      if (!this._rendered) {
-        this._rendered = true;
-        this._createElement();
-        this._wireEvents();
-      }
     }
 
     disconnectedCallback() {
@@ -79,10 +75,27 @@ if (!customElements.get('wc-split-pane')) {
       this._unWireEvents();
     }
 
-    _createElement() {
+    _render() {
+      super._render();
+      const innerEl = this.querySelector('.wc-split-pane > .wc-split-divider');
+      if (innerEl) {
+        // Already rendered — rebind references
+        this._divider = innerEl;
+        this._startEl = this.querySelector(':scope > .wc-split-pane > wc-split-start');
+        this._endEl = this.querySelector(':scope > .wc-split-pane > wc-split-end');
+        this._collapseBtn = innerEl.querySelector('.wc-split-collapse-btn');
+      } else {
+        this.componentElement.innerHTML = '';
+        this._createInnerElement();
+      }
+      // Wire events after DOM is built and _divider exists
+      this._wireEvents();
+    }
+
+    _createInnerElement() {
       const direction = this.getAttribute('direction') || 'horizontal';
       const isHorizontal = direction === 'horizontal';
-      const dividerWidth = parseInt(this.getAttribute('divider-width') || '4', 10);
+      const dividerWidth = parseInt(this.getAttribute('divider-width') || '6', 10);
       const collapsible = this.hasAttribute('collapsible');
       const startCollapsed = this.hasAttribute('collapsed');
 
@@ -101,7 +114,6 @@ if (!customElements.get('wc-split-pane')) {
       }
       if (startCollapsed) this._isCollapsed = true;
 
-      // Parse initial size to px
       this._initialSizeStr = initialSize;
       this._direction = direction;
       this._dividerWidth = dividerWidth;
@@ -153,6 +165,13 @@ if (!customElements.get('wc-split-pane')) {
         divider.style.cursor = 'row-resize';
       }
 
+      // Add grip icon to divider
+      const grip = document.createElement('wc-fa-icon');
+      grip.classList.add('wc-split-grip');
+      grip.setAttribute('name', isHorizontal ? 'grip-dots-vertical' : 'grip-dots');
+      grip.setAttribute('size', '0.75rem');
+      divider.appendChild(grip);
+
       // Collapse button
       if (collapsible) {
         const collapseBtn = document.createElement('button');
@@ -176,7 +195,6 @@ if (!customElements.get('wc-split-pane')) {
       this._endEl = endEl;
 
       // Assemble: move children into componentElement
-      this.componentElement.innerHTML = '';
       this.componentElement.appendChild(startEl);
       this.componentElement.appendChild(divider);
       this.componentElement.appendChild(endEl);
@@ -249,7 +267,6 @@ if (!customElements.get('wc-split-pane')) {
       const isH = this._direction === 'horizontal';
       const prop = isH ? 'width' : 'height';
 
-      // Save current size before collapsing
       if (!this._isCollapsed) {
         this._sizeBeforeCollapse = this._currentSize;
       }
@@ -298,6 +315,9 @@ if (!customElements.get('wc-split-pane')) {
 
     _wireEvents() {
       if (!this._divider) return;
+      // Prevent double-wiring
+      if (this._eventsWired) return;
+      this._eventsWired = true;
 
       // Drag
       this._onMouseDown = (e) => {
@@ -308,9 +328,7 @@ if (!customElements.get('wc-split-pane')) {
         document.body.style.cursor = this._direction === 'horizontal' ? 'col-resize' : 'row-resize';
         this._divider.classList.add('active');
 
-        const isH = this._direction === 'horizontal';
-        const rect = this.componentElement.getBoundingClientRect();
-        this._dragStartPos = isH ? e.clientX : e.clientY;
+        this._dragStartPos = (this._direction === 'horizontal') ? e.clientX : e.clientY;
         this._dragStartSize = this._currentSize;
       };
 
@@ -425,6 +443,7 @@ if (!customElements.get('wc-split-pane')) {
     }
 
     _unWireEvents() {
+      this._eventsWired = false;
       if (this._onMouseMove) document.removeEventListener('mousemove', this._onMouseMove);
       if (this._onMouseUp) document.removeEventListener('mouseup', this._onMouseUp);
       if (this._onTouchMove) document.removeEventListener('touchmove', this._onTouchMove);
@@ -453,7 +472,7 @@ if (!customElements.get('wc-split-pane')) {
 
         .wc-split-divider {
           flex-shrink: 0;
-          background: var(--split-pane-divider-bg, var(--border-color, #374151));
+          background: var(--component-border-color);
           position: relative;
           display: flex;
           align-items: center;
@@ -462,21 +481,34 @@ if (!customElements.get('wc-split-pane')) {
           z-index: 1;
         }
         .wc-split-divider:hover {
-          background: var(--split-pane-divider-hover-bg, var(--primary-color, #6366f1));
+          background: var(--primary-bg-color);
         }
         .wc-split-divider.active {
-          background: var(--split-pane-divider-active-bg, var(--primary-color, #6366f1));
+          background: var(--primary-bg-color);
         }
         .wc-split-divider:focus-visible {
-          outline: 2px solid var(--primary-color, #6366f1);
+          outline: 2px solid var(--primary-bg-color);
           outline-offset: -2px;
+        }
+
+        .wc-split-grip {
+          pointer-events: none;
+          color: var(--text-color);
+          opacity: 0.4;
+          font-size: 14px;
+          line-height: 1;
+          user-select: none;
+        }
+        .wc-split-divider:hover .wc-split-grip {
+          opacity: 0.9;
+          color: var(--primary-text-color, #fff);
         }
 
         .wc-split-collapse-btn {
           position: absolute;
-          background: var(--surface-3, #333);
-          border: 1px solid var(--surface-5, #555);
-          color: var(--text-4, #aaa);
+          background: var(--card-bg-color);
+          border: 1px solid var(--card-border-color);
+          color: var(--text-color);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -488,9 +520,9 @@ if (!customElements.get('wc-split-pane')) {
           transition: background-color 0.15s, color 0.15s;
         }
         .wc-split-collapse-btn:hover {
-          background: var(--primary-color, #6366f1);
-          color: #fff;
-          border-color: var(--primary-color, #6366f1);
+          background: var(--primary-bg-color);
+          color: var(--primary-text-color, #fff);
+          border-color: var(--primary-bg-color);
         }
 
         /* Horizontal divider collapse button */

@@ -13160,22 +13160,12 @@ var WcTab = class extends WcBaseComponent {
       btn.appendChild(closeBtn);
     }
     tabNav.appendChild(btn);
-    const tabItem = document.createElement("wc-tab-item");
-    tabItem.setAttribute("label", label);
-    if (typeof content === "string") {
-      requestAnimationFrame(() => {
-        const inner = tabItem.querySelector(".wc-tab-item");
-        if (inner) {
-          inner.innerHTML = content;
-        }
-      });
-    } else if (content instanceof HTMLElement) {
-      requestAnimationFrame(() => {
-        const inner = tabItem.querySelector(".wc-tab-item");
-        if (inner) {
-          inner.appendChild(content);
-        }
-      });
+    const contentHtml = typeof content === "string" ? content : "";
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = `<wc-tab-item label="${label.replace(/"/g, "&quot;")}"><div class="wc-tab-item">${contentHtml}</div></wc-tab-item>`;
+    const tabItem = wrapper.firstElementChild;
+    if (content instanceof HTMLElement) {
+      tabItem.querySelector(".wc-tab-item").appendChild(content);
     }
     tabBody.appendChild(tabItem);
     const payload = { detail: { label }, bubbles: true, composed: true };
@@ -16274,6 +16264,7 @@ if (!customElements.get("wc-tree-item")) {
       }
     }
     expand() {
+      if (this.hasAttribute("expanded")) return;
       this.setAttribute("expanded", "");
       const children = this.componentElement?.querySelector(".tree-item-children");
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
@@ -16287,6 +16278,7 @@ if (!customElements.get("wc-tree-item")) {
       }
     }
     collapse() {
+      if (!this.hasAttribute("expanded")) return;
       this.removeAttribute("expanded");
       const children = this.componentElement?.querySelector(".tree-item-children");
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
@@ -16295,10 +16287,32 @@ if (!customElements.get("wc-tree-item")) {
       if (arrow) arrow.classList.remove("expanded");
       if (row) row.setAttribute("aria-expanded", "false");
     }
+    _applyExpandedState(expanded) {
+      const children = this.componentElement?.querySelector(".tree-item-children");
+      const arrow = this.componentElement?.querySelector(".tree-item-arrow");
+      const row = this.componentElement?.querySelector(".tree-item-row");
+      if (expanded) {
+        if (children) children.style.display = "";
+        if (arrow) arrow.classList.add("expanded");
+        if (row) row.setAttribute("aria-expanded", "true");
+        const lazyUrl = this.getAttribute("lazy-url");
+        if (lazyUrl && !this._lazyLoaded) {
+          this._lazyLoad(lazyUrl, children);
+        }
+      } else {
+        if (children) children.style.display = "none";
+        if (arrow) arrow.classList.remove("expanded");
+        if (row) row.setAttribute("aria-expanded", "false");
+      }
+    }
     select() {
+      if (this.hasAttribute("selected")) return;
       const tree = this.closest("wc-tree");
       if (tree) {
         tree.querySelectorAll(".tree-item-row.selected").forEach((r) => r.classList.remove("selected"));
+        tree.querySelectorAll("wc-tree-item[selected]").forEach((item) => {
+          if (item !== this) item.removeAttribute("selected");
+        });
       }
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (row) row.classList.add("selected");
@@ -16334,10 +16348,19 @@ if (!customElements.get("wc-tree-item")) {
     }
     _handleAttributeChange(attrName, newValue) {
       if (attrName === "expanded") {
-        if (newValue !== null) this.expand();
-        else this.collapse();
+        this._applyExpandedState(newValue !== null);
       } else if (attrName === "selected") {
-        if (newValue !== null) this.select();
+        if (newValue !== null) {
+          const tree = this.closest("wc-tree");
+          if (tree) {
+            tree.querySelectorAll(".tree-item-row.selected").forEach((r) => r.classList.remove("selected"));
+            tree.querySelectorAll("wc-tree-item[selected]").forEach((item) => {
+              if (item !== this) item.removeAttribute("selected");
+            });
+          }
+          const row = this.componentElement?.querySelector(".tree-item-row");
+          if (row) row.classList.add("selected");
+        }
       } else if (attrName === "label") {
         const labelEl = this.componentElement?.querySelector(".tree-item-label");
         if (labelEl) labelEl.textContent = newValue || "";
@@ -17156,6 +17179,7 @@ if (!customElements.get("wc-split-pane")) {
     }
     constructor() {
       super();
+      this.childComponentSelector = "wc-split-start";
       this._isDragging = false;
       this._currentSize = 0;
       this._isCollapsed = false;
@@ -17171,20 +17195,29 @@ if (!customElements.get("wc-split-pane")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
-      if (!this._rendered) {
-        this._rendered = true;
-        this._createElement();
-        this._wireEvents();
-      }
     }
     disconnectedCallback() {
       super.disconnectedCallback();
       this._unWireEvents();
     }
-    _createElement() {
+    _render() {
+      super._render();
+      const innerEl = this.querySelector(".wc-split-pane > .wc-split-divider");
+      if (innerEl) {
+        this._divider = innerEl;
+        this._startEl = this.querySelector(":scope > .wc-split-pane > wc-split-start");
+        this._endEl = this.querySelector(":scope > .wc-split-pane > wc-split-end");
+        this._collapseBtn = innerEl.querySelector(".wc-split-collapse-btn");
+      } else {
+        this.componentElement.innerHTML = "";
+        this._createInnerElement();
+      }
+      this._wireEvents();
+    }
+    _createInnerElement() {
       const direction = this.getAttribute("direction") || "horizontal";
       const isHorizontal = direction === "horizontal";
-      const dividerWidth = parseInt(this.getAttribute("divider-width") || "4", 10);
+      const dividerWidth = parseInt(this.getAttribute("divider-width") || "6", 10);
       const collapsible = this.hasAttribute("collapsible");
       const startCollapsed = this.hasAttribute("collapsed");
       let initialSize = this.getAttribute("initial-size") || "250px";
@@ -17241,6 +17274,11 @@ if (!customElements.get("wc-split-pane")) {
         divider.style.height = `${dividerWidth}px`;
         divider.style.cursor = "row-resize";
       }
+      const grip = document.createElement("wc-fa-icon");
+      grip.classList.add("wc-split-grip");
+      grip.setAttribute("name", isHorizontal ? "grip-dots-vertical" : "grip-dots");
+      grip.setAttribute("size", "0.75rem");
+      divider.appendChild(grip);
       if (collapsible) {
         const collapseBtn = document.createElement("button");
         collapseBtn.classList.add("wc-split-collapse-btn");
@@ -17258,7 +17296,6 @@ if (!customElements.get("wc-split-pane")) {
       endEl.style.minWidth = "0";
       endEl.style.minHeight = "0";
       this._endEl = endEl;
-      this.componentElement.innerHTML = "";
       this.componentElement.appendChild(startEl);
       this.componentElement.appendChild(divider);
       this.componentElement.appendChild(endEl);
@@ -17366,6 +17403,8 @@ if (!customElements.get("wc-split-pane")) {
     }
     _wireEvents() {
       if (!this._divider) return;
+      if (this._eventsWired) return;
+      this._eventsWired = true;
       this._onMouseDown = (e) => {
         if (e.target.closest(".wc-split-collapse-btn")) return;
         e.preventDefault();
@@ -17373,9 +17412,7 @@ if (!customElements.get("wc-split-pane")) {
         document.body.style.userSelect = "none";
         document.body.style.cursor = this._direction === "horizontal" ? "col-resize" : "row-resize";
         this._divider.classList.add("active");
-        const isH = this._direction === "horizontal";
-        const rect = this.componentElement.getBoundingClientRect();
-        this._dragStartPos = isH ? e.clientX : e.clientY;
+        this._dragStartPos = this._direction === "horizontal" ? e.clientX : e.clientY;
         this._dragStartSize = this._currentSize;
       };
       this._onMouseMove = (e) => {
@@ -17490,6 +17527,7 @@ if (!customElements.get("wc-split-pane")) {
       document.addEventListener("touchend", this._onTouchEnd);
     }
     _unWireEvents() {
+      this._eventsWired = false;
       if (this._onMouseMove) document.removeEventListener("mousemove", this._onMouseMove);
       if (this._onMouseUp) document.removeEventListener("mouseup", this._onMouseUp);
       if (this._onTouchMove) document.removeEventListener("touchmove", this._onTouchMove);
@@ -17516,7 +17554,7 @@ if (!customElements.get("wc-split-pane")) {
 
         .wc-split-divider {
           flex-shrink: 0;
-          background: var(--split-pane-divider-bg, var(--border-color, #374151));
+          background: var(--component-border-color);
           position: relative;
           display: flex;
           align-items: center;
@@ -17525,21 +17563,34 @@ if (!customElements.get("wc-split-pane")) {
           z-index: 1;
         }
         .wc-split-divider:hover {
-          background: var(--split-pane-divider-hover-bg, var(--primary-color, #6366f1));
+          background: var(--primary-bg-color);
         }
         .wc-split-divider.active {
-          background: var(--split-pane-divider-active-bg, var(--primary-color, #6366f1));
+          background: var(--primary-bg-color);
         }
         .wc-split-divider:focus-visible {
-          outline: 2px solid var(--primary-color, #6366f1);
+          outline: 2px solid var(--primary-bg-color);
           outline-offset: -2px;
+        }
+
+        .wc-split-grip {
+          pointer-events: none;
+          color: var(--text-color);
+          opacity: 0.4;
+          font-size: 14px;
+          line-height: 1;
+          user-select: none;
+        }
+        .wc-split-divider:hover .wc-split-grip {
+          opacity: 0.9;
+          color: var(--primary-text-color, #fff);
         }
 
         .wc-split-collapse-btn {
           position: absolute;
-          background: var(--surface-3, #333);
-          border: 1px solid var(--surface-5, #555);
-          color: var(--text-4, #aaa);
+          background: var(--card-bg-color);
+          border: 1px solid var(--card-border-color);
+          color: var(--text-color);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -17551,9 +17602,9 @@ if (!customElements.get("wc-split-pane")) {
           transition: background-color 0.15s, color 0.15s;
         }
         .wc-split-collapse-btn:hover {
-          background: var(--primary-color, #6366f1);
-          color: #fff;
-          border-color: var(--primary-color, #6366f1);
+          background: var(--primary-bg-color);
+          color: var(--primary-text-color, #fff);
+          border-color: var(--primary-bg-color);
         }
 
         /* Horizontal divider collapse button */

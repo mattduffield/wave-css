@@ -201,24 +201,14 @@ class WcTab extends WcBaseComponent {
 
     tabNav.appendChild(btn);
 
-    // Create the wc-tab-item
-    const tabItem = document.createElement('wc-tab-item');
-    tabItem.setAttribute('label', label);
-    if (typeof content === 'string') {
-      // Wait for the component to render, then set inner content
-      requestAnimationFrame(() => {
-        const inner = tabItem.querySelector('.wc-tab-item');
-        if (inner) {
-          inner.innerHTML = content;
-        }
-      });
-    } else if (content instanceof HTMLElement) {
-      requestAnimationFrame(() => {
-        const inner = tabItem.querySelector('.wc-tab-item');
-        if (inner) {
-          inner.appendChild(content);
-        }
-      });
+    // Create the wc-tab-item via innerHTML to avoid createElement spec violation
+    // (wc-tab-item's constructor appends children, which is not allowed during createElement)
+    const contentHtml = typeof content === 'string' ? content : '';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `<wc-tab-item label="${label.replace(/"/g, '&quot;')}"><div class="wc-tab-item">${contentHtml}</div></wc-tab-item>`;
+    const tabItem = wrapper.firstElementChild;
+    if (content instanceof HTMLElement) {
+      tabItem.querySelector('.wc-tab-item').appendChild(content);
     }
     tabBody.appendChild(tabItem);
 
