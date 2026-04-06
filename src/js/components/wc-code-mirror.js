@@ -523,7 +523,6 @@ if (!customElements.get('wc-code-mirror')) {
 
       const gutters = await this.getGutters();
 
-      // Initialize CodeMirror editor
       this.editor = CodeMirror(this.componentElement, {
         mode: this.getAttribute('mode') || 'javascript',
         theme: this.getAttribute('theme') || 'default',
@@ -540,7 +539,7 @@ if (!customElements.get('wc-code-mirror')) {
               var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
               cm.replaceSelection(spaces);
             }
-          }        
+          }
         },
         value: initialValue,
         tabSize: parseInt(this.getAttribute('tab-size'), 10) || 4,

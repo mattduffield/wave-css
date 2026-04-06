@@ -42,8 +42,8 @@ class WcDependencyManager {
       },
       'CodeMirror': {
         urls: [
-          'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css',
-          'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js'
+          'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css',
+          'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js'
         ],
         globalName: 'CodeMirror',
         timeout: 15000

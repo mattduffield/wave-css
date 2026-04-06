@@ -32,19 +32,37 @@ export function loadCSS(url) {
   });
 }
 
-export function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
+// Track in-flight script loads so concurrent callers share the same promise
+const _scriptLoadPromises = new Map();
 
+export function loadScript(url) {
+  // Already fully loaded — resolve immediately
+  const existing = document.querySelector(`script[src="${url}"]`);
+  if (existing && !_scriptLoadPromises.has(url)) {
+    return Promise.resolve();
+  }
+
+  // In-flight — return the same promise so all callers wait for it
+  if (_scriptLoadPromises.has(url)) {
+    return _scriptLoadPromises.get(url);
+  }
+
+  const promise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
+    script.onload = () => {
+      _scriptLoadPromises.delete(url);
+      resolve();
+    };
+    script.onerror = (err) => {
+      _scriptLoadPromises.delete(url);
+      reject(err);
+    };
     document.head.appendChild(script);
   });
+
+  _scriptLoadPromises.set(url, promise);
+  return promise;
 }
 
 export function loadLibrary(url, globalObjectName) {

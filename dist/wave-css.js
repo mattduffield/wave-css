@@ -27,18 +27,30 @@ function loadCSS(url) {
     }, 50);
   });
 }
+var _scriptLoadPromises = /* @__PURE__ */ new Map();
 function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
+  const existing = document.querySelector(`script[src="${url}"]`);
+  if (existing && !_scriptLoadPromises.has(url)) {
+    return Promise.resolve();
+  }
+  if (_scriptLoadPromises.has(url)) {
+    return _scriptLoadPromises.get(url);
+  }
+  const promise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
+    script.onload = () => {
+      _scriptLoadPromises.delete(url);
+      resolve();
+    };
+    script.onerror = (err) => {
+      _scriptLoadPromises.delete(url);
+      reject(err);
+    };
     document.head.appendChild(script);
   });
+  _scriptLoadPromises.set(url, promise);
+  return promise;
 }
 function loadLibrary(url, globalObjectName) {
   return new Promise((resolve, reject) => {
@@ -661,8 +673,8 @@ var WcDependencyManager = class {
       },
       "CodeMirror": {
         urls: [
-          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css",
-          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css",
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"
         ],
         globalName: "CodeMirror",
         timeout: 15e3
@@ -13021,8 +13033,12 @@ var WcTabItem = class extends WcBaseComponent {
     const buttons = parentTab.querySelectorAll(":scope > .wc-tab > .tab-nav > button.tab-link");
     const btn = buttons[myIndex];
     if (btn && newLabel) {
+      const closeBtn = btn.querySelector(".tab-close");
       btn.textContent = newLabel;
       btn.dataset.label = newLabel;
+      if (closeBtn) {
+        btn.appendChild(closeBtn);
+      }
     }
   }
   _render() {

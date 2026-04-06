@@ -109,8 +109,13 @@ class WcTabItem extends WcBaseComponent {
     const btn = buttons[myIndex];
 
     if (btn && newLabel) {
+      // Preserve child elements (e.g. close button) — only update the text node
+      const closeBtn = btn.querySelector('.tab-close');
       btn.textContent = newLabel;
       btn.dataset.label = newLabel;
+      if (closeBtn) {
+        btn.appendChild(closeBtn);
+      }
     }
   }
 

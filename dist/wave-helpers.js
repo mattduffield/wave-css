@@ -81,18 +81,30 @@ var WaveHelpers = (() => {
       }, 50);
     });
   }
+  var _scriptLoadPromises = /* @__PURE__ */ new Map();
   function loadScript(url) {
-    return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${url}"]`)) {
-        resolve();
-        return;
-      }
+    const existing = document.querySelector(`script[src="${url}"]`);
+    if (existing && !_scriptLoadPromises.has(url)) {
+      return Promise.resolve();
+    }
+    if (_scriptLoadPromises.has(url)) {
+      return _scriptLoadPromises.get(url);
+    }
+    const promise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = url;
-      script.onload = resolve;
-      script.onerror = reject;
+      script.onload = () => {
+        _scriptLoadPromises.delete(url);
+        resolve();
+      };
+      script.onerror = (err) => {
+        _scriptLoadPromises.delete(url);
+        reject(err);
+      };
       document.head.appendChild(script);
     });
+    _scriptLoadPromises.set(url, promise);
+    return promise;
   }
   function loadLibrary(url, globalObjectName) {
     return new Promise((resolve, reject) => {
