@@ -156,8 +156,23 @@ async function bundleCommonIcons() {
   console.log(`  ✓ Created common-icons.json with ${Object.keys(bundle).length} icons`);
 }
 
+// Copy icon bundles to versioned dist folder
+function copyBundlesToVersioned() {
+  const versionedBundles = path.join(__dirname, '../dist/wave-css-0.0.1/assets/icon-bundles');
+  if (!fs.existsSync(path.join(__dirname, '../dist/wave-css-0.0.1'))) return;
+  if (!fs.existsSync(versionedBundles)) {
+    fs.mkdirSync(versionedBundles, { recursive: true });
+  }
+  const files = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.json'));
+  files.forEach(f => {
+    fs.copyFileSync(path.join(OUTPUT_DIR, f), path.join(versionedBundles, f));
+  });
+  console.log(`\nIcon bundles copied to dist/wave-css-0.0.1/assets/icon-bundles`);
+}
+
 // Run bundling
 (async () => {
   await bundleIconsByStyle();
   await bundleCommonIcons();
+  copyBundlesToVersioned();
 })();

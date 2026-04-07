@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "esbuild.config.js",
   "scripts": {
-    "build": "node esbuild.config.js && npm run build:icons",
+    "build": "node scripts/copy-fa-pro-svgs.js && node esbuild.config.js && npm run build:icons",
     "build:icons": "node scripts/bundle-icons.js",
     "release": "npm run build && node scripts/release.js",
     "test": "echo \"Error: no test specified\" && exit 1"

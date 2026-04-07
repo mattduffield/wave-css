@@ -85,6 +85,25 @@ if (fs.existsSync(iconsSource)) {
   console.log('SVG icons copied to dist/assets/icons');
 }
 
+// Copy built files to versioned dist folder
+const versionedDir = path.join(__dirname, 'dist/wave-css-0.0.1');
+if (fs.existsSync(versionedDir)) {
+  ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js'].forEach(file => {
+    const src = path.join(__dirname, 'dist', file);
+    const dest = path.join(versionedDir, file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
+    }
+  });
+  // Copy icons and icon bundles to versioned folder
+  const versionedIcons = path.join(versionedDir, 'assets/icons');
+  if (fs.existsSync(iconsTarget)) {
+    copyRecursiveSync(iconsTarget, versionedIcons);
+  }
+  // Note: icon bundles are copied by bundle-icons.js which runs after esbuild
+  console.log('Built files copied to dist/wave-css-0.0.1');
+}
+
 // Copy live-designer-canvas.html to dist with adjusted paths
 const canvasSource = path.join(__dirname, 'views/live-designer-canvas.html');
 const canvasDist = path.join(__dirname, 'dist/live-designer-canvas.html');

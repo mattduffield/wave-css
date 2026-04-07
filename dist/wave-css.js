@@ -16380,7 +16380,8 @@ if (!customElements.get("wc-tree-item")) {
       const selected = this.hasAttribute("selected");
       const hasChildren = this.querySelectorAll(":scope > wc-tree-item").length > 0;
       const lazyUrl = this.getAttribute("lazy-url") || "";
-      const hasExpandable = hasChildren || lazyUrl;
+      const hxGet = this.getAttribute("hx-get") || "";
+      const hasExpandable = hasChildren || lazyUrl || hxGet;
       const isSystem = label.startsWith("_");
       let level = 0;
       let parent = this.parentElement?.closest("wc-tree-item");
@@ -16425,7 +16426,9 @@ if (!customElements.get("wc-tree-item")) {
       children.classList.add("tree-item-children");
       children.setAttribute("role", "group");
       if (!expanded) children.style.display = "none";
-      const childItems = Array.from(this.querySelectorAll(":scope > wc-tree-item"));
+      const childItems = Array.from(
+        this.querySelectorAll(":scope > wc-tree-item")
+      );
       childItems.forEach((child) => children.appendChild(child));
       this.componentElement.appendChild(children);
     }
@@ -16445,7 +16448,16 @@ if (!customElements.get("wc-tree-item")) {
     expand() {
       if (this.hasAttribute("expanded")) return;
       this.setAttribute("expanded", "");
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      this.dispatchEvent(
+        new CustomEvent("tree:item-expand", {
+          bubbles: true,
+          composed: true,
+          detail: { label: this.getAttribute("label"), item: this }
+        })
+      );
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (children) children.style.display = "";
@@ -16459,7 +16471,16 @@ if (!customElements.get("wc-tree-item")) {
     collapse() {
       if (!this.hasAttribute("expanded")) return;
       this.removeAttribute("expanded");
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      this.dispatchEvent(
+        new CustomEvent("tree:item-collapse", {
+          bubbles: true,
+          composed: true,
+          detail: { label: this.getAttribute("label"), item: this }
+        })
+      );
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (children) children.style.display = "none";
@@ -16467,7 +16488,9 @@ if (!customElements.get("wc-tree-item")) {
       if (row) row.setAttribute("aria-expanded", "false");
     }
     _applyExpandedState(expanded) {
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (expanded) {
@@ -16570,46 +16593,52 @@ if (!customElements.get("wc-tree-item")) {
           return;
         }
         this.select();
-        this.dispatchEvent(new CustomEvent("tree:item-click", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-click", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this
+            }
+          })
+        );
       };
       this._handleRowDblClick = (e) => {
-        this.dispatchEvent(new CustomEvent("tree:item-dblclick", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-dblclick", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this
+            }
+          })
+        );
       };
       this._handleRowContextMenu = (e) => {
         this.select();
-        this.dispatchEvent(new CustomEvent("tree:item-context-menu", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this,
-            x: e.clientX,
-            y: e.clientY
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-context-menu", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this,
+              x: e.clientX,
+              y: e.clientY
+            }
+          })
+        );
       };
       this._handleKeydown = (e) => {
         const tree = this.closest("wc-tree");
@@ -16655,10 +16684,14 @@ if (!customElements.get("wc-tree-item")) {
     _unWireEvents() {
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (!row) return;
-      if (this._handleRowClick) row.removeEventListener("click", this._handleRowClick);
-      if (this._handleRowDblClick) row.removeEventListener("dblclick", this._handleRowDblClick);
-      if (this._handleRowContextMenu) row.removeEventListener("contextmenu", this._handleRowContextMenu);
-      if (this._handleKeydown) row.removeEventListener("keydown", this._handleKeydown);
+      if (this._handleRowClick)
+        row.removeEventListener("click", this._handleRowClick);
+      if (this._handleRowDblClick)
+        row.removeEventListener("dblclick", this._handleRowDblClick);
+      if (this._handleRowContextMenu)
+        row.removeEventListener("contextmenu", this._handleRowContextMenu);
+      if (this._handleKeydown)
+        row.removeEventListener("keydown", this._handleKeydown);
     }
     _applyStyle() {
     }

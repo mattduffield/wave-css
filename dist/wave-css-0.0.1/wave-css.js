@@ -27,18 +27,30 @@ function loadCSS(url) {
     }, 50);
   });
 }
+var _scriptLoadPromises = /* @__PURE__ */ new Map();
 function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
+  const existing = document.querySelector(`script[src="${url}"]`);
+  if (existing && !_scriptLoadPromises.has(url)) {
+    return Promise.resolve();
+  }
+  if (_scriptLoadPromises.has(url)) {
+    return _scriptLoadPromises.get(url);
+  }
+  const promise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
+    script.onload = () => {
+      _scriptLoadPromises.delete(url);
+      resolve();
+    };
+    script.onerror = (err) => {
+      _scriptLoadPromises.delete(url);
+      reject(err);
+    };
     document.head.appendChild(script);
   });
+  _scriptLoadPromises.set(url, promise);
+  return promise;
 }
 function loadLibrary(url, globalObjectName) {
   return new Promise((resolve, reject) => {
@@ -661,8 +673,8 @@ var WcDependencyManager = class {
       },
       "CodeMirror": {
         urls: [
-          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css",
-          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css",
+          "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"
         ],
         globalName: "CodeMirror",
         timeout: 15e3
@@ -13021,8 +13033,12 @@ var WcTabItem = class extends WcBaseComponent {
     const buttons = parentTab.querySelectorAll(":scope > .wc-tab > .tab-nav > button.tab-link");
     const btn = buttons[myIndex];
     if (btn && newLabel) {
+      const closeBtn = btn.querySelector(".tab-close");
       btn.textContent = newLabel;
       btn.dataset.label = newLabel;
+      if (closeBtn) {
+        btn.appendChild(closeBtn);
+      }
     }
   }
   _render() {
@@ -13201,6 +13217,131 @@ var WcTab = class extends WcBaseComponent {
       }
     }
   }
+  /**
+   * Close all tabs except the one with the given label.
+   * @param {string} label - The label of the tab to keep
+   */
+  closeOthers(label) {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (!tabNav) return;
+    const labels = Array.from(tabNav.querySelectorAll(":scope > button.tab-link")).map((btn) => btn.dataset.label).filter((l) => l !== label);
+    labels.forEach((l) => this.removeTab(l));
+  }
+  /**
+   * Close all tabs.
+   */
+  closeAll() {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (!tabNav) return;
+    const labels = Array.from(tabNav.querySelectorAll(":scope > button.tab-link")).map((btn) => btn.dataset.label);
+    labels.forEach((l) => this.removeTab(l));
+  }
+  /**
+   * Close all tabs to the right of the given label.
+   * @param {string} label - The reference tab label
+   */
+  closeToRight(label) {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (!tabNav) return;
+    const buttons = Array.from(tabNav.querySelectorAll(":scope > button.tab-link"));
+    const idx = buttons.findIndex((btn) => btn.dataset.label === label);
+    if (idx === -1) return;
+    const labels = buttons.slice(idx + 1).map((btn) => btn.dataset.label);
+    labels.forEach((l) => this.removeTab(l));
+  }
+  /**
+   * Close all tabs to the left of the given label.
+   * @param {string} label - The reference tab label
+   */
+  closeToLeft(label) {
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (!tabNav) return;
+    const buttons = Array.from(tabNav.querySelectorAll(":scope > button.tab-link"));
+    const idx = buttons.findIndex((btn) => btn.dataset.label === label);
+    if (idx === -1) return;
+    const labels = buttons.slice(0, idx).map((btn) => btn.dataset.label);
+    labels.forEach((l) => this.removeTab(l));
+  }
+  _showTabContextMenu(event) {
+    event.preventDefault();
+    const btn = event.target.closest("button.tab-link");
+    if (!btn || !this.hasAttribute("removable")) return;
+    this._hideTabContextMenu();
+    const label = btn.dataset.label;
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    const buttons = Array.from(tabNav.querySelectorAll(":scope > button.tab-link"));
+    const idx = buttons.indexOf(btn);
+    const hasLeft = idx > 0;
+    const hasRight = idx < buttons.length - 1;
+    const hasOthers = buttons.length > 1;
+    const menu = document.createElement("div");
+    menu.classList.add("wc-tab-context-menu");
+    const items = [
+      { text: "Close", action: () => this.removeTab(label), enabled: true },
+      { text: "Close Others", action: () => this.closeOthers(label), enabled: hasOthers },
+      { text: "Close to the Right", action: () => this.closeToRight(label), enabled: hasRight },
+      { text: "Close to the Left", action: () => this.closeToLeft(label), enabled: hasLeft },
+      { divider: true },
+      { text: "Close All", action: () => this.closeAll(), enabled: true }
+    ];
+    items.forEach((item) => {
+      if (item.divider) {
+        const hr = document.createElement("div");
+        hr.classList.add("wc-tab-context-divider");
+        menu.appendChild(hr);
+        return;
+      }
+      const el = document.createElement("div");
+      el.classList.add("wc-tab-context-item");
+      el.textContent = item.text;
+      if (!item.enabled) {
+        el.classList.add("disabled");
+      } else {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this._hideTabContextMenu();
+          item.action();
+        });
+      }
+      menu.appendChild(el);
+    });
+    menu.style.position = "absolute";
+    menu.style.left = `${event.clientX}px`;
+    menu.style.top = `${event.clientY}px`;
+    document.body.appendChild(menu);
+    requestAnimationFrame(() => {
+      const rect = menu.getBoundingClientRect();
+      if (rect.right > window.innerWidth) {
+        menu.style.left = `${window.innerWidth - rect.width - 4}px`;
+      }
+      if (rect.bottom > window.innerHeight) {
+        menu.style.top = `${window.innerHeight - rect.height - 4}px`;
+      }
+    });
+    this._contextMenu = menu;
+    this._contextMenuClose = (e) => {
+      if (!menu.contains(e.target)) this._hideTabContextMenu();
+    };
+    this._contextMenuEsc = (e) => {
+      if (e.key === "Escape") this._hideTabContextMenu();
+    };
+    document.addEventListener("mousedown", this._contextMenuClose, true);
+    document.addEventListener("keydown", this._contextMenuEsc, true);
+  }
+  _hideTabContextMenu() {
+    if (this._contextMenu) {
+      this._contextMenu.remove();
+      this._contextMenu = null;
+    }
+    if (this._contextMenuClose) {
+      document.removeEventListener("mousedown", this._contextMenuClose, true);
+      this._contextMenuClose = null;
+    }
+    if (this._contextMenuEsc) {
+      document.removeEventListener("keydown", this._contextMenuEsc, true);
+      this._contextMenuEsc = null;
+    }
+  }
   _createCloseButton(label) {
     const closeBtn = document.createElement("span");
     closeBtn.classList.add("tab-close");
@@ -13237,6 +13378,11 @@ var WcTab = class extends WcBaseComponent {
     } else {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
+    }
+    const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
+    if (tabNav && !tabNav._contextMenuWired) {
+      tabNav._contextMenuWired = true;
+      tabNav.addEventListener("contextmenu", this._showTabContextMenu.bind(this));
     }
     if (typeof htmx !== "undefined") {
       htmx.process(this);
@@ -13767,6 +13913,38 @@ var WcTab = class extends WcBaseComponent {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
       }
 
+      /* Tab context menu */
+      .wc-tab-context-menu {
+        z-index: 10000;
+        min-width: 180px;
+        background: var(--card-bg-color, #1e1e2e);
+        border: 1px solid var(--card-border-color, #444);
+        border-radius: 6px;
+        padding: 4px 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        font-size: 13px;
+      }
+      .wc-tab-context-item {
+        padding: 6px 14px;
+        cursor: pointer;
+        white-space: nowrap;
+        color: var(--text-color, #ccc);
+      }
+      .wc-tab-context-item:hover {
+        background: var(--primary-bg-color, #4466ff);
+        color: var(--primary-text-color, #fff);
+      }
+      .wc-tab-context-item.disabled {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+      }
+      .wc-tab-context-divider {
+        height: 1px;
+        margin: 4px 0;
+        background: var(--card-border-color, #444);
+      }
+
       @keyframes tab-fade {
         from {
           opacity: 0;
@@ -13787,6 +13965,7 @@ var WcTab = class extends WcBaseComponent {
     document.body.removeEventListener("wc-tab:click", this._handleOnClick.bind(this));
     const btns = this.querySelectorAll(".tab-link");
     btns.forEach((btn) => btn.removeEventListener("click", this._handleClick.bind(this)));
+    this._hideTabContextMenu();
   }
 };
 customElements.define("wc-tab", WcTab);
@@ -16201,7 +16380,8 @@ if (!customElements.get("wc-tree-item")) {
       const selected = this.hasAttribute("selected");
       const hasChildren = this.querySelectorAll(":scope > wc-tree-item").length > 0;
       const lazyUrl = this.getAttribute("lazy-url") || "";
-      const hasExpandable = hasChildren || lazyUrl;
+      const hxGet = this.getAttribute("hx-get") || "";
+      const hasExpandable = hasChildren || lazyUrl || hxGet;
       const isSystem = label.startsWith("_");
       let level = 0;
       let parent = this.parentElement?.closest("wc-tree-item");
@@ -16246,7 +16426,9 @@ if (!customElements.get("wc-tree-item")) {
       children.classList.add("tree-item-children");
       children.setAttribute("role", "group");
       if (!expanded) children.style.display = "none";
-      const childItems = Array.from(this.querySelectorAll(":scope > wc-tree-item"));
+      const childItems = Array.from(
+        this.querySelectorAll(":scope > wc-tree-item")
+      );
       childItems.forEach((child) => children.appendChild(child));
       this.componentElement.appendChild(children);
     }
@@ -16266,7 +16448,16 @@ if (!customElements.get("wc-tree-item")) {
     expand() {
       if (this.hasAttribute("expanded")) return;
       this.setAttribute("expanded", "");
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      this.dispatchEvent(
+        new CustomEvent("tree:item-expand", {
+          bubbles: true,
+          composed: true,
+          detail: { label: this.getAttribute("label"), item: this }
+        })
+      );
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (children) children.style.display = "";
@@ -16280,7 +16471,16 @@ if (!customElements.get("wc-tree-item")) {
     collapse() {
       if (!this.hasAttribute("expanded")) return;
       this.removeAttribute("expanded");
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      this.dispatchEvent(
+        new CustomEvent("tree:item-collapse", {
+          bubbles: true,
+          composed: true,
+          detail: { label: this.getAttribute("label"), item: this }
+        })
+      );
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (children) children.style.display = "none";
@@ -16288,7 +16488,9 @@ if (!customElements.get("wc-tree-item")) {
       if (row) row.setAttribute("aria-expanded", "false");
     }
     _applyExpandedState(expanded) {
-      const children = this.componentElement?.querySelector(".tree-item-children");
+      const children = this.componentElement?.querySelector(
+        ".tree-item-children"
+      );
       const arrow = this.componentElement?.querySelector(".tree-item-arrow");
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (expanded) {
@@ -16391,46 +16593,52 @@ if (!customElements.get("wc-tree-item")) {
           return;
         }
         this.select();
-        this.dispatchEvent(new CustomEvent("tree:item-click", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-click", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this
+            }
+          })
+        );
       };
       this._handleRowDblClick = (e) => {
-        this.dispatchEvent(new CustomEvent("tree:item-dblclick", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-dblclick", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this
+            }
+          })
+        );
       };
       this._handleRowContextMenu = (e) => {
         this.select();
-        this.dispatchEvent(new CustomEvent("tree:item-context-menu", {
-          bubbles: true,
-          composed: true,
-          detail: {
-            label: this.getAttribute("label"),
-            icon: this.getAttribute("icon"),
-            badge: this.getAttribute("badge"),
-            level: this._level,
-            element: this,
-            x: e.clientX,
-            y: e.clientY
-          }
-        }));
+        this.dispatchEvent(
+          new CustomEvent("tree:item-context-menu", {
+            bubbles: true,
+            composed: true,
+            detail: {
+              label: this.getAttribute("label"),
+              icon: this.getAttribute("icon"),
+              badge: this.getAttribute("badge"),
+              level: this._level,
+              element: this,
+              x: e.clientX,
+              y: e.clientY
+            }
+          })
+        );
       };
       this._handleKeydown = (e) => {
         const tree = this.closest("wc-tree");
@@ -16476,10 +16684,14 @@ if (!customElements.get("wc-tree-item")) {
     _unWireEvents() {
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (!row) return;
-      if (this._handleRowClick) row.removeEventListener("click", this._handleRowClick);
-      if (this._handleRowDblClick) row.removeEventListener("dblclick", this._handleRowDblClick);
-      if (this._handleRowContextMenu) row.removeEventListener("contextmenu", this._handleRowContextMenu);
-      if (this._handleKeydown) row.removeEventListener("keydown", this._handleKeydown);
+      if (this._handleRowClick)
+        row.removeEventListener("click", this._handleRowClick);
+      if (this._handleRowDblClick)
+        row.removeEventListener("dblclick", this._handleRowDblClick);
+      if (this._handleRowContextMenu)
+        row.removeEventListener("contextmenu", this._handleRowContextMenu);
+      if (this._handleKeydown)
+        row.removeEventListener("keydown", this._handleKeydown);
     }
     _applyStyle() {
     }
@@ -25458,6 +25670,27 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     super.connectedCallback();
     this._applyStyle();
   }
+  get value() {
+    const innerSelect = this.querySelector("select");
+    if (innerSelect) {
+      return innerSelect.value;
+    }
+    return this._value;
+  }
+  set value(newValue) {
+    this._value = newValue;
+    this._internals.setFormValue(newValue);
+    const innerSelect = this.querySelector("select");
+    if (innerSelect && innerSelect.value !== newValue) {
+      innerSelect.value = newValue;
+    }
+  }
+  _handleInputChange(event) {
+    super._handleInputChange(event);
+    if (event.type === "change") {
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
   getDesignerHTML() {
     const innerSelect = this.querySelector("select");
     if (!innerSelect) return null;
@@ -26288,7 +26521,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       this.updateSelect();
       this.updateChips();
       this.updateDropdownOptions();
-      const event = new Event("change");
+      const event = new Event("change", { bubbles: true });
       this.dispatchEvent(event);
     }, 10);
   }
@@ -26297,7 +26530,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     this.updateSelect();
     this.updateChips();
     this.updateDropdownOptions();
-    const event = new Event("change");
+    const event = new Event("change", { bubbles: true });
     this.dispatchEvent(event);
   }
   updateChips() {

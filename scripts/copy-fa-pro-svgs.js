@@ -620,6 +620,9 @@ const ICONS_TO_COPY = [
   "microscope",
   "cloud-arrow-up",
   "plug",
+  "list-check",
+  "list-ul",
+  "font",
   // Add more icon names here
 ];
 
