@@ -108,8 +108,10 @@
   </wc-tab>
 
   <h3 class="mt-6 mb-2 px-4">Add Tabs Dynamically</h3>
+  <p class="mb-2 px-4">Click "Add Tab" to create tabs. Right-click any tab for the context menu (Close, Close Others, Close All, etc.).</p>
   <div class="row gap-2 px-4 mb-4">
     <button class="btn btn-primary" onclick="addDynamicTab()">Add Tab</button>
+    <button class="btn btn-primary" onclick="addMultipleTabs()">Add 5 Tabs</button>
     <button class="btn btn-secondary" onclick="removeDynamicTab()">Remove Active Tab</button>
   </div>
   <wc-tab id="dynamic-tabs" class="p-4 mb-4" animate removable>
@@ -117,6 +119,7 @@
       <div class="col-1 gap-2 pt-2 pb-10 px-10">
         <h3>Home</h3>
         <p>Click "Add Tab" to add new tabs dynamically. Use the x buttons or "Remove Active Tab" to remove them.</p>
+        <p>Right-click any tab to see the context menu with Close, Close Others, Close to the Right, Close to the Left, and Close All.</p>
       </div>
     </wc-tab-item>
   </wc-tab>
@@ -125,20 +128,23 @@
     <script>
       var tabCounter = 0;
       function addDynamicTab() {
-        const tab = document.getElementById('dynamic-tabs');
+        var tab = document.getElementById('dynamic-tabs');
         tabCounter++;
-        const label = `Tab ${tabCounter}`;
-        const content = `
-          <div class="col-1 gap-2 pt-2 pb-10 px-10">
-            <h3>${label}</h3>
-            <p>This tab was added dynamically at ${new Date().toLocaleTimeString()}.</p>
-          </div>
-        `;
+        var label = 'Tab ' + tabCounter;
+        var content = '<div class="col-1 gap-2 pt-2 pb-10 px-10">'
+          + '<h3>' + label + '</h3>'
+          + '<p>This tab was added dynamically at ' + new Date().toLocaleTimeString() + '.</p>'
+          + '</div>';
         tab.addTab(label, content);
       }
+      function addMultipleTabs() {
+        for (var i = 0; i < 5; i++) {
+          addDynamicTab();
+        }
+      }
       function removeDynamicTab() {
-        const tab = document.getElementById('dynamic-tabs');
-        const activeBtn = tab.querySelector(':scope > .wc-tab > .tab-nav > button.tab-link.active');
+        var tab = document.getElementById('dynamic-tabs');
+        var activeBtn = tab.querySelector(':scope > .wc-tab > .tab-nav > button.tab-link.active');
         if (activeBtn) {
           tab.removeTab(activeBtn.dataset.label);
         }

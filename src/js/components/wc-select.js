@@ -68,6 +68,32 @@ class WcSelect extends WcBaseFormComponent {
     // console.log('connectedCallback:wc-select');
   }
 
+  get value() {
+    const innerSelect = this.querySelector('select');
+    if (innerSelect) {
+      return innerSelect.value;
+    }
+    return this._value;
+  }
+
+  set value(newValue) {
+    this._value = newValue;
+    this._internals.setFormValue(newValue);
+    const innerSelect = this.querySelector('select');
+    if (innerSelect && innerSelect.value !== newValue) {
+      innerSelect.value = newValue;
+    }
+  }
+
+  _handleInputChange(event) {
+    super._handleInputChange(event);
+    // Re-dispatch change event from the wc-select element so external
+    // listeners can use wc-select.addEventListener('change', ...)
+    if (event.type === 'change') {
+      this.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
   getDesignerHTML() {
     // Return options from the inner select element
     const innerSelect = this.querySelector('select');
@@ -1011,7 +1037,7 @@ class WcSelect extends WcBaseFormComponent {
       this.updateChips();
       this.updateDropdownOptions();
 
-      const event = new Event('change');
+      const event = new Event('change', { bubbles: true });
       this.dispatchEvent(event);
     }, 10);
   }
@@ -1022,7 +1048,7 @@ class WcSelect extends WcBaseFormComponent {
     this.updateChips();
     this.updateDropdownOptions();
 
-    const event = new Event('change');
+    const event = new Event('change', { bubbles: true });
     this.dispatchEvent(event);
   }
 

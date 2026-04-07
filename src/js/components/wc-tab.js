@@ -260,6 +260,153 @@ class WcTab extends WcBaseComponent {
     }
   }
 
+  /**
+   * Close all tabs except the one with the given label.
+   * @param {string} label - The label of the tab to keep
+   */
+  closeOthers(label) {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (!tabNav) return;
+    const labels = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'))
+      .map(btn => btn.dataset.label)
+      .filter(l => l !== label);
+    labels.forEach(l => this.removeTab(l));
+  }
+
+  /**
+   * Close all tabs.
+   */
+  closeAll() {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (!tabNav) return;
+    const labels = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'))
+      .map(btn => btn.dataset.label);
+    labels.forEach(l => this.removeTab(l));
+  }
+
+  /**
+   * Close all tabs to the right of the given label.
+   * @param {string} label - The reference tab label
+   */
+  closeToRight(label) {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (!tabNav) return;
+    const buttons = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'));
+    const idx = buttons.findIndex(btn => btn.dataset.label === label);
+    if (idx === -1) return;
+    const labels = buttons.slice(idx + 1).map(btn => btn.dataset.label);
+    labels.forEach(l => this.removeTab(l));
+  }
+
+  /**
+   * Close all tabs to the left of the given label.
+   * @param {string} label - The reference tab label
+   */
+  closeToLeft(label) {
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (!tabNav) return;
+    const buttons = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'));
+    const idx = buttons.findIndex(btn => btn.dataset.label === label);
+    if (idx === -1) return;
+    const labels = buttons.slice(0, idx).map(btn => btn.dataset.label);
+    labels.forEach(l => this.removeTab(l));
+  }
+
+  _showTabContextMenu(event) {
+    event.preventDefault();
+    const btn = event.target.closest('button.tab-link');
+    if (!btn || !this.hasAttribute('removable')) return;
+
+    // Remove any existing context menu
+    this._hideTabContextMenu();
+
+    const label = btn.dataset.label;
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    const buttons = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'));
+    const idx = buttons.indexOf(btn);
+    const hasLeft = idx > 0;
+    const hasRight = idx < buttons.length - 1;
+    const hasOthers = buttons.length > 1;
+
+    const menu = document.createElement('div');
+    menu.classList.add('wc-tab-context-menu');
+
+    const items = [
+      { text: 'Close', action: () => this.removeTab(label), enabled: true },
+      { text: 'Close Others', action: () => this.closeOthers(label), enabled: hasOthers },
+      { text: 'Close to the Right', action: () => this.closeToRight(label), enabled: hasRight },
+      { text: 'Close to the Left', action: () => this.closeToLeft(label), enabled: hasLeft },
+      { divider: true },
+      { text: 'Close All', action: () => this.closeAll(), enabled: true },
+    ];
+
+    items.forEach(item => {
+      if (item.divider) {
+        const hr = document.createElement('div');
+        hr.classList.add('wc-tab-context-divider');
+        menu.appendChild(hr);
+        return;
+      }
+      const el = document.createElement('div');
+      el.classList.add('wc-tab-context-item');
+      el.textContent = item.text;
+      if (!item.enabled) {
+        el.classList.add('disabled');
+      } else {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._hideTabContextMenu();
+          item.action();
+        });
+      }
+      menu.appendChild(el);
+    });
+
+    // Position near the click
+    menu.style.position = 'absolute';
+    menu.style.left = `${event.clientX}px`;
+    menu.style.top = `${event.clientY}px`;
+    document.body.appendChild(menu);
+
+    // Adjust if off-screen
+    requestAnimationFrame(() => {
+      const rect = menu.getBoundingClientRect();
+      if (rect.right > window.innerWidth) {
+        menu.style.left = `${window.innerWidth - rect.width - 4}px`;
+      }
+      if (rect.bottom > window.innerHeight) {
+        menu.style.top = `${window.innerHeight - rect.height - 4}px`;
+      }
+    });
+
+    this._contextMenu = menu;
+
+    // Close on any click or Escape
+    this._contextMenuClose = (e) => {
+      if (!menu.contains(e.target)) this._hideTabContextMenu();
+    };
+    this._contextMenuEsc = (e) => {
+      if (e.key === 'Escape') this._hideTabContextMenu();
+    };
+    document.addEventListener('mousedown', this._contextMenuClose, true);
+    document.addEventListener('keydown', this._contextMenuEsc, true);
+  }
+
+  _hideTabContextMenu() {
+    if (this._contextMenu) {
+      this._contextMenu.remove();
+      this._contextMenu = null;
+    }
+    if (this._contextMenuClose) {
+      document.removeEventListener('mousedown', this._contextMenuClose, true);
+      this._contextMenuClose = null;
+    }
+    if (this._contextMenuEsc) {
+      document.removeEventListener('keydown', this._contextMenuEsc, true);
+      this._contextMenuEsc = null;
+    }
+  }
+
   _createCloseButton(label) {
     const closeBtn = document.createElement('span');
     closeBtn.classList.add('tab-close');
@@ -300,6 +447,13 @@ class WcTab extends WcBaseComponent {
     } else {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
+    }
+
+    // Wire context menu on tab-nav (event delegation, once)
+    const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
+    if (tabNav && !tabNav._contextMenuWired) {
+      tabNav._contextMenuWired = true;
+      tabNav.addEventListener('contextmenu', this._showTabContextMenu.bind(this));
     }
 
     if (typeof htmx !== 'undefined') {
@@ -894,6 +1048,38 @@ class WcTab extends WcBaseComponent {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
       }
 
+      /* Tab context menu */
+      .wc-tab-context-menu {
+        z-index: 10000;
+        min-width: 180px;
+        background: var(--card-bg-color, #1e1e2e);
+        border: 1px solid var(--card-border-color, #444);
+        border-radius: 6px;
+        padding: 4px 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        font-size: 13px;
+      }
+      .wc-tab-context-item {
+        padding: 6px 14px;
+        cursor: pointer;
+        white-space: nowrap;
+        color: var(--text-color, #ccc);
+      }
+      .wc-tab-context-item:hover {
+        background: var(--primary-bg-color, #4466ff);
+        color: var(--primary-text-color, #fff);
+      }
+      .wc-tab-context-item.disabled {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+      }
+      .wc-tab-context-divider {
+        height: 1px;
+        margin: 4px 0;
+        background: var(--card-border-color, #444);
+      }
+
       @keyframes tab-fade {
         from {
           opacity: 0;
@@ -917,6 +1103,7 @@ class WcTab extends WcBaseComponent {
     document.body.removeEventListener('wc-tab:click', this._handleOnClick.bind(this));
     const btns = this.querySelectorAll('.tab-link');
     btns.forEach(btn => btn.removeEventListener('click', this._handleClick.bind(this)));
+    this._hideTabContextMenu();
   }
 }
 
