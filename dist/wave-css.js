@@ -22085,27 +22085,27 @@ if (!customElements.get("wc-prompt")) {
     }
     async success(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "success", title, text, footer });
+      const { value: result } = await Swal.fire({ icon: "success", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async error(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "error", title, text, footer });
+      const { value: result } = await Swal.fire({ icon: "error", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async warning(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "warning", title, text, footer });
+      const { value: result } = await Swal.fire({ icon: "warning", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async info(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "info", title, text, footer });
+      const { value: result } = await Swal.fire({ icon: "info", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async question(c) {
       const { title = "", text = "", footer = "", showCancelButton = true, callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "question", title, text, footer, showCancelButton });
+      const { value: result } = await Swal.fire({ icon: "question", title, text, footer, showCancelButton, focusConfirm: false, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async notify(c) {

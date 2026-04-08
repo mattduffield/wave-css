@@ -15,6 +15,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Build all assets (JS and CSS bundles)
+# Note: build automatically runs copy-fa-pro-svgs before bundling
+# and auto-syncs dist/wave-css-0.0.1/ versioned folder including icon bundles
 npm run build
 
 # View components locally
@@ -78,6 +80,9 @@ The build process (esbuild.config.js) generates:
 ### Layout Components
 - `wc-sidebar`: Sidebar navigation component
 - `wc-sidenav`: Side navigation menu
+- `wc-split-pane`: Resizable split panel with draggable divider, horizontal/vertical layouts, collapsible, localStorage persistence
+- `wc-split-start`: Start pane content wrapper for wc-split-pane
+- `wc-split-end`: End pane content wrapper for wc-split-pane
 
 ### Form Components (extend WcBaseFormComponent)
 - `wc-form`: Form wrapper with validation
@@ -103,7 +108,7 @@ The build process (esbuild.config.js) generates:
 - `wc-menu`: Menu system with HTMX support
 - `wc-breadcrumb`: Breadcrumb navigation
 - `wc-breadcrumb-item`: Individual breadcrumb item
-- `wc-tab`: Tab container
+- `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally)
 - `wc-tab-item`: Individual tab item
 - `wc-dropdown`: Dropdown menu
 - `wc-dropdown-item`: Dropdown menu item
@@ -120,6 +125,8 @@ The build process (esbuild.config.js) generates:
 - `wc-slideshow-image`: Slideshow image item
 - `wc-code-mirror`: Code editor integration
 - `wc-canvas-dot-highlight`: Canvas animation effect
+- `wc-context-menu`: Reusable context menu with static `WcContextMenu.show(x, y, items)` / `WcContextMenu.hide()` API
+- `wc-context-menu-item`: Declarative menu item for wc-context-menu
 
 ### Button Components
 - `wc-save-button`: Save action button
@@ -128,7 +135,7 @@ The build process (esbuild.config.js) generates:
 
 ### Navigation Components
 - `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support
-- `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url)
+- `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url); emits `tree:item-expand` / `tree:item-collapse` events (bubbles: false); supports `data-tree-action` attribute for hover-reveal action buttons; `hx-trigger` and `hx-disinherit` in observedAttributes; click behavior: only arrow toggles expand/collapse, clicking elsewhere selects
 
 ### Data Components
 - `wc-table`: Lightweight data-driven table (url, items, sorting, formatting, events)
@@ -251,6 +258,9 @@ http://localhost:3015/views/index.html
 - `views/theme.html` - Theme switcher and color showcase
 - `views/tabulator.html` - Data table examples
 - `views/ai-bot.html` - AI chatbot interface example
+- `views/split-pane.html` - Split pane examples
+- `views/context-menu.html` - Context menu examples
+- `views/tab.html` - Tab component with dynamic tabs and context menu testing
 
 ### Quick Start Example
 

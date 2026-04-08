@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-04-05"
+    "lastUpdated": "2026-04-08"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -28,7 +28,14 @@
       "css": [
         "wave-css.min.css",
         "wave-css.css"
-      ]
+      ],
+      "versionedDist": "dist/wave-css-0.0.1/ — auto-synced copy including icon bundles; also copied to go-kart static/js/wave-css-0.0.1/"
+    },
+    "helperFunctions": {
+      "loadScript": "Concurrent callers now share the same promise via Map to prevent duplicate script loads and race conditions"
+    },
+    "dependencyVersions": {
+      "codeMirror": "5.65.13 (loaded by DependencyManager)"
     }
   },
   "components": {
@@ -89,6 +96,37 @@
           "class"
         ],
         "usage": "<wc-div class=\"p-4\">\n  <!-- content -->\n</wc-div>"
+      },
+      {
+        "name": "wc-split-pane",
+        "description": "Resizable split panel with draggable divider, horizontal/vertical layouts, collapsible panes, localStorage persistence, keyboard/touch support, and nesting",
+        "attributes": [
+          "id",
+          "class",
+          "direction",
+          "initial-size",
+          "min-size",
+          "max-size",
+          "divider-width",
+          "collapsible",
+          "collapsed",
+          "persist-key"
+        ],
+        "childElements": [
+          "wc-split-start — start (left/top) pane wrapper",
+          "wc-split-end — end (right/bottom) pane wrapper"
+        ],
+        "events": {
+          "emits": [
+            "split-pane:resize (detail: { size, percentage })",
+            "split-pane:collapse (detail: { collapsed })"
+          ]
+        },
+        "methods": [
+          "toggle() — collapse or expand the start pane"
+        ],
+        "notes": "direction='horizontal' (default, left/right) or 'vertical' (top/bottom). persist-key saves size/collapsed state to localStorage under 'wc-split-pane:{key}'. Keyboard: arrow keys resize (shift=50px step), Home/End min/max, Enter toggles collapse. Touch drag supported. Nestable for complex layouts.",
+        "usage": "<wc-split-pane initial-size=\"256px\" min-size=\"200px\" max-size=\"400px\" collapsible persist-key=\"sidebar\">\n  <wc-split-start>Left panel</wc-split-start>\n  <wc-split-end>Right panel</wc-split-end>\n</wc-split-pane>"
       }
     ],
     "navigation": [
@@ -132,14 +170,15 @@
       },
       {
         "name": "wc-tab",
-        "description": "Tabbed interface with URL hash state, nested tab support, and contrast control",
+        "description": "Tabbed interface with URL hash state, nested tab support, contrast control, removable tabs with context menu",
         "attributes": [
           "id",
           "class",
           "animate",
           "vertical",
           "contrast",
-          "tab-overflow"
+          "tab-overflow",
+          "removable"
         ],
         "events": {
           "emits": [
@@ -149,8 +188,16 @@
             "wc-tab:click"
           ]
         },
-        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback).",
-        "usage": "<wc-tab id=\"cities\" animate>\n  <wc-tab-item class=\"active\" label=\"London\">\n    <div class=\"p-4\"><h3>London</h3><p>Content...</p></div>\n  </wc-tab-item>\n  <wc-tab-item label=\"New York\">\n    <div class=\"p-4\"><h3>New York</h3><p>Content...</p></div>\n  </wc-tab-item>\n</wc-tab>\n\n<!-- With scrollable tabs -->\n<wc-tab tab-overflow=\"scroll\" animate>\n  <wc-tab-item class=\"active\" label=\"Tab 1\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 2\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 3\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 4\">...</wc-tab-item>\n</wc-tab>"
+        "methods": [
+          "addTab(label, content, activate)",
+          "removeTab(label)",
+          "closeOthers(label)",
+          "closeAll()",
+          "closeToRight(label)",
+          "closeToLeft(label)"
+        ],
+        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback). removable attribute adds close buttons on dynamically added tabs and enables right-click context menu (Close, Close Others, Close to Right, Close to Left, Close All) powered by wc-context-menu.",
+        "usage": "<wc-tab id=\"cities\" animate>\n  <wc-tab-item class=\"active\" label=\"London\">\n    <div class=\"p-4\"><h3>London</h3><p>Content...</p></div>\n  </wc-tab-item>\n  <wc-tab-item label=\"New York\">\n    <div class=\"p-4\"><h3>New York</h3><p>Content...</p></div>\n  </wc-tab-item>\n</wc-tab>\n\n<!-- Removable tabs -->\n<wc-tab id=\"editors\" animate removable>\n  <wc-tab-item class=\"active\" label=\"Main\">...</wc-tab-item>\n</wc-tab>\n\n<!-- With scrollable tabs -->\n<wc-tab tab-overflow=\"scroll\" animate>\n  <wc-tab-item class=\"active\" label=\"Tab 1\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 2\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 3\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 4\">...</wc-tab-item>\n</wc-tab>"
       },
       {
         "name": "wc-tab-item",
@@ -214,8 +261,10 @@
       },
       {
         "name": "wc-tree-item",
-        "description": "Tree node used as a child of wc-tree or another wc-tree-item for nesting",
+        "description": "Tree node used as a child of wc-tree or another wc-tree-item for nesting. Supports hover-reveal action buttons, HTMX attributes, and expand/collapse events.",
         "attributes": [
+          "id",
+          "class",
           "label",
           "icon",
           "icon-style",
@@ -228,9 +277,18 @@
           "hx-target",
           "hx-swap",
           "hx-trigger",
-          "hx-push-url"
+          "hx-disinherit",
+          "hx-push-url",
+          "hx-indicator"
         ],
-        "usage": "<wc-tree-item label=\"Node\" icon=\"fa-folder\" badge=\"3\" expanded>\n  <wc-tree-item label=\"Child\" icon=\"fa-file\" icon-style=\"color:red;\"></wc-tree-item>\n</wc-tree-item>"
+        "events": {
+          "emits": [
+            "tree:item-expand (bubbles: false)",
+            "tree:item-collapse (bubbles: false)"
+          ]
+        },
+        "notes": "Click behavior: only the arrow toggle expands/collapses; clicking the label selects. data-tree-action child elements render as hover-reveal action buttons. contextmenu event is prevented. htmx.process is called with guard check after render.",
+        "usage": "<wc-tree-item label=\"Node\" icon=\"fa-folder\" badge=\"3\" expanded>\n  <wc-tree-item label=\"Child\" icon=\"fa-file\" icon-style=\"color:red;\"></wc-tree-item>\n</wc-tree-item>\n\n<!-- With hover action buttons -->\n<wc-tree-item label=\"Document\" icon=\"fa-file\">\n  <button data-tree-action onclick=\"editDoc()\">Edit</button>\n  <button data-tree-action onclick=\"deleteDoc()\">Delete</button>\n</wc-tree-item>"
       }
     ],
     "form": [
@@ -354,7 +412,7 @@
           "onkeypress",
           "onclick"
         ],
-        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values.",
+        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values. Value getter proxies to inner <select> element. Change events dispatch with bubbles:true from the outer wc-select element. Chip mode change events also bubble.",
         "usage": {
           "standard": "<wc-select name=\"status\" lbl-label=\"Status\" required>\n  <option value=\"active\">Active</option>\n  <option value=\"inactive\">Inactive</option>\n</wc-select>",
           "chip": "<wc-select name=\"tags\" lbl-label=\"Tags\" mode=\"chip\"\n  items='[{\"key\":\"JavaScript\",\"value\":\"js\"},{\"key\":\"React\",\"value\":\"react\"}]'>\n</wc-select>",
@@ -662,6 +720,30 @@
     ],
     "interactive": [
       {
+        "name": "wc-context-menu",
+        "description": "Reusable context menu with singleton pattern, declarative or programmatic items, auto-close on click outside or Escape",
+        "attributes": [
+          "id",
+          "class"
+        ],
+        "childElements": [
+          "wc-context-menu-item — declarative menu item with label, icon, action, disabled, divider attributes"
+        ],
+        "staticMethods": [
+          "WcContextMenu.show(x, y, items) — show singleton context menu at position with items array",
+          "WcContextMenu.hide() — hide the singleton context menu"
+        ],
+        "methods": [
+          "open(x, y, items) — show this instance at position (reads declarative children if items omitted)",
+          "close() — hide this instance"
+        ],
+        "notes": "Only one context menu visible at a time (singleton pattern for static API). Items support: label, icon (wc-fa-icon name), action (function), disabled, divider. Used by wc-tab for removable tab context menus. Auto-positions to stay within viewport bounds.",
+        "usage": {
+          "programmatic": "import { WcContextMenu } from './wc-context-menu.js';\n\nelement.addEventListener('contextmenu', (e) => {\n  e.preventDefault();\n  WcContextMenu.show(e.clientX, e.clientY, [\n    { label: 'Edit', icon: 'pen', action: () => edit() },\n    { divider: true },\n    { label: 'Delete', icon: 'trash', action: () => remove(), disabled: true },\n  ]);\n});",
+          "declarative": "<wc-context-menu id=\"my-menu\">\n  <wc-context-menu-item label=\"Query\" icon=\"magnifying-glass\" action=\"doQuery()\"></wc-context-menu-item>\n  <wc-context-menu-item divider></wc-context-menu-item>\n  <wc-context-menu-item label=\"Delete\" icon=\"trash\" action=\"doDelete()\" disabled></wc-context-menu-item>\n</wc-context-menu>"
+        }
+      },
+      {
         "name": "wc-code-mirror",
         "description": "Code editor integration using CodeMirror with dynamic themes, modes, and settings popover",
         "attributes": [
@@ -688,7 +770,7 @@
             "fetch-complete"
           ]
         },
-        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL.",
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13.",
         "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
       },
       {
@@ -884,7 +966,7 @@
       },
       {
         "name": "wc-prompt",
-        "description": "Dialog system using SweetAlert2 and notie for banners, toasts, and modal dialogs",
+        "description": "Dialog system using SweetAlert2 and notie for banners, toasts, and modal dialogs. Simple dialog methods use focusConfirm:false, backdrop:false, scrollbarPadding:false to prevent scroll reset.",
         "methods": [
           "banner(config)",
           "toast(config)",
