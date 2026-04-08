@@ -31,6 +31,8 @@ if (!customElements.get("wc-tree-item")) {
         "hx-swap",
         "hx-push-url",
         "hx-indicator",
+        "hx-trigger",
+        "hx-disinherit",
       ];
     }
 
@@ -68,7 +70,8 @@ if (!customElements.get("wc-tree-item")) {
       super._render();
       this._createElement();
 
-      if (typeof htmx !== "undefined") {
+      if (typeof htmx !== "undefined" && !this._htmxProcessed) {
+        this._htmxProcessed = true;
         htmx.process(this);
       }
     }
@@ -129,6 +132,15 @@ if (!customElements.get("wc-tree-item")) {
       labelEl.textContent = label;
       row.appendChild(labelEl);
 
+      // Actions
+      const actions = Array.from(this.querySelectorAll(':scope > [data-tree-action]'));
+      if (actions.length > 0) {
+        const actionsEl = document.createElement('span');
+        actionsEl.classList.add('tree-item-actions');
+        actions.forEach(a => actionsEl.appendChild(a));
+        row.appendChild(actionsEl);
+      }
+
       // Badge
       if (badge) {
         const badgeEl = document.createElement("span");
@@ -175,7 +187,7 @@ if (!customElements.get("wc-tree-item")) {
       this.setAttribute("expanded", "");
       this.dispatchEvent(
         new CustomEvent("tree:item-expand", {
-          bubbles: true,
+          bubbles: false,
           composed: true,
           detail: { label: this.getAttribute("label"), item: this },
         }),
@@ -201,7 +213,7 @@ if (!customElements.get("wc-tree-item")) {
       this.removeAttribute("expanded");
       this.dispatchEvent(
         new CustomEvent("tree:item-collapse", {
-          bubbles: true,
+          bubbles: false,
           composed: true,
           detail: { label: this.getAttribute("label"), item: this },
         }),
@@ -338,18 +350,15 @@ if (!customElements.get("wc-tree-item")) {
       if (!row) return;
 
       this._handleRowClick = (e) => {
-        const arrow = e.target.closest(".tree-item-arrow");
-        if (arrow && arrow.querySelector("wc-fa-icon")) {
-          // Click on arrow — toggle expand/collapse
-          e.stopPropagation();
+        const arrow = this.componentElement?.querySelector('.tree-item-arrow');
+        const clickedArrow = arrow && (e.target === arrow || arrow.contains(e.target));
+
+        if (clickedArrow) {
           this.toggle();
-          return;
         }
 
-        // Select this item
         this.select();
 
-        // Dispatch event (bubbles to wc-tree)
         this.dispatchEvent(
           new CustomEvent("tree:item-click", {
             bubbles: true,
@@ -382,6 +391,7 @@ if (!customElements.get("wc-tree-item")) {
       };
 
       this._handleRowContextMenu = (e) => {
+        e.preventDefault();
         this.select();
         this.dispatchEvent(
           new CustomEvent("tree:item-context-menu", {

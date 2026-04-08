@@ -1,0 +1,109 @@
+<div id="page-contents">
+  <div class="my-2 px-4">
+
+    <h2 class="mb-2">Context Menu</h2>
+    <p class="mb-4">
+      A reusable context menu component. Supports declarative child items or programmatic
+      <code>WcContextMenu.show(x, y, items)</code> calls. Only one menu is visible at a time.
+    </p>
+
+    <!-- Programmatic example -->
+    <h3 class="mb-2">Programmatic (right-click the box)</h3>
+    <div id="demo-area"
+         class="flex items-center justify-center mb-6"
+         style="height: 150px; border: 2px dashed var(--card-border-color); border-radius: 8px; cursor: context-menu;">
+      <span>Right-click anywhere in this box</span>
+    </div>
+
+    <!-- Declarative example -->
+    <h3 class="mb-2">Declarative (right-click the box)</h3>
+    <div id="demo-declarative"
+         class="flex items-center justify-center mb-6"
+         style="height: 150px; border: 2px dashed var(--card-border-color); border-radius: 8px; cursor: context-menu;">
+      <span>Right-click for declarative menu</span>
+    </div>
+
+    <wc-context-menu id="declarative-menu">
+      <wc-context-menu-item label="Open" icon="folder-open" action="alert('Open clicked')"></wc-context-menu-item>
+      <wc-context-menu-item label="Rename" icon="pen" action="alert('Rename clicked')"></wc-context-menu-item>
+      <wc-context-menu-item divider></wc-context-menu-item>
+      <wc-context-menu-item label="Delete" icon="trash" action="alert('Delete clicked')"></wc-context-menu-item>
+      <wc-context-menu-item label="Archive (disabled)" icon="box-archive" disabled></wc-context-menu-item>
+    </wc-context-menu>
+
+    <!-- Button triggered -->
+    <h3 class="mb-2">Button Triggered</h3>
+    <p class="mb-2">Click the button to open a context menu at the button's position.</p>
+    <button id="btn-menu" class="btn btn-primary mb-6">Show Menu</button>
+
+    <!-- API Reference -->
+    <h3 class="mb-2">API Reference</h3>
+    <div class="mb-4">
+      <pre class="p-4" style="background: var(--card-bg-color); border-radius: 6px; overflow-x: auto; font-size: 13px;">// Programmatic — show at x/y with items array
+WcContextMenu.show(event.clientX, event.clientY, [
+  { label: 'Query', icon: 'magnifying-glass', action: () =&gt; doQuery() },
+  { label: 'View Indexes', icon: 'bolt', action: () =&gt; viewIndexes() },
+  { divider: true },
+  { label: 'Import Data', icon: 'file-import', action: () =&gt; importData(), disabled: true },
+]);
+
+// Hide programmatically
+WcContextMenu.hide();</pre>
+    </div>
+
+  </div>
+</div>
+
+<wc-event-hub></wc-event-hub>
+<wc-mask-hub></wc-mask-hub>
+<wc-prompt></wc-prompt>
+
+<wc-javascript>
+  <script>
+    // Programmatic context menu
+    var demoArea = document.getElementById('demo-area');
+    if (demoArea) {
+      demoArea.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        var WcContextMenu = customElements.get('wc-context-menu');
+        // Access the class from the singleton
+        var menu = document.querySelector('wc-context-menu') || document.createElement('wc-context-menu');
+        menu.constructor.show(e.clientX, e.clientY, [
+          { label: 'Query', icon: 'magnifying-glass', action: function() { alert('Query clicked'); } },
+          { label: 'View Indexes', icon: 'bolt', action: function() { alert('View Indexes clicked'); } },
+          { label: 'Schema Profile', icon: 'list-ul', action: function() { alert('Schema Profile clicked'); } },
+          { divider: true },
+          { label: 'Import Data', icon: 'file-import', action: function() { alert('Import Data clicked'); }, disabled: true },
+          { label: 'Export Data', icon: 'file-export', action: function() { alert('Export Data clicked'); } },
+        ]);
+      });
+    }
+
+    // Declarative context menu
+    var demoDecl = document.getElementById('demo-declarative');
+    if (demoDecl) {
+      demoDecl.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        var menu = document.getElementById('declarative-menu');
+        if (menu) menu.open(e.clientX, e.clientY);
+      });
+    }
+
+    // Button triggered menu
+    var btnMenu = document.getElementById('btn-menu');
+    if (btnMenu) {
+      btnMenu.addEventListener('click', function(e) {
+        var rect = btnMenu.getBoundingClientRect();
+        var menu = document.querySelector('wc-context-menu') || document.createElement('wc-context-menu');
+        menu.constructor.show(rect.left, rect.bottom + 4, [
+          { label: 'New Tab', icon: 'plus', action: function() { alert('New Tab'); } },
+          { label: 'Duplicate', icon: 'copy', action: function() { alert('Duplicate'); } },
+          { divider: true },
+          { label: 'Close All', icon: 'xmark', action: function() { alert('Close All'); } },
+        ]);
+      });
+    }
+  </script>
+</wc-javascript>
+
+<script type="module" src="./index.js"></script>

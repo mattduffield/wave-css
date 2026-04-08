@@ -23,26 +23,26 @@
  *    tree:item-context-menu — { label, icon, badge, level, element, x, y }
  */
 
-import { WcBaseComponent } from './wc-base-component.js';
+import { WcBaseComponent } from "./wc-base-component.js";
 
-if (!customElements.get('wc-tree')) {
+if (!customElements.get("wc-tree")) {
   class WcTree extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'searchable'];
+      return ["id", "class", "searchable"];
     }
 
     static get is() {
-      return 'wc-tree';
+      return "wc-tree";
     }
 
     constructor() {
       super();
-      const compEl = this.querySelector(':scope > .wc-tree');
+      const compEl = this.querySelector(":scope > .wc-tree");
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-tree');
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-tree");
         this.appendChild(this.componentElement);
       }
     }
@@ -64,63 +64,67 @@ if (!customElements.get('wc-tree')) {
       super._render();
       this._createElement();
 
-      if (typeof htmx !== 'undefined') {
+      if (typeof htmx !== "undefined" && !this._htmxProcessed) {
+        this._htmxProcessed = true;
         htmx.process(this);
       }
     }
 
     _createElement() {
-      const searchable = this.hasAttribute('searchable');
+      const searchable = this.hasAttribute("searchable");
 
       // Search input
       if (searchable) {
-        const searchWrap = document.createElement('div');
-        searchWrap.classList.add('tree-search-wrap');
-        const searchInput = document.createElement('input');
-        searchInput.type = 'search';
-        searchInput.classList.add('tree-search');
-        searchInput.placeholder = 'Filter...';
-        searchInput.setAttribute('autocomplete', 'off');
+        const searchWrap = document.createElement("div");
+        searchWrap.classList.add("tree-search-wrap");
+        const searchInput = document.createElement("input");
+        searchInput.type = "search";
+        searchInput.classList.add("tree-search");
+        searchInput.placeholder = "Filter...";
+        searchInput.setAttribute("autocomplete", "off");
         searchWrap.appendChild(searchInput);
         this.componentElement.appendChild(searchWrap);
       }
 
       // Tree content container
-      const content = document.createElement('div');
-      content.classList.add('tree-content');
-      content.setAttribute('role', 'tree');
+      const content = document.createElement("div");
+      content.classList.add("tree-content");
+      content.setAttribute("role", "tree");
 
       // Move child wc-tree-item elements into content
-      const items = Array.from(this.querySelectorAll(':scope > wc-tree-item'));
-      items.forEach(item => content.appendChild(item));
+      const items = Array.from(this.querySelectorAll(":scope > wc-tree-item"));
+      items.forEach((item) => content.appendChild(item));
 
       this.componentElement.appendChild(content);
     }
 
     getInnerContainer() {
-      return this.querySelector(':scope > .wc-tree > .tree-content') || this;
+      return this.querySelector(":scope > .wc-tree > .tree-content") || this;
     }
 
     // --- Keyboard Navigation ---
 
     _getVisibleRows() {
-      return Array.from(this.querySelectorAll('.tree-item-row')).filter(row => {
-        // Check if the row is visible (not inside a collapsed parent)
-        let el = row.closest('wc-tree-item');
-        let parent = el?.parentElement?.closest('wc-tree-item');
-        while (parent) {
-          if (!parent.isExpanded) return false;
-          parent = parent.parentElement?.closest('wc-tree-item');
-        }
-        // Check if filtered out by search
-        if (row.closest('.tree-filtered-out')) return false;
-        return true;
-      });
+      return Array.from(this.querySelectorAll(".tree-item-row")).filter(
+        (row) => {
+          // Check if the row is visible (not inside a collapsed parent)
+          let el = row.closest("wc-tree-item");
+          let parent = el?.parentElement?.closest("wc-tree-item");
+          while (parent) {
+            if (!parent.isExpanded) return false;
+            parent = parent.parentElement?.closest("wc-tree-item");
+          }
+          // Check if filtered out by search
+          if (row.closest(".tree-filtered-out")) return false;
+          return true;
+        },
+      );
     }
 
     _focusNext(currentItem) {
       const rows = this._getVisibleRows();
-      const currentRow = currentItem.componentElement?.querySelector('.tree-item-row');
+      const currentRow =
+        currentItem.componentElement?.querySelector(".tree-item-row");
       const idx = rows.indexOf(currentRow);
       if (idx < rows.length - 1) {
         rows[idx + 1].focus();
@@ -129,7 +133,8 @@ if (!customElements.get('wc-tree')) {
 
     _focusPrev(currentItem) {
       const rows = this._getVisibleRows();
-      const currentRow = currentItem.componentElement?.querySelector('.tree-item-row');
+      const currentRow =
+        currentItem.componentElement?.querySelector(".tree-item-row");
       const idx = rows.indexOf(currentRow);
       if (idx > 0) {
         rows[idx - 1].focus();
@@ -139,32 +144,32 @@ if (!customElements.get('wc-tree')) {
     // --- Search ---
 
     _filterItems(query) {
-      const items = this.querySelectorAll('wc-tree-item');
+      const items = this.querySelectorAll("wc-tree-item");
       const lowerQuery = query.toLowerCase();
 
-      items.forEach(item => {
-        const label = (item.getAttribute('label') || '').toLowerCase();
+      items.forEach((item) => {
+        const label = (item.getAttribute("label") || "").toLowerCase();
         const matches = !query || label.includes(lowerQuery);
 
         if (matches) {
-          item.classList.remove('tree-filtered-out');
+          item.classList.remove("tree-filtered-out");
           // Expand parents so the match is visible
           if (query) {
-            let parent = item.parentElement?.closest('wc-tree-item');
+            let parent = item.parentElement?.closest("wc-tree-item");
             while (parent) {
-              parent.classList.remove('tree-filtered-out');
+              parent.classList.remove("tree-filtered-out");
               parent.expand();
-              parent = parent.parentElement?.closest('wc-tree-item');
+              parent = parent.parentElement?.closest("wc-tree-item");
             }
           }
         } else {
-          item.classList.add('tree-filtered-out');
+          item.classList.add("tree-filtered-out");
         }
       });
     }
 
     _handleAttributeChange(attrName, newValue) {
-      if (attrName === 'searchable') {
+      if (attrName === "searchable") {
         this._render();
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -172,19 +177,19 @@ if (!customElements.get('wc-tree')) {
     }
 
     _wireEvents() {
-      const searchInput = this.componentElement?.querySelector('.tree-search');
+      const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput) {
         this._handleSearch = (e) => {
           this._filterItems(e.target.value.trim());
         };
-        searchInput.addEventListener('input', this._handleSearch);
+        searchInput.addEventListener("input", this._handleSearch);
       }
     }
 
     _unWireEvents() {
-      const searchInput = this.componentElement?.querySelector('.tree-search');
+      const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput && this._handleSearch) {
-        searchInput.removeEventListener('input', this._handleSearch);
+        searchInput.removeEventListener("input", this._handleSearch);
       }
     }
 
@@ -295,13 +300,52 @@ if (!customElements.get('wc-tree')) {
           white-space: nowrap;
         }
 
+        /* Actions (hover-reveal buttons) */
+        .tree-item-actions {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          margin-left: auto;
+          padding-left: 0.25rem;
+          opacity: 0;
+          transition: opacity 0.15s ease;
+        }
+        .tree-item-row:hover .tree-item-actions {
+          opacity: 1;
+        }
+        .tree-item-action-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.25rem;
+          height: 1.25rem;
+          border: none;
+          border-radius: 3px;
+          background: transparent;
+          color: var(--text-6, #888);
+          cursor: pointer;
+          padding: 0;
+        }
+        .tree-item-action-btn:hover {
+          background: var(--surface-3, #333);
+          color: var(--text-1, #e0e0e0);
+        }
+
         /* Badge */
         .tree-item-badge {
-          font-size: 0.6875rem;
-          color: var(--text-6, #888);
+          font-size: 0.625rem;
+          color: var(--text-1, #e0e0e0);
+          background: var(--surface-3, #333);
+          border-radius: 9999px;
+          padding: 0.0625rem 0.375rem;
+          min-width: 1.25rem;
+          text-align: center;
           flex-shrink: 0;
           margin-left: auto;
-          padding-left: 0.5rem;
+        }
+        .tree-item-actions + .tree-item-badge {
+          margin-left: 0;
+          padding-left: 0.25rem;
         }
 
         /* Children */
@@ -329,9 +373,9 @@ if (!customElements.get('wc-tree')) {
           display: none !important;
         }
       `;
-      this.loadStyle('wc-tree-style', style);
+      this.loadStyle("wc-tree-style", style);
     }
   }
 
-  customElements.define('wc-tree', WcTree);
+  customElements.define("wc-tree", WcTree);
 }

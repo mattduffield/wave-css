@@ -623,6 +623,8 @@ const ICONS_TO_COPY = [
   "list-check",
   "list-ul",
   "font",
+  "bolt",
+  "arrow-up-right-from-square",
   // Add more icon names here
 ];
 

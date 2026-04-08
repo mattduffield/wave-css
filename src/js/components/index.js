@@ -14,6 +14,7 @@ import './wc-canvas-dot-highlight.js';
 import './wc-code-mirror.js';
 import './wc-contact-card.js';
 import './wc-contact-chip.js';
+import './wc-context-menu.js';
 import './wc-div.js';
 import './wc-dropdown-item.js';
 import './wc-dropdown.js';

@@ -317,9 +317,6 @@ class WcTab extends WcBaseComponent {
     const btn = event.target.closest('button.tab-link');
     if (!btn || !this.hasAttribute('removable')) return;
 
-    // Remove any existing context menu
-    this._hideTabContextMenu();
-
     const label = btn.dataset.label;
     const tabNav = this.querySelector(':scope > .wc-tab > .tab-nav');
     const buttons = Array.from(tabNav.querySelectorAll(':scope > button.tab-link'));
@@ -328,83 +325,17 @@ class WcTab extends WcBaseComponent {
     const hasRight = idx < buttons.length - 1;
     const hasOthers = buttons.length > 1;
 
-    const menu = document.createElement('div');
-    menu.classList.add('wc-tab-context-menu');
+    const WcContextMenu = customElements.get('wc-context-menu');
+    if (!WcContextMenu) return;
 
-    const items = [
-      { text: 'Close', action: () => this.removeTab(label), enabled: true },
-      { text: 'Close Others', action: () => this.closeOthers(label), enabled: hasOthers },
-      { text: 'Close to the Right', action: () => this.closeToRight(label), enabled: hasRight },
-      { text: 'Close to the Left', action: () => this.closeToLeft(label), enabled: hasLeft },
+    WcContextMenu.show(event.clientX, event.clientY, [
+      { label: 'Close', action: () => this.removeTab(label) },
+      { label: 'Close Others', action: () => this.closeOthers(label), disabled: !hasOthers },
+      { label: 'Close to the Right', action: () => this.closeToRight(label), disabled: !hasRight },
+      { label: 'Close to the Left', action: () => this.closeToLeft(label), disabled: !hasLeft },
       { divider: true },
-      { text: 'Close All', action: () => this.closeAll(), enabled: true },
-    ];
-
-    items.forEach(item => {
-      if (item.divider) {
-        const hr = document.createElement('div');
-        hr.classList.add('wc-tab-context-divider');
-        menu.appendChild(hr);
-        return;
-      }
-      const el = document.createElement('div');
-      el.classList.add('wc-tab-context-item');
-      el.textContent = item.text;
-      if (!item.enabled) {
-        el.classList.add('disabled');
-      } else {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this._hideTabContextMenu();
-          item.action();
-        });
-      }
-      menu.appendChild(el);
-    });
-
-    // Position near the click
-    menu.style.position = 'absolute';
-    menu.style.left = `${event.clientX}px`;
-    menu.style.top = `${event.clientY}px`;
-    document.body.appendChild(menu);
-
-    // Adjust if off-screen
-    requestAnimationFrame(() => {
-      const rect = menu.getBoundingClientRect();
-      if (rect.right > window.innerWidth) {
-        menu.style.left = `${window.innerWidth - rect.width - 4}px`;
-      }
-      if (rect.bottom > window.innerHeight) {
-        menu.style.top = `${window.innerHeight - rect.height - 4}px`;
-      }
-    });
-
-    this._contextMenu = menu;
-
-    // Close on any click or Escape
-    this._contextMenuClose = (e) => {
-      if (!menu.contains(e.target)) this._hideTabContextMenu();
-    };
-    this._contextMenuEsc = (e) => {
-      if (e.key === 'Escape') this._hideTabContextMenu();
-    };
-    document.addEventListener('mousedown', this._contextMenuClose, true);
-    document.addEventListener('keydown', this._contextMenuEsc, true);
-  }
-
-  _hideTabContextMenu() {
-    if (this._contextMenu) {
-      this._contextMenu.remove();
-      this._contextMenu = null;
-    }
-    if (this._contextMenuClose) {
-      document.removeEventListener('mousedown', this._contextMenuClose, true);
-      this._contextMenuClose = null;
-    }
-    if (this._contextMenuEsc) {
-      document.removeEventListener('keydown', this._contextMenuEsc, true);
-      this._contextMenuEsc = null;
-    }
+      { label: 'Close All', action: () => this.closeAll() },
+    ]);
   }
 
   _createCloseButton(label) {
@@ -1048,38 +979,6 @@ class WcTab extends WcBaseComponent {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
       }
 
-      /* Tab context menu */
-      .wc-tab-context-menu {
-        z-index: 10000;
-        min-width: 180px;
-        background: var(--card-bg-color, #1e1e2e);
-        border: 1px solid var(--card-border-color, #444);
-        border-radius: 6px;
-        padding: 4px 0;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        font-size: 13px;
-      }
-      .wc-tab-context-item {
-        padding: 6px 14px;
-        cursor: pointer;
-        white-space: nowrap;
-        color: var(--text-color, #ccc);
-      }
-      .wc-tab-context-item:hover {
-        background: var(--primary-bg-color, #4466ff);
-        color: var(--primary-text-color, #fff);
-      }
-      .wc-tab-context-item.disabled {
-        opacity: 0.35;
-        cursor: default;
-        pointer-events: none;
-      }
-      .wc-tab-context-divider {
-        height: 1px;
-        margin: 4px 0;
-        background: var(--card-border-color, #444);
-      }
-
       @keyframes tab-fade {
         from {
           opacity: 0;
@@ -1103,7 +1002,6 @@ class WcTab extends WcBaseComponent {
     document.body.removeEventListener('wc-tab:click', this._handleOnClick.bind(this));
     const btns = this.querySelectorAll('.tab-link');
     btns.forEach(btn => btn.removeEventListener('click', this._handleClick.bind(this)));
-    this._hideTabContextMenu();
   }
 }
 

@@ -3840,6 +3840,234 @@ var WcContactChip = class extends WcBaseComponent {
 };
 customElements.define("wc-contact-chip", WcContactChip);
 
+// src/js/components/wc-context-menu.js
+if (!customElements.get("wc-context-menu-item")) {
+  class WcContextMenuItem extends HTMLElement {
+    constructor() {
+      super();
+    }
+  }
+  customElements.define("wc-context-menu-item", WcContextMenuItem);
+}
+if (!customElements.get("wc-context-menu")) {
+  let _singleton = null;
+  class WcContextMenu extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class"];
+    }
+    static get is() {
+      return "wc-context-menu";
+    }
+    constructor() {
+      super();
+      this._items = [];
+      this._onOutsideClick = null;
+      this._onEscape = null;
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._removeListeners();
+    }
+    _render() {
+      super._render();
+      const compEl = this.querySelector(".wc-context-menu");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-context-menu");
+        this.appendChild(this.componentElement);
+      }
+      this.componentElement.style.display = "none";
+    }
+    // ── Public instance methods ──────────────────────────────────────────────
+    /**
+     * Show this menu instance at x/y with the given items.
+     * If items is omitted, reads from declarative wc-context-menu-item children.
+     */
+    open(x, y, items) {
+      if (items) {
+        this._items = items;
+      } else {
+        this._items = this._readDeclarativeItems();
+      }
+      this._buildMenu();
+      this._position(x, y);
+      this.componentElement.style.display = "";
+      this._addListeners();
+    }
+    /** Hide this menu instance. */
+    close() {
+      this.componentElement.style.display = "none";
+      this.componentElement.innerHTML = "";
+      this._removeListeners();
+    }
+    // ── Static singleton API ─────────────────────────────────────────────────
+    /**
+     * Show a context menu at x/y with the given items array.
+     * Creates/reuses a singleton element on document.body.
+     * @param {number} x - clientX position
+     * @param {number} y - clientY position
+     * @param {Array} items - menu item descriptors
+     * @returns {WcContextMenu} the singleton instance
+     */
+    static show(x, y, items) {
+      if (!_singleton) {
+        _singleton = document.createElement("wc-context-menu");
+        _singleton.id = "__wc-context-menu-singleton";
+        document.body.appendChild(_singleton);
+      }
+      _singleton.close();
+      _singleton.open(x, y, items);
+      return _singleton;
+    }
+    /** Hide the singleton context menu. */
+    static hide() {
+      if (_singleton) {
+        _singleton.close();
+      }
+    }
+    // ── Internal ─────────────────────────────────────────────────────────────
+    _readDeclarativeItems() {
+      const children = this.querySelectorAll(":scope > wc-context-menu-item");
+      return Array.from(children).map((child) => {
+        if (child.hasAttribute("divider")) {
+          return { divider: true };
+        }
+        const actionStr = child.getAttribute("action") || "";
+        return {
+          label: child.getAttribute("label") || "",
+          icon: child.getAttribute("icon") || "",
+          disabled: child.hasAttribute("disabled"),
+          action: actionStr ? () => new Function(actionStr)() : null
+        };
+      });
+    }
+    _buildMenu() {
+      this.componentElement.innerHTML = "";
+      this._items.forEach((item) => {
+        if (item.divider) {
+          const div = document.createElement("div");
+          div.classList.add("wc-context-menu-divider");
+          this.componentElement.appendChild(div);
+          return;
+        }
+        const el = document.createElement("div");
+        el.classList.add("wc-context-menu-item");
+        if (item.disabled) {
+          el.classList.add("disabled");
+        }
+        if (item.icon) {
+          const iconEl = document.createElement("wc-fa-icon");
+          iconEl.setAttribute("name", item.icon);
+          iconEl.setAttribute("size", "0.8125rem");
+          el.appendChild(iconEl);
+        }
+        const labelEl = document.createElement("span");
+        labelEl.textContent = item.label || "";
+        el.appendChild(labelEl);
+        if (!item.disabled && item.action) {
+          el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.close();
+            item.action();
+          });
+        }
+        this.componentElement.appendChild(el);
+      });
+    }
+    _position(x, y) {
+      const el = this.componentElement;
+      el.style.position = "fixed";
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const margin = 4;
+        if (rect.right > window.innerWidth - margin) {
+          el.style.left = `${window.innerWidth - rect.width - margin}px`;
+        }
+        if (rect.bottom > window.innerHeight - margin) {
+          el.style.top = `${window.innerHeight - rect.height - margin}px`;
+        }
+      });
+    }
+    _addListeners() {
+      this._removeListeners();
+      this._onOutsideClick = (e) => {
+        if (!this.componentElement.contains(e.target)) {
+          this.close();
+        }
+      };
+      this._onEscape = (e) => {
+        if (e.key === "Escape") {
+          this.close();
+        }
+      };
+      document.addEventListener("mousedown", this._onOutsideClick, true);
+      document.addEventListener("keydown", this._onEscape, true);
+    }
+    _removeListeners() {
+      if (this._onOutsideClick) {
+        document.removeEventListener("mousedown", this._onOutsideClick, true);
+        this._onOutsideClick = null;
+      }
+      if (this._onEscape) {
+        document.removeEventListener("keydown", this._onEscape, true);
+        this._onEscape = null;
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-context-menu { display: contents; }
+
+        .wc-context-menu {
+          z-index: 10000;
+          min-width: 180px;
+          background: var(--card-bg-color, #1e1e2e);
+          border: 1px solid var(--card-border-color, #444);
+          border-radius: 6px;
+          padding: 4px 0;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+          font-size: 13px;
+          position: fixed;
+        }
+
+        .wc-context-menu .wc-context-menu-item {
+          padding: 6px 14px;
+          cursor: pointer;
+          white-space: nowrap;
+          color: var(--text-color, #ccc);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .wc-context-menu .wc-context-menu-item:hover {
+          background: var(--primary-bg-color, #4466ff);
+          color: var(--primary-text-color, #fff);
+        }
+        .wc-context-menu .wc-context-menu-item.disabled {
+          opacity: 0.35;
+          cursor: default;
+          pointer-events: none;
+        }
+
+        .wc-context-menu .wc-context-menu-divider {
+          height: 1px;
+          margin: 4px 0;
+          background: var(--card-border-color, #444);
+        }
+      `;
+      this.loadStyle("wc-context-menu-style", style);
+    }
+  }
+  customElements.define("wc-context-menu", WcContextMenu);
+}
+
 // src/js/components/wc-div.js
 var WcDiv = class extends WcBaseComponent {
   static get observedAttributes() {
@@ -13266,7 +13494,6 @@ var WcTab = class extends WcBaseComponent {
     event.preventDefault();
     const btn = event.target.closest("button.tab-link");
     if (!btn || !this.hasAttribute("removable")) return;
-    this._hideTabContextMenu();
     const label = btn.dataset.label;
     const tabNav = this.querySelector(":scope > .wc-tab > .tab-nav");
     const buttons = Array.from(tabNav.querySelectorAll(":scope > button.tab-link"));
@@ -13274,73 +13501,16 @@ var WcTab = class extends WcBaseComponent {
     const hasLeft = idx > 0;
     const hasRight = idx < buttons.length - 1;
     const hasOthers = buttons.length > 1;
-    const menu = document.createElement("div");
-    menu.classList.add("wc-tab-context-menu");
-    const items = [
-      { text: "Close", action: () => this.removeTab(label), enabled: true },
-      { text: "Close Others", action: () => this.closeOthers(label), enabled: hasOthers },
-      { text: "Close to the Right", action: () => this.closeToRight(label), enabled: hasRight },
-      { text: "Close to the Left", action: () => this.closeToLeft(label), enabled: hasLeft },
+    const WcContextMenu = customElements.get("wc-context-menu");
+    if (!WcContextMenu) return;
+    WcContextMenu.show(event.clientX, event.clientY, [
+      { label: "Close", action: () => this.removeTab(label) },
+      { label: "Close Others", action: () => this.closeOthers(label), disabled: !hasOthers },
+      { label: "Close to the Right", action: () => this.closeToRight(label), disabled: !hasRight },
+      { label: "Close to the Left", action: () => this.closeToLeft(label), disabled: !hasLeft },
       { divider: true },
-      { text: "Close All", action: () => this.closeAll(), enabled: true }
-    ];
-    items.forEach((item) => {
-      if (item.divider) {
-        const hr = document.createElement("div");
-        hr.classList.add("wc-tab-context-divider");
-        menu.appendChild(hr);
-        return;
-      }
-      const el = document.createElement("div");
-      el.classList.add("wc-tab-context-item");
-      el.textContent = item.text;
-      if (!item.enabled) {
-        el.classList.add("disabled");
-      } else {
-        el.addEventListener("click", (e) => {
-          e.stopPropagation();
-          this._hideTabContextMenu();
-          item.action();
-        });
-      }
-      menu.appendChild(el);
-    });
-    menu.style.position = "absolute";
-    menu.style.left = `${event.clientX}px`;
-    menu.style.top = `${event.clientY}px`;
-    document.body.appendChild(menu);
-    requestAnimationFrame(() => {
-      const rect = menu.getBoundingClientRect();
-      if (rect.right > window.innerWidth) {
-        menu.style.left = `${window.innerWidth - rect.width - 4}px`;
-      }
-      if (rect.bottom > window.innerHeight) {
-        menu.style.top = `${window.innerHeight - rect.height - 4}px`;
-      }
-    });
-    this._contextMenu = menu;
-    this._contextMenuClose = (e) => {
-      if (!menu.contains(e.target)) this._hideTabContextMenu();
-    };
-    this._contextMenuEsc = (e) => {
-      if (e.key === "Escape") this._hideTabContextMenu();
-    };
-    document.addEventListener("mousedown", this._contextMenuClose, true);
-    document.addEventListener("keydown", this._contextMenuEsc, true);
-  }
-  _hideTabContextMenu() {
-    if (this._contextMenu) {
-      this._contextMenu.remove();
-      this._contextMenu = null;
-    }
-    if (this._contextMenuClose) {
-      document.removeEventListener("mousedown", this._contextMenuClose, true);
-      this._contextMenuClose = null;
-    }
-    if (this._contextMenuEsc) {
-      document.removeEventListener("keydown", this._contextMenuEsc, true);
-      this._contextMenuEsc = null;
-    }
+      { label: "Close All", action: () => this.closeAll() }
+    ]);
   }
   _createCloseButton(label) {
     const closeBtn = document.createElement("span");
@@ -13913,38 +14083,6 @@ var WcTab = class extends WcBaseComponent {
         border-bottom-color: color-mix(in srgb, var(--card-bg-color) 60%, #000 40%);
       }
 
-      /* Tab context menu */
-      .wc-tab-context-menu {
-        z-index: 10000;
-        min-width: 180px;
-        background: var(--card-bg-color, #1e1e2e);
-        border: 1px solid var(--card-border-color, #444);
-        border-radius: 6px;
-        padding: 4px 0;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        font-size: 13px;
-      }
-      .wc-tab-context-item {
-        padding: 6px 14px;
-        cursor: pointer;
-        white-space: nowrap;
-        color: var(--text-color, #ccc);
-      }
-      .wc-tab-context-item:hover {
-        background: var(--primary-bg-color, #4466ff);
-        color: var(--primary-text-color, #fff);
-      }
-      .wc-tab-context-item.disabled {
-        opacity: 0.35;
-        cursor: default;
-        pointer-events: none;
-      }
-      .wc-tab-context-divider {
-        height: 1px;
-        margin: 4px 0;
-        background: var(--card-border-color, #444);
-      }
-
       @keyframes tab-fade {
         from {
           opacity: 0;
@@ -13965,7 +14103,6 @@ var WcTab = class extends WcBaseComponent {
     document.body.removeEventListener("wc-tab:click", this._handleOnClick.bind(this));
     const btns = this.querySelectorAll(".tab-link");
     btns.forEach((btn) => btn.removeEventListener("click", this._handleClick.bind(this)));
-    this._hideTabContextMenu();
   }
 };
 customElements.define("wc-tab", WcTab);
@@ -16335,7 +16472,9 @@ if (!customElements.get("wc-tree-item")) {
         "hx-target",
         "hx-swap",
         "hx-push-url",
-        "hx-indicator"
+        "hx-indicator",
+        "hx-trigger",
+        "hx-disinherit"
       ];
     }
     static get is() {
@@ -16367,7 +16506,8 @@ if (!customElements.get("wc-tree-item")) {
       this._rendered = true;
       super._render();
       this._createElement();
-      if (typeof htmx !== "undefined") {
+      if (typeof htmx !== "undefined" && !this._htmxProcessed) {
+        this._htmxProcessed = true;
         htmx.process(this);
       }
     }
@@ -16415,6 +16555,13 @@ if (!customElements.get("wc-tree-item")) {
       labelEl.classList.add("tree-item-label");
       labelEl.textContent = label;
       row.appendChild(labelEl);
+      const actions = Array.from(this.querySelectorAll(":scope > [data-tree-action]"));
+      if (actions.length > 0) {
+        const actionsEl = document.createElement("span");
+        actionsEl.classList.add("tree-item-actions");
+        actions.forEach((a) => actionsEl.appendChild(a));
+        row.appendChild(actionsEl);
+      }
       if (badge) {
         const badgeEl = document.createElement("span");
         badgeEl.classList.add("tree-item-badge");
@@ -16450,7 +16597,7 @@ if (!customElements.get("wc-tree-item")) {
       this.setAttribute("expanded", "");
       this.dispatchEvent(
         new CustomEvent("tree:item-expand", {
-          bubbles: true,
+          bubbles: false,
           composed: true,
           detail: { label: this.getAttribute("label"), item: this }
         })
@@ -16473,7 +16620,7 @@ if (!customElements.get("wc-tree-item")) {
       this.removeAttribute("expanded");
       this.dispatchEvent(
         new CustomEvent("tree:item-collapse", {
-          bubbles: true,
+          bubbles: false,
           composed: true,
           detail: { label: this.getAttribute("label"), item: this }
         })
@@ -16586,11 +16733,10 @@ if (!customElements.get("wc-tree-item")) {
       const row = this.componentElement?.querySelector(".tree-item-row");
       if (!row) return;
       this._handleRowClick = (e) => {
-        const arrow = e.target.closest(".tree-item-arrow");
-        if (arrow && arrow.querySelector("wc-fa-icon")) {
-          e.stopPropagation();
+        const arrow = this.componentElement?.querySelector(".tree-item-arrow");
+        const clickedArrow = arrow && (e.target === arrow || arrow.contains(e.target));
+        if (clickedArrow) {
           this.toggle();
-          return;
         }
         this.select();
         this.dispatchEvent(
@@ -16623,6 +16769,7 @@ if (!customElements.get("wc-tree-item")) {
         );
       };
       this._handleRowContextMenu = (e) => {
+        e.preventDefault();
         this.select();
         this.dispatchEvent(
           new CustomEvent("tree:item-context-menu", {
@@ -16733,7 +16880,8 @@ if (!customElements.get("wc-tree")) {
       this._rendered = true;
       super._render();
       this._createElement();
-      if (typeof htmx !== "undefined") {
+      if (typeof htmx !== "undefined" && !this._htmxProcessed) {
+        this._htmxProcessed = true;
         htmx.process(this);
       }
     }
@@ -16762,16 +16910,18 @@ if (!customElements.get("wc-tree")) {
     }
     // --- Keyboard Navigation ---
     _getVisibleRows() {
-      return Array.from(this.querySelectorAll(".tree-item-row")).filter((row) => {
-        let el = row.closest("wc-tree-item");
-        let parent = el?.parentElement?.closest("wc-tree-item");
-        while (parent) {
-          if (!parent.isExpanded) return false;
-          parent = parent.parentElement?.closest("wc-tree-item");
+      return Array.from(this.querySelectorAll(".tree-item-row")).filter(
+        (row) => {
+          let el = row.closest("wc-tree-item");
+          let parent = el?.parentElement?.closest("wc-tree-item");
+          while (parent) {
+            if (!parent.isExpanded) return false;
+            parent = parent.parentElement?.closest("wc-tree-item");
+          }
+          if (row.closest(".tree-filtered-out")) return false;
+          return true;
         }
-        if (row.closest(".tree-filtered-out")) return false;
-        return true;
-      });
+      );
     }
     _focusNext(currentItem) {
       const rows = this._getVisibleRows();
@@ -16940,13 +17090,52 @@ if (!customElements.get("wc-tree")) {
           white-space: nowrap;
         }
 
+        /* Actions (hover-reveal buttons) */
+        .tree-item-actions {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          margin-left: auto;
+          padding-left: 0.25rem;
+          opacity: 0;
+          transition: opacity 0.15s ease;
+        }
+        .tree-item-row:hover .tree-item-actions {
+          opacity: 1;
+        }
+        .tree-item-action-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.25rem;
+          height: 1.25rem;
+          border: none;
+          border-radius: 3px;
+          background: transparent;
+          color: var(--text-6, #888);
+          cursor: pointer;
+          padding: 0;
+        }
+        .tree-item-action-btn:hover {
+          background: var(--surface-3, #333);
+          color: var(--text-1, #e0e0e0);
+        }
+
         /* Badge */
         .tree-item-badge {
-          font-size: 0.6875rem;
-          color: var(--text-6, #888);
+          font-size: 0.625rem;
+          color: var(--text-1, #e0e0e0);
+          background: var(--surface-3, #333);
+          border-radius: 9999px;
+          padding: 0.0625rem 0.375rem;
+          min-width: 1.25rem;
+          text-align: center;
           flex-shrink: 0;
           margin-left: auto;
-          padding-left: 0.5rem;
+        }
+        .tree-item-actions + .tree-item-badge {
+          margin-left: 0;
+          padding-left: 0.25rem;
         }
 
         /* Children */
