@@ -2709,7 +2709,9 @@ if (!customElements.get("wc-code-mirror")) {
         "value",
         "disabled",
         "required",
-        "fetch"
+        "fetch",
+        "hint-words",
+        "hint-url"
       ];
     }
     constructor() {
@@ -2718,6 +2720,7 @@ if (!customElements.get("wc-code-mirror")) {
       this._isResizing = false;
       this._internals = this.attachInternals();
       this.firstContent = "";
+      this._hintWords = [];
       dependencyManager.register("CodeMirror");
       if (this.innerHTML.trim() != "") {
         this.firstContent = this.innerHTML.replaceAll("=&gt;", "=>");
@@ -2794,6 +2797,16 @@ if (!customElements.get("wc-code-mirror")) {
           this.editor.setOption("readOnly", "nocursor");
         } else {
           this.editor.setOption("readOnly", false);
+        }
+      } else if (attrName === "hint-words") {
+        try {
+          this._hintWords = JSON.parse(newValue) || [];
+        } catch (e) {
+          this._hintWords = [];
+        }
+      } else if (attrName === "hint-url") {
+        if (newValue) {
+          this._fetchHintWords(newValue);
         }
       } else if (attrName === "fetch") {
         if (!oldValue) return;
@@ -3298,12 +3311,45 @@ if (!customElements.get("wc-code-mirror")) {
       this.loadStyle("wc-code-mirror-style", style);
     }
     async renderEditor(initialValue) {
+      const hasHints = this.hasAttribute("hint-words") || this.hasAttribute("hint-url");
       await Promise.all([
         this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"),
         this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"),
-        this.loadScript("https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js")
+        this.loadScript("https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js"),
+        ...hasHints ? [
+          this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"),
+          this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css")
+        ] : []
       ]);
+      if (this.hasAttribute("hint-words")) {
+        try {
+          this._hintWords = JSON.parse(this.getAttribute("hint-words")) || [];
+        } catch (e) {
+          this._hintWords = [];
+        }
+      }
+      if (this.hasAttribute("hint-url")) {
+        await this._fetchHintWords(this.getAttribute("hint-url"));
+      }
       const gutters = await this.getGutters();
+      const extraKeys = {
+        "Ctrl-Q": function(cm) {
+          cm.foldCode(cm.getCursor());
+        },
+        "Tab": (cm) => {
+          if (cm.somethingSelected()) {
+            cm.indentSelection("add");
+          } else {
+            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+            cm.replaceSelection(spaces);
+          }
+        }
+      };
+      if (hasHints) {
+        extraKeys["Ctrl-Space"] = (cm) => {
+          cm.showHint({ hint: this._getHintFunction(), completeSingle: false });
+        };
+      }
       this.editor = CodeMirror(this.componentElement, {
         mode: this.getAttribute("mode") || "javascript",
         theme: this.getAttribute("theme") || "default",
@@ -3311,19 +3357,7 @@ if (!customElements.get("wc-code-mirror")) {
         lineWrapper: this.hasAttribute("line-wrapper"),
         foldGutter: this.hasAttribute("fold-gutter"),
         gutters,
-        extraKeys: {
-          "Ctrl-Q": function(cm) {
-            cm.foldCode(cm.getCursor());
-          },
-          "Tab": (cm) => {
-            if (cm.somethingSelected()) {
-              cm.indentSelection("add");
-            } else {
-              var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-              cm.replaceSelection(spaces);
-            }
-          }
-        },
+        extraKeys,
         value: initialValue,
         tabSize: parseInt(this.getAttribute("tab-size"), 10) || 4,
         indentUnit: parseInt(this.getAttribute("indent-unit"), 10) || 2,
@@ -3373,6 +3407,75 @@ if (!customElements.get("wc-code-mirror")) {
       } catch (ex) {
         console.error("Error encountered while trying to fetch wc-code-mirror data!", ex);
       }
+    }
+    async _fetchHintWords(url) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        this._hintWords = Array.isArray(data) ? data : Array.isArray(data.result) ? data.result : [];
+      } catch (e) {
+        console.warn("[wc-code-mirror] Failed to fetch hint words from", url, e.message);
+      }
+    }
+    _getHintFunction() {
+      const words = this._hintWords;
+      return (cm) => {
+        const cur = cm.getCursor();
+        const line = cm.getLine(cur.line);
+        let start = cur.ch;
+        while (start > 0 && /[\w.$]/.test(line.charAt(start - 1))) {
+          start--;
+        }
+        const charBefore = start > 0 ? line.charAt(start - 1) : "";
+        const insideQuote = charBefore === '"' || charBefore === "'";
+        const inJsonContext = this._isJsonContext(line, start);
+        const token = line.slice(start, cur.ch).toLowerCase();
+        const filtered = token ? words.filter((w) => w.toLowerCase().includes(token)) : words.slice();
+        const list = filtered.map((w) => {
+          if (insideQuote) {
+            const charAfter = cur.ch < line.length ? line.charAt(cur.ch) : "";
+            const to = charAfter === '"' || charAfter === "'" ? CodeMirror.Pos(cur.line, cur.ch + 1) : cur;
+            return {
+              text: w + (charAfter === '"' || charAfter === "'" ? "" : '"'),
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to
+            };
+          } else if (inJsonContext) {
+            return {
+              text: '"' + w + '"',
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to: cur
+            };
+          } else {
+            return {
+              text: w,
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to: cur
+            };
+          }
+        });
+        return { list, from: CodeMirror.Pos(cur.line, start), to: cur };
+      };
+    }
+    _isJsonContext(line, pos) {
+      let braceDepth = 0;
+      let bracketDepth = 0;
+      for (let i = pos - 1; i >= 0; i--) {
+        const ch = line.charAt(i);
+        if (ch === "}") braceDepth++;
+        else if (ch === "{") {
+          if (braceDepth === 0) return true;
+          braceDepth--;
+        } else if (ch === "]") bracketDepth++;
+        else if (ch === "[") {
+          if (bracketDepth === 0) return true;
+          bracketDepth--;
+        }
+      }
+      return false;
     }
     // Method called when the form is reset
     formResetCallback() {
@@ -13323,7 +13426,7 @@ customElements.define("wc-tab-item", WcTabItem);
 // src/js/components/wc-tab.js
 var WcTab = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "animate", "vertical", "contrast", "tab-overflow", "removable"];
+    return ["id", "class", "animate", "vertical", "contrast", "tab-overflow", "removable", "no-hash"];
   }
   constructor() {
     super();
@@ -13645,7 +13748,9 @@ var WcTab = class extends WcBaseComponent {
         innerDiv.dispatchEvent(custom2);
       }
     }
-    location.hash = this._buildActiveTabStringFromRoot(target);
+    if (!this.hasAttribute("no-hash")) {
+      location.hash = this._buildActiveTabStringFromRoot(target);
+    }
   }
   _buildActiveTabStringFromRoot(startElement) {
     function findRootMostTab(element) {
@@ -13716,6 +13821,7 @@ var WcTab = class extends WcBaseComponent {
     }
   }
   _restoreTabsFromHash() {
+    if (this.hasAttribute("no-hash")) return;
     const hashParts = location.hash.slice(1).split("+");
     let activatedAnyTab = false;
     hashParts.forEach((part) => {

@@ -102,6 +102,24 @@ if (fs.existsSync(versionedDir)) {
   }
   // Note: icon bundles are copied by bundle-icons.js which runs after esbuild
   console.log('Built files copied to dist/wave-css-0.0.1');
+
+  // Also copy to go-kart project
+  const goKartDir = path.join(__dirname, '../../_learn/go-kart/static/js/wave-css-0.0.1');
+  if (fs.existsSync(goKartDir)) {
+    ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js'].forEach(file => {
+      const src = path.join(__dirname, 'dist', file);
+      const dest = path.join(goKartDir, file);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+      }
+    });
+    // Copy icons
+    const goKartIcons = path.join(goKartDir, 'assets/icons');
+    if (fs.existsSync(iconsTarget)) {
+      copyRecursiveSync(iconsTarget, goKartIcons);
+    }
+    console.log('Built files copied to go-kart/static/js/wave-css-0.0.1');
+  }
 }
 
 // Copy live-designer-canvas.html to dist with adjusted paths

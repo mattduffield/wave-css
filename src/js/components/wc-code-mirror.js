@@ -28,7 +28,7 @@ if (!customElements.get('wc-code-mirror')) {
   class WcCodeMirror extends WcBaseComponent {
     static get observedAttributes() {
       return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required'
-        , 'fetch'
+        , 'fetch', 'hint-words', 'hint-url'
       ];
     }
 
@@ -38,6 +38,7 @@ if (!customElements.get('wc-code-mirror')) {
       this._isResizing = false;
       this._internals = this.attachInternals();
       this.firstContent = '';
+      this._hintWords = [];
 
       // Register CodeMirror as a required dependency
       DependencyManager.register('CodeMirror');
@@ -125,6 +126,16 @@ if (!customElements.get('wc-code-mirror')) {
           this.editor.setOption('readOnly', 'nocursor');
         } else {
           this.editor.setOption('readOnly', false);
+        }
+      } else if (attrName === 'hint-words') {
+        try {
+          this._hintWords = JSON.parse(newValue) || [];
+        } catch (e) {
+          this._hintWords = [];
+        }
+      } else if (attrName === 'hint-url') {
+        if (newValue) {
+          this._fetchHintWords(newValue);
         }
       } else if (attrName === 'fetch') {
         if (!oldValue) return;
@@ -515,13 +526,52 @@ if (!customElements.get('wc-code-mirror')) {
     }
     
     async renderEditor(initialValue) {
+      const hasHints = this.hasAttribute('hint-words') || this.hasAttribute('hint-url');
+
       await Promise.all([
         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js'),
         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js'),
-        this.loadScript('https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js')
+        this.loadScript('https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js'),
+        ...(hasHints ? [
+          this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js'),
+          this.loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css')
+        ] : [])
       ]);
 
+      // Parse hint-words if present
+      if (this.hasAttribute('hint-words')) {
+        try {
+          this._hintWords = JSON.parse(this.getAttribute('hint-words')) || [];
+        } catch (e) {
+          this._hintWords = [];
+        }
+      }
+
+      // Fetch hint-url if present
+      if (this.hasAttribute('hint-url')) {
+        await this._fetchHintWords(this.getAttribute('hint-url'));
+      }
+
       const gutters = await this.getGutters();
+
+      const extraKeys = {
+        "Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
+        "Tab": (cm) => {
+          if (cm.somethingSelected()) {
+            cm.indentSelection("add");
+          } else {
+            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+            cm.replaceSelection(spaces);
+          }
+        }
+      };
+
+      // Add Ctrl-Space hint trigger if hints are available
+      if (hasHints) {
+        extraKeys["Ctrl-Space"] = (cm) => {
+          cm.showHint({ hint: this._getHintFunction(), completeSingle: false });
+        };
+      }
 
       this.editor = CodeMirror(this.componentElement, {
         mode: this.getAttribute('mode') || 'javascript',
@@ -530,17 +580,7 @@ if (!customElements.get('wc-code-mirror')) {
         lineWrapper: this.hasAttribute('line-wrapper'),
         foldGutter: this.hasAttribute('fold-gutter'),
         gutters: gutters,
-        extraKeys: {
-          "Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); },
-          "Tab": (cm) => {
-            if (cm.somethingSelected()) {
-              cm.indentSelection("add");
-            } else {
-              var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-              cm.replaceSelection(spaces);
-            }
-          }
-        },
+        extraKeys: extraKeys,
         value: initialValue,
         tabSize: parseInt(this.getAttribute('tab-size'), 10) || 4,
         indentUnit: parseInt(this.getAttribute('indent-unit'), 10) || 2,
@@ -604,9 +644,100 @@ if (!customElements.get('wc-code-mirror')) {
         }
       } catch(ex) {
         console.error('Error encountered while trying to fetch wc-code-mirror data!', ex);
-      }      
+      }
     }
-    
+
+    async _fetchHintWords(url) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        // Support both raw array and { result: [...] } shape
+        this._hintWords = Array.isArray(data) ? data : (Array.isArray(data.result) ? data.result : []);
+      } catch (e) {
+        console.warn('[wc-code-mirror] Failed to fetch hint words from', url, e.message);
+      }
+    }
+
+    _getHintFunction() {
+      const words = this._hintWords;
+      return (cm) => {
+        const cur = cm.getCursor();
+        const line = cm.getLine(cur.line);
+        // Walk backwards to find the start of the current token
+        let start = cur.ch;
+        while (start > 0 && /[\w.$]/.test(line.charAt(start - 1))) {
+          start--;
+        }
+
+        // Detect quote context
+        const charBefore = start > 0 ? line.charAt(start - 1) : '';
+        const insideQuote = charBefore === '"' || charBefore === "'";
+
+        // Detect JSON context: scan backward for nearest unmatched {
+        const inJsonContext = this._isJsonContext(line, start);
+
+        const token = line.slice(start, cur.ch).toLowerCase();
+        const filtered = token
+          ? words.filter(w => w.toLowerCase().includes(token))
+          : words.slice();
+
+        // Build the completion list with appropriate wrapping
+        const list = filtered.map(w => {
+          if (insideQuote) {
+            // Case 1: inside quotes like { "▌" } — find closing quote
+            const charAfter = cur.ch < line.length ? line.charAt(cur.ch) : '';
+            const to = charAfter === '"' || charAfter === "'"
+              ? CodeMirror.Pos(cur.line, cur.ch + 1)
+              : cur;
+            return {
+              text: w + (charAfter === '"' || charAfter === "'" ? '' : '"'),
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to: to
+            };
+          } else if (inJsonContext) {
+            // Case 2: JSON context, no quote yet like { ▌ } — wrap in quotes
+            return {
+              text: '"' + w + '"',
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to: cur
+            };
+          } else {
+            // Case 3: regular JS — no quotes
+            return {
+              text: w,
+              displayText: w,
+              from: CodeMirror.Pos(cur.line, start),
+              to: cur
+            };
+          }
+        });
+
+        return { list, from: CodeMirror.Pos(cur.line, start), to: cur };
+      };
+    }
+
+    _isJsonContext(line, pos) {
+      // Scan backward from pos to find nearest unmatched { or [
+      let braceDepth = 0;
+      let bracketDepth = 0;
+      for (let i = pos - 1; i >= 0; i--) {
+        const ch = line.charAt(i);
+        if (ch === '}') braceDepth++;
+        else if (ch === '{') {
+          if (braceDepth === 0) return true;
+          braceDepth--;
+        }
+        else if (ch === ']') bracketDepth++;
+        else if (ch === '[') {
+          if (bracketDepth === 0) return true;
+          bracketDepth--;
+        }
+      }
+      return false;
+    }
+
     // Method called when the form is reset
     formResetCallback() {
       this.editor.setValue(''); // Reset editor content on form reset

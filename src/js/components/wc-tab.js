@@ -92,7 +92,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcTab extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'animate', 'vertical', 'contrast', 'tab-overflow', 'removable'];
+    return ['id', 'class', 'animate', 'vertical', 'contrast', 'tab-overflow', 'removable', 'no-hash'];
   }
 
   constructor() {
@@ -502,7 +502,9 @@ class WcTab extends WcBaseComponent {
       }
     }
 
-    location.hash = this._buildActiveTabStringFromRoot(target);
+    if (!this.hasAttribute('no-hash')) {
+      location.hash = this._buildActiveTabStringFromRoot(target);
+    }
   }
 
   _buildActiveTabStringFromRoot(startElement) {
@@ -601,6 +603,7 @@ class WcTab extends WcBaseComponent {
   }
 
   _restoreTabsFromHash() {
+    if (this.hasAttribute('no-hash')) return;
     const hashParts = location.hash.slice(1).split('+');
     let activatedAnyTab = false;
 

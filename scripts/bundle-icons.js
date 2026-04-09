@@ -168,6 +168,19 @@ function copyBundlesToVersioned() {
     fs.copyFileSync(path.join(OUTPUT_DIR, f), path.join(versionedBundles, f));
   });
   console.log(`\nIcon bundles copied to dist/wave-css-0.0.1/assets/icon-bundles`);
+
+  // Also copy to go-kart
+  const goKartBundles = path.join(__dirname, '../../../_learn/go-kart/static/js/wave-css-0.0.1/assets/icon-bundles');
+  const goKartDir = path.join(__dirname, '../../../_learn/go-kart/static/js/wave-css-0.0.1');
+  if (fs.existsSync(goKartDir)) {
+    if (!fs.existsSync(goKartBundles)) {
+      fs.mkdirSync(goKartBundles, { recursive: true });
+    }
+    files.forEach(f => {
+      fs.copyFileSync(path.join(OUTPUT_DIR, f), path.join(goKartBundles, f));
+    });
+    console.log(`Icon bundles copied to go-kart/static/js/wave-css-0.0.1/assets/icon-bundles`);
+  }
 }
 
 // Run bundling
