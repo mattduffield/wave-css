@@ -15,7 +15,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-tabulator')) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'data', 'projection-fields'];
+      return ['id', 'class', 'data', 'projection-fields', 'auto-columns'];
     }
 
     icons = {
@@ -360,7 +360,20 @@ if (!customElements.get('wc-tabulator')) {
     }
 
     async _handleAttributeChange(attrName, newValue) {
-      super._handleAttributeChange(attrName, newValue); 
+      if (attrName === 'data' && this.table) {
+        try {
+          const data = JSON.parse(newValue) || [];
+          if (this.hasAttribute('auto-columns')) {
+            const cols = this._generateAutoColumns(data);
+            this.table.setColumns(cols);
+          }
+          this.table.setData(data);
+        } catch (e) {
+          console.error('[wc-tabulator] Error updating data:', e);
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
     }
 
     _render() {
@@ -436,16 +449,31 @@ if (!customElements.get('wc-tabulator')) {
         }
       }
 
+      // Determine columns: declarative children take precedence, then auto-columns, then empty
+      const hasDeclarativeColumns = this.querySelectorAll('wc-tabulator-column').length > 0;
+      const useAutoColumns = this.hasAttribute('auto-columns') && !hasDeclarativeColumns;
+      let columns;
+      if (useAutoColumns && inlineData && inlineData.length > 0) {
+        columns = this._generateAutoColumns(inlineData);
+      } else {
+        columns = this.getColumnsConfig();
+      }
+
       const options = {
-        columns: this.getColumnsConfig(),
+        columns: columns,
         layout: this.getAttribute('layout') || 'fitData',
-        filterMode: inlineData ? 'local' : 'remote',  // Local filtering if using inline data
-        sortMode: inlineData ? 'local' : 'remote',     // Local sorting if using inline data
-        ajaxURL: this.getAttribute('ajax-url') || '', // URL for server-side loading
+        filterMode: inlineData ? 'local' : 'remote',
+        sortMode: inlineData ? 'local' : 'remote',
+        ajaxURL: this.getAttribute('ajax-url') || '',
         ajaxURLGenerator: this.getAjaxURLGenerator.bind(this),
         ajaxConfig: this.getAjaxConfig(),
-        ajaxResponse: this.handleAjaxResponse.bind(this), // Optional custom handling of server response
+        ajaxResponse: this.handleAjaxResponse.bind(this),
       };
+
+      // Enable nested field access for auto-columns with dot-notation paths
+      if (useAutoColumns) {
+        options.nestedFieldSeparator = '.';
+      }
 
       // If inline data is provided, add it to options and use local pagination
       if (inlineData) {
@@ -489,7 +517,11 @@ if (!customElements.get('wc-tabulator')) {
           options.rowContextMenu = this.rowMenu;
         }
       }
-      if (placeholder) options.placeholder = placeholder;
+      if (placeholder) {
+        options.placeholder = placeholder;
+      } else if (useAutoColumns) {
+        options.placeholder = 'No results';
+      }
       if (selectableRows) {
         if (!isNaN(parseInt(selectableRows))) {
           options.selectableRows = parseInt(selectableRows);
@@ -843,6 +875,154 @@ if (!customElements.get('wc-tabulator')) {
 
         columns.push(column);
       });
+
+      return columns;
+    }
+
+    _generateAutoColumns(data) {
+      const sampleSize = Math.min(data.length, 100);
+      const sample = data.slice(0, sampleSize);
+
+      // Collect all unique field paths by flattening nested objects
+      const fieldMap = new Map(); // path → { type, count }
+
+      const detectType = (value) => {
+        if (value === null || value === undefined) return 'null';
+        if (typeof value === 'boolean') return 'boolean';
+        if (typeof value === 'number') return 'number';
+        if (Array.isArray(value)) return 'array';
+        if (typeof value === 'object') {
+          if (value.$oid) return 'objectid';
+          if (value.$date) return 'date';
+          return 'object';
+        }
+        if (typeof value === 'string') {
+          // Check for ObjectID (24-char hex)
+          if (/^[a-f0-9]{24}$/i.test(value)) return 'objectid';
+          // Check for ISO date string
+          if (/^\d{4}-\d{2}-\d{2}T/.test(value)) return 'date';
+          return 'string';
+        }
+        return 'string';
+      };
+
+      const collectFields = (obj, prefix) => {
+        for (const key of Object.keys(obj)) {
+          const value = obj[key];
+          const path = prefix ? `${prefix}.${key}` : key;
+          const type = detectType(value);
+
+          if (type === 'object' && !value.$oid && !value.$date) {
+            collectFields(value, path);
+          } else {
+            const existing = fieldMap.get(path);
+            if (!existing) {
+              fieldMap.set(path, { type, count: 1 });
+            } else {
+              existing.count++;
+              // Upgrade type if we see a more specific type
+              if (existing.type === 'null' && type !== 'null') {
+                existing.type = type;
+              }
+            }
+          }
+        }
+      };
+
+      sample.forEach(row => collectFields(row, ''));
+
+      // Convert to title case: "address.state" → "Address State"
+      const toTitle = (path) => path.split(/[._]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+      // Build column definitions
+      const columns = [];
+      const headerMenu = this.headerMenu.bind(this);
+
+      // Sort fields: _id first, then alphabetical
+      const sortedPaths = Array.from(fieldMap.keys()).sort((a, b) => {
+        if (a === '_id' || a === '_id.$oid') return -1;
+        if (b === '_id' || b === '_id.$oid') return 1;
+        return a.localeCompare(b);
+      });
+
+      for (const path of sortedPaths) {
+        const info = fieldMap.get(path);
+        const isId = path === '_id' || path === '_id.$oid';
+        const col = {
+          field: path,
+          title: toTitle(path),
+          headerMenu: headerMenu,
+          headerSort: true,
+          resizable: true,
+          tooltip: true,
+        };
+
+        if (isId) {
+          col.frozen = true;
+          col.width = 100;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (val && typeof val === 'object' && val.$oid) return val.$oid.substring(0, 8) + '…';
+            if (typeof val === 'string' && val.length > 8) return val.substring(0, 8) + '…';
+            return val;
+          };
+          col.tooltip = (e, cell) => {
+            const val = cell.getValue();
+            if (val && typeof val === 'object' && val.$oid) return val.$oid;
+            return val;
+          };
+        } else if (info.type === 'number') {
+          col.hozAlign = 'right';
+          col.headerHozAlign = 'right';
+          col.minWidth = 80;
+        } else if (info.type === 'boolean') {
+          col.hozAlign = 'center';
+          col.minWidth = 80;
+          col.formatter = 'tickCross';
+        } else if (info.type === 'date') {
+          col.minWidth = 160;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (!val) return '';
+            const dateStr = typeof val === 'object' && val.$date ? val.$date : val;
+            try {
+              return new Date(dateStr).toLocaleString();
+            } catch (e) {
+              return dateStr;
+            }
+          };
+        } else if (info.type === 'objectid') {
+          col.minWidth = 100;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (val && typeof val === 'object' && val.$oid) return val.$oid.substring(0, 8) + '…';
+            if (typeof val === 'string' && val.length > 8) return val.substring(0, 8) + '…';
+            return val;
+          };
+          col.tooltip = (e, cell) => {
+            const val = cell.getValue();
+            if (val && typeof val === 'object' && val.$oid) return val.$oid;
+            return val;
+          };
+        } else if (info.type === 'array') {
+          col.minWidth = 100;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (!Array.isArray(val)) return val;
+            return `[${val.length} items]`;
+          };
+          col.tooltip = (e, cell) => {
+            const val = cell.getValue();
+            if (!Array.isArray(val)) return val;
+            try { return JSON.stringify(val); } catch (e) { return `[${val.length} items]`; }
+          };
+        } else {
+          // string
+          col.minWidth = 120;
+        }
+
+        columns.push(col);
+      }
 
       return columns;
     }

@@ -1,0 +1,245 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <h2>Chart Builder Demo</h2>
+  <p class="text-sm mb-2">The <code>wc-chart-builder</code> component renders interactive charts from raw JSON data with auto-detection and configurable field pickers.</p>
+
+  <!-- Auto-detect bar chart from aggregation results -->
+  <h3 class="mt-4">Auto-Detect: Aggregation Results (Bar)</h3>
+  <p class="text-sm mb-2">Grouped by <code>_id</code> with a <code>count</code> field — auto-detects as a bar chart.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      auto-detect
+      data='[
+        {"_id":"Oregon","count":4219},
+        {"_id":"Washington","count":3847},
+        {"_id":"California","count":7123},
+        {"_id":"North Carolina","count":2456},
+        {"_id":"Texas","count":5891},
+        {"_id":"Florida","count":4102},
+        {"_id":"New York","count":6234}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Auto-detect pie chart (few categories) -->
+  <h3 class="mt-6">Auto-Detect: Few Categories (Pie)</h3>
+  <p class="text-sm mb-2">With fewer than 8 categories and one value field, auto-detects as a pie chart.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      auto-detect
+      data='[
+        {"status":"Active","count":842},
+        {"status":"Inactive","count":231},
+        {"status":"Pending","count":67},
+        {"status":"Suspended","count":12}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Line chart with dates -->
+  <h3 class="mt-6">Auto-Detect: Time Series (Line)</h3>
+  <p class="text-sm mb-2">When the label field contains ISO dates, auto-detects as a line chart.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      auto-detect
+      data='[
+        {"month":"2026-01-01T00:00:00Z","revenue":12400,"cost":8200},
+        {"month":"2026-02-01T00:00:00Z","revenue":15600,"cost":9100},
+        {"month":"2026-03-01T00:00:00Z","revenue":14200,"cost":8800},
+        {"month":"2026-04-01T00:00:00Z","revenue":18900,"cost":10200},
+        {"month":"2026-05-01T00:00:00Z","revenue":21300,"cost":11500},
+        {"month":"2026-06-01T00:00:00Z","revenue":19800,"cost":10800}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Multi-series bar chart -->
+  <h3 class="mt-6">Multi-Series Bar: Sales by Region (3 Product Lines)</h3>
+  <p class="text-sm mb-2">Three value fields create a grouped bar chart. Use the controls to add/remove series or switch to line.</p>
+  <div style="height: 400px;">
+    <wc-chart-builder
+      chart-type="bar"
+      label-field="region"
+      value-fields="electronics,clothing,food"
+      title="Sales by Region and Product Line"
+      data='[
+        {"region":"West","electronics":42000,"clothing":28000,"food":15000},
+        {"region":"East","electronics":38000,"clothing":32000,"food":19000},
+        {"region":"South","electronics":31000,"clothing":24000,"food":22000},
+        {"region":"Midwest","electronics":27000,"clothing":18000,"food":17000},
+        {"region":"Northeast","electronics":35000,"clothing":29000,"food":14000}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Multi-series line chart with many data points -->
+  <h3 class="mt-6">Multi-Series Line: Monthly Metrics (12 Months, 4 Series)</h3>
+  <p class="text-sm mb-2">Multiple value fields over time. Try switching to bar, area, or removing series.</p>
+  <div style="height: 400px;">
+    <wc-chart-builder
+      chart-type="line"
+      label-field="month"
+      value-fields="revenue,cost,profit,forecast"
+      title="2025 Monthly Financial Overview"
+      data='[
+        {"month":"Jan","revenue":45000,"cost":32000,"profit":13000,"forecast":44000},
+        {"month":"Feb","revenue":48000,"cost":33000,"profit":15000,"forecast":47000},
+        {"month":"Mar","revenue":52000,"cost":35000,"profit":17000,"forecast":50000},
+        {"month":"Apr","revenue":49000,"cost":34000,"profit":15000,"forecast":53000},
+        {"month":"May","revenue":56000,"cost":37000,"profit":19000,"forecast":55000},
+        {"month":"Jun","revenue":61000,"cost":39000,"profit":22000,"forecast":58000},
+        {"month":"Jul","revenue":58000,"cost":38000,"profit":20000,"forecast":60000},
+        {"month":"Aug","revenue":63000,"cost":40000,"profit":23000,"forecast":62000},
+        {"month":"Sep","revenue":59000,"cost":38000,"profit":21000,"forecast":61000},
+        {"month":"Oct","revenue":65000,"cost":41000,"profit":24000,"forecast":64000},
+        {"month":"Nov","revenue":70000,"cost":43000,"profit":27000,"forecast":67000},
+        {"month":"Dec","revenue":75000,"cost":45000,"profit":30000,"forecast":72000}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Number/KPI display -->
+  <h3 class="mt-6">Number/KPI Display</h3>
+  <p class="text-sm mb-2">Single value displayed prominently. Set <code>chart-type="number"</code>.</p>
+  <div class="row gap-4">
+    <div style="height: 200px; width: 250px;" class="rounded border p-2">
+      <wc-chart-builder
+        chart-type="number"
+        value-fields="total_users"
+        title="Total Users"
+        show-controls="false"
+        data='[{"total_users":12847}]'>
+      </wc-chart-builder>
+    </div>
+    <div style="height: 200px; width: 250px;" class="rounded border p-2">
+      <wc-chart-builder
+        chart-type="number"
+        value-fields="revenue"
+        title="Monthly Revenue"
+        show-controls="false"
+        data='[{"revenue":84250}]'>
+      </wc-chart-builder>
+    </div>
+    <div style="height: 200px; width: 250px;" class="rounded border p-2">
+      <wc-chart-builder
+        chart-type="number"
+        value-fields="avg_response_ms"
+        title="Avg Response Time (ms)"
+        show-controls="false"
+        data='[{"avg_response_ms":142}]'>
+      </wc-chart-builder>
+    </div>
+  </div>
+
+  <!-- Pre-configured multi-series -->
+  <h3 class="mt-6">Pre-Configured: Multi-Series (No Controls)</h3>
+  <p class="text-sm mb-2">Revenue vs Cost line chart with controls hidden.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      chart-type="line"
+      label-field="quarter"
+      value-fields="revenue,cost,profit"
+      title="Quarterly Financials"
+      show-controls="false"
+      data='[
+        {"quarter":"Q1 2025","revenue":45000,"cost":32000,"profit":13000},
+        {"quarter":"Q2 2025","revenue":52000,"cost":35000,"profit":17000},
+        {"quarter":"Q3 2025","revenue":48000,"cost":33000,"profit":15000},
+        {"quarter":"Q4 2025","revenue":61000,"cost":38000,"profit":23000},
+        {"quarter":"Q1 2026","revenue":58000,"cost":36000,"profit":22000}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Doughnut -->
+  <h3 class="mt-6">Doughnut Chart</h3>
+  <p class="text-sm mb-2">Explicitly set <code>chart-type="doughnut"</code>.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      chart-type="doughnut"
+      label-field="browser"
+      value-fields="share"
+      title="Browser Market Share"
+      data='[
+        {"browser":"Chrome","share":64.7},
+        {"browser":"Safari","share":18.2},
+        {"browser":"Firefox","share":7.8},
+        {"browser":"Edge","share":5.1},
+        {"browser":"Other","share":4.2}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Area chart -->
+  <h3 class="mt-6">Area Chart</h3>
+  <p class="text-sm mb-2">Filled line chart with <code>chart-type="area"</code>.</p>
+  <div style="height: 350px;">
+    <wc-chart-builder
+      chart-type="area"
+      label-field="day"
+      value-fields="requests"
+      title="API Requests per Day"
+      data='[
+        {"day":"Mon","requests":1200},
+        {"day":"Tue","requests":1900},
+        {"day":"Wed","requests":2100},
+        {"day":"Thu","requests":1800},
+        {"day":"Fri","requests":2400},
+        {"day":"Sat","requests":800},
+        {"day":"Sun","requests":600}
+      ]'>
+    </wc-chart-builder>
+  </div>
+
+  <!-- Dynamic data swap -->
+  <h3 class="mt-6">Dynamic Data Update</h3>
+  <p class="text-sm mb-2">Click buttons to swap data — chart re-renders with new schema and values.</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="loadSalesData()">Sales by Region</button>
+    <button class="btn btn-secondary" onclick="loadDeviceData()">Users by Device</button>
+    <button class="btn btn-primary" onclick="loadTimeData()">Signups Over Time</button>
+  </div>
+  <div style="height: 350px;">
+    <wc-chart-builder id="dynamic-chart" auto-detect
+      data='[{"_id":"Click a button above","count":0}]'>
+    </wc-chart-builder>
+  </div>
+
+  <wc-javascript>
+    <script>
+      function loadSalesData() {
+        var chart = document.getElementById('dynamic-chart');
+        var data = [
+          {"region":"West","sales":42000},
+          {"region":"East","sales":38000},
+          {"region":"South","sales":31000},
+          {"region":"Midwest","sales":27000},
+          {"region":"Northeast","sales":35000}
+        ];
+        chart.setAttribute('data', JSON.stringify(data));
+      }
+      function loadDeviceData() {
+        var chart = document.getElementById('dynamic-chart');
+        var data = [
+          {"device":"Desktop","users":5421},
+          {"device":"Mobile","users":8234},
+          {"device":"Tablet","users":1876}
+        ];
+        chart.setAttribute('data', JSON.stringify(data));
+      }
+      function loadTimeData() {
+        var chart = document.getElementById('dynamic-chart');
+        var data = [
+          {"date":"2026-01-01T00:00:00Z","signups":120},
+          {"date":"2026-02-01T00:00:00Z","signups":185},
+          {"date":"2026-03-01T00:00:00Z","signups":210},
+          {"date":"2026-04-01T00:00:00Z","signups":340},
+          {"date":"2026-05-01T00:00:00Z","signups":290},
+          {"date":"2026-06-01T00:00:00Z","signups":420}
+        ];
+        chart.setAttribute('data', JSON.stringify(data));
+      }
+    </script>
+  </wc-javascript>
+
+</div>

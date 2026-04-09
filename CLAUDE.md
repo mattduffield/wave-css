@@ -108,22 +108,24 @@ The build process (esbuild.config.js) generates:
 - `wc-menu`: Menu system with HTMX support
 - `wc-breadcrumb`: Breadcrumb navigation
 - `wc-breadcrumb-item`: Individual breadcrumb item
-- `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally)
+- `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally; `no-hash` attribute suppresses URL hash updates on tab click)
 - `wc-tab-item`: Individual tab item
 - `wc-dropdown`: Dropdown menu
 - `wc-dropdown-item`: Dropdown menu item
 
 ### Data Components
-- `wc-tabulator`: Advanced data table
+- `wc-tabulator`: Advanced data table; supports `auto-columns` attribute for auto-generating columns from data, `data` attribute for inline JSON arrays
 - `wc-tabulator-column`: Table column definition
 - `wc-tabulator-func`: Table function helpers
 - `wc-tabulator-row-menu`: Row context menu
 - `wc-timeline`: Timeline visualization
+- `wc-pivot`: Cross-tabulation pivot table with four-zone field panel (Rows/Columns/Values/Filters), value filters, drill-down with inline detail tables, heatmap, column sorting, date grouping (year/quarter/month/day/datetime), compact layout toggle, config save/load (`getConfig()`/`loadConfig()`), CSV export
 
 ### Interactive Components
 - `wc-slideshow`: Image slideshow
 - `wc-slideshow-image`: Slideshow image item
-- `wc-code-mirror`: Code editor integration
+- `wc-chart-builder`: Interactive chart renderer from raw JSON with auto-detection, field pickers, supports bar/line/pie/doughnut/area/number types
+- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping
 - `wc-canvas-dot-highlight`: Canvas animation effect
 - `wc-context-menu`: Reusable context menu with static `WcContextMenu.show(x, y, items)` / `WcContextMenu.hide()` API
 - `wc-context-menu-item`: Declarative menu item for wc-context-menu
@@ -261,6 +263,8 @@ http://localhost:3015/views/index.html
 - `views/split-pane.html` - Split pane examples
 - `views/context-menu.html` - Context menu examples
 - `views/tab.html` - Tab component with dynamic tabs and context menu testing
+- `views/chart-builder.html` - Chart Builder demos with auto-detect, KPI numbers, dynamic data
+- `views/pivot.html` - Pivot table demos with heatmap, sorting, cell click events, CSV export
 
 ### Quick Start Example
 

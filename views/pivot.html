@@ -1,0 +1,391 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <h2>Pivot Table Demo</h2>
+  <p class="text-sm mb-2">The <code>wc-pivot</code> component renders cross-tabulation pivot tables from raw JSON data with auto-detection, four-zone field panel, value filters, heatmap, sorting, and CSV export.</p>
+
+  <!-- Field Panel demo -->
+  <h3 class="mt-4">Field Panel: Click ☰ or use <code>show-field-panel</code></h3>
+  <p class="text-sm mb-2">The field panel shows all available fields with type badges. Click a field to assign it to Rows, Columns, Values, or Filters. Click the ⧫ icon on a chip to filter values. Click the value chip label (e.g., "Sum of Amount") to change the aggregate function.</p>
+  <div style="height: 450px;">
+    <wc-pivot
+      auto-detect
+      show-heatmap
+      show-field-panel
+      data='[
+        {"state":"Oregon","status":"active","category":"A","amount":1200,"score":85},
+        {"state":"Oregon","status":"active","category":"B","amount":800,"score":72},
+        {"state":"Oregon","status":"closed","category":"A","amount":450,"score":60},
+        {"state":"Oregon","status":"pending","category":"B","amount":300,"score":45},
+        {"state":"Washington","status":"active","category":"A","amount":950,"score":78},
+        {"state":"Washington","status":"active","category":"B","amount":1100,"score":88},
+        {"state":"Washington","status":"closed","category":"A","amount":600,"score":55},
+        {"state":"Washington","status":"pending","category":"B","amount":200,"score":40},
+        {"state":"California","status":"active","category":"A","amount":2000,"score":92},
+        {"state":"California","status":"active","category":"B","amount":1500,"score":80},
+        {"state":"California","status":"closed","category":"A","amount":900,"score":65},
+        {"state":"California","status":"pending","category":"B","amount":400,"score":50},
+        {"state":"Texas","status":"active","category":"A","amount":1100,"score":75},
+        {"state":"Texas","status":"closed","category":"B","amount":500,"score":58},
+        {"state":"Texas","status":"pending","category":"A","amount":250,"score":42},
+        {"state":"Florida","status":"active","category":"B","amount":900,"score":70},
+        {"state":"Florida","status":"closed","category":"A","amount":600,"score":52},
+        {"state":"Florida","status":"pending","category":"B","amount":350,"score":38}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Auto-detect: state × status → count -->
+  <h3 class="mt-6">Auto-Detect: Prospects by State and Status (Count)</h3>
+  <p class="text-sm mb-2">Auto-detects row/column fields and defaults to count aggregation. Click ☰ to open the field panel.</p>
+  <div style="height: 400px;">
+    <wc-pivot
+      auto-detect
+      show-heatmap
+      data='[
+        {"state":"Oregon","status":"active","amount":1200},
+        {"state":"Oregon","status":"active","amount":800},
+        {"state":"Oregon","status":"closed","amount":450},
+        {"state":"Oregon","status":"pending","amount":300},
+        {"state":"Washington","status":"active","amount":950},
+        {"state":"Washington","status":"active","amount":1100},
+        {"state":"Washington","status":"closed","amount":600},
+        {"state":"Washington","status":"pending","amount":200},
+        {"state":"Washington","status":"pending","amount":350},
+        {"state":"California","status":"active","amount":2000},
+        {"state":"California","status":"active","amount":1500},
+        {"state":"California","status":"active","amount":1800},
+        {"state":"California","status":"closed","amount":900},
+        {"state":"California","status":"closed","amount":750},
+        {"state":"California","status":"pending","amount":400},
+        {"state":"Texas","status":"active","amount":1100},
+        {"state":"Texas","status":"active","amount":1300},
+        {"state":"Texas","status":"closed","amount":500},
+        {"state":"Texas","status":"closed","amount":700},
+        {"state":"Texas","status":"pending","amount":250},
+        {"state":"Texas","status":"pending","amount":150},
+        {"state":"Florida","status":"active","amount":900},
+        {"state":"Florida","status":"active","amount":1050},
+        {"state":"Florida","status":"closed","amount":600},
+        {"state":"Florida","status":"pending","amount":350},
+        {"state":"North Carolina","status":"active","amount":750},
+        {"state":"North Carolina","status":"closed","amount":400},
+        {"state":"North Carolina","status":"closed","amount":300},
+        {"state":"North Carolina","status":"pending","amount":200},
+        {"state":"New York","status":"active","amount":2200},
+        {"state":"New York","status":"active","amount":1800},
+        {"state":"New York","status":"active","amount":1600},
+        {"state":"New York","status":"closed","amount":1000},
+        {"state":"New York","status":"pending","amount":500}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Pre-configured: Sum of amounts -->
+  <h3 class="mt-6">Pre-Configured: Revenue by State and Status (Sum, Currency)</h3>
+  <p class="text-sm mb-2">Same data as above but configured to sum the <code>amount</code> field with currency formatting.</p>
+  <div style="height: 400px;">
+    <wc-pivot
+      row-field="state"
+      col-field="status"
+      value-field="amount"
+      aggregate="sum"
+      number-format="currency"
+      show-totals
+      show-heatmap
+      sort-rows="value-desc"
+      data='[
+        {"state":"Oregon","status":"active","amount":1200},
+        {"state":"Oregon","status":"active","amount":800},
+        {"state":"Oregon","status":"closed","amount":450},
+        {"state":"Oregon","status":"pending","amount":300},
+        {"state":"Washington","status":"active","amount":950},
+        {"state":"Washington","status":"active","amount":1100},
+        {"state":"Washington","status":"closed","amount":600},
+        {"state":"Washington","status":"pending","amount":200},
+        {"state":"Washington","status":"pending","amount":350},
+        {"state":"California","status":"active","amount":2000},
+        {"state":"California","status":"active","amount":1500},
+        {"state":"California","status":"active","amount":1800},
+        {"state":"California","status":"closed","amount":900},
+        {"state":"California","status":"closed","amount":750},
+        {"state":"California","status":"pending","amount":400},
+        {"state":"Texas","status":"active","amount":1100},
+        {"state":"Texas","status":"active","amount":1300},
+        {"state":"Texas","status":"closed","amount":500},
+        {"state":"Texas","status":"closed","amount":700},
+        {"state":"Texas","status":"pending","amount":250},
+        {"state":"Texas","status":"pending","amount":150},
+        {"state":"Florida","status":"active","amount":900},
+        {"state":"Florida","status":"active","amount":1050},
+        {"state":"Florida","status":"closed","amount":600},
+        {"state":"Florida","status":"pending","amount":350},
+        {"state":"North Carolina","status":"active","amount":750},
+        {"state":"North Carolina","status":"closed","amount":400},
+        {"state":"North Carolina","status":"closed","amount":300},
+        {"state":"North Carolina","status":"pending","amount":200},
+        {"state":"New York","status":"active","amount":2200},
+        {"state":"New York","status":"active","amount":1800},
+        {"state":"New York","status":"active","amount":1600},
+        {"state":"New York","status":"closed","amount":1000},
+        {"state":"New York","status":"pending","amount":500}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Boolean column pivot -->
+  <h3 class="mt-6">Boolean Column: Users by Role and Active Status (Average Score)</h3>
+  <p class="text-sm mb-2">Boolean fields are natural 2-column pivots. Shows average score with decimal format.</p>
+  <div style="height: 350px;">
+    <wc-pivot
+      row-field="role"
+      col-field="is_active"
+      value-field="score"
+      aggregate="avg"
+      number-format="decimal"
+      show-totals
+      show-heatmap
+      data='[
+        {"role":"Admin","is_active":true,"score":92},
+        {"role":"Admin","is_active":true,"score":88},
+        {"role":"Admin","is_active":false,"score":45},
+        {"role":"Editor","is_active":true,"score":76},
+        {"role":"Editor","is_active":true,"score":82},
+        {"role":"Editor","is_active":true,"score":71},
+        {"role":"Editor","is_active":false,"score":55},
+        {"role":"Editor","is_active":false,"score":48},
+        {"role":"Viewer","is_active":true,"score":65},
+        {"role":"Viewer","is_active":true,"score":70},
+        {"role":"Viewer","is_active":true,"score":58},
+        {"role":"Viewer","is_active":true,"score":72},
+        {"role":"Viewer","is_active":false,"score":30},
+        {"role":"Viewer","is_active":false,"score":22},
+        {"role":"Viewer","is_active":false,"score":40},
+        {"role":"Contributor","is_active":true,"score":80},
+        {"role":"Contributor","is_active":true,"score":85},
+        {"role":"Contributor","is_active":false,"score":60}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Quarterly sales pivot -->
+  <h3 class="mt-6">Sales: Product × Quarter (No Controls)</h3>
+  <p class="text-sm mb-2">Embedded dashboard style — controls hidden, heatmap on.</p>
+  <div style="height: 300px;">
+    <wc-pivot
+      row-field="product"
+      col-field="quarter"
+      value-field="revenue"
+      aggregate="sum"
+      number-format="currency"
+      show-controls="false"
+      show-totals
+      show-heatmap
+      sort-rows="value-desc"
+      data='[
+        {"product":"Widget A","quarter":"Q1","revenue":12000},
+        {"product":"Widget A","quarter":"Q2","revenue":15000},
+        {"product":"Widget A","quarter":"Q3","revenue":11000},
+        {"product":"Widget A","quarter":"Q4","revenue":18000},
+        {"product":"Gadget B","quarter":"Q1","revenue":8000},
+        {"product":"Gadget B","quarter":"Q2","revenue":9500},
+        {"product":"Gadget B","quarter":"Q3","revenue":12000},
+        {"product":"Gadget B","quarter":"Q4","revenue":14000},
+        {"product":"Doohickey C","quarter":"Q1","revenue":3000},
+        {"product":"Doohickey C","quarter":"Q2","revenue":4200},
+        {"product":"Doohickey C","quarter":"Q3","revenue":3800},
+        {"product":"Doohickey C","quarter":"Q4","revenue":5100},
+        {"product":"Thingamajig D","quarter":"Q1","revenue":22000},
+        {"product":"Thingamajig D","quarter":"Q2","revenue":25000},
+        {"product":"Thingamajig D","quarter":"Q3","revenue":21000},
+        {"product":"Thingamajig D","quarter":"Q4","revenue":28000}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Date grouping demo -->
+  <h3 class="mt-6">Date Grouping: Sales Over Time</h3>
+  <p class="text-sm mb-2">Date fields are now detected and can be grouped. Open the field panel, click the 📅 icon on the date chip to change grouping (Year, Quarter, Month). Try the compact layout toggle (▤/▦) in the controls bar.</p>
+  <div style="height: 450px;">
+    <wc-pivot
+      auto-detect
+      show-field-panel
+      show-heatmap
+      show-totals
+      data='[
+        {"date":"2025-01-15T10:00:00Z","category":"Electronics","region":"West","revenue":4200},
+        {"date":"2025-02-20T10:00:00Z","category":"Electronics","region":"East","revenue":3800},
+        {"date":"2025-03-10T10:00:00Z","category":"Clothing","region":"West","revenue":2100},
+        {"date":"2025-04-05T10:00:00Z","category":"Electronics","region":"West","revenue":5100},
+        {"date":"2025-05-18T10:00:00Z","category":"Clothing","region":"East","revenue":2900},
+        {"date":"2025-06-22T10:00:00Z","category":"Food","region":"West","revenue":1800},
+        {"date":"2025-07-14T10:00:00Z","category":"Electronics","region":"East","revenue":4500},
+        {"date":"2025-08-09T10:00:00Z","category":"Clothing","region":"West","revenue":3200},
+        {"date":"2025-09-03T10:00:00Z","category":"Food","region":"East","revenue":2200},
+        {"date":"2025-10-17T10:00:00Z","category":"Electronics","region":"West","revenue":5800},
+        {"date":"2025-11-21T10:00:00Z","category":"Clothing","region":"East","revenue":3400},
+        {"date":"2025-12-15T10:00:00Z","category":"Food","region":"West","revenue":2600},
+        {"date":"2026-01-10T10:00:00Z","category":"Electronics","region":"East","revenue":4800},
+        {"date":"2026-02-14T10:00:00Z","category":"Clothing","region":"West","revenue":2700},
+        {"date":"2026-03-22T10:00:00Z","category":"Food","region":"East","revenue":1900}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Datetime pivot -->
+  <h3 class="mt-6">Datetime: Server Logs by Timestamp and Severity</h3>
+  <p class="text-sm mb-2">Data with real timestamps — defaults to Month grouping. Click 📅 on the date chip to switch between Day, Datetime, Quarter, etc. Try Datetime to see exact times, or Day to ignore time.</p>
+  <div style="height: 450px;">
+    <wc-pivot
+      auto-detect
+      show-field-panel
+      show-heatmap
+      show-totals
+      number-format="integer"
+      data='[
+        {"timestamp":"2026-04-07T08:12:33Z","severity":"error","service":"api-gateway","response_ms":1240},
+        {"timestamp":"2026-04-07T08:15:01Z","severity":"warning","service":"auth-service","response_ms":450},
+        {"timestamp":"2026-04-07T09:22:17Z","severity":"error","service":"api-gateway","response_ms":2100},
+        {"timestamp":"2026-04-07T09:45:44Z","severity":"info","service":"worker","response_ms":120},
+        {"timestamp":"2026-04-07T10:03:55Z","severity":"error","service":"auth-service","response_ms":980},
+        {"timestamp":"2026-04-07T10:30:12Z","severity":"warning","service":"api-gateway","response_ms":670},
+        {"timestamp":"2026-04-07T11:15:08Z","severity":"info","service":"worker","response_ms":95},
+        {"timestamp":"2026-04-07T14:22:41Z","severity":"error","service":"api-gateway","response_ms":3200},
+        {"timestamp":"2026-04-07T14:55:03Z","severity":"warning","service":"worker","response_ms":510},
+        {"timestamp":"2026-04-07T16:10:29Z","severity":"info","service":"auth-service","response_ms":180},
+        {"timestamp":"2026-04-08T07:05:11Z","severity":"error","service":"worker","response_ms":1500},
+        {"timestamp":"2026-04-08T07:45:33Z","severity":"error","service":"api-gateway","response_ms":2800},
+        {"timestamp":"2026-04-08T08:30:22Z","severity":"warning","service":"auth-service","response_ms":390},
+        {"timestamp":"2026-04-08T09:12:07Z","severity":"info","service":"api-gateway","response_ms":110},
+        {"timestamp":"2026-04-08T10:44:58Z","severity":"error","service":"auth-service","response_ms":1800},
+        {"timestamp":"2026-04-08T11:20:15Z","severity":"warning","service":"worker","response_ms":620},
+        {"timestamp":"2026-04-08T13:05:41Z","severity":"info","service":"api-gateway","response_ms":140},
+        {"timestamp":"2026-04-08T15:33:09Z","severity":"error","service":"api-gateway","response_ms":4100},
+        {"timestamp":"2026-04-09T06:15:22Z","severity":"warning","service":"auth-service","response_ms":340},
+        {"timestamp":"2026-04-09T07:48:55Z","severity":"error","service":"worker","response_ms":2200},
+        {"timestamp":"2026-04-09T08:30:11Z","severity":"info","service":"api-gateway","response_ms":90},
+        {"timestamp":"2026-04-09T09:55:37Z","severity":"error","service":"auth-service","response_ms":1650},
+        {"timestamp":"2026-04-09T11:10:44Z","severity":"warning","service":"worker","response_ms":480},
+        {"timestamp":"2026-04-09T14:25:18Z","severity":"info","service":"auth-service","response_ms":160}
+      ]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Config save/load demo -->
+  <h3 class="mt-6">Config Save / Load</h3>
+  <p class="text-sm mb-2">Configure the pivot above, then click "Save Config" to capture the current state. Click "Load Config" to restore it. Uses <code>getConfig()</code> and <code>loadConfig()</code> methods.</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="saveConfig()">Save Config</button>
+    <button class="btn btn-secondary" onclick="loadSavedConfig()">Load Config</button>
+    <span id="config-status" class="text-sm self-center" style="color: var(--text-6);"></span>
+  </div>
+  <pre id="config-output" class="p-3 rounded text-xs mb-4" style="background: var(--card-bg-color); border: 1px solid var(--card-border-color); max-height: 150px; overflow: auto; color: var(--text-color);">Click "Save Config" on any pivot above...</pre>
+
+  <!-- Dynamic data update -->
+  <h3 class="mt-6">Dynamic Data Update</h3>
+  <p class="text-sm mb-2">Click buttons to load different datasets. The pivot re-analyzes and re-renders.</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="loadSalesDataPivot()">Sales by Region × Category</button>
+    <button class="btn btn-secondary" onclick="loadSupportDataPivot()">Support Tickets by Priority × Status</button>
+  </div>
+  <div style="height: 350px;">
+    <wc-pivot id="dynamic-pivot" auto-detect show-heatmap show-totals
+      data='[{"_id":"Click a button above"}]'>
+    </wc-pivot>
+  </div>
+
+  <!-- Drill-down demo -->
+  <h3 class="mt-6">Drill-Down: Click Any Cell</h3>
+  <p class="text-sm mb-2">Click any cell to expand an inline detail table showing the matching source documents. Click the same cell again (or ×) to collapse. The <code>pivot:drill-down</code> event fires with the documents.</p>
+  <div style="height: 350px;">
+    <wc-pivot id="event-pivot"
+      auto-detect show-totals show-heatmap
+      data='[
+        {"department":"Engineering","level":"Senior","salary":150000},
+        {"department":"Engineering","level":"Senior","salary":145000},
+        {"department":"Engineering","level":"Mid","salary":110000},
+        {"department":"Engineering","level":"Mid","salary":105000},
+        {"department":"Engineering","level":"Junior","salary":75000},
+        {"department":"Sales","level":"Senior","salary":130000},
+        {"department":"Sales","level":"Mid","salary":95000},
+        {"department":"Sales","level":"Mid","salary":90000},
+        {"department":"Sales","level":"Junior","salary":60000},
+        {"department":"Sales","level":"Junior","salary":55000},
+        {"department":"Marketing","level":"Senior","salary":125000},
+        {"department":"Marketing","level":"Mid","salary":85000},
+        {"department":"Marketing","level":"Junior","salary":65000},
+        {"department":"Marketing","level":"Junior","salary":60000}
+      ]'>
+    </wc-pivot>
+  </div>
+  <pre id="cell-output" class="mt-2 p-3 rounded text-xs" style="background: var(--card-bg-color); border: 1px solid var(--card-border-color); min-height: 60px; max-height: 200px; overflow: auto; color: var(--text-color);">Click a cell above to see the event detail...</pre>
+
+  <wc-javascript>
+    <script>
+      // Wire up drill-down event demo
+      var eventPivot = document.getElementById('event-pivot');
+      if (eventPivot) {
+        eventPivot.addEventListener('pivot:cell-click', function(e) {
+          var output = document.getElementById('cell-output');
+          if (output) output.textContent = JSON.stringify(e.detail, null, 2);
+        });
+      }
+
+      var _savedConfig = null;
+      function saveConfig() {
+        var pivots = document.querySelectorAll('wc-pivot');
+        // Save config from the first pivot that has a result
+        for (var i = 0; i < pivots.length; i++) {
+          if (pivots[i].getConfig) {
+            _savedConfig = pivots[i].getConfig();
+            document.getElementById('config-output').textContent = JSON.stringify(_savedConfig, null, 2);
+            document.getElementById('config-status').textContent = 'Config saved!';
+            setTimeout(function() { document.getElementById('config-status').textContent = ''; }, 2000);
+            return;
+          }
+        }
+      }
+      function loadSavedConfig() {
+        if (!_savedConfig) {
+          document.getElementById('config-status').textContent = 'No config saved yet.';
+          return;
+        }
+        var pivots = document.querySelectorAll('wc-pivot');
+        if (pivots.length > 0 && pivots[0].loadConfig) {
+          pivots[0].loadConfig(_savedConfig);
+          document.getElementById('config-status').textContent = 'Config loaded!';
+          setTimeout(function() { document.getElementById('config-status').textContent = ''; }, 2000);
+        }
+      }
+      function loadSalesDataPivot() {
+        var pivot = document.getElementById('dynamic-pivot');
+        var data = [];
+        var regions = ['West', 'East', 'South', 'Midwest'];
+        var categories = ['Electronics', 'Clothing', 'Food', 'Home'];
+        regions.forEach(function(r) {
+          categories.forEach(function(c) {
+            for (var i = 0; i < 3 + Math.floor(Math.random() * 5); i++) {
+              data.push({ region: r, category: c, sales: Math.floor(Math.random() * 5000) + 500 });
+            }
+          });
+        });
+        pivot.setAttribute('data', JSON.stringify(data));
+      }
+      function loadSupportDataPivot() {
+        var pivot = document.getElementById('dynamic-pivot');
+        var data = [];
+        var priorities = ['Critical', 'High', 'Medium', 'Low'];
+        var statuses = ['Open', 'In Progress', 'Resolved', 'Closed'];
+        priorities.forEach(function(p) {
+          statuses.forEach(function(s) {
+            var count = Math.floor(Math.random() * 8) + 1;
+            for (var i = 0; i < count; i++) {
+              data.push({ priority: p, status: s, hours: Math.floor(Math.random() * 40) + 1 });
+            }
+          });
+        });
+        pivot.setAttribute('data', JSON.stringify(data));
+      }
+    </script>
+  </wc-javascript>
+
+</div>

@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-04-08"
   },
@@ -178,7 +178,8 @@
           "vertical",
           "contrast",
           "tab-overflow",
-          "removable"
+          "removable",
+          "no-hash"
         ],
         "events": {
           "emits": [
@@ -196,7 +197,7 @@
           "closeToRight(label)",
           "closeToLeft(label)"
         ],
-        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback). removable attribute adds close buttons on dynamically added tabs and enables right-click context menu (Close, Close Others, Close to Right, Close to Left, Close All) powered by wc-context-menu.",
+        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). no-hash attribute suppresses URL hash updates on tab click (default behavior unchanged for backwards compatibility). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback). removable attribute adds close buttons on dynamically added tabs and enables right-click context menu (Close, Close Others, Close to Right, Close to Left, Close All) powered by wc-context-menu.",
         "usage": "<wc-tab id=\"cities\" animate>\n  <wc-tab-item class=\"active\" label=\"London\">\n    <div class=\"p-4\"><h3>London</h3><p>Content...</p></div>\n  </wc-tab-item>\n  <wc-tab-item label=\"New York\">\n    <div class=\"p-4\"><h3>New York</h3><p>Content...</p></div>\n  </wc-tab-item>\n</wc-tab>\n\n<!-- Removable tabs -->\n<wc-tab id=\"editors\" animate removable>\n  <wc-tab-item class=\"active\" label=\"Main\">...</wc-tab-item>\n</wc-tab>\n\n<!-- With scrollable tabs -->\n<wc-tab tab-overflow=\"scroll\" animate>\n  <wc-tab-item class=\"active\" label=\"Tab 1\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 2\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 3\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 4\">...</wc-tab-item>\n</wc-tab>"
       },
       {
@@ -658,12 +659,13 @@
     "data": [
       {
         "name": "wc-tabulator",
-        "description": "Advanced data table powered by Tabulator.js with column definitions, row menus, pagination, and HTMX sync",
+        "description": "Advanced data table powered by Tabulator.js with column definitions, row menus, pagination, auto-columns, and HTMX sync",
         "attributes": [
           "id",
           "class",
           "data",
-          "projection-fields"
+          "projection-fields",
+          "auto-columns"
         ],
         "events": {
           "emits": [
@@ -671,7 +673,7 @@
             "wc-tabulator-ready"
           ]
         },
-        "notes": "Column definitions via <wc-tabulator-column> children. Custom functions via <wc-tabulator-func>. Row context menus via <wc-tabulator-row-menu>. Supports pagination, column resizing, movable columns, selectable rows, filters.",
+        "notes": "Column definitions via <wc-tabulator-column> children. Custom functions via <wc-tabulator-func>. Row context menus via <wc-tabulator-row-menu>. Supports pagination, column resizing, movable columns, selectable rows, filters. auto-columns attribute with data generates columns automatically from data keys: flattens nested objects with dot notation, detects types (string/number/boolean/date/ObjectID/array), freezes _id column first, makes columns sortable/resizable/reorderable. Reactive to data attribute updates.",
         "usage": "<wc-tabulator id=\"myTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Age\" field=\"age\" sorter=\"number\"></wc-tabulator-column>\n</wc-tabulator>"
       },
       {
@@ -716,6 +718,76 @@
           "class"
         ],
         "usage": "<wc-table-col field=\"name\" label=\"Full Name\" sortable align=\"left\" width=\"200px\"></wc-table-col>"
+      },
+      {
+        "name": "wc-chart-builder",
+        "description": "Interactive chart component that renders charts from arbitrary JSON data with auto-detection and field picker UI",
+        "attributes": [
+          "id",
+          "class",
+          "data",
+          "auto-detect",
+          "chart-type",
+          "label-field",
+          "value-fields",
+          "title",
+          "show-controls",
+          "height",
+          "colors"
+        ],
+        "events": {
+          "emits": [
+            "chart:ready",
+            "chart:click"
+          ]
+        },
+        "notes": "chart-type options: bar, line, pie, doughnut, area, number. auto-detect analyzes data to choose chart type, label field, and value fields automatically. show-controls displays a configuration bar with Type, Label, and Values dropdowns for user-driven customization. colors attribute accepts a JSON array of hex colors.",
+        "usage": "<wc-chart-builder data='[{\"name\":\"Alice\",\"sales\":100},{\"name\":\"Bob\",\"sales\":200}]' auto-detect show-controls title=\"Sales by Rep\"></wc-chart-builder>\n\n<!-- Explicit configuration -->\n<wc-chart-builder data='[...]' chart-type=\"pie\" label-field=\"name\" value-fields=\"sales\" title=\"Sales Distribution\"></wc-chart-builder>"
+      },
+      {
+        "name": "wc-pivot",
+        "description": "Full-featured cross-tabulation pivot table with field panel, drag-to-zone assignment, value filters, drill-down detail rows, date grouping, config save/load, compact layout, heatmap, sorting, and CSV export",
+        "attributes": [
+          "id",
+          "class",
+          "data",
+          "auto-detect",
+          "row-field",
+          "col-field",
+          "value-field",
+          "aggregate",
+          "show-controls",
+          "show-totals",
+          "show-heatmap",
+          "number-format",
+          "sort-rows",
+          "max-columns",
+          "height",
+          "show-field-panel",
+          "show-subtotals",
+          "compact-layout",
+          "config"
+        ],
+        "events": {
+          "emits": [
+            "pivot:ready",
+            "pivot:cell-click",
+            "pivot:config-change",
+            "pivot:filter-change",
+            "pivot:zone-change",
+            "pivot:drill-down"
+          ]
+        },
+        "methods": [
+          "exportCSV()",
+          "getConfig()",
+          "loadConfig(json)"
+        ],
+        "notes": "aggregate options: count, sum, avg, min, max. number-format options: integer, decimal, currency, percent. auto-detect selects row-field, col-field, and value-field from data. show-controls displays configuration dropdowns. show-heatmap applies color intensity to cells based on value. Sticky headers and row labels. Column headers are sortable. sort-rows options: asc, desc, value-asc, value-desc. max-columns limits the number of column values displayed. Phase 1 — Field Panel: show-field-panel attribute or hamburger button toggles a sidebar listing all data fields with type badges (Abc for string, # for number, T/F for boolean, calendar for date). Four drop zones: Filters, Rows, Columns, Values. Click a field to open a popover for zone assignment. Zone chips show filter icon and remove button. Value filter dropdown with checkbox list, search, All/None/Apply. Active filters highlighted with yellow outline. Values zone chips display 'Sum of Revenue' style labels; click to change aggregate via popover. Phase 2 — Drill-Down: click any pivot cell to expand an inline detail table showing matching source documents with smooth slide animation. Expand icon appears on cell hover. Detail table shows all flattened fields with formatted dates. Click same cell or close button to collapse. pivot:drill-down event includes { row, column, expanded, documents }. Phase 3 — Config & Layout: getConfig() returns full pivot state as JSON (zones, filters, dateGrouping, sort, layout, formatting). loadConfig(json) restores from config object or JSON string. config attribute for declarative pre-configuration. compact-layout attribute or toggle button reduces padding and font size for dense display. Date fields auto-detected with calendar badge. Date grouping options: year, quarter, month, year-month, day, datetime. Auto-defaults to month grouping when date field placed in rows or columns. Calendar icon on date chips opens grouping popover. Dates in drill-down detail formatted as human-readable (e.g. Jan 15, 2025 10:00 AM).",
+        "usage": "<wc-pivot data='[{\"region\":\"East\",\"product\":\"Widget\",\"sales\":100},...]' auto-detect show-controls show-totals show-heatmap show-field-panel></wc-pivot>\n\n<!-- Explicit configuration -->\n<wc-pivot data='[...]' row-field=\"region\" col-field=\"product\" value-field=\"sales\" aggregate=\"sum\" number-format=\"currency\" show-totals></wc-pivot>\n\n<!-- With saved config -->\n<wc-pivot data='[...]' config='{\"zones\":{\"rows\":[\"region\"],\"columns\":[\"product\"],\"values\":[{\"field\":\"sales\",\"aggregate\":\"sum\"}]},\"formatting\":{\"numberFormat\":\"currency\",\"showTotals\":true}}' show-controls></wc-pivot>\n\n<!-- Compact layout with date grouping -->\n<wc-pivot data='[...]' auto-detect compact-layout show-totals show-field-panel></wc-pivot>",
+        "demoViews": [
+          "views/pivot.html — Field Panel demo, auto-detect count, currency sum, boolean column, quarterly sales, date grouping, datetime server logs, config save/load, dynamic data, drill-down with cell click events"
+        ]
       }
     ],
     "interactive": [
@@ -745,7 +817,7 @@
       },
       {
         "name": "wc-code-mirror",
-        "description": "Code editor integration using CodeMirror with dynamic themes, modes, and settings popover",
+        "description": "Code editor integration using CodeMirror with dynamic themes, modes, settings popover, and autocomplete hints",
         "attributes": [
           "id",
           "class",
@@ -762,7 +834,9 @@
           "value",
           "disabled",
           "required",
-          "fetch"
+          "fetch",
+          "hint-words",
+          "hint-url"
         ],
         "events": {
           "emits": [
@@ -770,7 +844,7 @@
             "fetch-complete"
           ]
         },
-        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13.",
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present.",
         "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
       },
       {
@@ -1527,6 +1601,20 @@
     "tabbedLayoutTemplate": "<wc-tab id=\"mainTabs\" animate>\n  <wc-tab-item class=\"active\" label=\"Details\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"name\" lbl-label=\"Name\" required></wc-input>\n      <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\"></wc-input>\n    </div>\n  </wc-tab-item>\n  <wc-tab-item label=\"Settings\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"active\" type=\"checkbox\" lbl-label=\"Active\" toggle-switch></wc-input>\n      <wc-select name=\"role\" lbl-label=\"Role\">\n        <option value=\"admin\">Admin</option>\n        <option value=\"user\">User</option>\n      </wc-select>\n    </div>\n  </wc-tab-item>\n</wc-tab>",
     "dataTableTemplate": "<wc-tabulator id=\"contactsTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Status\" field=\"status\" editor=\"select\" editor-params='{\"values\":[\"Active\",\"Inactive\"]}'></wc-tabulator-column>\n</wc-tabulator>",
     "notificationPattern": "// Success notification\nwc.Notify.showSuccess('Record saved successfully!', 3000);\n\n// Error notification\nwc.Notify.showError('Failed to save record.', 5000, true);\n\n// Confirmation dialog\nwc.Prompt.question({\n  title: 'Delete Record?',\n  text: 'This action cannot be undone.',\n  callback: (result) => {\n    if (result.isConfirmed) {\n      // proceed with delete\n    }\n  }\n});"
+  },
+  "viewFiles": {
+    "description": "Example HTML files in views/ directory demonstrating components",
+    "keyViews": [
+      "views/chart-builder.html — Chart Builder demos (bar, line, pie, doughnut, area, number charts with auto-detect and controls)",
+      "views/pivot.html — Pivot Table demos (cross-tabulation with heatmap, sorting, CSV export)",
+      "views/tab.html — Tab component with dynamic tabs and context menu testing",
+      "views/context-menu.html — Context menu examples",
+      "views/split-pane.html — Split pane examples",
+      "views/form-elements.html — All form components showcase",
+      "views/tabulator.html — Data table examples (including auto-columns)",
+      "views/complete-example.html — Comprehensive standalone example",
+      "views/index.html — Main navigation hub using HTMX (includes chart-builder and pivot links)"
+    ]
   },
   "routing": {
     "description": "Template-based routing used with Go Kart framework",

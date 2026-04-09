@@ -579,4 +579,62 @@
     }' />
 </template>
 
+  <h3 class="mt-6 mb-2">Auto-Columns Demo</h3>
+  <p class="mb-4 text-sm">This tabulator uses <code>auto-columns</code> with inline <code>data</code>. Columns are auto-detected from the JSON data — no <code>wc-tabulator-column</code> children needed.</p>
+
+  <wc-tabulator
+    id="auto-col-demo"
+    class="rounded w-full"
+    auto-columns
+    height="400px"
+    placeholder="No Data Available"
+    selectable-rows="true"
+    data='[
+      {"_id":"6615a1b2c3d4e5f6a7b8c9d0","first_name":"Matt","last_name":"Duffield","email":"matt@example.com","age":42,"is_active":true,"created_date":"2026-01-15T10:30:00Z","address":{"street":"123 Main St","city":"Portland","state":"OR","zip":"97201"},"tags":["admin","developer"]},
+      {"_id":"6615a1b2c3d4e5f6a7b8c9d1","first_name":"Sarah","last_name":"Connor","email":"sarah@example.com","age":35,"is_active":true,"created_date":"2026-02-20T14:15:00Z","address":{"street":"456 Oak Ave","city":"Los Angeles","state":"CA","zip":"90001"},"tags":["user"]},
+      {"_id":"6615a1b2c3d4e5f6a7b8c9d2","first_name":"John","last_name":"Smith","email":"john@example.com","age":28,"is_active":false,"created_date":"2025-11-05T08:00:00Z","address":{"street":"789 Pine Rd","city":"Seattle","state":"WA","zip":"98101"},"tags":["user","beta"]},
+      {"_id":"6615a1b2c3d4e5f6a7b8c9d3","first_name":"Emily","last_name":"Chen","email":"emily@example.com","age":31,"is_active":true,"created_date":"2026-03-10T16:45:00Z","address":{"street":"321 Elm Blvd","city":"Austin","state":"TX","zip":"73301"},"tags":["admin"]},
+      {"_id":"6615a1b2c3d4e5f6a7b8c9d4","first_name":"Carlos","last_name":"Rivera","email":"carlos@example.com","age":45,"is_active":true,"created_date":"2025-08-22T12:00:00Z","address":{"street":"555 Cedar Ln","city":"Miami","state":"FL","zip":"33101"},"tags":["user","premium"]}
+    ]'>
+  </wc-tabulator>
+
+  <h3 class="mt-6 mb-2">Auto-Columns — Dynamic Update</h3>
+  <p class="mb-2 text-sm">Click the button to load different data with a different schema. The columns auto-update.</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="loadProductData()">Load Product Data</button>
+    <button class="btn btn-secondary" onclick="loadOrderData()">Load Order Data</button>
+  </div>
+
+  <wc-tabulator
+    id="auto-col-dynamic"
+    class="rounded w-full"
+    auto-columns
+    height="300px"
+    placeholder="Click a button above to load data">
+  </wc-tabulator>
+
+  <wc-javascript>
+    <script>
+      function loadProductData() {
+        var tab = document.getElementById('auto-col-dynamic');
+        var data = [
+          {"_id":"prod001","name":"Widget A","sku":"WGT-001","price":29.99,"in_stock":true,"category":"Hardware","weight_kg":0.5},
+          {"_id":"prod002","name":"Gadget B","sku":"GDT-002","price":149.95,"in_stock":true,"category":"Electronics","weight_kg":1.2},
+          {"_id":"prod003","name":"Doohickey C","sku":"DHK-003","price":9.99,"in_stock":false,"category":"Accessories","weight_kg":0.1},
+          {"_id":"prod004","name":"Thingamajig D","sku":"THG-004","price":74.50,"in_stock":true,"category":"Hardware","weight_kg":2.3}
+        ];
+        tab.setAttribute('data', JSON.stringify(data));
+      }
+      function loadOrderData() {
+        var tab = document.getElementById('auto-col-dynamic');
+        var data = [
+          {"_id":"ord001","order_number":"ORD-2026-001","customer":"Matt Duffield","total":299.97,"items":["Widget A","Gadget B","Doohickey C"],"status":"shipped","order_date":"2026-04-01T09:00:00Z"},
+          {"_id":"ord002","order_number":"ORD-2026-002","customer":"Sarah Connor","total":149.95,"items":["Gadget B"],"status":"delivered","order_date":"2026-04-02T11:30:00Z"},
+          {"_id":"ord003","order_number":"ORD-2026-003","customer":"John Smith","total":84.49,"items":["Thingamajig D","Doohickey C"],"status":"pending","order_date":"2026-04-05T14:00:00Z"}
+        ];
+        tab.setAttribute('data', JSON.stringify(data));
+      }
+    </script>
+  </wc-javascript>
+
 </div>
