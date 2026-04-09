@@ -3183,6 +3183,9 @@ if (!customElements.get("wc-code-mirror")) {
     }
     _applyStyle() {
       const style = `
+        .CodeMirror-hints {
+          z-index: 100000 !important;
+        }
         /* Container using flex or grid layout */
         .editor-container-flex {
           display: flex;
@@ -3409,6 +3412,7 @@ if (!customElements.get("wc-code-mirror")) {
       }
     }
     async _fetchHintWords(url) {
+      if (!url || !url.trim()) return;
       try {
         const response = await fetch(url);
         const data = await response.json();
@@ -3428,7 +3432,7 @@ if (!customElements.get("wc-code-mirror")) {
         }
         const charBefore = start > 0 ? line.charAt(start - 1) : "";
         const insideQuote = charBefore === '"' || charBefore === "'";
-        const inJsonContext = this._isJsonContext(line, start);
+        const inJsonContext = this._isJsonContext(cm, cur.line, start);
         const token = line.slice(start, cur.ch).toLowerCase();
         const filtered = token ? words.filter((w) => w.toLowerCase().includes(token)) : words.slice();
         const list = filtered.map((w) => {
@@ -3460,19 +3464,23 @@ if (!customElements.get("wc-code-mirror")) {
         return { list, from: CodeMirror.Pos(cur.line, start), to: cur };
       };
     }
-    _isJsonContext(line, pos) {
+    _isJsonContext(cm, lineNum, pos) {
       let braceDepth = 0;
       let bracketDepth = 0;
-      for (let i = pos - 1; i >= 0; i--) {
-        const ch = line.charAt(i);
-        if (ch === "}") braceDepth++;
-        else if (ch === "{") {
-          if (braceDepth === 0) return true;
-          braceDepth--;
-        } else if (ch === "]") bracketDepth++;
-        else if (ch === "[") {
-          if (bracketDepth === 0) return true;
-          bracketDepth--;
+      for (let ln = lineNum; ln >= 0; ln--) {
+        const text = cm.getLine(ln);
+        const end = ln === lineNum ? pos - 1 : text.length - 1;
+        for (let i = end; i >= 0; i--) {
+          const ch = text.charAt(i);
+          if (ch === "}") braceDepth++;
+          else if (ch === "{") {
+            if (braceDepth === 0) return true;
+            braceDepth--;
+          } else if (ch === "]") bracketDepth++;
+          else if (ch === "[") {
+            if (bracketDepth === 0) return true;
+            bracketDepth--;
+          }
         }
       }
       return false;
