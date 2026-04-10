@@ -1,0 +1,273 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <h2>Explain Tree Demo</h2>
+  <p class="text-sm mb-2">The <code>wc-explain-tree</code> component renders MongoDB explain plan output as a visual stage-by-stage flow diagram.</p>
+
+  <!-- Simple indexed query -->
+  <h3 class="mt-4">Indexed Query (IXSCAN + FETCH)</h3>
+  <p class="text-sm mb-2">Efficient query using an index. Green summary — docs examined matches docs returned.</p>
+  <div style="height: 350px;">
+    <wc-explain-tree
+      data='{
+        "queryPlanner": {
+          "winningPlan": {
+            "stage": "FETCH",
+            "inputStage": {
+              "stage": "IXSCAN",
+              "keyPattern": {"status": 1},
+              "indexName": "status_1",
+              "direction": "forward",
+              "isMultiKey": false
+            }
+          }
+        },
+        "executionStats": {
+          "executionSuccess": true,
+          "nReturned": 42,
+          "executionTimeMillis": 3,
+          "totalKeysExamined": 42,
+          "totalDocsExamined": 42,
+          "executionStages": {
+            "stage": "FETCH",
+            "nReturned": 42,
+            "executionTimeMillisEstimate": 0,
+            "docsExamined": 42,
+            "inputStage": {
+              "stage": "IXSCAN",
+              "nReturned": 42,
+              "executionTimeMillisEstimate": 0,
+              "keyPattern": {"status": 1},
+              "indexName": "status_1",
+              "direction": "forward",
+              "keysExamined": 42
+            }
+          }
+        }
+      }'>
+    </wc-explain-tree>
+  </div>
+
+  <!-- Collection scan (bad) -->
+  <h3 class="mt-6">Collection Scan (COLLSCAN)</h3>
+  <p class="text-sm mb-2">No index used. Red summary — full collection scan examining many more docs than returned.</p>
+  <div style="height: 300px;">
+    <wc-explain-tree
+      data='{
+        "queryPlanner": {
+          "winningPlan": {
+            "stage": "COLLSCAN",
+            "direction": "forward"
+          }
+        },
+        "executionStats": {
+          "executionSuccess": true,
+          "nReturned": 15,
+          "executionTimeMillis": 245,
+          "totalKeysExamined": 0,
+          "totalDocsExamined": 49198,
+          "executionStages": {
+            "stage": "COLLSCAN",
+            "nReturned": 15,
+            "executionTimeMillisEstimate": 230,
+            "docsExamined": 49198,
+            "direction": "forward"
+          }
+        }
+      }'>
+    </wc-explain-tree>
+  </div>
+
+  <!-- Complex: sort + fetch + ixscan -->
+  <h3 class="mt-6">Sort + Fetch + Index Scan (3 stages)</h3>
+  <p class="text-sm mb-2">In-memory sort after index scan. Yellow warning on SORT stage.</p>
+  <div style="height: 450px;">
+    <wc-explain-tree
+      data='{
+        "queryPlanner": {
+          "winningPlan": {
+            "stage": "SORT",
+            "sortPattern": {"created_date": -1},
+            "inputStage": {
+              "stage": "FETCH",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "keyPattern": {"status": 1},
+                "indexName": "status_1",
+                "direction": "forward"
+              }
+            }
+          }
+        },
+        "executionStats": {
+          "executionSuccess": true,
+          "nReturned": 100,
+          "executionTimeMillis": 45,
+          "totalKeysExamined": 2500,
+          "totalDocsExamined": 2500,
+          "executionStages": {
+            "stage": "SORT",
+            "nReturned": 100,
+            "executionTimeMillisEstimate": 20,
+            "sortPattern": {"created_date": -1},
+            "inputStage": {
+              "stage": "FETCH",
+              "nReturned": 2500,
+              "executionTimeMillisEstimate": 15,
+              "docsExamined": 2500,
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nReturned": 2500,
+                "executionTimeMillisEstimate": 5,
+                "keyPattern": {"status": 1},
+                "indexName": "status_1",
+                "direction": "forward",
+                "keysExamined": 2500
+              }
+            }
+          }
+        }
+      }'>
+    </wc-explain-tree>
+  </div>
+
+  <!-- $or with branches -->
+  <h3 class="mt-6">$or Query (Branching)</h3>
+  <p class="text-sm mb-2">Two parallel IXSCAN branches merged by an OR stage.</p>
+  <div style="height: 450px;">
+    <wc-explain-tree
+      data='{
+        "queryPlanner": {
+          "winningPlan": {
+            "stage": "FETCH",
+            "inputStage": {
+              "stage": "OR",
+              "inputStages": [
+                {
+                  "stage": "IXSCAN",
+                  "keyPattern": {"status": 1},
+                  "indexName": "status_1",
+                  "direction": "forward"
+                },
+                {
+                  "stage": "IXSCAN",
+                  "keyPattern": {"priority": 1},
+                  "indexName": "priority_1",
+                  "direction": "forward"
+                }
+              ]
+            }
+          }
+        },
+        "executionStats": {
+          "executionSuccess": true,
+          "nReturned": 89,
+          "executionTimeMillis": 5,
+          "totalKeysExamined": 120,
+          "totalDocsExamined": 89,
+          "executionStages": {
+            "stage": "FETCH",
+            "nReturned": 89,
+            "executionTimeMillisEstimate": 0,
+            "docsExamined": 89,
+            "inputStage": {
+              "stage": "OR",
+              "nReturned": 89,
+              "executionTimeMillisEstimate": 0,
+              "inputStages": [
+                {
+                  "stage": "IXSCAN",
+                  "nReturned": 42,
+                  "keyPattern": {"status": 1},
+                  "indexName": "status_1",
+                  "keysExamined": 55
+                },
+                {
+                  "stage": "IXSCAN",
+                  "nReturned": 47,
+                  "keyPattern": {"priority": 1},
+                  "indexName": "priority_1",
+                  "keysExamined": 65
+                }
+              ]
+            }
+          }
+        }
+      }'>
+    </wc-explain-tree>
+  </div>
+
+  <!-- Aggregation pipeline -->
+  <h3 class="mt-6">Aggregation Pipeline</h3>
+  <p class="text-sm mb-2">A <code>$match</code> → <code>$group</code> → <code>$sort</code> → <code>$limit</code> pipeline.</p>
+  <div style="height: 500px;">
+    <wc-explain-tree
+      data='{
+        "stages": [
+          {"$cursor": {
+            "queryPlanner": {
+              "winningPlan": {"stage": "IXSCAN", "indexName": "status_1"}
+            },
+            "executionStats": {
+              "nReturned": 5000,
+              "executionTimeMillis": 12
+            }
+          }},
+          {"$match": {"status": "active"}},
+          {"$group": {"_id": "$address.state", "count": {"$sum": 1}, "total": {"$sum": "$amount"}}},
+          {"$sort": {"count": -1}},
+          {"$limit": 10}
+        ]
+      }'>
+    </wc-explain-tree>
+  </div>
+
+  <!-- Dynamic loading -->
+  <h3 class="mt-6">Dynamic: Load Explain Data</h3>
+  <p class="text-sm mb-2">Click buttons to load different explain plans.</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="loadSimpleExplain()">Simple Index</button>
+    <button class="btn btn-secondary" onclick="loadCollScanExplain()">Collection Scan</button>
+    <button class="btn btn-primary" onclick="loadDeepExplain()">Deep Pipeline</button>
+  </div>
+  <div style="height: 400px;">
+    <wc-explain-tree id="dynamic-explain"
+      data='{"queryPlanner":{"winningPlan":{"stage":"EOF"}},"executionStats":{"nReturned":0,"executionTimeMillis":0,"totalDocsExamined":0}}'>
+    </wc-explain-tree>
+  </div>
+
+  <wc-javascript>
+    <script>
+      function loadSimpleExplain() {
+        var el = document.getElementById('dynamic-explain');
+        el.setAttribute('data', JSON.stringify({
+          queryPlanner: { winningPlan: { stage: 'LIMIT', inputStage: { stage: 'FETCH', inputStage: { stage: 'IXSCAN', indexName: 'email_1', keyPattern: { email: 1 }, direction: 'forward' }}}},
+          executionStats: { executionSuccess: true, nReturned: 1, executionTimeMillis: 0, totalKeysExamined: 1, totalDocsExamined: 1,
+            executionStages: { stage: 'LIMIT', nReturned: 1, executionTimeMillisEstimate: 0, inputStage: { stage: 'FETCH', nReturned: 1, docsExamined: 1, inputStage: { stage: 'IXSCAN', nReturned: 1, keysExamined: 1, indexName: 'email_1', keyPattern: { email: 1 }}}}}
+        }));
+      }
+      function loadCollScanExplain() {
+        var el = document.getElementById('dynamic-explain');
+        el.setAttribute('data', JSON.stringify({
+          queryPlanner: { winningPlan: { stage: 'COLLSCAN', direction: 'forward', filter: { 'name': { '$regex': 'smith' }}}},
+          executionStats: { executionSuccess: true, nReturned: 23, executionTimeMillis: 890, totalKeysExamined: 0, totalDocsExamined: 125000,
+            executionStages: { stage: 'COLLSCAN', nReturned: 23, executionTimeMillisEstimate: 870, docsExamined: 125000, direction: 'forward', filter: { 'name': { '$regex': 'smith' }}}}
+        }));
+      }
+      function loadDeepExplain() {
+        var el = document.getElementById('dynamic-explain');
+        el.setAttribute('data', JSON.stringify({
+          stages: [
+            { '$cursor': { queryPlanner: { winningPlan: { stage: 'COLLSCAN' }}, executionStats: { nReturned: 49198, executionTimeMillis: 200 }}},
+            { '$match': { is_active: true }},
+            { '$addFields': { full_name: { '$concat': ['$first_name', ' ', '$last_name'] }}},
+            { '$group': { _id: '$address.state', count: { '$sum': 1 }, avg_score: { '$avg': '$score' }}},
+            { '$sort': { count: -1 }},
+            { '$project': { state: '$_id', count: 1, avg_score: { '$round': ['$avg_score', 1] }}},
+            { '$limit': 25 }
+          ]
+        }));
+      }
+    </script>
+  </wc-javascript>
+
+</div>
