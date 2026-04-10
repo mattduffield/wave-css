@@ -86,11 +86,12 @@ if (!customElements.get('wc-split-button')) {
     _createElement() {
       const id = this.getAttribute('id') || '';
       const label = this.getAttribute('label') || '';
+      const btnClass = this.getAttribute('btn-class') || '';
       const positionArea = this.getAttribute('position-area') || 'bottom span-right';
       const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';
 
       const markup = `
-        <button id="${id}" type="button" class="btn">${label}</button>
+        <button id="${id}" type="button" class="btn ${btnClass}">${label}</button>
         <div class="dropdown">
           <div class="dropdown-content text-sm">
           </div>

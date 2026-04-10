@@ -25,7 +25,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcDropdown extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'label', 'mode', 'format', 'dropdown-class'];
+    return ['id', 'class', 'label', 'mode', 'format', 'dropdown-class', 'btn-class'];
   }
 
   constructor() {
@@ -131,14 +131,17 @@ class WcDropdown extends WcBaseComponent {
     const lbl = this.getAttribute('label') || '';
     const format = this.getAttribute('format') || 'standard';
     const dropdownHeight = this.getAttribute('dropdown-height') || '';
-    const btn = document.createElement('button');    
+    const btn = document.createElement('button');
+    const btnClass = this.getAttribute('btn-class');
     if (lbl && format === 'standard') {
       btn.classList.add('dropbtn');
+      if (btnClass) btn.classList.add(...btnClass.split(' ').filter(c => c));
       btn.textContent = lbl;
     } else {
       if (format === 'grid-round') {
         btn.classList.add('dropbtn');
         btn.classList.add('grid-round');
+        if (btnClass) btn.classList.add(...btnClass.split(' ').filter(c => c));
         btn.innerHTML = `
           <svg class="h-5 w-5 align-middle pointer-events-none"
             fill="currentColor"
@@ -149,6 +152,7 @@ class WcDropdown extends WcBaseComponent {
       } else if (format === 'avatar') {
         btn.classList.add('dropbtn');
         btn.classList.add('avatar');
+        if (btnClass) btn.classList.add(...btnClass.split(' ').filter(c => c));
         btn.innerHTML = `
           <svg class="h-4 w-4 align-middle pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />

@@ -31,7 +31,7 @@ if (!customElements.get('wc-save-split-button')) {
 
   class WcSaveSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return ['form', 'hx-include'];
+      return ['form', 'hx-include', 'btn-class'];
     }
 
     constructor() {
@@ -78,9 +78,10 @@ if (!customElements.get('wc-save-split-button')) {
       }
       const hxInclude = this.getAttribute('hx-include') || '';
       const hxIncludeAttr = hxInclude ? `hx-include="${hxInclude}"` : '';
-      
+      const btnClass = this.getAttribute('btn-class') || '';
+
       const markup = `
-        <button type="button" class="save-btn btn"
+        <button type="button" class="save-btn btn ${btnClass}"
           hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ''} ${hxIncludeAttr}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">

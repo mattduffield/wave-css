@@ -524,6 +524,16 @@ if (!customElements.get('wc-code-mirror')) {
         .cm-js-comment { color: #75715e !important; }
         .cm-js-property { color: #a6e22e !important; }
         .cm-js-atom { color: #ae81ff !important; }
+
+        /* Suppress HTML entity error highlighting (red bg on & in JS content) */
+        .CodeMirror .cm-error {
+          background: none !important;
+        }
+
+        /* Pongo2 template syntax overlay */
+        .cm-pongo2-tag { color: #c792ea !important; }
+        .cm-pongo2-variable { color: #f78c6c !important; }
+        .cm-pongo2-comment { color: #546e7a !important; font-style: italic; }
       `.trim();
       this.loadStyle('wc-code-mirror-style', style);
     }
@@ -576,8 +586,10 @@ if (!customElements.get('wc-code-mirror')) {
         };
       }
 
+      const requestedMode = this.getAttribute('mode') || 'javascript';
+
       this.editor = CodeMirror(this.componentElement, {
-        mode: this.getAttribute('mode') || 'javascript',
+        mode: requestedMode,
         theme: this.getAttribute('theme') || 'default',
         lineNumbers: this.hasAttribute('line-numbers'),
         lineWrapper: this.hasAttribute('line-wrapper'),
@@ -596,9 +608,6 @@ if (!customElements.get('wc-code-mirror')) {
       await this.loadAssets(this.getAttribute('theme'), this.getAttribute('mode'));
       
 
-      // Apply JavaScript highlighting to web components
-      this.addWebComponentsJsHighlighting();
-
       // Sync editor value with the internal form value
       this.editor.on('change', async () => {
         const value = this.editor.getValue();
@@ -616,6 +625,12 @@ if (!customElements.get('wc-code-mirror')) {
       this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
       // console.log('----> broadcasting event: wc-code-mirror:ready');
+
+      // Apply Pongo2 overlay and JS highlighting for htmlmixed mode
+      if (requestedMode === 'htmlmixed') {
+        this._applyPongo2Overlay();
+        this.addWebComponentsJsHighlighting();
+      }
 
       const url = this.getAttribute('fetch');
       this.handleFetch(url);
@@ -928,16 +943,11 @@ if (!customElements.get('wc-code-mirror')) {
       }
 
       this.editor.setOption('mode', mode);
-
-      // If mode is HTML-based, apply our highlighting
+      // Re-apply Pongo2 overlay and JS highlighting after mode switch
       if (['htmlmixed', 'php', 'markdown', 'htmlembedded'].includes(mode)) {
-        // Wait a bit for the mode to be fully applied
-        setTimeout(() => {
-          this.addWebComponentsJsHighlighting();
-        }, 100);
+        this._applyPongo2Overlay();
+        setTimeout(() => this.addWebComponentsJsHighlighting(), 100);
       }
-
-
     }
 
     _unWireEvents() {
@@ -946,59 +956,70 @@ if (!customElements.get('wc-code-mirror')) {
       settingsIcon.removeEventListener('click', this._handleSettingsIconClick.bind(this));
     }
 
-    /**
-     * Add JavaScript highlighting to web components
-     * This approach directly scans the document for web component content
-     */
+    async _applyPongo2Overlay() {
+      if (!this.editor) return;
+      await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/overlay.min.js');
+
+      // Define a simple Pongo2 overlay that highlights {% %}, {{ }}, {# #}
+      if (!CodeMirror.modes['pongo2-overlay']) {
+        CodeMirror.defineMode('pongo2-overlay', function() {
+          return {
+            token: function(stream) {
+              // Comment {# ... #}
+              if (stream.match('{#')) {
+                stream.skipTo('#}') ? stream.match('#}') : stream.skipToEnd();
+                return 'pongo2-comment';
+              }
+              // Block tag {% ... %}
+              if (stream.match('{%')) {
+                stream.skipTo('%}') ? stream.match('%}') : stream.skipToEnd();
+                return 'pongo2-tag';
+              }
+              // Variable {{ ... }}
+              if (stream.match('{{')) {
+                stream.skipTo('}}') ? stream.match('}}') : stream.skipToEnd();
+                return 'pongo2-variable';
+              }
+              // Skip to next potential match
+              while (stream.next() != null) {
+                if (stream.match('{%', false) || stream.match('{{', false) || stream.match('{#', false)) break;
+              }
+              return null;
+            }
+          };
+        });
+      }
+
+      this.editor.addOverlay(CodeMirror.getMode(this.editor.getOption('mode'), 'pongo2-overlay'));
+    }
+
     addWebComponentsJsHighlighting() {
-      // console.log("Adding JS highlighting to web components");
-      
-      // Function to apply the highlighting
+      if (!this.editor) return;
       const applyHighlighting = () => {
-        // console.log("Applying highlighting to editor content");
-        
-        // Get all content lines
         const lines = this.editor.getValue().split('\n');
-        
-        // Variables to track web component state
         let inComponent = false;
         let componentName = '';
-        let content = [];
         let startLine = -1;
         let endLine = -1;
-        
-        // Scan for web component tags
+
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
-          
-          // Look for opening tag
           if (!inComponent) {
-            const openMatch = line.match(/<(wc-[a-zA-Z0-9-]+)(?:\s|>)/i);
+            const openMatch = line.match(/<(wc-javascript|wc-script)(?:\s|>)/i);
             if (openMatch) {
               componentName = openMatch[1];
               inComponent = true;
               startLine = i;
-              // console.log(`Found opening tag at line ${i}: ${componentName}`);
             }
-          } 
-          // Look for closing tag
-          else {
+          } else {
             const closeMatch = line.match(new RegExp(`</${componentName}>`));
             if (closeMatch) {
               endLine = i;
               inComponent = false;
-              // console.log(`Found closing tag at line ${i}: ${componentName}`);
-              
-              // Process content between tags
               if (startLine !== -1 && endLine !== -1) {
                 const jsContent = lines.slice(startLine + 1, endLine).join('\n');
-                // console.log(`Processing JS content between lines ${startLine+1} and ${endLine}`);
-                
-                // Add code highlighting manually using markers
                 this.highlightJavaScript(jsContent, startLine + 1, endLine);
               }
-              
-              // Reset for next component
               startLine = -1;
               endLine = -1;
               componentName = '';
@@ -1006,78 +1027,49 @@ if (!customElements.get('wc-code-mirror')) {
           }
         }
       };
-            
-      // Run initial highlighting
+
       setTimeout(() => {
         applyHighlighting();
-        
-        // Watch for changes and reapply highlighting
         this.editor.on('change', () => {
-          // Debounce to avoid too many updates
           clearTimeout(this._highlightTimeout);
-          this._highlightTimeout = setTimeout(() => {
-            applyHighlighting();
-          }, 500);
+          this._highlightTimeout = setTimeout(() => applyHighlighting(), 500);
         });
-        
-        // console.log("Added change listener for highlighting");
       }, 100);
     }
 
-    /**
-     * Highlight JavaScript content using markers
-     */
     highlightJavaScript(jsContent, startLine, endLine) {
-      // console.log("Highlighting JavaScript content");
-      
-      // Clear any existing markers in this range
       const doc = this.editor.getDoc();
       const existingMarks = doc.findMarks(
-        {line: startLine, ch: 0}, 
+        {line: startLine, ch: 0},
         {line: endLine, ch: 0}
       );
-      
       existingMarks.forEach(mark => mark.clear());
-      
-      // Split content into lines
+
       const jsLines = jsContent.split('\n');
-      
-      // Use simple regex patterns to identify JavaScript tokens
       const patterns = [
-        { pattern: /\b(function|var|let|const|return|if|else|endif|for|endfor|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await|in)\b/g, className: 'cm-js-keyword' },
-        { pattern: /\b(true|false|null|undefined)\b/g, className: 'cm-js-atom' },
+        { pattern: /\/\/.*$/g, className: 'cm-js-comment' },
+        { pattern: /\b(function|var|let|const|return|if|else|for|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await|in|of|try|catch|throw|finally|do|delete|void|yield)\b/g, className: 'cm-js-keyword' },
+        { pattern: /\b(true|false|null|undefined|NaN|Infinity)\b/g, className: 'cm-js-atom' },
         { pattern: /\b\d+(\.\d+)?\b/g, className: 'cm-js-number' },
         { pattern: /(["'`])(?:[^\\]|\\.)*?\1/g, className: 'cm-js-string' },
-        { pattern: /[+\-*/%=&|^<>!?:;,.]/g, className: 'cm-js-operator' },
-        // Arrow functions
         { pattern: /=>/g, className: 'cm-js-keyword' },
-        // Function/property access
-        { pattern: /\b\.[A-Za-z]+/g, className: 'cm-js-property' }
+        { pattern: /\.\s*([A-Za-z_$][\w$]*)/g, className: 'cm-js-property' },
       ];
-      
-      // Apply highlighting to each line
+
       jsLines.forEach((line, lineIndex) => {
-        // Add background to whole line to show it's web component content
-        doc.markText(
-          {line: startLine + lineIndex, ch: 0},
-          {line: startLine + lineIndex, ch: line.length},
-          {className: 'cm-wc-content'}
-        );
-        
-        // Apply each pattern
         patterns.forEach(({pattern, className}) => {
           let match;
-          // Reset regex state
           pattern.lastIndex = 0;
-          
           while ((match = pattern.exec(line)) !== null) {
-            const startCh = match.index;
-            const endCh = startCh + match[0].length;
-            
-            // Add specific token highlighting
+            let startCh = match.index;
+            let length = match[0].length;
+            if (className === 'cm-js-property' && match[1]) {
+              startCh = match.index + match[0].indexOf(match[1]);
+              length = match[1].length;
+            }
             doc.markText(
               {line: startLine + lineIndex, ch: startCh},
-              {line: startLine + lineIndex, ch: endCh},
+              {line: startLine + lineIndex, ch: startCh + length},
               {className}
             );
           }

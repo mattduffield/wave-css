@@ -3310,6 +3310,16 @@ if (!customElements.get("wc-code-mirror")) {
         .cm-js-comment { color: #75715e !important; }
         .cm-js-property { color: #a6e22e !important; }
         .cm-js-atom { color: #ae81ff !important; }
+
+        /* Suppress HTML entity error highlighting (red bg on & in JS content) */
+        .CodeMirror .cm-error {
+          background: none !important;
+        }
+
+        /* Pongo2 template syntax overlay */
+        .cm-pongo2-tag { color: #c792ea !important; }
+        .cm-pongo2-variable { color: #f78c6c !important; }
+        .cm-pongo2-comment { color: #546e7a !important; font-style: italic; }
       `.trim();
       this.loadStyle("wc-code-mirror-style", style);
     }
@@ -3353,8 +3363,9 @@ if (!customElements.get("wc-code-mirror")) {
           cm.showHint({ hint: this._getHintFunction(), completeSingle: false });
         };
       }
+      const requestedMode = this.getAttribute("mode") || "javascript";
       this.editor = CodeMirror(this.componentElement, {
-        mode: this.getAttribute("mode") || "javascript",
+        mode: requestedMode,
         theme: this.getAttribute("theme") || "default",
         lineNumbers: this.hasAttribute("line-numbers"),
         lineWrapper: this.hasAttribute("line-wrapper"),
@@ -3369,7 +3380,6 @@ if (!customElements.get("wc-code-mirror")) {
         showInvisibles: true
       });
       await this.loadAssets(this.getAttribute("theme"), this.getAttribute("mode"));
-      this.addWebComponentsJsHighlighting();
       this.editor.on("change", async () => {
         const value = this.editor.getValue();
         this._internals.setFormValue(value);
@@ -3384,6 +3394,10 @@ if (!customElements.get("wc-code-mirror")) {
       const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
       this.dispatchEvent(customEvent);
       document.body.dispatchEvent(customEvent);
+      if (requestedMode === "htmlmixed") {
+        this._applyPongo2Overlay();
+        this.addWebComponentsJsHighlighting();
+      }
       const url = this.getAttribute("fetch");
       this.handleFetch(url);
     }
@@ -3621,9 +3635,8 @@ if (!customElements.get("wc-code-mirror")) {
       }
       this.editor.setOption("mode", mode);
       if (["htmlmixed", "php", "markdown", "htmlembedded"].includes(mode)) {
-        setTimeout(() => {
-          this.addWebComponentsJsHighlighting();
-        }, 100);
+        this._applyPongo2Overlay();
+        setTimeout(() => this.addWebComponentsJsHighlighting(), 100);
       }
     }
     _unWireEvents() {
@@ -3631,22 +3644,47 @@ if (!customElements.get("wc-code-mirror")) {
       const settingsIcon = this.querySelector(".settings-icon");
       settingsIcon.removeEventListener("click", this._handleSettingsIconClick.bind(this));
     }
-    /**
-     * Add JavaScript highlighting to web components
-     * This approach directly scans the document for web component content
-     */
+    async _applyPongo2Overlay() {
+      if (!this.editor) return;
+      await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/overlay.min.js");
+      if (!CodeMirror.modes["pongo2-overlay"]) {
+        CodeMirror.defineMode("pongo2-overlay", function() {
+          return {
+            token: function(stream) {
+              if (stream.match("{#")) {
+                stream.skipTo("#}") ? stream.match("#}") : stream.skipToEnd();
+                return "pongo2-comment";
+              }
+              if (stream.match("{%")) {
+                stream.skipTo("%}") ? stream.match("%}") : stream.skipToEnd();
+                return "pongo2-tag";
+              }
+              if (stream.match("{{")) {
+                stream.skipTo("}}") ? stream.match("}}") : stream.skipToEnd();
+                return "pongo2-variable";
+              }
+              while (stream.next() != null) {
+                if (stream.match("{%", false) || stream.match("{{", false) || stream.match("{#", false)) break;
+              }
+              return null;
+            }
+          };
+        });
+      }
+      this.editor.addOverlay(CodeMirror.getMode(this.editor.getOption("mode"), "pongo2-overlay"));
+    }
     addWebComponentsJsHighlighting() {
+      if (!this.editor) return;
       const applyHighlighting = () => {
         const lines = this.editor.getValue().split("\n");
         let inComponent = false;
         let componentName = "";
-        let content = [];
         let startLine = -1;
         let endLine = -1;
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!inComponent) {
-            const openMatch = line.match(/<(wc-[a-zA-Z0-9-]+)(?:\s|>)/i);
+            const openMatch = line.match(/<(wc-javascript|wc-script)(?:\s|>)/i);
             if (openMatch) {
               componentName = openMatch[1];
               inComponent = true;
@@ -3672,15 +3710,10 @@ if (!customElements.get("wc-code-mirror")) {
         applyHighlighting();
         this.editor.on("change", () => {
           clearTimeout(this._highlightTimeout);
-          this._highlightTimeout = setTimeout(() => {
-            applyHighlighting();
-          }, 500);
+          this._highlightTimeout = setTimeout(() => applyHighlighting(), 500);
         });
       }, 100);
     }
-    /**
-     * Highlight JavaScript content using markers
-     */
     highlightJavaScript(jsContent, startLine, endLine) {
       const doc = this.editor.getDoc();
       const existingMarks = doc.findMarks(
@@ -3690,31 +3723,28 @@ if (!customElements.get("wc-code-mirror")) {
       existingMarks.forEach((mark) => mark.clear());
       const jsLines = jsContent.split("\n");
       const patterns = [
-        { pattern: /\b(function|var|let|const|return|if|else|endif|for|endfor|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await|in)\b/g, className: "cm-js-keyword" },
-        { pattern: /\b(true|false|null|undefined)\b/g, className: "cm-js-atom" },
+        { pattern: /\/\/.*$/g, className: "cm-js-comment" },
+        { pattern: /\b(function|var|let|const|return|if|else|for|while|switch|case|break|continue|this|new|typeof|instanceof|class|async|await|in|of|try|catch|throw|finally|do|delete|void|yield)\b/g, className: "cm-js-keyword" },
+        { pattern: /\b(true|false|null|undefined|NaN|Infinity)\b/g, className: "cm-js-atom" },
         { pattern: /\b\d+(\.\d+)?\b/g, className: "cm-js-number" },
         { pattern: /(["'`])(?:[^\\]|\\.)*?\1/g, className: "cm-js-string" },
-        { pattern: /[+\-*/%=&|^<>!?:;,.]/g, className: "cm-js-operator" },
-        // Arrow functions
         { pattern: /=>/g, className: "cm-js-keyword" },
-        // Function/property access
-        { pattern: /\b\.[A-Za-z]+/g, className: "cm-js-property" }
+        { pattern: /\.\s*([A-Za-z_$][\w$]*)/g, className: "cm-js-property" }
       ];
       jsLines.forEach((line, lineIndex) => {
-        doc.markText(
-          { line: startLine + lineIndex, ch: 0 },
-          { line: startLine + lineIndex, ch: line.length },
-          { className: "cm-wc-content" }
-        );
         patterns.forEach(({ pattern, className }) => {
           let match;
           pattern.lastIndex = 0;
           while ((match = pattern.exec(line)) !== null) {
-            const startCh = match.index;
-            const endCh = startCh + match[0].length;
+            let startCh = match.index;
+            let length = match[0].length;
+            if (className === "cm-js-property" && match[1]) {
+              startCh = match.index + match[0].indexOf(match[1]);
+              length = match[1].length;
+            }
             doc.markText(
               { line: startLine + lineIndex, ch: startCh },
-              { line: startLine + lineIndex, ch: endCh },
+              { line: startLine + lineIndex, ch: startCh + length },
               { className }
             );
           }
@@ -4273,7 +4303,7 @@ if (!customElements.get("wc-dropdown-item")) {
 // src/js/components/wc-dropdown.js
 var WcDropdown = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "label", "mode", "format", "dropdown-class"];
+    return ["id", "class", "label", "mode", "format", "dropdown-class", "btn-class"];
   }
   constructor() {
     super();
@@ -4365,13 +4395,16 @@ var WcDropdown = class extends WcBaseComponent {
     const format = this.getAttribute("format") || "standard";
     const dropdownHeight = this.getAttribute("dropdown-height") || "";
     const btn = document.createElement("button");
+    const btnClass = this.getAttribute("btn-class");
     if (lbl && format === "standard") {
       btn.classList.add("dropbtn");
+      if (btnClass) btn.classList.add(...btnClass.split(" ").filter((c) => c));
       btn.textContent = lbl;
     } else {
       if (format === "grid-round") {
         btn.classList.add("dropbtn");
         btn.classList.add("grid-round");
+        if (btnClass) btn.classList.add(...btnClass.split(" ").filter((c) => c));
         btn.innerHTML = `
           <svg class="h-5 w-5 align-middle pointer-events-none"
             fill="currentColor"
@@ -4382,6 +4415,7 @@ var WcDropdown = class extends WcBaseComponent {
       } else if (format === "avatar") {
         btn.classList.add("dropbtn");
         btn.classList.add("avatar");
+        if (btnClass) btn.classList.add(...btnClass.split(" ").filter((c) => c));
         btn.innerHTML = `
           <svg class="h-4 w-4 align-middle pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -11800,7 +11834,7 @@ if (!customElements.get("wc-save-button")) {
 if (!customElements.get("wc-save-split-button")) {
   class WcSaveSplitButton extends WcBaseComponent {
     static get observedAttributes() {
-      return ["form", "hx-include"];
+      return ["form", "hx-include", "btn-class"];
     }
     constructor() {
       super();
@@ -11841,8 +11875,9 @@ if (!customElements.get("wc-save-split-button")) {
       }
       const hxInclude = this.getAttribute("hx-include") || "";
       const hxIncludeAttr = hxInclude ? `hx-include="${hxInclude}"` : "";
+      const btnClass = this.getAttribute("btn-class") || "";
       const markup = `
-        <button type="button" class="save-btn btn"
+        <button type="button" class="save-btn btn ${btnClass}"
           hx-${method}="${saveUrl}" hx-trigger="validated" ${beforeSend ? beforeSend : ""} ${hxIncludeAttr}
           data-url="${saveUrl}">Save</button>
         <div class="dropdown">
@@ -12140,10 +12175,11 @@ if (!customElements.get("wc-split-button")) {
     _createElement() {
       const id = this.getAttribute("id") || "";
       const label = this.getAttribute("label") || "";
+      const btnClass = this.getAttribute("btn-class") || "";
       const positionArea = this.getAttribute("position-area") || "bottom span-right";
       const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
       const markup = `
-        <button id="${id}" type="button" class="btn">${label}</button>
+        <button id="${id}" type="button" class="btn ${btnClass}">${label}</button>
         <div class="dropdown">
           <div class="dropdown-content text-sm">
           </div>
