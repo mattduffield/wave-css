@@ -29,7 +29,8 @@
         "wave-css.min.css",
         "wave-css.css"
       ],
-      "versionedDist": "dist/wave-css-0.0.1/ — auto-synced copy including icon bundles; also copied to go-kart static/js/wave-css-0.0.1/"
+      "versionedDist": "dist/wave-css-0.0.1/ — auto-synced copy including icon bundles; also copied to go-kart static/js/wave-css-0.0.1/",
+      "cssGridUtilities": "CSS grid utilities added at all breakpoints: grid-cols-1 through grid-cols-12, grid-rows, col-span, row-span, grid-flow"
     },
     "helperFunctions": {
       "loadScript": "Concurrent callers now share the same promise via Map to prevent duplicate script loads and race conditions"
@@ -223,7 +224,8 @@
           "label",
           "mode",
           "format",
-          "dropdown-class"
+          "dropdown-class",
+          "btn-class"
         ],
         "events": {
           "listens": [
@@ -232,7 +234,7 @@
             "wc-dropdown:toggle"
           ]
         },
-        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input.",
+        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button.",
         "usage": "<wc-dropdown label=\"Options\" mode=\"search\">\n  <a href=\"#about\">About</a>\n  <a href=\"#settings\">Settings</a>\n  <a href=\"#logout\">Logout</a>\n</wc-dropdown>"
       },
       {
@@ -413,7 +415,7 @@
           "onkeypress",
           "onclick"
         ],
-        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values. Value getter proxies to inner <select> element. Change events dispatch with bubbles:true from the outer wc-select element. Chip mode change events also bubble.",
+        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values. Value getter proxies to inner <select> element. Change events dispatch with bubbles:true from the outer wc-select element. Chip mode change events also bubble. optionsloaded event fires after URL-based options are populated and value is applied. Detail: { value, optionCount }. Hyperscript-compatible (no colons).",
         "usage": {
           "standard": "<wc-select name=\"status\" lbl-label=\"Status\" required>\n  <option value=\"active\">Active</option>\n  <option value=\"inactive\">Inactive</option>\n</wc-select>",
           "chip": "<wc-select name=\"tags\" lbl-label=\"Tags\" mode=\"chip\"\n  items='[{\"key\":\"JavaScript\",\"value\":\"js\"},{\"key\":\"React\",\"value\":\"react\"}]'>\n</wc-select>",
@@ -788,6 +790,17 @@
         "demoViews": [
           "views/pivot.html — Field Panel demo, auto-detect count, currency sum, boolean column, quarterly sales, date grouping, datetime server logs, config save/load, dynamic data, drill-down with cell click events"
         ]
+      },
+      {
+        "name": "wc-explain-tree",
+        "description": "Visual MongoDB explain plan viewer, renders stage-by-stage flow diagram",
+        "attributes": [
+          "data",
+          "height"
+        ],
+        "events": {},
+        "notes": "Summary bar with green/yellow/red status indicators. Stage nodes with color-coded types: COLLSCAN=red, IXSCAN=green, FETCH=blue, SORT=yellow. Bottom-to-top flow with connectors. Branching for $or queries. Aggregation pipeline support. Click-to-expand raw JSON detail (inline). Loading indicator. data property setter accepts object or JSON string. Unwraps Go Kart { raw, summary } wrapper. Host element: wc-explain-tree { display: contents; }.",
+        "usage": "<wc-explain-tree data='{\"queryPlanner\":{...},\"executionStats\":{...}}'></wc-explain-tree>"
       }
     ],
     "interactive": [
@@ -844,7 +857,7 @@
             "fetch-complete"
           ]
         },
-        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}.",
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}. Mode scripts are now pre-loaded BEFORE editor creation via _preloadMode() so syntax highlighting works on first render in HTMX-loaded fragments. Editor is always created (never deferred/null) — this.editor is always available after connectedCallback. One-time mode re-apply on first change event fixes syntax highlighting for editors created in hidden containers. display() method forces re-tokenization + refresh (call after making editor visible). value property setter re-applies mode after setValue for hidden-container fix. Pongo2/Django template syntax highlighting via overlay ({% %} tags in violet, {{ }} variables in coral, {# #} comments in gray). .cm-error red background suppressed globally. Additional language modes supported: python, go, ruby, rust, sql, shell, yaml, toml, dockerfile, swift, and clike-based MIME types (text/x-java, text/x-csharp, etc.).",
         "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
       },
       {
@@ -936,9 +949,10 @@
         "description": "Split button with Save, Save & New, and Save & Return options",
         "attributes": [
           "form",
-          "hx-include"
+          "hx-include",
+          "btn-class"
         ],
-        "notes": "Handles HTMX redirect headers. save-url, save-new-url, save-return-url for each action.",
+        "notes": "Handles HTMX redirect headers. save-url, save-new-url, save-return-url for each action. btn-class attribute styles the save button.",
         "usage": "<wc-save-split-button form=\"form#myForm\" save-url=\"/save\" save-new-url=\"/create\" save-return-url=\"/list\"></wc-save-split-button>"
       },
       {
@@ -950,6 +964,7 @@
           "btn-label",
           "split-class"
         ],
+        "notes": "btn-class attribute is now wired up (was declared but unused previously).",
         "usage": "<wc-split-button label=\"Actions\">\n  <a class=\"btn\">Action 1</a>\n  <a class=\"btn\">Action 2</a>\n</wc-split-button>"
       }
     ],
@@ -1392,7 +1407,11 @@
       ],
       "grid": [
         "grid-1 through grid-6",
-        "grid-cols-1 through grid-cols-6"
+        "grid-cols-1 through grid-cols-12",
+        "grid-rows-1 through grid-rows-6",
+        "col-span-1 through col-span-12",
+        "row-span-1 through row-span-6",
+        "grid-flow-row, grid-flow-col, grid-flow-dense, grid-flow-row-dense, grid-flow-col-dense"
       ],
       "gap": [
         "gap-0 through gap-12 (0.25rem increments)",

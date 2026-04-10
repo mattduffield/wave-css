@@ -219,34 +219,30 @@ if (!customElements.get('wc-code-mirror')) {
       const isActiveTab = !tabItem || innerTabDiv?.classList.contains('active');
       const shouldDefer = tabItem && !isActiveTab;
 
+      // Always create the editor so this.editor is never null.
+      // For deferred (hidden tab) editors, create with minimal setup then
+      // do full mode/theme init when visible.
+      await this.renderEditor(initialValue);
+      this._internals.setFormValue(initialValue);
+
       if (shouldDefer) {
-        this._pendingValue = initialValue;
-        this._deferredInit = true;
-        // Set form value now so hx-include can read it before editor initializes
-        this._internals.setFormValue(initialValue);
-        // Observe the inner componentElement (not 'this' which is display:contents
-        // and has no visual box for IntersectionObserver to detect)
+        // Editor exists but may not render correctly while hidden.
+        // When it becomes visible, re-apply mode (forces re-tokenization) and refresh.
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
-            if (entry.isIntersecting && this._deferredInit) {
-              this._deferredInit = false;
+            if (entry.isIntersecting) {
               observer.disconnect();
-              const value = this._pendingValue ?? initialValue;
-              this.renderEditor(value).then(() => {
-                this._internals.setFormValue(value);
-              });
+              const currentValue = this.editor.getValue();
+              const mode = this.editor.getOption('mode');
+              // Force full re-tokenization by re-setting mode
+              this.editor.setOption('mode', mode);
+              this.editor.setValue(currentValue);
+              this.editor.refresh();
             }
           });
         }, { threshold: 0.1 });
         observer.observe(this.componentElement);
-        return;
       }
-
-      // Element is visible — initialize immediately
-      await this.renderEditor(initialValue);
-
-      // Set the initial form value to the value from the attribute
-      this._internals.setFormValue(initialValue);
     }
 
     _handleSettingsIconClick(event) {
@@ -379,6 +375,18 @@ if (!customElements.get('wc-code-mirror')) {
       return this.getAttribute('name') || '';
     }
 
+    /**
+     * Refresh the editor display. Call after making the editor visible.
+     * Forces re-tokenization to fix syntax highlighting for editors created in hidden containers.
+     */
+    display() {
+      if (this.editor) {
+        const mode = this.editor.getOption('mode');
+        this.editor.setOption('mode', mode);
+        this.editor.refresh();
+      }
+    }
+
     get value() {
       if (this.editor) return this.editor.getValue();
       return this._pendingValue || this.getAttribute('value') || '';
@@ -388,8 +396,10 @@ if (!customElements.get('wc-code-mirror')) {
       if (this.editor) {
         this.editor.setValue(val);
         this._internals.setFormValue(val);
+        // Force re-tokenization — needed when editor was created in a hidden container
+        const mode = this.editor.getOption('mode');
+        this.editor.setOption('mode', mode);
       } else {
-        // Editor not initialized yet — queue for when it initializes
         this._pendingValue = val;
         this._internals.setFormValue(val);
       }
@@ -588,8 +598,23 @@ if (!customElements.get('wc-code-mirror')) {
 
       const requestedMode = this.getAttribute('mode') || 'javascript';
 
+      // Pre-load mode scripts BEFORE creating the editor so syntax highlighting works on first render.
+      // We can't call loadMode() here because it calls editor.setOption() which requires the editor to exist.
+      // Instead, just load the script files so the mode is registered when CodeMirror initializes.
+      await this._preloadMode(requestedMode);
+
+      // Pre-load theme CSS
+      const requestedTheme = this.getAttribute('theme');
+      if (requestedTheme && requestedTheme !== 'default') {
+        const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${requestedTheme}.min.css`;
+        await this.loadCSS(themeUrl);
+      }
+
+      // Use pongo2-html for htmlmixed if available (registered during preload)
+      const editorMode = (requestedMode === 'htmlmixed' && CodeMirror.modes['pongo2-html']) ? 'pongo2-html' : requestedMode;
+
       this.editor = CodeMirror(this.componentElement, {
-        mode: requestedMode,
+        mode: editorMode,
         theme: this.getAttribute('theme') || 'default',
         lineNumbers: this.hasAttribute('line-numbers'),
         lineWrapper: this.hasAttribute('line-wrapper'),
@@ -604,9 +629,31 @@ if (!customElements.get('wc-code-mirror')) {
         showInvisibles: true
       });
 
-      // Load theme and mode dynamically
-      await this.loadAssets(this.getAttribute('theme'), this.getAttribute('mode'));
-      
+      // Now that editor exists, apply theme and mode options (setOption calls are safe now)
+      if (requestedTheme && requestedTheme !== 'default') {
+        this.editor.setOption('theme', requestedTheme);
+      }
+      // Re-set mode to force tokenization (important for editors created in hidden containers)
+      this.editor.setOption('mode', editorMode);
+
+      // One-time fix: when setValue is called externally on an editor that was created
+      // in a hidden container, re-apply mode to force syntax highlighting.
+      this._needsModeReapply = true;
+      this.editor.on('change', () => {
+        if (this._needsModeReapply) {
+          this._needsModeReapply = false;
+          const m = this.editor.getOption('mode');
+          requestAnimationFrame(() => {
+            this.editor.setOption('mode', m);
+          });
+        }
+      });
+
+      // Apply Pongo2 overlay for htmlmixed mode (editor must exist for addOverlay)
+      if (requestedMode === 'htmlmixed') {
+        this._applyPongo2Overlay();
+        this.addWebComponentsJsHighlighting();
+      }
 
       // Sync editor value with the internal form value
       this.editor.on('change', async () => {
@@ -877,6 +924,60 @@ if (!customElements.get('wc-code-mirror')) {
         await this.loadCSS(themeUrl);
       }
       this.editor.setOption('theme', theme);
+    }
+
+    async _preloadMode(mode) {
+      // Load mode scripts only — no editor.setOption calls. Safe to call before editor exists.
+      const modeDependencies = {
+        "htmlmixed": ["xml", "css", "javascript"],
+        "php": ["htmlmixed", "xml", "css", "javascript"],
+        "htmlembedded": ["xml", "javascript"],
+        "markdown": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-java": ["clike"],
+        "text/x-csharp": ["clike"],
+        "text/x-c++src": ["clike"],
+        "text/x-csrc": ["clike"],
+        "text/x-objectivec": ["clike"],
+        "text/x-scala": ["clike"],
+        "text/x-kotlin": ["clike"],
+      };
+      const mimeToModeFile = {
+        "text/x-java": "clike", "text/x-csharp": "clike", "text/x-c++src": "clike",
+        "text/x-csrc": "clike", "text/x-objectivec": "clike", "text/x-scala": "clike",
+        "text/x-kotlin": "clike",
+      };
+
+      const dependencies = modeDependencies[mode];
+      if (dependencies && dependencies.length > 0) {
+        for (const modeName of dependencies) {
+          await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
+        }
+      }
+
+      // Register pongo2-html mode for htmlmixed
+      if (mode === 'htmlmixed' && !CodeMirror.modes['pongo2-html']) {
+        await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/overlay.min.js');
+        await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/django/django.min.js');
+        CodeMirror.defineMode('pongo2-html', function(config) {
+          var htmlBase = CodeMirror.getMode(config, {
+            name: 'htmlmixed',
+            tags: {
+              'wc-javascript': [[null, null, 'javascript']],
+              'wc-script': [[null, null, 'javascript']]
+            }
+          });
+          var djangoOverlay = CodeMirror.getMode(config, 'django:inner');
+          return CodeMirror.overlayMode(htmlBase, djangoOverlay);
+        });
+      }
+
+      // Load the mode file itself (skip for MIME types that are already covered by dependencies)
+      if (!mimeToModeFile[mode]) {
+        const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
+        if (!document.querySelector(`script[src="${modeUrl}"]`)) {
+          await this.loadScript(modeUrl);
+        }
+      }
     }
 
     async loadMode(mode) {

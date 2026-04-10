@@ -2871,27 +2871,23 @@ if (!customElements.get("wc-code-mirror")) {
       const innerTabDiv = tabItem?.querySelector(".wc-tab-item");
       const isActiveTab = !tabItem || innerTabDiv?.classList.contains("active");
       const shouldDefer = tabItem && !isActiveTab;
+      await this.renderEditor(initialValue);
+      this._internals.setFormValue(initialValue);
       if (shouldDefer) {
-        this._pendingValue = initialValue;
-        this._deferredInit = true;
-        this._internals.setFormValue(initialValue);
         const observer = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting && this._deferredInit) {
-              this._deferredInit = false;
+            if (entry.isIntersecting) {
               observer.disconnect();
-              const value = this._pendingValue ?? initialValue;
-              this.renderEditor(value).then(() => {
-                this._internals.setFormValue(value);
-              });
+              const currentValue = this.editor.getValue();
+              const mode = this.editor.getOption("mode");
+              this.editor.setOption("mode", mode);
+              this.editor.setValue(currentValue);
+              this.editor.refresh();
             }
           });
         }, { threshold: 0.1 });
         observer.observe(this.componentElement);
-        return;
       }
-      await this.renderEditor(initialValue);
-      this._internals.setFormValue(initialValue);
     }
     _handleSettingsIconClick(event) {
       const settingsPopover = this.querySelector(".settings-popover");
@@ -3168,6 +3164,17 @@ if (!customElements.get("wc-code-mirror")) {
     get name() {
       return this.getAttribute("name") || "";
     }
+    /**
+     * Refresh the editor display. Call after making the editor visible.
+     * Forces re-tokenization to fix syntax highlighting for editors created in hidden containers.
+     */
+    display() {
+      if (this.editor) {
+        const mode = this.editor.getOption("mode");
+        this.editor.setOption("mode", mode);
+        this.editor.refresh();
+      }
+    }
     get value() {
       if (this.editor) return this.editor.getValue();
       return this._pendingValue || this.getAttribute("value") || "";
@@ -3176,6 +3183,8 @@ if (!customElements.get("wc-code-mirror")) {
       if (this.editor) {
         this.editor.setValue(val);
         this._internals.setFormValue(val);
+        const mode = this.editor.getOption("mode");
+        this.editor.setOption("mode", mode);
       } else {
         this._pendingValue = val;
         this._internals.setFormValue(val);
@@ -3364,8 +3373,15 @@ if (!customElements.get("wc-code-mirror")) {
         };
       }
       const requestedMode = this.getAttribute("mode") || "javascript";
+      await this._preloadMode(requestedMode);
+      const requestedTheme = this.getAttribute("theme");
+      if (requestedTheme && requestedTheme !== "default") {
+        const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${requestedTheme}.min.css`;
+        await this.loadCSS(themeUrl);
+      }
+      const editorMode = requestedMode === "htmlmixed" && CodeMirror.modes["pongo2-html"] ? "pongo2-html" : requestedMode;
       this.editor = CodeMirror(this.componentElement, {
-        mode: requestedMode,
+        mode: editorMode,
         theme: this.getAttribute("theme") || "default",
         lineNumbers: this.hasAttribute("line-numbers"),
         lineWrapper: this.hasAttribute("line-wrapper"),
@@ -3379,7 +3395,24 @@ if (!customElements.get("wc-code-mirror")) {
         keyMap: "sublime",
         showInvisibles: true
       });
-      await this.loadAssets(this.getAttribute("theme"), this.getAttribute("mode"));
+      if (requestedTheme && requestedTheme !== "default") {
+        this.editor.setOption("theme", requestedTheme);
+      }
+      this.editor.setOption("mode", editorMode);
+      this._needsModeReapply = true;
+      this.editor.on("change", () => {
+        if (this._needsModeReapply) {
+          this._needsModeReapply = false;
+          const m = this.editor.getOption("mode");
+          requestAnimationFrame(() => {
+            this.editor.setOption("mode", m);
+          });
+        }
+      });
+      if (requestedMode === "htmlmixed") {
+        this._applyPongo2Overlay();
+        this.addWebComponentsJsHighlighting();
+      }
       this.editor.on("change", async () => {
         const value = this.editor.getValue();
         this._internals.setFormValue(value);
@@ -3579,6 +3612,57 @@ if (!customElements.get("wc-code-mirror")) {
         await this.loadCSS(themeUrl);
       }
       this.editor.setOption("theme", theme);
+    }
+    async _preloadMode(mode) {
+      const modeDependencies = {
+        "htmlmixed": ["xml", "css", "javascript"],
+        "php": ["htmlmixed", "xml", "css", "javascript"],
+        "htmlembedded": ["xml", "javascript"],
+        "markdown": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-java": ["clike"],
+        "text/x-csharp": ["clike"],
+        "text/x-c++src": ["clike"],
+        "text/x-csrc": ["clike"],
+        "text/x-objectivec": ["clike"],
+        "text/x-scala": ["clike"],
+        "text/x-kotlin": ["clike"]
+      };
+      const mimeToModeFile = {
+        "text/x-java": "clike",
+        "text/x-csharp": "clike",
+        "text/x-c++src": "clike",
+        "text/x-csrc": "clike",
+        "text/x-objectivec": "clike",
+        "text/x-scala": "clike",
+        "text/x-kotlin": "clike"
+      };
+      const dependencies = modeDependencies[mode];
+      if (dependencies && dependencies.length > 0) {
+        for (const modeName of dependencies) {
+          await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
+        }
+      }
+      if (mode === "htmlmixed" && !CodeMirror.modes["pongo2-html"]) {
+        await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/overlay.min.js");
+        await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/django/django.min.js");
+        CodeMirror.defineMode("pongo2-html", function(config) {
+          var htmlBase = CodeMirror.getMode(config, {
+            name: "htmlmixed",
+            tags: {
+              "wc-javascript": [[null, null, "javascript"]],
+              "wc-script": [[null, null, "javascript"]]
+            }
+          });
+          var djangoOverlay = CodeMirror.getMode(config, "django:inner");
+          return CodeMirror.overlayMode(htmlBase, djangoOverlay);
+        });
+      }
+      if (!mimeToModeFile[mode]) {
+        const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
+        if (!document.querySelector(`script[src="${modeUrl}"]`)) {
+          await this.loadScript(modeUrl);
+        }
+      }
     }
     async loadMode(mode) {
       const modeDependencies = {

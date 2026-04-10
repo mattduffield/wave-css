@@ -75,6 +75,10 @@ The build process (esbuild.config.js) generates:
 - Components automatically adapt to the selected theme
 - Theme selector component (`wc-theme-selector`) for runtime switching
 
+### CSS Grid Utilities
+
+Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl).
+
 ## Component Categories
 
 ### Layout Components
@@ -87,7 +91,7 @@ The build process (esbuild.config.js) generates:
 ### Form Components (extend WcBaseFormComponent)
 - `wc-form`: Form wrapper with validation
 - `wc-input`: Text input field
-- `wc-select`: Dropdown select
+- `wc-select`: Dropdown select; `optionsloaded` event fires after URL options load
 - `wc-textarea`: Multi-line text input
 
 ### Display Components
@@ -110,7 +114,7 @@ The build process (esbuild.config.js) generates:
 - `wc-breadcrumb-item`: Individual breadcrumb item
 - `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally; `no-hash` attribute suppresses URL hash updates on tab click)
 - `wc-tab-item`: Individual tab item
-- `wc-dropdown`: Dropdown menu
+- `wc-dropdown`: Dropdown menu; `btn-class` attribute for trigger button styling
 - `wc-dropdown-item`: Dropdown menu item
 
 ### Data Components
@@ -119,21 +123,22 @@ The build process (esbuild.config.js) generates:
 - `wc-tabulator-func`: Table function helpers
 - `wc-tabulator-row-menu`: Row context menu
 - `wc-timeline`: Timeline visualization
+- `wc-explain-tree`: Visual MongoDB explain plan viewer with stage flow diagram, color-coded stages, branching, aggregation pipeline support, click-to-expand detail
 - `wc-pivot`: Cross-tabulation pivot table with four-zone field panel (Rows/Columns/Values/Filters), value filters, drill-down with inline detail tables, heatmap, column sorting, date grouping (year/quarter/month/day/datetime), compact layout toggle, config save/load (`getConfig()`/`loadConfig()`), CSV export
 
 ### Interactive Components
 - `wc-slideshow`: Image slideshow
 - `wc-slideshow-image`: Slideshow image item
 - `wc-chart-builder`: Interactive chart renderer from raw JSON with auto-detection, field pickers, supports bar/line/pie/doughnut/area/number types
-- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping
+- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping; Pongo2/Django template syntax overlay for htmlmixed mode; pre-loads mode scripts before editor creation; editor always initialized (never null); `display()` method for refresh; supports python, go, ruby, rust, sql, shell, yaml, swift, clike-based MIME types
 - `wc-canvas-dot-highlight`: Canvas animation effect
 - `wc-context-menu`: Reusable context menu with static `WcContextMenu.show(x, y, items)` / `WcContextMenu.hide()` API
 - `wc-context-menu-item`: Declarative menu item for wc-context-menu
 
 ### Button Components
 - `wc-save-button`: Save action button
-- `wc-save-split-button`: Split button with save options
-- `wc-split-button`: Generic split button
+- `wc-save-split-button`: Split button with save options; `btn-class` attribute for save button styling
+- `wc-split-button`: Generic split button; `btn-class` attribute for trigger button styling
 
 ### Navigation Components
 - `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support
@@ -265,6 +270,7 @@ http://localhost:3015/views/index.html
 - `views/tab.html` - Tab component with dynamic tabs and context menu testing
 - `views/chart-builder.html` - Chart Builder demos with auto-detect, KPI numbers, dynamic data
 - `views/pivot.html` - Pivot table demos with heatmap, sorting, cell click events, CSV export
+- `views/explain-tree.html` - MongoDB explain plan viewer demos
 
 ### Quick Start Example
 

@@ -629,6 +629,7 @@ const ICONS_TO_COPY = [
   "arrows-up-down",
   "exchange",
   "question",
+  "mask",
   // Add more icon names here
 ];
 
