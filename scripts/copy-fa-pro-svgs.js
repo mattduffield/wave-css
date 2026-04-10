@@ -625,6 +625,9 @@ const ICONS_TO_COPY = [
   "font",
   "bolt",
   "arrow-up-right-from-square",
+  "diagram-project",
+  "arrows-up-down",
+  "exchange",
   // Add more icon names here
 ];
 
