@@ -26149,41 +26149,81 @@ if (!customElements.get("wc-explain-tree")) {
     IXSCAN: { border: "#22c55e", bg: "rgba(34,197,94,0.1)", label: "good" },
     FETCH: { border: "#6366f1", bg: "rgba(99,102,241,0.1)", label: "info" },
     SORT: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: "warn" },
-    SORT_KEY_GENERATOR: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: "warn" },
-    SORT_MERGE: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: "warn" },
-    PROJECTION: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
-    PROJECTION_COVERED: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
-    PROJECTION_SIMPLE: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
+    SORT_KEY_GENERATOR: {
+      border: "#f59e0b",
+      bg: "rgba(245,158,11,0.1)",
+      label: "warn"
+    },
+    SORT_MERGE: {
+      border: "#f59e0b",
+      bg: "rgba(245,158,11,0.1)",
+      label: "warn"
+    },
+    PROJECTION: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral"
+    },
+    PROJECTION_COVERED: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral"
+    },
+    PROJECTION_SIMPLE: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral"
+    },
     LIMIT: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
     SKIP: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
     COUNT: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
     COUNT_SCAN: { border: "#22c55e", bg: "rgba(34,197,94,0.1)", label: "good" },
-    SHARDING_FILTER: { border: "#a855f7", bg: "rgba(168,85,247,0.1)", label: "shard" },
-    SHARD_MERGE: { border: "#a855f7", bg: "rgba(168,85,247,0.1)", label: "shard" },
+    SHARDING_FILTER: {
+      border: "#a855f7",
+      bg: "rgba(168,85,247,0.1)",
+      label: "shard"
+    },
+    SHARD_MERGE: {
+      border: "#a855f7",
+      bg: "rgba(168,85,247,0.1)",
+      label: "shard"
+    },
     OR: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
-    AND_HASH: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
-    AND_SORTED: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
+    AND_HASH: {
+      border: "#f97316",
+      bg: "rgba(249,115,22,0.1)",
+      label: "branch"
+    },
+    AND_SORTED: {
+      border: "#f97316",
+      bg: "rgba(249,115,22,0.1)",
+      label: "branch"
+    },
     SUBPLAN: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
     EOF: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" }
   };
-  const DEFAULT_COLOR = { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" };
+  const DEFAULT_COLOR = {
+    border: "#64748b",
+    bg: "rgba(100,116,139,0.1)",
+    label: "neutral"
+  };
   const AGG_COLORS = {
-    "$match": { border: "#22c55e", bg: "rgba(34,197,94,0.1)" },
-    "$group": { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
-    "$sort": { border: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
-    "$project": { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
-    "$lookup": { border: "#a855f7", bg: "rgba(168,85,247,0.1)" },
-    "$unwind": { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
-    "$limit": { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
-    "$skip": { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
-    "$addFields": { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
-    "$set": { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
-    "$count": { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
-    "$out": { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
-    "$merge": { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
-    "$bucket": { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
-    "$facet": { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
-    "$replaceRoot": { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" }
+    $match: { border: "#22c55e", bg: "rgba(34,197,94,0.1)" },
+    $group: { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+    $sort: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
+    $project: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $lookup: { border: "#a855f7", bg: "rgba(168,85,247,0.1)" },
+    $unwind: { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
+    $limit: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $skip: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $addFields: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
+    $set: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
+    $count: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $out: { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
+    $merge: { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
+    $bucket: { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+    $facet: { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
+    $replaceRoot: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" }
   };
   const AGG_DEFAULT = { border: "#64748b", bg: "rgba(100,116,139,0.1)" };
   class WcExplainTree extends WcBaseComponent {
@@ -26218,6 +26258,23 @@ if (!customElements.get("wc-explain-tree")) {
     _render() {
       super._render();
     }
+    set data(val) {
+      if (typeof val === "string") {
+        try {
+          val = JSON.parse(val);
+        } catch (e) {
+          val = null;
+        }
+      }
+      if (val && val.raw && val.raw.queryPlanner) {
+        val = val.raw;
+      }
+      this._data = val;
+      this._buildUI();
+    }
+    get data() {
+      return this._data;
+    }
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === "data") {
         this._parseData();
@@ -26234,7 +26291,11 @@ if (!customElements.get("wc-explain-tree")) {
         return;
       }
       try {
-        this._data = JSON.parse(raw);
+        let parsed = JSON.parse(raw);
+        if (parsed && parsed.raw && parsed.raw.queryPlanner) {
+          parsed = parsed.raw;
+        }
+        this._data = parsed;
       } catch (e) {
         this._data = null;
       }
@@ -26316,8 +26377,10 @@ if (!customElements.get("wc-explain-tree")) {
       if (hasCollScan) parts.push("Collection scan");
       else if (success) parts.push("Execution successful");
       parts.push(`${this._fmt(nReturned)} returned`);
-      if (docsExamined !== "?") parts.push(`${this._fmt(docsExamined)} docs examined`);
-      if (keysExamined !== "?" && keysExamined > 0) parts.push(`${this._fmt(keysExamined)} keys examined`);
+      if (docsExamined !== "?")
+        parts.push(`${this._fmt(docsExamined)} docs examined`);
+      if (keysExamined !== "?" && keysExamined > 0)
+        parts.push(`${this._fmt(keysExamined)} keys examined`);
       parts.push(`${timeMs}ms`);
       if (indexName) parts.push(`Index: ${indexName}`);
       else if (hasCollScan) parts.push("No index used");
@@ -26328,7 +26391,8 @@ if (!customElements.get("wc-explain-tree")) {
       if (!stage) return false;
       if (stage.stage === name) return true;
       if (stage.inputStage) return this._hasStage(stage.inputStage, name);
-      if (stage.inputStages) return stage.inputStages.some((s) => this._hasStage(s, name));
+      if (stage.inputStages)
+        return stage.inputStages.some((s) => this._hasStage(s, name));
       return false;
     }
     _findIndexName(stage) {
@@ -26388,16 +26452,41 @@ if (!customElements.get("wc-explain-tree")) {
       node.appendChild(header);
       const metrics = document.createElement("div");
       metrics.classList.add("explain-node-metrics");
-      if (stage.nReturned !== void 0) this._addMetric(metrics, "Returned", this._fmt(stage.nReturned));
-      if (stage.docsExamined !== void 0) this._addMetric(metrics, "Docs examined", this._fmt(stage.docsExamined));
-      if (stage.keysExamined !== void 0) this._addMetric(metrics, "Keys examined", this._fmt(stage.keysExamined));
-      if (stage.executionTimeMillisEstimate !== void 0) this._addMetric(metrics, "Time", stage.executionTimeMillisEstimate + "ms");
+      if (stage.nReturned !== void 0)
+        this._addMetric(metrics, "Returned", this._fmt(stage.nReturned));
+      if (stage.docsExamined !== void 0)
+        this._addMetric(
+          metrics,
+          "Docs examined",
+          this._fmt(stage.docsExamined)
+        );
+      if (stage.keysExamined !== void 0)
+        this._addMetric(
+          metrics,
+          "Keys examined",
+          this._fmt(stage.keysExamined)
+        );
+      if (stage.executionTimeMillisEstimate !== void 0)
+        this._addMetric(
+          metrics,
+          "Time",
+          stage.executionTimeMillisEstimate + "ms"
+        );
       if (stage.indexName) this._addMetric(metrics, "Index", stage.indexName);
-      if (stage.keyPattern) this._addMetric(metrics, "Key pattern", JSON.stringify(stage.keyPattern));
-      if (stage.direction) this._addMetric(metrics, "Direction", stage.direction);
-      if (stage.sortPattern) this._addMetric(metrics, "Sort", JSON.stringify(stage.sortPattern));
-      if (stage.filter) this._addMetric(metrics, "Filter", JSON.stringify(stage.filter));
-      if (stage.isMultiKey !== void 0) this._addMetric(metrics, "Multi-key", String(stage.isMultiKey));
+      if (stage.keyPattern)
+        this._addMetric(
+          metrics,
+          "Key pattern",
+          JSON.stringify(stage.keyPattern)
+        );
+      if (stage.direction)
+        this._addMetric(metrics, "Direction", stage.direction);
+      if (stage.sortPattern)
+        this._addMetric(metrics, "Sort", JSON.stringify(stage.sortPattern));
+      if (stage.filter)
+        this._addMetric(metrics, "Filter", JSON.stringify(stage.filter));
+      if (stage.isMultiKey !== void 0)
+        this._addMetric(metrics, "Multi-key", String(stage.isMultiKey));
       node.appendChild(metrics);
       node.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -26451,14 +26540,26 @@ if (!customElements.get("wc-explain-tree")) {
           const wp = stageData.queryPlanner.winningPlan;
           if (wp) this._addMetric(metrics, "Plan", wp.stage || "unknown");
           if (stageData.executionStats) {
-            this._addMetric(metrics, "Returned", this._fmt(stageData.executionStats.nReturned));
-            this._addMetric(metrics, "Time", stageData.executionStats.executionTimeMillis + "ms");
+            this._addMetric(
+              metrics,
+              "Returned",
+              this._fmt(stageData.executionStats.nReturned)
+            );
+            this._addMetric(
+              metrics,
+              "Time",
+              stageData.executionStats.executionTimeMillis + "ms"
+            );
           }
         } else if (typeof stageData === "object" && stageData !== null) {
           const entries = Object.entries(stageData).slice(0, 4);
           entries.forEach(([k, v]) => {
             const display = typeof v === "object" ? JSON.stringify(v) : String(v);
-            this._addMetric(metrics, k, display.length > 50 ? display.substring(0, 47) + "..." : display);
+            this._addMetric(
+              metrics,
+              k,
+              display.length > 50 ? display.substring(0, 47) + "..." : display
+            );
           });
         }
         node.appendChild(metrics);
@@ -26476,7 +26577,9 @@ if (!customElements.get("wc-explain-tree")) {
       const existing = node.querySelector(".explain-detail");
       if (existing) {
         existing.classList.add("explain-detail-closing");
-        existing.addEventListener("animationend", () => existing.remove(), { once: true });
+        existing.addEventListener("animationend", () => existing.remove(), {
+          once: true
+        });
         return;
       }
       this.componentElement.querySelectorAll(".explain-detail").forEach((d) => d.remove());
@@ -26494,6 +26597,9 @@ if (!customElements.get("wc-explain-tree")) {
     // ── Styles ────────────────────────────────────────────────────────────────
     _applyStyle() {
       const style = `
+        wc-explain-tree {
+          display: contents;
+        }
         .wc-explain-tree {
           display: flex;
           flex-direction: column;
@@ -26670,6 +26776,28 @@ if (!customElements.get("wc-explain-tree")) {
           margin: 0;
           white-space: pre-wrap;
           word-break: break-all;
+        }
+
+        /* Loading indicator */
+        .explain-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 2rem;
+          color: var(--text-6, #888);
+          font-size: 0.875rem;
+        }
+        .explain-spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid var(--text-6, #444);
+          border-top-color: var(--primary-bg-color, #6366f1);
+          border-radius: 50%;
+          animation: explainSpin 0.6s linear infinite;
+        }
+        @keyframes explainSpin {
+          to { transform: rotate(360deg); }
         }
 
         /* Empty state */

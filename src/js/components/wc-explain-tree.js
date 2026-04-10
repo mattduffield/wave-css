@@ -10,62 +10,103 @@
  * Renders MongoDB explain plan output as a visual stage-by-stage flow diagram.
  */
 
-import { WcBaseComponent } from './wc-base-component.js';
+import { WcBaseComponent } from "./wc-base-component.js";
 
-if (!customElements.get('wc-explain-tree')) {
-
+if (!customElements.get("wc-explain-tree")) {
   const STAGE_COLORS = {
-    COLLSCAN:           { border: '#ef4444', bg: 'rgba(239,68,68,0.1)',  label: 'danger' },
-    IXSCAN:             { border: '#22c55e', bg: 'rgba(34,197,94,0.1)',  label: 'good' },
-    FETCH:              { border: '#6366f1', bg: 'rgba(99,102,241,0.1)', label: 'info' },
-    SORT:               { border: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: 'warn' },
-    SORT_KEY_GENERATOR: { border: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: 'warn' },
-    SORT_MERGE:         { border: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: 'warn' },
-    PROJECTION:         { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    PROJECTION_COVERED: { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    PROJECTION_SIMPLE:  { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    LIMIT:              { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    SKIP:               { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    COUNT:              { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
-    COUNT_SCAN:         { border: '#22c55e', bg: 'rgba(34,197,94,0.1)',  label: 'good' },
-    SHARDING_FILTER:    { border: '#a855f7', bg: 'rgba(168,85,247,0.1)', label: 'shard' },
-    SHARD_MERGE:        { border: '#a855f7', bg: 'rgba(168,85,247,0.1)', label: 'shard' },
-    OR:                 { border: '#f97316', bg: 'rgba(249,115,22,0.1)', label: 'branch' },
-    AND_HASH:           { border: '#f97316', bg: 'rgba(249,115,22,0.1)', label: 'branch' },
-    AND_SORTED:         { border: '#f97316', bg: 'rgba(249,115,22,0.1)', label: 'branch' },
-    SUBPLAN:            { border: '#f97316', bg: 'rgba(249,115,22,0.1)', label: 'branch' },
-    EOF:                { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' },
+    COLLSCAN: { border: "#ef4444", bg: "rgba(239,68,68,0.1)", label: "danger" },
+    IXSCAN: { border: "#22c55e", bg: "rgba(34,197,94,0.1)", label: "good" },
+    FETCH: { border: "#6366f1", bg: "rgba(99,102,241,0.1)", label: "info" },
+    SORT: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: "warn" },
+    SORT_KEY_GENERATOR: {
+      border: "#f59e0b",
+      bg: "rgba(245,158,11,0.1)",
+      label: "warn",
+    },
+    SORT_MERGE: {
+      border: "#f59e0b",
+      bg: "rgba(245,158,11,0.1)",
+      label: "warn",
+    },
+    PROJECTION: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral",
+    },
+    PROJECTION_COVERED: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral",
+    },
+    PROJECTION_SIMPLE: {
+      border: "#64748b",
+      bg: "rgba(100,116,139,0.1)",
+      label: "neutral",
+    },
+    LIMIT: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
+    SKIP: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
+    COUNT: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
+    COUNT_SCAN: { border: "#22c55e", bg: "rgba(34,197,94,0.1)", label: "good" },
+    SHARDING_FILTER: {
+      border: "#a855f7",
+      bg: "rgba(168,85,247,0.1)",
+      label: "shard",
+    },
+    SHARD_MERGE: {
+      border: "#a855f7",
+      bg: "rgba(168,85,247,0.1)",
+      label: "shard",
+    },
+    OR: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
+    AND_HASH: {
+      border: "#f97316",
+      bg: "rgba(249,115,22,0.1)",
+      label: "branch",
+    },
+    AND_SORTED: {
+      border: "#f97316",
+      bg: "rgba(249,115,22,0.1)",
+      label: "branch",
+    },
+    SUBPLAN: { border: "#f97316", bg: "rgba(249,115,22,0.1)", label: "branch" },
+    EOF: { border: "#64748b", bg: "rgba(100,116,139,0.1)", label: "neutral" },
   };
 
-  const DEFAULT_COLOR = { border: '#64748b', bg: 'rgba(100,116,139,0.1)', label: 'neutral' };
+  const DEFAULT_COLOR = {
+    border: "#64748b",
+    bg: "rgba(100,116,139,0.1)",
+    label: "neutral",
+  };
 
   // Aggregation pipeline stage colors
   const AGG_COLORS = {
-    '$match':    { border: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-    '$group':    { border: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
-    '$sort':     { border: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-    '$project':  { border: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    '$lookup':   { border: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
-    '$unwind':   { border: '#f97316', bg: 'rgba(249,115,22,0.1)' },
-    '$limit':    { border: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    '$skip':     { border: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    '$addFields':{ border: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
-    '$set':      { border: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
-    '$count':    { border: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    '$out':      { border: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-    '$merge':    { border: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-    '$bucket':   { border: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
-    '$facet':    { border: '#f97316', bg: 'rgba(249,115,22,0.1)' },
-    '$replaceRoot': { border: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
+    $match: { border: "#22c55e", bg: "rgba(34,197,94,0.1)" },
+    $group: { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+    $sort: { border: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
+    $project: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $lookup: { border: "#a855f7", bg: "rgba(168,85,247,0.1)" },
+    $unwind: { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
+    $limit: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $skip: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $addFields: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
+    $set: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
+    $count: { border: "#64748b", bg: "rgba(100,116,139,0.1)" },
+    $out: { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
+    $merge: { border: "#ef4444", bg: "rgba(239,68,68,0.1)" },
+    $bucket: { border: "#6366f1", bg: "rgba(99,102,241,0.1)" },
+    $facet: { border: "#f97316", bg: "rgba(249,115,22,0.1)" },
+    $replaceRoot: { border: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
   };
 
-  const AGG_DEFAULT = { border: '#64748b', bg: 'rgba(100,116,139,0.1)' };
+  const AGG_DEFAULT = { border: "#64748b", bg: "rgba(100,116,139,0.1)" };
 
   class WcExplainTree extends WcBaseComponent {
-    static get is() { return 'wc-explain-tree'; }
+    static get is() {
+      return "wc-explain-tree";
+    }
 
     static get observedAttributes() {
-      return ['id', 'class', 'data', 'height'];
+      return ["id", "class", "data", "height"];
     }
 
     constructor() {
@@ -73,12 +114,12 @@ if (!customElements.get('wc-explain-tree')) {
       this._data = null;
       this._expandedStage = null;
 
-      const compEl = this.querySelector('.wc-explain-tree');
+      const compEl = this.querySelector(".wc-explain-tree");
       if (compEl) {
         this.componentElement = compEl;
       } else {
-        this.componentElement = document.createElement('div');
-        this.componentElement.classList.add('wc-explain-tree');
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-explain-tree");
         this.appendChild(this.componentElement);
       }
     }
@@ -98,8 +139,27 @@ if (!customElements.get('wc-explain-tree')) {
       super._render();
     }
 
+    set data(val) {
+      if (typeof val === "string") {
+        try {
+          val = JSON.parse(val);
+        } catch (e) {
+          val = null;
+        }
+      }
+      if (val && val.raw && val.raw.queryPlanner) {
+        val = val.raw;
+      }
+      this._data = val;
+      this._buildUI();
+    }
+
+    get data() {
+      return this._data;
+    }
+
     async _handleAttributeChange(attrName, newValue) {
-      if (attrName === 'data') {
+      if (attrName === "data") {
         this._parseData();
         this._buildUI();
       } else {
@@ -110,10 +170,17 @@ if (!customElements.get('wc-explain-tree')) {
     // ── Data parsing ──────────────────────────────────────────────────────────
 
     _parseData() {
-      const raw = this.getAttribute('data');
-      if (!raw) { this._data = null; return; }
+      const raw = this.getAttribute("data");
+      if (!raw) {
+        this._data = null;
+        return;
+      }
       try {
-        this._data = JSON.parse(raw);
+        let parsed = JSON.parse(raw);
+        if (parsed && parsed.raw && parsed.raw.queryPlanner) {
+          parsed = parsed.raw;
+        }
+        this._data = parsed;
       } catch (e) {
         this._data = null;
       }
@@ -122,12 +189,20 @@ if (!customElements.get('wc-explain-tree')) {
     _isAggregation() {
       if (!this._data) return false;
       // Aggregation explains have stages array or $cursor
-      return !!(this._data.stages || (this._data.queryPlanner && this._data.queryPlanner.winningPlan && this._data.queryPlanner.winningPlan.stage === undefined));
+      return !!(
+        this._data.stages ||
+        (this._data.queryPlanner &&
+          this._data.queryPlanner.winningPlan &&
+          this._data.queryPlanner.winningPlan.stage === undefined)
+      );
     }
 
     _getExecutionStages() {
       if (!this._data) return null;
-      if (this._data.executionStats && this._data.executionStats.executionStages) {
+      if (
+        this._data.executionStats &&
+        this._data.executionStats.executionStages
+      ) {
         return this._data.executionStats.executionStages;
       }
       if (this._data.queryPlanner && this._data.queryPlanner.winningPlan) {
@@ -150,14 +225,15 @@ if (!customElements.get('wc-explain-tree')) {
     // ── UI building ───────────────────────────────────────────────────────────
 
     _buildUI() {
-      this.componentElement.innerHTML = '';
+      this.componentElement.innerHTML = "";
       this._expandedStage = null;
 
-      const height = this.getAttribute('height');
+      const height = this.getAttribute("height");
       if (height) this.componentElement.style.height = height;
 
       if (!this._data) {
-        this.componentElement.innerHTML = '<div class="explain-empty">No explain data. Run a query with <code>.explain("executionStats")</code>.</div>';
+        this.componentElement.innerHTML =
+          '<div class="explain-empty">No explain data. Run a query with <code>.explain("executionStats")</code>.</div>';
         return;
       }
 
@@ -165,8 +241,8 @@ if (!customElements.get('wc-explain-tree')) {
       this.componentElement.appendChild(this._buildSummary());
 
       // Stage tree
-      const treeArea = document.createElement('div');
-      treeArea.classList.add('explain-tree-area');
+      const treeArea = document.createElement("div");
+      treeArea.classList.add("explain-tree-area");
 
       const aggStages = this._getAggStages();
       if (aggStages) {
@@ -184,51 +260,58 @@ if (!customElements.get('wc-explain-tree')) {
     // ── Summary bar ───────────────────────────────────────────────────────────
 
     _buildSummary() {
-      const bar = document.createElement('div');
-      bar.classList.add('explain-summary');
+      const bar = document.createElement("div");
+      bar.classList.add("explain-summary");
 
       const stats = this._getExecutionStats();
       const root = this._getExecutionStages();
 
       if (!stats && !root) {
-        bar.textContent = 'Query plan (no execution stats)';
-        bar.classList.add('explain-summary-neutral');
+        bar.textContent = "Query plan (no execution stats)";
+        bar.classList.add("explain-summary-neutral");
         return bar;
       }
 
-      const nReturned = stats?.nReturned ?? root?.nReturned ?? '?';
-      const docsExamined = stats?.totalDocsExamined ?? '?';
-      const keysExamined = stats?.totalKeysExamined ?? '?';
-      const timeMs = stats?.executionTimeMillis ?? '?';
+      const nReturned = stats?.nReturned ?? root?.nReturned ?? "?";
+      const docsExamined = stats?.totalDocsExamined ?? "?";
+      const keysExamined = stats?.totalKeysExamined ?? "?";
+      const timeMs = stats?.executionTimeMillis ?? "?";
       const success = stats?.executionSuccess !== false;
 
       // Detect COLLSCAN
-      const hasCollScan = this._hasStage(root, 'COLLSCAN');
+      const hasCollScan = this._hasStage(root, "COLLSCAN");
       // Find index name
       const indexName = this._findIndexName(root);
 
       // Determine severity
-      let severity = 'good';
+      let severity = "good";
       if (hasCollScan) {
-        severity = 'danger';
-      } else if (typeof docsExamined === 'number' && typeof nReturned === 'number' && docsExamined > nReturned * 2) {
-        severity = 'warn';
+        severity = "danger";
+      } else if (
+        typeof docsExamined === "number" &&
+        typeof nReturned === "number" &&
+        docsExamined > nReturned * 2
+      ) {
+        severity = "warn";
       }
 
       bar.classList.add(`explain-summary-${severity}`);
 
-      const icon = severity === 'danger' ? '⚠' : severity === 'warn' ? '⚠' : '✓';
+      const icon =
+        severity === "danger" ? "⚠" : severity === "warn" ? "⚠" : "✓";
       const parts = [];
-      if (hasCollScan) parts.push('Collection scan');
-      else if (success) parts.push('Execution successful');
+      if (hasCollScan) parts.push("Collection scan");
+      else if (success) parts.push("Execution successful");
       parts.push(`${this._fmt(nReturned)} returned`);
-      if (docsExamined !== '?') parts.push(`${this._fmt(docsExamined)} docs examined`);
-      if (keysExamined !== '?' && keysExamined > 0) parts.push(`${this._fmt(keysExamined)} keys examined`);
+      if (docsExamined !== "?")
+        parts.push(`${this._fmt(docsExamined)} docs examined`);
+      if (keysExamined !== "?" && keysExamined > 0)
+        parts.push(`${this._fmt(keysExamined)} keys examined`);
       parts.push(`${timeMs}ms`);
       if (indexName) parts.push(`Index: ${indexName}`);
-      else if (hasCollScan) parts.push('No index used');
+      else if (hasCollScan) parts.push("No index used");
 
-      bar.innerHTML = `<span class="explain-summary-icon">${icon}</span> ${parts.join(' &middot; ')}`;
+      bar.innerHTML = `<span class="explain-summary-icon">${icon}</span> ${parts.join(" &middot; ")}`;
 
       return bar;
     }
@@ -237,7 +320,8 @@ if (!customElements.get('wc-explain-tree')) {
       if (!stage) return false;
       if (stage.stage === name) return true;
       if (stage.inputStage) return this._hasStage(stage.inputStage, name);
-      if (stage.inputStages) return stage.inputStages.some(s => this._hasStage(s, name));
+      if (stage.inputStages)
+        return stage.inputStages.some((s) => this._hasStage(s, name));
       return false;
     }
 
@@ -255,23 +339,23 @@ if (!customElements.get('wc-explain-tree')) {
     }
 
     _fmt(n) {
-      if (typeof n !== 'number') return n;
+      if (typeof n !== "number") return n;
       return n.toLocaleString();
     }
 
     // ── Stage tree rendering ──────────────────────────────────────────────────
 
     _buildStageTree(stage) {
-      const container = document.createElement('div');
-      container.classList.add('explain-flow');
+      const container = document.createElement("div");
+      container.classList.add("explain-flow");
 
       // Build bottom-up: input stages first, then this stage
       if (stage.inputStages && stage.inputStages.length > 0) {
-        const branches = document.createElement('div');
-        branches.classList.add('explain-branches');
-        stage.inputStages.forEach(s => {
-          const branch = document.createElement('div');
-          branch.classList.add('explain-branch');
+        const branches = document.createElement("div");
+        branches.classList.add("explain-branches");
+        stage.inputStages.forEach((s) => {
+          const branch = document.createElement("div");
+          branch.classList.add("explain-branch");
           branch.appendChild(this._buildStageTree(s));
           branches.appendChild(branch);
         });
@@ -288,61 +372,86 @@ if (!customElements.get('wc-explain-tree')) {
 
     _buildStageNode(stage) {
       const colors = STAGE_COLORS[stage.stage] || DEFAULT_COLOR;
-      const node = document.createElement('div');
-      node.classList.add('explain-node');
+      const node = document.createElement("div");
+      node.classList.add("explain-node");
       node.style.borderLeftColor = colors.border;
       node.style.backgroundColor = colors.bg;
 
       // Header
-      const header = document.createElement('div');
-      header.classList.add('explain-node-header');
-      const dot = document.createElement('span');
-      dot.classList.add('explain-node-dot');
+      const header = document.createElement("div");
+      header.classList.add("explain-node-header");
+      const dot = document.createElement("span");
+      dot.classList.add("explain-node-dot");
       dot.style.backgroundColor = colors.border;
       header.appendChild(dot);
-      const name = document.createElement('span');
-      name.classList.add('explain-node-name');
+      const name = document.createElement("span");
+      name.classList.add("explain-node-name");
       name.textContent = stage.stage;
       header.appendChild(name);
       node.appendChild(header);
 
       // Metrics
-      const metrics = document.createElement('div');
-      metrics.classList.add('explain-node-metrics');
+      const metrics = document.createElement("div");
+      metrics.classList.add("explain-node-metrics");
 
-      if (stage.nReturned !== undefined) this._addMetric(metrics, 'Returned', this._fmt(stage.nReturned));
-      if (stage.docsExamined !== undefined) this._addMetric(metrics, 'Docs examined', this._fmt(stage.docsExamined));
-      if (stage.keysExamined !== undefined) this._addMetric(metrics, 'Keys examined', this._fmt(stage.keysExamined));
-      if (stage.executionTimeMillisEstimate !== undefined) this._addMetric(metrics, 'Time', stage.executionTimeMillisEstimate + 'ms');
-      if (stage.indexName) this._addMetric(metrics, 'Index', stage.indexName);
-      if (stage.keyPattern) this._addMetric(metrics, 'Key pattern', JSON.stringify(stage.keyPattern));
-      if (stage.direction) this._addMetric(metrics, 'Direction', stage.direction);
-      if (stage.sortPattern) this._addMetric(metrics, 'Sort', JSON.stringify(stage.sortPattern));
-      if (stage.filter) this._addMetric(metrics, 'Filter', JSON.stringify(stage.filter));
-      if (stage.isMultiKey !== undefined) this._addMetric(metrics, 'Multi-key', String(stage.isMultiKey));
+      if (stage.nReturned !== undefined)
+        this._addMetric(metrics, "Returned", this._fmt(stage.nReturned));
+      if (stage.docsExamined !== undefined)
+        this._addMetric(
+          metrics,
+          "Docs examined",
+          this._fmt(stage.docsExamined),
+        );
+      if (stage.keysExamined !== undefined)
+        this._addMetric(
+          metrics,
+          "Keys examined",
+          this._fmt(stage.keysExamined),
+        );
+      if (stage.executionTimeMillisEstimate !== undefined)
+        this._addMetric(
+          metrics,
+          "Time",
+          stage.executionTimeMillisEstimate + "ms",
+        );
+      if (stage.indexName) this._addMetric(metrics, "Index", stage.indexName);
+      if (stage.keyPattern)
+        this._addMetric(
+          metrics,
+          "Key pattern",
+          JSON.stringify(stage.keyPattern),
+        );
+      if (stage.direction)
+        this._addMetric(metrics, "Direction", stage.direction);
+      if (stage.sortPattern)
+        this._addMetric(metrics, "Sort", JSON.stringify(stage.sortPattern));
+      if (stage.filter)
+        this._addMetric(metrics, "Filter", JSON.stringify(stage.filter));
+      if (stage.isMultiKey !== undefined)
+        this._addMetric(metrics, "Multi-key", String(stage.isMultiKey));
 
       node.appendChild(metrics);
 
       // Click to expand raw JSON
-      node.addEventListener('click', (e) => {
+      node.addEventListener("click", (e) => {
         e.stopPropagation();
         this._toggleDetail(node, stage);
       });
-      node.title = 'Click to view raw JSON';
+      node.title = "Click to view raw JSON";
 
       return node;
     }
 
     _addMetric(container, label, value) {
-      const row = document.createElement('div');
-      row.classList.add('explain-metric');
+      const row = document.createElement("div");
+      row.classList.add("explain-metric");
       row.innerHTML = `<span class="explain-metric-label">${label}:</span> <span class="explain-metric-value">${value}</span>`;
       container.appendChild(row);
     }
 
     _buildConnector() {
-      const conn = document.createElement('div');
-      conn.classList.add('explain-connector');
+      const conn = document.createElement("div");
+      conn.classList.add("explain-connector");
       conn.innerHTML = '<span class="explain-arrow">▲</span>';
       return conn;
     }
@@ -350,8 +459,8 @@ if (!customElements.get('wc-explain-tree')) {
     // ── Aggregation pipeline ──────────────────────────────────────────────────
 
     _buildAggPipeline(stages) {
-      const container = document.createElement('div');
-      container.classList.add('explain-flow');
+      const container = document.createElement("div");
+      container.classList.add("explain-flow");
 
       stages.forEach((stageObj, idx) => {
         if (idx > 0) {
@@ -360,54 +469,67 @@ if (!customElements.get('wc-explain-tree')) {
 
         // Each agg stage is { "$match": { ... } } or { "$cursor": { ... } }
         const keys = Object.keys(stageObj);
-        const stageName = keys[0] || 'unknown';
+        const stageName = keys[0] || "unknown";
         const stageData = stageObj[stageName] || {};
 
         const colors = AGG_COLORS[stageName] || AGG_DEFAULT;
-        const node = document.createElement('div');
-        node.classList.add('explain-node');
+        const node = document.createElement("div");
+        node.classList.add("explain-node");
         node.style.borderLeftColor = colors.border;
         node.style.backgroundColor = colors.bg;
 
-        const header = document.createElement('div');
-        header.classList.add('explain-node-header');
-        const dot = document.createElement('span');
-        dot.classList.add('explain-node-dot');
+        const header = document.createElement("div");
+        header.classList.add("explain-node-header");
+        const dot = document.createElement("span");
+        dot.classList.add("explain-node-dot");
         dot.style.backgroundColor = colors.border;
         header.appendChild(dot);
-        const name = document.createElement('span');
-        name.classList.add('explain-node-name');
+        const name = document.createElement("span");
+        name.classList.add("explain-node-name");
         name.textContent = stageName;
         header.appendChild(name);
         node.appendChild(header);
 
-        const metrics = document.createElement('div');
-        metrics.classList.add('explain-node-metrics');
+        const metrics = document.createElement("div");
+        metrics.classList.add("explain-node-metrics");
 
         // Show key info based on stage type
-        if (stageName === '$cursor' && stageData.queryPlanner) {
+        if (stageName === "$cursor" && stageData.queryPlanner) {
           const wp = stageData.queryPlanner.winningPlan;
-          if (wp) this._addMetric(metrics, 'Plan', wp.stage || 'unknown');
+          if (wp) this._addMetric(metrics, "Plan", wp.stage || "unknown");
           if (stageData.executionStats) {
-            this._addMetric(metrics, 'Returned', this._fmt(stageData.executionStats.nReturned));
-            this._addMetric(metrics, 'Time', stageData.executionStats.executionTimeMillis + 'ms');
+            this._addMetric(
+              metrics,
+              "Returned",
+              this._fmt(stageData.executionStats.nReturned),
+            );
+            this._addMetric(
+              metrics,
+              "Time",
+              stageData.executionStats.executionTimeMillis + "ms",
+            );
           }
-        } else if (typeof stageData === 'object' && stageData !== null) {
+        } else if (typeof stageData === "object" && stageData !== null) {
           // Show first few fields as metrics
           const entries = Object.entries(stageData).slice(0, 4);
           entries.forEach(([k, v]) => {
-            const display = typeof v === 'object' ? JSON.stringify(v) : String(v);
-            this._addMetric(metrics, k, display.length > 50 ? display.substring(0, 47) + '...' : display);
+            const display =
+              typeof v === "object" ? JSON.stringify(v) : String(v);
+            this._addMetric(
+              metrics,
+              k,
+              display.length > 50 ? display.substring(0, 47) + "..." : display,
+            );
           });
         }
 
         node.appendChild(metrics);
 
-        node.addEventListener('click', (e) => {
+        node.addEventListener("click", (e) => {
           e.stopPropagation();
           this._toggleDetail(node, stageObj);
         });
-        node.title = 'Click to view raw JSON';
+        node.title = "Click to view raw JSON";
 
         container.appendChild(node);
       });
@@ -418,26 +540,30 @@ if (!customElements.get('wc-explain-tree')) {
     // ── Detail panel ──────────────────────────────────────────────────────────
 
     _toggleDetail(node, stageData) {
-      const existing = node.querySelector('.explain-detail');
+      const existing = node.querySelector(".explain-detail");
       if (existing) {
-        existing.classList.add('explain-detail-closing');
-        existing.addEventListener('animationend', () => existing.remove(), { once: true });
+        existing.classList.add("explain-detail-closing");
+        existing.addEventListener("animationend", () => existing.remove(), {
+          once: true,
+        });
         return;
       }
 
       // Close any other open detail
-      this.componentElement.querySelectorAll('.explain-detail').forEach(d => d.remove());
+      this.componentElement
+        .querySelectorAll(".explain-detail")
+        .forEach((d) => d.remove());
 
-      const detail = document.createElement('div');
-      detail.classList.add('explain-detail');
+      const detail = document.createElement("div");
+      detail.classList.add("explain-detail");
 
       // Remove inputStage/inputStages from display to reduce noise
       const display = { ...stageData };
       delete display.inputStage;
       delete display.inputStages;
 
-      const pre = document.createElement('pre');
-      pre.classList.add('explain-detail-json');
+      const pre = document.createElement("pre");
+      pre.classList.add("explain-detail-json");
       pre.textContent = JSON.stringify(display, null, 2);
       detail.appendChild(pre);
 
@@ -448,6 +574,9 @@ if (!customElements.get('wc-explain-tree')) {
 
     _applyStyle() {
       const style = `
+        wc-explain-tree {
+          display: contents;
+        }
         .wc-explain-tree {
           display: flex;
           flex-direction: column;
@@ -626,6 +755,28 @@ if (!customElements.get('wc-explain-tree')) {
           word-break: break-all;
         }
 
+        /* Loading indicator */
+        .explain-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 2rem;
+          color: var(--text-6, #888);
+          font-size: 0.875rem;
+        }
+        .explain-spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid var(--text-6, #444);
+          border-top-color: var(--primary-bg-color, #6366f1);
+          border-radius: 50%;
+          animation: explainSpin 0.6s linear infinite;
+        }
+        @keyframes explainSpin {
+          to { transform: rotate(360deg); }
+        }
+
         /* Empty state */
         .explain-empty {
           padding: 2rem;
@@ -640,9 +791,9 @@ if (!customElements.get('wc-explain-tree')) {
           font-size: 0.8125rem;
         }
       `.trim();
-      this.loadStyle('wc-explain-tree-style', style);
+      this.loadStyle("wc-explain-tree-style", style);
     }
   }
 
-  customElements.define('wc-explain-tree', WcExplainTree);
+  customElements.define("wc-explain-tree", WcExplainTree);
 }
