@@ -3585,13 +3585,40 @@ if (!customElements.get("wc-code-mirror")) {
         "htmlmixed": ["xml", "css", "javascript"],
         "php": ["htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
-        "markdown": ["htmlmixed", "xml", "css", "javascript"]
+        "markdown": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-java": ["clike"],
+        "text/x-csharp": ["clike"],
+        "text/x-c++src": ["clike"],
+        "text/x-csrc": ["clike"],
+        "text/x-objectivec": ["clike"],
+        "text/x-scala": ["clike"],
+        "text/x-kotlin": ["clike"],
+        "python": [],
+        "go": [],
+        "ruby": [],
+        "rust": [],
+        "sql": [],
+        "shell": [],
+        "yaml": [],
+        "toml": [],
+        "dockerfile": [],
+        "swift": []
+      };
+      const mimeToModeFile = {
+        "text/x-java": "clike",
+        "text/x-csharp": "clike",
+        "text/x-c++src": "clike",
+        "text/x-csrc": "clike",
+        "text/x-objectivec": "clike",
+        "text/x-scala": "clike",
+        "text/x-kotlin": "clike"
       };
       const dependencies = modeDependencies[mode];
       if (dependencies && dependencies.length > 0) {
         for (const modeName of dependencies) {
           await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
         }
+        if (mimeToModeFile[mode]) return;
       }
       if (mode === "litespec") {
         CodeMirror.registerHelper("fold", "litespec", function(cm, start) {

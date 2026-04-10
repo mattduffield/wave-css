@@ -885,12 +885,43 @@ if (!customElements.get('wc-code-mirror')) {
         "php": ["htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
         "markdown": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-java": ["clike"],
+        "text/x-csharp": ["clike"],
+        "text/x-c++src": ["clike"],
+        "text/x-csrc": ["clike"],
+        "text/x-objectivec": ["clike"],
+        "text/x-scala": ["clike"],
+        "text/x-kotlin": ["clike"],
+        "python": [],
+        "go": [],
+        "ruby": [],
+        "rust": [],
+        "sql": [],
+        "shell": [],
+        "yaml": [],
+        "toml": [],
+        "dockerfile": [],
+        "swift": [],
       };
+
+      // MIME types that map to a mode file (mode file ≠ mode name)
+      const mimeToModeFile = {
+        "text/x-java": "clike",
+        "text/x-csharp": "clike",
+        "text/x-c++src": "clike",
+        "text/x-csrc": "clike",
+        "text/x-objectivec": "clike",
+        "text/x-scala": "clike",
+        "text/x-kotlin": "clike",
+      };
+
       const dependencies = modeDependencies[mode];
       if (dependencies && dependencies.length > 0) {
         for (const modeName of dependencies) {
           await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
         }
+        // For MIME types, the mode file is already loaded via dependencies — skip the default load below
+        if (mimeToModeFile[mode]) return;
       }
 
       if (mode === 'litespec') {
