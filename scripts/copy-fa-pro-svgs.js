@@ -628,6 +628,7 @@ const ICONS_TO_COPY = [
   "diagram-project",
   "arrows-up-down",
   "exchange",
+  "question",
   // Add more icon names here
 ];
 
