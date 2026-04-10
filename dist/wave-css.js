@@ -29598,6 +29598,11 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
               }
             }
           });
+          this.dispatchEvent(new CustomEvent("optionsloaded", {
+            bubbles: true,
+            composed: true,
+            detail: { value: this.value, optionCount: this._items.length }
+          }));
         });
       }
     } else if (attrName === "items") {
