@@ -320,10 +320,10 @@ if (!customElements.get('wc-table')) {
             this._sortField = field;
             this._sortDir = 'asc';
           }
-          this.dispatchEvent(new CustomEvent('table:sort', {
+          this._emitEvent('wctablesort', 'table:sort', {
             bubbles: true,
             detail: { field: this._sortField, direction: this._sortDir }
-          }));
+          });
           this._renderTable();
         });
       });
@@ -333,19 +333,19 @@ if (!customElements.get('wc-table')) {
         tr.addEventListener('click', () => {
           const idx = parseInt(tr.dataset.rowIndex);
           const data = this._getSortedData()[idx];
-          this.dispatchEvent(new CustomEvent('table:row-click', {
+          this._emitEvent('wctablerowclick', 'table:row-click', {
             bubbles: true,
             detail: { row: tr, index: idx, data }
-          }));
+          });
         });
 
         tr.addEventListener('dblclick', () => {
           const idx = parseInt(tr.dataset.rowIndex);
           const data = this._getSortedData()[idx];
-          this.dispatchEvent(new CustomEvent('table:row-dblclick', {
+          this._emitEvent('wctablerowdblclick', 'table:row-dblclick', {
             bubbles: true,
             detail: { row: tr, index: idx, data }
-          }));
+          });
         });
       });
     }

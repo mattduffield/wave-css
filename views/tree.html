@@ -294,7 +294,7 @@
       const log = document.getElementById('event-log-1');
 
       if (dbTree && log) {
-        dbTree.addEventListener('tree:item-click', (e) => {
+        dbTree.addEventListener('wctreeitemclick', (e) => {
           const d = e.detail;
           const entry = document.createElement('div');
           entry.textContent = `click: ${d.label} (level ${d.level}${d.badge ? ', badge: ' + d.badge : ''})`;
@@ -302,7 +302,7 @@
           if (log.children.length > 20) log.lastChild.remove();
         });
 
-        dbTree.addEventListener('tree:item-dblclick', (e) => {
+        dbTree.addEventListener('wctreeitemdblclick', (e) => {
           const d = e.detail;
           const entry = document.createElement('div');
           entry.style.color = 'var(--primary-color)';
@@ -310,7 +310,7 @@
           log.prepend(entry);
         });
 
-        dbTree.addEventListener('tree:item-context-menu', (e) => {
+        dbTree.addEventListener('wctreeitemcontextmenu', (e) => {
           e.preventDefault();
           const d = e.detail;
           const entry = document.createElement('div');

@@ -135,7 +135,7 @@ List slug convention: COLLECTION_list (e.g., article_list).
 === EXAMPLE (Content Tab) ===
 {% extends "__template_name__" %}
 {% block pageContent %}
-<wc-table-skeleton _="on 'wc-tabulator:ready' from body
+<wc-table-skeleton _="on 'wctabulatorready' from body
                       WaveHelpers.waitForThenHideAndShow('#table-skeleton', '.page-content', 3000, 500)
                    end">
 </wc-table-skeleton>
@@ -1094,7 +1094,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus('');
-          this._emitEvent('bot:ready', { botId, model: modelName });
+          this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: modelName });
           return;
         }
         
@@ -1105,7 +1105,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus('');
-          this._emitEvent('bot:ready', { botId, model: modelName });
+          this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: modelName });
           return;
         }
         
@@ -1120,7 +1120,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         this._isModelReady = true;
         this._sendButton.disabled = false;
         this._updateStatus('');
-        this._emitEvent('bot:ready', { botId, model: modelName });
+        this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: modelName });
         
         // Mark success in localStorage
         localStorage.setItem('wc-ai-bot-success', 'true');
@@ -1129,7 +1129,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         console.error('[wc-ai-bot] Failed to initialize model:', error);
         this._error = error.message;
         this._updateStatus(`Error: ${error.message}`, 'error');
-        this._emitEvent('bot:error', { botId, error: error.message });
+        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
         
         // Mark failure in localStorage (unless force-enabled)
         if (this.getAttribute('force-enable') !== 'true') {
@@ -1404,7 +1404,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         }
       } else {
         // For embedded bots, emit close event
-        this._emitEvent('bot:closed', { botId: this.getAttribute('bot-id') });
+        this._emitBotEvent('wcbotclosed', 'bot:closed', { botId: this.getAttribute('bot-id') });
       }
     }
 
@@ -1417,7 +1417,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._adjustInputHeight();
       
       // Emit message sent event
-      this._emitEvent('bot:message-sent', { botId, message });
+      this._emitBotEvent('wcbotmessagesent', 'bot:message-sent', { botId, message });
       
       // Show loading state
       this._isLoading = true;
@@ -1453,12 +1453,12 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         }
         
         // Emit response received event
-        this._emitEvent('bot:response-received', { botId, response });
+        this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', { botId, response });
         
       } catch (error) {
         console.error('[wc-ai-bot] Failed to get response:', error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
-        this._emitEvent('bot:error', { botId, error: error.message });
+        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
       } finally {
         this._isLoading = false;
         this._sendButton.disabled = false;
@@ -1677,17 +1677,15 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       return `Hello! I'm ${title}. How can I help you today?`;
     }
 
-    _emitEvent(eventName, detail) {
-      this.dispatchEvent(new CustomEvent(eventName, {
-        detail,
-        bubbles: true,
-        composed: true
-      }));
-      
-      // Also emit via EventHub
+    _emitBotEvent(newName, legacyName, detail) {
+      const opts = { detail, bubbles: true, composed: true };
+      // Use base class _emitEvent for backward-compat dispatch
+      super._emitEvent(newName, legacyName, opts);
+
+      // Also emit via EventHub (new name only)
       const botId = this.getAttribute('bot-id');
       if (botId && window.wc && window.wc.EventHub) {
-        window.wc.EventHub.broadcast(eventName, [`[bot-id="${botId}"]`], detail);
+        window.wc.EventHub.broadcast(newName, [`[bot-id="${botId}"]`], detail);
       }
     }
 
@@ -1721,7 +1719,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._messages = [];
       this._messagesContainer.innerHTML = '';
       this._addMessage('bot', this._getWelcomeMessage());
-      this._emitEvent('bot:conversation-cleared', { 
+      this._emitBotEvent('wcbotconversationcleared', 'bot:conversation-cleared', { 
         botId: this.getAttribute('bot-id') 
       });
     }
@@ -1854,7 +1852,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // For bubble theme, don't show anything
       if (theme === 'bubble') {
         this.style.display = 'none';
-        this._emitEvent('bot:unsupported', { 
+        this._emitBotEvent('wcbotunsupported', 'bot:unsupported', { 
           botId: this.getAttribute('bot-id'),
           reason: this._unsupportedReason
         });
@@ -1881,7 +1879,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this.appendChild(this._container);
       this._applyStyles();
       
-      this._emitEvent('bot:unsupported', { 
+      this._emitBotEvent('wcbotunsupported', 'bot:unsupported', { 
         botId: this.getAttribute('bot-id'),
         reason: this._unsupportedReason
       });

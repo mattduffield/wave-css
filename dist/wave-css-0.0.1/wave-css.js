@@ -301,7 +301,7 @@ function enableSortable(target) {
           oldIndex: evt.oldIndex,
           newIndex: evt.newIndex
         };
-        wc?.EventHub?.broadcast("sortable:on-end", "", "", custom);
+        wc?.EventHub?.broadcast("wcsortableonend", "", "", custom);
       }
     };
     if (typeof Sortable !== "undefined") {
@@ -822,8 +822,8 @@ var WcDependencyManager = class {
       let dispatchCount = 0;
       const dispatchReady = (source = "unknown") => {
         dispatchCount++;
-        this._log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
-        document.dispatchEvent(new CustomEvent("wc:ready", {
+        this._log(`Dispatching wcready event #${dispatchCount} (source: ${source})`);
+        document.dispatchEvent(new CustomEvent("wcready", {
           detail: {
             dependencies: Array.from(this._registeredDependencies),
             dispatchCount,
@@ -833,25 +833,25 @@ var WcDependencyManager = class {
       };
       this._log("Current document.readyState:", document.readyState);
       if (document.readyState === "loading") {
-        this._log("Waiting for DOMContentLoaded before dispatching wc:ready");
+        this._log("Waiting for DOMContentLoaded before dispatching wcready");
         document.addEventListener("DOMContentLoaded", () => {
           dispatchReady("DOMContentLoaded");
           setTimeout(() => dispatchReady("DOMContentLoaded+50ms"), 50);
           setTimeout(() => dispatchReady("DOMContentLoaded+150ms"), 150);
         }, { once: true });
       } else if (document.readyState === "interactive") {
-        this._log("DOM interactive, dispatching wc:ready with retries");
+        this._log("DOM interactive, dispatching wcready with retries");
         setTimeout(() => dispatchReady("interactive+0ms"), 0);
         setTimeout(() => dispatchReady("interactive+100ms"), 100);
         setTimeout(() => dispatchReady("interactive+200ms"), 200);
       } else {
-        this._log("DOM complete, dispatching wc:ready with retries");
+        this._log("DOM complete, dispatching wcready with retries");
         setTimeout(() => dispatchReady("complete+0ms"), 0);
         setTimeout(() => dispatchReady("complete+50ms"), 50);
         setTimeout(() => dispatchReady("complete+150ms"), 150);
       }
       window.addEventListener("load", () => {
-        this._log("window.load fired, dispatching wc:ready");
+        this._log("window.load fired, dispatching wcready");
         dispatchReady("window.load");
         setTimeout(() => dispatchReady("window.load+100ms"), 100);
       }, { once: true });
@@ -877,11 +877,11 @@ var WcDependencyManager = class {
   }
   /**
    * Trigger initialization for an element (for HTMX partial loads)
-   * This dispatches wc:ready to a specific element if dependencies are already loaded
+   * This dispatches wcready to a specific element if dependencies are already loaded
    */
   triggerReadyForElement(element) {
     if (this.isReady) {
-      element.dispatchEvent(new CustomEvent("wc:ready", {
+      element.dispatchEvent(new CustomEvent("wcready", {
         bubbles: false,
         detail: { dependencies: Array.from(this._registeredDependencies) }
       }));
@@ -929,23 +929,23 @@ if (typeof window !== "undefined") {
   document.addEventListener("htmx:afterSettle", (event) => {
     if (dependencyManager.isReady) {
       const target = event.detail.target;
-      dependencyManager._log("HTMX afterSettle - dependencies ready, dispatching wc:ready to new content");
+      dependencyManager._log("HTMX afterSettle - dependencies ready, dispatching wcready to new content");
       dependencyManager._log("Target element:", target);
       setTimeout(() => {
-        dependencyManager._log("Dispatching wc:ready after hyperscript initialization delay");
-        target.dispatchEvent(new CustomEvent("wc:ready", {
+        dependencyManager._log("Dispatching wcready after hyperscript initialization delay");
+        target.dispatchEvent(new CustomEvent("wcready", {
           bubbles: true,
           detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
         }));
         const allElements = target.querySelectorAll("*");
-        dependencyManager._log(`Dispatching wc:ready to ${allElements.length} child elements`);
+        dependencyManager._log(`Dispatching wcready to ${allElements.length} child elements`);
         allElements.forEach((el, index) => {
-          el.dispatchEvent(new CustomEvent("wc:ready", {
+          el.dispatchEvent(new CustomEvent("wcready", {
             bubbles: false,
             detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
           }));
           if (dependencyManager._debug && el.tagName === "WC-INPUT" && el.getAttribute("type") === "tel") {
-            dependencyManager._log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute("name"));
+            dependencyManager._log(`Dispatched wcready to phone input [${index}]:`, el.getAttribute("name"));
           }
         });
       }, 100);
@@ -989,7 +989,7 @@ if (!window.WcIconConfig) {
 }
 
 // src/js/components/wc-base-component.js
-var WcBaseComponent = class extends HTMLElement {
+var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
   /**
    * Returns true when the component is running inside the designer canvas.
    * Components can check this to skip behaviors that don't apply at design time
@@ -1014,6 +1014,29 @@ var WcBaseComponent = class extends HTMLElement {
    */
   getDesignerHTML() {
     return null;
+  }
+  /**
+   * Dispatch a custom event using the new all-lowercase naming convention.
+   * Also fires the legacy (colon-separated) event name with a deprecation warning.
+   * @param {string} newName - New event name (e.g. 'treeitemclick')
+   * @param {string} legacyName - Old event name (e.g. 'tree:item-click')
+   * @param {object} opts - CustomEvent options (bubbles, composed, detail, etc.)
+   * @param {EventTarget} [altTarget] - Optional additional target to also dispatch on
+   */
+  _emitEvent(newName, legacyName, opts, altTarget) {
+    const evt = new CustomEvent(newName, opts);
+    this.dispatchEvent(evt);
+    if (altTarget) altTarget.dispatchEvent(new CustomEvent(newName, opts));
+    if (legacyName && legacyName !== newName) {
+      if (!_WcBaseComponent._deprecationWarned) _WcBaseComponent._deprecationWarned = {};
+      if (!_WcBaseComponent._deprecationWarned[legacyName]) {
+        _WcBaseComponent._deprecationWarned[legacyName] = true;
+        console.warn(`[wave-css] Event "${legacyName}" is deprecated. Use "${newName}" instead.`);
+      }
+      const legacyEvt = new CustomEvent(legacyName, opts);
+      this.dispatchEvent(legacyEvt);
+      if (altTarget) altTarget.dispatchEvent(new CustomEvent(legacyName, opts));
+    }
   }
   constructor() {
     super();
@@ -2050,15 +2073,15 @@ if (!customElements.get("wc-accordion")) {
     }
     _wireEvents() {
       super._wireEvents();
-      document.body.addEventListener("wc-accordion:open", this._handleOpen.bind(this));
-      document.body.addEventListener("wc-accordion:close", this._handleClose.bind(this));
-      document.body.addEventListener("wc-accordion:toggle", this._handleToggle.bind(this));
+      document.body.addEventListener("wcaccordionopen", this._handleOpen.bind(this));
+      document.body.addEventListener("wcaccordionclose", this._handleClose.bind(this));
+      document.body.addEventListener("wcaccordiontoggle", this._handleToggle.bind(this));
     }
     _unWireEvents() {
       super._unWireEvents();
-      document.body.removeEventListener("wc-accordion:open", this._handleOpen.bind(this));
-      document.body.removeEventListener("wc-accordion:close", this._handleClose.bind(this));
-      document.body.removeEventListener("wc-accordion:toggle", this._handleToggle.bind(this));
+      document.body.removeEventListener("wcaccordionopen", this._handleOpen.bind(this));
+      document.body.removeEventListener("wcaccordionclose", this._handleClose.bind(this));
+      document.body.removeEventListener("wcaccordiontoggle", this._handleToggle.bind(this));
     }
   }
   customElements.define("wc-accordion", WcAccordion);
@@ -3424,9 +3447,7 @@ if (!customElements.get("wc-code-mirror")) {
         bubbles: true,
         composed: true
       };
-      const customEvent = new CustomEvent("wc-code-mirror:ready", payload);
-      this.dispatchEvent(customEvent);
-      document.body.dispatchEvent(customEvent);
+      this._emitEvent("wccodemirrorready", "wc-code-mirror:ready", payload, document.body);
       if (requestedMode === "htmlmixed") {
         this._applyPongo2Overlay();
         this.addWebComponentsJsHighlighting();
@@ -4886,9 +4907,9 @@ var WcDropdown = class extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
     if (this.clickModes.includes(this.mode)) {
-      document.body.addEventListener("wc-dropdown:open", this._handleOpen.bind(this));
-      document.body.addEventListener("wc-dropdown:close", this._handleClose.bind(this));
-      document.body.addEventListener("wc-dropdown:toggle", this._handleToggle.bind(this));
+      document.body.addEventListener("wcdropdownopen", this._handleOpen.bind(this));
+      document.body.addEventListener("wcdropdownclose", this._handleClose.bind(this));
+      document.body.addEventListener("wcdropdowntoggle", this._handleToggle.bind(this));
     }
     this._boundReposition = this._repositionOnScroll.bind(this);
     window.addEventListener("scroll", this._boundReposition, { passive: true });
@@ -4897,9 +4918,9 @@ var WcDropdown = class extends WcBaseComponent {
   _unWireEvents() {
     super._unWireEvents();
     if (this.clickModes.includes(this.mode)) {
-      document.body.removeEventListener("wc-dropdown:open", this._handleOpen.bind(this));
-      document.body.removeEventListener("wc-dropdown:close", this._handleClose.bind(this));
-      document.body.removeEventListener("wc-dropdown:toggle", this._handleToggle.bind(this));
+      document.body.removeEventListener("wcdropdownopen", this._handleOpen.bind(this));
+      document.body.removeEventListener("wcdropdownclose", this._handleClose.bind(this));
+      document.body.removeEventListener("wcdropdowntoggle", this._handleToggle.bind(this));
       const btn = this.querySelector(".dropbtn");
       btn.removeEventListener("click", this._handleClick.bind(this));
       window.removeEventListener("click", this._handleWindowClick.bind(this));
@@ -5171,11 +5192,11 @@ if (!customElements.get("wc-emoji")) {
       this.componentElement.appendChild(picker);
     }
     _pickEmoji(emoji) {
-      this.dispatchEvent(new CustomEvent("emoji:pick", {
+      this._emitEvent("wcemojipick", "emoji:pick", {
         bubbles: true,
         composed: true,
         detail: { emoji, shortcode: WcEmoji.getShortcode(emoji) }
-      }));
+      });
     }
     _togglePicker() {
       if (this._isOpen) {
@@ -5238,7 +5259,7 @@ if (!customElements.get("wc-emoji")) {
     }
     _wireOnpick(handlerStr) {
       if (this._onpickHandler) {
-        this.removeEventListener("emoji:pick", this._onpickHandler);
+        this.removeEventListener("wcemojipick", this._onpickHandler);
         this._onpickHandler = null;
       }
       if (handlerStr) {
@@ -5248,7 +5269,7 @@ if (!customElements.get("wc-emoji")) {
             ${handlerStr}
           }
         `);
-        this.addEventListener("emoji:pick", this._onpickHandler);
+        this.addEventListener("wcemojipick", this._onpickHandler);
       }
     }
     _handleWindowClick(e) {
@@ -5330,19 +5351,19 @@ if (!customElements.get("wc-emoji")) {
     _wireEvents() {
       super._wireEvents();
       window.addEventListener("click", this._boundHandleWindowClick);
-      document.body.addEventListener("wc-emoji:open", this._boundHandleOpen);
-      document.body.addEventListener("wc-emoji:close", this._boundHandleClose);
-      document.body.addEventListener("wc-emoji:toggle", this._boundHandleToggle);
+      document.body.addEventListener("wcemojiopen", this._boundHandleOpen);
+      document.body.addEventListener("wcemojiclose", this._boundHandleClose);
+      document.body.addEventListener("wcemojitoggle", this._boundHandleToggle);
     }
     _unWireEvents() {
       super._unWireEvents();
       window.removeEventListener("click", this._boundHandleWindowClick);
-      document.body.removeEventListener("wc-emoji:open", this._boundHandleOpen);
-      document.body.removeEventListener("wc-emoji:close", this._boundHandleClose);
-      document.body.removeEventListener("wc-emoji:toggle", this._boundHandleToggle);
+      document.body.removeEventListener("wcemojiopen", this._boundHandleOpen);
+      document.body.removeEventListener("wcemojiclose", this._boundHandleClose);
+      document.body.removeEventListener("wcemojitoggle", this._boundHandleToggle);
       this._unwireHoverTarget();
       if (this._onpickHandler) {
-        this.removeEventListener("emoji:pick", this._onpickHandler);
+        this.removeEventListener("wcemojipick", this._onpickHandler);
         this._onpickHandler = null;
       }
     }
@@ -6851,15 +6872,10 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
     return formattedAddress.replace(/,?\s*(USA|United States|US)$/i, "").replace(/,/g, "").replace(/\s+/g, " ").trim().replace(/\s/g, "-");
   }
   _broadcastAddressChange(addressData) {
-    const event = "google-address:change";
-    const customEvent = new CustomEvent(event, {
-      detail: addressData,
-      bubbles: true,
-      composed: true
-    });
-    document.dispatchEvent(customEvent);
+    const opts = { detail: addressData, bubbles: true, composed: true };
+    this._emitEvent("wcgoogleaddresschange", "google-address:change", opts, document);
     if (window.wc?.EventHub) {
-      wc.EventHub.broadcast(event, [], addressData);
+      wc.EventHub.broadcast("wcgoogleaddresschange", [], addressData);
     }
   }
   _updateMap(targetMapId, addressData) {
@@ -7083,12 +7099,12 @@ var WcAddressListener = class extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    document.addEventListener("google-address:change", this.boundHandleAddressChange);
+    document.addEventListener("wcgoogleaddresschange", this.boundHandleAddressChange);
     this._setupDirectListeners();
   }
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener("google-address:change", this.boundHandleAddressChange);
+    document.removeEventListener("wcgoogleaddresschange", this.boundHandleAddressChange);
   }
   _setupDirectListeners() {
     const listenableElements = this.querySelectorAll("[address-listener]");
@@ -7102,7 +7118,7 @@ var WcAddressListener = class extends WcBaseComponent {
             this._updateFieldValue(element, addressData);
           }
         };
-        document.addEventListener("google-address:change", element._handleDirectAddressChange);
+        document.addEventListener("wcgoogleaddresschange", element._handleDirectAddressChange);
       }
     });
   }
@@ -7565,7 +7581,7 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
     this.spinnerIcon?.classList.add("hidden");
   }
   _broadcastChange(data, source) {
-    const event = new CustomEvent("vin-decoder:change", {
+    this._emitEvent("wcvindecoderchange", "vin-decoder:change", {
       bubbles: true,
       composed: true,
       detail: {
@@ -7576,10 +7592,9 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         // 'database', 'api', or 'cache'
       }
     });
-    this.dispatchEvent(event);
   }
   _broadcastError(message) {
-    const event = new CustomEvent("vin-decoder:error", {
+    this._emitEvent("wcvindecodererror", "vin-decoder:error", {
       bubbles: true,
       composed: true,
       detail: {
@@ -7587,7 +7602,6 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         error: message
       }
     });
-    this.dispatchEvent(event);
   }
   _createTooltipElement() {
     const tooltip = this.getAttribute("tooltip");
@@ -7682,12 +7696,12 @@ var WcVinListener = class extends WcBaseComponent {
   connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
-    document.addEventListener("vin-decoder:change", this.boundHandleVinChange);
+    document.addEventListener("wcvindecoderchange", this.boundHandleVinChange);
     this._setupDirectListeners();
   }
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener("vin-decoder:change", this.boundHandleVinChange);
+    document.removeEventListener("wcvindecoderchange", this.boundHandleVinChange);
   }
   _setupDirectListeners() {
     const listenableElements = this.querySelectorAll("[vin-listener]");
@@ -7701,7 +7715,7 @@ var WcVinListener = class extends WcBaseComponent {
             this._updateFieldValue(element, vinData.data);
           }
         };
-        document.addEventListener("vin-decoder:change", element._handleDirectVinChange);
+        document.addEventListener("wcvindecoderchange", element._handleDirectVinChange);
       }
     });
   }
@@ -8899,15 +8913,15 @@ var WcImage = class extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
     if (this.hasAttribute("modal")) {
-      document.body.addEventListener("wc-image:show", this._handleShow.bind(this));
-      document.body.addEventListener("wc-image:hide", this._handleHide.bind(this));
+      document.body.addEventListener("wcimageshow", this._handleShow.bind(this));
+      document.body.addEventListener("wcimagehide", this._handleHide.bind(this));
     }
   }
   _unWireEvents() {
     super._unWireEvents();
     if (this.hasAttribute("modal")) {
-      document.body.removeEventListener("wc-image:show", this._handleShow.bind(this));
-      document.body.removeEventListener("wc-image:hide", this._handleHide.bind(this));
+      document.body.removeEventListener("wcimageshow", this._handleShow.bind(this));
+      document.body.removeEventListener("wcimagehide", this._handleHide.bind(this));
       const imgEl = this.querySelector(".img");
       imgEl.removeEventListener("click", this._showModal.bind(this));
       const closeBtn = this.querySelector(".overlay .closebtn");
@@ -9180,11 +9194,11 @@ var WcMenu = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
-    document.body.addEventListener("wc-menu:click", this._handleOnClick.bind(this));
+    document.body.addEventListener("wcmenuclick", this._handleOnClick.bind(this));
   }
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener("wc-menu:click", this._handleOnClick.bind(this));
+    document.body.removeEventListener("wcmenuclick", this._handleOnClick.bind(this));
     const links = this.querySelectorAll(".menu-link");
     links.forEach((link) => link.removeEventListener("click", this._handleClick.bind(this)));
     const menuIcon = this.querySelector(".menu-toggle");
@@ -12829,11 +12843,11 @@ if (!customElements.get("wc-sidenav")) {
           }
         }
       }
-      this.dispatchEvent(new CustomEvent("sidenav:opened", {
+      this._emitEvent("wcsidenavopened", "sidenav:opened", {
         bubbles: true,
         composed: true,
         detail: { width }
-      }));
+      });
     }
     _closeNav(event) {
       const pushSelector = this.getAttribute("push-target") || "#viewport";
@@ -12865,10 +12879,10 @@ if (!customElements.get("wc-sidenav")) {
           openBtn.style.transform = "translateX(0)";
         }
       }
-      this.dispatchEvent(new CustomEvent("sidenav:closed", {
+      this._emitEvent("wcsidenavclosed", "sidenav:closed", {
         bubbles: true,
         composed: true
-      }));
+      });
     }
     _applyStyle() {
       const style = `
@@ -13012,9 +13026,9 @@ if (!customElements.get("wc-sidenav")) {
     }
     _wireEvents() {
       super._wireEvents();
-      document.body.addEventListener("wc-sidenav:open", this._boundHandleOpen);
-      document.body.addEventListener("wc-sidenav:close", this._boundHandleClose);
-      document.body.addEventListener("wc-sidenav:toggle", this._boundHandleToggle);
+      document.body.addEventListener("wcsidenavopen", this._boundHandleOpen);
+      document.body.addEventListener("wcsidenavclose", this._boundHandleClose);
+      document.body.addEventListener("wcsidenavtoggle", this._boundHandleToggle);
     }
     _unWireEvents() {
       super._unWireEvents();
@@ -13026,9 +13040,9 @@ if (!customElements.get("wc-sidenav")) {
       if (openBtn) {
         openBtn.removeEventListener("click", this._boundToggleNav);
       }
-      document.body.removeEventListener("wc-sidenav:open", this._boundHandleOpen);
-      document.body.removeEventListener("wc-sidenav:close", this._boundHandleClose);
-      document.body.removeEventListener("wc-sidenav:toggle", this._boundHandleToggle);
+      document.body.removeEventListener("wcsidenavopen", this._boundHandleOpen);
+      document.body.removeEventListener("wcsidenavclose", this._boundHandleClose);
+      document.body.removeEventListener("wcsidenavtoggle", this._boundHandleToggle);
     }
   }
   customElements.define("wc-sidenav", WcSidenav);
@@ -13436,18 +13450,18 @@ if (!customElements.get("wc-slideshow")) {
         this._startSlideshow();
       }, 50);
       document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
-      document.body.addEventListener("wc-slideshow:next", this._handleNext.bind(this));
-      document.body.addEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
-      document.body.addEventListener("wc-slideshow:start", this._handleStart.bind(this));
-      document.body.addEventListener("wc-slideshow:stop", this._handleStop.bind(this));
+      document.body.addEventListener("wcslideshownext", this._handleNext.bind(this));
+      document.body.addEventListener("wcslideshowprev", this._handlePrev.bind(this));
+      document.body.addEventListener("wcslideshowstart", this._handleStart.bind(this));
+      document.body.addEventListener("wcslideshowstop", this._handleStop.bind(this));
     }
     _unWireEvents() {
       super._unWireEvents();
       document.removeEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
-      document.body.removeEventListener("wc-slideshow:next", this._handleNext.bind(this));
-      document.body.removeEventListener("wc-slideshow:prev", this._handlePrev.bind(this));
-      document.body.removeEventListener("wc-slideshow:start", this._handleStart.bind(this));
-      document.body.removeEventListener("wc-slideshow:stop", this._handleStop.bind(this));
+      document.body.removeEventListener("wcslideshownext", this._handleNext.bind(this));
+      document.body.removeEventListener("wcslideshowprev", this._handlePrev.bind(this));
+      document.body.removeEventListener("wcslideshowstart", this._handleStart.bind(this));
+      document.body.removeEventListener("wcslideshowstop", this._handleStop.bind(this));
       const prev = this.querySelector(".prev");
       const next = this.querySelector(".next");
       const play = this.querySelector(".play");
@@ -14357,11 +14371,11 @@ var WcTab = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
-    document.body.addEventListener("wc-tab:click", this._handleOnClick.bind(this));
+    document.body.addEventListener("wctabclick", this._handleOnClick.bind(this));
   }
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener("wc-tab:click", this._handleOnClick.bind(this));
+    document.body.removeEventListener("wctabclick", this._handleOnClick.bind(this));
     const btns = this.querySelectorAll(".tab-link");
     btns.forEach((btn) => btn.removeEventListener("click", this._handleClick.bind(this)));
   }
@@ -14879,7 +14893,7 @@ if (!customElements.get("wc-tabulator")) {
         if ("onInit" in this.funcs) {
           this.funcs["onInit"](this.table);
         }
-        wc.EventHub.broadcast("wc-tabulator:ready", [], "");
+        wc.EventHub.broadcast("wctabulatorready", [], "");
         wc.EventHub.broadcast("wc-tabulator-ready", [], "");
         if (typeof htmx !== "undefined") {
           await sleep(1e3);
@@ -16404,10 +16418,10 @@ if (!customElements.get("wc-template-preview")) {
         const { target } = event;
         if (target.value === "on") {
           previewFrame.contentDocument.body.classList.add("preview-frame");
-          wc.EventHub.broadcast("wc-template-preview:enable-drag", "", "");
+          wc.EventHub.broadcast("wctemplatepreviewenabledrag", "", "");
         } else {
           previewFrame.contentDocument.body.classList.remove("preview-frame");
-          wc.EventHub.broadcast("wc-template-preview:disable-drag", "", "");
+          wc.EventHub.broadcast("wctemplatepreviewdisabledrag", "", "");
         }
       });
     }
@@ -16437,10 +16451,10 @@ if (!customElements.get("wc-template-preview")) {
         const { target } = event;
         if (target.value === "on") {
           previewFrame.contentDocument.body.classList.add("preview-frame");
-          wc.EventHub.broadcast("wc-template-preview:enable-drag", "", "");
+          wc.EventHub.broadcast("wctemplatepreviewenabledrag", "", "");
         } else {
           previewFrame.contentDocument.body.classList.remove("preview-frame");
-          wc.EventHub.broadcast("wc-template-preview:disable-drag", "", "");
+          wc.EventHub.broadcast("wctemplatepreviewdisabledrag", "", "");
         }
       });
     }
@@ -16560,11 +16574,11 @@ var WcThemeSelector = class extends WcBaseComponent {
           if me.value
             remove .light from document.documentElement
             add .dark to document.documentElement
-            send theme:change to <body/>
+            send wcthemechange to <body/>
           else
             remove .dark from document.documentElement
             add .light to document.documentElement
-            send theme:change to <body/>
+            send wcthemechange to <body/>
           end
         end"
         >
@@ -16614,7 +16628,7 @@ var WcThemeSelector = class extends WcBaseComponent {
     });
     document.documentElement.classList.add(theme);
     if (window.wc && window.wc.EventHub) {
-      window.wc.EventHub.broadcast("theme:change", "", { theme });
+      window.wc.EventHub.broadcast("wcthemechange", "", { theme });
     }
   }
   _handleLoadTheme() {
@@ -17017,13 +17031,11 @@ if (!customElements.get("wc-tree-item")) {
     expand() {
       if (this.hasAttribute("expanded")) return;
       this.setAttribute("expanded", "");
-      this.dispatchEvent(
-        new CustomEvent("tree:item-expand", {
-          bubbles: false,
-          composed: true,
-          detail: { label: this.getAttribute("label"), item: this }
-        })
-      );
+      this._emitEvent("wctreeitemexpand", "tree:item-expand", {
+        bubbles: false,
+        composed: true,
+        detail: { label: this.getAttribute("label"), item: this }
+      });
       const children = this.componentElement?.querySelector(
         ".tree-item-children"
       );
@@ -17040,13 +17052,11 @@ if (!customElements.get("wc-tree-item")) {
     collapse() {
       if (!this.hasAttribute("expanded")) return;
       this.removeAttribute("expanded");
-      this.dispatchEvent(
-        new CustomEvent("tree:item-collapse", {
-          bubbles: false,
-          composed: true,
-          detail: { label: this.getAttribute("label"), item: this }
-        })
-      );
+      this._emitEvent("wctreeitemcollapse", "tree:item-collapse", {
+        bubbles: false,
+        composed: true,
+        detail: { label: this.getAttribute("label"), item: this }
+      });
       const children = this.componentElement?.querySelector(
         ".tree-item-children"
       );
@@ -17169,53 +17179,47 @@ if (!customElements.get("wc-tree-item")) {
           this.toggle();
         }
         this.select();
-        this.dispatchEvent(
-          new CustomEvent("tree:item-click", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this
-            }
-          })
-        );
+        this._emitEvent("wctreeitemclick", "tree:item-click", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this
+          }
+        });
       };
       this._handleRowDblClick = (e) => {
-        this.dispatchEvent(
-          new CustomEvent("tree:item-dblclick", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this
-            }
-          })
-        );
+        this._emitEvent("wctreeitemdblclick", "tree:item-dblclick", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this
+          }
+        });
       };
       this._handleRowContextMenu = (e) => {
         e.preventDefault();
         this.select();
-        this.dispatchEvent(
-          new CustomEvent("tree:item-context-menu", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this,
-              x: e.clientX,
-              y: e.clientY
-            }
-          })
-        );
+        this._emitEvent("wctreeitemcontextmenu", "tree:item-context-menu", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this,
+            x: e.clientX,
+            y: e.clientY
+          }
+        });
       };
       this._handleKeydown = (e) => {
         const tree = this.closest("wc-tree");
@@ -17883,10 +17887,10 @@ if (!customElements.get("wc-table")) {
             this._sortField = field;
             this._sortDir = "asc";
           }
-          this.dispatchEvent(new CustomEvent("table:sort", {
+          this._emitEvent("wctablesort", "table:sort", {
             bubbles: true,
             detail: { field: this._sortField, direction: this._sortDir }
-          }));
+          });
           this._renderTable();
         });
       });
@@ -17894,18 +17898,18 @@ if (!customElements.get("wc-table")) {
         tr.addEventListener("click", () => {
           const idx = parseInt(tr.dataset.rowIndex);
           const data = this._getSortedData()[idx];
-          this.dispatchEvent(new CustomEvent("table:row-click", {
+          this._emitEvent("wctablerowclick", "table:row-click", {
             bubbles: true,
             detail: { row: tr, index: idx, data }
-          }));
+          });
         });
         tr.addEventListener("dblclick", () => {
           const idx = parseInt(tr.dataset.rowIndex);
           const data = this._getSortedData()[idx];
-          this.dispatchEvent(new CustomEvent("table:row-dblclick", {
+          this._emitEvent("wctablerowdblclick", "table:row-dblclick", {
             bubbles: true,
             detail: { row: tr, index: idx, data }
-          }));
+          });
         });
       });
     }
@@ -18204,10 +18208,10 @@ if (!customElements.get("wc-split-pane")) {
       this._isCollapsed = true;
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
       this._persist();
-      this.dispatchEvent(new CustomEvent("split-pane:collapse", {
+      this._emitEvent("wcsplitpanecollapse", "split-pane:collapse", {
         bubbles: true,
         detail: { collapsed: true }
-      }));
+      });
     }
     _expand(animate = true) {
       const size = this._sizeBeforeCollapse || parseInt(this._initialSizeStr, 10) || 250;
@@ -18215,10 +18219,10 @@ if (!customElements.get("wc-split-pane")) {
       this._isCollapsed = false;
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
       this._persist();
-      this.dispatchEvent(new CustomEvent("split-pane:collapse", {
+      this._emitEvent("wcsplitpanecollapse", "split-pane:collapse", {
         bubbles: true,
         detail: { collapsed: false }
-      }));
+      });
     }
     toggle() {
       if (this._isCollapsed) this._expand();
@@ -18263,10 +18267,10 @@ if (!customElements.get("wc-split-pane")) {
         this._persist();
         const containerSize = this._direction === "horizontal" ? this.componentElement.offsetWidth : this.componentElement.offsetHeight;
         const percentage = (this._currentSize / containerSize * 100).toFixed(1);
-        this.dispatchEvent(new CustomEvent("split-pane:resize", {
+        this._emitEvent("wcsplitpaneresize", "split-pane:resize", {
           bubbles: true,
           detail: { size: `${this._currentSize}px`, percentage: `${percentage}%` }
-        }));
+        });
       };
       if (this._collapseBtn) {
         this._onCollapseClick = (e) => {
@@ -18591,7 +18595,7 @@ List slug convention: COLLECTION_list (e.g., article_list).
 === EXAMPLE (Content Tab) ===
 {% extends "__template_name__" %}
 {% block pageContent %}
-<wc-table-skeleton _="on 'wc-tabulator:ready' from body
+<wc-table-skeleton _="on 'wctabulatorready' from body
                       WaveHelpers.waitForThenHideAndShow('#table-skeleton', '.page-content', 3000, 500)
                    end">
 </wc-table-skeleton>
@@ -19476,7 +19480,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus("");
-          this._emitEvent("bot:ready", { botId, model: modelName });
+          this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
           return;
         }
         if (modelLoadingPromises.has(modelName)) {
@@ -19485,7 +19489,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus("");
-          this._emitEvent("bot:ready", { botId, model: modelName });
+          this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
           return;
         }
         const loadPromise = this._loadModel(modelName);
@@ -19496,13 +19500,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         this._isModelReady = true;
         this._sendButton.disabled = false;
         this._updateStatus("");
-        this._emitEvent("bot:ready", { botId, model: modelName });
+        this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
         localStorage.setItem("wc-ai-bot-success", "true");
       } catch (error) {
         console.error("[wc-ai-bot] Failed to initialize model:", error);
         this._error = error.message;
         this._updateStatus(`Error: ${error.message}`, "error");
-        this._emitEvent("bot:error", { botId, error: error.message });
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: error.message });
         if (this.getAttribute("force-enable") !== "true") {
           localStorage.setItem("wc-ai-bot-failure", "true");
         }
@@ -19720,7 +19724,7 @@ ${json}`);
           this._fab.style.display = "flex";
         }
       } else {
-        this._emitEvent("bot:closed", { botId: this.getAttribute("bot-id") });
+        this._emitBotEvent("wcbotclosed", "bot:closed", { botId: this.getAttribute("bot-id") });
       }
     }
     async _sendMessage(message) {
@@ -19728,7 +19732,7 @@ ${json}`);
       this._addMessage("user", message);
       this._input.value = "";
       this._adjustInputHeight();
-      this._emitEvent("bot:message-sent", { botId, message });
+      this._emitBotEvent("wcbotmessagesent", "bot:message-sent", { botId, message });
       this._isLoading = true;
       this._sendButton.disabled = true;
       const loadingId = this._addMessage("bot", "...", true);
@@ -19751,11 +19755,11 @@ ${json}`);
         if (this.getAttribute("debug") === "true") {
           console.log("[wc-ai-bot] Raw LLM response:", response);
         }
-        this._emitEvent("bot:response-received", { botId, response });
+        this._emitBotEvent("wcbotresponsereceived", "bot:response-received", { botId, response });
       } catch (error) {
         console.error("[wc-ai-bot] Failed to get response:", error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
-        this._emitEvent("bot:error", { botId, error: error.message });
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: error.message });
       } finally {
         this._isLoading = false;
         this._sendButton.disabled = false;
@@ -19932,15 +19936,12 @@ Type \`/help\` to see available commands, or ask me anything about these project
       }
       return `Hello! I'm ${title}. How can I help you today?`;
     }
-    _emitEvent(eventName, detail) {
-      this.dispatchEvent(new CustomEvent(eventName, {
-        detail,
-        bubbles: true,
-        composed: true
-      }));
+    _emitBotEvent(newName, legacyName, detail) {
+      const opts = { detail, bubbles: true, composed: true };
+      super._emitEvent(newName, legacyName, opts);
       const botId = this.getAttribute("bot-id");
       if (botId && window.wc && window.wc.EventHub) {
-        window.wc.EventHub.broadcast(eventName, [`[bot-id="${botId}"]`], detail);
+        window.wc.EventHub.broadcast(newName, [`[bot-id="${botId}"]`], detail);
       }
     }
     // Public methods
@@ -19967,7 +19968,7 @@ Type \`/help\` to see available commands, or ask me anything about these project
       this._messages = [];
       this._messagesContainer.innerHTML = "";
       this._addMessage("bot", this._getWelcomeMessage());
-      this._emitEvent("bot:conversation-cleared", {
+      this._emitBotEvent("wcbotconversationcleared", "bot:conversation-cleared", {
         botId: this.getAttribute("bot-id")
       });
     }
@@ -20066,7 +20067,7 @@ Type \`/help\` to see available commands, or ask me anything about these project
       const title = this.getAttribute("title") || "AI Assistant";
       if (theme === "bubble") {
         this.style.display = "none";
-        this._emitEvent("bot:unsupported", {
+        this._emitBotEvent("wcbotunsupported", "bot:unsupported", {
           botId: this.getAttribute("bot-id"),
           reason: this._unsupportedReason
         });
@@ -20089,7 +20090,7 @@ Type \`/help\` to see available commands, or ask me anything about these project
       `;
       this.appendChild(this._container);
       this._applyStyles();
-      this._emitEvent("bot:unsupported", {
+      this._emitBotEvent("wcbotunsupported", "bot:unsupported", {
         botId: this.getAttribute("bot-id"),
         reason: this._unsupportedReason
       });
@@ -20766,7 +20767,7 @@ if (!customElements.get("wc-hf-bot")) {
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus("");
-          this._emitEvent("bot:ready", { botId, model: modelName });
+          this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
           return;
         }
         if (modelLoadingPromises.has(modelName)) {
@@ -20777,7 +20778,7 @@ if (!customElements.get("wc-hf-bot")) {
           this._isModelReady = true;
           this._sendButton.disabled = false;
           this._updateStatus("");
-          this._emitEvent("bot:ready", { botId, model: modelName });
+          this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
           return;
         }
         const loadPromise = this._loadModel(modelName);
@@ -20790,13 +20791,13 @@ if (!customElements.get("wc-hf-bot")) {
         this._isModelReady = true;
         this._sendButton.disabled = false;
         this._updateStatus("");
-        this._emitEvent("bot:ready", { botId, model: modelName });
+        this._emitBotEvent("wcbotready", "bot:ready", { botId, model: modelName });
         localStorage.setItem("wc-hf-bot-success", "true");
       } catch (error) {
         console.error("[wc-hf-bot] Failed to initialize model:", error);
         this._error = error.message;
         this._updateStatus(`Error: ${error.message}`, "error");
-        this._emitEvent("bot:error", { botId, error: error.message });
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: error.message });
         if (this.getAttribute("force-enable") !== "true") {
           localStorage.setItem("wc-hf-bot-failure", "true");
         }
@@ -20890,7 +20891,7 @@ if (!customElements.get("wc-hf-bot")) {
           this._fab.style.display = "flex";
         }
       } else {
-        this._emitEvent("bot:closed", { botId: this.getAttribute("bot-id") });
+        this._emitBotEvent("wcbotclosed", "bot:closed", { botId: this.getAttribute("bot-id") });
       }
     }
     async _sendMessage(message) {
@@ -20898,7 +20899,7 @@ if (!customElements.get("wc-hf-bot")) {
       this._addMessage("user", message);
       this._input.value = "";
       this._adjustInputHeight();
-      this._emitEvent("bot:message-sent", { botId, message });
+      this._emitBotEvent("wcbotmessagesent", "bot:message-sent", { botId, message });
       this._isLoading = true;
       this._sendButton.disabled = true;
       const loadingId = this._addMessage("bot", "...", true);
@@ -20944,11 +20945,11 @@ if (!customElements.get("wc-hf-bot")) {
         if (this.getAttribute("debug") === "true") {
           console.log("[wc-hf-bot] Raw response:", this._currentResponse);
         }
-        this._emitEvent("bot:response-received", { botId, response: this._currentResponse });
+        this._emitBotEvent("wcbotresponsereceived", "bot:response-received", { botId, response: this._currentResponse });
       } catch (error) {
         console.error("[wc-hf-bot] Failed to get response:", error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
-        this._emitEvent("bot:error", { botId, error: error.message });
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: error.message });
       } finally {
         this._isLoading = false;
         this._sendButton.disabled = false;
@@ -21039,15 +21040,12 @@ if (!customElements.get("wc-hf-bot")) {
       const title = this.getAttribute("title") || "HF Assistant";
       return `Hello! I'm ${title} powered by Hugging Face. How can I help you today?`;
     }
-    _emitEvent(eventName, detail) {
-      this.dispatchEvent(new CustomEvent(eventName, {
-        detail,
-        bubbles: true,
-        composed: true
-      }));
+    _emitBotEvent(newName, legacyName, detail) {
+      const opts = { detail, bubbles: true, composed: true };
+      super._emitEvent(newName, legacyName, opts);
       const botId = this.getAttribute("bot-id");
       if (botId && window.wc && window.wc.EventHub) {
-        window.wc.EventHub.broadcast(eventName, [`[bot-id="${botId}"]`], detail);
+        window.wc.EventHub.broadcast(newName, [`[bot-id="${botId}"]`], detail);
       }
     }
     async _checkSystemCapabilities() {
@@ -21122,7 +21120,7 @@ if (!customElements.get("wc-hf-bot")) {
       const title = this.getAttribute("title") || "HF Assistant";
       if (theme === "bubble") {
         this.style.display = "none";
-        this._emitEvent("bot:unsupported", {
+        this._emitBotEvent("wcbotunsupported", "bot:unsupported", {
           botId: this.getAttribute("bot-id"),
           reason: this._unsupportedReason
         });
@@ -21144,7 +21142,7 @@ if (!customElements.get("wc-hf-bot")) {
       `;
       this.appendChild(this._container);
       this._applyStyles();
-      this._emitEvent("bot:unsupported", {
+      this._emitBotEvent("wcbotunsupported", "bot:unsupported", {
         botId: this.getAttribute("bot-id"),
         reason: this._unsupportedReason
       });
@@ -21246,7 +21244,7 @@ if (!customElements.get("wc-hf-bot")) {
       this._messages = [];
       this._messagesContainer.innerHTML = "";
       this._addMessage("bot", this._getWelcomeMessage());
-      this._emitEvent("bot:conversation-cleared", {
+      this._emitBotEvent("wcbotconversationcleared", "bot:conversation-cleared", {
         botId: this.getAttribute("bot-id")
       });
     }
@@ -21780,15 +21778,15 @@ var WcLoader = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
-    document.body.addEventListener("wc-loader:show", this._handleShow.bind(this));
-    document.body.addEventListener("wc-loader:hide", this._handleHide.bind(this));
-    document.body.addEventListener("wc-loader:toggle", this._handleToggle.bind(this));
+    document.body.addEventListener("wcloadershow", this._handleShow.bind(this));
+    document.body.addEventListener("wcloaderhide", this._handleHide.bind(this));
+    document.body.addEventListener("wcloadertoggle", this._handleToggle.bind(this));
   }
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener("wc-loader:show", this._handleShow.bind(this));
-    document.body.removeEventListener("wc-loader:hide", this._handleHide.bind(this));
-    document.body.removeEventListener("wc-loader:toggle", this._handleToggle.bind(this));
+    document.body.removeEventListener("wcloadershow", this._handleShow.bind(this));
+    document.body.removeEventListener("wcloaderhide", this._handleHide.bind(this));
+    document.body.removeEventListener("wcloadertoggle", this._handleToggle.bind(this));
   }
 };
 customElements.define("wc-loader", WcLoader);
@@ -22490,7 +22488,7 @@ if (!customElements.get("wc-prompt")) {
         window.wc = {};
       }
       window.wc.Prompt = this;
-      wc.EventHub.broadcast("wc-prompt:ready", "", "");
+      wc.EventHub.broadcast("wcpromptready", "", "");
     }
     banner(c) {
       const { text = "", type = "info", stay = false, time = 3, position = "top" } = c;
@@ -22727,60 +22725,60 @@ if (!customElements.get("wc-prompt")) {
       this.loadStyle("wc-prompt-style", style);
     }
     wireEvents() {
-      document.body.addEventListener("wc-prompt:banner", (event) => {
+      document.body.addEventListener("wcpromptbanner", (event) => {
         this.banner(event.detail);
       });
-      document.body.addEventListener("wc-prompt:toast", (event) => {
+      document.body.addEventListener("wcprompttoast", (event) => {
         this.toast(event.detail);
       });
-      document.body.addEventListener("wc-prompt:success", async (event) => {
+      document.body.addEventListener("wcpromptsuccess", async (event) => {
         return this.success(event.detail);
       });
-      document.body.addEventListener("wc-prompt:error", async (event) => {
+      document.body.addEventListener("wcprompterror", async (event) => {
         return this.error(event.detail);
       });
-      document.body.addEventListener("wc-prompt:warning", async (event) => {
+      document.body.addEventListener("wcpromptwarning", async (event) => {
         return this.warning(event.detail);
       });
-      document.body.addEventListener("wc-prompt:info", async (event) => {
+      document.body.addEventListener("wcpromptinfo", async (event) => {
         return this.info(event.detail);
       });
-      document.body.addEventListener("wc-prompt:question", async (event) => {
+      document.body.addEventListener("wcpromptquestion", async (event) => {
         return this.question(event.detail);
       });
-      document.body.addEventListener("wc-prompt:notify", async (event) => {
+      document.body.addEventListener("wcpromptnotify", async (event) => {
         return this.notify(event.detail);
       });
-      document.body.addEventListener("wc-prompt:notify-template", async (event) => {
+      document.body.addEventListener("wcpromptnotifytemplate", async (event) => {
         return this.notifyTemplate(event.detail);
       });
     }
     unWireEvents() {
-      document.body.removeEventListener("wc-prompt:banner", (event) => {
+      document.body.removeEventListener("wcpromptbanner", (event) => {
         this.banner(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:toast", (event) => {
+      document.body.removeEventListener("wcprompttoast", (event) => {
         this.toast(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:success", async (event) => {
+      document.body.removeEventListener("wcpromptsuccess", async (event) => {
         return this.success(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:error", async (event) => {
+      document.body.removeEventListener("wcprompterror", async (event) => {
         return this.error(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:warning", async (event) => {
+      document.body.removeEventListener("wcpromptwarning", async (event) => {
         return this.warning(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:info", async (event) => {
+      document.body.removeEventListener("wcpromptinfo", async (event) => {
         return this.info(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:question", async (event) => {
+      document.body.removeEventListener("wcpromptquestion", async (event) => {
         return this.question(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:notify", async (event) => {
+      document.body.removeEventListener("wcpromptnotify", async (event) => {
         return this.notify(event.detail);
       });
-      document.body.removeEventListener("wc-prompt:notify-template", async (event) => {
+      document.body.removeEventListener("wcpromptnotifytemplate", async (event) => {
         return this.notifyTemplate(event.detail);
       });
     }
@@ -22836,7 +22834,7 @@ if (!customElements.get("wc-notify")) {
         window.wc = {};
       }
       window.wc.Notify = this;
-      wc.EventHub.broadcast("wc-notify:ready", "", "");
+      wc.EventHub.broadcast("wcnotifyready", "", "");
     }
     showSuccess(message, delay, persist = false) {
       this.showNotification(message, "success", delay, persist);
@@ -23195,7 +23193,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
       }
       this.isLibraryLoaded = true;
       if (window.wc && window.wc.EventHub) {
-        window.wc.EventHub.broadcast("wc-chart:library-loaded", "", { Chart: window.Chart });
+        window.wc.EventHub.broadcast("wcchartlibraryloaded", "", { Chart: window.Chart });
       }
     } catch (error) {
       console.error("Failed to load Chart.js library:", error);
@@ -23542,7 +23540,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
         this.refresh();
       }, 100);
     };
-    document.body.addEventListener("theme:change", this._handleThemeChange);
+    document.body.addEventListener("wcthemechange", this._handleThemeChange);
     if (this.canvas) {
       this.canvas.addEventListener("click", (event) => {
         if (!this.chartInstance) return;
@@ -23578,7 +23576,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
   }
   _unWireEvents() {
     if (this._handleThemeChange) {
-      document.body.removeEventListener("theme:change", this._handleThemeChange);
+      document.body.removeEventListener("wcthemechange", this._handleThemeChange);
     }
   }
   _applyStyle() {
@@ -24053,7 +24051,7 @@ if (!customElements.get("wc-chart-builder")) {
               const el = elements[0];
               const idx = el.index;
               const dsIdx = el.datasetIndex;
-              this.dispatchEvent(new CustomEvent("chart:click", {
+              this._emitEvent("wcchartclick", "chart:click", {
                 bubbles: true,
                 composed: true,
                 detail: {
@@ -24062,17 +24060,17 @@ if (!customElements.get("wc-chart-builder")) {
                   field: this._valueFields[dsIdx],
                   document: this._data[idx]
                 }
-              }));
+              });
             }
           }
         }
       };
       this._chartInstance = new Chart(this._canvas, config);
-      this.dispatchEvent(new CustomEvent("chart:ready", {
+      this._emitEvent("wcchartready", "chart:ready", {
         bubbles: true,
         composed: true,
         detail: { chart: this._chartInstance }
-      }));
+      });
     }
     _renderNumberChart() {
       this._canvas.style.display = "none";
@@ -24102,11 +24100,11 @@ if (!customElements.get("wc-chart-builder")) {
         <div class="chart-builder-number-label">${title}</div>
       `;
       area.appendChild(container2);
-      this.dispatchEvent(new CustomEvent("chart:ready", {
+      this._emitEvent("wcchartready", "chart:ready", {
         bubbles: true,
         composed: true,
         detail: { value, label: title }
-      }));
+      });
     }
     _extractLabels() {
       return this._data.map((row) => {
@@ -24604,11 +24602,11 @@ if (!customElements.get("wc-pivot")) {
       this._sortCol = null;
       this._buildUI();
       this._fireConfigChange();
-      this.dispatchEvent(new CustomEvent("pivot:zone-change", {
+      this._emitEvent("wcpivotzonechange", "pivot:zone-change", {
         bubbles: true,
         composed: true,
         detail: { zone, field, action: "add", zones: this._zones }
-      }));
+      });
     }
     _removeFieldFromZone(field, zone) {
       if (zone === "values") {
@@ -24620,11 +24618,11 @@ if (!customElements.get("wc-pivot")) {
       this._sortCol = null;
       this._buildUI();
       this._fireConfigChange();
-      this.dispatchEvent(new CustomEvent("pivot:zone-change", {
+      this._emitEvent("wcpivotzonechange", "pivot:zone-change", {
         bubbles: true,
         composed: true,
         detail: { zone, field, action: "remove", zones: this._zones }
-      }));
+      });
     }
     _removeFieldFromAnyZone(field) {
       this._zones.rows = this._zones.rows.filter((f) => f !== field);
@@ -24829,11 +24827,11 @@ if (!customElements.get("wc-pivot")) {
       }
       this.componentElement.appendChild(main);
       if (this._pivotResult) {
-        this.dispatchEvent(new CustomEvent("pivot:ready", {
+        this._emitEvent("wcpivotready", "pivot:ready", {
           bubbles: true,
           composed: true,
           detail: { pivot: this._pivotResult }
-        }));
+        });
       }
     }
     // ── Controls bar ──────────────────────────────────────────────────────────
@@ -25287,7 +25285,7 @@ if (!customElements.get("wc-pivot")) {
         this._closePopovers();
         this._buildUI();
         this._fireConfigChange();
-        this.dispatchEvent(new CustomEvent("pivot:filter-change", {
+        this._emitEvent("wcpivotfilterchange", "pivot:filter-change", {
           bubbles: true,
           composed: true,
           detail: {
@@ -25295,7 +25293,7 @@ if (!customElements.get("wc-pivot")) {
             excluded: Array.from(newExcluded),
             included: sortedVals.filter((v) => !newExcluded.has(v))
           }
-        }));
+        });
       });
       actions.appendChild(applyBtn);
       dropdown.appendChild(actions);
@@ -25389,11 +25387,11 @@ if (!customElements.get("wc-pivot")) {
       this._buildUI();
     }
     _fireConfigChange() {
-      this.dispatchEvent(new CustomEvent("pivot:config-change", {
+      this._emitEvent("wcpivotconfigchange", "pivot:config-change", {
         bubbles: true,
         composed: true,
         detail: this.getConfig()
-      }));
+      });
     }
     // ── Table rendering ───────────────────────────────────────────────────────
     _renderTable() {
@@ -25499,11 +25497,11 @@ if (!customElements.get("wc-pivot")) {
       const matches = filteredData.filter(
         (d) => this._valToString(this._getGroupedValue(d, this._rowField)) === row && this._valToString(this._getGroupedValue(d, this._colField)) === col
       );
-      this.dispatchEvent(new CustomEvent("pivot:cell-click", {
+      this._emitEvent("wcpivotcellclick", "pivot:cell-click", {
         bubbles: true,
         composed: true,
         detail: { row, column: col, value: matches.length, documents: matches }
-      }));
+      });
       const wasExpanded = this._drillDown && this._drillDown.row === row && this._drillDown.col === col;
       tbody.querySelectorAll(".pivot-cell-expanded").forEach((el) => el.classList.remove("pivot-cell-expanded"));
       const existingDd = tbody.querySelector(".pivot-drilldown-row");
@@ -25518,11 +25516,11 @@ if (!customElements.get("wc-pivot")) {
       }
       if (wasExpanded) {
         this._drillDown = null;
-        this.dispatchEvent(new CustomEvent("pivot:drill-down", {
+        this._emitEvent("wcpivotdrilldown", "pivot:drill-down", {
           bubbles: true,
           composed: true,
           detail: { row, column: col, expanded: false, documents: [] }
-        }));
+        });
         return;
       }
       this._drillDown = { row, col };
@@ -25531,11 +25529,11 @@ if (!customElements.get("wc-pivot")) {
       if (colIdx >= 0 && cells[colIdx]) cells[colIdx].classList.add("pivot-cell-expanded");
       const ddRow = this._renderDrillDownRow(row, col, filteredData, colSpan);
       if (ddRow) afterTr.after(ddRow);
-      this.dispatchEvent(new CustomEvent("pivot:drill-down", {
+      this._emitEvent("wcpivotdrilldown", "pivot:drill-down", {
         bubbles: true,
         composed: true,
         detail: { row, column: col, expanded: true, documents: matches }
-      }));
+      });
     }
     _renderDrillDownRow(row, col, filteredData, colSpan) {
       const matches = filteredData.filter(
@@ -27153,11 +27151,11 @@ if (!customElements.get("wc-document-tree")) {
           const full = this._getFullValue(val, type);
           navigator.clipboard.writeText(full).then(() => {
             this._showCopyToast(valEl);
-            this.dispatchEvent(new CustomEvent("document-tree:copy", {
+            this._emitEvent("wcdocumenttreecopy", "document-tree:copy", {
               bubbles: true,
               composed: true,
               detail: { path, value: full, type }
-            }));
+            });
           }).catch(() => {
           });
         });
@@ -27173,11 +27171,11 @@ if (!customElements.get("wc-document-tree")) {
       });
       row.addEventListener("click", (e) => {
         if (!isExpandable) {
-          this.dispatchEvent(new CustomEvent("document-tree:select", {
+          this._emitEvent("wcdocumenttreeselect", "document-tree:select", {
             bubbles: true,
             composed: true,
             detail: { path, value: val, type }
-          }));
+          });
         }
       });
       const wrapper = document.createElement("div");
@@ -27435,10 +27433,10 @@ var WcChartjs = class extends WcChart {
     if (!url) return;
     this.isLoading = true;
     this._showLoading();
-    this.dispatchEvent(new CustomEvent("chartjs:loading", {
+    this._emitEvent("wcchartjsloading", "chartjs:loading", {
       bubbles: true,
       detail: { url }
-    }));
+    });
     try {
       const requestUrl = this._buildRequestUrl(url);
       const method = this.getAttribute("ajax-method") || "GET";
@@ -27456,18 +27454,18 @@ var WcChartjs = class extends WcChart {
       this._applyFetchedData(data);
       this.isLoading = false;
       this._hideLoading();
-      this.dispatchEvent(new CustomEvent("chartjs:loaded", {
+      this._emitEvent("wcchartjsloaded", "chartjs:loaded", {
         bubbles: true,
         detail: { data }
-      }));
+      });
     } catch (error) {
       console.error("Failed to fetch chart data:", error);
       this.isLoading = false;
       this._showError(error.message);
-      this.dispatchEvent(new CustomEvent("chartjs:error", {
+      this._emitEvent("wcchartjserror", "chartjs:error", {
         bubbles: true,
         detail: { error: error.message }
-      }));
+      });
     }
   }
   _buildRequestUrl(baseUrl) {
@@ -29201,7 +29199,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       icon.classList.add("icon");
       const iconItem = _WcInput.icons.find((f) => f.name === "tel-fill");
       icon.innerHTML = iconItem.icon;
-      this.formElement.setAttribute("_", `on wc:ready from document
+      this.formElement.setAttribute("_", `on wcready from document
           call wc.MaskHub.phoneMaskElement(me)
           me.setCustomValidity('')
         end`);
@@ -30115,7 +30113,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
               }
             }
           });
-          this.dispatchEvent(new CustomEvent("optionsloaded", {
+          this.dispatchEvent(new CustomEvent("wcoptionsloaded", {
             bubbles: true,
             composed: true,
             detail: { value: this.value, optionCount: this._items.length }

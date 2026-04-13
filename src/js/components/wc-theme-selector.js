@@ -152,11 +152,11 @@ class WcThemeSelector extends WcBaseComponent {
           if me.value
             remove .light from document.documentElement
             add .dark to document.documentElement
-            send theme:change to <body/>
+            send wcthemechange to <body/>
           else
             remove .dark from document.documentElement
             add .light to document.documentElement
-            send theme:change to <body/>
+            send wcthemechange to <body/>
           end
         end"
         >
@@ -216,7 +216,7 @@ class WcThemeSelector extends WcBaseComponent {
     
     // Broadcast theme change event
     if (window.wc && window.wc.EventHub) {
-      window.wc.EventHub.broadcast('theme:change', '', { theme });
+      window.wc.EventHub.broadcast('wcthemechange', '', { theme });
     }
   }
 

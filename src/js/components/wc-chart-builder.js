@@ -488,7 +488,7 @@ if (!customElements.get('wc-chart-builder')) {
               const el = elements[0];
               const idx = el.index;
               const dsIdx = el.datasetIndex;
-              this.dispatchEvent(new CustomEvent('chart:click', {
+              this._emitEvent('wcchartclick', 'chart:click', {
                 bubbles: true, composed: true,
                 detail: {
                   label: labels[idx],
@@ -496,7 +496,7 @@ if (!customElements.get('wc-chart-builder')) {
                   field: this._valueFields[dsIdx],
                   document: this._data[idx],
                 },
-              }));
+              });
             }
           },
         },
@@ -504,10 +504,10 @@ if (!customElements.get('wc-chart-builder')) {
 
       this._chartInstance = new Chart(this._canvas, config);
 
-      this.dispatchEvent(new CustomEvent('chart:ready', {
+      this._emitEvent('wcchartready', 'chart:ready', {
         bubbles: true, composed: true,
         detail: { chart: this._chartInstance },
-      }));
+      });
     }
 
     _renderNumberChart() {
@@ -547,10 +547,10 @@ if (!customElements.get('wc-chart-builder')) {
       `;
       area.appendChild(container);
 
-      this.dispatchEvent(new CustomEvent('chart:ready', {
+      this._emitEvent('wcchartready', 'chart:ready', {
         bubbles: true, composed: true,
         detail: { value, label: title },
-      }));
+      });
     }
 
     _extractLabels() {

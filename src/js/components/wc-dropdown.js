@@ -15,9 +15,9 @@
  *    </wc-dropdown>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-dropdown:open', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-dropdown:close', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-dropdown:toggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcdropdownopen', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcdropdownclose', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcdropdowntoggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -564,9 +564,9 @@ class WcDropdown extends WcBaseComponent {
     super._wireEvents();
 
     if (this.clickModes.includes(this.mode)) {
-      document.body.addEventListener('wc-dropdown:open', this._handleOpen.bind(this));
-      document.body.addEventListener('wc-dropdown:close', this._handleClose.bind(this));
-      document.body.addEventListener('wc-dropdown:toggle', this._handleToggle.bind(this));
+      document.body.addEventListener('wcdropdownopen', this._handleOpen.bind(this));
+      document.body.addEventListener('wcdropdownclose', this._handleClose.bind(this));
+      document.body.addEventListener('wcdropdowntoggle', this._handleToggle.bind(this));
     }
     
     // Add scroll and resize listeners for mobile positioning
@@ -579,9 +579,9 @@ class WcDropdown extends WcBaseComponent {
     super._unWireEvents();
 
     if (this.clickModes.includes(this.mode)) {
-      document.body.removeEventListener('wc-dropdown:open', this._handleOpen.bind(this));
-      document.body.removeEventListener('wc-dropdown:close', this._handleClose.bind(this));
-      document.body.removeEventListener('wc-dropdown:toggle', this._handleToggle.bind(this));
+      document.body.removeEventListener('wcdropdownopen', this._handleOpen.bind(this));
+      document.body.removeEventListener('wcdropdownclose', this._handleClose.bind(this));
+      document.body.removeEventListener('wcdropdowntoggle', this._handleToggle.bind(this));
 
       const btn = this.querySelector('.dropbtn');
       btn.removeEventListener('click', this._handleClick.bind(this));

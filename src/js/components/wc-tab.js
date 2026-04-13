@@ -82,9 +82,9 @@
  *  Note: dark-15 matches auto nesting level 1, dark-30 matches auto nesting level 2
  *
  *  API:
- *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(2)')
- *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(3)')
- *    wc.EventHub.broadcast('wc-tab:click', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(1)')
+ *    wc.EventHub.broadcast('wctabclick', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(2)')
+ *    wc.EventHub.broadcast('wctabclick', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(3)')
+ *    wc.EventHub.broadcast('wctabclick', ['[data-wc-id="b2d9-5bf2-e24c-6391"]'], '.tab-link:nth-of-type(1)')
  */
 
 
@@ -997,12 +997,12 @@ class WcTab extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
 
-    document.body.addEventListener('wc-tab:click', this._handleOnClick.bind(this));
+    document.body.addEventListener('wctabclick', this._handleOnClick.bind(this));
   }
 
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener('wc-tab:click', this._handleOnClick.bind(this));
+    document.body.removeEventListener('wctabclick', this._handleOnClick.bind(this));
     const btns = this.querySelectorAll('.tab-link');
     btns.forEach(btn => btn.removeEventListener('click', this._handleClick.bind(this)));
   }

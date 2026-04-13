@@ -183,10 +183,10 @@
     const clickTable = document.getElementById('click-table');
     const clickOutput = document.getElementById('click-output');
     if (clickTable && clickOutput) {
-      clickTable.addEventListener('table:row-click', (e) => {
+      clickTable.addEventListener('wctablerowclick', (e) => {
         clickOutput.innerHTML = '<strong>Click:</strong> ' + JSON.stringify(e.detail.data);
       });
-      clickTable.addEventListener('table:row-dblclick', (e) => {
+      clickTable.addEventListener('wctablerowdblclick', (e) => {
         clickOutput.innerHTML = '<strong>Double-click:</strong> ' + e.detail.data.name + ' (' + e.detail.data.industry + ')';
       });
     }

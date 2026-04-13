@@ -91,7 +91,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 ### Form Components (extend WcBaseFormComponent)
 - `wc-form`: Form wrapper with validation
 - `wc-input`: Text input field
-- `wc-select`: Dropdown select; `optionsloaded` event fires after URL options load
+- `wc-select`: Dropdown select; `wcoptionsloaded` event fires after URL options load
 - `wc-textarea`: Multi-line text input
 
 ### Display Components
@@ -142,7 +142,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 
 ### Navigation Components
 - `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support
-- `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url); emits `tree:item-expand` / `tree:item-collapse` events (bubbles: false); supports `data-tree-action` attribute for hover-reveal action buttons; `hx-trigger` and `hx-disinherit` in observedAttributes; click behavior: only arrow toggles expand/collapse, clicking elsewhere selects
+- `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url); emits `wctreeitemexpand` / `wctreeitemcollapse` events (bubbles: false); supports `data-tree-action` attribute for hover-reveal action buttons; `hx-trigger` and `hx-disinherit` in observedAttributes; click behavior: only arrow toggles expand/collapse, clicking elsewhere selects
 
 ### Data Components
 - `wc-table`: Lightweight data-driven table (url, items, sorting, formatting, events)

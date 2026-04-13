@@ -9,9 +9,9 @@
  *    </wc-template-preview>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-accordion:open', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
- *    wc.EventHub.broadcast('wc-accordion:close', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
- *    wc.EventHub.broadcast('wc-accordion:toggle', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(2)'])
+ *    wc.EventHub.broadcast('wcaccordionopen', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
+ *    wc.EventHub.broadcast('wcaccordionclose', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
+ *    wc.EventHub.broadcast('wcaccordiontoggle', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(2)'])
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -138,10 +138,10 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         if (target.value === 'on') {
           previewFrame.contentDocument.body.classList.add('preview-frame');
-          wc.EventHub.broadcast('wc-template-preview:enable-drag', '', '');
+          wc.EventHub.broadcast('wctemplatepreviewenabledrag', '', '');
         } else {
           previewFrame.contentDocument.body.classList.remove('preview-frame');
-          wc.EventHub.broadcast('wc-template-preview:disable-drag', '', '');
+          wc.EventHub.broadcast('wctemplatepreviewdisabledrag', '', '');
         }
         // console.log('wc-template-preview:dragToggle change - ', event);
       });
@@ -175,10 +175,10 @@ if (!customElements.get('wc-template-preview')) {
         const {target} = event;
         if (target.value === 'on') {
           previewFrame.contentDocument.body.classList.add('preview-frame');
-          wc.EventHub.broadcast('wc-template-preview:enable-drag', '', '');
+          wc.EventHub.broadcast('wctemplatepreviewenabledrag', '', '');
         } else {
           previewFrame.contentDocument.body.classList.remove('preview-frame');
-          wc.EventHub.broadcast('wc-template-preview:disable-drag', '', '');
+          wc.EventHub.broadcast('wctemplatepreviewdisabledrag', '', '');
         }
         // console.log('wc-template-preview:dragToggle change - ', event);
       });

@@ -29,12 +29,12 @@
  *    - hover-target: CSS selector for an ancestor element — emoji bar is hidden until that ancestor is hovered
  *
  *  Events:
- *    - emoji:pick — dispatched when an emoji is selected, with { detail: { emoji, shortcode } }
+ *    - wcemojipick — dispatched when an emoji is selected, with { detail: { emoji, shortcode } }
  *
  *  API:
- *    wc.EventHub.broadcast('wc-emoji:open', '#myEmoji')
- *    wc.EventHub.broadcast('wc-emoji:close', '#myEmoji')
- *    wc.EventHub.broadcast('wc-emoji:toggle', '#myEmoji')
+ *    wc.EventHub.broadcast('wcemojiopen', '#myEmoji')
+ *    wc.EventHub.broadcast('wcemojiclose', '#myEmoji')
+ *    wc.EventHub.broadcast('wcemojitoggle', '#myEmoji')
  *
  *  Shortcodes:
  *    All emojis have associated shortcodes (e.g. :thumbsup: for 👍).
@@ -266,11 +266,11 @@ if (!customElements.get('wc-emoji')) {
     }
 
     _pickEmoji(emoji) {
-      this.dispatchEvent(new CustomEvent('emoji:pick', {
+      this._emitEvent('wcemojipick', 'emoji:pick', {
         bubbles: true,
         composed: true,
         detail: { emoji, shortcode: WcEmoji.getShortcode(emoji) }
-      }));
+      });
     }
 
     _togglePicker() {
@@ -347,7 +347,7 @@ if (!customElements.get('wc-emoji')) {
 
     _wireOnpick(handlerStr) {
       if (this._onpickHandler) {
-        this.removeEventListener('emoji:pick', this._onpickHandler);
+        this.removeEventListener('wcemojipick', this._onpickHandler);
         this._onpickHandler = null;
       }
       if (handlerStr) {
@@ -357,7 +357,7 @@ if (!customElements.get('wc-emoji')) {
             ${handlerStr}
           }
         `);
-        this.addEventListener('emoji:pick', this._onpickHandler);
+        this.addEventListener('wcemojipick', this._onpickHandler);
       }
     }
 
@@ -455,20 +455,20 @@ if (!customElements.get('wc-emoji')) {
     _wireEvents() {
       super._wireEvents();
       window.addEventListener('click', this._boundHandleWindowClick);
-      document.body.addEventListener('wc-emoji:open', this._boundHandleOpen);
-      document.body.addEventListener('wc-emoji:close', this._boundHandleClose);
-      document.body.addEventListener('wc-emoji:toggle', this._boundHandleToggle);
+      document.body.addEventListener('wcemojiopen', this._boundHandleOpen);
+      document.body.addEventListener('wcemojiclose', this._boundHandleClose);
+      document.body.addEventListener('wcemojitoggle', this._boundHandleToggle);
     }
 
     _unWireEvents() {
       super._unWireEvents();
       window.removeEventListener('click', this._boundHandleWindowClick);
-      document.body.removeEventListener('wc-emoji:open', this._boundHandleOpen);
-      document.body.removeEventListener('wc-emoji:close', this._boundHandleClose);
-      document.body.removeEventListener('wc-emoji:toggle', this._boundHandleToggle);
+      document.body.removeEventListener('wcemojiopen', this._boundHandleOpen);
+      document.body.removeEventListener('wcemojiclose', this._boundHandleClose);
+      document.body.removeEventListener('wcemojitoggle', this._boundHandleToggle);
       this._unwireHoverTarget();
       if (this._onpickHandler) {
-        this.removeEventListener('emoji:pick', this._onpickHandler);
+        this.removeEventListener('wcemojipick', this._onpickHandler);
         this._onpickHandler = null;
       }
     }

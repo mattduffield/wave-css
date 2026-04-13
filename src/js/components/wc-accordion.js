@@ -15,9 +15,9 @@
  *    </wc-accordion>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-accordion:open', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
- *    wc.EventHub.broadcast('wc-accordion:close', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
- *    wc.EventHub.broadcast('wc-accordion:toggle', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(2)'])
+ *    wc.EventHub.broadcast('wcaccordionopen', ['[data-wc-id="0982-a544-98da-b3da"]'], '.accordion-header:nth-of-type(1)')
+ *    wc.EventHub.broadcast('wcaccordionclose', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(1)'])
+ *    wc.EventHub.broadcast('wcaccordiontoggle', ['[data-wc-id="0982-a544-98da-b3da"]', '.accordion-header:nth-of-type(2)'])
  */
 
 
@@ -287,16 +287,16 @@ if (!customElements.get('wc-accordion')) {
     _wireEvents() {
       super._wireEvents();
 
-      document.body.addEventListener('wc-accordion:open', this._handleOpen.bind(this));
-      document.body.addEventListener('wc-accordion:close', this._handleClose.bind(this));
-      document.body.addEventListener('wc-accordion:toggle', this._handleToggle.bind(this));
+      document.body.addEventListener('wcaccordionopen', this._handleOpen.bind(this));
+      document.body.addEventListener('wcaccordionclose', this._handleClose.bind(this));
+      document.body.addEventListener('wcaccordiontoggle', this._handleToggle.bind(this));
     }
 
     _unWireEvents() {
       super._unWireEvents();
-      document.body.removeEventListener('wc-accordion:open', this._handleOpen.bind(this));
-      document.body.removeEventListener('wc-accordion:close', this._handleClose.bind(this));
-      document.body.removeEventListener('wc-accordion:toggle', this._handleToggle.bind(this));
+      document.body.removeEventListener('wcaccordionopen', this._handleOpen.bind(this));
+      document.body.removeEventListener('wcaccordionclose', this._handleClose.bind(this));
+      document.body.removeEventListener('wcaccordiontoggle', this._handleToggle.bind(this));
     }
 
   }

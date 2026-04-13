@@ -258,27 +258,27 @@ WcAiBot.clearStoredPreferences();</code></pre>
       
       <div class="bg-gray-100 p-4 rounded-lg">
         <pre class="text-sm"><code>// Bot ready
-document.addEventListener('bot:ready', (e) => {
+document.addEventListener('wcbotready', (e) => {
   console.log('Bot ready:', e.detail.botId, e.detail.model);
 });
 
 // Message sent
-document.addEventListener('bot:message-sent', (e) => {
+document.addEventListener('wcbotmessagesent', (e) => {
   console.log('User:', e.detail.message);
 });
 
 // Response received
-document.addEventListener('bot:response-received', (e) => {
+document.addEventListener('wcbotresponsereceived', (e) => {
   console.log('Bot:', e.detail.response);
 });
 
 // System unsupported
-document.addEventListener('bot:unsupported', (e) => {
+document.addEventListener('wcbotunsupported', (e) => {
   console.log('Bot unsupported:', e.detail.reason);
 });
 
 // Error handling
-document.addEventListener('bot:error', (e) => {
+document.addEventListener('wcboterror', (e) => {
   console.error('Error:', e.detail.error);
 });</code></pre>
       </div>
@@ -395,7 +395,7 @@ document.addEventListener('bot:error', (e) => {
 
 &lt;script&gt;
   // Listen for when bot is ready
-  document.addEventListener('bot:ready', (e) => {
+  document.addEventListener('wcbotready', (e) => {
     if (e.detail.botId === 'support') {
       console.log('Support bot is ready!');
       
@@ -408,7 +408,7 @@ document.addEventListener('bot:error', (e) => {
   });
   
   // Track user interactions
-  document.addEventListener('bot:message-sent', (e) => {
+  document.addEventListener('wcbotmessagesent', (e) => {
     if (e.detail.botId === 'support') {
       // Analytics tracking
       console.log('User query:', e.detail.message);

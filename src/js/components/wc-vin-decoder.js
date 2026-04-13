@@ -496,7 +496,7 @@ export default class WcVinDecoder extends WcBaseFormComponent {
   }
 
   _broadcastChange(data, source) {
-    const event = new CustomEvent('vin-decoder:change', {
+    this._emitEvent('wcvindecoderchange', 'vin-decoder:change', {
       bubbles: true,
       composed: true,
       detail: {
@@ -506,11 +506,10 @@ export default class WcVinDecoder extends WcBaseFormComponent {
         source: source // 'database', 'api', or 'cache'
       }
     });
-    this.dispatchEvent(event);
   }
 
   _broadcastError(message) {
-    const event = new CustomEvent('vin-decoder:error', {
+    this._emitEvent('wcvindecodererror', 'vin-decoder:error', {
       bubbles: true,
       composed: true,
       detail: {
@@ -518,7 +517,6 @@ export default class WcVinDecoder extends WcBaseFormComponent {
         error: message
       }
     });
-    this.dispatchEvent(event);
   }
 
   _createTooltipElement() {

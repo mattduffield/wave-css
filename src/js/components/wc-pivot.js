@@ -379,10 +379,10 @@ if (!customElements.get('wc-pivot')) {
       this._sortCol = null;
       this._buildUI();
       this._fireConfigChange();
-      this.dispatchEvent(new CustomEvent('pivot:zone-change', {
+      this._emitEvent('wcpivotzonechange', 'pivot:zone-change', {
         bubbles: true, composed: true,
         detail: { zone, field, action: 'add', zones: this._zones },
-      }));
+      });
     }
 
     _removeFieldFromZone(field, zone) {
@@ -397,10 +397,10 @@ if (!customElements.get('wc-pivot')) {
       this._sortCol = null;
       this._buildUI();
       this._fireConfigChange();
-      this.dispatchEvent(new CustomEvent('pivot:zone-change', {
+      this._emitEvent('wcpivotzonechange', 'pivot:zone-change', {
         bubbles: true, composed: true,
         detail: { zone, field, action: 'remove', zones: this._zones },
-      }));
+      });
     }
 
     _removeFieldFromAnyZone(field) {
@@ -621,10 +621,10 @@ if (!customElements.get('wc-pivot')) {
       this.componentElement.appendChild(main);
 
       if (this._pivotResult) {
-        this.dispatchEvent(new CustomEvent('pivot:ready', {
+        this._emitEvent('wcpivotready', 'pivot:ready', {
           bubbles: true, composed: true,
           detail: { pivot: this._pivotResult },
-        }));
+        });
       }
     }
 
@@ -1173,14 +1173,14 @@ if (!customElements.get('wc-pivot')) {
         this._closePopovers();
         this._buildUI();
         this._fireConfigChange();
-        this.dispatchEvent(new CustomEvent('pivot:filter-change', {
+        this._emitEvent('wcpivotfilterchange', 'pivot:filter-change', {
           bubbles: true, composed: true,
           detail: {
             field,
             excluded: Array.from(newExcluded),
             included: sortedVals.filter(v => !newExcluded.has(v)),
           },
-        }));
+        });
       });
       actions.appendChild(applyBtn);
       dropdown.appendChild(actions);
@@ -1281,10 +1281,10 @@ if (!customElements.get('wc-pivot')) {
     }
 
     _fireConfigChange() {
-      this.dispatchEvent(new CustomEvent('pivot:config-change', {
+      this._emitEvent('wcpivotconfigchange', 'pivot:config-change', {
         bubbles: true, composed: true,
         detail: this.getConfig(),
-      }));
+      });
     }
 
     // ── Table rendering ───────────────────────────────────────────────────────
@@ -1420,10 +1420,10 @@ if (!customElements.get('wc-pivot')) {
       );
 
       // Always dispatch the cell-click event
-      this.dispatchEvent(new CustomEvent('pivot:cell-click', {
+      this._emitEvent('wcpivotcellclick', 'pivot:cell-click', {
         bubbles: true, composed: true,
         detail: { row, column: col, value: matches.length, documents: matches },
-      }));
+      });
 
       // Toggle drill-down
       const wasExpanded = this._drillDown && this._drillDown.row === row && this._drillDown.col === col;
@@ -1445,10 +1445,10 @@ if (!customElements.get('wc-pivot')) {
 
       if (wasExpanded) {
         this._drillDown = null;
-        this.dispatchEvent(new CustomEvent('pivot:drill-down', {
+        this._emitEvent('wcpivotdrilldown', 'pivot:drill-down', {
           bubbles: true, composed: true,
           detail: { row, column: col, expanded: false, documents: [] },
-        }));
+        });
         return;
       }
 
@@ -1463,10 +1463,10 @@ if (!customElements.get('wc-pivot')) {
       const ddRow = this._renderDrillDownRow(row, col, filteredData, colSpan);
       if (ddRow) afterTr.after(ddRow);
 
-      this.dispatchEvent(new CustomEvent('pivot:drill-down', {
+      this._emitEvent('wcpivotdrilldown', 'pivot:drill-down', {
         bubbles: true, composed: true,
         detail: { row, column: col, expanded: true, documents: matches },
-      }));
+      });
     }
 
     _renderDrillDownRow(row, col, filteredData, colSpan) {

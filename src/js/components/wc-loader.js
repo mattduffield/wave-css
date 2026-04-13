@@ -8,9 +8,9 @@
  *    <wc-loader></wc-loader>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-loader:show', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-loader:hide', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-loader:toggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcloadershow', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcloaderhide', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcloadertoggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -144,17 +144,17 @@ class WcLoader extends WcBaseComponent {
 
   _wireEvents() {
     super._wireEvents();
-    document.body.addEventListener('wc-loader:show', this._handleShow.bind(this));
-    document.body.addEventListener('wc-loader:hide', this._handleHide.bind(this));
-    document.body.addEventListener('wc-loader:toggle', this._handleToggle.bind(this));
+    document.body.addEventListener('wcloadershow', this._handleShow.bind(this));
+    document.body.addEventListener('wcloaderhide', this._handleHide.bind(this));
+    document.body.addEventListener('wcloadertoggle', this._handleToggle.bind(this));
   }
 
 
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener('wc-loader:show', this._handleShow.bind(this));
-    document.body.removeEventListener('wc-loader:hide', this._handleHide.bind(this));
-    document.body.removeEventListener('wc-loader:toggle', this._handleToggle.bind(this));
+    document.body.removeEventListener('wcloadershow', this._handleShow.bind(this));
+    document.body.removeEventListener('wcloaderhide', this._handleHide.bind(this));
+    document.body.removeEventListener('wcloadertoggle', this._handleToggle.bind(this));
   }
 
 }

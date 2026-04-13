@@ -324,7 +324,7 @@
       // Wire up drill-down event demo
       var eventPivot = document.getElementById('event-pivot');
       if (eventPivot) {
-        eventPivot.addEventListener('pivot:cell-click', function(e) {
+        eventPivot.addEventListener('wcpivotcellclick', function(e) {
           var output = document.getElementById('cell-output');
           if (output) output.textContent = JSON.stringify(e.detail, null, 2);
         });

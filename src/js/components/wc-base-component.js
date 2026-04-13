@@ -31,6 +31,31 @@ export class WcBaseComponent extends HTMLElement {
     return null;
   }
 
+  /**
+   * Dispatch a custom event using the new all-lowercase naming convention.
+   * Also fires the legacy (colon-separated) event name with a deprecation warning.
+   * @param {string} newName - New event name (e.g. 'treeitemclick')
+   * @param {string} legacyName - Old event name (e.g. 'tree:item-click')
+   * @param {object} opts - CustomEvent options (bubbles, composed, detail, etc.)
+   * @param {EventTarget} [altTarget] - Optional additional target to also dispatch on
+   */
+  _emitEvent(newName, legacyName, opts, altTarget) {
+    const evt = new CustomEvent(newName, opts);
+    this.dispatchEvent(evt);
+    if (altTarget) altTarget.dispatchEvent(new CustomEvent(newName, opts));
+    // Backward compat: fire legacy name with deprecation warning
+    if (legacyName && legacyName !== newName) {
+      if (!WcBaseComponent._deprecationWarned) WcBaseComponent._deprecationWarned = {};
+      if (!WcBaseComponent._deprecationWarned[legacyName]) {
+        WcBaseComponent._deprecationWarned[legacyName] = true;
+        console.warn(`[wave-css] Event "${legacyName}" is deprecated. Use "${newName}" instead.`);
+      }
+      const legacyEvt = new CustomEvent(legacyName, opts);
+      this.dispatchEvent(legacyEvt);
+      if (altTarget) altTarget.dispatchEvent(new CustomEvent(legacyName, opts));
+    }
+  }
+
   constructor() {
     super();
     this._wcId = generateUniqueId();

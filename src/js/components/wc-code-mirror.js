@@ -663,15 +663,12 @@ if (!customElements.get('wc-code-mirror')) {
         this.editor.setOption('gutters', gutters);
       });
 
-      const payload = { 
+      const payload = {
         detail: { name: this.getAttribute('name'), editor: this.editor },
         bubbles: true,
         composed: true
       };
-      const customEvent = new CustomEvent('wc-code-mirror:ready', payload);
-      this.dispatchEvent(customEvent);
-      document.body.dispatchEvent(customEvent);
-      // console.log('----> broadcasting event: wc-code-mirror:ready');
+      this._emitEvent('wccodemirrorready', 'wc-code-mirror:ready', payload, document.body);
 
       // Apply Pongo2 overlay and JS highlighting for htmlmixed mode
       if (requestedMode === 'htmlmixed') {

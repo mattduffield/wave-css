@@ -136,7 +136,7 @@ class WcChart extends WcBaseComponent {
       
       // Dispatch event when Chart.js is ready
       if (window.wc && window.wc.EventHub) {
-        window.wc.EventHub.broadcast('wc-chart:library-loaded', '', { Chart: window.Chart });
+        window.wc.EventHub.broadcast('wcchartlibraryloaded', '', { Chart: window.Chart });
       }
     } catch (error) {
       console.error('Failed to load Chart.js library:', error);
@@ -579,7 +579,7 @@ class WcChart extends WcBaseComponent {
       }, 100);
     };
     
-    document.body.addEventListener('theme:change', this._handleThemeChange);
+    document.body.addEventListener('wcthemechange', this._handleThemeChange);
     
     // Add click handler
     if (this.canvas) {
@@ -624,7 +624,7 @@ class WcChart extends WcBaseComponent {
   _unWireEvents() {
     // Clean up event listeners if needed
     if (this._handleThemeChange) {
-      document.body.removeEventListener('theme:change', this._handleThemeChange);
+      document.body.removeEventListener('wcthemechange', this._handleThemeChange);
     }
   }
 

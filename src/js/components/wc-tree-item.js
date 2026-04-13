@@ -193,13 +193,11 @@ if (!customElements.get("wc-tree-item")) {
     expand() {
       if (this.hasAttribute("expanded")) return; // Already expanded, prevent recursion
       this.setAttribute("expanded", "");
-      this.dispatchEvent(
-        new CustomEvent("tree:item-expand", {
-          bubbles: false,
-          composed: true,
-          detail: { label: this.getAttribute("label"), item: this },
-        }),
-      );
+      this._emitEvent("wctreeitemexpand", "tree:item-expand", {
+        bubbles: false,
+        composed: true,
+        detail: { label: this.getAttribute("label"), item: this },
+      });
       const children = this.componentElement?.querySelector(
         ".tree-item-children",
       );
@@ -219,13 +217,11 @@ if (!customElements.get("wc-tree-item")) {
     collapse() {
       if (!this.hasAttribute("expanded")) return; // Already collapsed, prevent recursion
       this.removeAttribute("expanded");
-      this.dispatchEvent(
-        new CustomEvent("tree:item-collapse", {
-          bubbles: false,
-          composed: true,
-          detail: { label: this.getAttribute("label"), item: this },
-        }),
-      );
+      this._emitEvent("wctreeitemcollapse", "tree:item-collapse", {
+        bubbles: false,
+        composed: true,
+        detail: { label: this.getAttribute("label"), item: this },
+      });
       const children = this.componentElement?.querySelector(
         ".tree-item-children",
       );
@@ -375,55 +371,49 @@ if (!customElements.get("wc-tree-item")) {
 
         this.select();
 
-        this.dispatchEvent(
-          new CustomEvent("tree:item-click", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this,
-            },
-          }),
-        );
+        this._emitEvent("wctreeitemclick", "tree:item-click", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this,
+          },
+        });
       };
 
       this._handleRowDblClick = (e) => {
-        this.dispatchEvent(
-          new CustomEvent("tree:item-dblclick", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this,
-            },
-          }),
-        );
+        this._emitEvent("wctreeitemdblclick", "tree:item-dblclick", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this,
+          },
+        });
       };
 
       this._handleRowContextMenu = (e) => {
         e.preventDefault();
         this.select();
-        this.dispatchEvent(
-          new CustomEvent("tree:item-context-menu", {
-            bubbles: true,
-            composed: true,
-            detail: {
-              label: this.getAttribute("label"),
-              icon: this.getAttribute("icon"),
-              badge: this.getAttribute("badge"),
-              level: this._level,
-              element: this,
-              x: e.clientX,
-              y: e.clientY,
-            },
-          }),
-        );
+        this._emitEvent("wctreeitemcontextmenu", "tree:item-context-menu", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            label: this.getAttribute("label"),
+            icon: this.getAttribute("icon"),
+            badge: this.getAttribute("badge"),
+            level: this._level,
+            element: this,
+            x: e.clientX,
+            y: e.clientY,
+          },
+        });
       };
 
       this._handleKeydown = (e) => {

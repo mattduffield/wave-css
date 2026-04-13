@@ -55,7 +55,7 @@ if (!customElements.get('wc-prompt')) {
         window.wc = {};
       }
       window.wc.Prompt = this;
-      wc.EventHub.broadcast('wc-prompt:ready', '', '');
+      wc.EventHub.broadcast('wcpromptready', '', '');
     }
 
     banner(c) {
@@ -299,60 +299,60 @@ if (!customElements.get('wc-prompt')) {
     }
 
     wireEvents() {
-      document.body.addEventListener('wc-prompt:banner', (event) => {
+      document.body.addEventListener('wcpromptbanner', (event) => {
         this.banner(event.detail);
       });
-      document.body.addEventListener('wc-prompt:toast', (event) => {
+      document.body.addEventListener('wcprompttoast', (event) => {
         this.toast(event.detail);
       });
-      document.body.addEventListener('wc-prompt:success', async (event) => {
+      document.body.addEventListener('wcpromptsuccess', async (event) => {
         return this.success(event.detail);
       });
-      document.body.addEventListener('wc-prompt:error', async (event) => {
+      document.body.addEventListener('wcprompterror', async (event) => {
         return this.error(event.detail);
       });
-      document.body.addEventListener('wc-prompt:warning', async (event) => {
+      document.body.addEventListener('wcpromptwarning', async (event) => {
         return this.warning(event.detail);
       });
-      document.body.addEventListener('wc-prompt:info', async (event) => {
+      document.body.addEventListener('wcpromptinfo', async (event) => {
         return this.info(event.detail);
       });
-      document.body.addEventListener('wc-prompt:question', async (event) => {
+      document.body.addEventListener('wcpromptquestion', async (event) => {
         return this.question(event.detail);
       });
-      document.body.addEventListener('wc-prompt:notify', async (event) => {
+      document.body.addEventListener('wcpromptnotify', async (event) => {
         return this.notify(event.detail);
       });
-      document.body.addEventListener('wc-prompt:notify-template', async (event) => {
+      document.body.addEventListener('wcpromptnotifytemplate', async (event) => {
         return this.notifyTemplate(event.detail);
       });      
     }
     unWireEvents() {
-      document.body.removeEventListener('wc-prompt:banner', (event) => {
+      document.body.removeEventListener('wcpromptbanner', (event) => {
         this.banner(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:toast', (event) => {
+      document.body.removeEventListener('wcprompttoast', (event) => {
         this.toast(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:success', async (event) => {
+      document.body.removeEventListener('wcpromptsuccess', async (event) => {
         return this.success(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:error', async (event) => {
+      document.body.removeEventListener('wcprompterror', async (event) => {
         return this.error(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:warning', async (event) => {
+      document.body.removeEventListener('wcpromptwarning', async (event) => {
         return this.warning(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:info', async (event) => {
+      document.body.removeEventListener('wcpromptinfo', async (event) => {
         return this.info(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:question', async (event) => {
+      document.body.removeEventListener('wcpromptquestion', async (event) => {
         return this.question(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:notify', async (event) => {
+      document.body.removeEventListener('wcpromptnotify', async (event) => {
         return this.notify(event.detail);
       });
-      document.body.removeEventListener('wc-prompt:notify-template', async (event) => {
+      document.body.removeEventListener('wcpromptnotifytemplate', async (event) => {
         return this.notifyTemplate(event.detail);
       });      
     }

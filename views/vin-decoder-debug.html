@@ -67,7 +67,7 @@
   <script type="module" src="./index.js"></script>
   <script>
     // Listen for VIN decoder events to show debug output
-    document.addEventListener('vin-decoder:change', (event) => {
+    document.addEventListener('wcvindecoderchange', (event) => {
       console.log('VIN Decoded:', event.detail);
 
       // Show debug output for Example 1
@@ -77,7 +77,7 @@
       debugContent.textContent = JSON.stringify(event.detail.data, null, 2);
     });
 
-    document.addEventListener('vin-decoder:error', (event) => {
+    document.addEventListener('wcvindecodererror', (event) => {
       console.error('VIN Decode Error:', event.detail);
       alert(`Error: ${event.detail.error}`);
     });

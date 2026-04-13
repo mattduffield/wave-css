@@ -233,11 +233,11 @@ class WcDependencyManager {
 
       let dispatchCount = 0;
 
-      // Dispatch wc:ready event - we'll dispatch multiple times to ensure hyperscript catches it
+      // Dispatch wcready event - we'll dispatch multiple times to ensure hyperscript catches it
       const dispatchReady = (source = 'unknown') => {
         dispatchCount++;
-        this._log(`Dispatching wc:ready event #${dispatchCount} (source: ${source})`);
-        document.dispatchEvent(new CustomEvent('wc:ready', {
+        this._log(`Dispatching wcready event #${dispatchCount} (source: ${source})`);
+        document.dispatchEvent(new CustomEvent('wcready', {
           detail: {
             dependencies: Array.from(this._registeredDependencies),
             dispatchCount,
@@ -253,7 +253,7 @@ class WcDependencyManager {
       // whenever it's ready. Hyperscript handlers should be idempotent anyway.
 
       if (document.readyState === 'loading') {
-        this._log('Waiting for DOMContentLoaded before dispatching wc:ready');
+        this._log('Waiting for DOMContentLoaded before dispatching wcready');
         document.addEventListener('DOMContentLoaded', () => {
           // After DOMContentLoaded, dispatch multiple times
           dispatchReady('DOMContentLoaded');
@@ -263,13 +263,13 @@ class WcDependencyManager {
       } else if (document.readyState === 'interactive') {
         // DOM parsed but still loading resources
         // Dispatch immediately and then retry
-        this._log('DOM interactive, dispatching wc:ready with retries');
+        this._log('DOM interactive, dispatching wcready with retries');
         setTimeout(() => dispatchReady('interactive+0ms'), 0);
         setTimeout(() => dispatchReady('interactive+100ms'), 100);
         setTimeout(() => dispatchReady('interactive+200ms'), 200);
       } else {
         // DOM completely loaded
-        this._log('DOM complete, dispatching wc:ready with retries');
+        this._log('DOM complete, dispatching wcready with retries');
         setTimeout(() => dispatchReady('complete+0ms'), 0);
         setTimeout(() => dispatchReady('complete+50ms'), 50);
         setTimeout(() => dispatchReady('complete+150ms'), 150);
@@ -277,7 +277,7 @@ class WcDependencyManager {
 
       // Additional safety net: dispatch on window load
       window.addEventListener('load', () => {
-        this._log('window.load fired, dispatching wc:ready');
+        this._log('window.load fired, dispatching wcready');
         dispatchReady('window.load');
         setTimeout(() => dispatchReady('window.load+100ms'), 100);
       }, { once: true });
@@ -309,11 +309,11 @@ class WcDependencyManager {
 
   /**
    * Trigger initialization for an element (for HTMX partial loads)
-   * This dispatches wc:ready to a specific element if dependencies are already loaded
+   * This dispatches wcready to a specific element if dependencies are already loaded
    */
   triggerReadyForElement(element) {
     if (this.isReady) {
-      element.dispatchEvent(new CustomEvent('wc:ready', {
+      element.dispatchEvent(new CustomEvent('wcready', {
         bubbles: false,
         detail: { dependencies: Array.from(this._registeredDependencies) }
       }));
@@ -373,40 +373,40 @@ window.wc.DependencyManager = dependencyManager;
 window.wc.ready = dependencyManager.ready;
 
 // Setup HTMX integration for partial loads
-// When HTMX swaps in new content, dispatch wc:ready to new elements if dependencies are already loaded
+// When HTMX swaps in new content, dispatch wcready to new elements if dependencies are already loaded
 if (typeof window !== 'undefined') {
   // Use htmx:afterSettle instead of htmx:afterSwap to ensure hyperscript has processed elements
   document.addEventListener('htmx:afterSettle', (event) => {
-    // If dependencies are already loaded, trigger wc:ready for the new content
+    // If dependencies are already loaded, trigger wcready for the new content
     if (dependencyManager.isReady) {
       const target = event.detail.target;
 
-      dependencyManager._log('HTMX afterSettle - dependencies ready, dispatching wc:ready to new content');
+      dependencyManager._log('HTMX afterSettle - dependencies ready, dispatching wcready to new content');
       dependencyManager._log('Target element:', target);
 
       // Give hyperscript a moment to process the new elements
       setTimeout(() => {
-        dependencyManager._log('Dispatching wc:ready after hyperscript initialization delay');
+        dependencyManager._log('Dispatching wcready after hyperscript initialization delay');
 
         // Dispatch to the swapped container itself
-        target.dispatchEvent(new CustomEvent('wc:ready', {
+        target.dispatchEvent(new CustomEvent('wcready', {
           bubbles: true,
           detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
         }));
 
         // Also dispatch to all child elements (hyperscript may be listening on specific elements)
         const allElements = target.querySelectorAll('*');
-        dependencyManager._log(`Dispatching wc:ready to ${allElements.length} child elements`);
+        dependencyManager._log(`Dispatching wcready to ${allElements.length} child elements`);
 
         allElements.forEach((el, index) => {
-          el.dispatchEvent(new CustomEvent('wc:ready', {
+          el.dispatchEvent(new CustomEvent('wcready', {
             bubbles: false,
             detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
           }));
 
           // Log phone inputs specifically
           if (dependencyManager._debug && el.tagName === 'WC-INPUT' && el.getAttribute('type') === 'tel') {
-            dependencyManager._log(`Dispatched wc:ready to phone input [${index}]:`, el.getAttribute('name'));
+            dependencyManager._log(`Dispatched wcready to phone input [${index}]:`, el.getAttribute('name'));
           }
         });
       }, 100); // 100ms delay to let hyperscript initialize

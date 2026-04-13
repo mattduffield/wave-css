@@ -41,7 +41,7 @@ if (!customElements.get('wc-mask-hub')) {
     }
 
     async renderMask() {
-      // Set wc.MaskHub BEFORE loading IMask so it's available when wc:ready fires
+      // Set wc.MaskHub BEFORE loading IMask so it's available when wcready fires
       if (!window.wc) {
         window.wc = {};
       }

@@ -44,7 +44,7 @@
  *                Example: vin-link="https://google.com/search?q={{year}}+{{make}}+{{model}}"
  *
  *  How it works:
- *    1. Listens for 'vin-decoder:change' events
+ *    1. Listens for 'wcvindecoderchange' events
  *    2. Filters events by matching vinGroup
  *    3. Updates child form fields based on their name attribute
  *    4. Supports mapping: name="vehicle.year" gets updated from vinData.year
@@ -114,7 +114,7 @@ class WcVinListener extends WcBaseComponent {
     this._applyStyle();
 
     // Listen for VIN decoder change events
-    document.addEventListener('vin-decoder:change', this.boundHandleVinChange);
+    document.addEventListener('wcvindecoderchange', this.boundHandleVinChange);
 
     // Also check if any child elements have the vin-listener attribute
     this._setupDirectListeners();
@@ -122,7 +122,7 @@ class WcVinListener extends WcBaseComponent {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('vin-decoder:change', this.boundHandleVinChange);
+    document.removeEventListener('wcvindecoderchange', this.boundHandleVinChange);
   }
 
   _setupDirectListeners() {
@@ -141,7 +141,7 @@ class WcVinListener extends WcBaseComponent {
           }
         };
 
-        document.addEventListener('vin-decoder:change', element._handleDirectVinChange);
+        document.addEventListener('wcvindecoderchange', element._handleDirectVinChange);
       }
     });
   }

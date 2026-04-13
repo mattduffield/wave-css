@@ -60,9 +60,9 @@
  *    - open-vertical-text: Use upright vertical text in open button
  *
  *  API:
- *    wc.EventHub.broadcast('wc-sidenav:open', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-sidenav:close', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-sidenav:toggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcsidenavopen', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcsidenavclose', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcsidenavtoggle', ['[data-wc-id="0982-a544-98da-b3da"]'])
  */
 
 
@@ -372,11 +372,11 @@ if (!customElements.get('wc-sidenav')) {
       }
 
       // Dispatch custom event
-      this.dispatchEvent(new CustomEvent('sidenav:opened', {
+      this._emitEvent('wcsidenavopened', 'sidenav:opened', {
         bubbles: true,
         composed: true,
         detail: { width }
-      }));
+      });
     }
 
     _closeNav(event) {
@@ -415,10 +415,10 @@ if (!customElements.get('wc-sidenav')) {
       }
 
       // Dispatch custom event
-      this.dispatchEvent(new CustomEvent('sidenav:closed', {
+      this._emitEvent('wcsidenavclosed', 'sidenav:closed', {
         bubbles: true,
         composed: true
-      }));
+      });
     }
 
     _applyStyle() {
@@ -565,9 +565,9 @@ if (!customElements.get('wc-sidenav')) {
     _wireEvents() {
       super._wireEvents();
 
-      document.body.addEventListener('wc-sidenav:open', this._boundHandleOpen);
-      document.body.addEventListener('wc-sidenav:close', this._boundHandleClose);
-      document.body.addEventListener('wc-sidenav:toggle', this._boundHandleToggle);
+      document.body.addEventListener('wcsidenavopen', this._boundHandleOpen);
+      document.body.addEventListener('wcsidenavclose', this._boundHandleClose);
+      document.body.addEventListener('wcsidenavtoggle', this._boundHandleToggle);
     }
 
     _unWireEvents() {
@@ -580,9 +580,9 @@ if (!customElements.get('wc-sidenav')) {
       if (openBtn) {
         openBtn.removeEventListener('click', this._boundToggleNav);
       }
-      document.body.removeEventListener('wc-sidenav:open', this._boundHandleOpen);
-      document.body.removeEventListener('wc-sidenav:close', this._boundHandleClose);
-      document.body.removeEventListener('wc-sidenav:toggle', this._boundHandleToggle);
+      document.body.removeEventListener('wcsidenavopen', this._boundHandleOpen);
+      document.body.removeEventListener('wcsidenavclose', this._boundHandleClose);
+      document.body.removeEventListener('wcsidenavtoggle', this._boundHandleToggle);
     }
 
   }

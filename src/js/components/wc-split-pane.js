@@ -282,9 +282,9 @@ if (!customElements.get('wc-split-pane')) {
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
       this._persist();
 
-      this.dispatchEvent(new CustomEvent('split-pane:collapse', {
+      this._emitEvent('wcsplitpanecollapse', 'split-pane:collapse', {
         bubbles: true, detail: { collapsed: true }
-      }));
+      });
     }
 
     _expand(animate = true) {
@@ -294,9 +294,9 @@ if (!customElements.get('wc-split-pane')) {
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
       this._persist();
 
-      this.dispatchEvent(new CustomEvent('split-pane:collapse', {
+      this._emitEvent('wcsplitpanecollapse', 'split-pane:collapse', {
         bubbles: true, detail: { collapsed: false }
-      }));
+      });
     }
 
     toggle() {
@@ -354,10 +354,10 @@ if (!customElements.get('wc-split-pane')) {
           : this.componentElement.offsetHeight;
         const percentage = ((this._currentSize / containerSize) * 100).toFixed(1);
 
-        this.dispatchEvent(new CustomEvent('split-pane:resize', {
+        this._emitEvent('wcsplitpaneresize', 'split-pane:resize', {
           bubbles: true,
           detail: { size: `${this._currentSize}px`, percentage: `${percentage}%` }
-        }));
+        });
       };
 
       // Collapse button

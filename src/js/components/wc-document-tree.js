@@ -239,10 +239,10 @@ if (!customElements.get('wc-document-tree')) {
           const full = this._getFullValue(val, type);
           navigator.clipboard.writeText(full).then(() => {
             this._showCopyToast(valEl);
-            this.dispatchEvent(new CustomEvent('document-tree:copy', {
+            this._emitEvent('wcdocumenttreecopy', 'document-tree:copy', {
               bubbles: true, composed: true,
               detail: { path, value: full, type }
-            }));
+            });
           }).catch(() => {});
         });
       }
@@ -260,10 +260,10 @@ if (!customElements.get('wc-document-tree')) {
       // Select event on click
       row.addEventListener('click', (e) => {
         if (!isExpandable) {
-          this.dispatchEvent(new CustomEvent('document-tree:select', {
+          this._emitEvent('wcdocumenttreeselect', 'document-tree:select', {
             bubbles: true, composed: true,
             detail: { path, value: val, type }
-          }));
+          });
         }
       });
 

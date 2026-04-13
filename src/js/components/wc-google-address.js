@@ -582,21 +582,14 @@ class WcGoogleAddress extends WcBaseFormComponent {
   }
 
   _broadcastAddressChange(addressData) {
-    const event = 'google-address:change';
+    const opts = { detail: addressData, bubbles: true, composed: true };
 
-    // Create custom event with detail
-    const customEvent = new CustomEvent(event, {
-      detail: addressData,
-      bubbles: true,
-      composed: true
-    });
-
-    // Dispatch on document
-    document.dispatchEvent(customEvent);
+    // Dispatch on document (new + legacy name)
+    this._emitEvent('wcgoogleaddresschange', 'google-address:change', opts, document);
 
     // Also use EventHub if available
     if (window.wc?.EventHub) {
-      wc.EventHub.broadcast(event, [], addressData);
+      wc.EventHub.broadcast('wcgoogleaddresschange', [], addressData);
     }
   }
 

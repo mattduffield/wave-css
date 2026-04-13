@@ -188,7 +188,7 @@ class WcSelect extends WcBaseFormComponent {
                 }
               }
             });
-            this.dispatchEvent(new CustomEvent('optionsloaded', {
+            this.dispatchEvent(new CustomEvent('wcoptionsloaded', {
               bubbles: true,
               composed: true,
               detail: { value: this.value, optionCount: this._items.length }

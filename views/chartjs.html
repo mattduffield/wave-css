@@ -398,15 +398,15 @@
       const eventLog = document.getElementById('eventLog');
 
       // Log events from all charts
-      document.addEventListener('chartjs:loading', (e) => {
+      document.addEventListener('wcchartjsloading', (e) => {
         logEvent('🔄 Loading', e.detail);
       });
 
-      document.addEventListener('chartjs:loaded', (e) => {
+      document.addEventListener('wcchartjsloaded', (e) => {
         logEvent('✅ Loaded', e.detail);
       });
 
-      document.addEventListener('chartjs:error', (e) => {
+      document.addEventListener('wcchartjserror', (e) => {
         logEvent('❌ Error', e.detail);
       });
 

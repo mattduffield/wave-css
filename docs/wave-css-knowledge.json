@@ -3,7 +3,7 @@
     "name": "Wave CSS Knowledge Base",
     "version": "1.2.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-04-08"
+    "lastUpdated": "2026-04-13"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -37,6 +37,13 @@
     },
     "dependencyVersions": {
       "codeMirror": "5.65.13 (loaded by DependencyManager)"
+    },
+    "eventNamingConvention": {
+      "rule": "All custom events MUST be all lowercase with no separators (no colons, no hyphens, no camelCase)",
+      "pattern": "wc{component}{action} — e.g. wctreeitemclick, wcchartready, wcpivotcellclick, wcoptionsloaded",
+      "reason": "Colons break Hyperscript parsing; this format works universally in Hyperscript, HTMX hx-trigger, addEventListener, and HTML on* attributes",
+      "backwardCompat": "WcBaseComponent._emitEvent(newName, legacyName, opts, altTarget) fires both the new and legacy event names with a one-time console.warn deprecation notice for the old name",
+      "examples": ["wctreeitemclick", "wcchartready", "wcpivotcellclick", "wcsplitpanecollapse", "wcoptionsloaded", "wccodemirrorready"]
     }
   },
   "components": {
@@ -78,13 +85,13 @@
         ],
         "events": {
           "emits": [
-            "sidenav:opened",
-            "sidenav:closed"
+            "wcsidenavopened",
+            "wcsidenavclosed"
           ],
           "listens": [
-            "wc-sidenav:open",
-            "wc-sidenav:close",
-            "wc-sidenav:toggle"
+            "wcsidenavopen",
+            "wcsidenavclose",
+            "wcsidenavtoggle"
           ]
         },
         "usage": "<wc-sidenav label=\"MENU\" open-top=\"48px\" open-vertical-text push overlay>\n  <a href=\"#\">About</a>\n  <a href=\"#\">Services</a>\n  <a href=\"#\">Contact</a>\n</wc-sidenav>"
@@ -142,7 +149,7 @@
         ],
         "events": {
           "listens": [
-            "wc-menu:click"
+            "wcmenuclick"
           ]
         },
         "notes": "Uses declarative <option> children. Creates HTMX-powered links with hx-get, hx-target, hx-push-url.",
@@ -187,7 +194,7 @@
             "tabchange"
           ],
           "listens": [
-            "wc-tab:click"
+            "wctabclick"
           ]
         },
         "methods": [
@@ -229,9 +236,9 @@
         ],
         "events": {
           "listens": [
-            "wc-dropdown:open",
-            "wc-dropdown:close",
-            "wc-dropdown:toggle"
+            "wcdropdownopen",
+            "wcdropdownclose",
+            "wcdropdowntoggle"
           ]
         },
         "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button.",
@@ -254,9 +261,11 @@
         ],
         "events": {
           "emits": [
-            "tree:select",
-            "tree:expand",
-            "tree:collapse"
+            "wctreeitemclick",
+            "wctreeitemdblclick",
+            "wctreeitemcontextmenu",
+            "wctreeitemexpand",
+            "wctreeitemcollapse"
           ]
         },
         "notes": "Supports nested wc-tree-item children. Search attribute enables a filter input. lazy-url enables on-demand child loading. Full keyboard navigation (arrow keys, enter, space). HTMX attributes supported for server-driven interactions.",
@@ -282,15 +291,19 @@
           "hx-trigger",
           "hx-disinherit",
           "hx-push-url",
-          "hx-indicator"
+          "hx-indicator",
+          "indicator-color"
         ],
         "events": {
           "emits": [
-            "tree:item-expand (bubbles: false)",
-            "tree:item-collapse (bubbles: false)"
+            "treeitemexpand (bubbles: false)",
+            "treeitemcollapse (bubbles: false)",
+            "wctreeitemclick",
+            "wctreeitemdblclick",
+            "wctreeitemcontextmenu"
           ]
         },
-        "notes": "Click behavior: only the arrow toggle expands/collapses; clicking the label selects. data-tree-action child elements render as hover-reveal action buttons. contextmenu event is prevented. htmx.process is called with guard check after render.",
+        "notes": "Click behavior: only the arrow toggle expands/collapses; clicking the label selects. data-tree-action child elements render as hover-reveal action buttons. contextmenu event is prevented. htmx.process is called with guard check after render. indicator-color renders a vertical bar on the left of the item and all its children (applied to .wc-tree-item container).",
         "usage": "<wc-tree-item label=\"Node\" icon=\"fa-folder\" badge=\"3\" expanded>\n  <wc-tree-item label=\"Child\" icon=\"fa-file\" icon-style=\"color:red;\"></wc-tree-item>\n</wc-tree-item>\n\n<!-- With hover action buttons -->\n<wc-tree-item label=\"Document\" icon=\"fa-file\">\n  <button data-tree-action onclick=\"editDoc()\">Edit</button>\n  <button data-tree-action onclick=\"deleteDoc()\">Delete</button>\n</wc-tree-item>"
       }
     ],
@@ -491,9 +504,9 @@
         ],
         "events": {
           "listens": [
-            "wc-accordion:open",
-            "wc-accordion:close",
-            "wc-accordion:toggle"
+            "wcaccordionopen",
+            "wcaccordionclose",
+            "wcaccordiontoggle"
           ]
         },
         "notes": "Data via items JSON attribute or declarative <option> elements. HTMX support.",
@@ -607,8 +620,8 @@
         ],
         "events": {
           "listens": [
-            "wc-image:show",
-            "wc-image:hide"
+            "wcimageshow",
+            "wcimagehide"
           ]
         },
         "notes": "hover-mode options: top, bottom, left, right. Modal creates full-screen overlay on click.",
@@ -649,10 +662,10 @@
         ],
         "events": {
           "listens": [
-            "wc-slideshow:next",
-            "wc-slideshow:prev",
-            "wc-slideshow:start",
-            "wc-slideshow:stop"
+            "wcslideshownext",
+            "wcslideshowprev",
+            "wcslideshowstart",
+            "wcslideshowstop"
           ]
         },
         "usage": "<wc-slideshow autoplay autoplay-interval=\"3000\">\n  <wc-slideshow-image url=\"image1.jpg\" caption=\"Slide 1\"></wc-slideshow-image>\n  <wc-slideshow-image url=\"image2.jpg\" caption=\"Slide 2\"></wc-slideshow-image>\n</wc-slideshow>"
@@ -671,8 +684,7 @@
         ],
         "events": {
           "emits": [
-            "wc-tabulator:ready",
-            "wc-tabulator-ready"
+            "wctabulatorready"
           ]
         },
         "notes": "Column definitions via <wc-tabulator-column> children. Custom functions via <wc-tabulator-func>. Row context menus via <wc-tabulator-row-menu>. Supports pagination, column resizing, movable columns, selectable rows, filters. auto-columns attribute with data generates columns automatically from data keys: flattens nested objects with dot notation, detects types (string/number/boolean/date/ObjectID/array), freezes _id column first, makes columns sortable/resizable/reorderable. Reactive to data attribute updates.",
@@ -699,9 +711,9 @@
         ],
         "events": {
           "emits": [
-            "table:row-click",
-            "table:row-dblclick",
-            "table:sort"
+            "wctablerowclick",
+            "wctablerowdblclick",
+            "wctablesort"
           ]
         },
         "notes": "Column definitions via <wc-table-col> children. auto-columns generates columns from data keys. url attribute fetches JSON data. items attribute accepts JSON array. clickable enables row click/dblclick events.",
@@ -739,8 +751,8 @@
         ],
         "events": {
           "emits": [
-            "chart:ready",
-            "chart:click"
+            "wcchartready",
+            "wcchartclick"
           ]
         },
         "notes": "chart-type options: bar, line, pie, doughnut, area, number. auto-detect analyzes data to choose chart type, label field, and value fields automatically. show-controls displays a configuration bar with Type, Label, and Values dropdowns for user-driven customization. colors attribute accepts a JSON array of hex colors. Host element uses display: contents (via super._render()) for proper flex layout participation. maintainAspectRatio defaults to true when no explicit height is set; false when height attribute is provided. No height attribute = Chart.js default aspect ratio; explicit height = fills the container.",
@@ -772,12 +784,12 @@
         ],
         "events": {
           "emits": [
-            "pivot:ready",
-            "pivot:cell-click",
-            "pivot:config-change",
-            "pivot:filter-change",
-            "pivot:zone-change",
-            "pivot:drill-down"
+            "wcpivotready",
+            "wcpivotcellclick",
+            "wcpivotconfigchange",
+            "wcpivotfilterchange",
+            "wcpivotzonechange",
+            "wcpivotdrilldown"
           ]
         },
         "methods": [
@@ -853,7 +865,7 @@
         ],
         "events": {
           "emits": [
-            "wc-code-mirror:ready",
+            "wccodemirrorready",
             "fetch-complete"
           ]
         },
@@ -881,13 +893,13 @@
         ],
         "events": {
           "emits": [
-            "bot:ready",
-            "bot:message-sent",
-            "bot:response-received",
-            "bot:error",
-            "bot:unsupported",
-            "bot:conversation-cleared",
-            "bot:closed"
+            "wcbotready",
+            "wcbotmessagesent",
+            "wcbotresponsereceived",
+            "wcboterror",
+            "wcbotunsupported",
+            "wcbotconversationcleared",
+            "wcbotclosed"
           ]
         },
         "themes": [
@@ -993,9 +1005,9 @@
         ],
         "events": {
           "listens": [
-            "wc-loader:show",
-            "wc-loader:hide",
-            "wc-loader:toggle"
+            "wcloadershow",
+            "wcloaderhide",
+            "wcloadertoggle"
           ]
         },
         "usage": "<wc-loader size=\"20px\" speed=\"0.5s\" thickness=\"4px\"></wc-loader>"
@@ -1070,15 +1082,15 @@
         ],
         "events": {
           "listens": [
-            "wc-prompt:banner",
-            "wc-prompt:toast",
-            "wc-prompt:success",
-            "wc-prompt:error",
-            "wc-prompt:warning",
-            "wc-prompt:info",
-            "wc-prompt:question",
-            "wc-prompt:notify",
-            "wc-prompt:notify-template"
+            "wcpromptbanner",
+            "wcprompttoast",
+            "wcpromptsuccess",
+            "wcprompterror",
+            "wcpromptwarning",
+            "wcpromptinfo",
+            "wcpromptquestion",
+            "wcpromptnotify",
+            "wcpromptnotifytemplate"
           ]
         },
         "usage": "wc.Prompt.success({ title: 'Done!', text: 'Record saved' });\nwc.Prompt.question({ title: 'Confirm?', text: 'Delete this record?', callback: (result) => {} });"
@@ -1094,7 +1106,7 @@
         ],
         "events": {
           "emits": [
-            "theme:change"
+            "wcthemechange"
           ]
         },
         "usage": "<wc-theme-selector></wc-theme-selector>"
@@ -1561,56 +1573,56 @@
     "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95"
   },
   "eventHub": {
-    "description": "Central pub/sub system for inter-component communication",
+    "description": "Central pub/sub system for inter-component communication.",
     "broadcastPattern": "wc.EventHub.broadcast(eventName, [selector], data)",
     "commonEvents": {
       "sidenav": [
-        "wc-sidenav:open",
-        "wc-sidenav:close",
-        "wc-sidenav:toggle"
+        "wcsidenavopen",
+        "wcsidenavclose",
+        "wcsidenavtoggle"
       ],
       "tab": [
-        "wc-tab:click"
+        "wctabclick"
       ],
       "dropdown": [
-        "wc-dropdown:open",
-        "wc-dropdown:close",
-        "wc-dropdown:toggle"
+        "wcdropdownopen",
+        "wcdropdownclose",
+        "wcdropdowntoggle"
       ],
       "accordion": [
-        "wc-accordion:open",
-        "wc-accordion:close",
-        "wc-accordion:toggle"
+        "wcaccordionopen",
+        "wcaccordionclose",
+        "wcaccordiontoggle"
       ],
       "loader": [
-        "wc-loader:show",
-        "wc-loader:hide",
-        "wc-loader:toggle"
+        "wcloadershow",
+        "wcloaderhide",
+        "wcloadertoggle"
       ],
       "image": [
-        "wc-image:show",
-        "wc-image:hide"
+        "wcimageshow",
+        "wcimagehide"
       ],
       "slideshow": [
-        "wc-slideshow:next",
-        "wc-slideshow:prev",
-        "wc-slideshow:start",
-        "wc-slideshow:stop"
+        "wcslideshownext",
+        "wcslideshowprev",
+        "wcslideshowstart",
+        "wcslideshowstop"
       ],
       "menu": [
-        "wc-menu:click"
+        "wcmenuclick"
       ],
       "prompt": [
-        "wc-prompt:success",
-        "wc-prompt:error",
-        "wc-prompt:warning",
-        "wc-prompt:info",
-        "wc-prompt:question",
-        "wc-prompt:banner",
-        "wc-prompt:toast"
+        "wcpromptsuccess",
+        "wcprompterror",
+        "wcpromptwarning",
+        "wcpromptinfo",
+        "wcpromptquestion",
+        "wcpromptbanner",
+        "wcprompttoast"
       ],
       "theme": [
-        "theme:change"
+        "wcthemechange"
       ]
     }
   },

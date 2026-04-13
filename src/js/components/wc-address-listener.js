@@ -24,7 +24,7 @@
  *    - address-listener: Add this attribute directly to wc-input/wc-select to make it listen
  *
  *  How it works:
- *    1. Listens for 'google-address:change' events
+ *    1. Listens for 'wcgoogleaddresschange' events
  *    2. Filters events by matching addressGroup
  *    3. Updates child form fields based on their name attribute
  *    4. Supports mapping: name="address.city" gets updated from addressData.city
@@ -69,7 +69,7 @@ class WcAddressListener extends WcBaseComponent {
     this._applyStyle();
 
     // Listen for address change events
-    document.addEventListener('google-address:change', this.boundHandleAddressChange);
+    document.addEventListener('wcgoogleaddresschange', this.boundHandleAddressChange);
 
     // Also check if any child elements have the address-listener attribute
     this._setupDirectListeners();
@@ -77,7 +77,7 @@ class WcAddressListener extends WcBaseComponent {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('google-address:change', this.boundHandleAddressChange);
+    document.removeEventListener('wcgoogleaddresschange', this.boundHandleAddressChange);
   }
 
   _setupDirectListeners() {
@@ -96,7 +96,7 @@ class WcAddressListener extends WcBaseComponent {
           }
         };
 
-        document.addEventListener('google-address:change', element._handleDirectAddressChange);
+        document.addEventListener('wcgoogleaddresschange', element._handleDirectAddressChange);
       }
     });
   }

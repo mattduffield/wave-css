@@ -67,7 +67,7 @@ if (!customElements.get('wc-notify')) {
         window.wc = {};
       }
       window.wc.Notify = this;
-      wc.EventHub.broadcast('wc-notify:ready', '', '');
+      wc.EventHub.broadcast('wcnotifyready', '', '');
     }
 
     showSuccess(message, delay, persist = false) {

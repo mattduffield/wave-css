@@ -153,10 +153,10 @@ class WcChartjs extends WcChart {
     this._showLoading();
 
     // Dispatch loading event
-    this.dispatchEvent(new CustomEvent('chartjs:loading', {
+    this._emitEvent('wcchartjsloading', 'chartjs:loading', {
       bubbles: true,
       detail: { url: url }
-    }));
+    });
 
     try {
       // Build URL with params
@@ -187,10 +187,10 @@ class WcChartjs extends WcChart {
       this._hideLoading();
 
       // Dispatch loaded event
-      this.dispatchEvent(new CustomEvent('chartjs:loaded', {
+      this._emitEvent('wcchartjsloaded', 'chartjs:loaded', {
         bubbles: true,
         detail: { data }
-      }));
+      });
 
     } catch (error) {
       console.error('Failed to fetch chart data:', error);
@@ -198,10 +198,10 @@ class WcChartjs extends WcChart {
       this._showError(error.message);
 
       // Dispatch error event
-      this.dispatchEvent(new CustomEvent('chartjs:error', {
+      this._emitEvent('wcchartjserror', 'chartjs:error', {
         bubbles: true,
         detail: { error: error.message }
-      }));
+      });
     }
   }
 

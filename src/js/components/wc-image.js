@@ -24,8 +24,8 @@
  *  </wc-image>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-image:show', ['[data-wc-id="0982-a544-98da-b3da"]'])
- *    wc.EventHub.broadcast('wc-image:hide', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcimageshow', ['[data-wc-id="0982-a544-98da-b3da"]'])
+ *    wc.EventHub.broadcast('wcimagehide', ['[data-wc-id="0982-a544-98da-b3da"]'])
  * 
  */
 
@@ -340,16 +340,16 @@ class WcImage extends WcBaseComponent {
     super._wireEvents();
 
     if (this.hasAttribute('modal')) {
-      document.body.addEventListener('wc-image:show', this._handleShow.bind(this));
-      document.body.addEventListener('wc-image:hide', this._handleHide.bind(this));
+      document.body.addEventListener('wcimageshow', this._handleShow.bind(this));
+      document.body.addEventListener('wcimagehide', this._handleHide.bind(this));
     }
   }
 
   _unWireEvents() {
     super._unWireEvents();
     if (this.hasAttribute('modal')) {
-      document.body.removeEventListener('wc-image:show', this._handleShow.bind(this));
-      document.body.removeEventListener('wc-image:hide', this._handleHide.bind(this));
+      document.body.removeEventListener('wcimageshow', this._handleShow.bind(this));
+      document.body.removeEventListener('wcimagehide', this._handleHide.bind(this));
       const imgEl = this.querySelector('.img');
       imgEl.removeEventListener('click', this._showModal.bind(this));
       const closeBtn = this.querySelector('.overlay .closebtn');

@@ -187,7 +187,7 @@ Always provide the most current information to customers.`;
 setInterval(updateBotWithLatestData, 5 * 60 * 1000);
 
 // Update when bot opens
-document.addEventListener('bot:ready', (e) => {
+document.addEventListener('wcbotready', (e) => {
   if (e.detail.botId === 'company-support') {
     updateBotWithLatestData();
   }

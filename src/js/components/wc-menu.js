@@ -13,9 +13,9 @@
  *  </wc-menu>
  * 
  *  API:
- *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="theme"]')
- *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="accordion"]')
- *    wc.EventHub.broadcast('wc-menu:click', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="form-states"]')
+ *    wc.EventHub.broadcast('wcmenuclick', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="theme"]')
+ *    wc.EventHub.broadcast('wcmenuclick', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="accordion"]')
+ *    wc.EventHub.broadcast('wcmenuclick', ['[data-wc-id="e58b-dbed-4eb4-6776"]'], '[data-name="form-states"]')
  */
 
 
@@ -323,12 +323,12 @@ class WcMenu extends WcBaseComponent {
   _wireEvents() {
     super._wireEvents();
 
-    document.body.addEventListener('wc-menu:click', this._handleOnClick.bind(this));
+    document.body.addEventListener('wcmenuclick', this._handleOnClick.bind(this));
   }
 
   _unWireEvents() {
     super._unWireEvents();
-    document.body.removeEventListener('wc-menu:click', this._handleOnClick.bind(this));
+    document.body.removeEventListener('wcmenuclick', this._handleOnClick.bind(this));
     const links = this.querySelectorAll('.menu-link');
     links.forEach(link => link.removeEventListener('click', this._handleClick.bind(this)));
     const menuIcon = this.querySelector('.menu-toggle');

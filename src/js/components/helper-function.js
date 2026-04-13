@@ -442,7 +442,7 @@ export function enableSortable(target) {
           oldIndex: evt.oldIndex,
           newIndex: evt.newIndex
         };
-        wc?.EventHub?.broadcast('sortable:on-end', '', '', custom);
+        wc?.EventHub?.broadcast('wcsortableonend', '', '', custom);
       }
     };
     if (typeof Sortable !== 'undefined') {

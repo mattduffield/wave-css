@@ -564,11 +564,11 @@ if (!customElements.get('wc-tabulator')) {
 
       this.table = new Tabulator(this.componentElement, options);
       this.table.on("tableBuilt", async () => {
-        // console.log('wc-tabulator:tableBuilt - broadcasting wc-tabulator:ready');
+        // console.log('wc-tabulator:tableBuilt - broadcasting wctabulatorready');
         if ("onInit" in this.funcs) {
           this.funcs["onInit"](this.table);
         }  
-        wc.EventHub.broadcast('wc-tabulator:ready', [], '');
+        wc.EventHub.broadcast('wctabulatorready', [], '');
         wc.EventHub.broadcast('wc-tabulator-ready', [], '');
         if (typeof htmx !== 'undefined') {
           await sleep(1000);
@@ -620,7 +620,7 @@ if (!customElements.get('wc-tabulator')) {
       //   var rowIndex = row.getIndex();
       //   var rowPosition = row.getPosition();
       //   const custom = { e, row, rowData, rowIndex, rowPosition };
-      //   wc.EventHub.broadcast('wc-tabulator:row-click', '', '', custom);
+      //   wc.EventHub.broadcast('wctabulatorrowclick', '', '', custom);
       // });
 
 
