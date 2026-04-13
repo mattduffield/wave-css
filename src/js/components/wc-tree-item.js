@@ -33,6 +33,7 @@ if (!customElements.get("wc-tree-item")) {
         "hx-indicator",
         "hx-trigger",
         "hx-disinherit",
+        "indicator-color",
       ];
     }
 
@@ -117,6 +118,13 @@ if (!customElements.get("wc-tree-item")) {
         if (expanded) arrow.classList.add("expanded");
       }
       row.appendChild(arrow);
+
+      // Indicator bar (on the .wc-tree-item container so it spans children)
+      const indicatorColor = this.getAttribute("indicator-color");
+      if (indicatorColor) {
+        this.componentElement.style.borderLeft = `3px solid ${indicatorColor}`;
+        this.componentElement.style.paddingLeft = "4px";
+      }
 
       // Icon
       if (icon) {
@@ -339,6 +347,14 @@ if (!customElements.get("wc-tree-item")) {
           badgeEl.textContent = newValue;
         } else if (badgeEl) {
           badgeEl.remove();
+        }
+      } else if (attrName === "indicator-color") {
+        if (newValue) {
+          this.componentElement.style.borderLeft = `3px solid ${newValue}`;
+          this.componentElement.style.paddingLeft = "4px";
+        } else {
+          this.componentElement.style.borderLeft = "";
+          this.componentElement.style.paddingLeft = "";
         }
       } else {
         super._handleAttributeChange(attrName, newValue);

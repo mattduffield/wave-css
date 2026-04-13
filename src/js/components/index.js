@@ -78,6 +78,7 @@ import './wc-chart.js';
 import './wc-chart-builder.js';
 import './wc-pivot.js';
 import './wc-explain-tree.js';
+import './wc-document-tree.js';
 import './wc-chartjs.js';
 import './wc-busy-indicator.js';
 // Form Controls

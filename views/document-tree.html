@@ -1,0 +1,147 @@
+<div id="page-contents" class="col p-4 gap-4">
+
+  <h2>Document Tree Demo</h2>
+  <p class="text-sm mb-2">The <code>wc-document-tree</code> component renders MongoDB documents as an expandable tree. Click values to copy, right-click field names to copy the path.</p>
+
+  <!-- Single document with nested objects -->
+  <h3 class="mt-4">Single Document (expand-level="2")</h3>
+  <p class="text-sm mb-2">Nested objects and arrays expand on click. Type badges on the right.</p>
+  <div style="height: 400px; border: 1px solid var(--card-border-color); border-radius: 6px; overflow: hidden;">
+    <wc-document-tree
+      expand-level="2"
+      data='[{
+        "_id": "68a6174aad3de97e8fdf564e",
+        "first_name": "Matt",
+        "last_name": "Duffield",
+        "email": "matt@example.com",
+        "age": 42,
+        "is_active": true,
+        "created_date": "2025-08-20T18:43:22.239Z",
+        "address": {
+          "street": "202 Main St",
+          "city": "Portland",
+          "state": "OR",
+          "postal_code": "97201",
+          "lat": 45.5152,
+          "lng": -122.6784
+        },
+        "tags": ["admin", "developer", "beta-tester"],
+        "preferences": {
+          "theme": "dark",
+          "notifications": true,
+          "language": "en"
+        },
+        "notes": null
+      }]'>
+    </wc-document-tree>
+  </div>
+
+  <!-- Multiple documents -->
+  <h3 class="mt-6">Multiple Documents</h3>
+  <p class="text-sm mb-2">Each document is a collapsible root node showing its <code>_id</code>.</p>
+  <div style="height: 400px; border: 1px solid var(--card-border-color); border-radius: 6px; overflow: hidden;">
+    <wc-document-tree
+      expand-level="1"
+      data='[
+        {"_id": "abc001", "name": "Widget A", "price": 29.99, "in_stock": true, "category": "Hardware"},
+        {"_id": "abc002", "name": "Gadget B", "price": 149.95, "in_stock": false, "category": "Electronics", "specs": {"weight_kg": 1.2, "color": "silver"}},
+        {"_id": "abc003", "name": "Doohickey C", "price": 9.99, "in_stock": true, "tags": ["sale", "clearance"]}
+      ]'>
+    </wc-document-tree>
+  </div>
+
+  <!-- Complex nested document -->
+  <h3 class="mt-6">Deeply Nested (Insurance Prospect)</h3>
+  <p class="text-sm mb-2">Real-world data with arrays of objects, deeply nested fields. Expand to explore.</p>
+  <div style="height: 500px; border: 1px solid var(--card-border-color); border-radius: 6px; overflow: hidden;">
+    <wc-document-tree
+      expand-level="1"
+      data='[{
+        "_id": "68a6174aad3de97e8fdf564e",
+        "first_name": "Jimmell",
+        "last_name": "Norwood",
+        "is_active": true,
+        "quote_state": "NC",
+        "address": {
+          "street": "202 Cutchin Rd",
+          "city": "Whitakers",
+          "state": "NC",
+          "postal_code": "27891",
+          "county": "Edgecombe County",
+          "lat": 36.1041353,
+          "lng": -77.7119295
+        },
+        "household_members": [
+          {
+            "first_name": "Jimmell",
+            "last_name": "Norwood",
+            "gender": "male",
+            "marital_status": "single",
+            "birth_date": "1990-09-04T00:00:00Z",
+            "driver": {
+              "license_number": "32251288",
+              "license_state": "NC",
+              "license_status": "active",
+              "driver_type": "principal"
+            },
+            "contact": {
+              "email": "none@none.com",
+              "mobile_number": "7777777777",
+              "preferred_language": "english"
+            }
+          }
+        ],
+        "household_vehicles": [
+          {
+            "year": "2013",
+            "make": "GMC",
+            "model": "Terrain",
+            "trim": "SLT",
+            "vin": "2gkflvek0d6281890",
+            "msrp": "31105.00"
+          }
+        ],
+        "liability_limits": {
+          "bi": "50/100",
+          "pd": "50",
+          "umbi": "50/100",
+          "umpd": "50"
+        },
+        "created_date": "2025-08-20T18:43:22.239Z",
+        "modified_date": "2025-08-21T11:39:23.643Z"
+      }]'>
+    </wc-document-tree>
+  </div>
+
+  <!-- Dynamic loading -->
+  <h3 class="mt-6">Dynamic: Load via Property Setter</h3>
+  <p class="text-sm mb-2">Click to load data via the <code>data</code> property (no DOM attribute bloat).</p>
+  <div class="row gap-2 mb-4">
+    <button class="btn btn-primary" onclick="loadUsers()">Load Users</button>
+    <button class="btn btn-secondary" onclick="loadOrders()">Load Orders</button>
+  </div>
+  <div style="height: 350px; border: 1px solid var(--card-border-color); border-radius: 6px; overflow: hidden;">
+    <wc-document-tree id="dynamic-doctree" expand-level="1"></wc-document-tree>
+  </div>
+
+  <wc-javascript>
+    <script>
+      function loadUsers() {
+        var tree = document.getElementById('dynamic-doctree');
+        tree.data = [
+          { _id: '001', username: 'matt_d', email: 'matt@example.com', role: 'admin', last_login: '2026-04-10T14:30:00Z', profile: { avatar: 'matt.jpg', bio: 'Developer and architect' }},
+          { _id: '002', username: 'sarah_c', email: 'sarah@example.com', role: 'editor', last_login: '2026-04-09T09:15:00Z', profile: { avatar: 'sarah.jpg', bio: 'Content manager' }},
+          { _id: '003', username: 'john_s', email: 'john@example.com', role: 'viewer', last_login: null, profile: { avatar: null, bio: '' }}
+        ];
+      }
+      function loadOrders() {
+        var tree = document.getElementById('dynamic-doctree');
+        tree.data = [
+          { _id: 'ord-001', customer: 'Matt Duffield', total: 299.97, status: 'shipped', items: [{ sku: 'WGT-001', name: 'Widget A', qty: 2, price: 29.99 }, { sku: 'GDT-002', name: 'Gadget B', qty: 1, price: 149.95 }], shipping: { carrier: 'UPS', tracking: '1Z999AA10123456784', eta: '2026-04-15T00:00:00Z' }},
+          { _id: 'ord-002', customer: 'Sarah Connor', total: 9.99, status: 'delivered', items: [{ sku: 'DHK-003', name: 'Doohickey C', qty: 1, price: 9.99 }], shipping: { carrier: 'USPS', tracking: '9400111899223100001', eta: '2026-04-08T00:00:00Z' }}
+        ];
+      }
+    </script>
+  </wc-javascript>
+
+</div>
