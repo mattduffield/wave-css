@@ -630,6 +630,7 @@ const ICONS_TO_COPY = [
   "exchange",
   "question",
   "mask",
+  "hard-drive",
   // Add more icon names here
 ];
 
