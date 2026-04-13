@@ -934,6 +934,7 @@ if (!customElements.get('wc-code-mirror')) {
       const modeDependencies = {
         "htmlmixed": ["xml", "css", "javascript"],
         "php": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-php": ["clike", "htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
         "markdown": ["htmlmixed", "xml", "css", "javascript"],
         "text/x-java": ["clike"],
@@ -945,6 +946,7 @@ if (!customElements.get('wc-code-mirror')) {
         "text/x-kotlin": ["clike"],
       };
       const mimeToModeFile = {
+        "text/x-php": "php",
         "text/x-java": "clike", "text/x-csharp": "clike", "text/x-c++src": "clike",
         "text/x-csrc": "clike", "text/x-objectivec": "clike", "text/x-scala": "clike",
         "text/x-kotlin": "clike",
@@ -987,6 +989,7 @@ if (!customElements.get('wc-code-mirror')) {
       const modeDependencies = {
         "htmlmixed": ["xml", "css", "javascript"],
         "php": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-php": ["clike", "htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
         "markdown": ["htmlmixed", "xml", "css", "javascript"],
         "text/x-java": ["clike"],
@@ -1010,6 +1013,7 @@ if (!customElements.get('wc-code-mirror')) {
 
       // MIME types that map to a mode file (mode file ≠ mode name)
       const mimeToModeFile = {
+        "text/x-php": "php",
         "text/x-java": "clike",
         "text/x-csharp": "clike",
         "text/x-c++src": "clike",
@@ -1024,8 +1028,17 @@ if (!customElements.get('wc-code-mirror')) {
         for (const modeName of dependencies) {
           await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
         }
-        // For MIME types, the mode file is already loaded via dependencies — skip the default load below
-        if (mimeToModeFile[mode]) return;
+      }
+
+      // For MIME types, load the actual mode file if different from dependencies, then set mode
+      if (mimeToModeFile[mode]) {
+        const modeFile = mimeToModeFile[mode];
+        const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeFile}/${modeFile}.min.js`;
+        if (!document.querySelector(`script[src="${modeUrl}"]`)) {
+          await this.loadScript(modeUrl);
+        }
+        this.editor.setOption('mode', mode);
+        return;
       }
 
       if (mode === 'litespec') {

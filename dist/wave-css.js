@@ -3671,6 +3671,7 @@ if (!customElements.get("wc-code-mirror")) {
       const modeDependencies = {
         "htmlmixed": ["xml", "css", "javascript"],
         "php": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-php": ["clike", "htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
         "markdown": ["htmlmixed", "xml", "css", "javascript"],
         "text/x-java": ["clike"],
@@ -3682,6 +3683,7 @@ if (!customElements.get("wc-code-mirror")) {
         "text/x-kotlin": ["clike"]
       };
       const mimeToModeFile = {
+        "text/x-php": "php",
         "text/x-java": "clike",
         "text/x-csharp": "clike",
         "text/x-c++src": "clike",
@@ -3722,6 +3724,7 @@ if (!customElements.get("wc-code-mirror")) {
       const modeDependencies = {
         "htmlmixed": ["xml", "css", "javascript"],
         "php": ["htmlmixed", "xml", "css", "javascript"],
+        "text/x-php": ["clike", "htmlmixed", "xml", "css", "javascript"],
         "htmlembedded": ["xml", "javascript"],
         "markdown": ["htmlmixed", "xml", "css", "javascript"],
         "text/x-java": ["clike"],
@@ -3743,6 +3746,7 @@ if (!customElements.get("wc-code-mirror")) {
         "swift": []
       };
       const mimeToModeFile = {
+        "text/x-php": "php",
         "text/x-java": "clike",
         "text/x-csharp": "clike",
         "text/x-c++src": "clike",
@@ -3756,7 +3760,15 @@ if (!customElements.get("wc-code-mirror")) {
         for (const modeName of dependencies) {
           await this.loadScript(`https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeName}/${modeName}.min.js`);
         }
-        if (mimeToModeFile[mode]) return;
+      }
+      if (mimeToModeFile[mode]) {
+        const modeFile = mimeToModeFile[mode];
+        const modeUrl2 = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${modeFile}/${modeFile}.min.js`;
+        if (!document.querySelector(`script[src="${modeUrl2}"]`)) {
+          await this.loadScript(modeUrl2);
+        }
+        this.editor.setOption("mode", mode);
+        return;
       }
       if (mode === "litespec") {
         CodeMirror.registerHelper("fold", "litespec", function(cm, start) {
