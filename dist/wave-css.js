@@ -14747,15 +14747,42 @@ if (!customElements.get("wc-tabulator")) {
         document.body.removeEventListener("htmx:configRequest", this._syncHandler);
       }
     }
+    get data() {
+      return this._inlineData || [];
+    }
+    set data(value) {
+      if (typeof value === "string") {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          value = [];
+        }
+      }
+      this._inlineData = Array.isArray(value) ? value : [];
+      if (this.table) {
+        const self = this;
+        const doSetData = () => {
+          if (self.hasAttribute("auto-columns")) {
+            const cols = self._generateAutoColumns(self._inlineData);
+            self.table.setColumns(cols);
+          }
+          self.table.options.sortMode = "local";
+          self.table.options.filterMode = "local";
+          self.table.options.paginationMode = "local";
+          self.table.setData(self._inlineData);
+        };
+        if (this._isReady) {
+          setTimeout(doSetData, 0);
+        } else {
+          this.ready.then(doSetData);
+        }
+      }
+    }
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === "data" && this.table) {
         try {
           const data = JSON.parse(newValue) || [];
-          if (this.hasAttribute("auto-columns")) {
-            const cols = this._generateAutoColumns(data);
-            this.table.setColumns(cols);
-          }
-          this.table.setData(data);
+          this.data = data;
         } catch (e) {
           console.error("[wc-tabulator] Error updating data:", e);
         }
@@ -23780,6 +23807,22 @@ if (!customElements.get("wc-chart-builder")) {
     }
     _render() {
       super._render();
+    }
+    // ── Data property ─────────────────────────────────────────────────────────
+    get data() {
+      return this._data;
+    }
+    set data(value) {
+      this._data = Array.isArray(value) ? value : [];
+      this._analyzeFields();
+      if (this.hasAttribute("auto-detect") || !this.getAttribute("chart-type")) {
+        this._autoDetect();
+      }
+      this._syncFromAttributes();
+      if (this._isLibraryLoaded) {
+        this._buildUI();
+        this._renderChart();
+      }
     }
     // ── Data parsing ──────────────────────────────────────────────────────────
     _parseData() {

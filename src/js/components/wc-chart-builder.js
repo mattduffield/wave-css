@@ -113,6 +113,25 @@ if (!customElements.get('wc-chart-builder')) {
       // UI built in connectedCallback, not here
     }
 
+    // ── Data property ─────────────────────────────────────────────────────────
+
+    get data() {
+      return this._data;
+    }
+
+    set data(value) {
+      this._data = Array.isArray(value) ? value : [];
+      this._analyzeFields();
+      if (this.hasAttribute('auto-detect') || !this.getAttribute('chart-type')) {
+        this._autoDetect();
+      }
+      this._syncFromAttributes();
+      if (this._isLibraryLoaded) {
+        this._buildUI();
+        this._renderChart();
+      }
+    }
+
     // ── Data parsing ──────────────────────────────────────────────────────────
 
     _parseData() {
