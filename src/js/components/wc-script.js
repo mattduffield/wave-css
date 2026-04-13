@@ -9,6 +9,13 @@
  *   It also dispatches a custom event when the script is loaded or fails to load.
  */
 
+function _dispatchCompat(target, newName, legacyName, opts) {
+  target.dispatchEvent(new CustomEvent(newName, opts));
+  if (legacyName && legacyName !== newName) {
+    target.dispatchEvent(new CustomEvent(legacyName, opts));
+  }
+}
+
 if (!customElements.get('wc-script')) {
   class WcScript extends HTMLElement {
     constructor() {
@@ -39,31 +46,31 @@ if (!customElements.get('wc-script')) {
           script.onload = () => {
             // console.log(`Script loaded: ${src}`);
             window.wc.scriptsLoaded[src] = true;
-            document.body.dispatchEvent(new CustomEvent('script-loaded', {
+            _dispatchCompat(document.body, 'wcscriptloaded', 'script-loaded', {
               detail: { src },
               bubbles: true,
               composed: true
-            }));
+            });
           };
 
           script.onerror = () => {
             console.error(`Failed to load script: ${src}`);
-            document.body.dispatchEvent(new CustomEvent('script-error', {
+            _dispatchCompat(document.body, 'wcscripterror', 'script-error', {
               detail: { src },
               bubbles: true,
               composed: true
-            }));
+            });
           };
 
           document.head.appendChild(script); // Append the script to the document head
           // console.log(`Added script: ${src}`);
         } else {
           // console.log(`Script already exists, skipping append: ${src}`);
-          document.body.dispatchEvent(new CustomEvent('script-loaded', {
+          _dispatchCompat(document.body, 'wcscriptloaded', 'script-loaded', {
             detail: { src },
             bubbles: true,
             composed: true
-          }));
+          });
         }
       } else {
         console.warn('No src provided for wc-script component.');

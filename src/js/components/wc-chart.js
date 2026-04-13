@@ -192,10 +192,10 @@ class WcChart extends WcBaseComponent {
       this.chartInstance = new window.Chart(this.canvas, config);
 
       // Dispatch event when chart is created
-      this.dispatchEvent(new CustomEvent('chart-created', {
+      this._emitEvent('wcchartcreated', 'chart-created', {
         detail: { chart: this.chartInstance },
         bubbles: true
-      }));
+      });
     } catch (error) {
       console.error('Failed to create chart:', error);
     }
@@ -598,7 +598,7 @@ class WcChart extends WcBaseComponent {
           const label = this.chartInstance.data.labels[firstPoint.index];
           const value = this.chartInstance.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
           
-          this.dispatchEvent(new CustomEvent('chart-click', {
+          this._emitEvent('wcchartclick', 'chart-click', {
             detail: {
               label,
               value,
@@ -606,7 +606,7 @@ class WcChart extends WcBaseComponent {
               index: firstPoint.index
             },
             bubbles: true
-          }));
+          });
         }
       });
     }

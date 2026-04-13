@@ -191,7 +191,9 @@
         ],
         "events": {
           "emits": [
-            "tabchange"
+            "wctabchange",
+            "wctabadd",
+            "wctabremove"
           ],
           "listens": [
             "wctabclick"
@@ -559,7 +561,7 @@
         ],
         "events": {
           "emits": [
-            "flip"
+            "wcflip"
           ]
         },
         "notes": "Uses slot='front' and slot='back' for content. flip-on='click' adds flip buttons; default is hover.",
@@ -586,11 +588,15 @@
         ],
         "events": {
           "emits": [
-            "map-loaded",
-            "pin-clicked",
-            "map-clicked",
-            "center-changed",
-            "zoom-changed"
+            "wcmaploaded",
+            "wcpinclicked",
+            "wcmapclicked",
+            "wcmapcenterchanged",
+            "wcmapzoomchanged",
+            "wcmapboundschanged",
+            "wcmapdragstart",
+            "wcmapdragging",
+            "wcmapdragend"
           ]
         },
         "methods": [
@@ -869,7 +875,7 @@
             "fetch-complete"
           ]
         },
-        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}. Mode scripts are now pre-loaded BEFORE editor creation via _preloadMode() so syntax highlighting works on first render in HTMX-loaded fragments. Editor is always created (never deferred/null) — this.editor is always available after connectedCallback. One-time mode re-apply on first change event fixes syntax highlighting for editors created in hidden containers. display() method forces re-tokenization + refresh (call after making editor visible). value property setter re-applies mode after setValue for hidden-container fix. Pongo2/Django template syntax highlighting via overlay ({% %} tags in violet, {{ }} variables in coral, {# #} comments in gray). .cm-error red background suppressed globally. Additional language modes supported: python, go, ruby, rust, sql, shell, yaml, toml, dockerfile, swift, and clike-based MIME types (text/x-java, text/x-csharp, etc.).",
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}. Mode scripts are now pre-loaded BEFORE editor creation via _preloadMode() so syntax highlighting works on first render in HTMX-loaded fragments. Editor is always created (never deferred/null) — this.editor is always available after connectedCallback. One-time mode re-apply on first change event fixes syntax highlighting for editors created in hidden containers. display() method forces re-tokenization + refresh (call after making editor visible). value property setter re-applies mode after setValue for hidden-container fix. Pongo2/Django template syntax highlighting via overlay ({% %} tags in violet, {{ }} variables in coral, {# #} comments in gray). .cm-error red background suppressed globally. Additional language modes supported: python, go, ruby, rust, sql, shell, yaml, toml, dockerfile, swift, and clike-based MIME types (text/x-java, text/x-csharp, etc.). Uses sublime keymap with full find/replace support: Cmd+F (find), Cmd+G (find next), Shift+Cmd+G (find prev), Cmd+D (select next occurrence), Cmd+Alt+F (find & replace). Search/dialog/jump-to-line addons loaded automatically.",
         "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
       },
       {
@@ -1127,8 +1133,8 @@
         "description": "Dynamic CSS stylesheet loader. Prevents duplicates. Removes self after loading.",
         "events": {
           "emits": [
-            "link-loaded",
-            "link-error"
+            "wclinkloaded",
+            "wclinkerror"
           ]
         },
         "usage": "<wc-link url=\"https://example.com/styles.css\"></wc-link>"
@@ -1138,8 +1144,8 @@
         "description": "Dynamic JavaScript loader. Prevents duplicates. Removes self after loading.",
         "events": {
           "emits": [
-            "script-loaded",
-            "script-error"
+            "wcscriptloaded",
+            "wcscripterror"
           ]
         },
         "usage": "<wc-script src=\"https://example.com/script.js\"></wc-script>"

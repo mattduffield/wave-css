@@ -3358,7 +3358,11 @@ if (!customElements.get("wc-code-mirror")) {
     async renderEditor(initialValue) {
       const hasHints = this.hasAttribute("hint-words") || this.hasAttribute("hint-url");
       await Promise.all([
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js"),
+        this.loadCSS("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css"),
         this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"),
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js"),
+        this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/jump-to-line.min.js"),
         this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"),
         this.loadScript("https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js"),
         ...hasHints ? [
@@ -5800,10 +5804,10 @@ var WcFlipBox = class extends WcBaseComponent {
         innerEl.classList.remove("flipped");
       }
     }
-    this.dispatchEvent(new CustomEvent("flip", {
+    this._emitEvent("wcflip", "flip", {
       detail: { isFlipped: this.isFlipped },
       bubbles: true
-    }));
+    });
   }
   _wireEvents() {
     const flipOn = this.getAttribute("flip-on") || "hover";
@@ -6097,10 +6101,10 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
     };
     try {
       this.map = new google.maps.Map(this.mapElement, mapOptions);
-      this.dispatchEvent(new CustomEvent("map-loaded", {
+      this._emitEvent("wcmaploaded", "map-loaded", {
         detail: { map: this.map },
         bubbles: true
-      }));
+      });
       this._addMapEventListeners();
       this._addPins();
     } catch (error) {
@@ -6165,14 +6169,14 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       marker.addListener("click", () => {
         this.infoWindows.forEach((iw) => iw.close());
         infoWindow.open(this.map, marker);
-        this.dispatchEvent(new CustomEvent("pin-clicked", {
+        this._emitEvent("wcpinclicked", "pin-clicked", {
           detail: {
             pin,
             marker,
             index
           },
           bubbles: true
-        }));
+        });
       });
     });
     if (pins.length > 1) {
@@ -6228,58 +6232,58 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
   _addMapEventListeners() {
     if (!this.map) return;
     this.map.addListener("click", (e) => {
-      this.dispatchEvent(new CustomEvent("map-clicked", {
+      this._emitEvent("wcmapclicked", "map-clicked", {
         detail: {
           lat: e.latLng.lat(),
           lng: e.latLng.lng(),
           event: e
         },
         bubbles: true
-      }));
+      });
     });
     this.map.addListener("center_changed", () => {
       const center = this.map.getCenter();
-      this.dispatchEvent(new CustomEvent("center-changed", {
+      this._emitEvent("wcmapcenterchanged", "center-changed", {
         detail: {
           lat: center.lat(),
           lng: center.lng()
         },
         bubbles: true
-      }));
+      });
     });
     this.map.addListener("zoom_changed", () => {
-      this.dispatchEvent(new CustomEvent("zoom-changed", {
+      this._emitEvent("wcmapzoomchanged", "zoom-changed", {
         detail: {
           zoom: this.map.getZoom()
         },
         bubbles: true
-      }));
+      });
     });
     this.map.addListener("bounds_changed", () => {
       const bounds = this.map.getBounds();
       if (bounds) {
-        this.dispatchEvent(new CustomEvent("bounds-changed", {
+        this._emitEvent("wcmapboundschanged", "bounds-changed", {
           detail: {
             bounds
           },
           bubbles: true
-        }));
+        });
       }
     });
     this.map.addListener("dragstart", () => {
-      this.dispatchEvent(new CustomEvent("drag-start", {
+      this._emitEvent("wcmapdragstart", "drag-start", {
         bubbles: true
-      }));
+      });
     });
     this.map.addListener("drag", () => {
-      this.dispatchEvent(new CustomEvent("dragging", {
+      this._emitEvent("wcmapdragging", "dragging", {
         bubbles: true
-      }));
+      });
     });
     this.map.addListener("dragend", () => {
-      this.dispatchEvent(new CustomEvent("drag-end", {
+      this._emitEvent("wcmapdragend", "drag-end", {
         bubbles: true
-      }));
+      });
     });
   }
   /**
@@ -13684,8 +13688,7 @@ var WcTab = class extends WcBaseComponent {
       tabItem.querySelector(".wc-tab-item").appendChild(content);
     }
     tabBody.appendChild(tabItem);
-    const payload = { detail: { label }, bubbles: true, composed: true };
-    this.dispatchEvent(new CustomEvent("tabadd", payload));
+    this._emitEvent("wctabadd", "tabadd", { detail: { label }, bubbles: true, composed: true });
     if (activate) {
       requestAnimationFrame(() => btn.click());
     }
@@ -13707,8 +13710,7 @@ var WcTab = class extends WcBaseComponent {
     const wasActive = btn.classList.contains("active");
     btn.remove();
     if (tabItem) tabItem.remove();
-    const payload = { detail: { label }, bubbles: true, composed: true };
-    this.dispatchEvent(new CustomEvent("tabremove", payload));
+    this._emitEvent("wctabremove", "tabremove", { detail: { label }, bubbles: true, composed: true });
     if (wasActive) {
       const remainingBtns = tabNav.querySelectorAll(":scope > button.tab-link");
       if (remainingBtns.length > 0) {
@@ -13909,12 +13911,12 @@ var WcTab = class extends WcBaseComponent {
     if (contents) {
       contents.classList.add("active");
       const payload = { detail: { label }, bubbles: true, composed: true };
-      const custom = new CustomEvent("tabchange", payload);
-      contents.dispatchEvent(custom);
+      contents.dispatchEvent(new CustomEvent("wctabchange", payload));
+      contents.dispatchEvent(new CustomEvent("tabchange", payload));
       const innerDiv = contents.querySelector(":scope > .wc-tab-item");
       if (innerDiv) {
-        const custom2 = new CustomEvent("tabchange", payload);
-        innerDiv.dispatchEvent(custom2);
+        innerDiv.dispatchEvent(new CustomEvent("wctabchange", payload));
+        innerDiv.dispatchEvent(new CustomEvent("tabchange", payload));
       }
     }
     if (!this.hasAttribute("no-hash")) {
@@ -22299,6 +22301,12 @@ if (!customElements.get("wc-hotkey")) {
 }
 
 // src/js/components/wc-link.js
+function _dispatchCompat(target, newName, legacyName, opts) {
+  target.dispatchEvent(new CustomEvent(newName, opts));
+  if (legacyName && legacyName !== newName) {
+    target.dispatchEvent(new CustomEvent(legacyName, opts));
+  }
+}
 if (!customElements.get("wc-link")) {
   class WcLink extends HTMLElement {
     constructor() {
@@ -22322,26 +22330,26 @@ if (!customElements.get("wc-link")) {
           link.id = linkId;
           link.onload = () => {
             window.wc.linksLoaded[url] = true;
-            document.body.dispatchEvent(new CustomEvent("link-loaded", {
+            _dispatchCompat(document.body, "wclinkloaded", "link-loaded", {
               detail: { url },
               bubbles: true,
               composed: true
-            }));
+            });
           };
           link.onerror = () => {
-            document.body.dispatchEvent(new CustomEvent("link-error", {
+            _dispatchCompat(document.body, "wclinkerror", "link-error", {
               detail: { url },
               bubbles: true,
               composed: true
-            }));
+            });
           };
           document.head.appendChild(link);
         } else {
-          document.body.dispatchEvent(new CustomEvent("link-loaded", {
+          _dispatchCompat(document.body, "wclinkloaded", "link-loaded", {
             detail: { url },
             bubbles: true,
             composed: true
-          }));
+          });
         }
       } else {
         console.warn("No URL provided for wc-link component.");
@@ -22353,6 +22361,12 @@ if (!customElements.get("wc-link")) {
 }
 
 // src/js/components/wc-script.js
+function _dispatchCompat2(target, newName, legacyName, opts) {
+  target.dispatchEvent(new CustomEvent(newName, opts));
+  if (legacyName && legacyName !== newName) {
+    target.dispatchEvent(new CustomEvent(legacyName, opts));
+  }
+}
 if (!customElements.get("wc-script")) {
   class WcScript extends HTMLElement {
     constructor() {
@@ -22376,27 +22390,27 @@ if (!customElements.get("wc-script")) {
           script.id = scriptId;
           script.onload = () => {
             window.wc.scriptsLoaded[src] = true;
-            document.body.dispatchEvent(new CustomEvent("script-loaded", {
+            _dispatchCompat2(document.body, "wcscriptloaded", "script-loaded", {
               detail: { src },
               bubbles: true,
               composed: true
-            }));
+            });
           };
           script.onerror = () => {
             console.error(`Failed to load script: ${src}`);
-            document.body.dispatchEvent(new CustomEvent("script-error", {
+            _dispatchCompat2(document.body, "wcscripterror", "script-error", {
               detail: { src },
               bubbles: true,
               composed: true
-            }));
+            });
           };
           document.head.appendChild(script);
         } else {
-          document.body.dispatchEvent(new CustomEvent("script-loaded", {
+          _dispatchCompat2(document.body, "wcscriptloaded", "script-loaded", {
             detail: { src },
             bubbles: true,
             composed: true
-          }));
+          });
         }
       } else {
         console.warn("No src provided for wc-script component.");
@@ -23231,10 +23245,10 @@ var WcChart = class _WcChart extends WcBaseComponent {
     }
     try {
       this.chartInstance = new window.Chart(this.canvas, config);
-      this.dispatchEvent(new CustomEvent("chart-created", {
+      this._emitEvent("wcchartcreated", "chart-created", {
         detail: { chart: this.chartInstance },
         bubbles: true
-      }));
+      });
     } catch (error) {
       console.error("Failed to create chart:", error);
     }
@@ -23554,7 +23568,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
           const firstPoint = points[0];
           const label = this.chartInstance.data.labels[firstPoint.index];
           const value = this.chartInstance.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
-          this.dispatchEvent(new CustomEvent("chart-click", {
+          this._emitEvent("wcchartclick", "chart-click", {
             detail: {
               label,
               value,
@@ -23562,7 +23576,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
               index: firstPoint.index
             },
             bubbles: true
-          }));
+          });
         }
       });
     }
@@ -30113,11 +30127,11 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
               }
             }
           });
-          this.dispatchEvent(new CustomEvent("wcoptionsloaded", {
+          this._emitEvent("wcoptionsloaded", "optionsloaded", {
             bubbles: true,
             composed: true,
             detail: { value: this.value, optionCount: this._items.length }
-          }));
+          });
         });
       }
     } else if (attrName === "items") {

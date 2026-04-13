@@ -8,6 +8,13 @@
  *   if it doesn't already exist. The `url` attribute specifies the href for the link.
  */
 
+function _dispatchCompat(target, newName, legacyName, opts) {
+  target.dispatchEvent(new CustomEvent(newName, opts));
+  if (legacyName && legacyName !== newName) {
+    target.dispatchEvent(new CustomEvent(legacyName, opts));
+  }
+}
+
 if (!customElements.get('wc-link')) {
   class WcLink extends HTMLElement {
     constructor() {
@@ -39,31 +46,31 @@ if (!customElements.get('wc-link')) {
           link.onload = () => {
             // console.log(`Link loaded: ${url}`);
             window.wc.linksLoaded[url] = true;
-            document.body.dispatchEvent(new CustomEvent('link-loaded', {
+            _dispatchCompat(document.body, 'wclinkloaded', 'link-loaded', {
               detail: { url },
               bubbles: true,
               composed: true
-            }));
+            });
           };
 
           link.onerror = () => {
             // console.error(`Failed to load link: ${url}`);
-            document.body.dispatchEvent(new CustomEvent('link-error', {
+            _dispatchCompat(document.body, 'wclinkerror', 'link-error', {
               detail: { url },
               bubbles: true,
               composed: true
-            }));
+            });
           };
 
           document.head.appendChild(link); // Append the link to the document head
           // console.log(`Added link: ${url}`);
         } else {
           // console.log(`Link already exists, skipping append: ${url}`);
-          document.body.dispatchEvent(new CustomEvent('link-loaded', {
+          _dispatchCompat(document.body, 'wclinkloaded', 'link-loaded', {
             detail: { url },
             bubbles: true,
             composed: true
-          }));
+          });
         }
       } else {
         console.warn('No URL provided for wc-link component.');

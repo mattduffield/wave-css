@@ -130,7 +130,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-slideshow`: Image slideshow
 - `wc-slideshow-image`: Slideshow image item
 - `wc-chart-builder`: Interactive chart renderer from raw JSON with auto-detection, field pickers, supports bar/line/pie/doughnut/area/number types
-- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping; Pongo2/Django template syntax overlay for htmlmixed mode; pre-loads mode scripts before editor creation; editor always initialized (never null); `display()` method for refresh; supports python, go, ruby, rust, sql, shell, yaml, swift, clike-based MIME types
+- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping; Pongo2/Django template syntax overlay for htmlmixed mode; pre-loads mode scripts before editor creation; editor always initialized (never null); `display()` method for refresh; supports python, go, ruby, rust, sql, shell, yaml, swift, clike-based MIME types; sublime keymap with find/replace (Cmd+F find, Cmd+D select next occurrence, Cmd+Alt+F replace)
 - `wc-canvas-dot-highlight`: Canvas animation effect
 - `wc-context-menu`: Reusable context menu with static `WcContextMenu.show(x, y, items)` / `WcContextMenu.hide()` API
 - `wc-context-menu-item`: Declarative menu item for wc-context-menu

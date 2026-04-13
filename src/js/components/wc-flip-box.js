@@ -172,10 +172,10 @@ class WcFlipBox extends WcBaseComponent {
     }
 
     // Dispatch custom event
-    this.dispatchEvent(new CustomEvent('flip', {
+    this._emitEvent('wcflip', 'flip', {
       detail: { isFlipped: this.isFlipped },
       bubbles: true
-    }));
+    });
   }
 
   _wireEvents() {

@@ -213,8 +213,7 @@ class WcTab extends WcBaseComponent {
     tabBody.appendChild(tabItem);
 
     // Dispatch tabadd event
-    const payload = { detail: { label }, bubbles: true, composed: true };
-    this.dispatchEvent(new CustomEvent('tabadd', payload));
+    this._emitEvent('wctabadd', 'tabadd', { detail: { label }, bubbles: true, composed: true });
 
     // Activate the new tab
     if (activate) {
@@ -246,8 +245,7 @@ class WcTab extends WcBaseComponent {
     if (tabItem) tabItem.remove();
 
     // Dispatch tabremove event
-    const payload = { detail: { label }, bubbles: true, composed: true };
-    this.dispatchEvent(new CustomEvent('tabremove', payload));
+    this._emitEvent('wctabremove', 'tabremove', { detail: { label }, bubbles: true, composed: true });
 
     // If the removed tab was active, activate an adjacent tab
     if (wasActive) {
@@ -488,17 +486,17 @@ class WcTab extends WcBaseComponent {
     if (contents) {
       contents.classList.add('active');
       const payload = { detail: { label }, bubbles: true, composed: true };
-      const custom = new CustomEvent('tabchange', payload);
 
-      // Dispatch on the wc-tab-item element itself
-      contents.dispatchEvent(custom);
+      // Dispatch on the wc-tab-item element itself (new + legacy name)
+      contents.dispatchEvent(new CustomEvent('wctabchange', payload));
+      contents.dispatchEvent(new CustomEvent('tabchange', payload));
 
       // Also dispatch on the inner .wc-tab-item div to ensure children receive it
       // This is needed because the wc-tab-item element might have display:contents
       const innerDiv = contents.querySelector(':scope > .wc-tab-item');
       if (innerDiv) {
-        const custom2 = new CustomEvent('tabchange', payload);
-        innerDiv.dispatchEvent(custom2);
+        innerDiv.dispatchEvent(new CustomEvent('wctabchange', payload));
+        innerDiv.dispatchEvent(new CustomEvent('tabchange', payload));
       }
     }
 

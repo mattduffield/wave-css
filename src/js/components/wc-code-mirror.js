@@ -552,7 +552,11 @@ if (!customElements.get('wc-code-mirror')) {
       const hasHints = this.hasAttribute('hint-words') || this.hasAttribute('hint-url');
 
       await Promise.all([
+        this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js'),
+        this.loadCSS('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css'),
         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js'),
+        this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js'),
+        this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/jump-to-line.min.js'),
         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js'),
         this.loadScript('https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js'),
         ...(hasHints ? [

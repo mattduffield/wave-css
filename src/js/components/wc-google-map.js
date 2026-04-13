@@ -260,10 +260,10 @@ class WcGoogleMap extends WcBaseComponent {
       // console.log('wc-google-map: Map created successfully', this.map);
 
       // Emit map-loaded event
-      this.dispatchEvent(new CustomEvent('map-loaded', {
+      this._emitEvent('wcmaploaded', 'map-loaded', {
         detail: { map: this.map },
         bubbles: true
-      }));
+      });
 
       // Add map event listeners
       this._addMapEventListeners();
@@ -363,14 +363,14 @@ class WcGoogleMap extends WcBaseComponent {
         infoWindow.open(this.map, marker);
 
         // Emit custom event
-        this.dispatchEvent(new CustomEvent('pin-clicked', {
+        this._emitEvent('wcpinclicked', 'pin-clicked', {
           detail: {
             pin: pin,
             marker: marker,
             index: index
           },
           bubbles: true
-        }));
+        });
       });
     });
 
@@ -439,68 +439,68 @@ class WcGoogleMap extends WcBaseComponent {
 
     // Click event
     this.map.addListener('click', (e) => {
-      this.dispatchEvent(new CustomEvent('map-clicked', {
+      this._emitEvent('wcmapclicked', 'map-clicked', {
         detail: {
           lat: e.latLng.lat(),
           lng: e.latLng.lng(),
           event: e
         },
         bubbles: true
-      }));
+      });
     });
 
     // Center changed
     this.map.addListener('center_changed', () => {
       const center = this.map.getCenter();
-      this.dispatchEvent(new CustomEvent('center-changed', {
+      this._emitEvent('wcmapcenterchanged', 'center-changed', {
         detail: {
           lat: center.lat(),
           lng: center.lng()
         },
         bubbles: true
-      }));
+      });
     });
 
     // Zoom changed
     this.map.addListener('zoom_changed', () => {
-      this.dispatchEvent(new CustomEvent('zoom-changed', {
+      this._emitEvent('wcmapzoomchanged', 'zoom-changed', {
         detail: {
           zoom: this.map.getZoom()
         },
         bubbles: true
-      }));
+      });
     });
 
     // Bounds changed
     this.map.addListener('bounds_changed', () => {
       const bounds = this.map.getBounds();
       if (bounds) {
-        this.dispatchEvent(new CustomEvent('bounds-changed', {
+        this._emitEvent('wcmapboundschanged', 'bounds-changed', {
           detail: {
             bounds: bounds
           },
           bubbles: true
-        }));
+        });
       }
     });
 
     // Drag events
     this.map.addListener('dragstart', () => {
-      this.dispatchEvent(new CustomEvent('drag-start', {
+      this._emitEvent('wcmapdragstart', 'drag-start', {
         bubbles: true
-      }));
+      });
     });
 
     this.map.addListener('drag', () => {
-      this.dispatchEvent(new CustomEvent('dragging', {
+      this._emitEvent('wcmapdragging', 'dragging', {
         bubbles: true
-      }));
+      });
     });
 
     this.map.addListener('dragend', () => {
-      this.dispatchEvent(new CustomEvent('drag-end', {
+      this._emitEvent('wcmapdragend', 'drag-end', {
         bubbles: true
-      }));
+      });
     });
   }
 
