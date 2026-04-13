@@ -1051,6 +1051,27 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
     this._isConnected = false;
     this.componentElement = null;
     this.formElement = null;
+    this._isReady = false;
+    this._readyResolve = null;
+    this.ready = new Promise((resolve) => {
+      this._readyResolve = resolve;
+    });
+  }
+  /**
+   * Mark this component as fully initialized and ready to accept data.
+   * Resolves the `ready` promise and sets `isReady` to true.
+   * Safe to call multiple times — only the first call has effect.
+   */
+  _setReady() {
+    if (this._isReady) return;
+    this._isReady = true;
+    if (this._readyResolve) {
+      this._readyResolve();
+      this._readyResolve = null;
+    }
+  }
+  get isReady() {
+    return this._isReady;
   }
   get wcId() {
     return this._wcId;
@@ -1071,10 +1092,12 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
       this._waitForChild(() => this[this.childComponentName]).then(() => {
         this._isConnected = true;
         this._applyPendingAttributes();
+        if (!this._deferReady) this._setReady();
       });
     } else {
       this._isConnected = true;
       this._applyPendingAttributes();
+      if (!this._deferReady) this._setReady();
     }
   }
   disconnectedCallback() {
@@ -2113,6 +2136,9 @@ if (!customElements.get("wc-article-card")) {
         this._createElement();
         this.appendChild(this.componentElement);
       }
+      if (this.hasAttribute("url")) {
+        this._deferReady = true;
+      }
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -2148,6 +2174,7 @@ if (!customElements.get("wc-article-card")) {
       } catch (error) {
         console.error("Error fetching article data:", error);
       }
+      this._setReady();
     }
     _createElement() {
       if (!this.articleData) return;
@@ -2760,6 +2787,7 @@ if (!customElements.get("wc-code-mirror")) {
         this.componentElement.classList.add("wc-code-mirror");
         this.appendChild(this.componentElement);
       }
+      this._deferReady = true;
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -3452,6 +3480,7 @@ if (!customElements.get("wc-code-mirror")) {
         composed: true
       };
       this._emitEvent("wccodemirrorready", "wc-code-mirror:ready", payload, document.body);
+      this._setReady();
       if (requestedMode === "htmlmixed") {
         this._applyPongo2Overlay();
         this.addWebComponentsJsHighlighting();
@@ -14662,6 +14691,7 @@ if (!customElements.get("wc-tabulator")) {
       }
       this.getFuncs();
       this.getRowMenu();
+      this._deferReady = true;
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -14897,6 +14927,7 @@ if (!customElements.get("wc-tabulator")) {
         }
         wc.EventHub.broadcast("wctabulatorready", [], "");
         wc.EventHub.broadcast("wc-tabulator-ready", [], "");
+        this._setReady();
         if (typeof htmx !== "undefined") {
           await sleep(1e3);
           htmx.process(this);
@@ -17670,6 +17701,9 @@ if (!customElements.get("wc-table")) {
         this.componentElement.classList.add("wc-table-container");
         this.appendChild(this.componentElement);
       }
+      if (this.hasAttribute("url")) {
+        this._deferReady = true;
+      }
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -17690,6 +17724,7 @@ if (!customElements.get("wc-table")) {
       } else {
         this._renderTable();
       }
+      this._setReady();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -23168,6 +23203,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
     this.componentElement = document.createElement("div");
     this.componentElement.classList.add("wc-chart", "relative");
     this.appendChild(this.componentElement);
+    this._deferReady = true;
   }
   _render() {
   }
@@ -23176,6 +23212,7 @@ var WcChart = class _WcChart extends WcBaseComponent {
     this._applyStyle();
     await this._initChart();
     this._wireEvents();
+    this._setReady();
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -23706,6 +23743,7 @@ if (!customElements.get("wc-chart-builder")) {
         this.componentElement.classList.add("wc-chart-builder");
         this.appendChild(this.componentElement);
       }
+      this._deferReady = true;
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -23714,6 +23752,7 @@ if (!customElements.get("wc-chart-builder")) {
       this._parseData();
       this._buildUI();
       this._renderChart();
+      this._setReady();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -24329,6 +24368,7 @@ if (!customElements.get("wc-pivot")) {
         this.componentElement.classList.add("wc-pivot");
         this.appendChild(this.componentElement);
       }
+      this._deferReady = true;
     }
     async connectedCallback() {
       super.connectedCallback();
@@ -24345,6 +24385,7 @@ if (!customElements.get("wc-pivot")) {
       this._buildUI();
       this._outsideClickHandler = (e) => this._handleOutsideClick(e);
       document.addEventListener("click", this._outsideClickHandler, true);
+      this._setReady();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -30025,6 +30066,9 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       this.componentElement.classList.add("wc-select", "relative");
       this.appendChild(this.componentElement);
     }
+    if (this.hasAttribute("url")) {
+      this._deferReady = true;
+    }
   }
   async connectedCallback() {
     super.connectedCallback();
@@ -30132,6 +30176,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
             composed: true,
             detail: { value: this.value, optionCount: this._items.length }
           });
+          this._setReady();
         });
       }
     } else if (attrName === "items") {

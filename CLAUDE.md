@@ -42,8 +42,21 @@ Wave CSS is a web component library that uses native Custom Elements without Sha
 
 ### Key Base Classes
 
-- `WcBaseComponent`: Foundation for all components, handles lifecycle, attributes, and rendering
+- `WcBaseComponent`: Foundation for all components, handles lifecycle, attributes, rendering, and `ready` promise
 - `WcBaseFormComponent`: Extends base with form-specific functionality (value, name, validation)
+
+### Ready Promise
+
+All components expose `ready` (Promise) and `isReady` (boolean) for knowing when a component is fully initialized. Simple components resolve automatically at the end of `_connectedCallback()`. Async components (wc-tabulator, wc-code-mirror, wc-chart, wc-chart-builder, wc-pivot, wc-select with url, wc-table with url, wc-article-card with url) set `this._deferReady = true` in their constructor and call `this._setReady()` when truly ready.
+
+```javascript
+// JavaScript
+await myComponent.ready;
+myComponent.data = myData;
+
+// Hyperscript
+_="on load wait for me.ready set my.data to window.myData end"
+```
 
 ### Event Communication Pattern
 

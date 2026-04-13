@@ -73,6 +73,7 @@ class WcChart extends WcBaseComponent {
     this.componentElement = document.createElement('div');
     this.componentElement.classList.add('wc-chart', 'relative');
     this.appendChild(this.componentElement);
+    this._deferReady = true;
   }
 
   _render() {
@@ -85,6 +86,7 @@ class WcChart extends WcBaseComponent {
     this._applyStyle();  // Apply styles first to ensure CSS variables are available
     await this._initChart();
     this._wireEvents();
+    this._setReady();
   }
 
   disconnectedCallback() {

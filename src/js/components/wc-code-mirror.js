@@ -59,6 +59,7 @@ if (!customElements.get('wc-code-mirror')) {
         this.appendChild(this.componentElement);
       }
       // console.log('ctor:wc-code-mirror');
+      this._deferReady = true;
     }
 
     async connectedCallback() {
@@ -673,6 +674,7 @@ if (!customElements.get('wc-code-mirror')) {
         composed: true
       };
       this._emitEvent('wccodemirrorready', 'wc-code-mirror:ready', payload, document.body);
+      this._setReady();
 
       // Apply Pongo2 overlay and JS highlighting for htmlmixed mode
       if (requestedMode === 'htmlmixed') {

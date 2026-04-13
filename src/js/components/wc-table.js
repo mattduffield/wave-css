@@ -59,6 +59,9 @@ if (!customElements.get('wc-table')) {
         this.componentElement.classList.add('wc-table-container');
         this.appendChild(this.componentElement);
       }
+      if (this.hasAttribute('url')) {
+        this._deferReady = true;
+      }
     }
 
     async connectedCallback() {
@@ -84,6 +87,7 @@ if (!customElements.get('wc-table')) {
       } else {
         this._renderTable();
       }
+      this._setReady();
     }
 
     disconnectedCallback() {

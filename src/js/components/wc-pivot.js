@@ -74,6 +74,7 @@ if (!customElements.get('wc-pivot')) {
         this.componentElement.classList.add('wc-pivot');
         this.appendChild(this.componentElement);
       }
+      this._deferReady = true;
     }
 
     async connectedCallback() {
@@ -88,6 +89,7 @@ if (!customElements.get('wc-pivot')) {
       this._buildUI();
       this._outsideClickHandler = (e) => this._handleOutsideClick(e);
       document.addEventListener('click', this._outsideClickHandler, true);
+      this._setReady();
     }
 
     disconnectedCallback() {

@@ -59,6 +59,9 @@ class WcSelect extends WcBaseFormComponent {
       this.appendChild(this.componentElement);      
     }
     // console.log('ctor:wc-select');
+    if (this.hasAttribute('url')) {
+      this._deferReady = true;
+    }
   }
 
   async connectedCallback() {
@@ -193,6 +196,7 @@ class WcSelect extends WcBaseFormComponent {
               composed: true,
               detail: { value: this.value, optionCount: this._items.length }
             });
+            this._setReady();
           });
       }           
     } else if (attrName === 'items') {

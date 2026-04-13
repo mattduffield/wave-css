@@ -69,6 +69,7 @@ if (!customElements.get('wc-chart-builder')) {
         this.componentElement.classList.add('wc-chart-builder');
         this.appendChild(this.componentElement);
       }
+      this._deferReady = true;
     }
 
     async connectedCallback() {
@@ -78,6 +79,7 @@ if (!customElements.get('wc-chart-builder')) {
       this._parseData();
       this._buildUI();
       this._renderChart();
+      this._setReady();
     }
 
     disconnectedCallback() {

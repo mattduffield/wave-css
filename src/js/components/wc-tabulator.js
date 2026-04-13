@@ -296,6 +296,7 @@ if (!customElements.get('wc-tabulator')) {
       this.getRowMenu();
 
       // console.log('ctor:wc-tabulator');
+      this._deferReady = true;
     }
 
     async connectedCallback() {
@@ -570,6 +571,7 @@ if (!customElements.get('wc-tabulator')) {
         }  
         wc.EventHub.broadcast('wctabulatorready', [], '');
         wc.EventHub.broadcast('wc-tabulator-ready', [], '');
+        this._setReady();
         if (typeof htmx !== 'undefined') {
           await sleep(1000);
           htmx.process(this);

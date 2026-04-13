@@ -69,6 +69,32 @@ export class WcBaseComponent extends HTMLElement {
     this._isConnected = false;
     this.componentElement = null; // This is the standard component or wrapper for form elements.
     this.formElement = null; // This is any form element: input, select, etc.
+    // Ready promise — resolves when the component is fully initialized.
+    // Components with async initialization (loading external libraries) should set
+    // this._deferReady = true in their constructor and call this._setReady() manually.
+    this._isReady = false;
+    this._readyResolve = null;
+    this.ready = new Promise((resolve) => {
+      this._readyResolve = resolve;
+    });
+  }
+
+  /**
+   * Mark this component as fully initialized and ready to accept data.
+   * Resolves the `ready` promise and sets `isReady` to true.
+   * Safe to call multiple times — only the first call has effect.
+   */
+  _setReady() {
+    if (this._isReady) return;
+    this._isReady = true;
+    if (this._readyResolve) {
+      this._readyResolve();
+      this._readyResolve = null;
+    }
+  }
+
+  get isReady() {
+    return this._isReady;
   }
 
   get wcId() {
@@ -95,10 +121,12 @@ export class WcBaseComponent extends HTMLElement {
       this._waitForChild(() => this[this.childComponentName]).then(() => {
         this._isConnected = true;
         this._applyPendingAttributes();
+        if (!this._deferReady) this._setReady();
       });
     } else {
       this._isConnected = true;
       this._applyPendingAttributes();
+      if (!this._deferReady) this._setReady();
     }
   }
 

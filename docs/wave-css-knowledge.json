@@ -17,7 +17,9 @@
     "lifecycle": [
       "Constructor \u2192 _render() \u2192 connectedCallback() \u2192 _handleAttributeChange()",
       "Pending attributes are stored until component is ready",
-      "Child components are detected and awaited before initialization completes"
+      "Child components are detected and awaited before initialization completes",
+      "All components expose ready (Promise) and isReady (boolean) — resolves when fully initialized",
+      "Simple components auto-resolve ready at end of _connectedCallback(). Async components set _deferReady=true in constructor and call _setReady() when truly ready"
     ],
     "buildOutput": {
       "js": [

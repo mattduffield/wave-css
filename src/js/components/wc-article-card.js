@@ -24,7 +24,10 @@ if (!customElements.get('wc-article-card')) {
         this.componentElement = document.createElement('div');
         this.componentElement.classList.add('wc-article-card');
         this._createElement();
-        this.appendChild(this.componentElement);      
+        this.appendChild(this.componentElement);
+      }
+      if (this.hasAttribute('url')) {
+        this._deferReady = true;
       }
     }
 
@@ -70,6 +73,7 @@ if (!customElements.get('wc-article-card')) {
       } catch (error) {
         console.error('Error fetching article data:', error);
       }
+      this._setReady();
     }
 
     _createElement() {
