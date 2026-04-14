@@ -13,6 +13,7 @@ import './wc-breadcrumb.js';
 import './wc-canvas-dot-highlight.js';
 import './wc-code-mirror.js';
 import './wc-contact-card.js';
+import './wc-cron-picker.js';
 import './wc-contact-chip.js';
 import './wc-context-menu.js';
 import './wc-div.js';

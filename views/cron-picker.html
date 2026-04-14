@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-cron-picker</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-cron-picker</h1>
+
+    <div class="col-1 gap-6">
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every Minute</h2>
+        <wc-cron-picker name="s1" lbl-label="Schedule" value="* * * * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every 15 Minutes</h2>
+        <wc-cron-picker name="s2" lbl-label="Schedule" value="*/15 * * * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every Hour at :00</h2>
+        <wc-cron-picker name="s3" lbl-label="Schedule" value="0 * * * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every 2 Hours at :30</h2>
+        <wc-cron-picker name="s4" lbl-label="Schedule" value="30 */2 * * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every Day at 8:00 AM</h2>
+        <wc-cron-picker name="s5" lbl-label="Schedule" value="0 8 * * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Weekdays at 9:00 AM</h2>
+        <wc-cron-picker name="s6" lbl-label="Schedule" value="0 9 * * 1-5"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Weekends at 10:00 AM</h2>
+        <wc-cron-picker name="s7" lbl-label="Schedule" value="0 10 * * 0,6"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Every Monday at 9:00 AM</h2>
+        <wc-cron-picker name="s8" lbl-label="Schedule" value="0 9 * * 1"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Monthly (1st at 6:00 AM)</h2>
+        <wc-cron-picker name="s9" lbl-label="Schedule" value="0 6 1 * *"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">No initial value (defaults to weekly)</h2>
+        <wc-cron-picker name="s10" lbl-label="New Schedule"></wc-cron-picker>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Form Integration</h2>
+        <form id="testForm" onsubmit="event.preventDefault(); alert(JSON.stringify(Object.fromEntries(new FormData(this))))">
+          <div class="col-1 gap-3">
+            <wc-cron-picker name="cron" lbl-label="Schedule" value="0 9 * * *" required></wc-cron-picker>
+            <button type="submit" class="btn btn-primary btn-sm">Submit Form</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Event Listener</h2>
+        <wc-cron-picker id="event-test" name="event_cron" lbl-label="Change me" value="0 12 * * *"></wc-cron-picker>
+        <pre id="event-log" class="text-xs p-2 bg-surface-2 rounded" style="min-height: 2rem;"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const picker = document.getElementById('event-test');
+      const log = document.getElementById('event-log');
+      if (picker && log) {
+        picker.addEventListener('wccronchange', (e) => {
+          log.textContent = `cron: ${e.detail.value}\nvalue: ${picker.value}`;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

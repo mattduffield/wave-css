@@ -106,6 +106,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-input`: Text input field
 - `wc-select`: Dropdown select; `wcoptionsloaded` event fires after URL options load
 - `wc-textarea`: Multi-line text input
+- `wc-cron-picker`: Visual cron schedule picker; generates 5-field cron expressions; frequencies: minute, N minutes, hour, N hours, day, weekday, weekend, week, month, custom; `wccronchange` event; collapsible syntax reference
 
 ### Display Components
 - `wc-accordion`: Collapsible content sections
@@ -284,6 +285,7 @@ http://localhost:3015/views/index.html
 - `views/chart-builder.html` - Chart Builder demos with auto-detect, KPI numbers, dynamic data
 - `views/pivot.html` - Pivot table demos with heatmap, sorting, cell click events, CSV export
 - `views/explain-tree.html` - MongoDB explain plan viewer demos
+- `views/cron-picker.html` - Cron picker demos with all frequency options, form integration, events
 
 ### Quick Start Example
 

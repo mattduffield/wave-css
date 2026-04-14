@@ -463,6 +463,27 @@
         "usage": "<wc-textarea name=\"message\" lbl-label=\"Message\" rows=\"5\" emoji-shortcodes placeholder=\"Type :smile: for emoji\"></wc-textarea>"
       },
       {
+        "name": "wc-cron-picker",
+        "description": "Visual cron schedule picker that generates standard 5-field cron expressions with dropdown-based frequency selection",
+        "attributes": [
+          "id",
+          "class",
+          "name",
+          "value",
+          "lbl-label",
+          "lbl-class",
+          "disabled",
+          "required"
+        ],
+        "events": {
+          "emits": [
+            "wccronchange"
+          ]
+        },
+        "notes": "Form-associated component. Frequencies: Minute, N Minutes (2/3/5/10/15/20/30), Hour, N Hours (2/3/4/6/8/12), Day, Weekday (Mon-Fri), Weekend (Sat-Sun), Week, Month, Custom. Parses cron expressions back into visual state. Shows human-readable description and collapsible syntax reference. Hidden input holds the cron value for form submission.",
+        "usage": "<wc-cron-picker name=\"schedule\" lbl-label=\"Schedule\" value=\"0 9 * * 1\"></wc-cron-picker>"
+      },
+      {
         "name": "wc-field",
         "description": "Read-only display field with optional clickable label link and HTMX support",
         "attributes": [
