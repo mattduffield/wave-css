@@ -631,6 +631,7 @@ const ICONS_TO_COPY = [
   "question",
   "mask",
   "hard-drive",
+  "gauge-high",
   // Add more icon names here
 ];
 

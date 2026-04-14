@@ -130,6 +130,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-tab-item`: Individual tab item
 - `wc-dropdown`: Dropdown menu; `btn-class` attribute for trigger button styling
 - `wc-dropdown-item`: Dropdown menu item
+- `wc-wizard`: HTMX-powered step wizard; `form-id` for form sync; `next()`, `back()`, `goTo(n)` public methods; `wcwizardstepchange` event; consumer provides navigation buttons externally
+- `wc-wizard-step`: Configuration-only child for wc-wizard (label, hx-get, hx-include, hx-indicator, before-navigate, icon)
 
 ### Data Components
 - `wc-tabulator`: Advanced data table; supports `auto-columns` attribute for auto-generating columns from data, `data` attribute for inline JSON arrays

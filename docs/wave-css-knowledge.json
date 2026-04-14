@@ -227,6 +227,45 @@
         "usage": "<wc-tab-item label=\"Tab Name\" class=\"active\">\n  <div class=\"p-4\">Tab content here</div>\n</wc-tab-item>"
       },
       {
+        "name": "wc-wizard",
+        "description": "HTMX-powered step-by-step wizard with declarative wc-wizard-step children",
+        "attributes": [
+          "id",
+          "class",
+          "form-id",
+          "active-step"
+        ],
+        "events": {
+          "emits": [
+            "wcwizardstepchange"
+          ]
+        },
+        "methods": [
+          "next()",
+          "back()",
+          "goTo(stepIndex)",
+          "getCurrentStep()",
+          "getTotalSteps()",
+          "isFirst()",
+          "isLast()"
+        ],
+        "notes": "Consumer provides navigation buttons externally and drives the wizard via public methods. Step indicators are rendered as clickable pills. Before navigating away from a step, calls the before-navigate window function if specified, then syncs visible form fields to hidden inputs in the form identified by form-id. Uses htmx.ajax with source option for proper form value encoding.",
+        "usage": "<wc-wizard id=\"my-wizard\" form-id=\"my-form\">\n  <wc-wizard-step label=\"Basics\" hx-get=\"/step1\" hx-include=\"#my-form\"></wc-wizard-step>\n  <wc-wizard-step label=\"Details\" hx-get=\"/step2\" hx-include=\"#my-form\" before-navigate=\"saveState\"></wc-wizard-step>\n  <wc-wizard-step label=\"Preview\" hx-get=\"/step3\" hx-include=\"#my-form\"></wc-wizard-step>\n</wc-wizard>"
+      },
+      {
+        "name": "wc-wizard-step",
+        "description": "Configuration-only child element for wc-wizard defining a wizard step",
+        "attributes": [
+          "label",
+          "icon",
+          "hx-get",
+          "hx-include",
+          "hx-indicator",
+          "before-navigate"
+        ],
+        "notes": "Not rendered into the DOM. The parent wc-wizard reads these attributes to configure step indicators and HTMX loading."
+      },
+      {
         "name": "wc-dropdown",
         "description": "Dropdown menu with CSS Anchor Positioning, search mode, and mobile fallback",
         "attributes": [

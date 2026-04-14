@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-wizard</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-wizard</h1>
+
+    <div class="col-1 gap-6">
+
+      <!-- Demo: Static wizard (no server needed) -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Static Wizard Demo</h2>
+        <p class="text-xs text-muted">This demo uses inline content to test the wizard UI without a server. Step content is injected via JavaScript.</p>
+
+        <form id="demo-form">
+          <input type="hidden" name="project_name" value="">
+          <input type="hidden" name="description" value="">
+          <input type="hidden" name="language" value="">
+          <input type="hidden" name="framework" value="">
+        </form>
+
+        <wc-wizard id="demo-wizard" form-id="demo-form">
+          <wc-wizard-step label="Basics" icon="info-circle"></wc-wizard-step>
+          <wc-wizard-step label="Tech Stack" icon="code" before-navigate="demoBeforeNavigate"></wc-wizard-step>
+          <wc-wizard-step label="Review" icon="check-circle"></wc-wizard-step>
+        </wc-wizard>
+
+        <div class="flex flex-row gap-2 justify-end">
+          <button id="demo-back" class="btn btn-sm btn-secondary" type="button" onclick="document.getElementById('demo-wizard').back()" style="display:none">Back</button>
+          <button id="demo-next" class="btn btn-sm btn-primary" type="button" onclick="document.getElementById('demo-wizard').next()">Next</button>
+          <button id="demo-save" class="btn btn-sm btn-success" type="button" onclick="demoSave()" style="display:none">Save</button>
+        </div>
+
+        <pre id="demo-log" class="text-xs p-2 bg-surface-2 rounded" style="min-height: 2rem;"></pre>
+      </div>
+
+      <!-- API Reference -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Public API</h2>
+        <div class="text-xs col-1 gap-1">
+          <code>wizard.next()</code> — Go to next step<br>
+          <code>wizard.back()</code> — Go to previous step<br>
+          <code>wizard.goTo(n)</code> — Go to step by index (0-based)<br>
+          <code>wizard.getCurrentStep()</code> — Current step index<br>
+          <code>wizard.getTotalSteps()</code> — Total number of steps<br>
+          <code>wizard.isFirst()</code> / <code>wizard.isLast()</code> — Position checks
+        </div>
+      </div>
+
+      <!-- Usage Example -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">HTMX Usage</h2>
+        <pre class="text-xs p-3 bg-surface-2 rounded overflow-auto"><code>&lt;wc-wizard id="my-wizard" form-id="my-form"&gt;
+  &lt;wc-wizard-step label="Basics"
+    hx-get="/api/step1"
+    hx-include="#my-form"
+    hx-indicator="#loader"&gt;
+  &lt;/wc-wizard-step&gt;
+  &lt;wc-wizard-step label="Details"
+    hx-get="/api/step2"
+    hx-include="#my-form"
+    before-navigate="saveState"&gt;
+  &lt;/wc-wizard-step&gt;
+&lt;/wc-wizard&gt;</code></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Static step content templates
+    var stepContent = [
+      `<div class="col-1 gap-3 p-3">
+        <h3 class="text-sm font-semibold">Step 1: Project Basics</h3>
+        <div class="col-1 gap-2">
+          <label class="text-xs font-medium">Project Name</label>
+          <input name="project_name" type="text" class="input input-sm" placeholder="My Project" value="">
+          <label class="text-xs font-medium">Description</label>
+          <textarea name="description" class="input input-sm" rows="3" placeholder="Describe your project..."></textarea>
+        </div>
+      </div>`,
+      `<div class="col-1 gap-3 p-3">
+        <h3 class="text-sm font-semibold">Step 2: Technology Stack</h3>
+        <div class="col-1 gap-2">
+          <label class="text-xs font-medium">Language</label>
+          <select name="language" class="input input-sm">
+            <option value="">Select...</option>
+            <option value="go">Go</option>
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="rust">Rust</option>
+          </select>
+          <label class="text-xs font-medium">Framework</label>
+          <input name="framework" type="text" class="input input-sm" placeholder="e.g., Gin, Django, Express">
+        </div>
+      </div>`,
+      `<div class="col-1 gap-3 p-3">
+        <h3 class="text-sm font-semibold">Step 3: Review</h3>
+        <div class="col-1 gap-1 text-xs">
+          <div><strong>Project:</strong> <span id="review-name">—</span></div>
+          <div><strong>Description:</strong> <span id="review-desc">—</span></div>
+          <div><strong>Language:</strong> <span id="review-lang">—</span></div>
+          <div><strong>Framework:</strong> <span id="review-framework">—</span></div>
+        </div>
+      </div>`
+    ];
+
+    // Inject step content manually (simulates HTMX loading)
+    function loadStaticStep(wizard, stepIndex) {
+      var content = wizard.querySelector('.wc-wizard-content');
+      if (content) {
+        content.innerHTML = stepContent[stepIndex] || '';
+        // On review step, populate from form hidden fields
+        if (stepIndex === 2) {
+          var form = document.getElementById('demo-form');
+          var rn = document.getElementById('review-name');
+          var rd = document.getElementById('review-desc');
+          var rl = document.getElementById('review-lang');
+          var rf = document.getElementById('review-framework');
+          if (rn) rn.textContent = form.querySelector('[name="project_name"]').value || '—';
+          if (rd) rd.textContent = form.querySelector('[name="description"]').value || '—';
+          if (rl) rl.textContent = form.querySelector('[name="language"]').value || '—';
+          if (rf) rf.textContent = form.querySelector('[name="framework"]').value || '—';
+        }
+      }
+    }
+
+    window.demoBeforeNavigate = function() {
+      var log = document.getElementById('demo-log');
+      if (log) log.textContent += 'before-navigate called on step 2\n';
+    };
+
+    window.demoSave = function() {
+      var form = document.getElementById('demo-form');
+      var data = Object.fromEntries(new FormData(form));
+      alert('Saved: ' + JSON.stringify(data, null, 2));
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var wizard = document.getElementById('demo-wizard');
+        if (!wizard) return;
+
+        // Load initial step
+        loadStaticStep(wizard, 0);
+
+        // Listen for step changes
+        wizard.addEventListener('wcwizardstepchange', function(e) {
+          var d = e.detail;
+          var log = document.getElementById('demo-log');
+          if (log) log.textContent = 'step: ' + d.step + ' / ' + d.totalSteps + ' | isFirst: ' + d.isFirst + ' | isLast: ' + d.isLast + '\n';
+
+          // Update button visibility
+          document.getElementById('demo-back').style.display = d.isFirst ? 'none' : '';
+          document.getElementById('demo-next').style.display = d.isLast ? 'none' : '';
+          document.getElementById('demo-save').style.display = d.isLast ? '' : 'none';
+
+          // Load static content for this step
+          loadStaticStep(wizard, d.step);
+        });
+      }, 200);
+    });
+  </script>
+</body>
+</html>
