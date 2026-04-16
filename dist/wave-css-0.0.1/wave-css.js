@@ -3539,12 +3539,12 @@ if (!customElements.get("wc-code-mirror")) {
         const list = filtered.map((w) => {
           if (insideQuote) {
             const charAfter = cur.ch < line.length ? line.charAt(cur.ch) : "";
-            const to = charAfter === '"' || charAfter === "'" ? CodeMirror.Pos(cur.line, cur.ch + 1) : cur;
+            const hasClosingQuote = charAfter === '"' || charAfter === "'";
             return {
-              text: w + (charAfter === '"' || charAfter === "'" ? "" : '"'),
+              text: w + (hasClosingQuote ? charAfter : '"'),
               displayText: w,
               from: CodeMirror.Pos(cur.line, start),
-              to
+              to: CodeMirror.Pos(cur.line, hasClosingQuote ? cur.ch + 1 : cur.ch)
             };
           } else if (inJsonContext) {
             return {
@@ -32010,7 +32010,6 @@ if (!customElements.get("wc-wizard-step")) {
   class WcWizardStep extends HTMLElement {
     constructor() {
       super();
-      this.classList.add("contents");
     }
     connectedCallback() {
     }
@@ -32022,7 +32021,7 @@ if (!customElements.get("wc-wizard-step")) {
 if (!customElements.get("wc-wizard")) {
   class WcWizard extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "form-id", "active-step"];
+      return ["id", "class", "active-step"];
     }
     static get is() {
       return "wc-wizard";
@@ -32031,7 +32030,7 @@ if (!customElements.get("wc-wizard")) {
       super();
       this._steps = [];
       this._activeStep = 0;
-      this._contentEl = null;
+      this._indicatorsEl = null;
       const compEl = this.querySelector(".wc-wizard");
       if (compEl) {
         this.componentElement = compEl;
@@ -32051,30 +32050,35 @@ if (!customElements.get("wc-wizard")) {
     }
     _render() {
       super._render();
-      const innerEl = this.querySelector(".wc-wizard > .wc-wizard-indicators");
-      if (innerEl) return;
+      if (this._indicatorsEl) return;
       this._readSteps();
       const activeAttr = this.getAttribute("active-step");
       if (activeAttr !== null) {
         this._activeStep = parseInt(activeAttr) || 0;
       }
       this._createInnerElement();
-      this._loadStep(this._activeStep);
+      this._emitEvent("wcwizardstepchange", null, {
+        bubbles: true,
+        composed: true,
+        detail: {
+          step: this._activeStep,
+          totalSteps: this._steps.length,
+          isFirst: this.isFirst(),
+          isLast: this.isLast()
+        }
+      });
     }
     _readSteps() {
-      this._steps = Array.from(this.querySelectorAll("wc-wizard-step")).map((el) => ({
+      this._steps = Array.from(this.querySelectorAll(":scope > wc-wizard-step")).map((el) => ({
         label: el.getAttribute("label") || "",
         icon: el.getAttribute("icon") || "",
-        hxGet: el.getAttribute("hx-get") || "",
-        hxInclude: el.getAttribute("hx-include") || "",
-        hxIndicator: el.getAttribute("hx-indicator") || "",
-        beforeNavigate: el.getAttribute("before-navigate") || ""
+        beforeNavigate: el.getAttribute("before-navigate") || "",
+        element: el
       }));
     }
     _createInnerElement() {
-      this.componentElement.innerHTML = "";
-      const indicators = document.createElement("div");
-      indicators.classList.add("wc-wizard-indicators");
+      this._indicatorsEl = document.createElement("div");
+      this._indicatorsEl.classList.add("wc-wizard-indicators");
       this._steps.forEach((step, i) => {
         const indicator = document.createElement("span");
         indicator.classList.add("wc-wizard-indicator");
@@ -32086,12 +32090,13 @@ if (!customElements.get("wc-wizard")) {
         } else {
           indicator.textContent = content;
         }
-        indicators.appendChild(indicator);
+        this._indicatorsEl.appendChild(indicator);
       });
-      this.componentElement.appendChild(indicators);
-      this._contentEl = document.createElement("div");
-      this._contentEl.classList.add("wc-wizard-content");
-      this.componentElement.appendChild(this._contentEl);
+      this.componentElement.appendChild(this._indicatorsEl);
+      this._steps.forEach((step, i) => {
+        this.componentElement.appendChild(step.element);
+        step.element.style.display = i === this._activeStep ? "" : "none";
+      });
       this._wireEvents();
     }
     // ── Public API ────────────────────────────────────────────────────────────
@@ -32115,10 +32120,10 @@ if (!customElements.get("wc-wizard")) {
           fn();
         }
       }
-      this._syncFormFields();
+      currentStep.element.style.display = "none";
       this._activeStep = stepIndex;
+      this._steps[stepIndex].element.style.display = "";
       this._updateIndicators();
-      this._loadStep(stepIndex);
       this._emitEvent("wcwizardstepchange", null, {
         bubbles: true,
         composed: true,
@@ -32144,55 +32149,11 @@ if (!customElements.get("wc-wizard")) {
     }
     // ── Internal ──────────────────────────────────────────────────────────────
     _updateIndicators() {
-      const indicators = this.componentElement.querySelectorAll(".wc-wizard-indicator");
+      if (!this._indicatorsEl) return;
+      const indicators = this._indicatorsEl.querySelectorAll(".wc-wizard-indicator");
       indicators.forEach((el, i) => {
         el.classList.toggle("active", i === this._activeStep);
       });
-    }
-    _syncFormFields() {
-      const formId = this.getAttribute("form-id");
-      if (!formId) return;
-      const form = document.getElementById(formId);
-      if (!form) return;
-      const contentFields = this._contentEl.querySelectorAll(
-        "input[name], select[name], textarea[name], wc-input[name], wc-select[name], wc-textarea[name], wc-cron-picker[name]"
-      );
-      contentFields.forEach((field) => {
-        const name = field.getAttribute("name");
-        if (!name) return;
-        let value;
-        if ("value" in field) {
-          value = field.value;
-        } else {
-          value = field.getAttribute("value") || "";
-        }
-        let hidden = form.querySelector(`input[type="hidden"][name="${name}"]`);
-        if (!hidden) {
-          hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = name;
-          form.appendChild(hidden);
-        }
-        hidden.value = value;
-      });
-    }
-    _loadStep(stepIndex) {
-      const step = this._steps[stepIndex];
-      if (!step || !step.hxGet) return;
-      if (typeof htmx === "undefined") {
-        console.warn("[wc-wizard] htmx is required for step loading");
-        return;
-      }
-      const formId = this.getAttribute("form-id");
-      const formEl = formId ? document.getElementById(formId) : null;
-      const ajaxOpts = {
-        target: this._contentEl,
-        swap: "innerHTML"
-      };
-      if (formEl) {
-        ajaxOpts.source = formEl;
-      }
-      htmx.ajax("GET", step.hxGet, ajaxOpts);
     }
     _handleAttributeChange(attrName, newValue) {
       if (attrName === "active-step") {
@@ -32214,15 +32175,13 @@ if (!customElements.get("wc-wizard")) {
           }
         }
       };
-      const indicators = this.componentElement.querySelector(".wc-wizard-indicators");
-      if (indicators) {
-        indicators.addEventListener("click", this._handleIndicatorClick);
+      if (this._indicatorsEl) {
+        this._indicatorsEl.addEventListener("click", this._handleIndicatorClick);
       }
     }
     _unWireEvents() {
-      const indicators = this.componentElement?.querySelector(".wc-wizard-indicators");
-      if (indicators && this._handleIndicatorClick) {
-        indicators.removeEventListener("click", this._handleIndicatorClick);
+      if (this._indicatorsEl && this._handleIndicatorClick) {
+        this._indicatorsEl.removeEventListener("click", this._handleIndicatorClick);
       }
     }
     _applyStyle() {
@@ -32230,14 +32189,15 @@ if (!customElements.get("wc-wizard")) {
         wc-wizard {
           display: contents;
         }
-        wc-wizard-step {
-          display: contents;
-        }
         .wc-wizard {
           display: flex;
           flex-direction: column;
           flex: 1;
           gap: 0.5rem;
+        }
+        wc-wizard-step {
+          flex: 1;
+          overflow: auto;
         }
         .wc-wizard-indicators {
           display: flex;
@@ -32265,10 +32225,6 @@ if (!customElements.get("wc-wizard")) {
         .wc-wizard-indicator:hover:not(.active) {
           background: var(--surface-5);
           color: var(--text-2);
-        }
-        .wc-wizard-content {
-          flex: 1;
-          overflow: auto;
         }
       `.trim();
       this.loadStyle("wc-wizard-style", style);

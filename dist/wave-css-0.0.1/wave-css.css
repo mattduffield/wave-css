@@ -5616,6 +5616,18 @@
   .flex-none {
     flex: none;
   }
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+  .flex-shrink {
+    flex-shrink: 1;
+  }
+  .flex-grow-0 {
+    flex-grow: 0;
+  }
+  .flex-grow {
+    flex-grow: 1;
+  }
   .flex-col {
     flex-direction: column;
   }
@@ -9684,6 +9696,12 @@
   }
   .overflow-visible {
     overflow: visible;
+  }
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+  .overflow-y-auto {
+    overflow-y: auto;
   }
   .table-hidden {
     display: none;

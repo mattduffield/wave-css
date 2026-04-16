@@ -1,15 +1,27 @@
 /**
  * Name: wc-wizard
  * Usage:
- *   <wc-wizard id="my-wizard" form-id="my-form">
- *     <wc-wizard-step label="Basics" hx-get="/step1" hx-include="#form"></wc-wizard-step>
- *     <wc-wizard-step label="Details" hx-get="/step2" hx-include="#form" before-navigate="saveState"></wc-wizard-step>
+ *   <wc-wizard id="my-wizard">
+ *     <wc-wizard-step label="Basics">
+ *       <wc-input name="name" lbl-label="Name"></wc-input>
+ *     </wc-wizard-step>
+ *     <wc-wizard-step label="Details" before-navigate="saveState">
+ *       <wc-select name="type" lbl-label="Type"></wc-select>
+ *     </wc-wizard-step>
+ *     <wc-wizard-step label="Preview">
+ *       <div id="preview"></div>
+ *     </wc-wizard-step>
  *   </wc-wizard>
  *
  * Description:
- *   Declarative step-by-step wizard powered by HTMX. Reads wc-wizard-step children
- *   as configuration and renders step indicators + a content area. Navigation is driven
- *   by public methods (next, back, goTo) — the consumer provides their own buttons.
+ *   Declarative step-by-step wizard. All step content is inline (same pattern
+ *   as wc-tab). Steps are shown/hidden via CSS. If a consumer needs dynamic
+ *   content, they can use hx-get with hx-trigger="load" inside the step.
+ *   Navigation is driven by public methods (next, back, goTo) — the consumer
+ *   provides their own buttons.
+ *
+ * Attributes:
+ *   - active-step: Zero-based index of initially active step (default: 0)
  *
  * Events:
  *   - wcwizardstepchange — fires after step changes, detail: { step, totalSteps, isFirst, isLast }
@@ -20,7 +32,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-wizard')) {
   class WcWizard extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'form-id', 'active-step'];
+      return ['id', 'class', 'active-step'];
     }
 
     static get is() {
@@ -31,7 +43,7 @@ if (!customElements.get('wc-wizard')) {
       super();
       this._steps = [];
       this._activeStep = 0;
-      this._contentEl = null;
+      this._indicatorsEl = null;
 
       const compEl = this.querySelector('.wc-wizard');
       if (compEl) {
@@ -55,8 +67,7 @@ if (!customElements.get('wc-wizard')) {
 
     _render() {
       super._render();
-      const innerEl = this.querySelector('.wc-wizard > .wc-wizard-indicators');
-      if (innerEl) return;
+      if (this._indicatorsEl) return;
 
       this._readSteps();
 
@@ -66,26 +77,33 @@ if (!customElements.get('wc-wizard')) {
       }
 
       this._createInnerElement();
-      this._loadStep(this._activeStep);
+
+      // Dispatch initial event so consumers can set button visibility
+      this._emitEvent('wcwizardstepchange', null, {
+        bubbles: true,
+        composed: true,
+        detail: {
+          step: this._activeStep,
+          totalSteps: this._steps.length,
+          isFirst: this.isFirst(),
+          isLast: this.isLast(),
+        },
+      });
     }
 
     _readSteps() {
-      this._steps = Array.from(this.querySelectorAll('wc-wizard-step')).map(el => ({
+      this._steps = Array.from(this.querySelectorAll(':scope > wc-wizard-step')).map(el => ({
         label: el.getAttribute('label') || '',
         icon: el.getAttribute('icon') || '',
-        hxGet: el.getAttribute('hx-get') || '',
-        hxInclude: el.getAttribute('hx-include') || '',
-        hxIndicator: el.getAttribute('hx-indicator') || '',
         beforeNavigate: el.getAttribute('before-navigate') || '',
+        element: el,
       }));
     }
 
     _createInnerElement() {
-      this.componentElement.innerHTML = '';
-
-      // Indicators
-      const indicators = document.createElement('div');
-      indicators.classList.add('wc-wizard-indicators');
+      // Build indicators
+      this._indicatorsEl = document.createElement('div');
+      this._indicatorsEl.classList.add('wc-wizard-indicators');
 
       this._steps.forEach((step, i) => {
         const indicator = document.createElement('span');
@@ -100,15 +118,16 @@ if (!customElements.get('wc-wizard')) {
           indicator.textContent = content;
         }
 
-        indicators.appendChild(indicator);
+        this._indicatorsEl.appendChild(indicator);
       });
 
-      this.componentElement.appendChild(indicators);
+      // Insert indicators first, then move step elements into the wrapper
+      this.componentElement.appendChild(this._indicatorsEl);
 
-      // Content area
-      this._contentEl = document.createElement('div');
-      this._contentEl.classList.add('wc-wizard-content');
-      this.componentElement.appendChild(this._contentEl);
+      this._steps.forEach((step, i) => {
+        this.componentElement.appendChild(step.element);
+        step.element.style.display = i === this._activeStep ? '' : 'none';
+      });
 
       this._wireEvents();
     }
@@ -140,17 +159,17 @@ if (!customElements.get('wc-wizard')) {
         }
       }
 
-      // 2. Sync form fields
-      this._syncFormFields();
+      // 2. Hide current step
+      currentStep.element.style.display = 'none';
 
       // 3. Update active step
       this._activeStep = stepIndex;
 
-      // 4. Update indicators
-      this._updateIndicators();
+      // 4. Show new step
+      this._steps[stepIndex].element.style.display = '';
 
-      // 5. Load new step content
-      this._loadStep(stepIndex);
+      // 5. Update indicators
+      this._updateIndicators();
 
       // 6. Dispatch event
       this._emitEvent('wcwizardstepchange', null, {
@@ -184,70 +203,11 @@ if (!customElements.get('wc-wizard')) {
     // ── Internal ──────────────────────────────────────────────────────────────
 
     _updateIndicators() {
-      const indicators = this.componentElement.querySelectorAll('.wc-wizard-indicator');
+      if (!this._indicatorsEl) return;
+      const indicators = this._indicatorsEl.querySelectorAll('.wc-wizard-indicator');
       indicators.forEach((el, i) => {
         el.classList.toggle('active', i === this._activeStep);
       });
-    }
-
-    _syncFormFields() {
-      const formId = this.getAttribute('form-id');
-      if (!formId) return;
-      const form = document.getElementById(formId);
-      if (!form) return;
-
-      // Find all named elements in the content area
-      const contentFields = this._contentEl.querySelectorAll(
-        'input[name], select[name], textarea[name], wc-input[name], wc-select[name], wc-textarea[name], wc-cron-picker[name]'
-      );
-
-      contentFields.forEach(field => {
-        const name = field.getAttribute('name');
-        if (!name) return;
-
-        // Get the value — handle both native and web component elements
-        let value;
-        if ('value' in field) {
-          value = field.value;
-        } else {
-          value = field.getAttribute('value') || '';
-        }
-
-        // Find or create matching hidden input in the form
-        let hidden = form.querySelector(`input[type="hidden"][name="${name}"]`);
-        if (!hidden) {
-          hidden = document.createElement('input');
-          hidden.type = 'hidden';
-          hidden.name = name;
-          form.appendChild(hidden);
-        }
-        hidden.value = value;
-      });
-    }
-
-    _loadStep(stepIndex) {
-      const step = this._steps[stepIndex];
-      if (!step || !step.hxGet) return;
-
-      if (typeof htmx === 'undefined') {
-        console.warn('[wc-wizard] htmx is required for step loading');
-        return;
-      }
-
-      const formId = this.getAttribute('form-id');
-      const formEl = formId ? document.getElementById(formId) : null;
-
-      const ajaxOpts = {
-        target: this._contentEl,
-        swap: 'innerHTML',
-      };
-
-      // Use form as source so htmx includes form values as query params
-      if (formEl) {
-        ajaxOpts.source = formEl;
-      }
-
-      htmx.ajax('GET', step.hxGet, ajaxOpts);
     }
 
     _handleAttributeChange(attrName, newValue) {
@@ -272,16 +232,14 @@ if (!customElements.get('wc-wizard')) {
         }
       };
 
-      const indicators = this.componentElement.querySelector('.wc-wizard-indicators');
-      if (indicators) {
-        indicators.addEventListener('click', this._handleIndicatorClick);
+      if (this._indicatorsEl) {
+        this._indicatorsEl.addEventListener('click', this._handleIndicatorClick);
       }
     }
 
     _unWireEvents() {
-      const indicators = this.componentElement?.querySelector('.wc-wizard-indicators');
-      if (indicators && this._handleIndicatorClick) {
-        indicators.removeEventListener('click', this._handleIndicatorClick);
+      if (this._indicatorsEl && this._handleIndicatorClick) {
+        this._indicatorsEl.removeEventListener('click', this._handleIndicatorClick);
       }
     }
 
@@ -290,14 +248,15 @@ if (!customElements.get('wc-wizard')) {
         wc-wizard {
           display: contents;
         }
-        wc-wizard-step {
-          display: contents;
-        }
         .wc-wizard {
           display: flex;
           flex-direction: column;
           flex: 1;
           gap: 0.5rem;
+        }
+        wc-wizard-step {
+          flex: 1;
+          overflow: auto;
         }
         .wc-wizard-indicators {
           display: flex;
@@ -325,10 +284,6 @@ if (!customElements.get('wc-wizard')) {
         .wc-wizard-indicator:hover:not(.active) {
           background: var(--surface-5);
           color: var(--text-2);
-        }
-        .wc-wizard-content {
-          flex: 1;
-          overflow: auto;
         }
       `.trim();
       this.loadStyle('wc-wizard-style', style);

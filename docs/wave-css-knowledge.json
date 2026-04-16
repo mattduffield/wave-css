@@ -228,11 +228,10 @@
       },
       {
         "name": "wc-wizard",
-        "description": "HTMX-powered step-by-step wizard with declarative wc-wizard-step children",
+        "description": "Step-by-step wizard with inline content, same pattern as wc-tab",
         "attributes": [
           "id",
           "class",
-          "form-id",
           "active-step"
         ],
         "events": {
@@ -249,21 +248,18 @@
           "isFirst()",
           "isLast()"
         ],
-        "notes": "Consumer provides navigation buttons externally and drives the wizard via public methods. Step indicators are rendered as clickable pills. Before navigating away from a step, calls the before-navigate window function if specified, then syncs visible form fields to hidden inputs in the form identified by form-id. Uses htmx.ajax with source option for proper form value encoding.",
-        "usage": "<wc-wizard id=\"my-wizard\" form-id=\"my-form\">\n  <wc-wizard-step label=\"Basics\" hx-get=\"/step1\" hx-include=\"#my-form\"></wc-wizard-step>\n  <wc-wizard-step label=\"Details\" hx-get=\"/step2\" hx-include=\"#my-form\" before-navigate=\"saveState\"></wc-wizard-step>\n  <wc-wizard-step label=\"Preview\" hx-get=\"/step3\" hx-include=\"#my-form\"></wc-wizard-step>\n</wc-wizard>"
+        "notes": "All step content is inline (same pattern as wc-tab). Steps are shown/hidden via CSS. Consumer provides navigation buttons externally and drives the wizard via public methods. Step indicators are rendered as clickable pills. before-navigate calls a window function before leaving a step. For dynamic content, use hx-get with hx-trigger=load inside the step.",
+        "usage": "<wc-wizard id=\"my-wizard\">\n  <wc-wizard-step label=\"Basics\">\n    <wc-input name=\"name\" lbl-label=\"Name\"></wc-input>\n  </wc-wizard-step>\n  <wc-wizard-step label=\"Details\" before-navigate=\"saveState\">\n    <wc-select name=\"type\" lbl-label=\"Type\"></wc-select>\n  </wc-wizard-step>\n</wc-wizard>"
       },
       {
         "name": "wc-wizard-step",
-        "description": "Configuration-only child element for wc-wizard defining a wizard step",
+        "description": "Child element for wc-wizard containing inline step content",
         "attributes": [
           "label",
           "icon",
-          "hx-get",
-          "hx-include",
-          "hx-indicator",
           "before-navigate"
         ],
-        "notes": "Not rendered into the DOM. The parent wc-wizard reads these attributes to configure step indicators and HTMX loading."
+        "notes": "Contains inline step content that is shown/hidden by the parent wizard. Same pattern as wc-tab-item."
       },
       {
         "name": "wc-dropdown",

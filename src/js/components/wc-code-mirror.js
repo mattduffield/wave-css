@@ -753,16 +753,14 @@ if (!customElements.get('wc-code-mirror')) {
         // Build the completion list with appropriate wrapping
         const list = filtered.map(w => {
           if (insideQuote) {
-            // Case 1: inside quotes like { "▌" } — find closing quote
+            // Case 1: inside quotes like { "ad▌" } — find closing quote
             const charAfter = cur.ch < line.length ? line.charAt(cur.ch) : '';
-            const to = charAfter === '"' || charAfter === "'"
-              ? CodeMirror.Pos(cur.line, cur.ch + 1)
-              : cur;
+            const hasClosingQuote = charAfter === '"' || charAfter === "'";
             return {
-              text: w + (charAfter === '"' || charAfter === "'" ? '' : '"'),
+              text: w + (hasClosingQuote ? charAfter : '"'),
               displayText: w,
               from: CodeMirror.Pos(cur.line, start),
-              to: to
+              to: CodeMirror.Pos(cur.line, hasClosingQuote ? cur.ch + 1 : cur.ch)
             };
           } else if (inJsonContext) {
             // Case 2: JSON context, no quote yet like { ▌ } — wrap in quotes
