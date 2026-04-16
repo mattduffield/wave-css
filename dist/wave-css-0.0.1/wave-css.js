@@ -17339,7 +17339,7 @@ var WcThemeSelector = class extends WcBaseComponent {
     if (document.documentElement.dataset.themeControlledBy === "wc-theme") {
       return;
     }
-    const savedTheme = localStorage.getItem("theme") || "rose";
+    const savedTheme = localStorage.getItem("theme") || "royal";
     const themeClass = `theme-${savedTheme}`;
     const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
     this._setTheme(target, themeClass);
