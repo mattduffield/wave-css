@@ -12,15 +12,27 @@
  *      </wc-tree-item>
  *    </wc-tree>
  *
+ *    <!-- With hash-nav for URL tracking -->
+ *    <wc-tree hash-nav>
+ *      <wc-tree-item label="Welcome" data-hash="welcome" hx-get="/x/doc/welcome" hx-target="#content">
+ *      </wc-tree-item>
+ *    </wc-tree>
+ *
  *  Description:
  *    A hierarchical tree component for navigation. Supports nested items,
  *    expand/collapse, lazy loading, search filtering, keyboard navigation,
  *    and HTMX integration.
  *
+ *  Attributes:
+ *    - searchable: enables search/filter input
+ *    - hash-nav: enables URL hash tracking. When a tree item is clicked, updates
+ *      location.hash from the item's data-hash or label attribute. On page load,
+ *      auto-selects the matching item and triggers its click.
+ *
  *  Events (bubble from wc-tree-item):
- *    tree:item-click    — { label, icon, badge, level, element }
- *    tree:item-dblclick — { label, icon, badge, level, element }
- *    tree:item-context-menu — { label, icon, badge, level, element, x, y }
+ *    wctreeitemclick       — { label, icon, badge, level, element }
+ *    wctreeitemdblclick    — { label, icon, badge, level, element }
+ *    wctreeitemcontextmenu — { label, icon, badge, level, element, x, y }
  */
 
 import { WcBaseComponent } from "./wc-base-component.js";
@@ -28,7 +40,7 @@ import { WcBaseComponent } from "./wc-base-component.js";
 if (!customElements.get("wc-tree")) {
   class WcTree extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "searchable"];
+      return ["id", "class", "searchable", "hash-nav"];
     }
 
     static get is() {
@@ -51,6 +63,12 @@ if (!customElements.get("wc-tree")) {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
+
+      // Hash-nav: auto-select tree item matching URL hash on load
+      if (this.hasAttribute('hash-nav')) {
+        // Defer to let tree items render
+        requestAnimationFrame(() => this._restoreFromHash());
+      }
     }
 
     disconnectedCallback() {
@@ -176,6 +194,44 @@ if (!customElements.get("wc-tree")) {
       }
     }
 
+    // --- Hash Navigation ---
+
+    _getItemHash(item) {
+      return item.getAttribute('data-hash') || item.getAttribute('label') || '';
+    }
+
+    _restoreFromHash() {
+      const hash = window.location.hash.substring(1);
+      if (!hash) return;
+
+      const decoded = decodeURIComponent(hash);
+      const items = this.querySelectorAll('wc-tree-item');
+      for (const item of items) {
+        if (this._getItemHash(item) === decoded) {
+          // Expand all ancestors
+          let parent = item.parentElement?.closest('wc-tree-item');
+          while (parent) {
+            parent.expand();
+            parent = parent.parentElement?.closest('wc-tree-item');
+          }
+          // Select and trigger click
+          item.select();
+          const row = item.componentElement?.querySelector('.tree-item-row');
+          if (row) row.click();
+          break;
+        }
+      }
+    }
+
+    _updateHash(item) {
+      // Only update hash for items that explicitly have data-hash
+      if (!item.hasAttribute('data-hash')) return;
+      const hash = item.getAttribute('data-hash');
+      if (hash) {
+        history.replaceState(null, '', '#' + encodeURIComponent(hash));
+      }
+    }
+
     _wireEvents() {
       const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput) {
@@ -184,12 +240,33 @@ if (!customElements.get("wc-tree")) {
         };
         searchInput.addEventListener("input", this._handleSearch);
       }
+
+      // Hash-nav: update hash when tree items are clicked
+      if (this.hasAttribute('hash-nav')) {
+        this._handleHashNavClick = (e) => {
+          const treeItem = e.target.closest('wc-tree-item');
+          if (treeItem) {
+            this._updateHash(treeItem);
+          }
+        };
+        this.addEventListener('wctreeitemclick', this._handleHashNavClick);
+
+        this._handleHashChange = () => this._restoreFromHash();
+        window.addEventListener('hashchange', this._handleHashChange);
+      }
     }
 
     _unWireEvents() {
       const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput && this._handleSearch) {
         searchInput.removeEventListener("input", this._handleSearch);
+      }
+
+      if (this._handleHashNavClick) {
+        this.removeEventListener('wctreeitemclick', this._handleHashNavClick);
+      }
+      if (this._handleHashChange) {
+        window.removeEventListener('hashchange', this._handleHashChange);
       }
     }
 

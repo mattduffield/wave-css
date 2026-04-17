@@ -88,7 +88,7 @@ if (fs.existsSync(iconsSource)) {
 // Copy built files to versioned dist folder
 const versionedDir = path.join(__dirname, 'dist/wave-css-0.0.1');
 if (fs.existsSync(versionedDir)) {
-  ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js'].forEach(file => {
+  ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js', 'wave-theme-init.js'].forEach(file => {
     const src = path.join(__dirname, 'dist', file);
     const dest = path.join(versionedDir, file);
     if (fs.existsSync(src)) {
@@ -106,7 +106,7 @@ if (fs.existsSync(versionedDir)) {
   // Also copy to go-kart project
   const goKartDir = path.join(__dirname, '../../_learn/go-kart/static/js/wave-css-0.0.1');
   if (fs.existsSync(goKartDir)) {
-    ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js'].forEach(file => {
+    ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js', 'wave-theme-init.js'].forEach(file => {
       const src = path.join(__dirname, 'dist', file);
       const dest = path.join(goKartDir, file);
       if (fs.existsSync(src)) {

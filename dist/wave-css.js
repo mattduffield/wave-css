@@ -3706,7 +3706,9 @@ if (!customElements.get("wc-code-mirror")) {
             name: "htmlmixed",
             tags: {
               "wc-javascript": [[null, null, "javascript"]],
-              "wc-script": [[null, null, "javascript"]]
+              "wc-script": [[null, null, "javascript"]],
+              "wc-tabulator-func": [[null, null, "javascript"]],
+              "wc-tabulator-row-menu": [[null, null, "javascript"]]
             }
           });
           var djangoOverlay = CodeMirror.getMode(config, "django:inner");
@@ -3866,7 +3868,7 @@ if (!customElements.get("wc-code-mirror")) {
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!inComponent) {
-            const openMatch = line.match(/<(wc-javascript|wc-script)(?:\s|>)/i);
+            const openMatch = line.match(/<(wc-javascript|wc-script|wc-tabulator-func|wc-tabulator-row-menu)(?:\s|>)/i);
             if (openMatch) {
               componentName = openMatch[1];
               inComponent = true;
@@ -17996,7 +17998,7 @@ if (!customElements.get("wc-tree-item")) {
 if (!customElements.get("wc-tree")) {
   class WcTree extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "searchable"];
+      return ["id", "class", "searchable", "hash-nav"];
     }
     static get is() {
       return "wc-tree";
@@ -18016,6 +18018,9 @@ if (!customElements.get("wc-tree")) {
       super.connectedCallback();
       this._applyStyle();
       this._wireEvents();
+      if (this.hasAttribute("hash-nav")) {
+        requestAnimationFrame(() => this._restoreFromHash());
+      }
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -18114,6 +18119,36 @@ if (!customElements.get("wc-tree")) {
         super._handleAttributeChange(attrName, newValue);
       }
     }
+    // --- Hash Navigation ---
+    _getItemHash(item) {
+      return item.getAttribute("data-hash") || item.getAttribute("label") || "";
+    }
+    _restoreFromHash() {
+      const hash = window.location.hash.substring(1);
+      if (!hash) return;
+      const decoded = decodeURIComponent(hash);
+      const items = this.querySelectorAll("wc-tree-item");
+      for (const item of items) {
+        if (this._getItemHash(item) === decoded) {
+          let parent = item.parentElement?.closest("wc-tree-item");
+          while (parent) {
+            parent.expand();
+            parent = parent.parentElement?.closest("wc-tree-item");
+          }
+          item.select();
+          const row = item.componentElement?.querySelector(".tree-item-row");
+          if (row) row.click();
+          break;
+        }
+      }
+    }
+    _updateHash(item) {
+      if (!item.hasAttribute("data-hash")) return;
+      const hash = item.getAttribute("data-hash");
+      if (hash) {
+        history.replaceState(null, "", "#" + encodeURIComponent(hash));
+      }
+    }
     _wireEvents() {
       const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput) {
@@ -18122,11 +18157,28 @@ if (!customElements.get("wc-tree")) {
         };
         searchInput.addEventListener("input", this._handleSearch);
       }
+      if (this.hasAttribute("hash-nav")) {
+        this._handleHashNavClick = (e) => {
+          const treeItem = e.target.closest("wc-tree-item");
+          if (treeItem) {
+            this._updateHash(treeItem);
+          }
+        };
+        this.addEventListener("wctreeitemclick", this._handleHashNavClick);
+        this._handleHashChange = () => this._restoreFromHash();
+        window.addEventListener("hashchange", this._handleHashChange);
+      }
     }
     _unWireEvents() {
       const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput && this._handleSearch) {
         searchInput.removeEventListener("input", this._handleSearch);
+      }
+      if (this._handleHashNavClick) {
+        this.removeEventListener("wctreeitemclick", this._handleHashNavClick);
+      }
+      if (this._handleHashChange) {
+        window.removeEventListener("hashchange", this._handleHashChange);
       }
     }
     _applyStyle() {
@@ -20539,8 +20591,8 @@ ${fieldLines}`;
       const messages = [
         { role: "system", content: systemPrompt }
       ];
-      const history = this._messages.slice(-10);
-      history.forEach((msg) => {
+      const history2 = this._messages.slice(-10);
+      history2.forEach((msg) => {
         if (msg.role !== "system") {
           messages.push({
             role: msg.role === "user" ? "user" : "assistant",
@@ -21677,8 +21729,8 @@ if (!customElements.get("wc-hf-bot")) {
       const messages = [
         { role: "system", content: systemPrompt }
       ];
-      const history = this._messages.slice(-10);
-      history.forEach((msg) => {
+      const history2 = this._messages.slice(-10);
+      history2.forEach((msg) => {
         if (msg.role !== "system") {
           messages.push({
             role: msg.role === "user" ? "user" : "assistant",

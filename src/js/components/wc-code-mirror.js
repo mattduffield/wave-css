@@ -966,7 +966,9 @@ if (!customElements.get('wc-code-mirror')) {
             name: 'htmlmixed',
             tags: {
               'wc-javascript': [[null, null, 'javascript']],
-              'wc-script': [[null, null, 'javascript']]
+              'wc-script': [[null, null, 'javascript']],
+              'wc-tabulator-func': [[null, null, 'javascript']],
+              'wc-tabulator-row-menu': [[null, null, 'javascript']]
             }
           });
           var djangoOverlay = CodeMirror.getMode(config, 'django:inner');
@@ -1158,7 +1160,7 @@ if (!customElements.get('wc-code-mirror')) {
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!inComponent) {
-            const openMatch = line.match(/<(wc-javascript|wc-script)(?:\s|>)/i);
+            const openMatch = line.match(/<(wc-javascript|wc-script|wc-tabulator-func|wc-tabulator-row-menu)(?:\s|>)/i);
             if (openMatch) {
               componentName = openMatch[1];
               inComponent = true;

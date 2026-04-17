@@ -291,12 +291,13 @@
       },
       {
         "name": "wc-tree",
-        "description": "Hierarchical tree component with nested items, expand/collapse, icons, badges, search, lazy loading, keyboard navigation, and HTMX support",
+        "description": "Hierarchical tree component with nested items, expand/collapse, icons, badges, search, lazy loading, keyboard navigation, HTMX support, and hash-based URL tracking",
         "attributes": [
           "id",
           "class",
           "search",
-          "lazy-url"
+          "lazy-url",
+          "hash-nav"
         ],
         "events": {
           "emits": [
@@ -307,7 +308,7 @@
             "wctreeitemcollapse"
           ]
         },
-        "notes": "Supports nested wc-tree-item children. Search attribute enables a filter input. lazy-url enables on-demand child loading. Full keyboard navigation (arrow keys, enter, space). HTMX attributes supported for server-driven interactions.",
+        "notes": "Supports nested wc-tree-item children. Search attribute enables a filter input. lazy-url enables on-demand child loading. Full keyboard navigation (arrow keys, enter, space). HTMX attributes supported for server-driven interactions. hash-nav enables URL hash tracking: clicking a tree item updates location.hash from data-hash or label, and on page load auto-selects the matching item, expands its parents, and triggers its click.",
         "usage": "<wc-tree search>\n  <wc-tree-item label=\"Documents\" icon=\"fa-folder\" expanded>\n    <wc-tree-item label=\"Resume.pdf\" icon=\"fa-file\"></wc-tree-item>\n    <wc-tree-item label=\"Cover Letter.docx\" icon=\"fa-file\"></wc-tree-item>\n  </wc-tree-item>\n  <wc-tree-item label=\"Photos\" icon=\"fa-folder\" badge=\"12\">\n    <wc-tree-item label=\"Vacation\" icon=\"fa-folder\" lazy-url=\"/api/photos/vacation\"></wc-tree-item>\n  </wc-tree-item>\n</wc-tree>"
       },
       {
