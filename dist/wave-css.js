@@ -3713,6 +3713,11 @@ if (!customElements.get("wc-code-mirror")) {
           return CodeMirror.overlayMode(htmlBase, djangoOverlay);
         });
       }
+      if (mode === "litespec") {
+        await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js");
+        await this.loadScript("/static/js/lite-spec-0.0.1/highlighters/litespec.mode.cm.js");
+        return;
+      }
       if (!mimeToModeFile[mode]) {
         const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
         if (!document.querySelector(`script[src="${modeUrl}"]`)) {
@@ -3800,7 +3805,7 @@ if (!customElements.get("wc-code-mirror")) {
         }
         const customModes = ["litespec"];
         if (customModes.includes(mode)) {
-          const modeUrl2 = "https://mattduffield.github.io/lite-spec/dist/highlighters/litespec.mode.cm.js";
+          const modeUrl2 = "/static/js/lite-spec-0.0.1/highlighters/litespec.mode.cm.js";
           await this.loadScript(modeUrl2);
           this.editor.setOption("mode", mode);
           return;

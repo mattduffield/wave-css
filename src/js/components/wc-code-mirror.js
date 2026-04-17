@@ -974,6 +974,13 @@ if (!customElements.get('wc-code-mirror')) {
         });
       }
 
+      // Handle custom modes (not on CDN)
+      if (mode === 'litespec') {
+        await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js');
+        await this.loadScript('/static/js/lite-spec-0.0.1/highlighters/litespec.mode.cm.js');
+        return;
+      }
+
       // Load the mode file itself (skip for MIME types that are already covered by dependencies)
       if (!mimeToModeFile[mode]) {
         const modeUrl = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/${mode}/${mode}.min.js`;
@@ -1075,7 +1082,7 @@ if (!customElements.get('wc-code-mirror')) {
 
         const customModes = ['litespec']; // List of custom simple modes you might add
         if (customModes.includes(mode)) {
-          const modeUrl = 'https://mattduffield.github.io/lite-spec/dist/highlighters/litespec.mode.cm.js';
+          const modeUrl = '/static/js/lite-spec-0.0.1/highlighters/litespec.mode.cm.js';
           await this.loadScript(modeUrl);
           // Once the custom mode is loaded, set it for the editor
           this.editor.setOption('mode', mode);
