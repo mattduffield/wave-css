@@ -35,8 +35,9 @@ class WcThemeSelector extends WcBaseComponent {
 
   constructor() {
     super();
-    this.prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    this.prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+    const savedDarkMode = localStorage.getItem("darkMode");
+    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true" : true;
+    this.prefersLight = !this.prefersDark;
 
     const compEl = this.querySelector('.wc-theme-selector');
     if (compEl) {

@@ -9190,7 +9190,8 @@ if (!customElements.get("wc-fa-icon")) {
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           path.setAttribute("d", pathData.d);
           if (iconStyle.includes("duotone")) {
-            if (pathData.class && pathData.class.includes("fa-secondary")) {
+            const isSecondary = pathData.class && pathData.class.includes("fa-secondary") || pathData.opacity;
+            if (isSecondary) {
               path.classList.add("fa-secondary");
               path.style.fill = "var(--fa-secondary-color)";
               path.style.opacity = "var(--fa-secondary-opacity)";
@@ -14760,6 +14761,7 @@ var WcTab = class extends WcBaseComponent {
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        color: inherit;
       }
       wc-tab .wc-tab .tab-nav .tab-link .tab-close {
         display: inline-flex;
@@ -17173,8 +17175,9 @@ var WcThemeSelector = class extends WcBaseComponent {
   }
   constructor() {
     super();
-    this.prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    this.prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+    const savedDarkMode = localStorage.getItem("darkMode");
+    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true" : true;
+    this.prefersLight = !this.prefersDark;
     const compEl = this.querySelector(".wc-theme-selector");
     if (compEl) {
       this.componentElement = compEl;
@@ -23785,22 +23788,24 @@ if (!customElements.get("wc-theme")) {
         const parts = themeAttr.trim().toLowerCase().split(/\s+/);
         if (parts.includes("dark")) {
           isDark = true;
-          themeName = parts.find((p) => p !== "dark" && p !== "light") || "rose";
+          themeName = parts.find((p) => p !== "dark" && p !== "light") || "royal";
         } else if (parts.includes("light")) {
           isDark = false;
-          themeName = parts.find((p) => p !== "dark" && p !== "light") || "rose";
+          themeName = parts.find((p) => p !== "dark" && p !== "light") || "royal";
         } else {
-          themeName = parts[0] || "rose";
+          themeName = parts[0] || "royal";
         }
         localStorage.setItem("theme", themeName);
         if (isDark !== null) {
           localStorage.setItem("darkMode", isDark ? "true" : "false");
         }
       } else {
-        themeName = localStorage.getItem("theme") || "rose";
+        themeName = localStorage.getItem("theme") || "royal";
         const savedDarkMode = localStorage.getItem("darkMode");
         if (savedDarkMode !== null) {
           isDark = savedDarkMode === "true";
+        } else {
+          isDark = true;
         }
       }
       const themeClass = `theme-${themeName}`;

@@ -303,7 +303,9 @@ if (!customElements.get('wc-fa-icon')) {
 
           if (iconStyle.includes('duotone')) {
             // Handle all duotone variants (duotone, duotone-regular, duotone-light, duotone-thin)
-            if (pathData.class && pathData.class.includes('fa-secondary')) {
+            // FA Pro 7 uses opacity=".4" for secondary; older versions use class="fa-secondary"
+            const isSecondary = (pathData.class && pathData.class.includes('fa-secondary')) || pathData.opacity;
+            if (isSecondary) {
               path.classList.add('fa-secondary');
               path.style.fill = 'var(--fa-secondary-color)';
               path.style.opacity = 'var(--fa-secondary-opacity)';

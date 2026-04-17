@@ -71,13 +71,13 @@ if (!customElements.get('wc-theme')) {
         // Check for 'dark' or 'light' in the parts
         if (parts.includes('dark')) {
           isDark = true;
-          themeName = parts.find(p => p !== 'dark' && p !== 'light') || 'rose';
+          themeName = parts.find(p => p !== 'dark' && p !== 'light') || 'royal';
         } else if (parts.includes('light')) {
           isDark = false;
-          themeName = parts.find(p => p !== 'dark' && p !== 'light') || 'rose';
+          themeName = parts.find(p => p !== 'dark' && p !== 'light') || 'royal';
         } else {
           // No dark/light specified, just theme name
-          themeName = parts[0] || 'rose';
+          themeName = parts[0] || 'royal';
         }
 
         // Save to localStorage for persistence
@@ -87,10 +87,12 @@ if (!customElements.get('wc-theme')) {
         }
       } else {
         // No theme attribute, load from localStorage
-        themeName = localStorage.getItem("theme") || "rose";
+        themeName = localStorage.getItem("theme") || "royal";
         const savedDarkMode = localStorage.getItem("darkMode");
         if (savedDarkMode !== null) {
           isDark = savedDarkMode === "true";
+        } else {
+          isDark = true;
         }
       }
 
