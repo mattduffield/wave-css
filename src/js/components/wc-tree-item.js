@@ -34,6 +34,7 @@ if (!customElements.get("wc-tree-item")) {
         "hx-trigger",
         "hx-disinherit",
         "indicator-color",
+        "leaf",
       ];
     }
 
@@ -88,7 +89,8 @@ if (!customElements.get("wc-tree-item")) {
         this.querySelectorAll(":scope > wc-tree-item").length > 0;
       const lazyUrl = this.getAttribute("lazy-url") || "";
       const hxGet = this.getAttribute("hx-get") || "";
-      const hasExpandable = hasChildren || lazyUrl || hxGet;
+      const isLeaf = this.hasAttribute("leaf");
+      const hasExpandable = !isLeaf && (hasChildren || lazyUrl || hxGet);
       const isSystem = label.startsWith("_");
 
       // Calculate depth level

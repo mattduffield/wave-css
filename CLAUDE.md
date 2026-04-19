@@ -118,6 +118,9 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-image`: Enhanced image component
 - `wc-background-image`: Background image container
 
+### Content Components
+- `wc-markdown-viewer`: Enhances goldmark-rendered markdown HTML with Prism.js syntax highlighting and copy-to-clipboard buttons on code blocks; auto-processes on connect and after HTMX swaps; supports json, javascript, sql, bash, go, html, python, ruby, and more
+
 ### Icon Components
 - `wc-fa-icon`: Font Awesome icon wrapper
 - `wc-icon`: Basic icon component

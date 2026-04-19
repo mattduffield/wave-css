@@ -672,6 +672,17 @@
         }
       },
       {
+        "name": "wc-markdown-viewer",
+        "description": "Enhances goldmark-rendered markdown HTML with Prism.js syntax highlighting and copy-to-clipboard buttons",
+        "attributes": [
+          "id",
+          "class",
+          "theme"
+        ],
+        "notes": "Wraps server-rendered markdown HTML. Loads Prism.js core and language components on demand based on language-* classes found in code blocks. Auto-processes on connect and after HTMX swaps via htmx:afterSettle listener. Copy button appears on hover with 2s checkmark feedback. Theme auto-detects dark/light mode. Includes full markdown content styling (headings, tables, blockquotes, lists, inline code, links, images).",
+        "usage": "<wc-markdown-viewer>\n  <h1>My Doc</h1>\n  <pre><code class=\"language-json\">{\"key\": \"value\"}</code></pre>\n</wc-markdown-viewer>"
+      },
+      {
         "name": "wc-image",
         "description": "Enhanced image with optional modal overlay and hover effects",
         "attributes": [

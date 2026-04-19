@@ -632,6 +632,10 @@ const ICONS_TO_COPY = [
   "mask",
   "hard-drive",
   "gauge-high",
+  "rocket",
+  "table-list",
+  "folder-tree",
+  "list-ol",
   // Add more icon names here
 ];
 
