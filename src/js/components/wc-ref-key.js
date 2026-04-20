@@ -19,7 +19,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-ref-key')) {
   class WcRefKey extends WcBaseComponent {
     static get observedAttributes() {
-      return ['value', 'label', 'position'];
+      return ['value', 'label', 'position', 'orientation'];
     }
 
     static get is() {
@@ -37,14 +37,7 @@ if (!customElements.get('wc-ref-key')) {
       super.connectedCallback();
       this._applyStyle();
 
-      // Ensure parent is positioned
-      const parent = this.parentElement;
-      if (parent) {
-        const parentPos = getComputedStyle(parent).position;
-        if (parentPos === 'static') {
-          parent.style.position = 'relative';
-        }
-      }
+      // No parent positioning needed — sticky handles its own context
     }
 
     _render() {
@@ -61,7 +54,10 @@ if (!customElements.get('wc-ref-key')) {
       const label = this.getAttribute('label') || '';
       const position = this.getAttribute('position') || 'bottom-right';
 
+      const orientation = this.getAttribute('orientation') || 'vertical';
+
       this.componentElement.dataset.position = position;
+      this.componentElement.dataset.orientation = orientation;
 
       const badge = document.createElement('span');
       badge.classList.add('ref-key-badge');
@@ -97,7 +93,11 @@ if (!customElements.get('wc-ref-key')) {
         }
       } else if (attrName === 'position') {
         if (this.componentElement) {
-          this.componentElement.dataset.position = newValue || 'top-right';
+          this.componentElement.dataset.position = newValue || 'bottom-right';
+        }
+      } else if (attrName === 'orientation') {
+        if (this.componentElement) {
+          this.componentElement.dataset.orientation = newValue || 'vertical';
         }
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -110,7 +110,7 @@ if (!customElements.get('wc-ref-key')) {
           display: contents;
         }
         .wc-ref-key {
-          position: absolute;
+          position: sticky;
           z-index: 1;
           display: flex;
           flex-direction: column;
@@ -119,25 +119,30 @@ if (!customElements.get('wc-ref-key')) {
           opacity: 0.35;
           transition: opacity 0.2s;
           pointer-events: auto;
+          width: fit-content;
         }
         .wc-ref-key:hover {
           opacity: 1;
         }
         .wc-ref-key[data-position="top-right"] {
-          top: 4px;
-          right: 2px;
+          top: 8px;
+          margin-left: auto;
+          padding-right: 6px;
         }
         .wc-ref-key[data-position="top-left"] {
-          top: 4px;
-          left: 2px;
+          top: 8px;
+          margin-right: auto;
+          padding-left: 6px;
         }
         .wc-ref-key[data-position="bottom-right"] {
-          bottom: 4px;
-          right: 2px;
+          bottom: 8px;
+          margin-left: auto;
+          padding-right: 6px;
         }
         .wc-ref-key[data-position="bottom-left"] {
-          bottom: 4px;
-          left: 2px;
+          bottom: 8px;
+          margin-right: auto;
+          padding-left: 6px;
         }
         .ref-key-badge {
           writing-mode: vertical-rl;
@@ -165,6 +170,15 @@ if (!customElements.get('wc-ref-key')) {
         }
         .wc-ref-key:hover .ref-key-label {
           display: block;
+        }
+        /* Horizontal orientation */
+        .wc-ref-key[data-orientation="horizontal"] {
+          flex-direction: row;
+        }
+        .wc-ref-key[data-orientation="horizontal"] .ref-key-badge,
+        .wc-ref-key[data-orientation="horizontal"] .ref-key-label {
+          writing-mode: horizontal-tb;
+          text-orientation: initial;
         }
       `.trim();
       this.loadStyle('wc-ref-key-style', style);
