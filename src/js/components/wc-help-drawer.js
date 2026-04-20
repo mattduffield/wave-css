@@ -510,7 +510,7 @@ if (!customElements.get("wc-help-drawer")) {
       const filter = JSON.stringify({
         "$or": [
           { "created_by": username },
-          { "assigned_to": username },
+          { "assignee": username },
           { "modified_by": username },
         ],
       });
