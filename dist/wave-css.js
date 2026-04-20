@@ -6696,44 +6696,56 @@ if (!customElements.get("wc-help-drawer")) {
         tabNav.appendChild(btn);
       });
       this._panel.appendChild(tabNav);
-      this._tabContent = document.createElement("div");
-      this._tabContent.classList.add("help-drawer-content");
-      this._panel.appendChild(this._tabContent);
+      this._helpPanel = document.createElement("div");
+      this._helpPanel.classList.add("help-drawer-content");
+      this._buildHelpPanel();
+      this._ticketPanel = document.createElement("div");
+      this._ticketPanel.classList.add("help-drawer-content");
+      this._buildTicketPanel();
+      this._myTicketsPanel = document.createElement("div");
+      this._myTicketsPanel.classList.add("help-drawer-content");
+      this._buildMyTicketsPanel();
+      this._panel.appendChild(this._helpPanel);
+      this._panel.appendChild(this._ticketPanel);
+      this._panel.appendChild(this._myTicketsPanel);
+      this._showActivePanel();
       const footer = document.createElement("div");
       footer.classList.add("help-drawer-footer");
       footer.innerHTML = `<span class="text-muted">Ctrl + / to toggle</span>`;
       this._panel.appendChild(footer);
       this.componentElement.appendChild(this._panel);
-      this._renderActiveTab();
       this._wireEvents();
     }
-    // ── Tab Rendering ─────────────────────────────────────────────────────────
-    _renderActiveTab() {
-      if (!this._tabContent) return;
-      this._tabContent.innerHTML = "";
-      switch (this._activeTab) {
-        case "help":
-          this._renderHelpTab();
-          break;
-        case "create-ticket":
-          this._renderCreateTicketTab();
-          break;
-        case "my-tickets":
-          this._renderMyTicketsTab();
-          break;
-      }
+    // ── Tab Panel Building ────────────────────────────────────────────────────
+    _showActivePanel() {
+      this._helpPanel.style.display = this._activeTab === "help" ? "" : "none";
+      this._ticketPanel.style.display = this._activeTab === "create-ticket" ? "" : "none";
+      this._myTicketsPanel.style.display = this._activeTab === "my-tickets" ? "" : "none";
     }
-    _renderHelpTab() {
+    _buildHelpPanel() {
+      const searchRow = document.createElement("div");
+      searchRow.classList.add("help-drawer-search-row");
       const search = document.createElement("input");
       search.type = "search";
       search.classList.add("help-drawer-search");
       search.placeholder = "Search help articles...";
       search.autocomplete = "off";
-      this._tabContent.appendChild(search);
+      searchRow.appendChild(search);
+      const refreshBtn = document.createElement("button");
+      refreshBtn.type = "button";
+      refreshBtn.classList.add("help-drawer-refresh-btn");
+      refreshBtn.title = "Refresh";
+      refreshBtn.innerHTML = '<wc-fa-icon name="rotate" size="0.7rem"></wc-fa-icon>';
+      refreshBtn.addEventListener("click", () => {
+        search.value = "";
+        this._loadHelpContent("");
+      });
+      searchRow.appendChild(refreshBtn);
+      this._helpPanel.appendChild(searchRow);
       const content = document.createElement("div");
       content.id = "help-drawer-content";
       content.classList.add("help-drawer-articles");
-      this._tabContent.appendChild(content);
+      this._helpPanel.appendChild(content);
       search.addEventListener("input", (e) => {
         clearTimeout(this._searchTimeout);
         this._searchTimeout = setTimeout(
@@ -6742,11 +6754,11 @@ if (!customElements.get("wc-help-drawer")) {
         );
       });
     }
-    _renderCreateTicketTab() {
+    _buildTicketPanel() {
       const refKey = this.getAttribute("reference-key") || "";
       const tmplSlug = this.getAttribute("template-slug") || "";
       const username = this.getAttribute("username") || "";
-      this._tabContent.innerHTML = `
+      this._ticketPanel.innerHTML = `
         <div class="help-ticket-context">
           <div class="help-ticket-context-row"><span class="text-muted">Screen:</span> ${refKey || "\u2014"}</div>
           <div class="help-ticket-context-row"><span class="text-muted">Template:</span> ${tmplSlug || "\u2014"}</div>
@@ -6783,23 +6795,42 @@ if (!customElements.get("wc-help-drawer")) {
           </button>
         </div>
       `;
-      const ssBtn = this._tabContent.querySelector(
+      const ssBtn = this._ticketPanel.querySelector(
         ".help-ticket-screenshot-btn"
       );
       ssBtn.addEventListener("click", () => this._captureScreenshot());
-      const submitBtn = this._tabContent.querySelector(
+      const submitBtn = this._ticketPanel.querySelector(
         ".help-ticket-submit-btn"
       );
       submitBtn.addEventListener("click", () => this._submitTicket());
     }
-    _renderMyTicketsTab() {
-      this._tabContent.innerHTML = `
-        <div class="flex items-center justify-center p-4">
-          <wc-fa-icon name="spinner" spin size="1rem"></wc-fa-icon>
-          <span class="ml-2 text-xs text-muted">Loading tickets...</span>
-        </div>
-      `;
-      this._loadMyTickets();
+    _buildMyTicketsPanel() {
+      const headerRow = document.createElement("div");
+      headerRow.classList.add("help-drawer-search-row");
+      const label = document.createElement("span");
+      label.classList.add("text-xs", "font-medium");
+      label.style.flex = "1";
+      label.textContent = "My Tickets";
+      headerRow.appendChild(label);
+      const refreshBtn = document.createElement("button");
+      refreshBtn.type = "button";
+      refreshBtn.classList.add("help-drawer-refresh-btn");
+      refreshBtn.title = "Refresh";
+      refreshBtn.innerHTML = '<wc-fa-icon name="rotate" size="0.7rem"></wc-fa-icon>';
+      refreshBtn.addEventListener("click", () => {
+        this._myTicketsContent.innerHTML = `
+          <div class="flex items-center justify-center p-4">
+            <wc-fa-icon name="spinner" spin size="1rem"></wc-fa-icon>
+            <span class="ml-2 text-xs text-muted">Loading tickets...</span>
+          </div>
+        `;
+        this._myTicketsLoaded = false;
+        this._loadMyTickets();
+      });
+      headerRow.appendChild(refreshBtn);
+      this._myTicketsPanel.appendChild(headerRow);
+      this._myTicketsContent = document.createElement("div");
+      this._myTicketsPanel.appendChild(this._myTicketsContent);
     }
     // ── Help Content ──────────────────────────────────────────────────────────
     _loadHelpContent(query) {
@@ -6809,7 +6840,7 @@ if (!customElements.get("wc-help-drawer")) {
       const tmplSlug = this.getAttribute("template-slug") || "";
       let url = `${helpUrl}?reference_key=${encodeURIComponent(refKey)}&template_slug=${encodeURIComponent(tmplSlug)}`;
       if (query) url += `&q=${encodeURIComponent(query)}`;
-      const target = this._tabContent.querySelector("#help-drawer-content");
+      const target = this._helpPanel.querySelector("#help-drawer-content");
       if (!target) return;
       if (typeof htmx !== "undefined") {
         htmx.ajax("GET", url, { target, swap: "innerHTML" });
@@ -6817,7 +6848,7 @@ if (!customElements.get("wc-help-drawer")) {
     }
     // ── Screenshot Capture ────────────────────────────────────────────────────
     async _captureScreenshot() {
-      const statusEl = this._tabContent.querySelector(
+      const statusEl = this._ticketPanel.querySelector(
         ".help-screenshot-status"
       );
       if (!window.html2canvas) {
@@ -6874,10 +6905,10 @@ if (!customElements.get("wc-help-drawer")) {
     async _submitTicket() {
       const ticketUrl = this.getAttribute("ticket-url");
       if (!ticketUrl) return;
-      const type = this._tabContent.querySelector('[name="ticket_type"]')?.value || "bug";
-      const priority = this._tabContent.querySelector('[name="ticket_priority"]')?.value || "medium";
-      const title = this._tabContent.querySelector('[name="ticket_title"]')?.value || "";
-      const description = this._tabContent.querySelector('[name="ticket_description"]')?.value || "";
+      const type = this._ticketPanel.querySelector('[name="ticket_type"]')?.value || "bug";
+      const priority = this._ticketPanel.querySelector('[name="ticket_priority"]')?.value || "medium";
+      const title = this._ticketPanel.querySelector('[name="ticket_title"]')?.value || "";
+      const description = this._ticketPanel.querySelector('[name="ticket_description"]')?.value || "";
       if (!title.trim()) {
         if (window.wc?.Prompt) {
           wc.Prompt.toast({ title: "Title is required", icon: "warning" });
@@ -6899,7 +6930,7 @@ if (!customElements.get("wc-help-drawer")) {
       if (this._screenshotUrl)
         body.append("screenshot_url", this._screenshotUrl);
       if (csrfToken) body.append("csrf_token", csrfToken);
-      const submitBtn = this._tabContent.querySelector(
+      const submitBtn = this._ticketPanel.querySelector(
         ".help-ticket-submit-btn"
       );
       if (submitBtn) submitBtn.disabled = true;
@@ -6922,7 +6953,12 @@ if (!customElements.get("wc-help-drawer")) {
             detail: { ticketId: data._id || data.id || "" }
           });
           this._screenshotUrl = "";
-          this._renderCreateTicketTab();
+          const titleInput = this._ticketPanel.querySelector('[name="ticket_title"]');
+          const descInput = this._ticketPanel.querySelector('[name="ticket_description"]');
+          const ssStatus = this._ticketPanel.querySelector(".help-screenshot-status");
+          if (titleInput) titleInput.value = "";
+          if (descInput) descInput.value = "";
+          if (ssStatus) ssStatus.textContent = "";
         } else {
           if (window.wc?.Prompt) {
             wc.Prompt.toast({
@@ -6944,32 +6980,36 @@ if (!customElements.get("wc-help-drawer")) {
       const username = this.getAttribute("username") || "";
       const ticketConn = this.getAttribute("ticket-conn") || "";
       const ticketDb = this.getAttribute("ticket-db") || "";
-      const filter = JSON.stringify([
-        { field: "created_by", type: "=", value: username }
-      ]);
+      const filter = JSON.stringify({
+        "$or": [
+          { "created_by": username },
+          { "assigned_to": username },
+          { "modified_by": username }
+        ]
+      });
       const sort = JSON.stringify([{ field: "created_date", dir: "desc" }]);
-      let url = `/api/_project_ticket?filter=${encodeURIComponent(filter)}&sort=${encodeURIComponent(sort)}&size=20`;
+      let url = `/api/_project_ticket?filter=${encodeURIComponent(filter)}&sort=${encodeURIComponent(sort)}&size=50`;
       if (ticketConn) url += `&connName=${encodeURIComponent(ticketConn)}`;
       if (ticketDb) url += `&dbName=${encodeURIComponent(ticketDb)}`;
       try {
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          this._myTickets = data.items || data.results || data || [];
+          this._myTickets = data.data || data.items || data.results || [];
           this._renderMyTicketsList();
         } else {
-          this._tabContent.innerHTML = '<div class="p-3 text-xs text-muted">Failed to load tickets.</div>';
+          this._myTicketsContent.innerHTML = '<div class="p-3 text-xs text-muted">Failed to load tickets.</div>';
         }
       } catch (e) {
-        this._tabContent.innerHTML = '<div class="p-3 text-xs text-muted">Error loading tickets.</div>';
+        this._myTicketsContent.innerHTML = '<div class="p-3 text-xs text-muted">Error loading tickets.</div>';
       }
     }
     _renderMyTicketsList() {
       if (!this._myTickets.length) {
-        this._tabContent.innerHTML = '<div class="p-3 text-xs text-muted">No tickets found.</div>';
+        this._myTicketsContent.innerHTML = '<div class="p-3 text-xs text-muted">No tickets found.</div>';
         return;
       }
-      this._tabContent.innerHTML = "";
+      this._myTicketsContent.innerHTML = "";
       const list = document.createElement("div");
       list.classList.add("help-tickets-list");
       this._myTickets.forEach((ticket) => {
@@ -6989,7 +7029,7 @@ if (!customElements.get("wc-help-drawer")) {
         `;
         list.appendChild(card);
       });
-      this._tabContent.appendChild(list);
+      this._myTicketsContent.appendChild(list);
     }
     _getStatusClass(status) {
       switch ((status || "").toLowerCase()) {
@@ -7029,14 +7069,14 @@ if (!customElements.get("wc-help-drawer")) {
         composed: true
       });
       if (this._activeTab === "help") {
-        requestAnimationFrame(() => {
-          const content = this._tabContent.querySelector(
-            "#help-drawer-content"
-          );
-          if (content && !content.innerHTML.trim()) {
-            this._loadHelpContent("");
-          }
-        });
+        const content = this._helpPanel.querySelector("#help-drawer-content");
+        if (content && !content.innerHTML.trim()) {
+          this._loadHelpContent("");
+        }
+      }
+      if (this._activeTab === "my-tickets" && !this._myTicketsLoaded) {
+        this._myTicketsLoaded = true;
+        this._loadMyTickets();
       }
     }
     close() {
@@ -7078,8 +7118,11 @@ if (!customElements.get("wc-help-drawer")) {
           if (!tab) return;
           this._activeTab = tab.dataset.tab;
           tabNav.querySelectorAll(".help-drawer-tab").forEach((t) => t.classList.toggle("active", t === tab));
-          this._renderActiveTab();
-          if (this._activeTab === "my-tickets") this._loadMyTickets();
+          this._showActivePanel();
+          if (this._activeTab === "my-tickets" && !this._myTicketsLoaded) {
+            this._myTicketsLoaded = true;
+            this._loadMyTickets();
+          }
         };
         tabNav.addEventListener("click", this._handleTabClick);
       }
@@ -7278,6 +7321,35 @@ if (!customElements.get("wc-help-drawer")) {
         }
         .help-drawer-search:focus {
           border-color: var(--primary-bg-color);
+        }
+
+        /* Search row */
+        .help-drawer-search-row {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          margin-bottom: 0.5rem;
+        }
+        .help-drawer-search-row .help-drawer-search {
+          margin-bottom: 0;
+        }
+        .help-drawer-refresh-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.75rem;
+          height: 1.75rem;
+          flex-shrink: 0;
+          border: 1px solid var(--component-border-color);
+          border-radius: 0.25rem;
+          background: var(--surface-3);
+          color: var(--text-4);
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+        }
+        .help-drawer-refresh-btn:hover {
+          background: var(--surface-4);
+          color: var(--text-1);
         }
 
         /* Help articles container */
