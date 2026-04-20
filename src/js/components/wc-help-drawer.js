@@ -327,13 +327,44 @@ if (!customElements.get("wc-help-drawer")) {
 
     // ── Help Content ──────────────────────────────────────────────────────────
 
+    _collectRefKeys() {
+      const refKeyElements = document.querySelectorAll("wc-ref-key");
+      const refKeys = [];
+      refKeyElements.forEach((el) => {
+        const val = el.getAttribute("value");
+        if (val && !refKeys.includes(val)) refKeys.push(val);
+      });
+      // Fallback to component attributes if no wc-ref-key elements found
+      if (refKeys.length === 0) {
+        const fallback = this.getAttribute("reference-key");
+        if (fallback) refKeys.push(fallback);
+      }
+      return refKeys;
+    }
+
+    _updateContextBadges(refKeys) {
+      const context = this._panel?.querySelector(".help-drawer-context");
+      if (!context) return;
+      const tmplSlug = this.getAttribute("template-slug") || "";
+      context.innerHTML = "";
+      refKeys.forEach((key) => {
+        context.innerHTML += `<span class="help-context-badge">${key}</span>`;
+      });
+      if (tmplSlug && refKeys.length === 0) {
+        context.innerHTML += `<span class="help-context-badge">${tmplSlug}</span>`;
+      }
+    }
+
     _loadHelpContent(query) {
       const helpUrl = this.getAttribute("help-url");
       if (!helpUrl) return;
 
-      const refKey = this.getAttribute("reference-key") || "";
+      const refKeys = this._collectRefKeys();
+      this._updateContextBadges(refKeys);
+
+      let url = `${helpUrl}?reference_keys=${encodeURIComponent(refKeys.join(","))}`;
       const tmplSlug = this.getAttribute("template-slug") || "";
-      let url = `${helpUrl}?reference_key=${encodeURIComponent(refKey)}&template_slug=${encodeURIComponent(tmplSlug)}`;
+      if (tmplSlug) url += `&template_slug=${encodeURIComponent(tmplSlug)}`;
       if (query) url += `&q=${encodeURIComponent(query)}`;
 
       const target = this._helpPanel.querySelector("#help-drawer-content");
@@ -610,12 +641,9 @@ if (!customElements.get("wc-help-drawer")) {
         composed: true,
       });
 
-      // Load help content on first open
+      // Always re-scan and load help content on open (fresh ref-key scan)
       if (this._activeTab === "help") {
-        const content = this._helpPanel.querySelector("#help-drawer-content");
-        if (content && !content.innerHTML.trim()) {
-          this._loadHelpContent("");
-        }
+        this._loadHelpContent("");
       }
       // Load tickets on first open to My Tickets tab
       if (this._activeTab === "my-tickets" && !this._myTicketsLoaded) {
