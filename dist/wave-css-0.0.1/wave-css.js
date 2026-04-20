@@ -7068,8 +7068,10 @@ if (!customElements.get("wc-help-drawer")) {
           display: flex;
           align-items: center;
           justify-content: center;
+          align-self: center;
           width: 32px;
           height: 32px;
+          margin: 4px 0;
           border-radius: 50%;
           border: 2px solid var(--primary-bg-color);
           background: transparent;
