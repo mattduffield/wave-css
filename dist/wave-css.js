@@ -6603,7 +6603,17 @@ customElements.define("wc-flip-box", WcFlipBox);
 if (!customElements.get("wc-help-drawer")) {
   class WcHelpDrawer extends WcBaseComponent {
     static get observedAttributes() {
-      return ["reference-key", "template-slug", "username", "user-email", "help-url", "ticket-url", "csrf-token"];
+      return [
+        "reference-key",
+        "template-slug",
+        "username",
+        "user-email",
+        "help-url",
+        "ticket-url",
+        "csrf-token",
+        "ticket-conn",
+        "ticket-db"
+      ];
     }
     static get is() {
       return "wc-help-drawer";
@@ -6634,7 +6644,9 @@ if (!customElements.get("wc-help-drawer")) {
     }
     _render() {
       super._render();
-      const innerEl = this.querySelector(".wc-help-drawer > .help-drawer-trigger");
+      const innerEl = this.querySelector(
+        ".wc-help-drawer > .help-drawer-trigger"
+      );
       if (innerEl) return;
       this._createInnerElement();
     }
@@ -6666,8 +6678,10 @@ if (!customElements.get("wc-help-drawer")) {
       if (refKey || tmplSlug) {
         const context = document.createElement("div");
         context.classList.add("help-drawer-context");
-        if (refKey) context.innerHTML += `<span class="help-context-badge">${refKey}</span>`;
-        if (tmplSlug) context.innerHTML += `<span class="help-context-badge">${tmplSlug}</span>`;
+        if (refKey)
+          context.innerHTML += `<span class="help-context-badge">${refKey}</span>`;
+        if (tmplSlug)
+          context.innerHTML += `<span class="help-context-badge">${tmplSlug}</span>`;
         this._panel.appendChild(context);
       }
       const tabNav = document.createElement("div");
@@ -6722,7 +6736,10 @@ if (!customElements.get("wc-help-drawer")) {
       this._tabContent.appendChild(content);
       search.addEventListener("input", (e) => {
         clearTimeout(this._searchTimeout);
-        this._searchTimeout = setTimeout(() => this._loadHelpContent(e.target.value), 300);
+        this._searchTimeout = setTimeout(
+          () => this._loadHelpContent(e.target.value),
+          300
+        );
       });
     }
     _renderCreateTicketTab() {
@@ -6766,9 +6783,13 @@ if (!customElements.get("wc-help-drawer")) {
           </button>
         </div>
       `;
-      const ssBtn = this._tabContent.querySelector(".help-ticket-screenshot-btn");
+      const ssBtn = this._tabContent.querySelector(
+        ".help-ticket-screenshot-btn"
+      );
       ssBtn.addEventListener("click", () => this._captureScreenshot());
-      const submitBtn = this._tabContent.querySelector(".help-ticket-submit-btn");
+      const submitBtn = this._tabContent.querySelector(
+        ".help-ticket-submit-btn"
+      );
       submitBtn.addEventListener("click", () => this._submitTicket());
     }
     _renderMyTicketsTab() {
@@ -6796,11 +6817,15 @@ if (!customElements.get("wc-help-drawer")) {
     }
     // ── Screenshot Capture ────────────────────────────────────────────────────
     async _captureScreenshot() {
-      const statusEl = this._tabContent.querySelector(".help-screenshot-status");
+      const statusEl = this._tabContent.querySelector(
+        ".help-screenshot-status"
+      );
       if (!window.html2canvas) {
         if (statusEl) statusEl.textContent = "Loading capture library...";
         try {
-          await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+          await this.loadScript(
+            "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+          );
         } catch (e) {
           if (statusEl) statusEl.textContent = "Failed to load capture library";
           return;
@@ -6811,8 +6836,13 @@ if (!customElements.get("wc-help-drawer")) {
       this._overlay.style.display = "none";
       await new Promise((r) => setTimeout(r, 300));
       try {
-        const canvas = await html2canvas(document.body, { useCORS: true, scale: 1 });
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+        const canvas = await html2canvas(document.body, {
+          useCORS: true,
+          scale: 1
+        });
+        const blob = await new Promise(
+          (resolve) => canvas.toBlob(resolve, "image/png")
+        );
         if (statusEl) statusEl.textContent = "Uploading...";
         this._panel.style.display = "";
         this._overlay.style.display = "";
@@ -6822,7 +6852,11 @@ if (!customElements.get("wc-help-drawer")) {
         const csrfToken = this.getAttribute("csrf-token") || "";
         const headers = {};
         if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-        const response = await fetch("/api/upload", { method: "POST", headers, body: formData });
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          headers,
+          body: formData
+        });
         if (response.ok) {
           const data = await response.json();
           this._screenshotUrl = data.url || data.file_url || "";
@@ -6862,14 +6896,21 @@ if (!customElements.get("wc-help-drawer")) {
       body.append("page_url", window.location.pathname);
       body.append("created_by", this.getAttribute("username") || "");
       body.append("user_email", this.getAttribute("user-email") || "");
-      if (this._screenshotUrl) body.append("screenshot_url", this._screenshotUrl);
+      if (this._screenshotUrl)
+        body.append("screenshot_url", this._screenshotUrl);
       if (csrfToken) body.append("csrf_token", csrfToken);
-      const submitBtn = this._tabContent.querySelector(".help-ticket-submit-btn");
+      const submitBtn = this._tabContent.querySelector(
+        ".help-ticket-submit-btn"
+      );
       if (submitBtn) submitBtn.disabled = true;
       try {
         const headers = { "Content-Type": "application/x-www-form-urlencoded" };
         if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-        const response = await fetch(ticketUrl, { method: "POST", headers, body });
+        const response = await fetch(ticketUrl, {
+          method: "POST",
+          headers,
+          body
+        });
         if (response.ok) {
           const data = await response.json().catch(() => ({}));
           if (window.wc?.Prompt) {
@@ -6884,7 +6925,10 @@ if (!customElements.get("wc-help-drawer")) {
           this._renderCreateTicketTab();
         } else {
           if (window.wc?.Prompt) {
-            wc.Prompt.toast({ title: "Failed to submit ticket", icon: "error" });
+            wc.Prompt.toast({
+              title: "Failed to submit ticket",
+              icon: "error"
+            });
           }
         }
       } catch (e) {
@@ -6898,9 +6942,15 @@ if (!customElements.get("wc-help-drawer")) {
     // ── My Tickets ────────────────────────────────────────────────────────────
     async _loadMyTickets() {
       const username = this.getAttribute("username") || "";
-      const filter = JSON.stringify([{ field: "created_by", type: "=", value: username }]);
+      const ticketConn = this.getAttribute("ticket-conn") || "";
+      const ticketDb = this.getAttribute("ticket-db") || "";
+      const filter = JSON.stringify([
+        { field: "created_by", type: "=", value: username }
+      ]);
       const sort = JSON.stringify([{ field: "created_date", dir: "desc" }]);
-      const url = `/api/_project_ticket?filter=${encodeURIComponent(filter)}&sort=${encodeURIComponent(sort)}&size=20`;
+      let url = `/api/_project_ticket?filter=${encodeURIComponent(filter)}&sort=${encodeURIComponent(sort)}&size=20`;
+      if (ticketConn) url += `&connName=${encodeURIComponent(ticketConn)}`;
+      if (ticketDb) url += `&dbName=${encodeURIComponent(ticketDb)}`;
       try {
         const response = await fetch(url);
         if (response.ok) {
@@ -6974,12 +7024,19 @@ if (!customElements.get("wc-help-drawer")) {
       this._isOpen = true;
       this._panel.classList.add("open");
       this._overlay.classList.add("open");
-      this._emitEvent("wchelpdraweropen", null, { bubbles: true, composed: true });
+      this._emitEvent("wchelpdraweropen", null, {
+        bubbles: true,
+        composed: true
+      });
       if (this._activeTab === "help") {
-        const content = this._tabContent.querySelector("#help-drawer-content");
-        if (content && !content.innerHTML.trim()) {
-          this._loadHelpContent("");
-        }
+        requestAnimationFrame(() => {
+          const content = this._tabContent.querySelector(
+            "#help-drawer-content"
+          );
+          if (content && !content.innerHTML.trim()) {
+            this._loadHelpContent("");
+          }
+        });
       }
     }
     close() {
@@ -6987,7 +7044,10 @@ if (!customElements.get("wc-help-drawer")) {
       this._isOpen = false;
       this._panel.classList.remove("open");
       this._overlay.classList.remove("open");
-      this._emitEvent("wchelpdrawerclose", null, { bubbles: true, composed: true });
+      this._emitEvent("wchelpdrawerclose", null, {
+        bubbles: true,
+        composed: true
+      });
     }
     toggle() {
       if (this._isOpen) this.close();
@@ -6995,7 +7055,9 @@ if (!customElements.get("wc-help-drawer")) {
     }
     // ── Events ────────────────────────────────────────────────────────────────
     _wireEvents() {
-      const trigger = this.componentElement.querySelector(".help-drawer-trigger");
+      const trigger = this.componentElement.querySelector(
+        ".help-drawer-trigger"
+      );
       if (trigger) {
         this._handleTriggerClick = () => this.toggle();
         trigger.addEventListener("click", this._handleTriggerClick);
@@ -7032,7 +7094,9 @@ if (!customElements.get("wc-help-drawer")) {
       document.addEventListener("keydown", this._handleKeydown);
     }
     _unWireEvents() {
-      const trigger = this.componentElement?.querySelector(".help-drawer-trigger");
+      const trigger = this.componentElement?.querySelector(
+        ".help-drawer-trigger"
+      );
       if (trigger && this._handleTriggerClick) {
         trigger.removeEventListener("click", this._handleTriggerClick);
       }
@@ -7047,8 +7111,10 @@ if (!customElements.get("wc-help-drawer")) {
           const refKey = this.getAttribute("reference-key") || "";
           const tmplSlug = this.getAttribute("template-slug") || "";
           context.innerHTML = "";
-          if (refKey) context.innerHTML += `<span class="help-context-badge">${refKey}</span>`;
-          if (tmplSlug) context.innerHTML += `<span class="help-context-badge">${tmplSlug}</span>`;
+          if (refKey)
+            context.innerHTML += `<span class="help-context-badge">${refKey}</span>`;
+          if (tmplSlug)
+            context.innerHTML += `<span class="help-context-badge">${tmplSlug}</span>`;
         }
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -7108,8 +7174,9 @@ if (!customElements.get("wc-help-drawer")) {
           right: 0;
           width: 420px;
           height: 100vh;
-          background: var(--card-bg-color, var(--surface-2));
-          border-left: 1px solid var(--surface-5);
+          background: var(--card-bg-color);
+          color: var(--text-1);
+          border-left: 1px solid var(--component-border-color);
           z-index: 9999;
           display: flex;
           flex-direction: column;
@@ -7127,8 +7194,9 @@ if (!customElements.get("wc-help-drawer")) {
           align-items: center;
           justify-content: space-between;
           padding: 0.75rem 1rem;
-          border-bottom: 1px solid var(--surface-5);
+          border-bottom: 1px solid var(--component-border-color);
           flex-shrink: 0;
+          color: var(--text-1);
         }
         .help-drawer-close {
           background: none;
@@ -7154,7 +7222,7 @@ if (!customElements.get("wc-help-drawer")) {
           padding: 1px 8px;
           border-radius: 10px;
           font-size: 0.6875rem;
-          background: var(--surface-4);
+          background: var(--surface-3);
           color: var(--text-4);
           font-family: monospace;
         }
@@ -7162,7 +7230,7 @@ if (!customElements.get("wc-help-drawer")) {
         /* Tabs */
         .help-drawer-tabs {
           display: flex;
-          border-bottom: 1px solid var(--surface-5);
+          border-bottom: 1px solid var(--component-border-color);
           flex-shrink: 0;
         }
         .help-drawer-tab {
@@ -7178,10 +7246,10 @@ if (!customElements.get("wc-help-drawer")) {
           text-align: center;
         }
         .help-drawer-tab:hover {
-          color: var(--text-2);
+          color: var(--text-1);
         }
         .help-drawer-tab.active {
-          color: var(--primary-bg-color);
+          color: var(--text-2);
           border-bottom-color: var(--primary-bg-color);
         }
 
@@ -7190,6 +7258,7 @@ if (!customElements.get("wc-help-drawer")) {
           flex: 1;
           overflow-y: auto;
           padding: 0.5rem;
+          color: var(--text-1);
         }
 
         /* Search */
@@ -7199,10 +7268,13 @@ if (!customElements.get("wc-help-drawer")) {
           font-size: 0.75rem;
           background: var(--surface-3);
           color: var(--text-1);
-          border: 1px solid var(--surface-5);
+          border: 1px solid var(--component-border-color);
           border-radius: 0.25rem;
           outline: none;
           margin-bottom: 0.5rem;
+        }
+        .help-drawer-search::placeholder {
+          color: var(--text-6);
         }
         .help-drawer-search:focus {
           border-color: var(--primary-bg-color);
@@ -7212,30 +7284,53 @@ if (!customElements.get("wc-help-drawer")) {
         .help-drawer-articles {
           font-size: 0.8125rem;
           line-height: 1.5;
+          color: var(--text-1);
+        }
+        .help-drawer-articles a {
+          text-decoration: none;
+        }
+        .help-drawer-articles a:hover {
+          text-decoration: underline;
+        }
+        .help-drawer-articles .text-muted,
+        .help-drawer-articles small,
+        .help-drawer-articles [class*="muted"],
+        .help-drawer-articles [class*="secondary"] {
+          color: var(--text-2);
         }
 
         /* Ticket form */
         .help-ticket-context {
           padding: 0.5rem;
           margin-bottom: 0.5rem;
-          background: var(--surface-2);
+          background: var(--surface-3);
           border-radius: 0.25rem;
           font-size: 0.6875rem;
-          border: 1px solid var(--surface-5);
+          border: 1px solid var(--component-border-color);
+          color: var(--text-2);
         }
         .help-ticket-context-row {
           padding: 1px 0;
+        }
+        .help-ticket-context-row .text-muted {
+          color: var(--text-2);
+        }
+        .help-drawer-content label {
+          color: var(--text-3);
         }
         .help-ticket-input {
           width: 100%;
           padding: 0.375rem 0.5rem;
           font-size: 0.75rem;
-          background: var(--surface-3);
+          background: var(--component-bg-color);
           color: var(--text-1);
-          border: 1px solid var(--surface-5);
+          border: 1px solid var(--component-border-color);
           border-radius: 0.25rem;
           outline: none;
           resize: vertical;
+        }
+        .help-ticket-input::placeholder {
+          color: var(--text-4);
         }
         .help-ticket-input:focus {
           border-color: var(--primary-bg-color);
@@ -7249,15 +7344,18 @@ if (!customElements.get("wc-help-drawer")) {
           gap: 0.25rem;
           padding: 0.375rem 0.75rem;
           font-size: 0.75rem;
-          background: var(--surface-4);
-          color: var(--text-2);
-          border: 1px solid var(--surface-5);
+          background: var(--surface-3);
+          color: var(--text-3);
+          border: 1px solid var(--component-border-color);
           border-radius: 0.25rem;
           cursor: pointer;
           transition: background 0.2s;
         }
         .help-ticket-screenshot-btn:hover {
-          background: var(--surface-5);
+          background: var(--surface-4);
+        }
+        .help-screenshot-status {
+          color: var(--text-3);
         }
         .help-ticket-submit-btn {
           display: flex;
@@ -7296,9 +7394,13 @@ if (!customElements.get("wc-help-drawer")) {
           cursor: pointer;
           transition: background 0.15s;
           font-size: 0.75rem;
+          color: var(--text-2);
         }
         .help-ticket-card:hover {
           background: var(--surface-4);
+        }
+        .help-ticket-card .text-muted {
+          color: var(--text-3);
         }
         .help-ticket-title {
           font-weight: 500;
@@ -7319,10 +7421,11 @@ if (!customElements.get("wc-help-drawer")) {
         /* Footer */
         .help-drawer-footer {
           padding: 0.5rem 1rem;
-          border-top: 1px solid var(--surface-5);
+          border-top: 1px solid var(--component-border-color);
           text-align: center;
           font-size: 0.6875rem;
           flex-shrink: 0;
+          color: var(--text-4);
         }
 
         /* Mobile */
