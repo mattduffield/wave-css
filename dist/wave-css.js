@@ -7573,7 +7573,7 @@ if (!customElements.get("wc-ref-key")) {
       this.componentElement.innerHTML = "";
       const value = this.getAttribute("value") || "";
       const label = this.getAttribute("label") || "";
-      const position = this.getAttribute("position") || "top-right";
+      const position = this.getAttribute("position") || "bottom-right";
       this.componentElement.dataset.position = position;
       const badge = document.createElement("span");
       badge.classList.add("ref-key-badge");
@@ -7623,8 +7623,8 @@ if (!customElements.get("wc-ref-key")) {
           z-index: 1;
           display: flex;
           flex-direction: column;
-          align-items: flex-end;
-          gap: 1px;
+          align-items: center;
+          gap: 2px;
           opacity: 0.35;
           transition: opacity 0.2s;
           pointer-events: auto;
@@ -7634,43 +7634,43 @@ if (!customElements.get("wc-ref-key")) {
         }
         .wc-ref-key[data-position="top-right"] {
           top: 4px;
-          right: 4px;
-          align-items: flex-end;
+          right: 2px;
         }
         .wc-ref-key[data-position="top-left"] {
           top: 4px;
-          left: 4px;
-          align-items: flex-start;
+          left: 2px;
         }
         .wc-ref-key[data-position="bottom-right"] {
           bottom: 4px;
-          right: 4px;
-          align-items: flex-end;
+          right: 2px;
         }
         .wc-ref-key[data-position="bottom-left"] {
           bottom: 4px;
-          left: 4px;
-          align-items: flex-start;
+          left: 2px;
         }
         .ref-key-badge {
-          padding: 0px 5px;
-          font-size: 9px;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          padding: 4px 2px;
+          font-size: 8px;
           font-family: monospace;
-          letter-spacing: 0.03em;
+          letter-spacing: 0.05em;
           background: var(--surface-3);
           color: var(--text-4);
-          border-radius: 6px;
+          border-radius: 4px;
           white-space: nowrap;
           cursor: default;
-          line-height: 1.5;
+          line-height: 1;
         }
         .ref-key-label {
           display: none;
-          padding: 0px 5px;
-          font-size: 8px;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          padding: 2px 2px;
+          font-size: 7px;
           color: var(--text-6);
           white-space: nowrap;
-          line-height: 1.4;
+          line-height: 1;
         }
         .wc-ref-key:hover .ref-key-label {
           display: block;
