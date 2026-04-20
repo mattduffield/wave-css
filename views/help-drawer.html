@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-help-drawer</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-help-drawer</h1>
+
+    <div class="col-1 gap-6">
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Demo</h2>
+        <p class="text-xs text-muted">Click the "?" button or press <kbd class="px-1 py-0.5 rounded bg-surface-3 text-xs">Ctrl + /</kbd> to open the help drawer.</p>
+
+        <div class="flex flex-row items-center gap-3">
+          <span class="text-xs">Trigger button:</span>
+          <wc-help-drawer id="demo-drawer"
+            reference-key="DEMO-001"
+            template-slug="help_drawer_demo"
+            username="demo_user"
+            user-email="demo@example.com"
+            help-url=""
+            ticket-url=""
+            csrf-token="">
+          </wc-help-drawer>
+        </div>
+
+        <pre id="drawer-log" class="text-xs p-2 bg-surface-2 rounded" style="min-height: 2rem;"></pre>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Features</h2>
+        <ul class="text-xs col-1 gap-1 pl-4" style="list-style: disc;">
+          <li>Circular "?" trigger button (inverts on hover)</li>
+          <li>Fixed right slide-out panel (420px) with overlay</li>
+          <li>Three tabs: Help, Create Ticket, My Tickets</li>
+          <li>Help tab: search with debounced HTMX content loading</li>
+          <li>Create Ticket: type, priority, title, description + screenshot capture</li>
+          <li>My Tickets: fetches and renders ticket cards with status badges</li>
+          <li>Keyboard: Ctrl+/ to toggle, Escape to close</li>
+          <li>Mobile responsive (full width under 480px)</li>
+        </ul>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Public API</h2>
+        <div class="text-xs col-1 gap-1">
+          <code>drawer.open()</code> — Open the drawer<br>
+          <code>drawer.close()</code> — Close the drawer<br>
+          <code>drawer.toggle()</code> — Toggle open/close
+        </div>
+        <div class="flex flex-row gap-2">
+          <button class="btn btn-sm btn-primary" type="button" onclick="document.getElementById('demo-drawer').open()">Open</button>
+          <button class="btn btn-sm btn-secondary" type="button" onclick="document.getElementById('demo-drawer').close()">Close</button>
+          <button class="btn btn-sm" type="button" onclick="document.getElementById('demo-drawer').toggle()">Toggle</button>
+        </div>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Usage</h2>
+        <pre class="text-xs p-3 bg-surface-2 rounded overflow-auto"><code>&lt;wc-help-drawer
+  reference-key="DS-COMPARE-001"
+  template-slug="data_studio_compare"
+  username="mattd"
+  user-email="matt@example.com"
+  help-url="/x/help_drawer_content/create"
+  ticket-url="/x/kanban_ticket_panel/create"
+  csrf-token="abc123"&gt;
+&lt;/wc-help-drawer&gt;</code></pre>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Events</h2>
+        <div class="text-xs col-1 gap-1">
+          <code>wchelpdraweropen</code> — Fired when drawer opens<br>
+          <code>wchelpdrawerclose</code> — Fired when drawer closes<br>
+          <code>wchelpticketcreated</code> — Fired after ticket submission (detail: { ticketId })
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <wc-javascript>
+    var drawer = document.getElementById('demo-drawer');
+    var log = document.getElementById('drawer-log');
+    if (drawer && log) {
+      drawer.addEventListener('wchelpdraweropen', function() {
+        log.textContent = 'Event: wchelpdraweropen';
+      });
+      drawer.addEventListener('wchelpdrawerclose', function() {
+        log.textContent = 'Event: wchelpdrawerclose';
+      });
+      drawer.addEventListener('wchelpticketcreated', function(e) {
+        log.textContent = 'Event: wchelpticketcreated | ticketId: ' + (e.detail.ticketId || 'n/a');
+      });
+    }
+  </wc-javascript>
+</body>
+</html>

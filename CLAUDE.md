@@ -178,6 +178,9 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-list-skeleton`: List loading skeleton
 - `wc-table-skeleton`: Table loading skeleton
 
+### Support Components
+- `wc-help-drawer`: Slide-out help drawer with Help (HTMX-loaded), Create Ticket (with screenshot capture), and My Tickets tabs; triggered by "?" button or Ctrl+/; events: `wchelpdraweropen`, `wchelpdrawerclose`, `wchelpticketcreated`
+
 ### Utility Components
 - `wc-theme-selector`: Theme switcher
 - `wc-theme`: Theme manager

@@ -1070,6 +1070,33 @@
     ],
     "skeleton": [
       {
+        "name": "wc-help-drawer",
+        "description": "Slide-out help drawer with Help, Create Ticket (with screenshot capture), and My Tickets tabs",
+        "attributes": [
+          "reference-key",
+          "template-slug",
+          "username",
+          "user-email",
+          "help-url",
+          "ticket-url",
+          "csrf-token"
+        ],
+        "events": {
+          "emits": [
+            "wchelpdraweropen",
+            "wchelpdrawerclose",
+            "wchelpticketcreated"
+          ]
+        },
+        "methods": [
+          "open()",
+          "close()",
+          "toggle()"
+        ],
+        "notes": "Triggered by ? button or Ctrl+/ shortcut. Escape closes. Help tab loads content via HTMX with search (debounced 300ms). Create Ticket tab has screenshot capture via html2canvas (loaded on demand), uploads to /api/upload. My Tickets tab fetches from /api/_project_ticket filtered by username. Fixed 420px right panel with overlay. Mobile responsive (full width under 480px).",
+        "usage": "<wc-help-drawer reference-key=\"DS-001\" template-slug=\"data_studio\" username=\"mattd\" help-url=\"/x/help/create\" ticket-url=\"/x/ticket/create\" csrf-token=\"abc\"></wc-help-drawer>"
+      },
+      {
         "name": "wc-loader",
         "description": "Loading spinner with configurable size, speed, and thickness",
         "attributes": [

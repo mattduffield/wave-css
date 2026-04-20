@@ -669,11 +669,16 @@ class WcTab extends WcBaseComponent {
       wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav {
         overflow-x: auto;
         overflow-y: hidden;
+        flex-wrap: nowrap;
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
       }
       wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav::-webkit-scrollbar {
         display: none; /* Chrome/Safari */
+      }
+      wc-tab[tab-overflow="scroll"] .wc-tab .tab-nav .tab-link {
+        flex-shrink: 0;
+        white-space: nowrap;
       }
 
       /* Tab overflow: wrap — tabs wrap to multiple lines */

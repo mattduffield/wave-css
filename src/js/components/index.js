@@ -22,6 +22,7 @@ import './wc-dropdown.js';
 import './wc-emoji.js';
 import './wc-field.js';
 import './wc-flip-box.js';
+import './wc-help-drawer.js';
 import './wc-google-map.js';
 import './wc-google-address.js';
 import './wc-address-listener.js';
