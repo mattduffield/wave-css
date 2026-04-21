@@ -636,6 +636,7 @@ const ICONS_TO_COPY = [
   "table-list",
   "folder-tree",
   "list-ol",
+  "plane",
   // Add more icon names here
 ];
 
