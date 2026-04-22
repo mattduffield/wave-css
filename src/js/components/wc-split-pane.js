@@ -2,14 +2,23 @@
  *  Name: wc-split-pane
  *  Usage:
  *    <wc-split-pane initial-size="256px" min-size="200px" max-size="400px" collapsible>
- *      <wc-split-start>Left panel</wc-split-start>
- *      <wc-split-end>Right panel</wc-split-end>
+ *      <wc-split-start>Left panel (sized)</wc-split-start>
+ *      <wc-split-end>Right panel (flex)</wc-split-end>
  *    </wc-split-pane>
+ *
+ *    <!-- Right-side collapsible panel -->
+ *    <wc-split-pane initial-size="380px" collapsible collapse-side="end">
+ *      <wc-split-start>Main content (flex)</wc-split-start>
+ *      <wc-split-end>Inspector panel (sized, collapsible)</wc-split-end>
+ *    </wc-split-pane>
+ *
+ *  Attributes:
+ *    - collapse-side: "start" (default) or "end" — which pane is sized/collapsible
  *
  *  Description:
  *    Resizable split panel with draggable divider. Supports horizontal (left/right)
- *    and vertical (top/bottom) layouts, collapsible panes, localStorage persistence,
- *    and nesting for complex layouts.
+ *    and vertical (top/bottom) layouts, collapsible panes on either side,
+ *    localStorage persistence, and nesting for complex layouts.
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
@@ -43,7 +52,7 @@ if (!customElements.get('wc-split-pane')) {
   class WcSplitPane extends WcBaseComponent {
     static get observedAttributes() {
       return ['id', 'class', 'direction', 'initial-size', 'min-size', 'max-size',
-              'divider-width', 'collapsible', 'collapsed', 'persist-key'];
+              'divider-width', 'collapsible', 'collapsed', 'persist-key', 'collapse-side'];
     }
 
     static get is() { return 'wc-split-pane'; }
@@ -83,6 +92,8 @@ if (!customElements.get('wc-split-pane')) {
         this._divider = innerEl;
         this._startEl = this.querySelector(':scope > .wc-split-pane > wc-split-start');
         this._endEl = this.querySelector(':scope > .wc-split-pane > wc-split-end');
+        this._collapseSide = this.getAttribute('collapse-side') || 'start';
+        this._targetEl = this._collapseSide === 'end' ? this._endEl : this._startEl;
         this._collapseBtn = innerEl.querySelector('.wc-split-collapse-btn');
       } else {
         this.componentElement.innerHTML = '';
@@ -98,6 +109,7 @@ if (!customElements.get('wc-split-pane')) {
       const dividerWidth = parseInt(this.getAttribute('divider-width') || '6', 10);
       const collapsible = this.hasAttribute('collapsible');
       const startCollapsed = this.hasAttribute('collapsed');
+      const collapseSide = this.getAttribute('collapse-side') || 'start';
 
       // Determine initial size
       let initialSize = this.getAttribute('initial-size') || '250px';
@@ -118,6 +130,7 @@ if (!customElements.get('wc-split-pane')) {
       this._direction = direction;
       this._dividerWidth = dividerWidth;
       this._persistKey = persistKey;
+      this._collapseSide = collapseSide;
 
       // Container
       this.componentElement.style.display = 'flex';
@@ -135,20 +148,27 @@ if (!customElements.get('wc-split-pane')) {
         return;
       }
 
-      // Style start pane
-      startEl.style.overflow = 'auto';
-      startEl.style.flexShrink = '0';
-      startEl.style.display = 'flex';
-      startEl.style.flexDirection = 'column';
-      if (isHorizontal) {
-        startEl.style.width = this._isCollapsed ? '0px' : initialSize;
-        startEl.style.height = '100%';
-      } else {
-        startEl.style.height = this._isCollapsed ? '0px' : initialSize;
-        startEl.style.width = '100%';
-      }
-      if (this._isCollapsed) startEl.style.overflow = 'hidden';
       this._startEl = startEl;
+      this._endEl = endEl;
+
+      // Determine which pane is the sized/collapsible one vs the flex one
+      const targetEl = collapseSide === 'end' ? endEl : startEl;
+      const flexEl = collapseSide === 'end' ? startEl : endEl;
+      this._targetEl = targetEl;
+
+      // Style the sized (collapsible) pane
+      targetEl.style.overflow = 'auto';
+      targetEl.style.flexShrink = '0';
+      targetEl.style.display = 'flex';
+      targetEl.style.flexDirection = 'column';
+      if (isHorizontal) {
+        targetEl.style.width = this._isCollapsed ? '0px' : initialSize;
+        targetEl.style.height = '100%';
+      } else {
+        targetEl.style.height = this._isCollapsed ? '0px' : initialSize;
+        targetEl.style.width = '100%';
+      }
+      if (this._isCollapsed) targetEl.style.overflow = 'hidden';
 
       // Create divider
       const divider = document.createElement('div');
@@ -185,14 +205,13 @@ if (!customElements.get('wc-split-pane')) {
 
       this._divider = divider;
 
-      // Style end pane
-      endEl.style.flex = '1';
-      endEl.style.overflow = 'auto';
-      endEl.style.display = 'flex';
-      endEl.style.flexDirection = 'column';
-      endEl.style.minWidth = '0';
-      endEl.style.minHeight = '0';
-      this._endEl = endEl;
+      // Style the flex pane
+      flexEl.style.flex = '1';
+      flexEl.style.overflow = 'auto';
+      flexEl.style.display = 'flex';
+      flexEl.style.flexDirection = 'column';
+      flexEl.style.minWidth = '0';
+      flexEl.style.minHeight = '0';
 
       // Assemble: move children into componentElement
       this.componentElement.appendChild(startEl);
@@ -202,18 +221,29 @@ if (!customElements.get('wc-split-pane')) {
       // Store initial pixel size after layout
       requestAnimationFrame(() => {
         const isH = this._direction === 'horizontal';
-        this._currentSize = isH ? startEl.offsetWidth : startEl.offsetHeight;
+        this._currentSize = isH ? targetEl.offsetWidth : targetEl.offsetHeight;
         this._updateAria();
       });
     }
 
     _updateCollapseIcon(btn) {
       const isH = this._direction === 'horizontal';
+      const isEnd = this._collapseSide === 'end';
       if (this._isCollapsed) {
-        btn.innerHTML = isH ? '&#9654;' : '&#9660;'; // ► or ▼
+        // Expand: arrow points toward the collapsed pane
+        if (isH) {
+          btn.innerHTML = isEnd ? '&#9664;' : '&#9654;'; // ◄ or ►
+        } else {
+          btn.innerHTML = isEnd ? '&#9650;' : '&#9660;'; // ▲ or ▼
+        }
         btn.title = 'Expand panel';
       } else {
-        btn.innerHTML = isH ? '&#9664;' : '&#9650;'; // ◄ or ▲
+        // Collapse: arrow points away from the pane
+        if (isH) {
+          btn.innerHTML = isEnd ? '&#9654;' : '&#9664;'; // ► or ◄
+        } else {
+          btn.innerHTML = isEnd ? '&#9660;' : '&#9650;'; // ▼ or ▲
+        }
         btn.title = 'Collapse panel';
       }
     }
@@ -244,26 +274,26 @@ if (!customElements.get('wc-split-pane')) {
     }
 
     _setSize(size, animate = false) {
-      if (!this._startEl) return;
+      if (!this._targetEl) return;
       const isH = this._direction === 'horizontal';
       const prop = isH ? 'width' : 'height';
       const clamped = this._clampSize(size);
       this._currentSize = clamped;
 
       if (animate) {
-        this._startEl.style.transition = `${prop} 200ms ease`;
-        setTimeout(() => { this._startEl.style.transition = ''; }, 250);
+        this._targetEl.style.transition = `${prop} 200ms ease`;
+        setTimeout(() => { this._targetEl.style.transition = ''; }, 250);
       }
 
-      this._startEl.style[prop] = `${clamped}px`;
-      this._startEl.style.overflow = 'auto';
+      this._targetEl.style[prop] = `${clamped}px`;
+      this._targetEl.style.overflow = 'auto';
       this._isCollapsed = false;
       this._updateAria();
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
     }
 
     _collapse(animate = true) {
-      if (!this._startEl) return;
+      if (!this._targetEl) return;
       const isH = this._direction === 'horizontal';
       const prop = isH ? 'width' : 'height';
 
@@ -272,12 +302,12 @@ if (!customElements.get('wc-split-pane')) {
       }
 
       if (animate) {
-        this._startEl.style.transition = `${prop} 200ms ease`;
-        setTimeout(() => { this._startEl.style.transition = ''; }, 250);
+        this._targetEl.style.transition = `${prop} 200ms ease`;
+        setTimeout(() => { this._targetEl.style.transition = ''; }, 250);
       }
 
-      this._startEl.style[prop] = '0px';
-      this._startEl.style.overflow = 'hidden';
+      this._targetEl.style[prop] = '0px';
+      this._targetEl.style.overflow = 'hidden';
       this._isCollapsed = true;
       if (this._collapseBtn) this._updateCollapseIcon(this._collapseBtn);
       this._persist();
@@ -337,7 +367,8 @@ if (!customElements.get('wc-split-pane')) {
         const isH = this._direction === 'horizontal';
         const currentPos = isH ? e.clientX : e.clientY;
         const delta = currentPos - this._dragStartPos;
-        const newSize = this._dragStartSize + delta;
+        const sign = this._collapseSide === 'end' ? -1 : 1;
+        const newSize = this._dragStartSize + (delta * sign);
         this._setSize(newSize);
       };
 
@@ -373,18 +404,19 @@ if (!customElements.get('wc-split-pane')) {
       this._onKeyDown = (e) => {
         const step = e.shiftKey ? 50 : 10;
         const isH = this._direction === 'horizontal';
+        const sign = this._collapseSide === 'end' ? -1 : 1;
         switch (e.key) {
           case 'ArrowLeft':
-            if (isH) { e.preventDefault(); this._setSize(this._currentSize - step); this._persist(); }
+            if (isH) { e.preventDefault(); this._setSize(this._currentSize - (step * sign)); this._persist(); }
             break;
           case 'ArrowRight':
-            if (isH) { e.preventDefault(); this._setSize(this._currentSize + step); this._persist(); }
+            if (isH) { e.preventDefault(); this._setSize(this._currentSize + (step * sign)); this._persist(); }
             break;
           case 'ArrowUp':
-            if (!isH) { e.preventDefault(); this._setSize(this._currentSize - step); this._persist(); }
+            if (!isH) { e.preventDefault(); this._setSize(this._currentSize - (step * sign)); this._persist(); }
             break;
           case 'ArrowDown':
-            if (!isH) { e.preventDefault(); this._setSize(this._currentSize + step); this._persist(); }
+            if (!isH) { e.preventDefault(); this._setSize(this._currentSize + (step * sign)); this._persist(); }
             break;
           case 'Home':
             e.preventDefault();
@@ -423,7 +455,8 @@ if (!customElements.get('wc-split-pane')) {
         const isH = this._direction === 'horizontal';
         const currentPos = isH ? touch.clientX : touch.clientY;
         const delta = currentPos - this._dragStartPos;
-        this._setSize(this._dragStartSize + delta);
+        const sign = this._collapseSide === 'end' ? -1 : 1;
+        this._setSize(this._dragStartSize + (delta * sign));
       };
 
       this._onTouchEnd = () => {
