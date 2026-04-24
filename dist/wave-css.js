@@ -4080,6 +4080,11 @@ if (!customElements.get("wc-cron-picker")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
+      this.formElement = this.componentElement.querySelector('input[type="hidden"]');
+      if (this._value && this.formElement) {
+        this.formElement.value = this._value;
+      }
+      this._wireCronEvents();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
@@ -4253,7 +4258,6 @@ Examples:
       this.componentElement.appendChild(refEl);
       this._updateVisibility();
       this._updateDescription();
-      this._wireCronEvents();
     }
     _createField(labelText) {
       const wrap = document.createElement("div");
@@ -4483,6 +4487,16 @@ Examples:
       }
     }
     _wireCronEvents() {
+      this._unWireCronEvents();
+      this._freqSelect = this.componentElement.querySelector("select.cron-frequency");
+      this._minIntervalSelect = this.componentElement.querySelector("select.cron-min-interval");
+      this._hourIntervalSelect = this.componentElement.querySelector("select.cron-hour-interval");
+      this._dowSelect = this.componentElement.querySelector("select.cron-dow");
+      this._domSelect = this.componentElement.querySelector("select.cron-dom");
+      this._hourSelect = this.componentElement.querySelector("select.cron-hour");
+      this._minuteSelect = this.componentElement.querySelector("select.cron-minute");
+      this._minuteOnlySelect = this.componentElement.querySelector("select.cron-minute-only");
+      this._customInput = this.componentElement.querySelector(".cron-custom-input");
       this._handleFreqChange = () => {
         this._frequency = this._freqSelect.value;
         this._updateVisibility();
@@ -4526,27 +4540,30 @@ Examples:
         this._customCron = this._customInput.value;
         this._onCronChanged();
       };
-      this._freqSelect.addEventListener("change", this._handleFreqChange);
-      this._minIntervalSelect.addEventListener("change", this._handleMinIntervalChange);
-      this._hourIntervalSelect.addEventListener("change", this._handleHourIntervalChange);
-      this._dowSelect.addEventListener("change", this._handleDowChange);
-      this._domSelect.addEventListener("change", this._handleDomChange);
-      this._hourSelect.addEventListener("change", this._handleHourChange);
-      this._minuteSelect.addEventListener("change", this._handleMinuteChange);
-      this._minuteOnlySelect.addEventListener("change", this._handleMinuteOnlyChange);
-      this._customInput.addEventListener("input", this._handleCustomInput);
+      if (this._freqSelect) this._freqSelect.addEventListener("change", this._handleFreqChange);
+      if (this._minIntervalSelect) this._minIntervalSelect.addEventListener("change", this._handleMinIntervalChange);
+      if (this._hourIntervalSelect) this._hourIntervalSelect.addEventListener("change", this._handleHourIntervalChange);
+      if (this._dowSelect) this._dowSelect.addEventListener("change", this._handleDowChange);
+      if (this._domSelect) this._domSelect.addEventListener("change", this._handleDomChange);
+      if (this._hourSelect) this._hourSelect.addEventListener("change", this._handleHourChange);
+      if (this._minuteSelect) this._minuteSelect.addEventListener("change", this._handleMinuteChange);
+      if (this._minuteOnlySelect) this._minuteOnlySelect.addEventListener("change", this._handleMinuteOnlyChange);
+      if (this._customInput) this._customInput.addEventListener("input", this._handleCustomInput);
+    }
+    _unWireCronEvents() {
+      if (this._freqSelect && this._handleFreqChange) this._freqSelect.removeEventListener("change", this._handleFreqChange);
+      if (this._minIntervalSelect && this._handleMinIntervalChange) this._minIntervalSelect.removeEventListener("change", this._handleMinIntervalChange);
+      if (this._hourIntervalSelect && this._handleHourIntervalChange) this._hourIntervalSelect.removeEventListener("change", this._handleHourIntervalChange);
+      if (this._dowSelect && this._handleDowChange) this._dowSelect.removeEventListener("change", this._handleDowChange);
+      if (this._domSelect && this._handleDomChange) this._domSelect.removeEventListener("change", this._handleDomChange);
+      if (this._hourSelect && this._handleHourChange) this._hourSelect.removeEventListener("change", this._handleHourChange);
+      if (this._minuteSelect && this._handleMinuteChange) this._minuteSelect.removeEventListener("change", this._handleMinuteChange);
+      if (this._minuteOnlySelect && this._handleMinuteOnlyChange) this._minuteOnlySelect.removeEventListener("change", this._handleMinuteOnlyChange);
+      if (this._customInput && this._handleCustomInput) this._customInput.removeEventListener("input", this._handleCustomInput);
     }
     _unWireEvents() {
       super._unWireEvents();
-      if (this._freqSelect) this._freqSelect.removeEventListener("change", this._handleFreqChange);
-      if (this._minIntervalSelect) this._minIntervalSelect.removeEventListener("change", this._handleMinIntervalChange);
-      if (this._hourIntervalSelect) this._hourIntervalSelect.removeEventListener("change", this._handleHourIntervalChange);
-      if (this._dowSelect) this._dowSelect.removeEventListener("change", this._handleDowChange);
-      if (this._domSelect) this._domSelect.removeEventListener("change", this._handleDomChange);
-      if (this._hourSelect) this._hourSelect.removeEventListener("change", this._handleHourChange);
-      if (this._minuteSelect) this._minuteSelect.removeEventListener("change", this._handleMinuteChange);
-      if (this._minuteOnlySelect) this._minuteOnlySelect.removeEventListener("change", this._handleMinuteOnlyChange);
-      if (this._customInput) this._customInput.removeEventListener("input", this._handleCustomInput);
+      this._unWireCronEvents();
     }
     _applyStyle() {
       const style = `
