@@ -219,6 +219,9 @@ class WcTab extends WcBaseComponent {
     if (activate) {
       requestAnimationFrame(() => btn.click());
     }
+
+    // Scroll the new tab into view (useful with tab-overflow="scroll")
+    requestAnimationFrame(() => btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' }));
   }
 
   /**

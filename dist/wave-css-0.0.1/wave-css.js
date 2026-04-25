@@ -15816,6 +15816,7 @@ var WcTab = class extends WcBaseComponent {
     if (activate) {
       requestAnimationFrame(() => btn.click());
     }
+    requestAnimationFrame(() => btn.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" }));
   }
   /**
    * Remove a tab by label.
