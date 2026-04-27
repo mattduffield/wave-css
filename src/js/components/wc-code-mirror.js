@@ -591,7 +591,9 @@ if (!customElements.get('wc-code-mirror')) {
             var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
             cm.replaceSelection(spaces);
           }
-        }
+        },
+        "Cmd-Shift-Backspace": (cm) => { cm.setValue(''); },
+        "Ctrl-Shift-Backspace": (cm) => { cm.setValue(''); },
       };
 
       // Add Ctrl-Space hint trigger if hints are available
