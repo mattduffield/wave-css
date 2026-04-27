@@ -1356,8 +1356,18 @@
     ]
   },
   "themes": {
-    "description": "40+ predefined themes using oklch color space with automatic light/dark mode support",
+    "description": "40+ predefined themes using oklch color space with automatic light/dark mode support. Includes theme-high-contrast for WCAG AAA accessibility.",
     "usage": "Apply theme class to <html> element or use <wc-theme> component",
+    "semanticColors": {
+      "description": "Four semantic color families with CSS variables and utility classes. Auto-adjust for light/dark mode.",
+      "variables": ["--success-color", "--success-light-color", "--danger-color", "--danger-light-color", "--warning-color", "--warning-light-color", "--info-color", "--info-light-color"],
+      "utilityClasses": ["success-color", "success-light-color", "success-bg-color", "success-border-color", "danger-color", "danger-light-color", "danger-bg-color", "danger-border-color", "warning-color", "warning-light-color", "warning-bg-color", "warning-border-color", "info-color", "info-light-color", "info-bg-color", "info-border-color"],
+      "defaults": {
+        "dark": { "success": "#22c55e", "danger": "#ef4444", "warning": "#f59e0b", "info": "#3b82f6" },
+        "light": { "success": "#16a34a", "danger": "#dc2626", "warning": "#d97706", "info": "#2563eb" },
+        "highContrast": { "success": "#00d000", "danger": "#ff2020", "warning": "#ffaa00", "info": "#00ccff" }
+      }
+    },
     "themeList": [
       "theme-rose",
       "theme-petal",
@@ -1399,7 +1409,8 @@
       "theme-fuchsia",
       "theme-cottoncandy",
       "theme-blush",
-      "theme-bubblegum"
+      "theme-bubblegum",
+      "theme-high-contrast"
     ],
     "legacyThemes": [
       "theme-coral-sunset",

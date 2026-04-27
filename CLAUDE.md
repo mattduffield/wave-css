@@ -87,6 +87,16 @@ The build process (esbuild.config.js) generates:
 - Themes modify `--hue` and related color variables
 - Components automatically adapt to the selected theme
 - Theme selector component (`wc-theme-selector`) for runtime switching
+- `theme-high-contrast` accessibility theme with WCAG AAA-level saturated semantic colors
+- `prefers-color-scheme: light` auto-adjusts semantic colors one shade darker for white backgrounds
+
+### Semantic State Colors
+
+Four semantic color families with CSS variables and utility classes:
+- **Success**: `--success-color` (#22c55e), `--success-light-color` — classes: `success-color`, `success-light-color`, `success-bg-color`, `success-border-color`
+- **Danger**: `--danger-color` (#ef4444), `--danger-light-color` — classes: `danger-color`, `danger-light-color`, `danger-bg-color`, `danger-border-color`
+- **Warning**: `--warning-color` (#f59e0b), `--warning-light-color` — classes: `warning-color`, `warning-light-color`, `warning-bg-color`, `warning-border-color`
+- **Info**: `--info-color` (#3b82f6), `--info-light-color` — classes: `info-color`, `info-light-color`, `info-bg-color`, `info-border-color`
 
 ### CSS Grid Utilities
 

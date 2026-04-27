@@ -18714,7 +18714,8 @@ var WcThemeSelector = class extends WcBaseComponent {
       "theme-fuchsia",
       "theme-cottoncandy",
       "theme-blush",
-      "theme-bubblegum"
+      "theme-bubblegum",
+      "theme-high-contrast"
     ];
     const template = document.createElement("template");
     template.innerHTML = `

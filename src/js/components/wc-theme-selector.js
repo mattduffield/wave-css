@@ -131,6 +131,7 @@ class WcThemeSelector extends WcBaseComponent {
       "theme-cottoncandy",
       "theme-blush",
       "theme-bubblegum",
+      "theme-high-contrast",
     ]
     const template = document.createElement('template');
       template.innerHTML = `
