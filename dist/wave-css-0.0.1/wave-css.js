@@ -3420,12 +3420,6 @@ if (!customElements.get("wc-code-mirror")) {
             var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
             cm.replaceSelection(spaces);
           }
-        },
-        "Cmd-Shift-Backspace": (cm) => {
-          cm.setValue("");
-        },
-        "Ctrl-Shift-Backspace": (cm) => {
-          cm.setValue("");
         }
       };
       if (hasHints) {
@@ -3455,6 +3449,14 @@ if (!customElements.get("wc-code-mirror")) {
         matchBrackets: true,
         keyMap: "sublime",
         showInvisibles: true
+      });
+      this.editor.addKeyMap({
+        "Shift-Cmd-K": (cm) => {
+          cm.setValue("");
+        },
+        "Shift-Ctrl-K": (cm) => {
+          cm.setValue("");
+        }
       });
       if (requestedTheme && requestedTheme !== "default") {
         this.editor.setOption("theme", requestedTheme);

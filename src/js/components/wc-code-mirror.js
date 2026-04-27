@@ -592,8 +592,6 @@ if (!customElements.get('wc-code-mirror')) {
             cm.replaceSelection(spaces);
           }
         },
-        "Cmd-Shift-Backspace": (cm) => { cm.setValue(''); },
-        "Ctrl-Shift-Backspace": (cm) => { cm.setValue(''); },
       };
 
       // Add Ctrl-Space hint trigger if hints are available
@@ -634,6 +632,12 @@ if (!customElements.get('wc-code-mirror')) {
         matchBrackets: true,
         keyMap: "sublime",
         showInvisibles: true
+      });
+
+      // Clear editor shortcut — added via addKeyMap to override sublime keymap's Cmd-K chord
+      this.editor.addKeyMap({
+        "Shift-Cmd-K": (cm) => { cm.setValue(''); },
+        "Shift-Ctrl-K": (cm) => { cm.setValue(''); },
       });
 
       // Now that editor exists, apply theme and mode options (setOption calls are safe now)
