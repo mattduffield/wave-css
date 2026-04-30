@@ -18648,7 +18648,7 @@ if (!customElements.get("wc-template-preview")) {
 // src/js/components/wc-theme-selector.js
 var WcThemeSelector = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "theme", "mode"];
+    return ["id", "class", "theme", "mode", "extra-themes"];
   }
   constructor() {
     super();
@@ -18738,6 +18738,13 @@ var WcThemeSelector = class extends WcBaseComponent {
       "theme-bubblegum",
       "theme-high-contrast"
     ];
+    const extraAttr = this.getAttribute("extra-themes");
+    if (extraAttr) {
+      const extras = extraAttr.split(/[\s,]+/).filter((t) => t);
+      extras.forEach((t) => {
+        if (!themes.includes(t)) themes.push(t);
+      });
+    }
     const template = document.createElement("template");
     template.innerHTML = `
       <div class="relative row flex-wrap">
