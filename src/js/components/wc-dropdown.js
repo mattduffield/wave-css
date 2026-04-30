@@ -351,9 +351,23 @@ class WcDropdown extends WcBaseComponent {
   }
 
   _positionDropdown(dropdownContent, button) {
-    // Only apply JS positioning if on mobile or anchor positioning not supported
+    // Even when CSS Anchor Positioning handles placement, cap maxHeight
+    // so dynamic content can't push the dropdown past the viewport edge.
     if (!this._detectMobile() && this._checkAnchorPositioningSupport()) {
-      return; // Let CSS handle positioning
+      if (!this.getAttribute('dropdown-height')) {
+        const buttonRect = button.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const dropdownRect = dropdownContent.getBoundingClientRect();
+        const opensUpward = dropdownRect.top < buttonRect.top;
+        const available = opensUpward
+          ? (buttonRect.top - 10)
+          : (viewportHeight - dropdownRect.top - 10);
+        if (available > 0) {
+          dropdownContent.style.maxHeight = `${available}px`;
+          dropdownContent.style.overflowY = 'auto';
+        }
+      }
+      return; // Let CSS handle the rest of positioning
     }
 
     // Get button and viewport dimensions

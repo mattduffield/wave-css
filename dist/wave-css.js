@@ -5434,6 +5434,17 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _positionDropdown(dropdownContent, button) {
     if (!this._detectMobile() && this._checkAnchorPositioningSupport()) {
+      if (!this.getAttribute("dropdown-height")) {
+        const buttonRect2 = button.getBoundingClientRect();
+        const viewportHeight2 = window.innerHeight;
+        const dropdownRect2 = dropdownContent.getBoundingClientRect();
+        const opensUpward = dropdownRect2.top < buttonRect2.top;
+        const available = opensUpward ? buttonRect2.top - 10 : viewportHeight2 - dropdownRect2.top - 10;
+        if (available > 0) {
+          dropdownContent.style.maxHeight = `${available}px`;
+          dropdownContent.style.overflowY = "auto";
+        }
+      }
       return;
     }
     const buttonRect = button.getBoundingClientRect();
@@ -24756,11 +24767,11 @@ if (!customElements.get("wc-prompt")) {
       const { text = "", type = "info", stay = false, time = 3, position = "top", dismissable = false } = c;
       notie.alert({ type, text, stay, time, position });
       if (stay && dismissable) {
-        requestAnimationFrame(() => {
-          const alertEl = document.querySelector(".notie-alert");
+        setTimeout(() => {
+          const alertEls = document.querySelectorAll(".notie-alert");
+          const alertEl = alertEls[alertEls.length - 1];
           if (!alertEl) return;
           if (alertEl.querySelector(".notie-close-btn")) return;
-          alertEl.style.position = "relative";
           const closeBtn = document.createElement("button");
           closeBtn.type = "button";
           closeBtn.classList.add("notie-close-btn");
@@ -24768,10 +24779,10 @@ if (!customElements.get("wc-prompt")) {
           closeBtn.title = "Dismiss";
           closeBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            notie.hideAlert();
+            notie.hideAlerts();
           });
           alertEl.appendChild(closeBtn);
-        });
+        }, 300);
       }
     }
     toast(c) {

@@ -63,13 +63,14 @@ if (!customElements.get('wc-prompt')) {
       notie.alert({ type, text, stay, time, position });
 
       if (stay && dismissable) {
-        requestAnimationFrame(() => {
-          const alertEl = document.querySelector('.notie-alert');
+        // notie animates the alert in — wait for it to appear in the DOM
+        setTimeout(() => {
+          const alertEls = document.querySelectorAll('.notie-alert');
+          const alertEl = alertEls[alertEls.length - 1]; // Latest alert
           if (!alertEl) return;
           // Prevent duplicate close buttons
           if (alertEl.querySelector('.notie-close-btn')) return;
 
-          alertEl.style.position = 'relative';
           const closeBtn = document.createElement('button');
           closeBtn.type = 'button';
           closeBtn.classList.add('notie-close-btn');
@@ -77,10 +78,10 @@ if (!customElements.get('wc-prompt')) {
           closeBtn.title = 'Dismiss';
           closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            notie.hideAlert();
+            notie.hideAlerts();
           });
           alertEl.appendChild(closeBtn);
-        });
+        }, 300);
       }
     }
 
