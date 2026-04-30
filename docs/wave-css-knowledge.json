@@ -1097,6 +1097,24 @@
         "usage": "<wc-help-drawer reference-key=\"DS-001\" template-slug=\"data_studio\" username=\"mattd\" help-url=\"/x/help/create\" ticket-url=\"/x/ticket/create\" csrf-token=\"abc\"></wc-help-drawer>"
       },
       {
+        "name": "wc-progress",
+        "description": "Linear progress bar with semantic color variants, three sizes, optional label and percentage text",
+        "attributes": [
+          "id",
+          "class",
+          "value",
+          "max",
+          "percent",
+          "variant",
+          "size",
+          "label",
+          "show-value",
+          "animate"
+        ],
+        "notes": "Uses value/max or direct percent. Variants: default (primary), success, warning, danger, info, muted. Sizes: sm (4px), md (8px), lg (16px). Accessible with role=progressbar and aria attributes. Fill animates on attribute change when animate is set.",
+        "usage": "<wc-progress value=\"75\" max=\"100\" variant=\"success\" size=\"sm\" label=\"Storage\" show-value animate></wc-progress>"
+      },
+      {
         "name": "wc-loader",
         "description": "Loading spinner with configurable size, speed, and thickness",
         "attributes": [
@@ -1361,7 +1379,8 @@
     "semanticColors": {
       "description": "Four semantic color families with CSS variables and utility classes. Auto-adjust for light/dark mode.",
       "variables": ["--success-color", "--success-light-color", "--danger-color", "--danger-light-color", "--warning-color", "--warning-light-color", "--info-color", "--info-light-color"],
-      "utilityClasses": ["success-color", "success-light-color", "success-bg-color", "success-border-color", "danger-color", "danger-light-color", "danger-bg-color", "danger-border-color", "warning-color", "warning-light-color", "warning-bg-color", "warning-border-color", "info-color", "info-light-color", "info-bg-color", "info-border-color"],
+      "utilityClasses": ["success-color", "success-light-color", "success-bg-color", "success-border-color", "danger-color", "danger-light-color", "danger-bg-color", "danger-border-color", "warning-color", "warning-light-color", "warning-bg-color", "warning-border-color", "info-color", "info-light-color", "info-bg-color", "info-border-color", "secondary-bg-color"],
+      "badgeClasses": ["badge", "badge-success", "badge-warning", "badge-danger", "badge-info", "badge-muted", "badge-primary"],
       "defaults": {
         "dark": { "success": "#22c55e", "danger": "#ef4444", "warning": "#f59e0b", "info": "#3b82f6" },
         "light": { "success": "#16a34a", "danger": "#dc2626", "warning": "#d97706", "info": "#2563eb" },

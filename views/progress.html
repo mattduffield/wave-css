@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-progress</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-progress</h1>
+
+    <div class="col-1 gap-6">
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Variants</h2>
+        <wc-progress value="80" max="100" variant="default" label="Default" show-value></wc-progress>
+        <wc-progress value="65" max="100" variant="success" label="Success" show-value></wc-progress>
+        <wc-progress value="45" max="100" variant="warning" label="Warning" show-value></wc-progress>
+        <wc-progress value="25" max="100" variant="danger" label="Danger" show-value></wc-progress>
+        <wc-progress value="55" max="100" variant="info" label="Info" show-value></wc-progress>
+        <wc-progress value="30" max="100" variant="muted" label="Muted" show-value></wc-progress>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Sizes</h2>
+        <wc-progress percent="70" variant="success" size="sm" label="Small" show-value></wc-progress>
+        <wc-progress percent="70" variant="success" size="md" label="Medium" show-value></wc-progress>
+        <wc-progress percent="70" variant="success" size="lg" label="Large" show-value></wc-progress>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Value / Max</h2>
+        <wc-progress value="2" max="2" variant="success" label="Quota" show-value></wc-progress>
+        <wc-progress value="1" max="5" variant="warning" label="API Calls" show-value></wc-progress>
+        <wc-progress value="0" max="10" variant="danger" label="Empty" show-value></wc-progress>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Direct Percent</h2>
+        <wc-progress percent="100" variant="success" show-value></wc-progress>
+        <wc-progress percent="50" variant="info" show-value></wc-progress>
+        <wc-progress percent="10" variant="danger" show-value></wc-progress>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">No Label / No Value</h2>
+        <wc-progress percent="60" variant="default"></wc-progress>
+        <wc-progress percent="40" variant="warning" size="lg"></wc-progress>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Animated</h2>
+        <wc-progress id="animated-bar" percent="20" variant="info" size="md" label="Upload" show-value animate></wc-progress>
+        <button class="btn btn-sm btn-primary" type="button" onclick="
+          var bar = document.getElementById('animated-bar');
+          var p = parseInt(bar.getAttribute('percent') || '0');
+          p = p >= 100 ? 0 : Math.min(100, p + 20);
+          bar.setAttribute('percent', p);
+        ">Increment +20%</button>
+      </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Dashboard Pattern</h2>
+        <div class="col-1 gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-20">Storage</span>
+            <wc-progress percent="85" variant="warning" size="sm" show-value animate></wc-progress>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-20">CPU</span>
+            <wc-progress percent="42" variant="success" size="sm" show-value animate></wc-progress>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-20">Memory</span>
+            <wc-progress percent="91" variant="danger" size="sm" show-value animate></wc-progress>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-20">Network</span>
+            <wc-progress percent="15" variant="info" size="sm" show-value animate></wc-progress>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

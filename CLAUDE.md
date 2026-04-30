@@ -98,6 +98,10 @@ Four semantic color families with CSS variables and utility classes:
 - **Warning**: `--warning-color` (#f59e0b), `--warning-light-color` — classes: `warning-color`, `warning-light-color`, `warning-bg-color`, `warning-border-color`
 - **Info**: `--info-color` (#3b82f6), `--info-light-color` — classes: `info-color`, `info-light-color`, `info-bg-color`, `info-border-color`
 
+**Badge variants** — semantic status pills: `badge badge-success`, `badge badge-warning`, `badge badge-danger`, `badge badge-info`, `badge badge-muted`, `badge badge-primary`
+
+**Secondary background** — `.secondary-bg-color` uses `--secondary-bg-color`
+
 ### CSS Grid Utilities
 
 Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl).
@@ -180,6 +184,9 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 ### AI/Bot Components
 - `wc-ai-bot`: AI chatbot interface
 - `wc-hf-bot`: Hugging Face bot interface
+
+### Data Display Components
+- `wc-progress`: Linear progress bar; `value`/`max` or `percent`; variants: default, success, warning, danger, info, muted; sizes: sm, md, lg; optional `label`, `show-value`, `animate`
 
 ### Skeleton/Loading Components
 - `wc-loader`: Loading spinner

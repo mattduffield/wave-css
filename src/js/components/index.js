@@ -85,6 +85,7 @@ import './wc-explain-tree.js';
 import './wc-document-tree.js';
 import './wc-chartjs.js';
 import './wc-busy-indicator.js';
+import './wc-progress.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';
