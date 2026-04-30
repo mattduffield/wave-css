@@ -414,9 +414,15 @@ class WcDropdown extends WcBaseComponent {
     dropdownContent.style.top = `${top}px`;
     dropdownContent.style.width = `${dropdownWidth}px`;
     
-    // Ensure dropdown doesn't extend beyond viewport bottom
-    if (top + dropdownHeight > viewportHeight - 10) {
-      dropdownContent.style.maxHeight = `${viewportHeight - top - 10}px`;
+    // Always cap at available viewport space so dynamic content (accordion
+    // expand, htmx swap, etc.) can't push the dropdown past the screen edge.
+    // Skip if dropdown-height is explicitly set (forced height with its own overflow).
+    if (!this.getAttribute('dropdown-height')) {
+      const opensUpward = top < buttonRect.top;
+      const available = opensUpward
+        ? (buttonRect.top - 10)
+        : (viewportHeight - top - 10);
+      dropdownContent.style.maxHeight = `${available}px`;
       dropdownContent.style.overflowY = 'auto';
     }
   }

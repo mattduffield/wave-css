@@ -5472,8 +5472,10 @@ var WcDropdown = class extends WcBaseComponent {
     dropdownContent.style.left = `${left}px`;
     dropdownContent.style.top = `${top}px`;
     dropdownContent.style.width = `${dropdownWidth}px`;
-    if (top + dropdownHeight > viewportHeight - 10) {
-      dropdownContent.style.maxHeight = `${viewportHeight - top - 10}px`;
+    if (!this.getAttribute("dropdown-height")) {
+      const opensUpward = top < buttonRect.top;
+      const available = opensUpward ? buttonRect.top - 10 : viewportHeight - top - 10;
+      dropdownContent.style.maxHeight = `${available}px`;
       dropdownContent.style.overflowY = "auto";
     }
   }
