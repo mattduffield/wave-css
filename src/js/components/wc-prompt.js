@@ -59,8 +59,29 @@ if (!customElements.get('wc-prompt')) {
     }
 
     banner(c) {
-      const { text = '', type = 'info', stay = false, time = 3, position = 'top' } = c;
+      const { text = '', type = 'info', stay = false, time = 3, position = 'top', dismissable = false } = c;
       notie.alert({ type, text, stay, time, position });
+
+      if (stay && dismissable) {
+        requestAnimationFrame(() => {
+          const alertEl = document.querySelector('.notie-alert');
+          if (!alertEl) return;
+          // Prevent duplicate close buttons
+          if (alertEl.querySelector('.notie-close-btn')) return;
+
+          alertEl.style.position = 'relative';
+          const closeBtn = document.createElement('button');
+          closeBtn.type = 'button';
+          closeBtn.classList.add('notie-close-btn');
+          closeBtn.innerHTML = '&times;';
+          closeBtn.title = 'Dismiss';
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notie.hideAlert();
+          });
+          alertEl.appendChild(closeBtn);
+        });
+      }
     }
 
     toast(c) {
@@ -293,6 +314,24 @@ if (!customElements.get('wc-prompt')) {
         border-radius: 0.375rem;
         color: var(--component-color);
         padding: 0.375rem;
+      }
+      .notie-close-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.25rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.7;
+        padding: 4px 8px;
+        transition: opacity 0.2s;
+      }
+      .notie-close-btn:hover {
+        opacity: 1;
       }
       `;
       this.loadStyle('wc-prompt-style', style);

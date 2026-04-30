@@ -1188,7 +1188,7 @@
       },
       {
         "name": "wc-prompt",
-        "description": "Dialog system using SweetAlert2 and notie for banners, toasts, and modal dialogs. Simple dialog methods use focusConfirm:false, backdrop:false, scrollbarPadding:false to prevent scroll reset.",
+        "description": "Dialog system using SweetAlert2 and notie for banners, toasts, and modal dialogs. Simple dialog methods use focusConfirm:false, backdrop:false, scrollbarPadding:false to prevent scroll reset. banner() supports dismissable option for persistent banners with a visible X close button.",
         "methods": [
           "banner(config)",
           "toast(config)",
