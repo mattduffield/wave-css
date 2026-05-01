@@ -154,6 +154,10 @@ if (!customElements.get('wc-document-tree')) {
     // ── Context Menu ─────────────────────────────────────────────────────────
 
     _parseContextMenu() {
+      // Only parse once — children get consumed (textContent cleared) on first parse
+      if (this._contextMenuParsed) return;
+      this._contextMenuParsed = true;
+
       const menuElements = this.querySelectorAll('wc-document-tree-context-menu');
       if (!menuElements.length) { this._contextMenuItems = null; return; }
 
@@ -210,8 +214,8 @@ if (!customElements.get('wc-document-tree')) {
     // ── UI building ───────────────────────────────────────────────────────────
 
     _buildUI() {
-      this.componentElement.innerHTML = '';
       this._parseContextMenu();
+      this.componentElement.innerHTML = '';
 
       const height = this.getAttribute('height');
       if (height) this.componentElement.style.height = height;

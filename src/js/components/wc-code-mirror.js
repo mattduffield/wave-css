@@ -43,6 +43,9 @@ if (!customElements.get('wc-code-mirror')) {
       // Register CodeMirror as a required dependency
       DependencyManager.register('CodeMirror');
 
+      // Collect context menu children BEFORE innerHTML is cleared
+      this._collectContextMenuItems();
+
       if (this.innerHTML.trim() != "") {
         this.firstContent = this.innerHTML.replaceAll('=&gt;', '=>');
         this.innerHTML = "";
@@ -156,8 +159,6 @@ if (!customElements.get('wc-code-mirror')) {
         const settingsIcon = this.querySelector('.settings-icon');
         settingsIcon.addEventListener('click', this._handleSettingsIconClick.bind(this));
       } else {
-        // Collect context menu children BEFORE innerHTML is cleared
-        this._collectContextMenuItems();
         this.componentElement.innerHTML = '';
 
         this._createInnerElement();

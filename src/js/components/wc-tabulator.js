@@ -747,8 +747,9 @@ if (!customElements.get('wc-tabulator')) {
           }
 
           const value = new Function(`return (${func})`)(); // Inline function
+          const icn = this.icons[icon];
           mnu = {
-            label: this.createMenuLabel(label, this.icons[icon]),
+            label: icn ? this.createMenuLabel(label, icn) : label,
             action: value,
             order: order
           };
@@ -2386,6 +2387,17 @@ if (!customElements.get('wc-tabulator')) {
     border-bottom: 1px solid var(--component-border-color);
     */
   } 
+
+  /* Table Tooltip */
+  .tabulator-tooltip {
+    background-color: var(--surface-2);
+    color: var(--text-1);
+    border: 1px solid var(--surface-5);
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    max-width: 300px;
+  }
 
   /* Table Popup */
   .tabulator-menu.tabulator-popup-container {

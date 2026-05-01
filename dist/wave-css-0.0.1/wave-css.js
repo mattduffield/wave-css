@@ -2772,6 +2772,7 @@ if (!customElements.get("wc-code-mirror")) {
       this.firstContent = "";
       this._hintWords = [];
       dependencyManager.register("CodeMirror");
+      this._collectContextMenuItems();
       if (this.innerHTML.trim() != "") {
         this.firstContent = this.innerHTML.replaceAll("=&gt;", "=>");
         this.innerHTML = "";
@@ -2876,7 +2877,6 @@ if (!customElements.get("wc-code-mirror")) {
         const settingsIcon = this.querySelector(".settings-icon");
         settingsIcon.addEventListener("click", this._handleSettingsIconClick.bind(this));
       } else {
-        this._collectContextMenuItems();
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
@@ -17243,8 +17243,9 @@ if (!customElements.get("wc-tabulator")) {
             return;
           }
           const value = new Function(`return (${func})`)();
+          const icn = this.icons[icon];
           mnu = {
-            label: this.createMenuLabel(label, this.icons[icon]),
+            label: icn ? this.createMenuLabel(label, icn) : label,
             action: value,
             order
           };
@@ -18548,6 +18549,17 @@ if (!customElements.get("wc-tabulator")) {
     border-bottom: 1px solid var(--component-border-color);
     */
   } 
+
+  /* Table Tooltip */
+  .tabulator-tooltip {
+    background-color: var(--surface-2);
+    color: var(--text-1);
+    border: 1px solid var(--surface-5);
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    max-width: 300px;
+  }
 
   /* Table Popup */
   .tabulator-menu.tabulator-popup-container {
@@ -29513,6 +29525,8 @@ if (!customElements.get("wc-document-tree")) {
     }
     // ── Context Menu ─────────────────────────────────────────────────────────
     _parseContextMenu() {
+      if (this._contextMenuParsed) return;
+      this._contextMenuParsed = true;
       const menuElements = this.querySelectorAll("wc-document-tree-context-menu");
       if (!menuElements.length) {
         this._contextMenuItems = null;
@@ -29561,8 +29575,8 @@ if (!customElements.get("wc-document-tree")) {
     }
     // ── UI building ───────────────────────────────────────────────────────────
     _buildUI() {
-      this.componentElement.innerHTML = "";
       this._parseContextMenu();
+      this.componentElement.innerHTML = "";
       const height = this.getAttribute("height");
       if (height) this.componentElement.style.height = height;
       if (!this._data) {
