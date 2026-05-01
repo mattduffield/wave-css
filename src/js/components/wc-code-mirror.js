@@ -156,6 +156,8 @@ if (!customElements.get('wc-code-mirror')) {
         const settingsIcon = this.querySelector('.settings-icon');
         settingsIcon.addEventListener('click', this._handleSettingsIconClick.bind(this));
       } else {
+        // Collect context menu children BEFORE innerHTML is cleared
+        this._collectContextMenuItems();
         this.componentElement.innerHTML = '';
 
         this._createInnerElement();
@@ -243,6 +245,82 @@ if (!customElements.get('wc-code-mirror')) {
           });
         }, { threshold: 0.1 });
         observer.observe(this.componentElement);
+      }
+
+      // Wire context menu listener now that editor exists
+      this._wireContextMenu();
+    }
+
+    _collectContextMenuItems() {
+      const menuElements = this.querySelectorAll('wc-code-mirror-context-menu');
+      if (!menuElements.length) { this._contextMenuItems = null; return; }
+
+      this._contextMenuItems = [];
+      menuElements.forEach((el) => {
+        const isSeparator = el.hasAttribute('separator');
+        if (isSeparator) {
+          this._contextMenuItems.push({ divider: true });
+        } else {
+          const label = el.getAttribute('label') || '';
+          const icon = el.getAttribute('icon') || '';
+          const order = el.getAttribute('order');
+          const funcStr = el.textContent.trim();
+          el.textContent = '';
+
+          if (!funcStr) return;
+
+          let actionFn;
+          try {
+            actionFn = new Function(`return (${funcStr})`)();
+          } catch (e) {
+            console.warn(`[wc-code-mirror] Invalid context menu action for "${label}":`, e);
+            return;
+          }
+
+          const item = { label, action: actionFn };
+          if (icon) item.icon = icon;
+          if (order !== null && !isNaN(order)) item.order = parseInt(order);
+          this._contextMenuItems.push(item);
+        }
+      });
+
+      if (this._contextMenuItems.length === 0) this._contextMenuItems = null;
+    }
+
+    _wireContextMenu() {
+      if (!this._contextMenuItems || !this._contextMenuItems.length) return;
+
+      this._handleContextMenu = (e) => {
+        e.preventDefault();
+
+        const cursor = this.editor.getCursor();
+        const selection = this.editor.getSelection();
+        const lineText = this.editor.getLine(cursor.line);
+        const info = {
+          cursor: { line: cursor.line, ch: cursor.ch },
+          selection,
+          lineText,
+          editor: this.editor,
+        };
+
+        const items = this._contextMenuItems.map(item => {
+          if (item.divider) return { divider: true };
+          return {
+            label: item.label,
+            icon: item.icon,
+            action: () => item.action(e, info),
+          };
+        });
+
+        const WcCM = customElements.get('wc-context-menu');
+        if (WcCM?.show) {
+          WcCM.show(e.clientX, e.clientY, items);
+        }
+      };
+
+      const cmWrapper = this.componentElement.querySelector('.CodeMirror');
+      if (cmWrapper) {
+        cmWrapper.addEventListener('contextmenu', this._handleContextMenu);
       }
     }
 
@@ -1115,6 +1193,12 @@ if (!customElements.get('wc-code-mirror')) {
       super._unWireEvents();
       const settingsIcon = this.querySelector('.settings-icon');
       settingsIcon.removeEventListener('click', this._handleSettingsIconClick.bind(this));
+      if (this._handleContextMenu) {
+        const cmWrapper = this.componentElement?.querySelector('.CodeMirror');
+        if (cmWrapper) {
+          cmWrapper.removeEventListener('contextmenu', this._handleContextMenu);
+        }
+      }
     }
 
     async _applyPongo2Overlay() {

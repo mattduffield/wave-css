@@ -32,7 +32,8 @@
         "wave-css.css"
       ],
       "versionedDist": "dist/wave-css-0.0.1/ — auto-synced copy including icon bundles; also copied to go-kart static/js/wave-css-0.0.1/",
-      "cssGridUtilities": "CSS grid utilities added at all breakpoints: grid-cols-1 through grid-cols-12, grid-rows, col-span, row-span, grid-flow"
+      "cssGridUtilities": "CSS grid utilities added at all breakpoints: grid-cols-1 through grid-cols-12, grid-rows, col-span, row-span, grid-flow",
+      "modalFlexFill": "modal-flex-fill class establishes flex column chain on modal-content so modal-body fills space between header/footer. Composes with fixed-pixel sizing (w-700 h-650). Children use flex-1 min-h-0 height=100% to fill."
     },
     "helperFunctions": {
       "loadScript": "Concurrent callers now share the same promise via Map to prevent duplicate script loads and race conditions"
@@ -880,6 +881,25 @@
         ]
       },
       {
+        "name": "wc-document-tree",
+        "description": "MongoDB document viewer with expandable/collapsible tree hierarchy",
+        "attributes": [
+          "id",
+          "class",
+          "data",
+          "height",
+          "expand-level"
+        ],
+        "events": {
+          "emits": [
+            "wcdocumenttreecopy",
+            "wcdocumenttreeselect"
+          ]
+        },
+        "notes": "Renders documents as nested key-value trees. Supports declarative context menu via wc-document-tree-context-menu children (same pattern as wc-tabulator-row-menu). Action function receives (e, node) where node = { key, value, path, documentId, type }. Without context menu children, right-click copies the field path.",
+        "usage": "<wc-document-tree data='[{\"_id\":\"abc\",\"name\":\"Matt\"}]' height=\"100%\" expand-level=\"2\">\n  <wc-document-tree-context-menu label=\"Edit\" icon=\"pen-to-square\">\n    (e, node) => { editDoc(node.documentId); }\n  </wc-document-tree-context-menu>\n</wc-document-tree>"
+      },
+      {
         "name": "wc-explain-tree",
         "description": "Visual MongoDB explain plan viewer, renders stage-by-stage flow diagram",
         "attributes": [
@@ -945,7 +965,7 @@
             "fetch-complete"
           ]
         },
-        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}. Mode scripts are now pre-loaded BEFORE editor creation via _preloadMode() so syntax highlighting works on first render in HTMX-loaded fragments. Editor is always created (never deferred/null) — this.editor is always available after connectedCallback. One-time mode re-apply on first change event fixes syntax highlighting for editors created in hidden containers. display() method forces re-tokenization + refresh (call after making editor visible). value property setter re-applies mode after setValue for hidden-container fix. Pongo2/Django template syntax highlighting via overlay ({% %} tags in violet, {{ }} variables in coral, {# #} comments in gray). .cm-error red background suppressed globally. Additional language modes supported: python, go, ruby, rust, sql, shell, yaml, toml, dockerfile, swift, and clike-based MIME types (text/x-java, text/x-csharp, etc.). Uses sublime keymap with full find/replace support: Cmd+F (find), Cmd+G (find next), Shift+Cmd+G (find prev), Cmd+D (select next occurrence), Cmd+Alt+F (find & replace). Search/dialog/jump-to-line addons loaded automatically.",
+        "notes": "Form-associated custom element. Supports dynamic theme/mode loading. Settings popover for runtime configuration. fetch attribute loads code from URL. DependencyManager loads CodeMirror 5.65.13. hint-words (JSON array) and hint-url (URL returning JSON array) enable Ctrl+Space autocomplete. Auto-wraps completions in double quotes when inside JSON context (detects { } braces). Hint addon loaded only when hint attributes present. hint-url skips fetch when empty/blank (guard added). .CodeMirror-hints z-index set to 100000 so hints render above modals. JSON context detection (_isJsonContext) now scans backward across multiple lines, not just the current line — fixes auto-quote wrapping in multi-line JSON like {\\n  \\n}. Mode scripts are now pre-loaded BEFORE editor creation via _preloadMode() so syntax highlighting works on first render in HTMX-loaded fragments. Editor is always created (never deferred/null) — this.editor is always available after connectedCallback. One-time mode re-apply on first change event fixes syntax highlighting for editors created in hidden containers. display() method forces re-tokenization + refresh (call after making editor visible). value property setter re-applies mode after setValue for hidden-container fix. Pongo2/Django template syntax highlighting via overlay ({% %} tags in violet, {{ }} variables in coral, {# #} comments in gray). .cm-error red background suppressed globally. Additional language modes supported: python, go, ruby, rust, sql, shell, yaml, toml, dockerfile, swift, and clike-based MIME types (text/x-java, text/x-csharp, etc.). Uses sublime keymap with full find/replace support: Cmd+F (find), Cmd+G (find next), Shift+Cmd+G (find prev), Cmd+D (select next occurrence), Cmd+Alt+F (find & replace). Search/dialog/jump-to-line addons loaded automatically. Declarative context menu via wc-code-mirror-context-menu children (same pattern as wc-tabulator-row-menu). Action function receives (e, info) where info = { cursor, selection, lineText, editor }. Uses WcContextMenu.show() singleton. Cmd-Shift-K / Ctrl-Shift-K clears editor content.",
         "usage": "<wc-code-mirror name=\"code\" line-numbers mode=\"javascript\" theme=\"monokai\" tab-size=\"2\">\nfunction hello() {\n  return 'world';\n}\n</wc-code-mirror>"
       },
       {

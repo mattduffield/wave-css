@@ -2876,6 +2876,7 @@ if (!customElements.get("wc-code-mirror")) {
         const settingsIcon = this.querySelector(".settings-icon");
         settingsIcon.addEventListener("click", this._handleSettingsIconClick.bind(this));
       } else {
+        this._collectContextMenuItems();
         this.componentElement.innerHTML = "";
         this._createInnerElement();
       }
@@ -2938,6 +2939,71 @@ if (!customElements.get("wc-code-mirror")) {
           });
         }, { threshold: 0.1 });
         observer.observe(this.componentElement);
+      }
+      this._wireContextMenu();
+    }
+    _collectContextMenuItems() {
+      const menuElements = this.querySelectorAll("wc-code-mirror-context-menu");
+      if (!menuElements.length) {
+        this._contextMenuItems = null;
+        return;
+      }
+      this._contextMenuItems = [];
+      menuElements.forEach((el) => {
+        const isSeparator = el.hasAttribute("separator");
+        if (isSeparator) {
+          this._contextMenuItems.push({ divider: true });
+        } else {
+          const label = el.getAttribute("label") || "";
+          const icon = el.getAttribute("icon") || "";
+          const order = el.getAttribute("order");
+          const funcStr = el.textContent.trim();
+          el.textContent = "";
+          if (!funcStr) return;
+          let actionFn;
+          try {
+            actionFn = new Function(`return (${funcStr})`)();
+          } catch (e) {
+            console.warn(`[wc-code-mirror] Invalid context menu action for "${label}":`, e);
+            return;
+          }
+          const item = { label, action: actionFn };
+          if (icon) item.icon = icon;
+          if (order !== null && !isNaN(order)) item.order = parseInt(order);
+          this._contextMenuItems.push(item);
+        }
+      });
+      if (this._contextMenuItems.length === 0) this._contextMenuItems = null;
+    }
+    _wireContextMenu() {
+      if (!this._contextMenuItems || !this._contextMenuItems.length) return;
+      this._handleContextMenu = (e) => {
+        e.preventDefault();
+        const cursor = this.editor.getCursor();
+        const selection = this.editor.getSelection();
+        const lineText = this.editor.getLine(cursor.line);
+        const info = {
+          cursor: { line: cursor.line, ch: cursor.ch },
+          selection,
+          lineText,
+          editor: this.editor
+        };
+        const items = this._contextMenuItems.map((item) => {
+          if (item.divider) return { divider: true };
+          return {
+            label: item.label,
+            icon: item.icon,
+            action: () => item.action(e, info)
+          };
+        });
+        const WcCM = customElements.get("wc-context-menu");
+        if (WcCM?.show) {
+          WcCM.show(e.clientX, e.clientY, items);
+        }
+      };
+      const cmWrapper = this.componentElement.querySelector(".CodeMirror");
+      if (cmWrapper) {
+        cmWrapper.addEventListener("contextmenu", this._handleContextMenu);
       }
     }
     _handleSettingsIconClick(event) {
@@ -3835,6 +3901,12 @@ if (!customElements.get("wc-code-mirror")) {
       super._unWireEvents();
       const settingsIcon = this.querySelector(".settings-icon");
       settingsIcon.removeEventListener("click", this._handleSettingsIconClick.bind(this));
+      if (this._handleContextMenu) {
+        const cmWrapper = this.componentElement?.querySelector(".CodeMirror");
+        if (cmWrapper) {
+          cmWrapper.removeEventListener("contextmenu", this._handleContextMenu);
+        }
+      }
     }
     async _applyPongo2Overlay() {
       if (!this.editor) return;
@@ -3945,6 +4017,19 @@ if (!customElements.get("wc-code-mirror")) {
     }
   }
   customElements.define("wc-code-mirror", WcCodeMirror);
+}
+
+// src/js/components/wc-code-mirror-context-menu.js
+if (!customElements.get("wc-code-mirror-context-menu")) {
+  class WcCodeMirrorContextMenu extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+    }
+  }
+  customElements.define("wc-code-mirror-context-menu", WcCodeMirrorContextMenu);
 }
 
 // src/js/components/wc-contact-card.js
@@ -29426,9 +29511,58 @@ if (!customElements.get("wc-document-tree")) {
       };
       return labels[type] || type;
     }
+    // ── Context Menu ─────────────────────────────────────────────────────────
+    _parseContextMenu() {
+      const menuElements = this.querySelectorAll("wc-document-tree-context-menu");
+      if (!menuElements.length) {
+        this._contextMenuItems = null;
+        return;
+      }
+      this._contextMenuItems = [];
+      menuElements.forEach((el) => {
+        const isSeparator = el.hasAttribute("separator");
+        if (isSeparator) {
+          this._contextMenuItems.push({ divider: true });
+        } else {
+          const label = el.getAttribute("label") || "";
+          const icon = el.getAttribute("icon") || "";
+          const order = el.getAttribute("order");
+          const funcStr = el.textContent.trim();
+          el.textContent = "";
+          if (!funcStr) return;
+          let actionFn;
+          try {
+            actionFn = new Function(`return (${funcStr})`)();
+          } catch (e) {
+            console.warn(`[wc-document-tree] Invalid context menu action for "${label}":`, e);
+            return;
+          }
+          const item = { label, action: actionFn };
+          if (icon) item.icon = icon;
+          if (order !== null && !isNaN(order)) item.order = parseInt(order);
+          this._contextMenuItems.push(item);
+        }
+      });
+      if (this._contextMenuItems.length === 0) this._contextMenuItems = null;
+    }
+    _showContextMenu(e, nodeInfo) {
+      const WcCM = customElements.get("wc-context-menu");
+      if (!WcCM?.show || !this._contextMenuItems) return;
+      e.preventDefault();
+      const items = this._contextMenuItems.map((item) => {
+        if (item.divider) return { divider: true };
+        return {
+          label: item.label,
+          icon: item.icon,
+          action: () => item.action(e, nodeInfo)
+        };
+      });
+      WcCM.show(e.clientX, e.clientY, items);
+    }
     // ── UI building ───────────────────────────────────────────────────────────
     _buildUI() {
       this.componentElement.innerHTML = "";
+      this._parseContextMenu();
       const height = this.getAttribute("height");
       if (height) this.componentElement.style.height = height;
       if (!this._data) {
@@ -29440,12 +29574,13 @@ if (!customElements.get("wc-document-tree")) {
       tree.classList.add("doctree-container");
       docs.forEach((doc, idx) => {
         const label = doc._id ? typeof doc._id === "object" && doc._id.$oid ? doc._id.$oid.substring(0, 12) + "..." : String(doc._id) : `Document ${idx}`;
-        const node = this._buildNode(`Document ${idx}`, label, doc, "object", "", 0);
+        const docId = doc._id ? typeof doc._id === "object" && doc._id.$oid ? doc._id.$oid : String(doc._id) : "";
+        const node = this._buildNode(`Document ${idx}`, label, doc, "object", "", 0, docId);
         tree.appendChild(node);
       });
       this.componentElement.appendChild(tree);
     }
-    _buildNode(key, displayKey, val, type, path, depth) {
+    _buildNode(key, displayKey, val, type, path, depth, documentId) {
       const isExpandable = type === "object" || type === "array";
       const isExpanded = depth < this._expandLevel;
       const row = document.createElement("div");
@@ -29501,7 +29636,16 @@ if (!customElements.get("wc-document-tree")) {
         });
       }
       row.addEventListener("contextmenu", (e) => {
-        if (path) {
+        if (this._contextMenuItems) {
+          const nodeInfo = {
+            key,
+            value: val,
+            path,
+            documentId: documentId || "",
+            type
+          };
+          this._showContextMenu(e, nodeInfo);
+        } else if (path) {
           e.preventDefault();
           navigator.clipboard.writeText(path).then(() => {
             this._showCopyToast(keyEl, "Path copied");
@@ -29531,14 +29675,14 @@ if (!customElements.get("wc-document-tree")) {
             if (k === "_id" && depth === 0) return;
             const childType = this._getType(v);
             const childPath = path ? `${path}.${k}` : k;
-            children.appendChild(this._buildNode(k, k, v, childType, childPath, depth + 1));
+            children.appendChild(this._buildNode(k, k, v, childType, childPath, depth + 1, documentId));
           });
         } else if (type === "array") {
           val.forEach((item, i) => {
             const childType = this._getType(item);
             const childPath = path ? `${path}[${i}]` : `[${i}]`;
             const label = childType === "object" ? item._id ? `[${i}] ${typeof item._id === "object" && item._id.$oid ? item._id.$oid.substring(0, 8) : item._id}` : `[${i}]` : `[${i}]`;
-            children.appendChild(this._buildNode(`[${i}]`, label, item, childType, childPath, depth + 1));
+            children.appendChild(this._buildNode(`[${i}]`, label, item, childType, childPath, depth + 1, documentId));
           });
         }
         wrapper.appendChild(children);
@@ -29700,6 +29844,19 @@ if (!customElements.get("wc-document-tree")) {
     }
   }
   customElements.define("wc-document-tree", WcDocumentTree);
+}
+
+// src/js/components/wc-document-tree-context-menu.js
+if (!customElements.get("wc-document-tree-context-menu")) {
+  class WcDocumentTreeContextMenu extends HTMLElement {
+    constructor() {
+      super();
+      this.classList.add("contents");
+    }
+    connectedCallback() {
+    }
+  }
+  customElements.define("wc-document-tree-context-menu", WcDocumentTreeContextMenu);
 }
 
 // src/js/components/wc-chartjs.js

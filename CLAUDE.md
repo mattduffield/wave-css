@@ -106,6 +106,10 @@ Four semantic color families with CSS variables and utility classes:
 
 Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl).
 
+### Modal Flex Fill
+
+`.modal-flex-fill` — composable utility for fixed-pixel modals (`w-700 h-650`). Establishes a flex column chain so `.modal-body` fills the space between header and footer, and children like `wc-code-mirror` can use `flex-1 min-h-0 height="100%"` to fill. Usage: `{% block modalContentCss %}modal-flex-fill w-700 h-650{% endblock %}`
+
 ## Component Categories
 
 ### Layout Components
@@ -156,6 +160,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-tabulator-func`: Table function helpers
 - `wc-tabulator-row-menu`: Row context menu
 - `wc-timeline`: Timeline visualization
+- `wc-document-tree`: MongoDB document viewer with expandable/collapsible tree; declarative context menu via `wc-document-tree-context-menu` children (action receives `(e, node)` with key/value/path/documentId/type)
 - `wc-explain-tree`: Visual MongoDB explain plan viewer with stage flow diagram, color-coded stages, branching, aggregation pipeline support, click-to-expand detail
 - `wc-pivot`: Cross-tabulation pivot table with four-zone field panel (Rows/Columns/Values/Filters), value filters, drill-down with inline detail tables, heatmap, column sorting, date grouping (year/quarter/month/day/datetime), compact layout toggle, config save/load (`getConfig()`/`loadConfig()`), CSV export
 
@@ -163,7 +168,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-slideshow`: Image slideshow
 - `wc-slideshow-image`: Slideshow image item
 - `wc-chart-builder`: Interactive chart renderer from raw JSON with auto-detection, field pickers, supports bar/line/pie/doughnut/area/number types
-- `wc-code-mirror`: Code editor integration; `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping; Pongo2/Django template syntax overlay for htmlmixed mode; pre-loads mode scripts before editor creation; editor always initialized (never null); `display()` method for refresh; supports python, go, ruby, rust, sql, shell, yaml, swift, clike-based MIME types; sublime keymap with find/replace (Cmd+F find, Cmd+D select next occurrence, Cmd+Alt+F replace)
+- `wc-code-mirror`: Code editor integration; declarative context menu via `wc-code-mirror-context-menu` children (label, icon, separator, action receives `(e, info)` with cursor/selection/lineText/editor); `hint-words` and `hint-url` attributes for autocomplete support with JSON-context-aware quote wrapping; Pongo2/Django template syntax overlay for htmlmixed mode; pre-loads mode scripts before editor creation; editor always initialized (never null); `display()` method for refresh; supports python, go, ruby, rust, sql, shell, yaml, swift, clike-based MIME types; sublime keymap with find/replace (Cmd+F find, Cmd+D select next occurrence, Cmd+Alt+F replace)
 - `wc-canvas-dot-highlight`: Canvas animation effect
 - `wc-context-menu`: Reusable context menu with static `WcContextMenu.show(x, y, items)` / `WcContextMenu.hide()` API
 - `wc-context-menu-item`: Declarative menu item for wc-context-menu

@@ -151,10 +151,67 @@ if (!customElements.get('wc-document-tree')) {
       return labels[type] || type;
     }
 
+    // ── Context Menu ─────────────────────────────────────────────────────────
+
+    _parseContextMenu() {
+      const menuElements = this.querySelectorAll('wc-document-tree-context-menu');
+      if (!menuElements.length) { this._contextMenuItems = null; return; }
+
+      this._contextMenuItems = [];
+      menuElements.forEach((el) => {
+        const isSeparator = el.hasAttribute('separator');
+        if (isSeparator) {
+          this._contextMenuItems.push({ divider: true });
+        } else {
+          const label = el.getAttribute('label') || '';
+          const icon = el.getAttribute('icon') || '';
+          const order = el.getAttribute('order');
+          const funcStr = el.textContent.trim();
+          el.textContent = '';
+
+          if (!funcStr) return;
+
+          let actionFn;
+          try {
+            actionFn = new Function(`return (${funcStr})`)();
+          } catch (e) {
+            console.warn(`[wc-document-tree] Invalid context menu action for "${label}":`, e);
+            return;
+          }
+
+          const item = { label, action: actionFn };
+          if (icon) item.icon = icon;
+          if (order !== null && !isNaN(order)) item.order = parseInt(order);
+          this._contextMenuItems.push(item);
+        }
+      });
+
+      if (this._contextMenuItems.length === 0) this._contextMenuItems = null;
+    }
+
+    _showContextMenu(e, nodeInfo) {
+      const WcCM = customElements.get('wc-context-menu');
+      if (!WcCM?.show || !this._contextMenuItems) return;
+
+      e.preventDefault();
+
+      const items = this._contextMenuItems.map(item => {
+        if (item.divider) return { divider: true };
+        return {
+          label: item.label,
+          icon: item.icon,
+          action: () => item.action(e, nodeInfo),
+        };
+      });
+
+      WcCM.show(e.clientX, e.clientY, items);
+    }
+
     // ── UI building ───────────────────────────────────────────────────────────
 
     _buildUI() {
       this.componentElement.innerHTML = '';
+      this._parseContextMenu();
 
       const height = this.getAttribute('height');
       if (height) this.componentElement.style.height = height;
@@ -173,14 +230,17 @@ if (!customElements.get('wc-document-tree')) {
         const label = doc._id
           ? (typeof doc._id === 'object' && doc._id.$oid ? doc._id.$oid.substring(0, 12) + '...' : String(doc._id))
           : `Document ${idx}`;
-        const node = this._buildNode(`Document ${idx}`, label, doc, 'object', '', 0);
+        const docId = doc._id
+          ? (typeof doc._id === 'object' && doc._id.$oid ? doc._id.$oid : String(doc._id))
+          : '';
+        const node = this._buildNode(`Document ${idx}`, label, doc, 'object', '', 0, docId);
         tree.appendChild(node);
       });
 
       this.componentElement.appendChild(tree);
     }
 
-    _buildNode(key, displayKey, val, type, path, depth) {
+    _buildNode(key, displayKey, val, type, path, depth, documentId) {
       const isExpandable = type === 'object' || type === 'array';
       const isExpanded = depth < this._expandLevel;
 
@@ -247,9 +307,19 @@ if (!customElements.get('wc-document-tree')) {
         });
       }
 
-      // Right-click to copy path
+      // Right-click context menu
       row.addEventListener('contextmenu', (e) => {
-        if (path) {
+        if (this._contextMenuItems) {
+          const nodeInfo = {
+            key,
+            value: val,
+            path,
+            documentId: documentId || '',
+            type,
+          };
+          this._showContextMenu(e, nodeInfo);
+        } else if (path) {
+          // Default: copy path on right-click
           e.preventDefault();
           navigator.clipboard.writeText(path).then(() => {
             this._showCopyToast(keyEl, 'Path copied');
@@ -283,7 +353,7 @@ if (!customElements.get('wc-document-tree')) {
             if (k === '_id' && depth === 0) return; // Already shown in root label
             const childType = this._getType(v);
             const childPath = path ? `${path}.${k}` : k;
-            children.appendChild(this._buildNode(k, k, v, childType, childPath, depth + 1));
+            children.appendChild(this._buildNode(k, k, v, childType, childPath, depth + 1, documentId));
           });
         } else if (type === 'array') {
           val.forEach((item, i) => {
@@ -292,7 +362,7 @@ if (!customElements.get('wc-document-tree')) {
             const label = childType === 'object'
               ? (item._id ? `[${i}] ${typeof item._id === 'object' && item._id.$oid ? item._id.$oid.substring(0, 8) : item._id}` : `[${i}]`)
               : `[${i}]`;
-            children.appendChild(this._buildNode(`[${i}]`, label, item, childType, childPath, depth + 1));
+            children.appendChild(this._buildNode(`[${i}]`, label, item, childType, childPath, depth + 1, documentId));
           });
         }
 
