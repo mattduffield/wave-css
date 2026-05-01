@@ -10092,6 +10092,20 @@
         overflow-y: auto;
     }
 
+    /* Modal flex fill — establishes flex column chain so children can fill
+       the body region when used with fixed-pixel sizing (w-N h-N) */
+    .modal-flex-fill {
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-flex-fill > .modal-body {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
     .table-hidden {
         display: none;
     }
