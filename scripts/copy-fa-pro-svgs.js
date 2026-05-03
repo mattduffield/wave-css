@@ -126,6 +126,7 @@ const ICONS_TO_COPY = [
   "bars-sort",
   "bars-staggered",
   "bell",
+  "bell-exclamation",
   "bolt",
   "book",
   "book-bible",
