@@ -1722,6 +1722,7 @@
         "usage": "bg-[color]-[shade], text-[color]-[shade], border-[color]-[shade]"
       }
     },
+    "lineHeightUtilities": ["leading-none", "leading-tight", "leading-snug", "leading-normal", "leading-relaxed", "leading-loose", "leading-3", "leading-4", "leading-5", "leading-6", "leading-7", "leading-8", "leading-9", "leading-10"],
     "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
     "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95"
   },
