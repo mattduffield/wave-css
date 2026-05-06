@@ -758,7 +758,7 @@ if (!customElements.get('wc-live-designer')) {
           <div class="flex flex-row flex-1 min-h-0">
             <!-- Left Panel: Palette -->
             <div class="ld-palette flex flex-col" style="width: 260px; min-width: 200px; max-width: 400px; background: var(--surface-2); overflow-y: auto; max-height: calc(100vh - 310px);">
-              <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate tab-overflow="scroll">
+              <wc-tab class="flex flex-col flex-1 min-h-0 text-xs" animate no-hash tab-overflow="scroll">
                 <wc-tab-item class="active" label="Containers">
                   <div class="ld-palette-tab-content">
                     <input class="ld-palette-search" type="search" placeholder="Filter..." />
@@ -808,7 +808,7 @@ if (!customElements.get('wc-live-designer')) {
 
             <!-- Center: Visual + Source tabs -->
             <div class="ld-canvas-area flex flex-col flex-1 overflow-hidden" style="background: var(--surface-1);">
-              <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate>
+              <wc-tab class="ld-center-tabs flex flex-col flex-1 min-h-0" animate no-hash>
                 <wc-tab-item class="active" label="Visual">
                   <div class="ld-canvas-visual flex-1 flex flex-col overflow-hidden" style="height: calc(100vh - 310px); position: relative;">
                     <div class="ld-canvas-loading" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface-1, #111); z-index: 10; color: var(--text-6, #888); font-family: system-ui, sans-serif; gap: 12px;">

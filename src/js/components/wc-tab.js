@@ -535,7 +535,7 @@ class WcTab extends WcBaseComponent {
             // Find all buttons with the 'active' class in this tab
             const activeButtons = Array.from(tabNav.querySelectorAll(':scope > button.active'));
             for (const button of activeButtons) {
-                result.push(button.textContent.trim());
+                result.push((button.dataset.label || button.textContent || '').trim());
             }
         }
 
