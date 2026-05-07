@@ -305,6 +305,7 @@ const ICONS_TO_COPY = [
   "file-arrow-up",
   "file-brackets-curly",
   "file-check",
+  "file-circle-plus",
   "file-code",
   "file-csv",
   "file-doc",
