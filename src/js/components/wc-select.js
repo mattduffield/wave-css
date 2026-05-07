@@ -33,7 +33,7 @@ class WcSelect extends WcBaseFormComponent {
       'lbl-label', 'disabled', 'required', 'autofocus', 'autocomplete', 'elt-class',
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
       'onkeypress', 'onclick',
-      'tooltip', 'tooltip-position'];
+      'tooltip', 'tooltip-position', 'no-filter'];
     // return ['mode']; // Allows switching between "multiple" and "chip" modes
   }
 
@@ -335,6 +335,12 @@ class WcSelect extends WcBaseFormComponent {
       const autocomplete = this.getAttribute('autocomplete');
       if (autocomplete) {
         ipt.setAttribute('autocomplete', autocomplete);
+      }
+
+      // When no-filter is set, disable autocomplete and make input readonly
+      if (this.hasAttribute('no-filter')) {
+        ipt.setAttribute('autocomplete', 'off');
+        ipt.setAttribute('readonly', '');
       }
 
       // Add event wiring for the dropdown input
@@ -920,7 +926,9 @@ class WcSelect extends WcBaseFormComponent {
     if (this.mode === 'chip') {
       if (dropdownInput) {
         dropdownInput?.addEventListener('focus', () => optionsContainer.style.display = 'block');
-        dropdownInput?.addEventListener('input', () => this.filterOptions(dropdownInput.value));
+        if (!this.hasAttribute('no-filter')) {
+          dropdownInput?.addEventListener('input', () => this.filterOptions(dropdownInput.value));
+        }
 
         optionsContainer?.addEventListener('click', (e) => {
           if (e.target.classList.contains('option')) {
@@ -996,6 +1004,7 @@ class WcSelect extends WcBaseFormComponent {
   }
 
   filterOptions(query) {
+    if (this.hasAttribute('no-filter')) return;
     const optionsContainer = this.querySelector('#optionsContainer');
     const options = optionsContainer.querySelectorAll('.option');
     const optgroupLabels = optionsContainer.querySelectorAll('.optgroup-label');

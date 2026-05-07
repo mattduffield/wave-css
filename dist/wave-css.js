@@ -16765,6 +16765,9 @@ if (!customElements.get("wc-tabulator")) {
       {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
         action: (e, row) => {
+          const srcConn = this.getAttribute("data-conn-name") || "";
+          const srcDb = this.getAttribute("data-db-name") || "";
+          const srcColl = this.getAttribute("data-coll-name") || "";
           const promptPayload = {
             title: "Clone Record(s)",
             icon: "info",
@@ -16772,69 +16775,66 @@ if (!customElements.get("wc-tabulator")) {
             template: "template#clone-template",
             didOpen: () => {
               const cnt = document.querySelector(".swal2-container");
-              if (cnt) {
-                htmx.process(cnt);
-                const dependentSelects = cnt.querySelectorAll("wc-select[data-url-template]");
-                dependentSelects.forEach((wcSelect) => {
-                  const urlTemplate = wcSelect.getAttribute("data-url-template");
-                  const dependsOn = wcSelect.getAttribute("data-url-depends");
-                  if (urlTemplate && dependsOn) {
-                    const sourceSelect = cnt.querySelector(`select[name="${dependsOn}"]`) || cnt.querySelector(`input[name="${dependsOn}"]`);
-                    if (sourceSelect) {
-                      const updateUrl = () => {
-                        const value = sourceSelect.value;
-                        const newUrl = urlTemplate.replace(/\{value\}/g, value);
-                        wcSelect.setAttribute("url", newUrl);
-                      };
-                      updateUrl();
-                      sourceSelect.addEventListener("change", updateUrl);
+              if (!cnt) return;
+              const setVal = (name, v) => {
+                const el = cnt.querySelector(`[name="${name}"]`);
+                if (el) el.value = v;
+              };
+              setVal("srcConnName", srcConn);
+              setVal("srcDbName", srcDb);
+              setVal("srcCollName", srcColl);
+              setVal("tgtCollName", srcColl);
+              fetch(`/api/clone-targets?srcConn=${encodeURIComponent(srcConn)}&srcDb=${encodeURIComponent(srcDb)}`, {
+                credentials: "same-origin"
+              }).then((r) => r.json()).then((data) => {
+                const srcLabel = cnt.querySelector("#cloneSourceLabel");
+                if (srcLabel) srcLabel.textContent = data.source?.label || `${srcConn} / ${srcDb}`;
+                const wcTgt = cnt.querySelector('wc-select[name="cloneTarget"]');
+                const innerSelect = wcTgt?.querySelector("select");
+                if (innerSelect) {
+                  const opts = (data.targets || []).map(
+                    (t) => `<option value="${t.db}" data-conn="${t.conn}" data-env="${t.env}">${t.label}</option>`
+                  ).join("");
+                  innerSelect.innerHTML = '<option value="">\u2014 select environment \u2014</option>' + opts;
+                  innerSelect.addEventListener("change", () => {
+                    const opt = innerSelect.options[innerSelect.selectedIndex];
+                    setVal("tgtConnName", opt.dataset.conn || "");
+                    setVal("tgtDbNames", opt.value || "");
+                  });
+                  if ((data.targets || []).length === 0) {
+                    const confirmBtn = Swal.getConfirmButton?.();
+                    if (confirmBtn) {
+                      confirmBtn.disabled = true;
+                      confirmBtn.title = "No accessible target environments. Contact your administrator.";
                     }
                   }
-                });
-                _hyperscript.processNode(cnt);
-              }
+                }
+              }).catch((err) => {
+                console.error("Failed to load clone targets:", err);
+              });
+              if (typeof htmx !== "undefined") htmx.process(cnt);
+              if (typeof _hyperscript !== "undefined") _hyperscript.processNode(cnt);
             },
             preConfirm: () => {
-              if (this.funcs["onClonePreConfirm"]) {
-                const payload = this.funcs["onClonePreConfirm"](row);
-                return payload;
-              } else {
-                const srcConnName = document.querySelector('[name="srcConnName"]')?.value;
-                const srcDbName = document.querySelector('[name="srcDbName"]')?.value;
-                const srcCollName = document.querySelector('[name="srcCollName"]')?.value;
-                const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
-                let tgtDbNames = [];
-                const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
-                const wcSelectTgtDb = tgtDbNamesSelect?.closest("wc-select");
-                if (wcSelectTgtDb) {
-                  const chips = wcSelectTgtDb.querySelectorAll(".chip");
-                  if (chips.length > 0) {
-                    tgtDbNames = Array.from(chips).map((chip) => chip.getAttribute("data-value"));
-                  }
-                  if (tgtDbNames.length === 0) {
-                    const selectElement = wcSelectTgtDb.querySelector("select");
-                    if (selectElement && selectElement.options.length > 0) {
-                      tgtDbNames = Array.from(selectElement.options).filter((opt) => opt.selected).map((opt) => opt.value);
-                    }
-                  }
-                  if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
-                    tgtDbNames = wcSelectTgtDb.selectedOptions;
-                  }
-                } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
-                  tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map((opt) => opt.value);
-                }
-                const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;
-                const payload = {
-                  srcConnName,
-                  srcDbName,
-                  srcCollName,
-                  tgtConnName,
-                  tgtDbNames: [...new Set(tgtDbNames)],
-                  // Remove duplicates
-                  tgtCollName
-                };
-                return payload;
+              if (this.funcs && this.funcs["onClonePreConfirm"]) {
+                return this.funcs["onClonePreConfirm"](row);
               }
+              const cnt = document.querySelector(".swal2-container");
+              const get = (name) => cnt?.querySelector(`[name="${name}"]`)?.value || "";
+              const tgtDb = get("tgtDbNames");
+              if (!get("tgtConnName") || !tgtDb) {
+                Swal.showValidationMessage("Pick a target environment first.");
+                return false;
+              }
+              return {
+                srcConnName: get("srcConnName"),
+                srcDbName: get("srcDbName"),
+                srcCollName: get("srcCollName"),
+                tgtConnName: get("tgtConnName"),
+                tgtDbNames: [tgtDb],
+                tgtCollName: get("tgtCollName"),
+                recordIds: [row._id || row.id]
+              };
             },
             callback: (result) => {
               if (this.funcs["onClone"]) {
@@ -32691,7 +32691,8 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       "onkeypress",
       "onclick",
       "tooltip",
-      "tooltip-position"
+      "tooltip-position",
+      "no-filter"
     ];
   }
   constructor() {
@@ -32945,6 +32946,10 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       const autocomplete2 = this.getAttribute("autocomplete");
       if (autocomplete2) {
         ipt.setAttribute("autocomplete", autocomplete2);
+      }
+      if (this.hasAttribute("no-filter")) {
+        ipt.setAttribute("autocomplete", "off");
+        ipt.setAttribute("readonly", "");
       }
       this.eventAttributes.forEach((attr) => {
         const value = this.getAttribute(attr);
@@ -33477,7 +33482,9 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     if (this.mode === "chip") {
       if (dropdownInput) {
         dropdownInput?.addEventListener("focus", () => optionsContainer.style.display = "block");
-        dropdownInput?.addEventListener("input", () => this.filterOptions(dropdownInput.value));
+        if (!this.hasAttribute("no-filter")) {
+          dropdownInput?.addEventListener("input", () => this.filterOptions(dropdownInput.value));
+        }
         optionsContainer?.addEventListener("click", (e) => {
           if (e.target.classList.contains("option")) {
             this.addChip(e.target.getAttribute("data-value"), e.target.textContent);
@@ -33544,6 +33551,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     this.updateHighlight([]);
   }
   filterOptions(query) {
+    if (this.hasAttribute("no-filter")) return;
     const optionsContainer = this.querySelector("#optionsContainer");
     const options = optionsContainer.querySelectorAll(".option");
     const optgroupLabels = optionsContainer.querySelectorAll(".optgroup-label");

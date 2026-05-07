@@ -118,109 +118,96 @@ if (!customElements.get('wc-tabulator')) {
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
         action: (e, row) => {
-          // const table = row.getTable();
-          // const selectedData = table.getSelectedData();
-          // const recordIds = selectedData.map(m => m._id);
+          // Auto-detect source from data attributes on the wc-tabulator element
+          const srcConn = this.getAttribute('data-conn-name') || '';
+          const srcDb = this.getAttribute('data-db-name') || '';
+          const srcColl = this.getAttribute('data-coll-name') || '';
+
           const promptPayload = {
             title: 'Clone Record(s)',
             icon: 'info',
             focusConfirm: false,
             template: 'template#clone-template',
             didOpen: () => {
-              const cnt = document.querySelector(".swal2-container");
-              if (cnt) {
-                htmx.process(cnt);
+              const cnt = document.querySelector('.swal2-container');
+              if (!cnt) return;
 
-                // Handle dynamic URL dependencies using data-url-depends attribute
-                // This works around SweetAlert2's template variable processing
-                const dependentSelects = cnt.querySelectorAll('wc-select[data-url-template]');
+              // Helper to set hidden input values
+              const setVal = (name, v) => {
+                const el = cnt.querySelector(`[name="${name}"]`);
+                if (el) el.value = v;
+              };
 
-                dependentSelects.forEach(wcSelect => {
-                  const urlTemplate = wcSelect.getAttribute('data-url-template');
-                  const dependsOn = wcSelect.getAttribute('data-url-depends');
+              // Populate hidden source inputs
+              setVal('srcConnName', srcConn);
+              setVal('srcDbName', srcDb);
+              setVal('srcCollName', srcColl);
+              setVal('tgtCollName', srcColl);
 
-                  if (urlTemplate && dependsOn) {
-                    // Find the source select element
-                    const sourceSelect = cnt.querySelector(`select[name="${dependsOn}"]`) ||
-                                       cnt.querySelector(`input[name="${dependsOn}"]`);
+              // Fetch valid clone targets
+              fetch(`/api/clone-targets?srcConn=${encodeURIComponent(srcConn)}&srcDb=${encodeURIComponent(srcDb)}`, {
+                credentials: 'same-origin',
+              })
+                .then(r => r.json())
+                .then(data => {
+                  // Source label
+                  const srcLabel = cnt.querySelector('#cloneSourceLabel');
+                  if (srcLabel) srcLabel.textContent = data.source?.label || `${srcConn} / ${srcDb}`;
 
-                    if (sourceSelect) {
-                      // Function to update the dependent select's URL
-                      const updateUrl = () => {
-                        const value = sourceSelect.value;
-                        // Replace {value} placeholder with actual value
-                        const newUrl = urlTemplate.replace(/\{value\}/g, value);
-                        wcSelect.setAttribute('url', newUrl);
-                      };
+                  // Populate target dropdown
+                  const wcTgt = cnt.querySelector('wc-select[name="cloneTarget"]');
+                  const innerSelect = wcTgt?.querySelector('select');
+                  if (innerSelect) {
+                    const opts = (data.targets || []).map(t =>
+                      `<option value="${t.db}" data-conn="${t.conn}" data-env="${t.env}">${t.label}</option>`
+                    ).join('');
+                    innerSelect.innerHTML = '<option value="">— select environment —</option>' + opts;
 
-                      // Update on load
-                      updateUrl();
+                    // When user picks a target, set hidden tgt inputs
+                    innerSelect.addEventListener('change', () => {
+                      const opt = innerSelect.options[innerSelect.selectedIndex];
+                      setVal('tgtConnName', opt.dataset.conn || '');
+                      setVal('tgtDbNames', opt.value || '');
+                    });
 
-                      // Update on change
-                      sourceSelect.addEventListener('change', updateUrl);
+                    // Disable Confirm if no targets
+                    if ((data.targets || []).length === 0) {
+                      const confirmBtn = Swal.getConfirmButton?.();
+                      if (confirmBtn) {
+                        confirmBtn.disabled = true;
+                        confirmBtn.title = 'No accessible target environments. Contact your administrator.';
+                      }
                     }
                   }
+                })
+                .catch(err => {
+                  console.error('Failed to load clone targets:', err);
                 });
 
-                _hyperscript.processNode(cnt);
-              }
+              // Process HTMX + Hyperscript on the dialog content
+              if (typeof htmx !== 'undefined') htmx.process(cnt);
+              if (typeof _hyperscript !== 'undefined') _hyperscript.processNode(cnt);
             },
             preConfirm: () => {
-              if (this.funcs['onClonePreConfirm']) {
-                const payload = this.funcs['onClonePreConfirm'](row);
-                return payload;
-              } else {
-                // Fallback: collect form values from the clone template
-                const srcConnName = document.querySelector('[name="srcConnName"]')?.value;
-                const srcDbName = document.querySelector('[name="srcDbName"]')?.value;
-                const srcCollName = document.querySelector('[name="srcCollName"]')?.value;
-                const tgtConnName = document.querySelector('[name="tgtConnName"]')?.value;
-
-                // Handle multiple select for tgtDbNames
-                let tgtDbNames = [];
-                // Find wc-select by looking for the one that contains select[name="tgtDbNames"]
-                const tgtDbNamesSelect = document.querySelector('select[name="tgtDbNames"]');
-                const wcSelectTgtDb = tgtDbNamesSelect?.closest('wc-select');
-                if (wcSelectTgtDb) {
-                  // Try multiple approaches to get selected values from wc-select
-
-                  // 1. In chip mode, values are in .chip elements
-                  const chips = wcSelectTgtDb.querySelectorAll('.chip');
-                  if (chips.length > 0) {
-                    tgtDbNames = Array.from(chips).map(chip => chip.getAttribute('data-value'));
-                  }
-
-                  // 2. Check the internal <select> element (standard mode)
-                  if (tgtDbNames.length === 0) {
-                    const selectElement = wcSelectTgtDb.querySelector('select');
-                    if (selectElement && selectElement.options.length > 0) {
-                      tgtDbNames = Array.from(selectElement.options)
-                        .filter(opt => opt.selected)
-                        .map(opt => opt.value);
-                    }
-                  }
-
-                  // 3. Fallback to component's selectedOptions property
-                  if (tgtDbNames.length === 0 && wcSelectTgtDb.selectedOptions) {
-                    tgtDbNames = wcSelectTgtDb.selectedOptions;
-                  }
-                } else if (tgtDbNamesSelect && tgtDbNamesSelect.selectedOptions) {
-                  // Fallback to regular select element (not wc-select)
-                  tgtDbNames = Array.from(tgtDbNamesSelect.selectedOptions).map(opt => opt.value);
-                }
-
-                const tgtCollName = document.querySelector('[name="tgtCollName"]')?.value;
-
-                const payload = {
-                  srcConnName,
-                  srcDbName,
-                  srcCollName,
-                  tgtConnName,
-                  tgtDbNames: [...new Set(tgtDbNames)], // Remove duplicates
-                  tgtCollName
-                };
-                return payload;
+              if (this.funcs && this.funcs['onClonePreConfirm']) {
+                return this.funcs['onClonePreConfirm'](row);
               }
+              const cnt = document.querySelector('.swal2-container');
+              const get = name => cnt?.querySelector(`[name="${name}"]`)?.value || '';
+              const tgtDb = get('tgtDbNames');
+              if (!get('tgtConnName') || !tgtDb) {
+                Swal.showValidationMessage('Pick a target environment first.');
+                return false;
+              }
+              return {
+                srcConnName: get('srcConnName'),
+                srcDbName: get('srcDbName'),
+                srcCollName: get('srcCollName'),
+                tgtConnName: get('tgtConnName'),
+                tgtDbNames: [tgtDb],
+                tgtCollName: get('tgtCollName'),
+                recordIds: [row._id || row.id],
+              };
             },
             callback: (result) => {
               if (this.funcs['onClone']) {
