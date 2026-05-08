@@ -179,7 +179,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-split-button`: Generic split button; `btn-class` attribute for trigger button styling
 
 ### Navigation Components
-- `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support, `hash-nav` attribute for URL hash tracking (auto-select from hash on load, update hash on click, uses `data-hash` or `label`)
+- `wc-tree`: Hierarchical tree with nested items, icons, badges, search, lazy-url, HTMX support, `hash-nav` for URL hash tracking, `filterable` for gear popover with structured filters via `wc-tree-filter` children
+- `wc-tree-filter`: Configuration-only child for wc-tree (field, label, values, checked); declares filterable attributes for the gear popover
 - `wc-tree-item`: Tree node (label, icon, badge, expanded, selected, lazy-url); emits `wctreeitemexpand` / `wctreeitemcollapse` events (bubbles: false); supports `data-tree-action` attribute for hover-reveal action buttons; `hx-trigger` and `hx-disinherit` in observedAttributes; click behavior: only arrow toggles expand/collapse, clicking elsewhere selects
 
 ### Data Components

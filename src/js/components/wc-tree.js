@@ -25,6 +25,8 @@
  *
  *  Attributes:
  *    - searchable: enables search/filter input
+ *    - filterable: enables gear icon with filter popover. Uses wc-tree-filter
+ *      children to define filterable attributes and values.
  *    - hash-nav: enables URL hash tracking. When a tree item is clicked, updates
  *      location.hash from the item's data-hash or label attribute. On page load,
  *      auto-selects the matching item and triggers its click.
@@ -40,7 +42,7 @@ import { WcBaseComponent } from "./wc-base-component.js";
 if (!customElements.get("wc-tree")) {
   class WcTree extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "searchable", "hash-nav"];
+      return ["id", "class", "searchable", "filterable", "hash-nav"];
     }
 
     static get is() {
@@ -90,18 +92,43 @@ if (!customElements.get("wc-tree")) {
 
     _createElement() {
       const searchable = this.hasAttribute("searchable");
+      const filterable = this.hasAttribute("filterable");
 
-      // Search input
-      if (searchable) {
-        const searchWrap = document.createElement("div");
-        searchWrap.classList.add("tree-search-wrap");
-        const searchInput = document.createElement("input");
-        searchInput.type = "search";
-        searchInput.classList.add("tree-search");
-        searchInput.placeholder = "Filter...";
-        searchInput.setAttribute("autocomplete", "off");
-        searchWrap.appendChild(searchInput);
-        this.componentElement.appendChild(searchWrap);
+      // Parse filter definitions before moving children
+      if (filterable) {
+        this._parseFilters();
+      }
+
+      // Header row (search + gear)
+      if (searchable || filterable) {
+        const headerWrap = document.createElement("div");
+        headerWrap.classList.add("tree-header-wrap");
+
+        if (searchable) {
+          const searchInput = document.createElement("input");
+          searchInput.type = "search";
+          searchInput.classList.add("tree-search");
+          searchInput.placeholder = "Filter...";
+          searchInput.setAttribute("autocomplete", "off");
+          headerWrap.appendChild(searchInput);
+        }
+
+        if (filterable && this._filters && this._filters.length > 0) {
+          const gearBtn = document.createElement("button");
+          gearBtn.type = "button";
+          gearBtn.classList.add("tree-filter-gear");
+          gearBtn.title = "Filter options";
+          gearBtn.innerHTML = '<wc-fa-icon name="gear" size="0.7rem"></wc-fa-icon>';
+          headerWrap.appendChild(gearBtn);
+
+          // Build popover
+          this._filterPopover = document.createElement("div");
+          this._filterPopover.classList.add("tree-filter-popover");
+          this._buildFilterPopover();
+          headerWrap.appendChild(this._filterPopover);
+        }
+
+        this.componentElement.appendChild(headerWrap);
       }
 
       // Tree content container
@@ -114,6 +141,124 @@ if (!customElements.get("wc-tree")) {
       items.forEach((item) => content.appendChild(item));
 
       this.componentElement.appendChild(content);
+    }
+
+    // --- Filtering ---
+
+    _parseFilters() {
+      const filterEls = this.querySelectorAll("wc-tree-filter");
+      this._filters = [];
+      filterEls.forEach((el) => {
+        const field = el.getAttribute("field") || "";
+        const label = el.getAttribute("label") || field;
+        const valuesStr = el.getAttribute("values") || "";
+        const checked = el.hasAttribute("checked");
+        if (!field || !valuesStr) return;
+        const values = valuesStr.split(",").map(v => v.trim()).filter(v => v);
+        // Each value gets its own checked state
+        const valueStates = {};
+        values.forEach(v => { valueStates[v] = checked; });
+        this._filters.push({ field, label, values, valueStates });
+      });
+    }
+
+    _buildFilterPopover() {
+      if (!this._filterPopover || !this._filters) return;
+      this._filterPopover.innerHTML = "";
+
+      this._filters.forEach((filter, fIdx) => {
+        const group = document.createElement("div");
+        group.classList.add("tree-filter-group");
+
+        const groupLabel = document.createElement("div");
+        groupLabel.classList.add("tree-filter-group-label");
+        groupLabel.textContent = filter.label;
+        group.appendChild(groupLabel);
+
+        filter.values.forEach((val) => {
+          const row = document.createElement("label");
+          row.classList.add("tree-filter-option");
+
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = filter.valueStates[val];
+          cb.dataset.filterIndex = fIdx;
+          cb.dataset.filterValue = val;
+          cb.addEventListener("change", () => {
+            filter.valueStates[val] = cb.checked;
+            this._applyFilters();
+          });
+          row.appendChild(cb);
+
+          const span = document.createElement("span");
+          span.textContent = val;
+          row.appendChild(span);
+
+          group.appendChild(row);
+        });
+
+        // Select all / none links
+        const controls = document.createElement("div");
+        controls.classList.add("tree-filter-controls");
+        const allLink = document.createElement("a");
+        allLink.href = "#";
+        allLink.textContent = "all";
+        allLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          filter.values.forEach(v => { filter.valueStates[v] = true; });
+          group.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+          this._applyFilters();
+        });
+        const noneLink = document.createElement("a");
+        noneLink.href = "#";
+        noneLink.textContent = "none";
+        noneLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          filter.values.forEach(v => { filter.valueStates[v] = false; });
+          group.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+          this._applyFilters();
+        });
+        controls.appendChild(allLink);
+        controls.appendChild(document.createTextNode(" / "));
+        controls.appendChild(noneLink);
+        group.appendChild(controls);
+
+        this._filterPopover.appendChild(group);
+      });
+    }
+
+    _applyFilters() {
+      if (!this._filters || this._filters.length === 0) return;
+      const items = this.querySelectorAll("wc-tree-item");
+
+      items.forEach((item) => {
+        let visible = true;
+
+        for (const filter of this._filters) {
+          const attrVal = item.getAttribute(filter.field) || "";
+          if (!attrVal) continue; // No attribute = not subject to this filter
+          if (!filter.valueStates[attrVal]) {
+            visible = false;
+            break;
+          }
+        }
+
+        if (visible) {
+          item.classList.remove("tree-filter-hidden");
+        } else {
+          item.classList.add("tree-filter-hidden");
+        }
+      });
+
+      // Ensure parent items with visible children stay visible
+      items.forEach((item) => {
+        if (item.classList.contains("tree-filter-hidden")) {
+          const hasVisibleChild = item.querySelector("wc-tree-item:not(.tree-filter-hidden)");
+          if (hasVisibleChild) {
+            item.classList.remove("tree-filter-hidden");
+          }
+        }
+      });
     }
 
     getInnerContainer() {
@@ -241,6 +386,26 @@ if (!customElements.get("wc-tree")) {
         searchInput.addEventListener("input", this._handleSearch);
       }
 
+      // Gear button toggles filter popover
+      const gearBtn = this.componentElement?.querySelector(".tree-filter-gear");
+      if (gearBtn && this._filterPopover) {
+        this._handleGearClick = (e) => {
+          e.stopPropagation();
+          this._filterPopover.classList.toggle("open");
+        };
+        gearBtn.addEventListener("click", this._handleGearClick);
+
+        // Close popover on outside click
+        this._handleDocClickForFilter = (e) => {
+          if (this._filterPopover.classList.contains("open") &&
+              !this._filterPopover.contains(e.target) &&
+              e.target !== gearBtn && !gearBtn.contains(e.target)) {
+            this._filterPopover.classList.remove("open");
+          }
+        };
+        document.addEventListener("click", this._handleDocClickForFilter);
+      }
+
       // Hash-nav: update hash when tree items are clicked
       if (this.hasAttribute('hash-nav')) {
         this._handleHashNavClick = (e) => {
@@ -260,6 +425,10 @@ if (!customElements.get("wc-tree")) {
       const searchInput = this.componentElement?.querySelector(".tree-search");
       if (searchInput && this._handleSearch) {
         searchInput.removeEventListener("input", this._handleSearch);
+      }
+
+      if (this._handleDocClickForFilter) {
+        document.removeEventListener("click", this._handleDocClickForFilter);
       }
 
       if (this._handleHashNavClick) {
@@ -283,13 +452,17 @@ if (!customElements.get("wc-tree")) {
           user-select: none;
         }
 
-        /* Search */
-        .tree-search-wrap {
+        /* Header (search + gear) */
+        .tree-header-wrap {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
           padding: 0.375rem;
           flex-shrink: 0;
+          position: relative;
         }
         .tree-search {
-          width: 100%;
+          flex: 1;
           padding: 0.25rem 0.5rem;
           font-size: 0.75rem;
           background: var(--surface-3, #2a2a2a);
@@ -300,6 +473,92 @@ if (!customElements.get("wc-tree")) {
         }
         .tree-search:focus {
           border-color: var(--primary-color, #3b97e3);
+        }
+
+        /* Filter gear button */
+        .tree-filter-gear {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.5rem;
+          height: 1.5rem;
+          flex-shrink: 0;
+          border: none;
+          border-radius: 0.25rem;
+          background: transparent;
+          color: var(--text-4);
+          cursor: pointer;
+          transition: background 0.15s, color 0.15s;
+        }
+        .tree-filter-gear:hover {
+          background: var(--surface-4);
+          color: var(--text-1);
+        }
+
+        /* Filter popover */
+        .tree-filter-popover {
+          display: none;
+          position: absolute;
+          top: 100%;
+          right: 0.375rem;
+          z-index: 10;
+          min-width: 160px;
+          padding: 0.5rem;
+          background: var(--card-bg-color);
+          border: 1px solid var(--component-border-color);
+          border-radius: 0.375rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .tree-filter-popover.open {
+          display: block;
+        }
+        .tree-filter-group {
+          margin-bottom: 0.375rem;
+        }
+        .tree-filter-group:last-child {
+          margin-bottom: 0;
+        }
+        .tree-filter-group-label {
+          font-size: 0.625rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-4);
+          margin-bottom: 0.25rem;
+        }
+        .tree-filter-option {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          padding: 1px 0.25rem;
+          font-size: 0.75rem;
+          color: var(--text-2);
+          cursor: pointer;
+          border-radius: 0.125rem;
+        }
+        .tree-filter-option:hover {
+          background: var(--surface-3);
+        }
+        .tree-filter-option input[type="checkbox"] {
+          margin: 0;
+          cursor: pointer;
+        }
+        .tree-filter-controls {
+          font-size: 0.625rem;
+          padding-top: 0.125rem;
+        }
+        .tree-filter-controls a {
+          color: var(--primary-bg-color);
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .tree-filter-controls a:hover {
+          text-decoration: underline;
+        }
+
+        /* Filter hidden items */
+        wc-tree-item.tree-filter-hidden {
+          display: none !important;
         }
 
         /* Tree content */

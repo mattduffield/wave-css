@@ -54,6 +54,7 @@ import './wc-theme-selector.js';
 import './wc-timeline.js';
 import './wc-tree-item.js';
 import './wc-tree.js';
+import './wc-tree-filter.js';
 import './wc-table-col.js';
 import './wc-table.js';
 import './wc-split-pane.js';
