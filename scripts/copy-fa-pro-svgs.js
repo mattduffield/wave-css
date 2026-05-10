@@ -613,6 +613,7 @@ const ICONS_TO_COPY = [
   "user-secret",
   "user-shield",
   "user-slash",
+  "user-tag",
   "user-tie",
   "user-unlock",
   "users",
