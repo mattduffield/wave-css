@@ -293,6 +293,7 @@ const ICONS_TO_COPY = [
   "ellipsis-stroke-vertical",
   "ellipsis-vertical",
   "envelope",
+  "envelope-open",
   "envelopes",
   "eraser",
   "exchange",
