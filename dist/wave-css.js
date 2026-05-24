@@ -2761,7 +2761,8 @@ if (!customElements.get("wc-code-mirror")) {
         "required",
         "fetch",
         "hint-words",
-        "hint-url"
+        "hint-url",
+        "step-gutter"
       ];
     }
     constructor() {
@@ -2838,6 +2839,12 @@ if (!customElements.get("wc-code-mirror")) {
         }
         const gutters = await this.getGutters();
         this.editor.setOption("gutters", gutters);
+      } else if (attrName === "step-gutter") {
+        if (newValue || newValue == "") {
+          this._enableStepGutterAutoParse();
+        } else {
+          this._disableStepGutterAutoParse();
+        }
       } else if (attrName === "tab-size") {
         this.editor.setOption("tabSize", parseInt(newValue, 10));
       } else if (attrName === "indent-unit") {
@@ -3559,6 +3566,16 @@ if (!customElements.get("wc-code-mirror")) {
         this._applyPongo2Overlay();
         this.addWebComponentsJsHighlighting();
       }
+      if (this._pendingStepBands !== void 0) {
+        const pending = this._pendingStepBands;
+        this._pendingStepBands = void 0;
+        this.setStepBands(pending);
+      }
+      if (this.hasAttribute("step-gutter") || this._stepGutterAutoEnabled) {
+        this._stepGutterAutoEnabled = true;
+        this._applyStepGutterFromCurrentValue();
+        this._installStepGutterChangeHandler();
+      }
       const url = this.getAttribute("fetch");
       this.handleFetch(url);
     }
@@ -3723,7 +3740,167 @@ if (!customElements.get("wc-code-mirror")) {
       } else if (hasFoldGutter) {
         gutters = ["CodeMirror-foldgutter"];
       }
+      if (this._stepGutterEnabled) {
+        if (hasLineNumbers && !gutters.includes("CodeMirror-linenumbers")) {
+          gutters.unshift("CodeMirror-linenumbers");
+        }
+        gutters.push("cm-step-band");
+      }
       return gutters;
+    }
+    /**
+     * Set or refresh the step-band gutter markers. Call this with the
+     * parser's latest [{startLine, endLine, type, name?}] output —
+     * startLine/endLine are 0-indexed, inclusive. Pass [] (or no args) to
+     * clear without unregistering the gutter column.
+     *
+     * On the first call, the cm-step-band gutter column is registered
+     * with the editor (one setOption('gutters', ...) call). Each
+     * subsequent call clears prior markers and repaints — cheap.
+     *
+     * `type` maps to CSS class `.cm-step-band-<type>` (lowercased).
+     * Documented types: nav, action, input, wait, loop, group, function,
+     * screen, instrument, alert. Unknown types render the band in a
+     * neutral default.
+     *
+     * Safe to call before the editor is ready — the call is queued and
+     * drained once the editor finishes initializing.
+     */
+    async setStepBands(ranges) {
+      if (!this.editor) {
+        this._pendingStepBands = ranges;
+        return;
+      }
+      if (!this._stepGutterEnabled) {
+        this._stepGutterEnabled = true;
+        const gutters = await this.getGutters();
+        this.editor.setOption("gutters", gutters);
+      }
+      this.editor.clearGutter("cm-step-band");
+      if (!ranges || ranges.length === 0) return;
+      for (const r of ranges) {
+        if (typeof r.startLine !== "number" || typeof r.endLine !== "number") continue;
+        const type = String(r.type || "group").toLowerCase();
+        for (let line = r.startLine; line <= r.endLine; line++) {
+          const marker = document.createElement("div");
+          marker.className = `cm-step-band cm-step-band-${type}`;
+          if (r.name) marker.title = r.name;
+          this.editor.setGutterMarker(line, "cm-step-band", marker);
+        }
+      }
+    }
+    /**
+     * Clear all step-band markers (leaves the column registered).
+     * To fully remove the column requires recreating the editor.
+     */
+    clearStepBands() {
+      if (!this.editor) {
+        this._pendingStepBands = null;
+        return;
+      }
+      this.editor.clearGutter("cm-step-band");
+    }
+    /**
+     * Parse the editor's current value as Pongo2/Nunjucks `{% call step %}`
+     * blocks and return [{startLine, endLine, type, name, depth}] ranges.
+     *
+     * Recognized syntax (matches our own step macro contract):
+     *   {% call step(name="Login", type="group") %}
+     *     body
+     *   {% endcall %}
+     *
+     * Nested step blocks produce nested ranges with incrementing `depth`.
+     * Non-step `{% call X %}` blocks (other macros) are tracked on the
+     * parse stack for correct {% endcall %} pairing but not emitted as
+     * gutter ranges. Defensive against unbalanced/unclosed input — every
+     * malformed case degrades to "no range" rather than throwing.
+     *
+     * Pure function. Public so callers can pre-parse if they want and
+     * push ranges in via setStepBands() without going through the
+     * step-gutter attribute auto-wiring.
+     */
+    parseStepBandRanges(text) {
+      const ranges = [];
+      if (!text) return ranges;
+      const STEP_OPEN_RE = /\{%\s*call\s+step\s*\(([^)]*)\)\s*%\}/;
+      const OTHER_CALL_OPEN_RE = /\{%\s*call\s+(?!step\b)[A-Za-z_][\w.]*/;
+      const ENDCALL_RE = /\{%\s*endcall\s*%\}/;
+      const NAME_RE = /\bname\s*=\s*["']([^"']*)["']/;
+      const TYPE_RE = /\btype\s*=\s*["']([^"']*)["']/;
+      const lines = String(text).split("\n");
+      const stack = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const stepOpen = STEP_OPEN_RE.exec(line);
+        if (stepOpen) {
+          const args = stepOpen[1] || "";
+          const nameMatch = NAME_RE.exec(args);
+          const typeMatch = TYPE_RE.exec(args);
+          stack.push({
+            isStep: true,
+            name: nameMatch ? nameMatch[1] : void 0,
+            type: typeMatch ? typeMatch[1] : "group",
+            startLine: i
+          });
+          continue;
+        }
+        if (OTHER_CALL_OPEN_RE.test(line)) {
+          stack.push({ isStep: false });
+          continue;
+        }
+        if (ENDCALL_RE.test(line)) {
+          const open = stack.pop();
+          if (open && open.isStep) {
+            ranges.push({
+              startLine: open.startLine,
+              endLine: i,
+              type: open.type,
+              name: open.name,
+              depth: stack.length
+            });
+          }
+        }
+      }
+      ranges.sort(function(a, b) {
+        if (a.startLine !== b.startLine) return a.startLine - b.startLine;
+        return b.endLine - a.endLine;
+      });
+      return ranges;
+    }
+    // ── step-gutter attribute auto-wiring ──────────────────────────────
+    // Turn on automatic parsing of {% call step %} blocks + debounced
+    // re-parse on every edit, painting bands via setStepBands().
+    // Idempotent — safe to call multiple times; safe before editor init.
+    _enableStepGutterAutoParse() {
+      this._stepGutterAutoEnabled = true;
+      if (!this.editor) return;
+      this._applyStepGutterFromCurrentValue();
+      this._installStepGutterChangeHandler();
+    }
+    _disableStepGutterAutoParse() {
+      this._stepGutterAutoEnabled = false;
+      if (this._stepGutterChangeHandler && this.editor) {
+        this.editor.off("change", this._stepGutterChangeHandler);
+      }
+      this._stepGutterChangeHandler = null;
+      this._stepGutterDebounceTimer = null;
+      this.clearStepBands();
+    }
+    _applyStepGutterFromCurrentValue() {
+      if (!this.editor || !this._stepGutterAutoEnabled) return;
+      const ranges = this.parseStepBandRanges(this.editor.getValue());
+      this.setStepBands(ranges);
+    }
+    _installStepGutterChangeHandler() {
+      if (this._stepGutterChangeHandler || !this.editor) return;
+      const self = this;
+      this._stepGutterChangeHandler = function() {
+        clearTimeout(self._stepGutterDebounceTimer);
+        self._stepGutterDebounceTimer = setTimeout(function() {
+          self._applyStepGutterFromCurrentValue();
+        }, 150);
+      };
+      this.editor.on("change", this._stepGutterChangeHandler);
     }
     async loadAssets(theme, mode) {
       if (theme && theme !== "default") {
