@@ -1058,12 +1058,21 @@ if (!customElements.get('wc-code-mirror')) {
       }
       this.editor.clearGutter('cm-step-band');
       if (!ranges || ranges.length === 0) return;
+      // Inline-style the marker height to match the editor's actual line
+      // height. CM v5's .CodeMirror-gutter-elt has no explicit height, so
+      // a CSS `height: 100%` collapses to 0 and the band is invisible
+      // despite being in the DOM. Reading defaultTextHeight() at marker
+      // creation time keeps the band in sync with the active theme/font.
+      const lineHeight = (typeof this.editor.defaultTextHeight === 'function')
+        ? this.editor.defaultTextHeight()
+        : 18;
       for (const r of ranges) {
         if (typeof r.startLine !== 'number' || typeof r.endLine !== 'number') continue;
         const type = String(r.type || 'group').toLowerCase();
         for (let line = r.startLine; line <= r.endLine; line++) {
           const marker = document.createElement('div');
           marker.className = `cm-step-band cm-step-band-${type}`;
+          marker.style.height = lineHeight + 'px';
           if (r.name) marker.title = r.name;
           this.editor.setGutterMarker(line, 'cm-step-band', marker);
         }

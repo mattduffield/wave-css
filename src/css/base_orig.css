@@ -1585,49 +1585,6 @@ div.wc-code-mirror[required] label::after
 }
 
 
-/* ─────────────────────────────────────────────────────────────────────── */
-/* wc-code-mirror: step-band gutter (Phase 2a of pilot-authoring evolution) */
-/* Opt-in via setStepBands([{startLine,endLine,type,name}]). Renders a     */
-/* colored band per step block in a dedicated 6px gutter column, with the  */
-/* color picked from the Q1 semantic palette. The 10 documented step types */
-/* (nav/action/input/wait/loop/group/function/screen/instrument/alert) map */
-/* to Wave CSS tokens — pure CSS-variable indirection, so theme overrides  */
-/* and hue shifts propagate automatically.                                 */
-
-/* Gutter column — narrow, fixed width so all line cells line up.          */
-.CodeMirror-gutter.cm-step-band {
-  width: 6px;
-  min-width: 6px;
-}
-
-/* Marker — the colored band sits inside each line's gutter cell. height   */
-/* 100% fills the line height so adjacent in-range markers visually merge  */
-/* into one continuous band.                                               */
-.CodeMirror-gutter-elt > .cm-step-band {
-  display: block;
-  width: 4px;
-  height: 100%;
-  margin-left: 1px;
-  border-radius: 1px;
-  /* Neutral default for unknown step types — gets overridden by the       */
-  /* type-modifier class below when present.                                */
-  background: var(--wc-gray-400, #9ca3af);
-  /* Cursor hint that hovering reveals the step name via title attribute.  */
-  cursor: help;
-}
-
-/* Color modifiers per step type. Matches the mockup palette exactly       */
-/* (docs/mockup-pilot-authoring-evolution.html) via Wave CSS tokens.       */
-.cm-step-band-nav        { background: var(--wc-blue-500); }
-.cm-step-band-action     { background: var(--wc-emerald-500); }
-.cm-step-band-input      { background: var(--wc-yellow-500); }
-.cm-step-band-wait       { background: var(--wc-gray-500); }
-.cm-step-band-loop       { background: var(--wc-orange-500); }
-.cm-step-band-group      { background: var(--wc-purple-500); }
-.cm-step-band-function   { background: var(--wc-pink-500); }
-.cm-step-band-screen     { background: var(--wc-cyan-500); }
-.cm-step-band-instrument { background: var(--wc-amber-500); }
-.cm-step-band-alert      { background: var(--wc-red-500); }
 
 
 

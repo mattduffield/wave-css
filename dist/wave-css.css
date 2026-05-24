@@ -1002,7 +1002,7 @@
   .dark.theme-cottoncandy,
   .dark.theme-blush,
   .dark.theme-bubblegum,
-  .dark.theme-designer-blue .dark.theme-designer-blue,
+  .dark.theme-designer-blue,
   .dark.theme-designer-gray,
   .dark.theme-designer {
     --text-1: var(--swatch-1);
@@ -9975,6 +9975,48 @@
   }
   .notie-container {
     box-shadow: none;
+  }
+  .CodeMirror-gutter.cm-step-band {
+    width: 6px;
+    min-width: 6px;
+  }
+  .CodeMirror-gutter-elt > .cm-step-band {
+    display: block;
+    width: 4px;
+    margin-left: 1px;
+    border-radius: 1px;
+    background: var(--wc-gray-400, #9ca3af);
+    cursor: help;
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-nav {
+    background: var(--wc-blue-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-action {
+    background: var(--wc-emerald-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-input {
+    background: var(--wc-yellow-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-wait {
+    background: var(--wc-gray-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-loop {
+    background: var(--wc-orange-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-group {
+    background: var(--wc-purple-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-function {
+    background: var(--wc-pink-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-screen {
+    background: var(--wc-cyan-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-instrument {
+    background: var(--wc-amber-500);
+  }
+  .CodeMirror-gutter-elt > .cm-step-band-alert {
+    background: var(--wc-red-500);
   }
   @keyframes ldio-qjspg5uvdp {
     0% {
