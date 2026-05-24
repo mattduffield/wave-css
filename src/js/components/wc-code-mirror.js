@@ -767,6 +767,13 @@ if (!customElements.get('wc-code-mirror')) {
         this.addWebComponentsJsHighlighting();
       }
 
+      // Drain any setStepBands() call that arrived before the editor was ready.
+      if (this._pendingStepBands !== undefined) {
+        const pending = this._pendingStepBands;
+        this._pendingStepBands = undefined;
+        this.setStepBands(pending);
+      }
+
       const url = this.getAttribute('fetch');
       this.handleFetch(url);
     }
@@ -990,7 +997,74 @@ if (!customElements.get('wc-code-mirror')) {
       } else if (hasFoldGutter) {
         gutters = ["CodeMirror-foldgutter"];
       }
-      return gutters;    
+
+      // Step-band gutter — opt-in via setStepBands(). Must be re-added on
+      // every getGutters() call so the change-event handler's implicit
+      // setOption('gutters', ...) (line ~752) doesn't drop the column.
+      // Marker contents themselves are wiped by setOption('gutters'); the
+      // consumer is expected to re-call setStepBands() after each parse.
+      if (this._stepGutterEnabled) {
+        if (hasLineNumbers && !gutters.includes("CodeMirror-linenumbers")) {
+          gutters.unshift("CodeMirror-linenumbers");
+        }
+        gutters.push("cm-step-band");
+      }
+
+      return gutters;
+    }
+
+    /**
+     * Set or refresh the step-band gutter markers. Call this with the
+     * parser's latest [{startLine, endLine, type, name?}] output —
+     * startLine/endLine are 0-indexed, inclusive. Pass [] (or no args) to
+     * clear without unregistering the gutter column.
+     *
+     * On the first call, the cm-step-band gutter column is registered
+     * with the editor (one setOption('gutters', ...) call). Each
+     * subsequent call clears prior markers and repaints — cheap.
+     *
+     * `type` maps to CSS class `.cm-step-band-<type>` (lowercased).
+     * Documented types: nav, action, input, wait, loop, group, function,
+     * screen, instrument, alert. Unknown types render the band in a
+     * neutral default.
+     *
+     * Safe to call before the editor is ready — the call is queued and
+     * drained once the editor finishes initializing.
+     */
+    async setStepBands(ranges) {
+      if (!this.editor) {
+        this._pendingStepBands = ranges;
+        return;
+      }
+      if (!this._stepGutterEnabled) {
+        this._stepGutterEnabled = true;
+        const gutters = await this.getGutters();
+        this.editor.setOption('gutters', gutters);
+      }
+      this.editor.clearGutter('cm-step-band');
+      if (!ranges || ranges.length === 0) return;
+      for (const r of ranges) {
+        if (typeof r.startLine !== 'number' || typeof r.endLine !== 'number') continue;
+        const type = String(r.type || 'group').toLowerCase();
+        for (let line = r.startLine; line <= r.endLine; line++) {
+          const marker = document.createElement('div');
+          marker.className = `cm-step-band cm-step-band-${type}`;
+          if (r.name) marker.title = r.name;
+          this.editor.setGutterMarker(line, 'cm-step-band', marker);
+        }
+      }
+    }
+
+    /**
+     * Clear all step-band markers (leaves the column registered).
+     * To fully remove the column requires recreating the editor.
+     */
+    clearStepBands() {
+      if (!this.editor) {
+        this._pendingStepBands = null;
+        return;
+      }
+      this.editor.clearGutter('cm-step-band');
     }
 
     async loadAssets(theme, mode) {
