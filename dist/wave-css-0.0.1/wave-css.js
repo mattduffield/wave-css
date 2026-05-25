@@ -4609,6 +4609,15 @@ if (!customElements.get("wc-event-stream")) {
       super();
       this.source = null;
       this._listeners = [];
+      const compEl = this.querySelector(".wc-event-stream");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-event-stream");
+        this.componentElement.style.display = "none";
+        this.appendChild(this.componentElement);
+      }
     }
     async connectedCallback() {
       super.connectedCallback();

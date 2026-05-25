@@ -57,6 +57,22 @@ if (!customElements.get('wc-event-stream')) {
       super();
       this.source = null;
       this._listeners = []; // [{ name, fn }] so we can remove on close
+
+      // WcBaseComponent's default attribute handling (class, id, etc.)
+      // expects this.componentElement to exist — without it we get a
+      // null-setAttribute crash during _applyPendingAttributes. Use an
+      // existing child with our class if present (live-designer scenario),
+      // otherwise create a hidden inert div so the component has a body
+      // but no visual footprint.
+      const compEl = this.querySelector('.wc-event-stream');
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement('div');
+        this.componentElement.classList.add('wc-event-stream');
+        this.componentElement.style.display = 'none';
+        this.appendChild(this.componentElement);
+      }
     }
 
     async connectedCallback() {
