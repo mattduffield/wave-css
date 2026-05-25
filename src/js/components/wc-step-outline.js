@@ -106,7 +106,10 @@ if (!customElements.get('wc-step-outline')) {
         const wcEl = ed.getWrapperElement().closest('wc-code-mirror');
         self._attach(wcEl, ed);
       };
-      document.body.addEventListener('wc-code-mirror:ready', this._readyHandler);
+      // Wave CSS emits both `wccodemirrorready` (canonical) and
+      // `wc-code-mirror:ready` (deprecated). Use the canonical name to
+      // avoid the deprecation-warning console noise.
+      document.body.addEventListener('wccodemirrorready', this._readyHandler);
     }
 
     _tryWireUp() {
@@ -154,7 +157,7 @@ if (!customElements.get('wc-step-outline')) {
     _teardown() {
       this._detach();
       if (this._readyHandler) {
-        document.body.removeEventListener('wc-code-mirror:ready', this._readyHandler);
+        document.body.removeEventListener('wccodemirrorready', this._readyHandler);
         this._readyHandler = null;
       }
     }

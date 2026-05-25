@@ -4307,7 +4307,7 @@ if (!customElements.get("wc-step-outline")) {
         const wcEl = ed.getWrapperElement().closest("wc-code-mirror");
         self._attach(wcEl, ed);
       };
-      document.body.addEventListener("wc-code-mirror:ready", this._readyHandler);
+      document.body.addEventListener("wccodemirrorready", this._readyHandler);
     }
     _tryWireUp() {
       const targetName = this.getAttribute("for");
@@ -4349,7 +4349,7 @@ if (!customElements.get("wc-step-outline")) {
     _teardown() {
       this._detach();
       if (this._readyHandler) {
-        document.body.removeEventListener("wc-code-mirror:ready", this._readyHandler);
+        document.body.removeEventListener("wccodemirrorready", this._readyHandler);
         this._readyHandler = null;
       }
     }
