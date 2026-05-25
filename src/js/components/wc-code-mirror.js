@@ -1056,8 +1056,34 @@ if (!customElements.get('wc-code-mirror')) {
         const gutters = await this.getGutters();
         this.editor.setOption('gutters', gutters);
       }
+      // Memoize the ranges so setActiveStepRange() can re-paint without
+      // re-parsing. setOption('gutters') above wipes existing markers
+      // anyway, so we always re-paint from scratch below.
+      this._lastStepRanges = ranges || [];
+      this._paintStepBands();
+    }
+
+    /**
+     * Highlight the gutter band(s) for an active step range. Called by
+     * wc-step-outline when its setActiveStack matches a deepest range,
+     * or directly by callers tracking a "current step" externally.
+     * Pass null or no args to clear.
+     */
+    setActiveStepRange(startLine, endLine) {
+      if (typeof startLine === 'number' && typeof endLine === 'number') {
+        this._activeStepRange = { startLine: startLine, endLine: endLine };
+      } else {
+        this._activeStepRange = null;
+      }
+      if (!this.editor) return;
+      this._paintStepBands();
+    }
+
+    _paintStepBands() {
+      if (!this.editor) return;
       this.editor.clearGutter('cm-step-band');
-      if (!ranges || ranges.length === 0) return;
+      const ranges = this._lastStepRanges || [];
+      if (ranges.length === 0) return;
       // Inline-style the marker height to match the editor's actual line
       // height. CM v5's .CodeMirror-gutter-elt has no explicit height, so
       // a CSS `height: 100%` collapses to 0 and the band is invisible
@@ -1066,12 +1092,17 @@ if (!customElements.get('wc-code-mirror')) {
       const lineHeight = (typeof this.editor.defaultTextHeight === 'function')
         ? this.editor.defaultTextHeight()
         : 18;
+      const active = this._activeStepRange;
       for (const r of ranges) {
         if (typeof r.startLine !== 'number' || typeof r.endLine !== 'number') continue;
         const type = String(r.type || 'group').toLowerCase();
         for (let line = r.startLine; line <= r.endLine; line++) {
           const marker = document.createElement('div');
-          marker.className = `cm-step-band cm-step-band-${type}`;
+          let cls = 'cm-step-band cm-step-band-' + type;
+          if (active && line >= active.startLine && line <= active.endLine) {
+            cls += ' is-active';
+          }
+          marker.className = cls;
           marker.style.height = lineHeight + 'px';
           if (r.name) marker.title = r.name;
           this.editor.setGutterMarker(line, 'cm-step-band', marker);

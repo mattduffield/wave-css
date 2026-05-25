@@ -3776,15 +3776,41 @@ if (!customElements.get("wc-code-mirror")) {
         const gutters = await this.getGutters();
         this.editor.setOption("gutters", gutters);
       }
+      this._lastStepRanges = ranges || [];
+      this._paintStepBands();
+    }
+    /**
+     * Highlight the gutter band(s) for an active step range. Called by
+     * wc-step-outline when its setActiveStack matches a deepest range,
+     * or directly by callers tracking a "current step" externally.
+     * Pass null or no args to clear.
+     */
+    setActiveStepRange(startLine, endLine) {
+      if (typeof startLine === "number" && typeof endLine === "number") {
+        this._activeStepRange = { startLine, endLine };
+      } else {
+        this._activeStepRange = null;
+      }
+      if (!this.editor) return;
+      this._paintStepBands();
+    }
+    _paintStepBands() {
+      if (!this.editor) return;
       this.editor.clearGutter("cm-step-band");
-      if (!ranges || ranges.length === 0) return;
+      const ranges = this._lastStepRanges || [];
+      if (ranges.length === 0) return;
       const lineHeight = typeof this.editor.defaultTextHeight === "function" ? this.editor.defaultTextHeight() : 18;
+      const active = this._activeStepRange;
       for (const r of ranges) {
         if (typeof r.startLine !== "number" || typeof r.endLine !== "number") continue;
         const type = String(r.type || "group").toLowerCase();
         for (let line = r.startLine; line <= r.endLine; line++) {
           const marker = document.createElement("div");
-          marker.className = `cm-step-band cm-step-band-${type}`;
+          let cls = "cm-step-band cm-step-band-" + type;
+          if (active && line >= active.startLine && line <= active.endLine) {
+            cls += " is-active";
+          }
+          marker.className = cls;
           marker.style.height = lineHeight + "px";
           if (r.name) marker.title = r.name;
           this.editor.setGutterMarker(line, "cm-step-band", marker);
@@ -4215,7 +4241,7 @@ if (!customElements.get("wc-code-mirror-context-menu")) {
 if (!customElements.get("wc-step-outline")) {
   class WcStepOutline extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "for"];
+      return ["id", "class", "for", "events-from"];
     }
     static get is() {
       return "wc-step-outline";
@@ -4227,7 +4253,13 @@ if (!customElements.get("wc-step-outline")) {
       this._debounceTimer = null;
       this._readyHandler = null;
       this._changeHandler = null;
+      this._activeStack = [];
       this._activeLine = null;
+      this._lastActiveLine = null;
+      this._eventStreamEl = null;
+      this._stepChangeHandler = null;
+      this._flashTimer = null;
+      this._currentRanges = [];
       const compEl = this.querySelector(".wc-step-outline");
       if (compEl) {
         this.componentElement = compEl;
@@ -4241,11 +4273,13 @@ if (!customElements.get("wc-step-outline")) {
       super.connectedCallback();
       this._installReadyListener();
       this._tryWireUp();
+      this._subscribeToEventStream();
       this._render();
     }
     disconnectedCallback() {
       super.disconnectedCallback();
       this._teardown();
+      this._unsubscribeFromEventStream();
     }
     _handleAttributeChange(attrName, newValue, oldValue) {
       if (attrName === "for") {
@@ -4253,6 +4287,9 @@ if (!customElements.get("wc-step-outline")) {
         this._installReadyListener();
         this._tryWireUp();
         this._render();
+      } else if (attrName === "events-from") {
+        this._unsubscribeFromEventStream();
+        this._subscribeToEventStream();
       } else {
         super._handleAttributeChange(attrName, newValue, oldValue);
       }
@@ -4316,15 +4353,93 @@ if (!customElements.get("wc-step-outline")) {
         this._readyHandler = null;
       }
     }
+    // ── Event-stream subscription ────────────────────────────────────────
+    // Optional pairing with a sibling <wc-event-stream> for live updates.
+    // The event stream is expected to emit step_change events with
+    // CustomEvent.detail = { event: "snapshot"|"start"|"end", stack: [...] }
+    // matching the /automate/events SSE payload contract from
+    // node-playwright (Phase 2c of pilot-authoring evolution).
+    _subscribeToEventStream() {
+      const id = this.getAttribute("events-from");
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el) {
+        const self2 = this;
+        setTimeout(function() {
+          if (!self2._eventStreamEl && self2.isConnected) self2._subscribeToEventStream();
+        }, 50);
+        return;
+      }
+      this._eventStreamEl = el;
+      const self = this;
+      this._stepChangeHandler = function(e) {
+        const detail = e.detail || {};
+        self.setActiveStack(Array.isArray(detail.stack) ? detail.stack : []);
+      };
+      el.addEventListener("wc-event-stream:step_change", this._stepChangeHandler);
+    }
+    _unsubscribeFromEventStream() {
+      if (this._eventStreamEl && this._stepChangeHandler) {
+        this._eventStreamEl.removeEventListener("wc-event-stream:step_change", this._stepChangeHandler);
+      }
+      this._eventStreamEl = null;
+      this._stepChangeHandler = null;
+    }
     // ── Public API ───────────────────────────────────────────────────────
     /**
      * Highlight the row matching the given line (0-indexed). Used by
-     * Phase 2c's live-Debug-step pulse and by ad-hoc callers that want
-     * to track "current step" externally. Pass null to clear.
+     * click-to-jump for an immediate visual confirmation. Pass null to
+     * clear. NB: setActiveStack() is the richer runtime-driven path —
+     * this is the simple "highlight one row by line" entry point.
      */
     setActiveLine(line) {
       this._activeLine = typeof line === "number" ? line : null;
+      this._activeStack = [];
       this._applyActiveRow();
+    }
+    /**
+     * Set the runtime step stack — typically pumped in from a paired
+     * wc-event-stream subscribed to /automate/events. Stack shape:
+     *   [{ name, type, iteration, started_at? }, ...]
+     * outermost first.
+     *
+     * Resolution against the parsed editor tree walks the stack from
+     * depth 0; for each frame, the first parsed range with matching
+     * name AND matching depth AND inside the previously-matched parent
+     * range becomes the match for that level. The DEEPEST matched range
+     * is highlighted as `is-active`; all matched ranges get an
+     * iteration badge if their stack frame's iteration > 1.
+     *
+     * Passing an empty stack clears the active highlight (the runtime
+     * is between steps or the run ended).
+     */
+    setActiveStack(stack) {
+      this._activeStack = Array.isArray(stack) ? stack.slice() : [];
+      this._activeLine = null;
+      this._render();
+    }
+    // ── Stack ↔ ranges matching ──────────────────────────────────────────
+    _matchStackToRanges(stack, ranges) {
+      const matched = [];
+      let parent = null;
+      for (let i = 0; i < stack.length; i++) {
+        const frame = stack[i];
+        let found = null;
+        for (let j = 0; j < ranges.length; j++) {
+          const r = ranges[j];
+          if (r.depth !== i) continue;
+          if (r.name !== frame.name) continue;
+          if (parent) {
+            if (r.startLine < parent.startLine || r.endLine > parent.endLine) continue;
+          }
+          found = r;
+          break;
+        }
+        matched.push(found);
+        if (!found) break;
+        parent = found;
+      }
+      return matched;
     }
     /**
      * Force a re-render. Rarely needed — the component re-renders
@@ -4339,11 +4454,28 @@ if (!customElements.get("wc-step-outline")) {
       const root = this.componentElement;
       if (!this._targetEditor || !this._targetWcEl) {
         root.innerHTML = "";
+        this._currentRanges = [];
         return;
       }
       let ranges = [];
       if (typeof this._targetWcEl.parseStepBandRanges === "function") {
         ranges = this._targetWcEl.parseStepBandRanges(this._targetEditor.getValue());
+      }
+      this._currentRanges = ranges;
+      const matched = this._matchStackToRanges(this._activeStack || [], ranges);
+      const iterationByLine = {};
+      for (let i = 0; i < matched.length; i++) {
+        const m = matched[i];
+        if (m && this._activeStack[i]) {
+          iterationByLine[m.startLine] = this._activeStack[i].iteration || 1;
+        }
+      }
+      let activeLine = null;
+      for (let i = matched.length - 1; i >= 0; i--) {
+        if (matched[i]) {
+          activeLine = matched[i].startLine;
+          break;
+        }
       }
       const frag = document.createDocumentFragment();
       const header = document.createElement("div");
@@ -4382,6 +4514,13 @@ if (!customElements.get("wc-step-outline")) {
         label.className = "wc-step-outline-label";
         label.textContent = r.name || "(unnamed)";
         row.appendChild(label);
+        const iter = iterationByLine[r.startLine];
+        if (typeof iter === "number" && iter > 1) {
+          const badge = document.createElement("span");
+          badge.className = "wc-step-outline-iter";
+          badge.textContent = "\xD7" + iter;
+          row.appendChild(badge);
+        }
         row.addEventListener("click", function() {
           self._jumpToLine(r.startLine);
         });
@@ -4389,18 +4528,56 @@ if (!customElements.get("wc-step-outline")) {
       }
       root.innerHTML = "";
       root.appendChild(frag);
-      this._applyActiveRow();
+      const lineToHighlight = activeLine != null ? activeLine : this._activeLine != null ? this._activeLine : null;
+      this._applyActiveHighlight(lineToHighlight);
+      if (this._targetWcEl && typeof this._targetWcEl.setActiveStepRange === "function") {
+        let activeRange = null;
+        for (let i = matched.length - 1; i >= 0; i--) {
+          if (matched[i]) {
+            activeRange = matched[i];
+            break;
+          }
+        }
+        if (activeRange) {
+          this._targetWcEl.setActiveStepRange(activeRange.startLine, activeRange.endLine);
+        } else if (this._activeLine != null) {
+          const click = ranges.find(function(r) {
+            return r.startLine === self._activeLine;
+          });
+          if (click) this._targetWcEl.setActiveStepRange(click.startLine, click.endLine);
+          else this._targetWcEl.setActiveStepRange(null);
+        } else {
+          this._targetWcEl.setActiveStepRange(null);
+        }
+      }
     }
-    _applyActiveRow() {
+    _applyActiveHighlight(line) {
       const rows = this.componentElement.querySelectorAll(".wc-step-outline-row");
-      const target = this._activeLine == null ? "" : String(this._activeLine);
+      const target = line == null ? "" : String(line);
+      let activated = null;
       for (let i = 0; i < rows.length; i++) {
         if (rows[i].dataset.line === target) {
           rows[i].classList.add("is-active");
+          activated = rows[i];
         } else {
           rows[i].classList.remove("is-active");
+          rows[i].classList.remove("is-active-flash");
         }
       }
+      if (activated && line !== this._lastActiveLine) {
+        activated.classList.add("is-active-flash");
+        clearTimeout(this._flashTimer);
+        const self = this;
+        this._flashTimer = setTimeout(function() {
+          activated.classList.remove("is-active-flash");
+        }, 250);
+      }
+      this._lastActiveLine = line;
+    }
+    // Backwards-compat shim — used by older render path. The new
+    // _applyActiveHighlight() takes the line as an argument instead.
+    _applyActiveRow() {
+      this._applyActiveHighlight(this._activeLine);
     }
     _jumpToLine(line) {
       if (!this._targetEditor) return;

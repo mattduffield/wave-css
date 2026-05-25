@@ -10404,6 +10404,15 @@
     .CodeMirror-gutter-elt > .cm-step-band-screen     { background: var(--wc-cyan-500); }
     .CodeMirror-gutter-elt > .cm-step-band-instrument { background: var(--wc-amber-500); }
     .CodeMirror-gutter-elt > .cm-step-band-alert      { background: var(--wc-red-500); }
+    /* Active-step glow — applied to each marker on the line range of
+       the currently-executing step (driven by setActiveStepRange()
+       from wc-step-outline). The 1px ring + 4px outer glow makes the
+       running step visually distinct without changing its base color,
+       so step-type identity stays readable. */
+    .CodeMirror-gutter-elt > .cm-step-band.is-active {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55),
+                    0 0 4px 1px rgba(255, 255, 255, 0.35);
+    }
 
     /* wc-step-outline — companion panel for wc-code-mirror[step-gutter].
        Renders a clickable list of {% call step %} blocks from the target
@@ -10461,6 +10470,25 @@
     .wc-step-outline-row.is-active {
         background: color-mix(in srgb, var(--wc-purple-500) 18%, transparent);
         border-left-color: var(--wc-purple-500);
+        transition: background 250ms ease-out, box-shadow 250ms ease-out;
+    }
+    /* Brief flash when a row becomes the active runtime step. Applied for
+       ~250ms by wc-step-outline.js on step transitions, then removed —
+       the `transition` on .is-active above fades it back to solid. */
+    .wc-step-outline-row.is-active-flash {
+        background: color-mix(in srgb, var(--wc-purple-500) 50%, transparent);
+        box-shadow: inset 0 0 0 1px var(--wc-purple-500);
+    }
+    .wc-step-outline-iter {
+        flex-shrink: 0;
+        margin-left: 6px;
+        padding: 1px 6px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--wc-purple-500) 22%, transparent);
+        color: var(--text-1, #e0e0e0);
+        font-size: 10px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
     }
     /* Indent by step depth — siblings line up, nested children push right. */
     .wc-step-outline-row[data-depth="1"] { padding-left: 44px; }
