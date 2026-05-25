@@ -4419,6 +4419,136 @@ if (!customElements.get("wc-step-outline")) {
   customElements.define("wc-step-outline", WcStepOutline);
 }
 
+// src/js/components/wc-event-stream.js
+if (!customElements.get("wc-event-stream")) {
+  class WcEventStream extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "src", "events"];
+    }
+    static get is() {
+      return "wc-event-stream";
+    }
+    constructor() {
+      super();
+      this.source = null;
+      this._listeners = [];
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      if (this.getAttribute("src")) this.open();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.close();
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      if (attrName === "src") {
+        this.close();
+        if (newValue) this.open();
+      } else if (attrName === "events") {
+        if (this.source) {
+          this._unbindNamedEvents();
+          this._bindNamedEvents();
+        }
+      } else {
+        super._handleAttributeChange(attrName, newValue, oldValue);
+      }
+    }
+    /**
+     * Open the EventSource against the current `src`. No-op if already open.
+     */
+    open() {
+      if (this.source) return;
+      const src = this.getAttribute("src");
+      if (!src) return;
+      const es = new EventSource(src);
+      this.source = es;
+      const self = this;
+      es.onopen = function() {
+        self._dispatch("wc-event-stream:open", { src });
+      };
+      es.onerror = function(e) {
+        self._dispatch("wc-event-stream:error", {
+          readyState: es.readyState,
+          src
+        });
+      };
+      es.onmessage = function(msg) {
+        self._dispatch("wc-event-stream:message", self._parsePayload(msg.data));
+      };
+      this._bindNamedEvents();
+    }
+    /**
+     * Close the EventSource. Subsequent calls to open() can reopen it.
+     */
+    close() {
+      if (!this.source) return;
+      this._unbindNamedEvents();
+      try {
+        this.source.close();
+      } catch (_) {
+      }
+      this.source = null;
+      this._dispatch("wc-event-stream:close", {});
+    }
+    /**
+     * Set the subscribed event-type list at runtime (alternative to the
+     * `events` attribute). Re-binds listeners against the new list.
+     */
+    setSubscribedEvents(list) {
+      const names = Array.isArray(list) ? list.join(",") : String(list || "");
+      this.setAttribute("events", names);
+    }
+    // ── Internals ─────────────────────────────────────────────────────────
+    _eventNames() {
+      const raw = this.getAttribute("events") || "";
+      return raw.split(",").map(function(s) {
+        return s.trim();
+      }).filter(Boolean);
+    }
+    _bindNamedEvents() {
+      if (!this.source) return;
+      const self = this;
+      this._listeners = [];
+      const names = this._eventNames();
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i];
+        const fn = function(msg) {
+          self._dispatch("wc-event-stream:" + name, self._parsePayload(msg.data));
+        };
+        this.source.addEventListener(name, fn);
+        this._listeners.push({ name, fn });
+      }
+    }
+    _unbindNamedEvents() {
+      if (!this.source) return;
+      for (let i = 0; i < this._listeners.length; i++) {
+        try {
+          this.source.removeEventListener(this._listeners[i].name, this._listeners[i].fn);
+        } catch (_) {
+        }
+      }
+      this._listeners = [];
+    }
+    _parsePayload(raw) {
+      if (raw == null) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (_) {
+        return raw;
+      }
+    }
+    _dispatch(eventName, detail) {
+      this.dispatchEvent(new CustomEvent(eventName, {
+        bubbles: true,
+        composed: true,
+        detail
+      }));
+    }
+  }
+  customElements.define("wc-event-stream", WcEventStream);
+}
+
 // src/js/components/wc-contact-card.js
 var WcContactCard = class extends WcBaseComponent {
   static get observedAttributes() {
