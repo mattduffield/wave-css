@@ -10423,6 +10423,70 @@
         cursor: pointer !important;
     }
 
+    /* PilotStudio Lint tab (Phase 4). Returned as an HTML fragment from
+       /x/pilot_lint/{record_id}. Each row mirrors the mockup's
+       lint-row layout: icon (warn / info) + message + detail. */
+    .ps-lint-pane {
+        display: flex;
+        flex-direction: column;
+        padding: 6px 0;
+        font-size: 12px;
+    }
+    .ps-lint-empty {
+        padding: 16px 14px;
+        color: var(--text-2, #888);
+        font-style: italic;
+    }
+    .ps-lint-row {
+        display: flex;
+        gap: 10px;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border-1, #333);
+        align-items: flex-start;
+    }
+    .ps-lint-row:last-child {
+        border-bottom: none;
+    }
+    .ps-lint-icon {
+        width: 18px;
+        flex-shrink: 0;
+        text-align: center;
+        padding-top: 2px;
+    }
+    .ps-lint-icon.lint-warn { color: var(--wc-amber-400, #fbbf24); }
+    .ps-lint-icon.lint-info { color: var(--wc-blue-400, #60a5fa); }
+    .ps-lint-body {
+        flex: 1;
+        min-width: 0;
+    }
+    .ps-lint-message {
+        color: var(--text-1, #e0e0e0);
+        line-height: 1.4;
+    }
+    .ps-lint-message code {
+        background: var(--surface-2, #252540);
+        padding: 0 4px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .ps-lint-detail {
+        color: var(--text-2, #888);
+        font-size: 11px;
+        line-height: 1.45;
+        margin-top: 3px;
+    }
+    .ps-lint-location {
+        color: var(--text-2, #888);
+        font-size: 10.5px;
+        margin-top: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        opacity: 0.75;
+    }
+    .ps-lint-location code {
+        font-family: inherit;
+    }
+
     /* wc-step-outline — companion panel for wc-code-mirror[step-gutter].
        Renders a clickable list of {% call step %} blocks from the target
        editor. Same palette as the gutter bands so the two views line up
