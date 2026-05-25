@@ -29,7 +29,7 @@ if (!customElements.get('wc-code-mirror')) {
     static get observedAttributes() {
       return ['id', 'class', 'height', 'theme', 'mode', 'lbl-label', 'lbl-class', 'line-numbers', 'line-wrapping', 'fold-gutter', 'tab-size', 'indent-unit', 'value', 'disabled', 'required'
         , 'fetch', 'hint-words', 'hint-url'
-        , 'step-gutter'
+        , 'step-gutter', 'link-includes'
       ];
     }
 
@@ -125,6 +125,12 @@ if (!customElements.get('wc-code-mirror')) {
           this._enableStepGutterAutoParse();
         } else {
           this._disableStepGutterAutoParse();
+        }
+      } else if (attrName === 'link-includes') {
+        if (newValue || newValue == '') {
+          this._enableLinkIncludes();
+        } else {
+          this._disableLinkIncludes();
         }
       } else if (attrName === 'tab-size') {
         this.editor.setOption('tabSize', parseInt(newValue, 10));
@@ -789,6 +795,12 @@ if (!customElements.get('wc-code-mirror')) {
         this._installStepGutterChangeHandler();
       }
 
+      // Same shape for link-includes — attribute or pre-queued flag.
+      if (this.hasAttribute('link-includes') || this._linkIncludesEnabled) {
+        this._linkIncludesEnabled = true;
+        this._installLinkIncludesListeners();
+      }
+
       const url = this.getAttribute('fetch');
       this.handleFetch(url);
     }
@@ -1269,6 +1281,112 @@ if (!customElements.get('wc-code-mirror')) {
         }, 150);
       };
       this.editor.on('change', this._stepGutterChangeHandler);
+    }
+
+    // ── link-includes attribute (Phase 3 Round 2) ─────────────────────────
+    // When set, modifier-mousedown (Cmd on Mac, Ctrl elsewhere) on an
+    // {% include "X" %} / {% from "X" %} / {% import "X" as Y %} /
+    // {% extends "X" %} line dispatches a wc-code-mirror:open-include
+    // CustomEvent with {slug, kind, line} in detail. Consumers (e.g.
+    // PilotStudio) listen and open the referenced fragment as a new tab.
+    //
+    // Visual affordance: when the modifier is held while hovering over an
+    // include tag, the editor's wrapper gets a `cm-link-includes-active`
+    // class so the cursor flips to pointer — matches VS Code's
+    // cmd-hover-link convention.
+
+    _enableLinkIncludes() {
+      this._linkIncludesEnabled = true;
+      if (!this.editor) return;
+      this._installLinkIncludesListeners();
+    }
+
+    _disableLinkIncludes() {
+      this._linkIncludesEnabled = false;
+      this._removeLinkIncludesListeners();
+    }
+
+    _installLinkIncludesListeners() {
+      if (this._linkIncludesMouseDown || !this.editor) return;
+      const editor  = this.editor;
+      const wrapper = editor.getWrapperElement();
+      const self    = this;
+
+      this._linkIncludesMouseDown = function (e) {
+        if (!(e.metaKey || e.ctrlKey)) return;
+        const pos = editor.coordsChar({ left: e.clientX, top: e.clientY });
+        if (!pos) return;
+        const line = editor.getLine(pos.line);
+        if (!line) return;
+        const hit = self._findIncludeAtPos(line, pos.ch);
+        if (!hit) return;
+        e.preventDefault();
+        e.stopPropagation();
+        self.dispatchEvent(new CustomEvent('wc-code-mirror:open-include', {
+          bubbles: true,
+          composed: true,
+          detail: { slug: hit.slug, kind: hit.kind, line: pos.line },
+        }));
+      };
+
+      this._linkIncludesMouseMove = function (e) {
+        if (!(e.metaKey || e.ctrlKey)) {
+          wrapper.classList.remove('cm-link-includes-active');
+          return;
+        }
+        const pos = editor.coordsChar({ left: e.clientX, top: e.clientY });
+        if (!pos) { wrapper.classList.remove('cm-link-includes-active'); return; }
+        const line = editor.getLine(pos.line);
+        const hit  = line ? self._findIncludeAtPos(line, pos.ch) : null;
+        if (hit) wrapper.classList.add('cm-link-includes-active');
+        else     wrapper.classList.remove('cm-link-includes-active');
+      };
+
+      this._linkIncludesKeyUp = function (e) {
+        if (!e.metaKey && !e.ctrlKey) {
+          wrapper.classList.remove('cm-link-includes-active');
+        }
+      };
+
+      wrapper.addEventListener('mousedown', this._linkIncludesMouseDown, true);
+      wrapper.addEventListener('mousemove', this._linkIncludesMouseMove);
+      document.addEventListener('keyup', this._linkIncludesKeyUp);
+    }
+
+    _removeLinkIncludesListeners() {
+      if (!this.editor) return;
+      const wrapper = this.editor.getWrapperElement();
+      if (this._linkIncludesMouseDown) wrapper.removeEventListener('mousedown', this._linkIncludesMouseDown, true);
+      if (this._linkIncludesMouseMove) wrapper.removeEventListener('mousemove', this._linkIncludesMouseMove);
+      if (this._linkIncludesKeyUp)     document.removeEventListener('keyup', this._linkIncludesKeyUp);
+      this._linkIncludesMouseDown = null;
+      this._linkIncludesMouseMove = null;
+      this._linkIncludesKeyUp     = null;
+      wrapper.classList.remove('cm-link-includes-active');
+    }
+
+    // Returns {slug, kind} if the given char position is inside an
+    // include-shaped tag on the line; null otherwise. Same set of
+    // patterns as parseIncludeSlugs() so both stay aligned.
+    _findIncludeAtPos(line, ch) {
+      const patterns = [
+        { re: /\{%\s*include\s+["']([^"']+)["']\s*%\}/g,                   kind: 'include' },
+        { re: /\{%\s*from\s+["']([^"']+)["']\s+import\s+[^%]+%\}/g,        kind: 'from'    },
+        { re: /\{%\s*import\s+["']([^"']+)["']\s+as\s+\w+\s*%\}/g,         kind: 'import'  },
+        { re: /\{%\s*extends\s+["']([^"']+)["']\s*%\}/g,                   kind: 'extends' },
+      ];
+      for (let i = 0; i < patterns.length; i++) {
+        const re = new RegExp(patterns[i].re.source, 'g');
+        let m;
+        while ((m = re.exec(line)) !== null) {
+          const start = m.index;
+          const end   = m.index + m[0].length;
+          if (ch >= start && ch <= end) {
+            return { slug: m[1], kind: patterns[i].kind };
+          }
+        }
+      }
+      return null;
     }
 
     async loadAssets(theme, mode) {

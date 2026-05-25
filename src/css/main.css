@@ -10414,6 +10414,15 @@
                     0 0 4px 1px rgba(255, 255, 255, 0.35);
     }
 
+    /* link-includes (Phase 3 Round 2): when the modifier key is held
+       over an include tag, the editor wrapper gets this class so the
+       cursor flips to pointer. JS toggles the class on mousemove. */
+    .CodeMirror.cm-link-includes-active,
+    .CodeMirror.cm-link-includes-active .CodeMirror-lines,
+    .CodeMirror.cm-link-includes-active .CodeMirror-line {
+        cursor: pointer !important;
+    }
+
     /* wc-step-outline — companion panel for wc-code-mirror[step-gutter].
        Renders a clickable list of {% call step %} blocks from the target
        editor. Same palette as the gutter bands so the two views line up

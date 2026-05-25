@@ -10021,6 +10021,11 @@
   .CodeMirror-gutter-elt > .cm-step-band.is-active {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55), 0 0 4px 1px rgba(255, 255, 255, 0.35);
   }
+  .CodeMirror.cm-link-includes-active,
+  .CodeMirror.cm-link-includes-active .CodeMirror-lines,
+  .CodeMirror.cm-link-includes-active .CodeMirror-line {
+    cursor: pointer !important;
+  }
   wc-step-outline {
     display: block;
     height: 100%;
