@@ -3895,6 +3895,44 @@ if (!customElements.get("wc-code-mirror")) {
       });
       return ranges;
     }
+    /**
+     * Parse the editor's current value for Pongo2/Nunjucks include tags.
+     * Returns [{slug, kind, line}] where:
+     *   kind = "include" | "from" | "import" | "extends"
+     *   line = 0-indexed line number where the tag appears
+     *
+     * Used by wc-step-outline's INCLUDES section (Phase 3 Round 1) and
+     * by wc-code-mirror[link-includes]'s modifier-click jump
+     * (Phase 3 Round 2). Same regex shape as node-playwright's
+     * extractIncludeStatements so the two sides stay aligned.
+     */
+    parseIncludeSlugs(text) {
+      const result = [];
+      if (!text) return result;
+      const patterns = [
+        { re: /\{%\s*include\s+["']([^"']+)["']\s*%\}/g, kind: "include" },
+        { re: /\{%\s*from\s+["']([^"']+)["']\s+import\s+[^%]+%\}/g, kind: "from" },
+        { re: /\{%\s*import\s+["']([^"']+)["']\s+as\s+\w+\s*%\}/g, kind: "import" },
+        { re: /\{%\s*extends\s+["']([^"']+)["']\s*%\}/g, kind: "extends" }
+      ];
+      const lines = String(text).split("\n");
+      const seen = /* @__PURE__ */ new Set();
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        for (let p = 0; p < patterns.length; p++) {
+          const re = new RegExp(patterns[p].re.source, "g");
+          let m;
+          while ((m = re.exec(line)) !== null) {
+            const slug = m[1];
+            const key = slug + "@" + i;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            result.push({ slug, kind: patterns[p].kind, line: i });
+          }
+        }
+      }
+      return result;
+    }
     // ── step-gutter attribute auto-wiring ──────────────────────────────
     // Turn on automatic parsing of {% call step %} blocks + debounced
     // re-parse on every edit, painting bands via setStepBands().
@@ -4300,6 +4338,12 @@ if (!customElements.get("wc-step-outline")) {
       }
     }
     // ── Wire-up lifecycle ────────────────────────────────────────────────
+    // Scope queries to the closest tab/form so multi-tab PilotStudio
+    // doesn't have one outline binding to another tab's editor. Falls
+    // back to document if no tab/form ancestor (e.g. standalone usage).
+    _findScopeRoot() {
+      return this.closest("wc-tab-item") || this.closest("form") || document;
+    }
     _installReadyListener() {
       if (this._readyHandler) return;
       const self = this;
@@ -4310,6 +4354,8 @@ if (!customElements.get("wc-step-outline")) {
         const ed = e.detail.editor;
         if (!ed || typeof ed.getWrapperElement !== "function") return;
         const wcEl = ed.getWrapperElement().closest("wc-code-mirror");
+        const scope = self._findScopeRoot();
+        if (scope !== document && wcEl && !scope.contains(wcEl)) return;
         self._attach(wcEl, ed);
       };
       document.body.addEventListener("wccodemirrorready", this._readyHandler);
@@ -4317,7 +4363,8 @@ if (!customElements.get("wc-step-outline")) {
     _tryWireUp() {
       const targetName = this.getAttribute("for");
       if (!targetName) return;
-      const wcEl = document.querySelector('wc-code-mirror[name="' + targetName + '"]');
+      const scope = this._findScopeRoot();
+      const wcEl = scope.querySelector('wc-code-mirror[name="' + targetName + '"]');
       if (wcEl && wcEl.editor) {
         this._attach(wcEl, wcEl.editor);
       }
@@ -4532,6 +4579,53 @@ if (!customElements.get("wc-step-outline")) {
         }
       }
       const frag = document.createDocumentFragment();
+      const includeSlugs = typeof this._targetWcEl.parseIncludeSlugs === "function" ? this._targetWcEl.parseIncludeSlugs(this._targetEditor.getValue()) : [];
+      const navIncludes = includeSlugs.filter(function(it) {
+        return it.slug && it.slug !== "macros_step";
+      });
+      if (navIncludes.length > 0) {
+        const incHeader = document.createElement("div");
+        incHeader.className = "wc-step-outline-header";
+        const incTitle = document.createElement("span");
+        incTitle.textContent = "Includes";
+        incHeader.appendChild(incTitle);
+        const incCount = document.createElement("span");
+        incCount.className = "wc-step-outline-count";
+        incCount.textContent = String(navIncludes.length);
+        incHeader.appendChild(incCount);
+        frag.appendChild(incHeader);
+        const selfRef = this;
+        for (let k = 0; k < navIncludes.length; k++) {
+          const inc = navIncludes[k];
+          const row = document.createElement("div");
+          row.className = "wc-step-outline-include-row";
+          row.title = inc.kind + ' "' + inc.slug + '" \u2014 line ' + (inc.line + 1);
+          const icon = document.createElement("wc-fa-icon");
+          icon.setAttribute("name", "puzzle-piece");
+          icon.setAttribute("size", "0.7rem");
+          icon.className = "wc-step-outline-include-icon";
+          row.appendChild(icon);
+          const label = document.createElement("span");
+          label.className = "wc-step-outline-include-label";
+          label.textContent = inc.slug;
+          row.appendChild(label);
+          row.addEventListener("click", function() {
+            const ev = new CustomEvent("wc-step-outline:open-include", {
+              bubbles: true,
+              composed: true,
+              detail: { slug: inc.slug, kind: inc.kind, line: inc.line }
+            });
+            const accepted = selfRef.dispatchEvent(ev);
+            if (accepted && !ev.defaultPrevented) {
+              try {
+                selfRef._jumpToLine(inc.line);
+              } catch (_) {
+              }
+            }
+          });
+          frag.appendChild(row);
+        }
+      }
       const header = document.createElement("div");
       header.className = "wc-step-outline-header";
       const title = document.createElement("span");
@@ -4666,6 +4760,141 @@ if (!customElements.get("wc-step-outline")) {
     }
   }
   customElements.define("wc-step-outline", WcStepOutline);
+}
+
+// src/js/components/wc-step-palette.js
+if (!customElements.get("wc-step-palette")) {
+  const STEP_TYPES = [
+    { id: "nav", label: "nav" },
+    { id: "action", label: "action" },
+    { id: "input", label: "input" },
+    { id: "wait", label: "wait" },
+    { id: "loop", label: "loop" },
+    { id: "group", label: "group" },
+    { id: "function", label: "fn" },
+    { id: "screen", label: "screen" },
+    { id: "instrument", label: "inst" },
+    { id: "alert", label: "alert" }
+  ];
+  class WcStepPalette extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["id", "class", "for"];
+    }
+    static get is() {
+      return "wc-step-palette";
+    }
+    constructor() {
+      super();
+      this._targetEditor = null;
+      this._readyHandler = null;
+      const compEl = this.querySelector(".wc-step-palette");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-step-palette");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._installReadyListener();
+      this._tryWireUp();
+      this._render();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      if (this._readyHandler) {
+        document.body.removeEventListener("wccodemirrorready", this._readyHandler);
+        this._readyHandler = null;
+      }
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      if (attrName === "for") {
+        this._targetEditor = null;
+        this._tryWireUp();
+      } else {
+        super._handleAttributeChange(attrName, newValue, oldValue);
+      }
+    }
+    // ── Editor wire-up ───────────────────────────────────────────────────
+    _findScopeRoot() {
+      return this.closest("wc-tab-item") || this.closest("form") || document;
+    }
+    _installReadyListener() {
+      if (this._readyHandler) return;
+      const self = this;
+      this._readyHandler = function(e) {
+        const targetName = self.getAttribute("for");
+        if (!targetName) return;
+        if (!e.detail || e.detail.name !== targetName) return;
+        if (!e.detail.editor) return;
+        const ed = e.detail.editor;
+        const wcEl = typeof ed.getWrapperElement === "function" ? ed.getWrapperElement().closest("wc-code-mirror") : null;
+        const scope = self._findScopeRoot();
+        if (scope !== document && wcEl && !scope.contains(wcEl)) return;
+        self._targetEditor = ed;
+      };
+      document.body.addEventListener("wccodemirrorready", this._readyHandler);
+    }
+    _tryWireUp() {
+      const targetName = this.getAttribute("for");
+      if (!targetName) return;
+      const scope = this._findScopeRoot();
+      const wcEl = scope.querySelector('wc-code-mirror[name="' + targetName + '"]');
+      if (wcEl && wcEl.editor) this._targetEditor = wcEl.editor;
+    }
+    // ── Public API ───────────────────────────────────────────────────────
+    /**
+     * Insert a step skeleton of the given type at the target editor's
+     * cursor. Cursor lands inside the empty name="". Public so keyboard
+     * shortcuts (Cmd-Shift-I for input, etc., a future enhancement) can
+     * call directly.
+     */
+    insert(type) {
+      const editor = this._resolveEditor();
+      if (!editor) return false;
+      const t = String(type || "action").toLowerCase();
+      const skeleton = '{% call step(name="", type="' + t + '") %}\n  \n{% endcall %}\n';
+      const start = editor.getCursor();
+      editor.replaceRange(skeleton, start);
+      editor.setCursor({ line: start.line, ch: start.ch + 19 });
+      editor.focus();
+      return true;
+    }
+    // ── Resolve the live editor lazily, in case the cache went stale ─────
+    _resolveEditor() {
+      if (this._targetEditor) return this._targetEditor;
+      this._tryWireUp();
+      return this._targetEditor;
+    }
+    // ── Render ───────────────────────────────────────────────────────────
+    _render() {
+      const root = this.componentElement;
+      root.innerHTML = "";
+      const self = this;
+      for (let i = 0; i < STEP_TYPES.length; i++) {
+        const t = STEP_TYPES[i];
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "wc-step-palette-tile wc-step-palette-tile-" + t.id;
+        tile.dataset.type = t.id;
+        tile.title = "Insert " + t.id + " step at cursor";
+        const dot = document.createElement("span");
+        dot.className = "wc-step-palette-dot";
+        tile.appendChild(dot);
+        const label = document.createElement("span");
+        label.className = "wc-step-palette-label";
+        label.textContent = t.label;
+        tile.appendChild(label);
+        tile.addEventListener("click", function() {
+          self.insert(t.id);
+        });
+        root.appendChild(tile);
+      }
+    }
+  }
+  customElements.define("wc-step-palette", WcStepPalette);
 }
 
 // src/js/components/wc-event-stream.js

@@ -99,6 +99,13 @@ if (!customElements.get('wc-step-outline')) {
 
     // ── Wire-up lifecycle ────────────────────────────────────────────────
 
+    // Scope queries to the closest tab/form so multi-tab PilotStudio
+    // doesn't have one outline binding to another tab's editor. Falls
+    // back to document if no tab/form ancestor (e.g. standalone usage).
+    _findScopeRoot() {
+      return this.closest('wc-tab-item') || this.closest('form') || document;
+    }
+
     _installReadyListener() {
       if (this._readyHandler) return;
       const self = this;
@@ -109,6 +116,11 @@ if (!customElements.get('wc-step-outline')) {
         const ed = e.detail.editor;
         if (!ed || typeof ed.getWrapperElement !== 'function') return;
         const wcEl = ed.getWrapperElement().closest('wc-code-mirror');
+        // Only attach if the new editor lives inside our scope —
+        // prevents this outline from rebinding to a sibling tab's
+        // editor when that tab fires its own ready event.
+        const scope = self._findScopeRoot();
+        if (scope !== document && wcEl && !scope.contains(wcEl)) return;
         self._attach(wcEl, ed);
       };
       // Wave CSS emits both `wccodemirrorready` (canonical) and
@@ -120,7 +132,8 @@ if (!customElements.get('wc-step-outline')) {
     _tryWireUp() {
       const targetName = this.getAttribute('for');
       if (!targetName) return;
-      const wcEl = document.querySelector('wc-code-mirror[name="' + targetName + '"]');
+      const scope = this._findScopeRoot();
+      const wcEl = scope.querySelector('wc-code-mirror[name="' + targetName + '"]');
       if (wcEl && wcEl.editor) {
         this._attach(wcEl, wcEl.editor);
       }
@@ -362,6 +375,67 @@ if (!customElements.get('wc-step-outline')) {
 
       // Build outline fragment off-DOM, then swap in — minimizes layout thrash.
       const frag = document.createDocumentFragment();
+
+      // Phase 3 Round 1: INCLUDES section — lists each fragment the open
+      // pilot pulls in via {% include %} / {% from %} / {% import %} /
+      // {% extends %}. Click a row to open that fragment as a new
+      // PilotStudio tab (handler wired in chunk-3).
+      const includeSlugs = (typeof this._targetWcEl.parseIncludeSlugs === 'function')
+        ? this._targetWcEl.parseIncludeSlugs(this._targetEditor.getValue())
+        : [];
+      // Filter out the macros file — it's not a fragment authors want to
+      // navigate to. Add more cosmetic filters here if needed.
+      const navIncludes = includeSlugs.filter(function (it) {
+        return it.slug && it.slug !== 'macros_step';
+      });
+      if (navIncludes.length > 0) {
+        const incHeader = document.createElement('div');
+        incHeader.className = 'wc-step-outline-header';
+        const incTitle = document.createElement('span');
+        incTitle.textContent = 'Includes';
+        incHeader.appendChild(incTitle);
+        const incCount = document.createElement('span');
+        incCount.className = 'wc-step-outline-count';
+        incCount.textContent = String(navIncludes.length);
+        incHeader.appendChild(incCount);
+        frag.appendChild(incHeader);
+        const selfRef = this;
+        for (let k = 0; k < navIncludes.length; k++) {
+          const inc = navIncludes[k];
+          const row = document.createElement('div');
+          row.className = 'wc-step-outline-include-row';
+          row.title = inc.kind + ' "' + inc.slug + '" — line ' + (inc.line + 1);
+
+          const icon = document.createElement('wc-fa-icon');
+          icon.setAttribute('name', 'puzzle-piece');
+          icon.setAttribute('size', '0.7rem');
+          icon.className = 'wc-step-outline-include-icon';
+          row.appendChild(icon);
+
+          const label = document.createElement('span');
+          label.className = 'wc-step-outline-include-label';
+          label.textContent = inc.slug;
+          row.appendChild(label);
+
+          // Click → dispatch a request for the host to open the fragment.
+          // The host (PilotStudio's chunk-3) catches this and calls
+          // psOpenPilot(slug). Falls back to setCursor if no host listens.
+          row.addEventListener('click', function () {
+            const ev = new CustomEvent('wc-step-outline:open-include', {
+              bubbles: true,
+              composed: true,
+              detail: { slug: inc.slug, kind: inc.kind, line: inc.line },
+            });
+            const accepted = selfRef.dispatchEvent(ev);
+            // If preventDefault wasn't called, the host took it. If no
+            // listener stopped it, fall back to jumping the cursor.
+            if (accepted && !ev.defaultPrevented) {
+              try { selfRef._jumpToLine(inc.line); } catch (_) {}
+            }
+          });
+          frag.appendChild(row);
+        }
+      }
 
       const header = document.createElement('div');
       header.className = 'wc-step-outline-header';

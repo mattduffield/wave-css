@@ -1193,6 +1193,45 @@ if (!customElements.get('wc-code-mirror')) {
       return ranges;
     }
 
+    /**
+     * Parse the editor's current value for Pongo2/Nunjucks include tags.
+     * Returns [{slug, kind, line}] where:
+     *   kind = "include" | "from" | "import" | "extends"
+     *   line = 0-indexed line number where the tag appears
+     *
+     * Used by wc-step-outline's INCLUDES section (Phase 3 Round 1) and
+     * by wc-code-mirror[link-includes]'s modifier-click jump
+     * (Phase 3 Round 2). Same regex shape as node-playwright's
+     * extractIncludeStatements so the two sides stay aligned.
+     */
+    parseIncludeSlugs(text) {
+      const result = [];
+      if (!text) return result;
+      const patterns = [
+        { re: /\{%\s*include\s+["']([^"']+)["']\s*%\}/g,                   kind: 'include' },
+        { re: /\{%\s*from\s+["']([^"']+)["']\s+import\s+[^%]+%\}/g,        kind: 'from'    },
+        { re: /\{%\s*import\s+["']([^"']+)["']\s+as\s+\w+\s*%\}/g,         kind: 'import'  },
+        { re: /\{%\s*extends\s+["']([^"']+)["']\s*%\}/g,                   kind: 'extends' },
+      ];
+      const lines = String(text).split("\n");
+      const seen = new Set();
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        for (let p = 0; p < patterns.length; p++) {
+          const re = new RegExp(patterns[p].re.source, 'g');
+          let m;
+          while ((m = re.exec(line)) !== null) {
+            const slug = m[1];
+            const key = slug + '@' + i;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            result.push({ slug: slug, kind: patterns[p].kind, line: i });
+          }
+        }
+      }
+      return result;
+    }
+
     // ── step-gutter attribute auto-wiring ──────────────────────────────
     // Turn on automatic parsing of {% call step %} blocks + debounced
     // re-parse on every edit, painting bands via setStepBands().
