@@ -10089,6 +10089,29 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
+  .wc-step-outline-pause {
+    flex-shrink: 0;
+    margin-left: 4px;
+    padding: 2px 4px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.22;
+    color: var(--text-2, #aaa);
+    transition: opacity 150ms ease, color 150ms ease;
+    line-height: 1;
+  }
+  .wc-step-outline-pause:hover {
+    opacity: 0.7;
+  }
+  .wc-step-outline-pause[aria-pressed=true] {
+    opacity: 1;
+    color: var(--wc-red-500);
+  }
+  .wc-step-outline-pause[aria-pressed=true]:hover {
+    opacity: 0.85;
+  }
   .wc-step-outline-row[data-depth="1"] {
     padding-left: 44px;
   }

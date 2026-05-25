@@ -4241,7 +4241,7 @@ if (!customElements.get("wc-code-mirror-context-menu")) {
 if (!customElements.get("wc-step-outline")) {
   class WcStepOutline extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "for", "events-from"];
+      return ["id", "class", "for", "events-from", "storage-key"];
     }
     static get is() {
       return "wc-step-outline";
@@ -4260,6 +4260,8 @@ if (!customElements.get("wc-step-outline")) {
       this._stepChangeHandler = null;
       this._flashTimer = null;
       this._currentRanges = [];
+      this._pausedStepNames = /* @__PURE__ */ new Set();
+      this._loadPausedSteps();
       const compEl = this.querySelector(".wc-step-outline");
       if (compEl) {
         this.componentElement = compEl;
@@ -4290,6 +4292,9 @@ if (!customElements.get("wc-step-outline")) {
       } else if (attrName === "events-from") {
         this._unsubscribeFromEventStream();
         this._subscribeToEventStream();
+      } else if (attrName === "storage-key") {
+        this._loadPausedSteps();
+        this._render();
       } else {
         super._handleAttributeChange(attrName, newValue, oldValue);
       }
@@ -4418,6 +4423,55 @@ if (!customElements.get("wc-step-outline")) {
       this._activeLine = null;
       this._render();
     }
+    /**
+     * Return the array of step names that have the pause toggle ON.
+     * Consumed by chunk-3's htmx:configRequest hook which appends these
+     * to the Debug button's request so the runtime pauses there.
+     */
+    getPausedStepNames() {
+      return Array.from(this._pausedStepNames || []);
+    }
+    // ── Pause-breakpoint state ───────────────────────────────────────────
+    _loadPausedSteps() {
+      this._pausedStepNames = /* @__PURE__ */ new Set();
+      const key = this.getAttribute("storage-key");
+      if (!key) return;
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          for (let i = 0; i < list.length; i++) this._pausedStepNames.add(String(list[i]));
+        }
+      } catch (_) {
+      }
+    }
+    _persistPausedSteps() {
+      const key = this.getAttribute("storage-key");
+      if (!key) return;
+      try {
+        const list = Array.from(this._pausedStepNames);
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch (_) {
+      }
+    }
+    _togglePauseAtStep(stepName, btn) {
+      if (!stepName) return;
+      if (this._pausedStepNames.has(stepName)) {
+        this._pausedStepNames.delete(stepName);
+        if (btn) {
+          btn.setAttribute("aria-pressed", "false");
+          btn.title = "Pause here in Debug";
+        }
+      } else {
+        this._pausedStepNames.add(stepName);
+        if (btn) {
+          btn.setAttribute("aria-pressed", "true");
+          btn.title = "Remove pause \u2014 currently set";
+        }
+      }
+      this._persistPausedSteps();
+    }
     // ── Stack ↔ ranges matching ──────────────────────────────────────────
     _matchStackToRanges(stack, ranges) {
       const matched = [];
@@ -4520,6 +4574,24 @@ if (!customElements.get("wc-step-outline")) {
           badge.className = "wc-step-outline-iter";
           badge.textContent = "\xD7" + iter;
           row.appendChild(badge);
+        }
+        const stepName = r.name || "";
+        if (stepName) {
+          const pauseBtn = document.createElement("button");
+          pauseBtn.type = "button";
+          pauseBtn.className = "wc-step-outline-pause";
+          const isPaused = this._pausedStepNames.has(stepName);
+          pauseBtn.setAttribute("aria-pressed", isPaused ? "true" : "false");
+          pauseBtn.title = isPaused ? "Remove pause \u2014 currently set" : "Pause here in Debug";
+          const icon = document.createElement("wc-fa-icon");
+          icon.setAttribute("name", "circle-pause");
+          icon.setAttribute("size", "0.9rem");
+          pauseBtn.appendChild(icon);
+          pauseBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            self._togglePauseAtStep(stepName, pauseBtn);
+          });
+          row.appendChild(pauseBtn);
         }
         row.addEventListener("click", function() {
           self._jumpToLine(r.startLine);
