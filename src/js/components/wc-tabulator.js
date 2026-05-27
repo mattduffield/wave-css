@@ -539,10 +539,14 @@ if (!customElements.get('wc-tabulator')) {
             if (hideLabels.length > 0) {
               this.rowMenu = this.rowMenu.filter(item => {
                 if (!item || !item.label) return true;
-                // createMenuLabel returns an HTML string with the label
-                // text; check substring match against each hide-target.
-                const labelStr = String(item.label);
-                return !hideLabels.some(h => labelStr.indexOf(h) >= 0);
+                // createMenuLabel returns an HTMLElement (a <span> with an
+                // icon + title child). textContent extracts the visible
+                // label text. If label is already a string (e.g. for menus
+                // built without an icon), use it directly.
+                const labelText = (typeof item.label === 'string')
+                  ? item.label
+                  : (item.label.textContent || '').trim();
+                return !hideLabels.some(h => labelText.indexOf(h) >= 0);
               });
             }
           }
