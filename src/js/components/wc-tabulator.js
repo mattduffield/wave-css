@@ -424,6 +424,7 @@ if (!customElements.get('wc-tabulator')) {
       const persistence = this.getAttribute('persistence');
       const headerVisible = this.getAttribute('header-visible');
       const rowContextMenu = this.getAttribute('row-context-menu');
+      const hideDefaultMenu = this.getAttribute('hide-default-menu');
       const placeholder = this.getAttribute('placeholder');
       const selectableRows = this.getAttribute('selectable-rows');
       const colFieldFormatter = this.getAttribute('col-field-formatter') || '{}';
@@ -527,6 +528,24 @@ if (!customElements.get('wc-tabulator')) {
       if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == 'true' ? true : false;
       if (rowContextMenu) {
         if (rowContextMenu == 'rowContextMenu') {
+          // Optionally strip specific built-in menu entries by their visible
+          // label, e.g. hide-default-menu="Delete Row,Clone Row". Custom
+          // <wc-tabulator-row-menu> children are added later in rowMenus
+          // and unaffected by this filter.
+          if (hideDefaultMenu) {
+            const hideLabels = hideDefaultMenu.split(',')
+              .map(s => s.trim())
+              .filter(s => s.length > 0);
+            if (hideLabels.length > 0) {
+              this.rowMenu = this.rowMenu.filter(item => {
+                if (!item || !item.label) return true;
+                // createMenuLabel returns an HTML string with the label
+                // text; check substring match against each hide-target.
+                const labelStr = String(item.label);
+                return !hideLabels.some(h => labelStr.indexOf(h) >= 0);
+              });
+            }
+          }
           options.rowContextMenu = this.rowMenu;
         }
       }
