@@ -18233,6 +18233,20 @@ if (!customElements.get("wc-tabulator")) {
                 const labelText = typeof item.label === "string" ? item.label : (item.label.textContent || "").trim();
                 return !hideLabels.some((h) => labelText.indexOf(h) >= 0);
               });
+              const cleaned = [];
+              for (const it of this.rowMenu) {
+                const isSep = it && it.separator === true;
+                if (isSep) {
+                  const last = cleaned[cleaned.length - 1];
+                  if (cleaned.length === 0) continue;
+                  if (last && last.separator === true) continue;
+                }
+                cleaned.push(it);
+              }
+              while (cleaned.length > 0 && cleaned[cleaned.length - 1] && cleaned[cleaned.length - 1].separator === true) {
+                cleaned.pop();
+              }
+              this.rowMenu = cleaned;
             }
           }
           options.rowContextMenu = this.rowMenu;

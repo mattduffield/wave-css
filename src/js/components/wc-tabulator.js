@@ -548,6 +548,23 @@ if (!customElements.get('wc-tabulator')) {
                   : (item.label.textContent || '').trim();
                 return !hideLabels.some(h => labelText.indexOf(h) >= 0);
               });
+              // Removing labelled items can leave orphan separators: a
+              // separator at the start/end of the list, or two separators
+              // adjacent with no labelled item between them. Collapse.
+              const cleaned = [];
+              for (const it of this.rowMenu) {
+                const isSep = it && it.separator === true;
+                if (isSep) {
+                  const last = cleaned[cleaned.length - 1];
+                  if (cleaned.length === 0) continue;          // leading
+                  if (last && last.separator === true) continue; // consecutive
+                }
+                cleaned.push(it);
+              }
+              while (cleaned.length > 0 && cleaned[cleaned.length - 1] && cleaned[cleaned.length - 1].separator === true) {
+                cleaned.pop();                                  // trailing
+              }
+              this.rowMenu = cleaned;
             }
           }
           options.rowContextMenu = this.rowMenu;
