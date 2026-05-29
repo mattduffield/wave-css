@@ -65,8 +65,18 @@
  *      Mirrors the `status` field onto `dataset.status` for CSS hooks.
  *
  *   data-bind-count="<countField>"
- *      Bind the element's textContent to the numeric count.
+ *      Bind the element's textContent to the numeric count. Use this on
+ *      a span/div/text element — NOT on a wc-fa-icon (the icon's contents
+ *      would be replaced with the number).
  *      Optional companions:
+ *        data-pulse-attr="<attr>"   — set this attribute when count > 0
+ *        data-pulse-class="<class>" — toggle this class when count > 0
+ *
+ *   data-pulse-when-field="<countField>"
+ *      Just toggle attribute/class when the field is > 0, WITHOUT touching
+ *      textContent. Use this on wc-fa-icons whose visual indication is the
+ *      pulse animation, not a numeric badge.
+ *      Required companion (one or both):
  *        data-pulse-attr="<attr>"   — set this attribute when count > 0
  *        data-pulse-class="<class>" — toggle this class when count > 0
  *
@@ -406,6 +416,13 @@ if (!customElements.get('wc-event-stream')) {
         this._applyBindCount(countEls[i]);
       }
 
+      // data-pulse-when-field — pulse attribute/class toggle WITHOUT
+      // touching textContent (for icons whose UI cue is the pulse).
+      const pulseEls = root.querySelectorAll('[data-pulse-when-field]');
+      for (let i = 0; i < pulseEls.length; i++) {
+        this._applyPulseWhen(pulseEls[i]);
+      }
+
       // data-show-when-field — visibility toggles
       const showEls = root.querySelectorAll('[data-show-when-field]');
       for (let i = 0; i < showEls.length; i++) {
@@ -464,6 +481,23 @@ if (!customElements.get('wc-event-stream')) {
       }
     }
 
+    _applyPulseWhen(el) {
+      const path = el.getAttribute('data-pulse-when-field');
+      if (!path) return;
+      const value = Number(this._readPath(this._runState, path) || 0);
+      const pulseAttr = el.getAttribute('data-pulse-attr');
+      const pulseClass = el.getAttribute('data-pulse-class');
+      const shouldPulse = value > 0;
+      if (pulseAttr) {
+        if (shouldPulse) el.setAttribute(pulseAttr, '');
+        else el.removeAttribute(pulseAttr);
+      }
+      if (pulseClass) {
+        if (shouldPulse) el.classList.add(pulseClass);
+        else el.classList.remove(pulseClass);
+      }
+    }
+
     _applyShowWhen(el) {
       const path = el.getAttribute('data-show-when-field');
       if (!path) return;
@@ -482,8 +516,16 @@ if (!customElements.get('wc-event-stream')) {
         case 'lte':   show = Number(value) <= Number(cmp);   break;
         default:      show = value != null && value !== '';  break;
       }
-      if (show) el.removeAttribute('hidden');
-      else el.setAttribute('hidden', '');
+      // Use inline `display: none` because attribute [hidden] has lower CSS
+      // specificity than a class selector (e.g. Tailwind `.flex`), so an
+      // element with `class="flex" hidden` still renders. Inline style wins.
+      if (show) {
+        el.removeAttribute('hidden');
+        el.style.removeProperty('display');
+      } else {
+        el.setAttribute('hidden', '');
+        el.style.display = 'none';
+      }
     }
 
     // ── Error-reload defense ──────────────────────────────────────────────

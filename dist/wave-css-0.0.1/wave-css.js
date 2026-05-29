@@ -5241,6 +5241,10 @@ if (!customElements.get("wc-event-stream")) {
       for (let i = 0; i < countEls.length; i++) {
         this._applyBindCount(countEls[i]);
       }
+      const pulseEls = root.querySelectorAll("[data-pulse-when-field]");
+      for (let i = 0; i < pulseEls.length; i++) {
+        this._applyPulseWhen(pulseEls[i]);
+      }
       const showEls = root.querySelectorAll("[data-show-when-field]");
       for (let i = 0; i < showEls.length; i++) {
         this._applyShowWhen(showEls[i]);
@@ -5294,6 +5298,22 @@ if (!customElements.get("wc-event-stream")) {
         else el.classList.remove(pulseClass);
       }
     }
+    _applyPulseWhen(el) {
+      const path = el.getAttribute("data-pulse-when-field");
+      if (!path) return;
+      const value = Number(this._readPath(this._runState, path) || 0);
+      const pulseAttr = el.getAttribute("data-pulse-attr");
+      const pulseClass = el.getAttribute("data-pulse-class");
+      const shouldPulse = value > 0;
+      if (pulseAttr) {
+        if (shouldPulse) el.setAttribute(pulseAttr, "");
+        else el.removeAttribute(pulseAttr);
+      }
+      if (pulseClass) {
+        if (shouldPulse) el.classList.add(pulseClass);
+        else el.classList.remove(pulseClass);
+      }
+    }
     _applyShowWhen(el) {
       const path = el.getAttribute("data-show-when-field");
       if (!path) return;
@@ -5330,8 +5350,13 @@ if (!customElements.get("wc-event-stream")) {
           show2 = value != null && value !== "";
           break;
       }
-      if (show2) el.removeAttribute("hidden");
-      else el.setAttribute("hidden", "");
+      if (show2) {
+        el.removeAttribute("hidden");
+        el.style.removeProperty("display");
+      } else {
+        el.setAttribute("hidden", "");
+        el.style.display = "none";
+      }
     }
     // ── Error-reload defense ──────────────────────────────────────────────
     // EventSource auto-reconnects on transient drops. If the server stays
