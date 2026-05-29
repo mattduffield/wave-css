@@ -5011,7 +5011,17 @@ if (!customElements.get("wc-step-palette")) {
 if (!customElements.get("wc-event-stream")) {
   class WcEventStream extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "src", "events"];
+      return [
+        "id",
+        "src",
+        "events",
+        // run-state mode + behavior knobs
+        "mode",
+        "scope",
+        "reload-on-error",
+        "reload-target",
+        "reload-trigger-event"
+      ];
     }
     static get is() {
       return "wc-event-stream";
@@ -5020,6 +5030,9 @@ if (!customElements.get("wc-event-stream")) {
       super();
       this.source = null;
       this._listeners = [];
+      this._errorReloadTimer = null;
+      this._hadSuccessfulEvent = false;
+      this._runState = {};
       const compEl = this.querySelector(".wc-event-stream");
       if (compEl) {
         this.componentElement = compEl;
@@ -5036,6 +5049,7 @@ if (!customElements.get("wc-event-stream")) {
     }
     disconnectedCallback() {
       super.disconnectedCallback();
+      this._clearErrorReloadTimer();
       this.close();
     }
     _handleAttributeChange(attrName, newValue, oldValue) {
@@ -5060,8 +5074,11 @@ if (!customElements.get("wc-event-stream")) {
       if (!src) return;
       const es = new EventSource(src);
       this.source = es;
+      this._hadSuccessfulEvent = false;
       const self = this;
       es.onopen = function() {
+        self._hadSuccessfulEvent = true;
+        self._clearErrorReloadTimer();
         self._dispatch("wc-event-stream:open", { src });
       };
       es.onerror = function(e) {
@@ -5069,8 +5086,13 @@ if (!customElements.get("wc-event-stream")) {
           readyState: es.readyState,
           src
         });
+        if (self._isRunStateMode() && !self._hadSuccessfulEvent) {
+          self._armErrorReloadTimer();
+        }
       };
       es.onmessage = function(msg) {
+        self._hadSuccessfulEvent = true;
+        self._clearErrorReloadTimer();
         self._dispatch("wc-event-stream:message", self._parsePayload(msg.data));
       };
       this._bindNamedEvents();
@@ -5086,6 +5108,7 @@ if (!customElements.get("wc-event-stream")) {
       } catch (_) {
       }
       this.source = null;
+      this._hadSuccessfulEvent = false;
       this._dispatch("wc-event-stream:close", {});
     }
     /**
@@ -5099,19 +5122,37 @@ if (!customElements.get("wc-event-stream")) {
     // ── Internals ─────────────────────────────────────────────────────────
     _eventNames() {
       const raw = this.getAttribute("events") || "";
-      return raw.split(",").map(function(s) {
+      const list = raw.split(",").map(function(s) {
         return s.trim();
       }).filter(Boolean);
+      if (this._isRunStateMode() && list.indexOf("run_update") === -1) {
+        list.push("run_update");
+      }
+      return list;
     }
     _bindNamedEvents() {
       if (!this.source) return;
       const self = this;
       this._listeners = [];
       const names = this._eventNames();
+      if (this._isRunStateMode() && names.indexOf("not_found") === -1) {
+        names.push("not_found");
+      }
       for (let i = 0; i < names.length; i++) {
         const name = names[i];
         const fn = function(msg) {
-          self._dispatch("wc-event-stream:" + name, self._parsePayload(msg.data));
+          self._hadSuccessfulEvent = true;
+          self._clearErrorReloadTimer();
+          const payload = self._parsePayload(msg.data);
+          self._dispatch("wc-event-stream:" + name, payload);
+          if (name === "run_update" && self._isRunStateMode()) {
+            self._applyRunUpdate(payload);
+          }
+          if (name === "not_found" && self._isRunStateMode()) {
+            self._clearErrorReloadTimer();
+            self.close();
+            self.removeAttribute("src");
+          }
         };
         this.source.addEventListener(name, fn);
         this._listeners.push({ name, fn });
@@ -5141,6 +5182,184 @@ if (!customElements.get("wc-event-stream")) {
         composed: true,
         detail
       }));
+    }
+    // ── Run-state mode ────────────────────────────────────────────────────
+    _isRunStateMode() {
+      return this.getAttribute("mode") === "run-state";
+    }
+    _scopeRoot() {
+      const sel = this.getAttribute("scope");
+      if (sel) {
+        const found = document.querySelector(sel);
+        if (found) return found;
+      }
+      return this.parentElement || document;
+    }
+    _applyRunUpdate(payload) {
+      if (!payload || typeof payload !== "object") return;
+      const fields = payload.fields || {};
+      const kind = payload.event;
+      if (kind === "snapshot") {
+        this._runState = Object.assign({}, fields);
+      } else if (kind === "delta" || kind === "complete") {
+        for (const k of Object.keys(fields)) {
+          if (k.endsWith("_appended")) continue;
+          this._runState[k] = fields[k];
+        }
+      }
+      this._dispatch("wc-event-stream:run-update", payload);
+      this._applyDomBindings(fields);
+      if (kind === "complete") {
+        const target = this.getAttribute("reload-target");
+        const evt = this.getAttribute("reload-trigger-event");
+        if (target && evt && window.htmx) {
+          try {
+            window.htmx.trigger(target, evt);
+          } catch (_) {
+          }
+        }
+        this.close();
+      }
+    }
+    // Walk the scope subtree and apply each declarative binding kind.
+    // `fields` is the payload's fields object — used for *_appended sub-
+    // events that aren't reflected in the mirror.
+    _applyDomBindings(fields) {
+      const root = this._scopeRoot();
+      if (!root || !root.querySelectorAll) return;
+      const bindFieldEls = root.querySelectorAll("[data-bind-field]");
+      for (let i = 0; i < bindFieldEls.length; i++) {
+        this._applyBindField(bindFieldEls[i]);
+      }
+      const statusEls = root.querySelectorAll("[data-bind-status]");
+      for (let i = 0; i < statusEls.length; i++) {
+        if (this._runState.status != null) {
+          statusEls[i].dataset.status = String(this._runState.status);
+        }
+      }
+      const countEls = root.querySelectorAll("[data-bind-count]");
+      for (let i = 0; i < countEls.length; i++) {
+        this._applyBindCount(countEls[i]);
+      }
+      const showEls = root.querySelectorAll("[data-show-when-field]");
+      for (let i = 0; i < showEls.length; i++) {
+        this._applyShowWhen(showEls[i]);
+      }
+    }
+    _readPath(obj, path) {
+      if (obj == null) return void 0;
+      const parts = String(path).split(".");
+      let cur = obj;
+      for (let i = 0; i < parts.length; i++) {
+        if (cur == null) return void 0;
+        cur = cur[parts[i]];
+      }
+      return cur;
+    }
+    _applyBindField(el) {
+      const path = el.getAttribute("data-bind-field");
+      if (!path) return;
+      const value = this._readPath(this._runState, path);
+      const attr = el.getAttribute("data-bind-attr");
+      if (attr) {
+        if (value == null || value === "") el.removeAttribute(attr);
+        else el.setAttribute(attr, String(value));
+        return;
+      }
+      if (el.tagName && el.tagName.toLowerCase().indexOf("wc-") === 0) {
+        if (value == null) el.setAttribute("value", "");
+        else el.setAttribute("value", String(value));
+        try {
+          el.value = value == null ? "" : value;
+        } catch (_) {
+        }
+        return;
+      }
+      el.textContent = value == null ? "" : String(value);
+    }
+    _applyBindCount(el) {
+      const path = el.getAttribute("data-bind-count");
+      if (!path) return;
+      const value = Number(this._readPath(this._runState, path) || 0);
+      el.textContent = String(value);
+      const pulseAttr = el.getAttribute("data-pulse-attr");
+      const pulseClass = el.getAttribute("data-pulse-class");
+      const shouldPulse = value > 0;
+      if (pulseAttr) {
+        if (shouldPulse) el.setAttribute(pulseAttr, "");
+        else el.removeAttribute(pulseAttr);
+      }
+      if (pulseClass) {
+        if (shouldPulse) el.classList.add(pulseClass);
+        else el.classList.remove(pulseClass);
+      }
+    }
+    _applyShowWhen(el) {
+      const path = el.getAttribute("data-show-when-field");
+      if (!path) return;
+      const op = (el.getAttribute("data-show-when-op") || "set").toLowerCase();
+      const value = this._readPath(this._runState, path);
+      const cmp = el.getAttribute("data-show-when-value");
+      let show2;
+      switch (op) {
+        case "set":
+          show2 = value != null && value !== "";
+          break;
+        case "unset":
+          show2 = value == null || value === "";
+          break;
+        case "eq":
+          show2 = String(value) === String(cmp);
+          break;
+        case "neq":
+          show2 = String(value) !== String(cmp);
+          break;
+        case "gt":
+          show2 = Number(value) > Number(cmp);
+          break;
+        case "gte":
+          show2 = Number(value) >= Number(cmp);
+          break;
+        case "lt":
+          show2 = Number(value) < Number(cmp);
+          break;
+        case "lte":
+          show2 = Number(value) <= Number(cmp);
+          break;
+        default:
+          show2 = value != null && value !== "";
+          break;
+      }
+      if (show2) el.removeAttribute("hidden");
+      else el.setAttribute("hidden", "");
+    }
+    // ── Error-reload defense ──────────────────────────────────────────────
+    // EventSource auto-reconnects on transient drops. If the server stays
+    // unreachable past the browser's retry interval (or the run record was
+    // deleted), the panel can sit stale forever. Arm a one-shot HTMX
+    // reload of the configured target if we don't see ANY successful
+    // event for 10 seconds after first error.
+    _armErrorReloadTimer() {
+      if (this._errorReloadTimer) return;
+      const target = this.getAttribute("reload-on-error");
+      if (!target) return;
+      const self = this;
+      this._errorReloadTimer = setTimeout(function() {
+        self._errorReloadTimer = null;
+        const evt = self.getAttribute("reload-trigger-event");
+        if (target && evt && window.htmx) {
+          try {
+            window.htmx.trigger(target, evt);
+          } catch (_) {
+          }
+        }
+      }, 1e4);
+    }
+    _clearErrorReloadTimer() {
+      if (this._errorReloadTimer) {
+        clearTimeout(this._errorReloadTimer);
+        this._errorReloadTimer = null;
+      }
     }
   }
   customElements.define("wc-event-stream", WcEventStream);
