@@ -65,6 +65,7 @@ if (!customElements.get('wc-step-palette')) {
       super();
       this._targetEditor = null;
       this._readyHandler = null;
+      this._collapsed    = false;
 
       const compEl = this.querySelector('.wc-step-palette');
       if (compEl) {
@@ -80,6 +81,7 @@ if (!customElements.get('wc-step-palette')) {
       super.connectedCallback();
       this._installReadyListener();
       this._tryWireUp();
+      this._loadCollapsedState();
       this._render();
     }
 
@@ -171,12 +173,78 @@ if (!customElements.get('wc-step-palette')) {
       return this._targetEditor;
     }
 
+    // ── Collapse state ───────────────────────────────────────────────────
+    // Persisted per `for=` target so each editor tab remembers independently.
+    // When collapsed, only the toggle stays visible and the host shrinks to
+    // a thin sliver (CSS rule on wc-step-palette[data-collapsed="true"]).
+
+    _storageKey() {
+      const k = this.getAttribute('for') || 'default';
+      return 'wc-step-palette-collapsed:' + k;
+    }
+
+    _loadCollapsedState() {
+      try {
+        this._collapsed = localStorage.getItem(this._storageKey()) === '1';
+      } catch (_) {
+        this._collapsed = false;
+      }
+      this._applyCollapsedAttr();
+    }
+
+    _persistCollapsedState() {
+      try {
+        if (this._collapsed) localStorage.setItem(this._storageKey(), '1');
+        else                 localStorage.removeItem(this._storageKey());
+      } catch (_) { /* storage quota / disabled — ignore */ }
+    }
+
+    _applyCollapsedAttr() {
+      if (this._collapsed) this.setAttribute('data-collapsed', 'true');
+      else                 this.removeAttribute('data-collapsed');
+    }
+
+    /**
+     * Toggle (or set, if `next` is passed) the collapsed state. Re-renders
+     * the tile column and dispatches `wc-step-palette:toggle-collapsed`
+     * with `{ collapsed }` so host layouts can react if needed.
+     */
+    toggleCollapsed(next) {
+      const target = (typeof next === 'boolean') ? next : !this._collapsed;
+      if (target === this._collapsed) return;
+      this._collapsed = target;
+      this._applyCollapsedAttr();
+      this._persistCollapsedState();
+      this._render();
+      this.dispatchEvent(new CustomEvent('wc-step-palette:toggle-collapsed', {
+        bubbles: true,
+        composed: true,
+        detail: { collapsed: this._collapsed },
+      }));
+    }
+
     // ── Render ───────────────────────────────────────────────────────────
 
     _render() {
       const root = this.componentElement;
       root.innerHTML = '';
       const self = this;
+
+      // Collapse toggle — always visible, even when collapsed.
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'wc-step-palette-toggle';
+      toggle.title = this._collapsed ? 'Expand step palette' : 'Collapse step palette';
+      toggle.setAttribute('aria-label', toggle.title);
+      toggle.setAttribute('aria-pressed', this._collapsed ? 'true' : 'false');
+      toggle.textContent = this._collapsed ? '»' : '«';
+      toggle.addEventListener('click', function () {
+        self.toggleCollapsed();
+      });
+      root.appendChild(toggle);
+
+      // Tiles are rendered always, but CSS hides them when collapsed.
+      // Keeps DOM stable across toggles and avoids reflow cost.
       for (let i = 0; i < STEP_TYPES.length; i++) {
         const t = STEP_TYPES[i];
         const tile = document.createElement('button');

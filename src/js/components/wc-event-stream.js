@@ -83,8 +83,10 @@
  *   data-show-when-field="<path>"
  *      Toggle the element's `hidden` attribute based on a condition.
  *      Optional companions:
- *        data-show-when-op="set|unset|eq|neq|gt|lt|gte|lte"   default "set"
- *        data-show-when-value="<value>"   used by eq/neq/gt/lt/gte/lte
+ *        data-show-when-op="set|unset|eq|neq|gt|lt|gte|lte|in|nin"   default "set"
+ *        data-show-when-value="<value>"
+ *          - eq/neq/gt/lt/gte/lte: scalar
+ *          - in/nin: pipe-separated list, e.g. "Run complete!|failed|terminated"
  *
  *  Custom event surface (in addition to existing wc-event-stream:* events):
  *
@@ -360,11 +362,22 @@ if (!customElements.get('wc-event-stream')) {
       if (kind === 'snapshot') {
         this._runState = Object.assign({}, fields);
       } else if (kind === 'delta' || kind === 'complete') {
-        // Merge scalar fields, drop *_appended aliases (they're consumed
-        // below as events, not stored in the mirror).
+        // Merge fields:
+        //   • *_appended aliases — consumed as event hooks, not stored.
+        //   • dotted keys (e.g. "data.bill_plan") — walk into the nested
+        //     mirror and set just that leaf, preserving siblings. This is
+        //     what makes customer-specific bindings auto-work: the server
+        //     emits whatever propName the pilot script writes via
+        //     setProp/setObjectId, and the client merges it deep without
+        //     a hardcoded field list.
+        //   • flat keys — assign at top level (matches snapshot replace).
         for (const k of Object.keys(fields)) {
           if (k.endsWith('_appended')) continue;
-          this._runState[k] = fields[k];
+          if (k.indexOf('.') >= 0) {
+            this._setPath(this._runState, k, fields[k]);
+          } else {
+            this._runState[k] = fields[k];
+          }
         }
       }
 
@@ -441,6 +454,24 @@ if (!customElements.get('wc-event-stream')) {
       return cur;
     }
 
+    // Walk a dotted path, creating intermediate objects as needed, and set
+    // the leaf to `value`. Counterpart to _readPath. Used by the delta merge
+    // so a server emit of `{"data.bill_plan": "12-Pay"}` lands as
+    // `_runState.data.bill_plan = "12-Pay"` without clobbering siblings.
+    _setPath(obj, path, value) {
+      if (obj == null) return;
+      const parts = String(path).split('.');
+      let cur = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const k = parts[i];
+        if (cur[k] == null || typeof cur[k] !== 'object') {
+          cur[k] = {};
+        }
+        cur = cur[k];
+      }
+      cur[parts[parts.length - 1]] = value;
+    }
+
     _applyBindField(el) {
       const path = el.getAttribute('data-bind-field');
       if (!path) return;
@@ -514,6 +545,16 @@ if (!customElements.get('wc-event-stream')) {
         case 'gte':   show = Number(value) >= Number(cmp);   break;
         case 'lt':    show = Number(value) <  Number(cmp);   break;
         case 'lte':   show = Number(value) <= Number(cmp);   break;
+        case 'in': {
+          const list = String(cmp || '').split('|');
+          show = list.indexOf(String(value)) >= 0;
+          break;
+        }
+        case 'nin': {
+          const list = String(cmp || '').split('|');
+          show = list.indexOf(String(value)) < 0;
+          break;
+        }
         default:      show = value != null && value !== '';  break;
       }
       // Use inline `display: none` because attribute [hidden] has lower CSS

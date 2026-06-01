@@ -1156,7 +1156,11 @@ if (!customElements.get('wc-code-mirror')) {
     parseStepBandRanges(text) {
       const ranges = [];
       if (!text) return ranges;
-      const STEP_OPEN_RE       = /\{%\s*call\s+step\s*\(([^)]*)\)\s*%\}/;
+      // Greedy `(.*)` so step names may contain parens
+      // (e.g. `name="Named Insured page (NC)"`). The trailing `\)\s*%\}`
+      // still anchors against the macro's own closing — only legal if a
+      // `) %}` appears on the same line after the opening `(`.
+      const STEP_OPEN_RE       = /\{%\s*call\s+step\s*\((.*)\)\s*%\}/;
       const OTHER_CALL_OPEN_RE = /\{%\s*call\s+(?!step\b)[A-Za-z_][\w.]*/;
       const ENDCALL_RE         = /\{%\s*endcall\s*%\}/;
       const NAME_RE            = /\bname\s*=\s*["']([^"']*)["']/;

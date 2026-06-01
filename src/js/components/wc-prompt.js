@@ -225,7 +225,10 @@ if (!customElements.get('wc-prompt')) {
     async fire(c) {
       const body = document.querySelector('body');
       const theme = body.dataset.theme;
-      let defaultArgs = {
+      // These belong inside customClass per SweetAlert2's API — passing
+      // them at the top level triggers a "Unknown parameter" warning per
+      // key on every fire(). Match the nesting used by notify() / notifyTemplate().
+      const customClass = {
         container: '',
         popup: theme,
         header: '',
@@ -244,6 +247,9 @@ if (!customElements.get('wc-prompt')) {
         loader: '',
         footer: '',
         timerProgressBar: '',
+      };
+      let defaultArgs = {
+        customClass,
         backdrop: false,
         focusConfirm: false,
         showCancelButton: true,
@@ -259,7 +265,10 @@ if (!customElements.get('wc-prompt')) {
           }
         }
       };
-      const customArgs = { ...defaultArgs, ...c };
+      // `callback` is wc-prompt's own post-result hook — not a SweetAlert2
+      // option. Strip it before forwarding so SweetAlert2 doesn't warn.
+      const { callback: _wcCallback, ...passthru } = c;
+      const customArgs = { ...defaultArgs, ...passthru };
       const {value: result} = await Swal.fire(customArgs);
       return this.handleResult(c, result);
     }

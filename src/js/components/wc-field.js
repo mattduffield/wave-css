@@ -119,8 +119,27 @@ class WcField extends WcBaseComponent {
     } else if (attrName === 'label-class') {
       // Do nothing - handled in render
     } else if (attrName === 'value') {
-      // Re-render when value changes
-      this._render();
+      // `_renderWithValue()` removes the `value` attribute after consuming
+      // it (so reads of the attribute don't shadow the rendered text); that
+      // removal triggers this callback with newValue=null. We must NOT
+      // blank the just-rendered textContent in that case. A consumer that
+      // genuinely wants to clear the field calls `setAttribute('value','')`
+      // — newValue="" — which still flows through the update path below.
+      if (newValue === null) return;
+      // After initial render the `_render()` path early-returns when
+      // `.wc-field > *` exists, so runtime value updates (e.g. live SSE
+      // bindings via data-bind-field) would otherwise be silently
+      // dropped. Update the existing `.wc-field-value` textContent
+      // in place; fall back to `_render()` only when the value
+      // container hasn't been built yet (initial paint).
+      const valueEl = this.componentElement
+        ? this.componentElement.querySelector('.wc-field-value')
+        : null;
+      if (valueEl && (valueEl.children.length === 0 || valueEl.firstChild.nodeType === Node.TEXT_NODE)) {
+        valueEl.textContent = String(newValue);
+      } else {
+        this._render();
+      }
     } else if (attrName === 'value-class') {
       // Do nothing - handled in render
     } else if (attrName === 'link') {

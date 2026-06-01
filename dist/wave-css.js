@@ -3861,7 +3861,7 @@ if (!customElements.get("wc-code-mirror")) {
     parseStepBandRanges(text) {
       const ranges = [];
       if (!text) return ranges;
-      const STEP_OPEN_RE = /\{%\s*call\s+step\s*\(([^)]*)\)\s*%\}/;
+      const STEP_OPEN_RE = /\{%\s*call\s+step\s*\((.*)\)\s*%\}/;
       const OTHER_CALL_OPEN_RE = /\{%\s*call\s+(?!step\b)[A-Za-z_][\w.]*/;
       const ENDCALL_RE = /\{%\s*endcall\s*%\}/;
       const NAME_RE = /\bname\s*=\s*["']([^"']*)["']/;
@@ -4897,6 +4897,7 @@ if (!customElements.get("wc-step-palette")) {
       super();
       this._targetEditor = null;
       this._readyHandler = null;
+      this._collapsed = false;
       const compEl = this.querySelector(".wc-step-palette");
       if (compEl) {
         this.componentElement = compEl;
@@ -4910,6 +4911,7 @@ if (!customElements.get("wc-step-palette")) {
       super.connectedCallback();
       this._installReadyListener();
       this._tryWireUp();
+      this._loadCollapsedState();
       this._render();
     }
     disconnectedCallback() {
@@ -4978,11 +4980,67 @@ if (!customElements.get("wc-step-palette")) {
       this._tryWireUp();
       return this._targetEditor;
     }
+    // ── Collapse state ───────────────────────────────────────────────────
+    // Persisted per `for=` target so each editor tab remembers independently.
+    // When collapsed, only the toggle stays visible and the host shrinks to
+    // a thin sliver (CSS rule on wc-step-palette[data-collapsed="true"]).
+    _storageKey() {
+      const k = this.getAttribute("for") || "default";
+      return "wc-step-palette-collapsed:" + k;
+    }
+    _loadCollapsedState() {
+      try {
+        this._collapsed = localStorage.getItem(this._storageKey()) === "1";
+      } catch (_) {
+        this._collapsed = false;
+      }
+      this._applyCollapsedAttr();
+    }
+    _persistCollapsedState() {
+      try {
+        if (this._collapsed) localStorage.setItem(this._storageKey(), "1");
+        else localStorage.removeItem(this._storageKey());
+      } catch (_) {
+      }
+    }
+    _applyCollapsedAttr() {
+      if (this._collapsed) this.setAttribute("data-collapsed", "true");
+      else this.removeAttribute("data-collapsed");
+    }
+    /**
+     * Toggle (or set, if `next` is passed) the collapsed state. Re-renders
+     * the tile column and dispatches `wc-step-palette:toggle-collapsed`
+     * with `{ collapsed }` so host layouts can react if needed.
+     */
+    toggleCollapsed(next) {
+      const target = typeof next === "boolean" ? next : !this._collapsed;
+      if (target === this._collapsed) return;
+      this._collapsed = target;
+      this._applyCollapsedAttr();
+      this._persistCollapsedState();
+      this._render();
+      this.dispatchEvent(new CustomEvent("wc-step-palette:toggle-collapsed", {
+        bubbles: true,
+        composed: true,
+        detail: { collapsed: this._collapsed }
+      }));
+    }
     // ── Render ───────────────────────────────────────────────────────────
     _render() {
       const root = this.componentElement;
       root.innerHTML = "";
       const self = this;
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "wc-step-palette-toggle";
+      toggle.title = this._collapsed ? "Expand step palette" : "Collapse step palette";
+      toggle.setAttribute("aria-label", toggle.title);
+      toggle.setAttribute("aria-pressed", this._collapsed ? "true" : "false");
+      toggle.textContent = this._collapsed ? "\xBB" : "\xAB";
+      toggle.addEventListener("click", function() {
+        self.toggleCollapsed();
+      });
+      root.appendChild(toggle);
       for (let i = 0; i < STEP_TYPES.length; i++) {
         const t = STEP_TYPES[i];
         const tile = document.createElement("button");
@@ -5204,7 +5262,11 @@ if (!customElements.get("wc-event-stream")) {
       } else if (kind === "delta" || kind === "complete") {
         for (const k of Object.keys(fields)) {
           if (k.endsWith("_appended")) continue;
-          this._runState[k] = fields[k];
+          if (k.indexOf(".") >= 0) {
+            this._setPath(this._runState, k, fields[k]);
+          } else {
+            this._runState[k] = fields[k];
+          }
         }
       }
       this._dispatch("wc-event-stream:run-update", payload);
@@ -5259,6 +5321,23 @@ if (!customElements.get("wc-event-stream")) {
         cur = cur[parts[i]];
       }
       return cur;
+    }
+    // Walk a dotted path, creating intermediate objects as needed, and set
+    // the leaf to `value`. Counterpart to _readPath. Used by the delta merge
+    // so a server emit of `{"data.bill_plan": "12-Pay"}` lands as
+    // `_runState.data.bill_plan = "12-Pay"` without clobbering siblings.
+    _setPath(obj, path, value) {
+      if (obj == null) return;
+      const parts = String(path).split(".");
+      let cur = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const k = parts[i];
+        if (cur[k] == null || typeof cur[k] !== "object") {
+          cur[k] = {};
+        }
+        cur = cur[k];
+      }
+      cur[parts[parts.length - 1]] = value;
     }
     _applyBindField(el) {
       const path = el.getAttribute("data-bind-field");
@@ -5346,6 +5425,16 @@ if (!customElements.get("wc-event-stream")) {
         case "lte":
           show2 = Number(value) <= Number(cmp);
           break;
+        case "in": {
+          const list = String(cmp || "").split("|");
+          show2 = list.indexOf(String(value)) >= 0;
+          break;
+        }
+        case "nin": {
+          const list = String(cmp || "").split("|");
+          show2 = list.indexOf(String(value)) < 0;
+          break;
+        }
         default:
           show2 = value != null && value !== "";
           break;
@@ -7672,7 +7761,13 @@ var WcField = class extends WcBaseComponent {
       this._render();
     } else if (attrName === "label-class") {
     } else if (attrName === "value") {
-      this._render();
+      if (newValue === null) return;
+      const valueEl = this.componentElement ? this.componentElement.querySelector(".wc-field-value") : null;
+      if (valueEl && (valueEl.children.length === 0 || valueEl.firstChild.nodeType === Node.TEXT_NODE)) {
+        valueEl.textContent = String(newValue);
+      } else {
+        this._render();
+      }
     } else if (attrName === "value-class") {
     } else if (attrName === "link") {
       this._render();
@@ -18122,86 +18217,10 @@ if (!customElements.get("wc-tabulator")) {
       },
       {
         label: this.createMenuLabel("Clone Row", this.icons.clone),
-        action: (e, row) => {
-          const srcConn = this.getAttribute("data-conn-name") || "";
-          const srcDb = this.getAttribute("data-db-name") || "";
-          const srcColl = this.getAttribute("data-coll-name") || "";
-          const promptPayload = {
-            title: "Clone Record(s)",
-            icon: "info",
-            focusConfirm: false,
-            template: "template#clone-template",
-            didOpen: () => {
-              const cnt = document.querySelector(".swal2-container");
-              if (!cnt) return;
-              const setVal = (name, v) => {
-                const el = cnt.querySelector(`[name="${name}"]`);
-                if (el) el.value = v;
-              };
-              setVal("srcConnName", srcConn);
-              setVal("srcDbName", srcDb);
-              setVal("srcCollName", srcColl);
-              setVal("tgtCollName", srcColl);
-              fetch(`/api/clone-targets?srcConn=${encodeURIComponent(srcConn)}&srcDb=${encodeURIComponent(srcDb)}`, {
-                credentials: "same-origin"
-              }).then((r) => r.json()).then((data) => {
-                const srcLabel = cnt.querySelector("#cloneSourceLabel");
-                if (srcLabel) srcLabel.textContent = data.source?.label || `${srcConn} / ${srcDb}`;
-                const wcTgt = cnt.querySelector('wc-select[name="cloneTarget"]');
-                const innerSelect = wcTgt?.querySelector("select");
-                if (innerSelect) {
-                  const opts = (data.targets || []).map(
-                    (t) => `<option value="${t.db}" data-conn="${t.conn}" data-env="${t.env}">${t.label}</option>`
-                  ).join("");
-                  innerSelect.innerHTML = '<option value="">\u2014 select environment \u2014</option>' + opts;
-                  innerSelect.addEventListener("change", () => {
-                    const opt = innerSelect.options[innerSelect.selectedIndex];
-                    setVal("tgtConnName", opt.dataset.conn || "");
-                    setVal("tgtDbNames", opt.value || "");
-                  });
-                  if ((data.targets || []).length === 0) {
-                    const confirmBtn = Swal.getConfirmButton?.();
-                    if (confirmBtn) {
-                      confirmBtn.disabled = true;
-                      confirmBtn.title = "No accessible target environments. Contact your administrator.";
-                    }
-                  }
-                }
-              }).catch((err) => {
-                console.error("Failed to load clone targets:", err);
-              });
-              if (typeof htmx !== "undefined") htmx.process(cnt);
-              if (typeof _hyperscript !== "undefined") _hyperscript.processNode(cnt);
-            },
-            preConfirm: () => {
-              if (this.funcs && this.funcs["onClonePreConfirm"]) {
-                return this.funcs["onClonePreConfirm"](row);
-              }
-              const cnt = document.querySelector(".swal2-container");
-              const get = (name) => cnt?.querySelector(`[name="${name}"]`)?.value || "";
-              const tgtDb = get("tgtDbNames");
-              if (!get("tgtConnName") || !tgtDb) {
-                Swal.showValidationMessage("Pick a target environment first.");
-                return false;
-              }
-              return {
-                srcConnName: get("srcConnName"),
-                srcDbName: get("srcDbName"),
-                srcCollName: get("srcCollName"),
-                tgtConnName: get("tgtConnName"),
-                tgtDbNames: [tgtDb],
-                tgtCollName: get("tgtCollName"),
-                recordIds: [row._id || row.id]
-              };
-            },
-            callback: (result) => {
-              if (this.funcs["onClone"]) {
-                this.funcs["onClone"](row, result);
-              }
-            }
-          };
-          wc.Prompt.fire(promptPayload);
-        }
+        // Gated on the `enable-clone` attribute via the filter pass below
+        // (see options.rowContextMenu wiring). Default is opt-OUT so
+        // tables that don't opt in don't get a broken modal.
+        action: (e, row) => this._handleCloneRow(row)
       },
       {
         separator: true
@@ -18469,6 +18488,13 @@ if (!customElements.get("wc-tabulator")) {
       if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == "true" ? true : false;
       if (rowContextMenu) {
         if (rowContextMenu == "rowContextMenu") {
+          if (!this.hasAttribute("enable-clone")) {
+            this.rowMenu = this.rowMenu.filter((item) => {
+              if (!item || !item.label) return true;
+              const labelText = typeof item.label === "string" ? item.label : (item.label.textContent || "").trim();
+              return labelText.indexOf("Clone Row") === -1;
+            });
+          }
           if (hideDefaultMenu) {
             const hideLabels = hideDefaultMenu.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
             if (hideLabels.length > 0) {
@@ -18605,6 +18631,143 @@ if (!customElements.get("wc-tabulator")) {
           console.error("Attempted to create:", `return (${func})`);
         }
         el.innerHTML = "";
+      });
+    }
+    // _handleCloneRow runs the unified Clone Row flow:
+    //   1. Build a self-contained one-dropdown modal (no template ref).
+    //   2. GET /api/clone-targets (no source params — server resolves
+    //      source from the request's tenant context, scopes targets to
+    //      write-allowed entries).
+    //   3. On confirm, POST /api/clone-records and toast the result.
+    //
+    // Customization hooks preserved for app code:
+    //   funcs.onClonePreConfirm(row)  — override the payload built on OK.
+    //   funcs.onClone(row, result)    — override the POST/toast behavior.
+    //
+    // Source identity is server-resolved (it's always "the page the user
+    // is on"), so the host element no longer needs `data-conn-name` /
+    // `data-db-name` attributes. The collection comes from the
+    // `collection` attribute (preferred) or the legacy `data-coll-name`.
+    _handleCloneRow(row) {
+      const collection = this.getAttribute("collection") || this.getAttribute("data-coll-name") || "";
+      if (!collection) {
+        wc.Notify.showError("wc-tabulator is missing a `collection` attribute \u2014 cannot clone.");
+        return;
+      }
+      const rowData = typeof row.getData === "function" ? row.getData() : row;
+      let recordIds = [];
+      try {
+        const table = typeof row.getTable === "function" ? row.getTable() : null;
+        const selected = table && typeof table.getSelectedData === "function" ? table.getSelectedData() : [];
+        recordIds = (selected || []).map((d) => d && (d._id || d.id)).filter((id) => !!id);
+      } catch (_) {
+        recordIds = [];
+      }
+      if (recordIds.length === 0 && rowData) {
+        const single = rowData._id || rowData.id;
+        if (single) recordIds = [single];
+      }
+      if (recordIds.length === 0) {
+        wc.Notify.showError("No record id on this row \u2014 cannot clone.");
+        return;
+      }
+      const self = this;
+      const pageQuery = new URLSearchParams(window.location.search);
+      const tenantParam = pageQuery.get("tenant");
+      const tenantQs = tenantParam ? "?tenant=" + encodeURIComponent(tenantParam) : "";
+      const cloneTargetsUrl = "/api/clone-targets" + tenantQs;
+      const cloneRecordsUrl = "/api/clone-records" + tenantQs;
+      const countLabel = recordIds.length === 1 ? "1 record" : recordIds.length + " records";
+      wc.Prompt.fire({
+        title: recordIds.length > 1 ? "Clone Records" : "Clone Record",
+        icon: "info",
+        focusConfirm: false,
+        showCancelButton: true,
+        html: '<div style="text-align:left;margin-bottom:0.5rem"><strong>Source:</strong> <span id="cloneSourceLabel">\u2026</span></div><div style="text-align:left;margin-bottom:0.5rem"><strong>Cloning:</strong> ' + countLabel + '</div><label for="cloneTargetSel" style="display:block;text-align:left;margin-bottom:0.25rem"><strong>Target Environment *</strong></label><select id="cloneTargetSel" required style="width:100%;padding:0.5rem">  <option value="">Loading\u2026</option></select><div id="cloneStatus" style="margin-top:0.5rem;font-size:0.875rem;text-align:left;color:var(--text-2,#888)"></div>',
+        didOpen: () => {
+          const cnt = Swal.getHtmlContainer();
+          if (!cnt) return;
+          const sel = cnt.querySelector("#cloneTargetSel");
+          const srcLabel = cnt.querySelector("#cloneSourceLabel");
+          const status = cnt.querySelector("#cloneStatus");
+          fetch(cloneTargetsUrl, { credentials: "same-origin" }).then((r) => r.json()).then((data) => {
+            if (srcLabel) srcLabel.textContent = data.source && data.source.label || "(unknown)";
+            const targets = data.targets || [];
+            if (targets.length === 0) {
+              sel.innerHTML = '<option value="">\u2014 no accessible targets \u2014</option>';
+              sel.disabled = true;
+              if (status) status.textContent = "No environments you can write to. Contact your administrator.";
+              const btn = Swal.getConfirmButton && Swal.getConfirmButton();
+              if (btn) btn.disabled = true;
+              return;
+            }
+            sel.innerHTML = '<option value="">\u2014 select environment \u2014</option>' + targets.map(
+              (t) => `<option value="${t.db}" data-tenant-conn="${t.tenantConn}">${t.label}</option>`
+            ).join("");
+            if (targets.length === 1) {
+              sel.value = targets[0].db;
+            }
+          }).catch((err) => {
+            if (srcLabel) srcLabel.textContent = "(failed to load)";
+            if (status) status.textContent = "Failed to load targets: " + (err && err.message ? err.message : err);
+            const btn = Swal.getConfirmButton && Swal.getConfirmButton();
+            if (btn) btn.disabled = true;
+          });
+        },
+        preConfirm: () => {
+          if (self.funcs && self.funcs["onClonePreConfirm"]) {
+            return self.funcs["onClonePreConfirm"](row);
+          }
+          const cnt = Swal.getHtmlContainer();
+          const sel = cnt && cnt.querySelector("#cloneTargetSel");
+          const tgtDb = sel && sel.value;
+          const opt = sel && sel.options[sel.selectedIndex];
+          const tgtConn = opt && opt.dataset.tenantConn;
+          if (!tgtDb || !tgtConn) {
+            Swal.showValidationMessage("Pick a target environment first.");
+            return false;
+          }
+          return {
+            // src* deliberately omitted — server resolves source from the
+            // request's tenant context. Avoids the data-attr stamping
+            // requirement on every template.
+            tgtConnName: tgtConn,
+            tgtDbNames: [tgtDb],
+            tgtCollName: collection,
+            srcCollName: collection,
+            recordIds
+          };
+        },
+        callback: (result) => {
+          if (self.funcs && self.funcs["onClone"]) {
+            return self.funcs["onClone"](row, result);
+          }
+          if (!result || result === false) return;
+          const payload = typeof result === "object" && "value" in result ? result.value : result;
+          if (!payload || payload === false) return;
+          fetch(cloneRecordsUrl, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).then(async (resp) => {
+            if (!resp.ok) {
+              const text = await resp.text();
+              throw new Error(text || "HTTP " + resp.status);
+            }
+            return resp.json();
+          }).then(() => {
+            if (wc.Notify && wc.Notify.showSuccess) {
+              const n = payload.recordIds && payload.recordIds.length || 1;
+              const noun = n === 1 ? "Record" : n + " records";
+              wc.Notify.showSuccess(noun + " cloned to " + (payload.tgtDbNames && payload.tgtDbNames[0] || "target") + ".");
+            }
+          }).catch((err) => {
+            if (wc.Notify && wc.Notify.showError) {
+              wc.Notify.showError("Clone failed: " + (err && err.message ? err.message : err));
+            }
+          });
+        }
       });
     }
     getRowMenu() {
@@ -26657,7 +26820,7 @@ if (!customElements.get("wc-prompt")) {
     async fire(c) {
       const body = document.querySelector("body");
       const theme = body.dataset.theme;
-      let defaultArgs = {
+      const customClass = {
         container: "",
         popup: theme,
         header: "",
@@ -26675,7 +26838,10 @@ if (!customElements.get("wc-prompt")) {
         cancelButton: "theme-slate-storm",
         loader: "",
         footer: "",
-        timerProgressBar: "",
+        timerProgressBar: ""
+      };
+      let defaultArgs = {
+        customClass,
         backdrop: false,
         focusConfirm: false,
         showCancelButton: true,
@@ -26691,7 +26857,8 @@ if (!customElements.get("wc-prompt")) {
           }
         }
       };
-      const customArgs = { ...defaultArgs, ...c };
+      const { callback: _wcCallback, ...passthru } = c;
+      const customArgs = { ...defaultArgs, ...passthru };
       const { value: result } = await Swal.fire(customArgs);
       return this.handleResult(c, result);
     }
@@ -34358,6 +34525,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
   async connectedCallback() {
     super.connectedCallback();
     this._applyStyle();
+    requestAnimationFrame(() => this._setupDependentUrl());
   }
   get value() {
     const innerSelect = this.querySelector("select");
@@ -34433,36 +34601,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       this.formElement?.setAttribute("autofocus", "");
     } else if (attrName === "url") {
       if (newValue) {
-        fetch(newValue).then((response) => response.json()).then((data) => {
-          const resultsMember = this.getAttribute("results-member");
-          this._items = resultsMember ? data[resultsMember] : Array.isArray(data) ? data : data.results || data;
-          const sortAttr = this.getAttribute("sort");
-          if (sortAttr !== null) {
-            const displayMember = this.getAttribute("display-member") || "key";
-            const dir = sortAttr === "desc" ? -1 : 1;
-            this._items.sort(function(a, b) {
-              const aVal = String(typeof a === "object" ? a[displayMember] || "" : a).toLowerCase();
-              const bVal = String(typeof b === "object" ? b[displayMember] || "" : b).toLowerCase();
-              return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
-            });
-          }
-          this._generateOptionsFromItems();
-          this._items.forEach((item) => {
-            if (item.selected) {
-              const displayMember = this.getAttribute("display-member") || "key";
-              const valueMember = this.getAttribute("value-member") || "value";
-              if (!this.selectedOptions.includes(item[valueMember])) {
-                this.addChip(item[valueMember], item[displayMember]);
-              }
-            }
-          });
-          this._emitEvent("wcoptionsloaded", "optionsloaded", {
-            bubbles: true,
-            composed: true,
-            detail: { value: this.value, optionCount: this._items.length }
-          });
-          this._setReady();
-        });
+        this._loadOptionsFromUrl(newValue);
       }
     } else if (attrName === "items") {
       if (typeof newValue === "string") {
@@ -34630,6 +34769,106 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       this.removeAttribute("name");
     }
     this.attachEventListeners();
+  }
+  // Load options from a fully-resolved URL. Shared by the `url` attribute
+  // handler and the dependent-URL binding (data-url-template + data-url-depends).
+  _loadOptionsFromUrl(url) {
+    if (!url) return;
+    fetch(url).then((response) => response.json()).then((data) => {
+      const resultsMember = this.getAttribute("results-member");
+      if (data == null) data = [];
+      this._items = resultsMember ? data[resultsMember] || [] : Array.isArray(data) ? data : data.results || [];
+      if (!Array.isArray(this._items)) this._items = [];
+      const sortAttr = this.getAttribute("sort");
+      if (sortAttr !== null) {
+        const displayMember = this.getAttribute("display-member") || "key";
+        const dir = sortAttr === "desc" ? -1 : 1;
+        this._items.sort(function(a, b) {
+          const aVal = String(typeof a === "object" ? a[displayMember] || "" : a).toLowerCase();
+          const bVal = String(typeof b === "object" ? b[displayMember] || "" : b).toLowerCase();
+          return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
+        });
+      }
+      if (this.mode === "chip" && this._dependentUrlWired) {
+        this.selectedOptions = [];
+        const chipContainer = this.querySelector("#chipContainer");
+        if (chipContainer) chipContainer.innerHTML = "";
+      }
+      this._generateOptionsFromItems();
+      this._items.forEach((item) => {
+        if (item && item.selected) {
+          const displayMember = this.getAttribute("display-member") || "key";
+          const valueMember = this.getAttribute("value-member") || "value";
+          if (!this.selectedOptions.includes(item[valueMember])) {
+            this.addChip(item[valueMember], item[displayMember]);
+          }
+        }
+      });
+      this._emitEvent("wcoptionsloaded", "optionsloaded", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this.value, optionCount: this._items.length }
+      });
+      this._setReady();
+    });
+  }
+  // Wire a dependent URL: when another control (referenced by name/id via
+  // data-url-depends) changes, refetch options using the data-url-template
+  // with {value} substituted. Also fires once on init when the parent
+  // already has a value (covers pre-selected defaults that don't emit
+  // a change event). Documented as Pattern 7 in docs/SELECT-BINDING-PATTERNS.md;
+  // 22+ production templates depend on it.
+  _setupDependentUrl() {
+    if (this._dependentUrlWired) return;
+    const tpl = this.getAttribute("data-url-template");
+    const dep = this.getAttribute("data-url-depends");
+    if (!tpl || !dep) return;
+    this._dependentUrlWired = true;
+    const findParent = () => {
+      const root = this.closest('form, dialog, [role="dialog"], .swal2-container') || document;
+      const selector = `[name="${dep}"], #${CSS.escape(dep)}`;
+      return root.querySelector(selector) || document.querySelector(selector);
+    };
+    const fire = (val) => {
+      if (val === void 0 || val === null || val === "") return;
+      const url = tpl.replaceAll("{value}", encodeURIComponent(val));
+      this._loadOptionsFromUrl(url);
+    };
+    const tryWire = (attempt = 0) => {
+      const parent = findParent();
+      if (!parent) {
+        if (attempt < 5) {
+          requestAnimationFrame(() => tryWire(attempt + 1));
+        } else {
+          console.warn(`[wc-select] data-url-depends: parent "${dep}" not found in scope`);
+        }
+        return;
+      }
+      const parentWrapper = parent.tagName === "WC-SELECT" || parent.tagName === "WC-INPUT" ? parent : parent.closest("wc-select, wc-input") || null;
+      const parentInput = parent.tagName === "WC-SELECT" || parent.tagName === "WC-INPUT" ? parent.querySelector("select") || parent.querySelector("input") : parent;
+      if (!parentInput) {
+        if (attempt < 5) {
+          requestAnimationFrame(() => tryWire(attempt + 1));
+        }
+        return;
+      }
+      const readParentValue = () => {
+        if (parentInput.value) return parentInput.value;
+        if (parentWrapper && parentWrapper.getAttribute("value")) {
+          return parentWrapper.getAttribute("value");
+        }
+        return "";
+      };
+      parentInput.addEventListener("change", (e) => fire(e.target.value));
+      if (parentWrapper) {
+        parentWrapper.addEventListener("wcoptionsloaded", () => fire(readParentValue()), { once: false });
+      }
+      const initial = readParentValue();
+      if (initial) {
+        fire(initial);
+      }
+    };
+    tryWire();
   }
   _generateOptionsFromItems() {
     const displayMember = this.getAttribute("display-member") || "key";
@@ -35268,22 +35507,40 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     }
     selectElement.innerHTML = "";
     const children = Array.from(this.children);
-    children.forEach((child) => {
-      if (child.tagName === "OPTION") {
-        const opt = child.cloneNode(true);
+    const declaredOptionCount = children.filter((c) => c.tagName === "OPTION" || c.tagName === "OPTGROUP").length;
+    if (declaredOptionCount > 0) {
+      children.forEach((child) => {
+        if (child.tagName === "OPTION") {
+          const opt = child.cloneNode(true);
+          opt.selected = this.selectedOptions.includes(opt.value);
+          selectElement.appendChild(opt);
+        } else if (child.tagName === "OPTGROUP") {
+          const optgroup = child.cloneNode(false);
+          const groupOptions = child.querySelectorAll("option");
+          groupOptions.forEach((opt) => {
+            const option = opt.cloneNode(true);
+            option.selected = this.selectedOptions.includes(option.value);
+            optgroup.appendChild(option);
+          });
+          selectElement.appendChild(optgroup);
+        }
+      });
+    } else if (Array.isArray(this._items) && this._items.length > 0) {
+      const displayMember = this.getAttribute("display-member") || "key";
+      const valueMember = this.getAttribute("value-member") || "value";
+      this._items.forEach((item) => {
+        const opt = document.createElement("option");
+        if (typeof item === "object" && item !== null) {
+          opt.value = item[valueMember];
+          opt.textContent = item[displayMember];
+        } else {
+          opt.value = item;
+          opt.textContent = item;
+        }
         opt.selected = this.selectedOptions.includes(opt.value);
         selectElement.appendChild(opt);
-      } else if (child.tagName === "OPTGROUP") {
-        const optgroup = child.cloneNode(false);
-        const groupOptions = child.querySelectorAll("option");
-        groupOptions.forEach((opt) => {
-          const option = opt.cloneNode(true);
-          option.selected = this.selectedOptions.includes(option.value);
-          optgroup.appendChild(option);
-        });
-        selectElement.appendChild(optgroup);
-      }
-    });
+      });
+    }
     if (allowDynamic) {
       existingDynamicOptions.forEach(({ value, label }) => {
         const newOption = new Option(label, value);

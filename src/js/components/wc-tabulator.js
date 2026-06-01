@@ -117,106 +117,10 @@ if (!customElements.get('wc-tabulator')) {
       },
       {
         label: this.createMenuLabel('Clone Row', this.icons.clone),
-        action: (e, row) => {
-          // Auto-detect source from data attributes on the wc-tabulator element
-          const srcConn = this.getAttribute('data-conn-name') || '';
-          const srcDb = this.getAttribute('data-db-name') || '';
-          const srcColl = this.getAttribute('data-coll-name') || '';
-
-          const promptPayload = {
-            title: 'Clone Record(s)',
-            icon: 'info',
-            focusConfirm: false,
-            template: 'template#clone-template',
-            didOpen: () => {
-              const cnt = document.querySelector('.swal2-container');
-              if (!cnt) return;
-
-              // Helper to set hidden input values
-              const setVal = (name, v) => {
-                const el = cnt.querySelector(`[name="${name}"]`);
-                if (el) el.value = v;
-              };
-
-              // Populate hidden source inputs
-              setVal('srcConnName', srcConn);
-              setVal('srcDbName', srcDb);
-              setVal('srcCollName', srcColl);
-              setVal('tgtCollName', srcColl);
-
-              // Fetch valid clone targets
-              fetch(`/api/clone-targets?srcConn=${encodeURIComponent(srcConn)}&srcDb=${encodeURIComponent(srcDb)}`, {
-                credentials: 'same-origin',
-              })
-                .then(r => r.json())
-                .then(data => {
-                  // Source label
-                  const srcLabel = cnt.querySelector('#cloneSourceLabel');
-                  if (srcLabel) srcLabel.textContent = data.source?.label || `${srcConn} / ${srcDb}`;
-
-                  // Populate target dropdown
-                  const wcTgt = cnt.querySelector('wc-select[name="cloneTarget"]');
-                  const innerSelect = wcTgt?.querySelector('select');
-                  if (innerSelect) {
-                    const opts = (data.targets || []).map(t =>
-                      `<option value="${t.db}" data-conn="${t.conn}" data-env="${t.env}">${t.label}</option>`
-                    ).join('');
-                    innerSelect.innerHTML = '<option value="">— select environment —</option>' + opts;
-
-                    // When user picks a target, set hidden tgt inputs
-                    innerSelect.addEventListener('change', () => {
-                      const opt = innerSelect.options[innerSelect.selectedIndex];
-                      setVal('tgtConnName', opt.dataset.conn || '');
-                      setVal('tgtDbNames', opt.value || '');
-                    });
-
-                    // Disable Confirm if no targets
-                    if ((data.targets || []).length === 0) {
-                      const confirmBtn = Swal.getConfirmButton?.();
-                      if (confirmBtn) {
-                        confirmBtn.disabled = true;
-                        confirmBtn.title = 'No accessible target environments. Contact your administrator.';
-                      }
-                    }
-                  }
-                })
-                .catch(err => {
-                  console.error('Failed to load clone targets:', err);
-                });
-
-              // Process HTMX + Hyperscript on the dialog content
-              if (typeof htmx !== 'undefined') htmx.process(cnt);
-              if (typeof _hyperscript !== 'undefined') _hyperscript.processNode(cnt);
-            },
-            preConfirm: () => {
-              if (this.funcs && this.funcs['onClonePreConfirm']) {
-                return this.funcs['onClonePreConfirm'](row);
-              }
-              const cnt = document.querySelector('.swal2-container');
-              const get = name => cnt?.querySelector(`[name="${name}"]`)?.value || '';
-              const tgtDb = get('tgtDbNames');
-              if (!get('tgtConnName') || !tgtDb) {
-                Swal.showValidationMessage('Pick a target environment first.');
-                return false;
-              }
-              return {
-                srcConnName: get('srcConnName'),
-                srcDbName: get('srcDbName'),
-                srcCollName: get('srcCollName'),
-                tgtConnName: get('tgtConnName'),
-                tgtDbNames: [tgtDb],
-                tgtCollName: get('tgtCollName'),
-                recordIds: [row._id || row.id],
-              };
-            },
-            callback: (result) => {
-              if (this.funcs['onClone']) {
-                this.funcs['onClone'](row, result);
-              }
-            }
-          };
-          wc.Prompt.fire(promptPayload);
-        }
+        // Gated on the `enable-clone` attribute via the filter pass below
+        // (see options.rowContextMenu wiring). Default is opt-OUT so
+        // tables that don't opt in don't get a broken modal.
+        action: (e, row) => this._handleCloneRow(row),
       },
       {
         separator:true,
@@ -528,6 +432,20 @@ if (!customElements.get('wc-tabulator')) {
       if (headerVisible) options.headerVisible = headerVisible.toLowerCase() == 'true' ? true : false;
       if (rowContextMenu) {
         if (rowContextMenu == 'rowContextMenu') {
+          // Clone Row is opt-in via the `enable-clone` attribute. Without
+          // it, the menu entry is omitted entirely — better than showing
+          // a button that opens an empty-targets modal. Templates that
+          // need Clone Row add `enable-clone` to their <wc-tabulator>.
+          if (!this.hasAttribute('enable-clone')) {
+            this.rowMenu = this.rowMenu.filter(item => {
+              if (!item || !item.label) return true;
+              const labelText = (typeof item.label === 'string')
+                ? item.label
+                : (item.label.textContent || '').trim();
+              return labelText.indexOf('Clone Row') === -1;
+            });
+          }
+
           // Optionally strip specific built-in menu entries by their visible
           // label, e.g. hide-default-menu="Delete Row,Clone Row". Custom
           // <wc-tabulator-row-menu> children are added later in rowMenus
@@ -749,6 +667,180 @@ if (!customElements.get('wc-tabulator')) {
         }
 
         el.innerHTML = "";
+      });
+    }
+
+    // _handleCloneRow runs the unified Clone Row flow:
+    //   1. Build a self-contained one-dropdown modal (no template ref).
+    //   2. GET /api/clone-targets (no source params — server resolves
+    //      source from the request's tenant context, scopes targets to
+    //      write-allowed entries).
+    //   3. On confirm, POST /api/clone-records and toast the result.
+    //
+    // Customization hooks preserved for app code:
+    //   funcs.onClonePreConfirm(row)  — override the payload built on OK.
+    //   funcs.onClone(row, result)    — override the POST/toast behavior.
+    //
+    // Source identity is server-resolved (it's always "the page the user
+    // is on"), so the host element no longer needs `data-conn-name` /
+    // `data-db-name` attributes. The collection comes from the
+    // `collection` attribute (preferred) or the legacy `data-coll-name`.
+    _handleCloneRow(row) {
+      const collection = this.getAttribute('collection') || this.getAttribute('data-coll-name') || '';
+      if (!collection) {
+        wc.Notify.showError('wc-tabulator is missing a `collection` attribute — cannot clone.');
+        return;
+      }
+
+      // Multi-row semantics: prefer the table's selected rows over the
+      // right-clicked row. Matches the original template-level behavior
+      // (user_list etc. did `table.getSelectedData()` to clone all
+      // selected rows). When nothing is selected, fall back to the row
+      // the menu was opened on.
+      const rowData = (typeof row.getData === 'function') ? row.getData() : row;
+      let recordIds = [];
+      try {
+        const table = (typeof row.getTable === 'function') ? row.getTable() : null;
+        const selected = table && typeof table.getSelectedData === 'function' ? table.getSelectedData() : [];
+        recordIds = (selected || [])
+          .map(d => d && (d._id || d.id))
+          .filter(id => !!id);
+      } catch (_) {
+        recordIds = [];
+      }
+      if (recordIds.length === 0 && rowData) {
+        const single = rowData._id || rowData.id;
+        if (single) recordIds = [single];
+      }
+      if (recordIds.length === 0) {
+        wc.Notify.showError('No record id on this row — cannot clone.');
+        return;
+      }
+      const self = this;
+      // If the page URL carries a `?tenant=<slug>` (used for non-subdomain
+      // local-dev access), forward it to BOTH the targets GET and the
+      // clone POST — otherwise WithTenantRouting on those API requests
+      // can't see a tenant context and platform-admin source-defaulting
+      // bails. On real subdomain access (e.g. pegramins.localhost), the
+      // Host header carries the slug on every request and this is a
+      // no-op.
+      const pageQuery = new URLSearchParams(window.location.search);
+      const tenantParam = pageQuery.get('tenant');
+      const tenantQs = tenantParam ? ('?tenant=' + encodeURIComponent(tenantParam)) : '';
+      const cloneTargetsUrl = '/api/clone-targets' + tenantQs;
+      const cloneRecordsUrl = '/api/clone-records' + tenantQs;
+
+      const countLabel = recordIds.length === 1
+        ? '1 record'
+        : (recordIds.length + ' records');
+      wc.Prompt.fire({
+        title: recordIds.length > 1 ? 'Clone Records' : 'Clone Record',
+        icon: 'info',
+        focusConfirm: false,
+        showCancelButton: true,
+        html:
+          '<div style="text-align:left;margin-bottom:0.5rem"><strong>Source:</strong> <span id="cloneSourceLabel">…</span></div>' +
+          '<div style="text-align:left;margin-bottom:0.5rem"><strong>Cloning:</strong> ' + countLabel + '</div>' +
+          '<label for="cloneTargetSel" style="display:block;text-align:left;margin-bottom:0.25rem"><strong>Target Environment *</strong></label>' +
+          '<select id="cloneTargetSel" required style="width:100%;padding:0.5rem">' +
+          '  <option value="">Loading…</option>' +
+          '</select>' +
+          '<div id="cloneStatus" style="margin-top:0.5rem;font-size:0.875rem;text-align:left;color:var(--text-2,#888)"></div>',
+        didOpen: () => {
+          const cnt = Swal.getHtmlContainer();
+          if (!cnt) return;
+          const sel = cnt.querySelector('#cloneTargetSel');
+          const srcLabel = cnt.querySelector('#cloneSourceLabel');
+          const status = cnt.querySelector('#cloneStatus');
+          fetch(cloneTargetsUrl, { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(data => {
+              if (srcLabel) srcLabel.textContent = (data.source && data.source.label) || '(unknown)';
+              const targets = (data.targets || []);
+              if (targets.length === 0) {
+                sel.innerHTML = '<option value="">— no accessible targets —</option>';
+                sel.disabled = true;
+                if (status) status.textContent = 'No environments you can write to. Contact your administrator.';
+                const btn = Swal.getConfirmButton && Swal.getConfirmButton();
+                if (btn) btn.disabled = true;
+                return;
+              }
+              sel.innerHTML = '<option value="">— select environment —</option>' +
+                targets.map(t =>
+                  `<option value="${t.db}" data-tenant-conn="${t.tenantConn}">${t.label}</option>`
+                ).join('');
+              // Auto-select when there's exactly one target — agents in
+              // practice always have one option (Development).
+              if (targets.length === 1) {
+                sel.value = targets[0].db;
+              }
+            })
+            .catch(err => {
+              if (srcLabel) srcLabel.textContent = '(failed to load)';
+              if (status) status.textContent = 'Failed to load targets: ' + (err && err.message ? err.message : err);
+              const btn = Swal.getConfirmButton && Swal.getConfirmButton();
+              if (btn) btn.disabled = true;
+            });
+        },
+        preConfirm: () => {
+          if (self.funcs && self.funcs['onClonePreConfirm']) {
+            return self.funcs['onClonePreConfirm'](row);
+          }
+          const cnt = Swal.getHtmlContainer();
+          const sel = cnt && cnt.querySelector('#cloneTargetSel');
+          const tgtDb = sel && sel.value;
+          const opt = sel && sel.options[sel.selectedIndex];
+          const tgtConn = opt && opt.dataset.tenantConn;
+          if (!tgtDb || !tgtConn) {
+            Swal.showValidationMessage('Pick a target environment first.');
+            return false;
+          }
+          return {
+            // src* deliberately omitted — server resolves source from the
+            // request's tenant context. Avoids the data-attr stamping
+            // requirement on every template.
+            tgtConnName: tgtConn,
+            tgtDbNames: [tgtDb],
+            tgtCollName: collection,
+            srcCollName: collection,
+            recordIds,
+          };
+        },
+        callback: (result) => {
+          // App-level override gets the raw result (preserves the old
+          // hook for templates that wired their own POST + UX).
+          if (self.funcs && self.funcs['onClone']) {
+            return self.funcs['onClone'](row, result);
+          }
+          if (!result || result === false) return;
+          const payload = (typeof result === 'object' && 'value' in result) ? result.value : result;
+          if (!payload || payload === false) return;
+          fetch(cloneRecordsUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+            .then(async resp => {
+              if (!resp.ok) {
+                const text = await resp.text();
+                throw new Error(text || ('HTTP ' + resp.status));
+              }
+              return resp.json();
+            })
+            .then(() => {
+              if (wc.Notify && wc.Notify.showSuccess) {
+                const n = (payload.recordIds && payload.recordIds.length) || 1;
+                const noun = n === 1 ? 'Record' : (n + ' records');
+                wc.Notify.showSuccess(noun + ' cloned to ' + (payload.tgtDbNames && payload.tgtDbNames[0] || 'target') + '.');
+              }
+            })
+            .catch(err => {
+              if (wc.Notify && wc.Notify.showError) {
+                wc.Notify.showError('Clone failed: ' + (err && err.message ? err.message : err));
+              }
+            });
+        }
       });
     }
 

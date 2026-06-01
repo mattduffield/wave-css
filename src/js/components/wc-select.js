@@ -68,6 +68,11 @@ class WcSelect extends WcBaseFormComponent {
     super.connectedCallback();
 
     this._applyStyle();
+    // Wire data-url-depends → data-url-template binding (Pattern 7).
+    // Deferred to next frame so the parent control's inner <select>/<input>
+    // is in the DOM before we look it up (when both wc-selects are siblings
+    // in a freshly-rendered template).
+    requestAnimationFrame(() => this._setupDependentUrl());
     // console.log('connectedCallback:wc-select');
   }
 
@@ -166,39 +171,8 @@ class WcSelect extends WcBaseFormComponent {
       this.formElement?.setAttribute('autofocus', '');
     } else if (attrName === 'url') {
       if (newValue) {
-        fetch(newValue).then(response => response.json())
-          .then(data => {
-            const resultsMember = this.getAttribute('results-member');
-            this._items = resultsMember ? data[resultsMember] : (Array.isArray(data) ? data : data.results || data);
-            const sortAttr = this.getAttribute('sort');
-            if (sortAttr !== null) {
-              const displayMember = this.getAttribute('display-member') || 'key';
-              const dir = sortAttr === 'desc' ? -1 : 1;
-              this._items.sort(function(a, b) {
-                const aVal = String(typeof a === 'object' ? a[displayMember] || '' : a).toLowerCase();
-                const bVal = String(typeof b === 'object' ? b[displayMember] || '' : b).toLowerCase();
-                return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
-              });
-            }
-            this._generateOptionsFromItems();
-            this._items.forEach(item => {
-              if (item.selected) {
-                const displayMember = this.getAttribute('display-member') || 'key';
-                const valueMember = this.getAttribute('value-member') || 'value';
-                // Check if chip already exists to prevent duplicates
-                if (!this.selectedOptions.includes(item[valueMember])) {
-                  this.addChip(item[valueMember], item[displayMember]);
-                }
-              }
-            });
-            this._emitEvent('wcoptionsloaded', 'optionsloaded', {
-              bubbles: true,
-              composed: true,
-              detail: { value: this.value, optionCount: this._items.length }
-            });
-            this._setReady();
-          });
-      }           
+        this._loadOptionsFromUrl(newValue);
+      }
     } else if (attrName === 'items') {
       if (typeof newValue === 'string') {
         this._items = JSON.parse(newValue);
@@ -400,6 +374,141 @@ class WcSelect extends WcBaseFormComponent {
     }
 
     this.attachEventListeners();
+  }
+
+  // Load options from a fully-resolved URL. Shared by the `url` attribute
+  // handler and the dependent-URL binding (data-url-template + data-url-depends).
+  _loadOptionsFromUrl(url) {
+    if (!url) return;
+    fetch(url).then(response => response.json())
+      .then(data => {
+        const resultsMember = this.getAttribute('results-member');
+        // Server may return null/empty when the user has no access or
+        // the connection has no allowed target_dbs. Coerce to [] so the
+        // rest of the load path doesn't NPE.
+        if (data == null) data = [];
+        this._items = resultsMember ? (data[resultsMember] || []) : (Array.isArray(data) ? data : (data.results || []));
+        if (!Array.isArray(this._items)) this._items = [];
+        const sortAttr = this.getAttribute('sort');
+        if (sortAttr !== null) {
+          const displayMember = this.getAttribute('display-member') || 'key';
+          const dir = sortAttr === 'desc' ? -1 : 1;
+          this._items.sort(function(a, b) {
+            const aVal = String(typeof a === 'object' ? a[displayMember] || '' : a).toLowerCase();
+            const bVal = String(typeof b === 'object' ? b[displayMember] || '' : b).toLowerCase();
+            return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
+          });
+        }
+        // When re-fetching for a dependent URL change, clear any chips and
+        // selected-options from a previous parent value — otherwise stale
+        // chips from the old options would persist alongside the new set.
+        if (this.mode === 'chip' && this._dependentUrlWired) {
+          this.selectedOptions = [];
+          const chipContainer = this.querySelector('#chipContainer');
+          if (chipContainer) chipContainer.innerHTML = '';
+        }
+        this._generateOptionsFromItems();
+        this._items.forEach(item => {
+          if (item && item.selected) {
+            const displayMember = this.getAttribute('display-member') || 'key';
+            const valueMember = this.getAttribute('value-member') || 'value';
+            if (!this.selectedOptions.includes(item[valueMember])) {
+              this.addChip(item[valueMember], item[displayMember]);
+            }
+          }
+        });
+        this._emitEvent('wcoptionsloaded', 'optionsloaded', {
+          bubbles: true,
+          composed: true,
+          detail: { value: this.value, optionCount: this._items.length }
+        });
+        this._setReady();
+      });
+  }
+
+  // Wire a dependent URL: when another control (referenced by name/id via
+  // data-url-depends) changes, refetch options using the data-url-template
+  // with {value} substituted. Also fires once on init when the parent
+  // already has a value (covers pre-selected defaults that don't emit
+  // a change event). Documented as Pattern 7 in docs/SELECT-BINDING-PATTERNS.md;
+  // 22+ production templates depend on it.
+  _setupDependentUrl() {
+    if (this._dependentUrlWired) return;
+    const tpl = this.getAttribute('data-url-template');
+    const dep = this.getAttribute('data-url-depends');
+    if (!tpl || !dep) return;
+    this._dependentUrlWired = true;
+
+    const findParent = () => {
+      // Scope the lookup so multiple instances on the same page don't
+      // cross-bind. Prefer the nearest form/dialog/modal; fall back to
+      // document. Match either name= or id=.
+      const root = this.closest('form, dialog, [role="dialog"], .swal2-container') || document;
+      const selector = `[name="${dep}"], #${CSS.escape(dep)}`;
+      return root.querySelector(selector) || document.querySelector(selector);
+    };
+
+    const fire = (val) => {
+      if (val === undefined || val === null || val === '') return;
+      const url = tpl.replaceAll('{value}', encodeURIComponent(val));
+      this._loadOptionsFromUrl(url);
+    };
+
+    const tryWire = (attempt = 0) => {
+      const parent = findParent();
+      if (!parent) {
+        if (attempt < 5) {
+          requestAnimationFrame(() => tryWire(attempt + 1));
+        } else {
+          console.warn(`[wc-select] data-url-depends: parent "${dep}" not found in scope`);
+        }
+        return;
+      }
+      // The match might be the wc-select wrapper or its inner <select>/
+      // <input>. Listen on the actual form element so change events fire.
+      const parentWrapper = parent.tagName === 'WC-SELECT' || parent.tagName === 'WC-INPUT'
+        ? parent : parent.closest('wc-select, wc-input') || null;
+      const parentInput = parent.tagName === 'WC-SELECT' || parent.tagName === 'WC-INPUT'
+        ? (parent.querySelector('select') || parent.querySelector('input'))
+        : parent;
+      if (!parentInput) {
+        if (attempt < 5) {
+          requestAnimationFrame(() => tryWire(attempt + 1));
+        }
+        return;
+      }
+
+      // Resolve the parent's "current value" from three sources, in order
+      // of authority:
+      //   1. the inner <select>/<input>.value if it's actually populated
+      //   2. the wc-select wrapper's value= attribute (set declaratively
+      //      in the template, e.g. value="Development") — present even
+      //      before async options load
+      //   3. nothing yet — wait for wcoptionsloaded or change
+      const readParentValue = () => {
+        if (parentInput.value) return parentInput.value;
+        if (parentWrapper && parentWrapper.getAttribute('value')) {
+          return parentWrapper.getAttribute('value');
+        }
+        return '';
+      };
+
+      parentInput.addEventListener('change', (e) => fire(e.target.value));
+      // Also fire when the parent finishes async option loading — covers
+      // url-driven parents where the value= attribute is honored but the
+      // inner <select>'s `value` property isn't reliable until options
+      // are in the DOM. No change event fires in that case.
+      if (parentWrapper) {
+        parentWrapper.addEventListener('wcoptionsloaded', () => fire(readParentValue()), { once: false });
+      }
+      // Initial attempt: fire immediately if a value is already resolvable.
+      const initial = readParentValue();
+      if (initial) {
+        fire(initial);
+      }
+    };
+
+    tryWire();
   }
 
   _generateOptionsFromItems() {
@@ -1106,26 +1215,51 @@ class WcSelect extends WcBaseFormComponent {
     }
     
     selectElement.innerHTML = '';
-    
-    // Rebuild select maintaining optgroup structure
+
+    // Rebuild select maintaining optgroup structure. Source of truth:
+    //   1. Declared <option>/<optgroup> direct children (template-authored).
+    //   2. this._items (when options were loaded via `url` or
+    //      data-url-template) — without this, addChip would wipe the
+    //      URL-loaded options and the inner <select>.value would read
+    //      empty even with a visible chip.
     const children = Array.from(this.children);
-    children.forEach(child => {
-      if (child.tagName === 'OPTION') {
-        const opt = child.cloneNode(true);
+    const declaredOptionCount = children.filter(c => c.tagName === 'OPTION' || c.tagName === 'OPTGROUP').length;
+
+    if (declaredOptionCount > 0) {
+      children.forEach(child => {
+        if (child.tagName === 'OPTION') {
+          const opt = child.cloneNode(true);
+          opt.selected = this.selectedOptions.includes(opt.value);
+          selectElement.appendChild(opt);
+        } else if (child.tagName === 'OPTGROUP') {
+          const optgroup = child.cloneNode(false);
+          const groupOptions = child.querySelectorAll('option');
+          groupOptions.forEach(opt => {
+            const option = opt.cloneNode(true);
+            option.selected = this.selectedOptions.includes(option.value);
+            optgroup.appendChild(option);
+          });
+          selectElement.appendChild(optgroup);
+        }
+      });
+    } else if (Array.isArray(this._items) && this._items.length > 0) {
+      // URL-loaded mode: rebuild from _items so chip selections survive.
+      const displayMember = this.getAttribute('display-member') || 'key';
+      const valueMember = this.getAttribute('value-member') || 'value';
+      this._items.forEach(item => {
+        const opt = document.createElement('option');
+        if (typeof item === 'object' && item !== null) {
+          opt.value = item[valueMember];
+          opt.textContent = item[displayMember];
+        } else {
+          opt.value = item;
+          opt.textContent = item;
+        }
         opt.selected = this.selectedOptions.includes(opt.value);
         selectElement.appendChild(opt);
-      } else if (child.tagName === 'OPTGROUP') {
-        const optgroup = child.cloneNode(false);
-        const groupOptions = child.querySelectorAll('option');
-        groupOptions.forEach(opt => {
-          const option = opt.cloneNode(true);
-          option.selected = this.selectedOptions.includes(option.value);
-          optgroup.appendChild(option);
-        });
-        selectElement.appendChild(optgroup);
-      }
-    });
-    
+      });
+    }
+
     // Re-add dynamic options and ensure they're selected if needed
     if (allowDynamic) {
       existingDynamicOptions.forEach(({value, label}) => {
