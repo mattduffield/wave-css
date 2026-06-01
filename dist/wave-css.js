@@ -10880,10 +10880,13 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         this.cachedData = data;
         this.dataSource = source;
         this._broadcastChange(data, source);
+        this._maybeToast("success", data);
       }
     } catch (error) {
       console.error("wc-vin-decoder: Error decoding VIN:", error);
-      this._broadcastError(error.message || "Failed to decode VIN");
+      const msg = error.message || "Failed to decode VIN";
+      this._broadcastError(msg);
+      this._maybeToast("error", { error: msg });
     } finally {
       this.isDecoding = false;
       this._hideSpinner();
@@ -10923,7 +10926,8 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
       }
       const result = await response.json();
       if (!result.success || !result.data) {
-        throw new Error(result.errorText || "Failed to decode VIN");
+        const msg = result.data && result.data.error || result.error || result.errorText || result.message || "Failed to decode VIN";
+        throw new Error(msg);
       }
       return result.data;
     } catch (error) {
@@ -10958,6 +10962,23 @@ var WcVinDecoder = class _WcVinDecoder extends WcBaseFormComponent {
         error: message
       }
     });
+  }
+  // Surface success / error as Notify toasts. Default-on for instant
+  // user feedback after a VIN-field change; opt out by adding `no-toast`
+  // attribute when the page wires its own listener for vin-decoder:change
+  // / vin-decoder:error and renders feedback differently.
+  _maybeToast(kind, payload) {
+    if (this.hasAttribute("no-toast")) return;
+    if (typeof window === "undefined" || !window.wc || !window.wc.Notify) return;
+    if (kind === "success") {
+      const d = payload || {};
+      const desc = [d.year, d.make, d.model].filter(Boolean).join(" ");
+      const msg = desc ? "VIN decoded: " + desc : "VIN decoded";
+      window.wc.Notify.showSuccess(msg, 2500);
+    } else if (kind === "error") {
+      const e = payload && payload.error || "Failed to decode VIN";
+      window.wc.Notify.showError(e, 4e3);
+    }
   }
   _createTooltipElement() {
     const tooltip = this.getAttribute("tooltip");
