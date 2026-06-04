@@ -1254,6 +1254,46 @@
         "usage": "<wc-theme-selector></wc-theme-selector>"
       },
       {
+        "name": "wc-websocket",
+        "description": "Declarative WebSocket wrapper with auto-reconnect, keepalive, stale detection, per-type events, and slotted bindings",
+        "attributes": [
+          "src",
+          "auto-reconnect",
+          "reconnect-min-ms",
+          "reconnect-max-ms",
+          "connect-on-load",
+          "max-reconnect-attempts",
+          "reload-on-error",
+          "log-prefix",
+          "ping-interval-ms",
+          "parse-json",
+          "subprotocol",
+          "notify-on-stale"
+        ],
+        "events": {
+          "emits": [
+            "wc-ws:open",
+            "wc-ws:close",
+            "wc-ws:error",
+            "wc-ws:reconnecting",
+            "wc-ws:message",
+            "wc-ws:t:<type>",
+            "wc-ws:gave-up"
+          ]
+        },
+        "methods": [
+          "send(obj)",
+          "sendRaw(str)",
+          "connect()",
+          "close(reason)",
+          "reconnect()",
+          "isOpen()",
+          "isClosing()"
+        ],
+        "notes": "Mirrors wc-event-stream posture for WebSockets. Auto-derives ws/wss from page protocol. Exponential backoff reconnect (min 500ms, max 8s). Client ping/pong keepalive. Stale detection at 2x ping interval. Per-type events from msg.t field. Slotted bindings: data-on, data-bind, data-show-when, data-hide-when. HTMX swap-safe via htmx:beforeCleanupElement listener. Tab visibility reconnect. No visual rendering (display:none).",
+        "usage": "<wc-websocket src=\"/ws/my_endpoint\" log-prefix=\"[app]\" _=\"on wc-ws:t:update(msg) set #status's textContent to msg.status end\"></wc-websocket>"
+      },
+      {
         "name": "wc-hotkey",
         "description": "Keyboard shortcut binding that triggers click or custom action on target element",
         "attributes": [

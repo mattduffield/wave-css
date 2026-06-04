@@ -16,6 +16,7 @@ import './wc-code-mirror-context-menu.js';
 import './wc-step-outline.js';
 import './wc-step-palette.js';
 import './wc-event-stream.js';
+import './wc-websocket.js';
 import './wc-contact-card.js';
 import './wc-cron-picker.js';
 import './wc-contact-chip.js';

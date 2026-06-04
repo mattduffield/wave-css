@@ -215,6 +215,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 ### Non-UI Components
 - `wc-event-hub`: Event broadcasting system
 - `wc-event-handler`: Event handling
+- `wc-event-stream`: SSE wrapper with declarative bindings, run-state mode, auto-reconnect
+- `wc-websocket`: WebSocket wrapper; auto-reconnect with exponential backoff, client ping/pong keepalive, stale detection, per-type events (`wc-ws:t:<type>`), slotted bindings (`data-on`/`data-bind`/`data-show-when`/`data-hide-when`), HTMX swap-safe teardown, tab visibility reconnect
 - `wc-mask-hub`: Mask/overlay management
 - `wc-behavior`: Behavior attachment
 - `wc-visibility-change`: Visibility change detection
