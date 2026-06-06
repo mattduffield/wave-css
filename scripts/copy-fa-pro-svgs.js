@@ -236,6 +236,7 @@ const ICONS_TO_COPY = [
   "circle-chevron-right",
   "circle-chevron-up",
   "circle-dot",
+  "circle-down",
   "circle-ellipsis",
   "circle-ellipsis-vertical",
   "circle-exclamation",
