@@ -21,6 +21,7 @@ if (!customElements.get('wc-ai-bot')) {
         'bot-id',
         'mode',
         'model',
+        'provider',
         'system-prompt',
         'title',
         'placeholder',
@@ -426,6 +427,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._isMinimized = true;
       this._error = null;
       this._engine = null;
+      this._provider = null;           // resolved backend: 'webllm' | 'gemini-nano'
       this._modelProgress = 0;
       this._isUnsupported = false;
       this._unsupportedReason = '';
@@ -448,10 +450,15 @@ If the user's request is ambiguous, generate the most likely interpretation and 
 
     async _render() {
       this.classList.add('contents');
-      
-      // Check system capabilities before rendering
+
+      // Resolve which inference backend to use before any capability gating.
+      this._provider = await this._resolveProvider();
+
+      // Check system capabilities before rendering. Gemini Nano runs via Chrome's
+      // on-device model component (not WebGPU), so the GPU compatibility gate only
+      // applies to the WebLLM backend.
       const checkGPU = this.getAttribute('check-gpu-compatibility') !== 'false';
-      if (checkGPU && !(await this._checkSystemCapabilities())) {
+      if (this._provider !== 'gemini-nano' && checkGPU && !(await this._checkSystemCapabilities())) {
         // System doesn't meet requirements - render minimal fallback UI
         this._renderUnsupportedUI();
         return;
@@ -1057,8 +1064,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
 
     async _initializeModel() {
+      // Gemini Nano (Chrome built-in AI) has its own init path — no WebLLM download.
+      if (this._provider === 'gemini-nano') {
+        return this._initGeminiNano();
+      }
+
       let modelName = this.getAttribute('model');
-      
+
       // Auto-select model based on detected capability if not specified
       if (!modelName && this._detectedCapability) {
         if (this._detectedCapability === 'high' || this._detectedCapability === 'medium') {
@@ -1189,6 +1201,160 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       } catch (error) {
         if (progressTimeout) clearTimeout(progressTimeout);
         throw error;
+      }
+    }
+
+    // --- Provider Resolution (WebLLM vs Gemini Nano) ---
+
+    // Returns the Prompt API availability string, or 'unavailable' if the
+    // browser doesn't expose the built-in AI LanguageModel global at all.
+    // Values: 'available' | 'downloadable' | 'downloading' | 'unavailable'
+    async _isGeminiNanoAvailable() {
+      try {
+        if (!('LanguageModel' in self) || typeof self.LanguageModel.availability !== 'function') {
+          return 'unavailable';
+        }
+        return await self.LanguageModel.availability();
+      } catch (error) {
+        if (this.getAttribute('debug') === 'true') {
+          console.warn('[wc-ai-bot] Gemini Nano availability check failed:', error);
+        }
+        return 'unavailable';
+      }
+    }
+
+    // Decide which backend to use. provider="webllm" forces WebLLM,
+    // provider="gemini-nano" forces Nano (and will trigger a model download if
+    // needed), and provider="auto" (default) prefers Nano only when it is already
+    // downloaded so users never hit a surprise multi-GB download.
+    async _resolveProvider() {
+      const pref = (this.getAttribute('provider') || 'auto').toLowerCase();
+
+      if (pref === 'webllm') return 'webllm';
+
+      const nano = await this._isGeminiNanoAvailable();
+
+      if (pref === 'gemini-nano') {
+        // Explicit opt-in: use Nano unless the browser can't support it at all.
+        if (nano !== 'unavailable') return 'gemini-nano';
+        if (this.getAttribute('debug') === 'true') {
+          console.warn('[wc-ai-bot] provider="gemini-nano" requested but unavailable; falling back to WebLLM');
+        }
+        return 'webllm';
+      }
+
+      // auto: only prefer Nano when the model is ready (no surprise downloads).
+      if (nano === 'available') return 'gemini-nano';
+      return 'webllm';
+    }
+
+    async _initGeminiNano() {
+      const botId = this.getAttribute('bot-id') || 'default';
+
+      try {
+        this._updateStatus('Initializing Gemini Nano...');
+
+        const availability = await this._isGeminiNanoAvailable();
+        if (availability === 'unavailable') {
+          throw new Error('Gemini Nano is not available in this browser. Requires Chrome desktop with the built-in AI Prompt API enabled.');
+        }
+
+        // Probe-create a session. When the model still needs downloading this
+        // awaits the (multi-minute) download and reports progress; once resolved
+        // the on-device model is ready for per-message sessions.
+        const probe = await self.LanguageModel.create({
+          monitor: (m) => {
+            m.addEventListener('downloadprogress', (e) => {
+              const pct = Math.round((e.loaded || 0) * 100);
+              this._modelProgress = pct;
+              this._updateStatus(`Downloading Gemini Nano: ${pct}%`);
+            });
+          }
+        });
+        if (typeof probe.destroy === 'function') probe.destroy();
+
+        // Lightweight marker so readiness checks (and loadedModels parity) work.
+        this._engine = { type: 'gemini-nano' };
+        this._isModelReady = true;
+        this._sendButton.disabled = false;
+        this._updateStatus('');
+        this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: 'gemini-nano' });
+        localStorage.setItem('wc-ai-bot-success', 'true');
+
+      } catch (error) {
+        console.error('[wc-ai-bot] Failed to initialize Gemini Nano:', error);
+
+        // In auto/forced-nano mode, degrade gracefully to WebLLM rather than
+        // leaving the user with a dead bot.
+        if ((this.getAttribute('provider') || 'auto').toLowerCase() !== 'webllm') {
+          if (this.getAttribute('debug') === 'true') {
+            console.warn('[wc-ai-bot] Falling back to WebLLM after Gemini Nano init failure');
+          }
+          this._provider = 'webllm';
+          return this._initializeModel();
+        }
+
+        this._error = error.message;
+        this._updateStatus(`Error: ${error.message}`, 'error');
+        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
+      }
+    }
+
+    // --- Streaming Abstraction ---
+
+    // Streams a chat completion through the active backend, invoking onUpdate with
+    // the full accumulated response text on each delta. Returns the final text.
+    async _streamChat(messages, opts, onUpdate) {
+      if (this._provider === 'gemini-nano') {
+        return this._streamGeminiNano(messages, opts, onUpdate);
+      }
+      return this._streamWebLLM(messages, opts, onUpdate);
+    }
+
+    async _streamWebLLM(messages, { temperature, maxTokens }, onUpdate) {
+      const completion = await this._engine.chat.completions.create({
+        messages: messages,
+        temperature: temperature,
+        max_tokens: maxTokens,
+        stream: true
+      });
+
+      let response = '';
+      for await (const chunk of completion) {
+        response += chunk.choices[0].delta.content || '';
+        onUpdate(response);
+      }
+      return response;
+    }
+
+    async _streamGeminiNano(messages, { temperature }, onUpdate) {
+      // The Prompt API sets the system prompt + history at session creation and
+      // takes the latest turn via prompt(). Reuse the same messages array the
+      // WebLLM path builds: everything but the final user turn becomes the
+      // session's initialPrompts, the final turn is the prompt.
+      const initialPrompts = messages.slice(0, -1);
+      const last = messages[messages.length - 1];
+
+      const createOpts = {};
+      if (initialPrompts.length > 0) createOpts.initialPrompts = initialPrompts;
+      // temperature and topK must be set together when overriding sampling.
+      if (!Number.isNaN(temperature)) {
+        createOpts.temperature = temperature;
+        createOpts.topK = 3;
+      }
+
+      const session = await self.LanguageModel.create(createOpts);
+      try {
+        let response = '';
+        const stream = session.promptStreaming(last.content);
+        // Chrome 138+ yields incremental deltas (not cumulative).
+        for await (const chunk of stream) {
+          response += chunk;
+          onUpdate(response);
+        }
+        return response;
+      } finally {
+        if (typeof session.destroy === 'function') session.destroy();
       }
     }
 
@@ -1431,22 +1597,15 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         // Get completion
         const temperature = parseFloat(this.getAttribute('temperature') || '0.7');
         const maxTokens = parseInt(this.getAttribute('max-tokens') || '1000');
-        
-        const completion = await this._engine.chat.completions.create({
-          messages: messages,
-          temperature: temperature,
-          max_tokens: maxTokens,
-          stream: true
-        });
-        
-        // Handle streaming response
+
+        // Stream through the active backend (WebLLM or Gemini Nano). The callback
+        // receives the full accumulated text so the message bubble updates live.
         let response = '';
-        for await (const chunk of completion) {
-          const delta = chunk.choices[0].delta.content || '';
-          response += delta;
+        await this._streamChat(messages, { temperature, maxTokens }, (full) => {
+          response = full;
           this._updateMessage(loadingId, response);
-        }
-        
+        });
+
         // Log raw response to console if debug mode is enabled
         if (this.getAttribute('debug') === 'true') {
           console.log('[wc-ai-bot] Raw LLM response:', response);

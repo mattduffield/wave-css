@@ -3970,11 +3970,11 @@ if (!customElements.get("wc-code-mirror")) {
     }
     _installStepGutterChangeHandler() {
       if (this._stepGutterChangeHandler || !this.editor) return;
-      const self = this;
+      const self2 = this;
       this._stepGutterChangeHandler = function() {
-        clearTimeout(self._stepGutterDebounceTimer);
-        self._stepGutterDebounceTimer = setTimeout(function() {
-          self._applyStepGutterFromCurrentValue();
+        clearTimeout(self2._stepGutterDebounceTimer);
+        self2._stepGutterDebounceTimer = setTimeout(function() {
+          self2._applyStepGutterFromCurrentValue();
         }, 150);
       };
       this.editor.on("change", this._stepGutterChangeHandler);
@@ -4003,18 +4003,18 @@ if (!customElements.get("wc-code-mirror")) {
       if (this._linkIncludesMouseDown || !this.editor) return;
       const editor = this.editor;
       const wrapper = editor.getWrapperElement();
-      const self = this;
+      const self2 = this;
       this._linkIncludesMouseDown = function(e) {
         if (!(e.metaKey || e.ctrlKey)) return;
         const pos = editor.coordsChar({ left: e.clientX, top: e.clientY });
         if (!pos) return;
         const line = editor.getLine(pos.line);
         if (!line) return;
-        const hit = self._findIncludeAtPos(line, pos.ch);
+        const hit = self2._findIncludeAtPos(line, pos.ch);
         if (!hit) return;
         e.preventDefault();
         e.stopPropagation();
-        self.dispatchEvent(new CustomEvent("wc-code-mirror:open-include", {
+        self2.dispatchEvent(new CustomEvent("wc-code-mirror:open-include", {
           bubbles: true,
           composed: true,
           detail: { slug: hit.slug, kind: hit.kind, line: pos.line }
@@ -4031,7 +4031,7 @@ if (!customElements.get("wc-code-mirror")) {
           return;
         }
         const line = editor.getLine(pos.line);
-        const hit = line ? self._findIncludeAtPos(line, pos.ch) : null;
+        const hit = line ? self2._findIncludeAtPos(line, pos.ch) : null;
         if (hit) wrapper.classList.add("cm-link-includes-active");
         else wrapper.classList.remove("cm-link-includes-active");
       };
@@ -4456,17 +4456,17 @@ if (!customElements.get("wc-step-outline")) {
     }
     _installReadyListener() {
       if (this._readyHandler) return;
-      const self = this;
+      const self2 = this;
       this._readyHandler = function(e) {
-        const targetName = self.getAttribute("for");
+        const targetName = self2.getAttribute("for");
         if (!targetName) return;
         if (!e.detail || e.detail.name !== targetName) return;
         const ed = e.detail.editor;
         if (!ed || typeof ed.getWrapperElement !== "function") return;
         const wcEl = ed.getWrapperElement().closest("wc-code-mirror");
-        const scope = self._findScopeRoot();
+        const scope = self2._findScopeRoot();
         if (scope !== document && wcEl && !scope.contains(wcEl)) return;
-        self._attach(wcEl, ed);
+        self2._attach(wcEl, ed);
       };
       document.body.addEventListener("wccodemirrorready", this._readyHandler);
     }
@@ -4489,11 +4489,11 @@ if (!customElements.get("wc-step-outline")) {
       this._targetEditor = editor;
       this._targetWcEl = wcEl;
       this._render();
-      const self = this;
+      const self2 = this;
       this._changeHandler = function() {
-        clearTimeout(self._debounceTimer);
-        self._debounceTimer = setTimeout(function() {
-          self._render();
+        clearTimeout(self2._debounceTimer);
+        self2._debounceTimer = setTimeout(function() {
+          self2._render();
         }, 150);
       };
       editor.on("change", this._changeHandler);
@@ -4526,17 +4526,17 @@ if (!customElements.get("wc-step-outline")) {
       if (!id) return;
       const el = document.getElementById(id);
       if (!el) {
-        const self2 = this;
+        const self3 = this;
         setTimeout(function() {
-          if (!self2._eventStreamEl && self2.isConnected) self2._subscribeToEventStream();
+          if (!self3._eventStreamEl && self3.isConnected) self3._subscribeToEventStream();
         }, 50);
         return;
       }
       this._eventStreamEl = el;
-      const self = this;
+      const self2 = this;
       this._stepChangeHandler = function(e) {
         const detail = e.detail || {};
-        self.setActiveStack(Array.isArray(detail.stack) ? detail.stack : []);
+        self2.setActiveStack(Array.isArray(detail.stack) ? detail.stack : []);
       };
       el.addEventListener("wc-event-stream:step_change", this._stepChangeHandler);
     }
@@ -4755,7 +4755,7 @@ if (!customElements.get("wc-step-outline")) {
         root.appendChild(frag);
         return;
       }
-      const self = this;
+      const self2 = this;
       for (let i = 0; i < ranges.length; i++) {
         const r = ranges[i];
         const row = document.createElement("div");
@@ -4793,12 +4793,12 @@ if (!customElements.get("wc-step-outline")) {
           pauseBtn.appendChild(icon);
           pauseBtn.addEventListener("click", function(e) {
             e.stopPropagation();
-            self._togglePauseAtStep(stepName, pauseBtn);
+            self2._togglePauseAtStep(stepName, pauseBtn);
           });
           row.appendChild(pauseBtn);
         }
         row.addEventListener("click", function() {
-          self._jumpToLine(r.startLine);
+          self2._jumpToLine(r.startLine);
         });
         frag.appendChild(row);
       }
@@ -4818,7 +4818,7 @@ if (!customElements.get("wc-step-outline")) {
           this._targetWcEl.setActiveStepRange(activeRange.startLine, activeRange.endLine);
         } else if (this._activeLine != null) {
           const click = ranges.find(function(r) {
-            return r.startLine === self._activeLine;
+            return r.startLine === self2._activeLine;
           });
           if (click) this._targetWcEl.setActiveStepRange(click.startLine, click.endLine);
           else this._targetWcEl.setActiveStepRange(null);
@@ -4843,7 +4843,7 @@ if (!customElements.get("wc-step-outline")) {
       if (activated && line !== this._lastActiveLine) {
         activated.classList.add("is-active-flash");
         clearTimeout(this._flashTimer);
-        const self = this;
+        const self2 = this;
         this._flashTimer = setTimeout(function() {
           activated.classList.remove("is-active-flash");
         }, 250);
@@ -4935,17 +4935,17 @@ if (!customElements.get("wc-step-palette")) {
     }
     _installReadyListener() {
       if (this._readyHandler) return;
-      const self = this;
+      const self2 = this;
       this._readyHandler = function(e) {
-        const targetName = self.getAttribute("for");
+        const targetName = self2.getAttribute("for");
         if (!targetName) return;
         if (!e.detail || e.detail.name !== targetName) return;
         if (!e.detail.editor) return;
         const ed = e.detail.editor;
         const wcEl = typeof ed.getWrapperElement === "function" ? ed.getWrapperElement().closest("wc-code-mirror") : null;
-        const scope = self._findScopeRoot();
+        const scope = self2._findScopeRoot();
         if (scope !== document && wcEl && !scope.contains(wcEl)) return;
-        self._targetEditor = ed;
+        self2._targetEditor = ed;
       };
       document.body.addEventListener("wccodemirrorready", this._readyHandler);
     }
@@ -5029,7 +5029,7 @@ if (!customElements.get("wc-step-palette")) {
     _render() {
       const root = this.componentElement;
       root.innerHTML = "";
-      const self = this;
+      const self2 = this;
       const toggle = document.createElement("button");
       toggle.type = "button";
       toggle.className = "wc-step-palette-toggle";
@@ -5038,7 +5038,7 @@ if (!customElements.get("wc-step-palette")) {
       toggle.setAttribute("aria-pressed", this._collapsed ? "true" : "false");
       toggle.textContent = this._collapsed ? "\xBB" : "\xAB";
       toggle.addEventListener("click", function() {
-        self.toggleCollapsed();
+        self2.toggleCollapsed();
       });
       root.appendChild(toggle);
       for (let i = 0; i < STEP_TYPES.length; i++) {
@@ -5056,7 +5056,7 @@ if (!customElements.get("wc-step-palette")) {
         label.textContent = t.label;
         tile.appendChild(label);
         tile.addEventListener("click", function() {
-          self.insert(t.id);
+          self2.insert(t.id);
         });
         root.appendChild(tile);
       }
@@ -5133,25 +5133,25 @@ if (!customElements.get("wc-event-stream")) {
       const es = new EventSource(src);
       this.source = es;
       this._hadSuccessfulEvent = false;
-      const self = this;
+      const self2 = this;
       es.onopen = function() {
-        self._hadSuccessfulEvent = true;
-        self._clearErrorReloadTimer();
-        self._dispatch("wc-event-stream:open", { src });
+        self2._hadSuccessfulEvent = true;
+        self2._clearErrorReloadTimer();
+        self2._dispatch("wc-event-stream:open", { src });
       };
       es.onerror = function(e) {
-        self._dispatch("wc-event-stream:error", {
+        self2._dispatch("wc-event-stream:error", {
           readyState: es.readyState,
           src
         });
-        if (self._isRunStateMode() && !self._hadSuccessfulEvent) {
-          self._armErrorReloadTimer();
+        if (self2._isRunStateMode() && !self2._hadSuccessfulEvent) {
+          self2._armErrorReloadTimer();
         }
       };
       es.onmessage = function(msg) {
-        self._hadSuccessfulEvent = true;
-        self._clearErrorReloadTimer();
-        self._dispatch("wc-event-stream:message", self._parsePayload(msg.data));
+        self2._hadSuccessfulEvent = true;
+        self2._clearErrorReloadTimer();
+        self2._dispatch("wc-event-stream:message", self2._parsePayload(msg.data));
       };
       this._bindNamedEvents();
     }
@@ -5190,7 +5190,7 @@ if (!customElements.get("wc-event-stream")) {
     }
     _bindNamedEvents() {
       if (!this.source) return;
-      const self = this;
+      const self2 = this;
       this._listeners = [];
       const names = this._eventNames();
       if (this._isRunStateMode() && names.indexOf("not_found") === -1) {
@@ -5199,17 +5199,17 @@ if (!customElements.get("wc-event-stream")) {
       for (let i = 0; i < names.length; i++) {
         const name = names[i];
         const fn = function(msg) {
-          self._hadSuccessfulEvent = true;
-          self._clearErrorReloadTimer();
-          const payload = self._parsePayload(msg.data);
-          self._dispatch("wc-event-stream:" + name, payload);
-          if (name === "run_update" && self._isRunStateMode()) {
-            self._applyRunUpdate(payload);
+          self2._hadSuccessfulEvent = true;
+          self2._clearErrorReloadTimer();
+          const payload = self2._parsePayload(msg.data);
+          self2._dispatch("wc-event-stream:" + name, payload);
+          if (name === "run_update" && self2._isRunStateMode()) {
+            self2._applyRunUpdate(payload);
           }
-          if (name === "not_found" && self._isRunStateMode()) {
-            self._clearErrorReloadTimer();
-            self.close();
-            self.removeAttribute("src");
+          if (name === "not_found" && self2._isRunStateMode()) {
+            self2._clearErrorReloadTimer();
+            self2.close();
+            self2.removeAttribute("src");
           }
         };
         this.source.addEventListener(name, fn);
@@ -5457,10 +5457,10 @@ if (!customElements.get("wc-event-stream")) {
       if (this._errorReloadTimer) return;
       const target = this.getAttribute("reload-on-error");
       if (!target) return;
-      const self = this;
+      const self2 = this;
       this._errorReloadTimer = setTimeout(function() {
-        self._errorReloadTimer = null;
-        const evt = self.getAttribute("reload-trigger-event");
+        self2._errorReloadTimer = null;
+        const evt = self2.getAttribute("reload-trigger-event");
         if (target && evt && window.htmx) {
           try {
             window.htmx.trigger(target, evt);
@@ -5589,51 +5589,51 @@ if (!customElements.get("wc-websocket")) {
         this._scheduleReconnect();
         return;
       }
-      const self = this;
+      const self2 = this;
       this._ws.onopen = function() {
-        self._reconnectAttempt = 0;
-        self._lastMessageTime = Date.now();
-        self._log("connected");
-        self._dispatch("wc-ws:open", {});
-        self._startPing();
-        self._startStaleDetection();
+        self2._reconnectAttempt = 0;
+        self2._lastMessageTime = Date.now();
+        self2._log("connected");
+        self2._dispatch("wc-ws:open", {});
+        self2._startPing();
+        self2._startStaleDetection();
       };
       this._ws.onclose = function(e) {
-        self._clearTimers();
-        self._log("closed", e.code, e.reason);
-        self._dispatch("wc-ws:close", {
+        self2._clearTimers();
+        self2._log("closed", e.code, e.reason);
+        self2._dispatch("wc-ws:close", {
           code: e.code,
           reason: e.reason,
           wasClean: e.wasClean
         });
-        if (!self._intentionalClose && !self._disposed) {
-          self._scheduleReconnect();
+        if (!self2._intentionalClose && !self2._disposed) {
+          self2._scheduleReconnect();
         }
       };
       this._ws.onerror = function(e) {
-        self._dispatch("wc-ws:error", { phase: "connect", err: "WebSocket error" });
+        self2._dispatch("wc-ws:error", { phase: "connect", err: "WebSocket error" });
       };
       this._ws.onmessage = function(e) {
-        self._lastMessageTime = Date.now();
-        self._resetStaleDetection();
-        const parseJson = !self.hasAttribute("parse-json") || self.getAttribute("parse-json") !== "false";
+        self2._lastMessageTime = Date.now();
+        self2._resetStaleDetection();
+        const parseJson = !self2.hasAttribute("parse-json") || self2.getAttribute("parse-json") !== "false";
         let msg = e.data;
         if (parseJson) {
           try {
             msg = JSON.parse(e.data);
           } catch (parseErr) {
-            self._dispatch("wc-ws:error", { phase: "parse", err: parseErr.message });
-            self._dispatch("wc-ws:message", { msg: e.data });
-            self._applySlottedBindings("wc-ws:message", e.data);
+            self2._dispatch("wc-ws:error", { phase: "parse", err: parseErr.message });
+            self2._dispatch("wc-ws:message", { msg: e.data });
+            self2._applySlottedBindings("wc-ws:message", e.data);
             return;
           }
         }
-        self._dispatch("wc-ws:message", { msg });
-        self._applySlottedBindings("wc-ws:message", msg);
+        self2._dispatch("wc-ws:message", { msg });
+        self2._applySlottedBindings("wc-ws:message", msg);
         if (msg && typeof msg === "object" && msg.t) {
           const typedEvent = "wc-ws:t:" + msg.t;
-          self._dispatch(typedEvent, { msg });
-          self._applySlottedBindings(typedEvent, msg);
+          self2._dispatch(typedEvent, { msg });
+          self2._applySlottedBindings(typedEvent, msg);
         }
       };
     }
@@ -18710,16 +18710,16 @@ if (!customElements.get("wc-tabulator")) {
       }
       this._inlineData = Array.isArray(value) ? value : [];
       if (this.table) {
-        const self = this;
+        const self2 = this;
         const doSetData = () => {
-          if (self.hasAttribute("auto-columns")) {
-            const cols = self._generateAutoColumns(self._inlineData);
-            self.table.setColumns(cols);
+          if (self2.hasAttribute("auto-columns")) {
+            const cols = self2._generateAutoColumns(self2._inlineData);
+            self2.table.setColumns(cols);
           }
-          self.table.options.sortMode = "local";
-          self.table.options.filterMode = "local";
-          self.table.options.paginationMode = "local";
-          self.table.setData(self._inlineData);
+          self2.table.options.sortMode = "local";
+          self2.table.options.filterMode = "local";
+          self2.table.options.paginationMode = "local";
+          self2.table.setData(self2._inlineData);
         };
         if (this._isReady) {
           setTimeout(doSetData, 0);
@@ -19036,7 +19036,7 @@ if (!customElements.get("wc-tabulator")) {
         wc.Notify.showError("No record id on this row \u2014 cannot clone.");
         return;
       }
-      const self = this;
+      const self2 = this;
       const pageQuery = new URLSearchParams(window.location.search);
       const tenantParam = pageQuery.get("tenant");
       const tenantQs = tenantParam ? "?tenant=" + encodeURIComponent(tenantParam) : "";
@@ -19080,8 +19080,8 @@ if (!customElements.get("wc-tabulator")) {
           });
         },
         preConfirm: () => {
-          if (self.funcs && self.funcs["onClonePreConfirm"]) {
-            return self.funcs["onClonePreConfirm"](row);
+          if (self2.funcs && self2.funcs["onClonePreConfirm"]) {
+            return self2.funcs["onClonePreConfirm"](row);
           }
           const cnt = Swal.getHtmlContainer();
           const sel = cnt && cnt.querySelector("#cloneTargetSel");
@@ -19104,8 +19104,8 @@ if (!customElements.get("wc-tabulator")) {
           };
         },
         callback: (result) => {
-          if (self.funcs && self.funcs["onClone"]) {
-            return self.funcs["onClone"](row, result);
+          if (self2.funcs && self2.funcs["onClone"]) {
+            return self2.funcs["onClone"](row, result);
           }
           if (!result || result === false) return;
           const payload = typeof result === "object" && "value" in result ? result.value : result;
@@ -19999,7 +19999,7 @@ if (!customElements.get("wc-tabulator")) {
     selectEditor(cell, onRendered, success, cancel, editorParams) {
       const cellValue = cell.getValue();
       const field = cell.getColumn().getField();
-      const self = this;
+      const self2 = this;
       const select = document.createElement("select");
       select.style.width = "100%";
       select.style.padding = "4px";
@@ -20052,8 +20052,8 @@ if (!customElements.get("wc-tabulator")) {
       if (editorParams) {
         if (editorParams.url) {
           const cacheKey = editorParams.url;
-          if (self.editorOptionsCache[cacheKey]) {
-            populateOptions(self.editorOptionsCache[cacheKey]);
+          if (self2.editorOptionsCache[cacheKey]) {
+            populateOptions(self2.editorOptionsCache[cacheKey]);
           } else {
             const loadingOption = document.createElement("option");
             loadingOption.textContent = "Loading...";
@@ -20070,7 +20070,7 @@ if (!customElements.get("wc-tabulator")) {
                 console.warn("Select editor: Expected array or object with results/data property, got:", data);
                 options = [];
               }
-              self.editorOptionsCache[cacheKey] = options;
+              self2.editorOptionsCache[cacheKey] = options;
               populateOptions(options);
             }).catch((error) => {
               console.error("Error loading select options:", error);
@@ -20079,10 +20079,10 @@ if (!customElements.get("wc-tabulator")) {
           }
         } else if (editorParams.options) {
           const cacheKey = `static_${field}`;
-          if (!self.editorOptionsCache[cacheKey]) {
-            self.editorOptionsCache[cacheKey] = editorParams.options;
+          if (!self2.editorOptionsCache[cacheKey]) {
+            self2.editorOptionsCache[cacheKey] = editorParams.options;
           }
-          populateOptions(self.editorOptionsCache[cacheKey]);
+          populateOptions(self2.editorOptionsCache[cacheKey]);
         }
       }
       onRendered(function() {
@@ -23005,6 +23005,7 @@ if (!customElements.get("wc-ai-bot")) {
         "bot-id",
         "mode",
         "model",
+        "provider",
         "system-prompt",
         "title",
         "placeholder",
@@ -23401,6 +23402,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._isMinimized = true;
       this._error = null;
       this._engine = null;
+      this._provider = null;
       this._modelProgress = 0;
       this._isUnsupported = false;
       this._unsupportedReason = "";
@@ -23417,8 +23419,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
     async _render() {
       this.classList.add("contents");
+      this._provider = await this._resolveProvider();
       const checkGPU = this.getAttribute("check-gpu-compatibility") !== "false";
-      if (checkGPU && !await this._checkSystemCapabilities()) {
+      if (this._provider !== "gemini-nano" && checkGPU && !await this._checkSystemCapabilities()) {
         this._renderUnsupportedUI();
         return;
       }
@@ -23977,6 +23980,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       }
     }
     async _initializeModel() {
+      if (this._provider === "gemini-nano") {
+        return this._initGeminiNano();
+      }
       let modelName = this.getAttribute("model");
       if (!modelName && this._detectedCapability) {
         if (this._detectedCapability === "high" || this._detectedCapability === "medium") {
@@ -24074,6 +24080,124 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       } catch (error) {
         if (progressTimeout) clearTimeout(progressTimeout);
         throw error;
+      }
+    }
+    // --- Provider Resolution (WebLLM vs Gemini Nano) ---
+    // Returns the Prompt API availability string, or 'unavailable' if the
+    // browser doesn't expose the built-in AI LanguageModel global at all.
+    // Values: 'available' | 'downloadable' | 'downloading' | 'unavailable'
+    async _isGeminiNanoAvailable() {
+      try {
+        if (!("LanguageModel" in self) || typeof self.LanguageModel.availability !== "function") {
+          return "unavailable";
+        }
+        return await self.LanguageModel.availability();
+      } catch (error) {
+        if (this.getAttribute("debug") === "true") {
+          console.warn("[wc-ai-bot] Gemini Nano availability check failed:", error);
+        }
+        return "unavailable";
+      }
+    }
+    // Decide which backend to use. provider="webllm" forces WebLLM,
+    // provider="gemini-nano" forces Nano (and will trigger a model download if
+    // needed), and provider="auto" (default) prefers Nano only when it is already
+    // downloaded so users never hit a surprise multi-GB download.
+    async _resolveProvider() {
+      const pref = (this.getAttribute("provider") || "auto").toLowerCase();
+      if (pref === "webllm") return "webllm";
+      const nano = await this._isGeminiNanoAvailable();
+      if (pref === "gemini-nano") {
+        if (nano !== "unavailable") return "gemini-nano";
+        if (this.getAttribute("debug") === "true") {
+          console.warn('[wc-ai-bot] provider="gemini-nano" requested but unavailable; falling back to WebLLM');
+        }
+        return "webllm";
+      }
+      if (nano === "available") return "gemini-nano";
+      return "webllm";
+    }
+    async _initGeminiNano() {
+      const botId = this.getAttribute("bot-id") || "default";
+      try {
+        this._updateStatus("Initializing Gemini Nano...");
+        const availability = await this._isGeminiNanoAvailable();
+        if (availability === "unavailable") {
+          throw new Error("Gemini Nano is not available in this browser. Requires Chrome desktop with the built-in AI Prompt API enabled.");
+        }
+        const probe = await self.LanguageModel.create({
+          monitor: (m) => {
+            m.addEventListener("downloadprogress", (e) => {
+              const pct = Math.round((e.loaded || 0) * 100);
+              this._modelProgress = pct;
+              this._updateStatus(`Downloading Gemini Nano: ${pct}%`);
+            });
+          }
+        });
+        if (typeof probe.destroy === "function") probe.destroy();
+        this._engine = { type: "gemini-nano" };
+        this._isModelReady = true;
+        this._sendButton.disabled = false;
+        this._updateStatus("");
+        this._emitBotEvent("wcbotready", "bot:ready", { botId, model: "gemini-nano" });
+        localStorage.setItem("wc-ai-bot-success", "true");
+      } catch (error) {
+        console.error("[wc-ai-bot] Failed to initialize Gemini Nano:", error);
+        if ((this.getAttribute("provider") || "auto").toLowerCase() !== "webllm") {
+          if (this.getAttribute("debug") === "true") {
+            console.warn("[wc-ai-bot] Falling back to WebLLM after Gemini Nano init failure");
+          }
+          this._provider = "webllm";
+          return this._initializeModel();
+        }
+        this._error = error.message;
+        this._updateStatus(`Error: ${error.message}`, "error");
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: error.message });
+      }
+    }
+    // --- Streaming Abstraction ---
+    // Streams a chat completion through the active backend, invoking onUpdate with
+    // the full accumulated response text on each delta. Returns the final text.
+    async _streamChat(messages, opts, onUpdate) {
+      if (this._provider === "gemini-nano") {
+        return this._streamGeminiNano(messages, opts, onUpdate);
+      }
+      return this._streamWebLLM(messages, opts, onUpdate);
+    }
+    async _streamWebLLM(messages, { temperature, maxTokens }, onUpdate) {
+      const completion = await this._engine.chat.completions.create({
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        stream: true
+      });
+      let response = "";
+      for await (const chunk of completion) {
+        response += chunk.choices[0].delta.content || "";
+        onUpdate(response);
+      }
+      return response;
+    }
+    async _streamGeminiNano(messages, { temperature }, onUpdate) {
+      const initialPrompts = messages.slice(0, -1);
+      const last = messages[messages.length - 1];
+      const createOpts = {};
+      if (initialPrompts.length > 0) createOpts.initialPrompts = initialPrompts;
+      if (!Number.isNaN(temperature)) {
+        createOpts.temperature = temperature;
+        createOpts.topK = 3;
+      }
+      const session = await self.LanguageModel.create(createOpts);
+      try {
+        let response = "";
+        const stream = session.promptStreaming(last.content);
+        for await (const chunk of stream) {
+          response += chunk;
+          onUpdate(response);
+        }
+        return response;
+      } finally {
+        if (typeof session.destroy === "function") session.destroy();
       }
     }
     // --- Assistant Mode Methods ---
@@ -24263,18 +24387,11 @@ ${json}`);
         const messages = this._prepareMessages(message);
         const temperature = parseFloat(this.getAttribute("temperature") || "0.7");
         const maxTokens = parseInt(this.getAttribute("max-tokens") || "1000");
-        const completion = await this._engine.chat.completions.create({
-          messages,
-          temperature,
-          max_tokens: maxTokens,
-          stream: true
-        });
         let response = "";
-        for await (const chunk of completion) {
-          const delta = chunk.choices[0].delta.content || "";
-          response += delta;
+        await this._streamChat(messages, { temperature, maxTokens }, (full) => {
+          response = full;
           this._updateMessage(loadingId, response);
-        }
+        });
         if (this.getAttribute("debug") === "true") {
           console.log("[wc-ai-bot] Raw LLM response:", response);
         }
