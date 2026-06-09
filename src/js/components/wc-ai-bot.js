@@ -22,6 +22,7 @@ if (!customElements.get('wc-ai-bot')) {
         'mode',
         'model',
         'provider',
+        'hide-if-unavailable',
         'system-prompt',
         'title',
         'placeholder',
@@ -453,6 +454,17 @@ If the user's request is ambiguous, generate the most likely interpretation and 
 
     async _render() {
       this.classList.add('contents');
+
+      // Optionally remove the component entirely when Gemini Nano can't run on this
+      // device (e.g. non-Chrome browsers, or hardware without built-in AI). Intended
+      // to pair with provider="gemini-nano" for Nano-only experiences.
+      if (this.getAttribute('hide-if-unavailable') === 'true') {
+        const nano = await this._isGeminiNanoAvailable();
+        if (nano === 'unavailable') {
+          this._hideUnavailable();
+          return;
+        }
+      }
 
       // Resolve which inference backend to use before any capability gating.
       this._provider = await this._resolveProvider();
@@ -1249,6 +1261,27 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // auto: only prefer Nano when the model is ready (no surprise downloads).
       if (nano === 'available') return 'gemini-nano';
       return 'webllm';
+    }
+
+    // Hide the component entirely (used by hide-if-unavailable when Gemini Nano
+    // can't run). Renders nothing, settles `ready`, and emits wcbotunsupported so
+    // consumers can react if needed.
+    _hideUnavailable() {
+      this._isUnsupported = true;
+      this._unsupportedReason = 'Gemini Nano is not available in this browser.';
+      this.style.display = 'none';
+      this.classList.add('wc-ai-bot--hidden');
+
+      if (this.getAttribute('debug') === 'true') {
+        console.warn('[wc-ai-bot] Gemini Nano unavailable and hide-if-unavailable="true" — hiding component');
+      }
+
+      this._emitBotEvent('wcbotunsupported', 'bot:unsupported', {
+        botId: this.getAttribute('bot-id') || 'default',
+        reason: this._unsupportedReason,
+        provider: 'gemini-nano',
+        hidden: true
+      });
     }
 
     async _initGeminiNano() {

@@ -23006,6 +23006,7 @@ if (!customElements.get("wc-ai-bot")) {
         "mode",
         "model",
         "provider",
+        "hide-if-unavailable",
         "system-prompt",
         "title",
         "placeholder",
@@ -23420,6 +23421,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
     async _render() {
       this.classList.add("contents");
+      if (this.getAttribute("hide-if-unavailable") === "true") {
+        const nano = await this._isGeminiNanoAvailable();
+        if (nano === "unavailable") {
+          this._hideUnavailable();
+          return;
+        }
+      }
       this._provider = await this._resolveProvider();
       const checkGPU = this.getAttribute("check-gpu-compatibility") !== "false";
       if (this._provider !== "gemini-nano" && checkGPU && !await this._checkSystemCapabilities()) {
@@ -24117,6 +24125,24 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       }
       if (nano === "available") return "gemini-nano";
       return "webllm";
+    }
+    // Hide the component entirely (used by hide-if-unavailable when Gemini Nano
+    // can't run). Renders nothing, settles `ready`, and emits wcbotunsupported so
+    // consumers can react if needed.
+    _hideUnavailable() {
+      this._isUnsupported = true;
+      this._unsupportedReason = "Gemini Nano is not available in this browser.";
+      this.style.display = "none";
+      this.classList.add("wc-ai-bot--hidden");
+      if (this.getAttribute("debug") === "true") {
+        console.warn('[wc-ai-bot] Gemini Nano unavailable and hide-if-unavailable="true" \u2014 hiding component');
+      }
+      this._emitBotEvent("wcbotunsupported", "bot:unsupported", {
+        botId: this.getAttribute("bot-id") || "default",
+        reason: this._unsupportedReason,
+        provider: "gemini-nano",
+        hidden: true
+      });
     }
     async _initGeminiNano() {
       const botId = this.getAttribute("bot-id") || "default";
