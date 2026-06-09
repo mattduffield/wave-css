@@ -1807,7 +1807,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
 
     async _sendMessage(message) {
       const botId = this.getAttribute('bot-id') || 'default';
-      
+
+      // Capture whether this is a /query command now — _prepareMessages() clears
+      // _activeCommand before the response comes back.
+      const isQueryCommand = this._isAssistantMode()
+        && !!this._activeCommand
+        && this._activeCommand.command === '/query';
+
       // Add user message
       this._addMessage('user', message);
       this._input.value = '';
@@ -1842,8 +1848,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           console.log('[wc-ai-bot] Raw LLM response:', response);
         }
         
-        // Emit response received event
-        this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', { botId, response });
+        // Emit response received event. For /query results, also surface the parsed
+        // query parts so consumers can apply them without re-parsing the markdown.
+        const detail = { botId, response };
+        if (isQueryCommand) {
+          detail.parsed = this._parseQueryResponse(response);
+        }
+        this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', detail);
         
       } catch (error) {
         console.error('[wc-ai-bot] Failed to get response:', error);
@@ -1854,6 +1865,36 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         this._sendButton.disabled = false;
         this._input.focus();
       }
+    }
+
+    // Extract the MongoDB query parts from a /query response's fenced code blocks.
+    // Returns { pipeline } for aggregations, { query, projection, sort } for finds
+    // (keys with no matching block are omitted), or null if no blocks are present.
+    // Each value is the raw JSON string from the block, ready to drop into an editor.
+    _parseQueryResponse(response) {
+      if (!response) return null;
+
+      const extract = (label) => {
+        // Matches ```label\n ...content... ``` (label optionally followed by spaces).
+        const re = new RegExp('```' + label + '\\s*\\n([\\s\\S]*?)```', 'i');
+        const m = response.match(re);
+        return m ? m[1].trim() : null;
+      };
+
+      // Aggregation pipelines are emitted as a single ```pipeline block.
+      const pipeline = extract('pipeline');
+      if (pipeline) return { pipeline };
+
+      // Find queries are up to three labeled blocks.
+      const parsed = {};
+      const query = extract('query');
+      const projection = extract('projection');
+      const sort = extract('sort');
+      if (query) parsed.query = query;
+      if (projection) parsed.projection = projection;
+      if (sort) parsed.sort = sort;
+
+      return Object.keys(parsed).length > 0 ? parsed : null;
     }
 
     _prepareMessages(userMessage) {

@@ -24576,6 +24576,7 @@ ${json}`);
     }
     async _sendMessage(message) {
       const botId = this.getAttribute("bot-id") || "default";
+      const isQueryCommand = this._isAssistantMode() && !!this._activeCommand && this._activeCommand.command === "/query";
       this._addMessage("user", message);
       this._input.value = "";
       this._adjustInputHeight();
@@ -24595,7 +24596,11 @@ ${json}`);
         if (this.getAttribute("debug") === "true") {
           console.log("[wc-ai-bot] Raw LLM response:", response);
         }
-        this._emitBotEvent("wcbotresponsereceived", "bot:response-received", { botId, response });
+        const detail = { botId, response };
+        if (isQueryCommand) {
+          detail.parsed = this._parseQueryResponse(response);
+        }
+        this._emitBotEvent("wcbotresponsereceived", "bot:response-received", detail);
       } catch (error) {
         console.error("[wc-ai-bot] Failed to get response:", error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
@@ -24605,6 +24610,28 @@ ${json}`);
         this._sendButton.disabled = false;
         this._input.focus();
       }
+    }
+    // Extract the MongoDB query parts from a /query response's fenced code blocks.
+    // Returns { pipeline } for aggregations, { query, projection, sort } for finds
+    // (keys with no matching block are omitted), or null if no blocks are present.
+    // Each value is the raw JSON string from the block, ready to drop into an editor.
+    _parseQueryResponse(response) {
+      if (!response) return null;
+      const extract = (label) => {
+        const re = new RegExp("```" + label + "\\s*\\n([\\s\\S]*?)```", "i");
+        const m = response.match(re);
+        return m ? m[1].trim() : null;
+      };
+      const pipeline = extract("pipeline");
+      if (pipeline) return { pipeline };
+      const parsed = {};
+      const query = extract("query");
+      const projection = extract("projection");
+      const sort = extract("sort");
+      if (query) parsed.query = query;
+      if (projection) parsed.projection = projection;
+      if (sort) parsed.sort = sort;
+      return Object.keys(parsed).length > 0 ? parsed : null;
     }
     _prepareMessages(userMessage) {
       let systemPrompt = this.getAttribute("system-prompt") || "You are a helpful AI assistant. Be concise and friendly in your responses.";
