@@ -23330,9 +23330,9 @@ function runDelete() {
         sections: {},
         systemPrompt: `You are a MongoDB query expert. Generate MongoDB find queries or aggregation pipelines from natural language descriptions.
 
-OUTPUT FORMAT \u2014 always respond with valid JSON blocks:
+OUTPUT FORMAT \u2014 respond ONLY with the labeled fenced blocks below. Do NOT use a \`json\` block.
 
-For FIND queries, output up to three labeled JSON blocks:
+For FIND queries, output up to three labeled blocks:
 \`\`\`query
 { "field": "value" }
 \`\`\`
@@ -23343,7 +23343,7 @@ For FIND queries, output up to three labeled JSON blocks:
 { "field": 1 }
 \`\`\`
 
-For AGGREGATION pipelines, output a single JSON block:
+For AGGREGATION pipelines, output a single labeled block:
 \`\`\`pipeline
 [
   { "$match": { ... } },
@@ -23351,7 +23351,28 @@ For AGGREGATION pipelines, output a single JSON block:
 ]
 \`\`\`
 
+CRITICAL SHAPE: the query object uses field names as keys directly \u2014 e.g. { "status": "shipped" }, NEVER { "field": "status", "value": "shipped" }.
+
+EXAMPLES:
+
+Input: orders with status shipped
+\`\`\`query
+{ "status": "shipped" }
+\`\`\`
+
+Input: active users in NC, newest first, show name and email
+\`\`\`query
+{ "address.state": "NC", "active": true }
+\`\`\`
+\`\`\`projection
+{ "name": 1, "contact.email": 1 }
+\`\`\`
+\`\`\`sort
+{ "createdAt": -1 }
+\`\`\`
+
 RULES:
+- Respond ONLY with the labeled query/projection/sort (or pipeline) fenced blocks. Do NOT use a \`json\` block or an unlabeled block.
 - Output ONLY valid MongoDB JSON \u2014 no JavaScript, no comments
 - Use standard MongoDB query operators: $gt, $gte, $lt, $lte, $in, $nin, $regex, $exists, $ne, $or, $and, $not, $elemMatch
 - For dates, use ISO 8601 strings: { "$gte": "2026-01-01T00:00:00Z" }
@@ -24613,8 +24634,13 @@ ${json}`);
     }
     // Extract the MongoDB query parts from a /query response's fenced code blocks.
     // Returns { pipeline } for aggregations, { query, projection, sort } for finds
-    // (keys with no matching block are omitted), or null if no blocks are present.
+    // (keys with no matching block are omitted), or null if nothing usable is found.
     // Each value is the raw JSON string from the block, ready to drop into an editor.
+    //
+    // Weaker models (e.g. Gemini Nano) sometimes ignore the requested labels and emit
+    // a generic ```json (or unlabeled) block, possibly using a { field, value } shape
+    // instead of a real filter. We fall back to those and normalize so detail.parsed
+    // is populated whenever the model emits any usable JSON.
     _parseQueryResponse(response) {
       if (!response) return null;
       const extract = (label) => {
@@ -24628,10 +24654,48 @@ ${json}`);
       const query = extract("query");
       const projection = extract("projection");
       const sort = extract("sort");
-      if (query) parsed.query = query;
+      if (query) parsed.query = this._normalizeQueryShape(query);
       if (projection) parsed.projection = projection;
       if (sort) parsed.sort = sort;
-      return Object.keys(parsed).length > 0 ? parsed : null;
+      if (Object.keys(parsed).length > 0) return parsed;
+      const fallback = extract("json") || this._extractUnlabeledBlock(response);
+      if (!fallback) return null;
+      let data;
+      try {
+        data = JSON.parse(fallback);
+      } catch {
+        return null;
+      }
+      if (Array.isArray(data)) {
+        return { pipeline: JSON.stringify(data, null, 2) };
+      }
+      if (data && typeof data === "object") {
+        return { query: this._normalizeQueryShape(fallback) };
+      }
+      return null;
+    }
+    // Pull the first unlabeled fenced block (```\n ... ```), ignoring labeled ones.
+    _extractUnlabeledBlock(response) {
+      const m = response.match(/```[ \t]*\r?\n([\s\S]*?)```/);
+      return m ? m[1].trim() : null;
+    }
+    // Normalize the { field, value } (optionally { field, operator, value }) shape
+    // weaker models emit into a real MongoDB filter { [field]: value }. Returns a JSON
+    // string; if the input can't be parsed or isn't that exact shape, returns it as-is.
+    _normalizeQueryShape(jsonStr) {
+      let obj;
+      try {
+        obj = JSON.parse(jsonStr);
+      } catch {
+        return jsonStr;
+      }
+      if (!obj || typeof obj !== "object" || Array.isArray(obj)) return jsonStr;
+      const allowed = /* @__PURE__ */ new Set(["field", "value", "operator", "op"]);
+      const isFieldValueShape = typeof obj.field === "string" && "value" in obj && Object.keys(obj).every((k) => allowed.has(k));
+      if (!isFieldValueShape) return jsonStr;
+      const op = obj.operator || obj.op;
+      const filter = typeof op === "string" && op.startsWith("$") ? { [obj.field]: { [op]: obj.value } } : { [obj.field]: obj.value };
+      return JSON.stringify(filter, null, 2);
     }
     _prepareMessages(userMessage) {
       let systemPrompt = this.getAttribute("system-prompt") || "You are a helpful AI assistant. Be concise and friendly in your responses.";
