@@ -448,6 +448,7 @@ const ICONS_TO_COPY = [
   "motorcycle",
   "music",
   "network-wired",
+  "newspaper",
   "note",
   "note-medical",
   "note-sticky",

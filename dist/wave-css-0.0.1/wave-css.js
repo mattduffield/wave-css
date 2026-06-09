@@ -23404,6 +23404,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._engine = null;
       this._provider = null;
       this._modelProgress = 0;
+      this._deferReady = true;
       this._isUnsupported = false;
       this._unsupportedReason = "";
       this._knowledgeBases = {};
@@ -24579,12 +24580,25 @@ Type \`/help\` to see available commands, or ask me anything about these project
     _emitBotEvent(newName, legacyName, detail) {
       const opts = { detail, bubbles: true, composed: true };
       super._emitEvent(newName, legacyName, opts);
+      if (newName === "wcbotready" || newName === "wcboterror" || newName === "wcbotunsupported") {
+        this._setReady();
+      }
       const botId = this.getAttribute("bot-id");
       if (botId && window.wc && window.wc.EventHub) {
         window.wc.EventHub.broadcast(newName, [`[bot-id="${botId}"]`], detail);
       }
     }
     // Public methods
+    // True only when an inference model (WebLLM or Gemini Nano) is loaded and the
+    // bot can answer. Distinct from `isReady`/`ready`, which settle once the init
+    // lifecycle completes regardless of outcome (ready, error, or unsupported).
+    get isModelReady() {
+      return this._isModelReady;
+    }
+    // The resolved inference backend: 'webllm' | 'gemini-nano' | null (pre-init).
+    get provider() {
+      return this._provider;
+    }
     async sendMessage(text) {
       if (this._isModelReady && !this._isLoading) {
         this._input.value = text;

@@ -429,6 +429,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._engine = null;
       this._provider = null;           // resolved backend: 'webllm' | 'gemini-nano'
       this._modelProgress = 0;
+      // Async init (model load): resolve the base `ready` promise manually once the
+      // model is ready (or a terminal error/unsupported state is reached).
+      this._deferReady = true;
       this._isUnsupported = false;
       this._unsupportedReason = '';
 
@@ -1841,6 +1844,13 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // Use base class _emitEvent for backward-compat dispatch
       super._emitEvent(newName, legacyName, opts);
 
+      // Settle the `ready` promise on the first terminal lifecycle event so that
+      // `await bot.ready` resolves whether the model loaded, errored, or the device
+      // is unsupported. _setReady() is idempotent, so later runtime errors no-op.
+      if (newName === 'wcbotready' || newName === 'wcboterror' || newName === 'wcbotunsupported') {
+        this._setReady();
+      }
+
       // Also emit via EventHub (new name only)
       const botId = this.getAttribute('bot-id');
       if (botId && window.wc && window.wc.EventHub) {
@@ -1849,6 +1859,19 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
 
     // Public methods
+
+    // True only when an inference model (WebLLM or Gemini Nano) is loaded and the
+    // bot can answer. Distinct from `isReady`/`ready`, which settle once the init
+    // lifecycle completes regardless of outcome (ready, error, or unsupported).
+    get isModelReady() {
+      return this._isModelReady;
+    }
+
+    // The resolved inference backend: 'webllm' | 'gemini-nano' | null (pre-init).
+    get provider() {
+      return this._provider;
+    }
+
     async sendMessage(text) {
       if (this._isModelReady && !this._isLoading) {
         this._input.value = text;
