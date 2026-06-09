@@ -877,6 +877,74 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           color: var(--warning-contrast-color, white);
         }
 
+        /* Gemini Nano state panels (download / unsupported / error) */
+        .wc-ai-bot-nano-panel {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          padding: 1.5rem 1.25rem;
+          margin: auto;
+          text-align: center;
+          color: var(--text-1, inherit);
+        }
+
+        .wc-ai-bot-nano-text {
+          margin: 0;
+          font-size: 0.9rem;
+          line-height: 1.4;
+          max-width: 32ch;
+        }
+
+        .wc-ai-bot-nano-msg {
+          margin: 0;
+          font-size: 0.8rem;
+          opacity: 0.75;
+          word-break: break-word;
+        }
+
+        .wc-ai-bot-nano-progress {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+        }
+
+        /* Match the library's themed buttons (--button-* tokens) so contrast
+           tracks the active theme rather than relying on the global .btn class. */
+        .wc-ai-bot-nano-btn {
+          background: var(--button-bg-color);
+          color: var(--button-color);
+          border: 1px solid var(--button-border-color);
+          border-radius: 6px;
+          padding: 0.5rem 1.1rem;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        .wc-ai-bot-nano-btn:hover:not(:disabled) {
+          background: var(--button-hover-bg-color);
+          color: var(--button-hover-color);
+        }
+
+        .wc-ai-bot-nano-btn:focus {
+          outline: none;
+          border-color: var(--button-focus-border-color);
+          box-shadow: 0 0 4px var(--button-focus-ring-color);
+        }
+
+        .wc-ai-bot-nano-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .wc-ai-bot-nano-unsupported,
+        .wc-ai-bot-nano-error {
+          color: var(--danger-color, #ef4444);
+        }
+
         /* FAB Button */
         .wc-ai-bot-fab {
           position: fixed;
@@ -1239,26 +1307,20 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
 
     // Decide which backend to use. provider="webllm" forces WebLLM,
-    // provider="gemini-nano" forces Nano (and will trigger a model download if
-    // needed), and provider="auto" (default) prefers Nano only when it is already
-    // downloaded so users never hit a surprise multi-GB download.
+    // provider="gemini-nano" forces Nano (NEVER falls back to WebLLM — _initGeminiNano
+    // handles every availability state itself), and provider="auto" (default) prefers
+    // Nano only when it is already downloaded so users never hit a surprise download.
     async _resolveProvider() {
       const pref = (this.getAttribute('provider') || 'auto').toLowerCase();
 
       if (pref === 'webllm') return 'webllm';
 
-      const nano = await this._isGeminiNanoAvailable();
-
-      if (pref === 'gemini-nano') {
-        // Explicit opt-in: use Nano unless the browser can't support it at all.
-        if (nano !== 'unavailable') return 'gemini-nano';
-        if (this.getAttribute('debug') === 'true') {
-          console.warn('[wc-ai-bot] provider="gemini-nano" requested but unavailable; falling back to WebLLM');
-        }
-        return 'webllm';
-      }
+      // Explicit opt-in: always use Nano. _initGeminiNano decides what to render for
+      // available / downloadable / downloading / unavailable, with no WebLLM fallback.
+      if (pref === 'gemini-nano') return 'gemini-nano';
 
       // auto: only prefer Nano when the model is ready (no surprise downloads).
+      const nano = await this._isGeminiNanoAvailable();
       if (nano === 'available') return 'gemini-nano';
       return 'webllm';
     }
@@ -1284,56 +1346,189 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       });
     }
 
+    // Input/output language hints for the Prompt API. Specifying these silences the
+    // "No output language was specified" console warning and keeps responses in English.
+    _nanoLanguageOpts() {
+      return {
+        expectedInputs: [{ type: 'text', languages: ['en'] }],
+        expectedOutputs: [{ type: 'text', languages: ['en'] }]
+      };
+    }
+
     async _initGeminiNano() {
       const botId = this.getAttribute('bot-id') || 'default';
+      const explicit = (this.getAttribute('provider') || 'auto').toLowerCase() === 'gemini-nano';
 
       try {
-        this._updateStatus('Initializing Gemini Nano...');
-
         const availability = await this._isGeminiNanoAvailable();
-        if (availability === 'unavailable') {
-          throw new Error('Gemini Nano is not available in this browser. Requires Chrome desktop with the built-in AI Prompt API enabled.');
+
+        if (availability === 'available') {
+          // Model already present — creating a session does not download, so no
+          // user gesture is required. Activate immediately.
+          await this._activateGeminiNano(botId);
+          return;
         }
 
-        // Probe-create a session. When the model still needs downloading this
-        // awaits the (multi-minute) download and reports progress; once resolved
-        // the on-device model is ready for per-message sessions.
-        const probe = await self.LanguageModel.create({
-          monitor: (m) => {
-            m.addEventListener('downloadprogress', (e) => {
-              const pct = Math.round((e.loaded || 0) * 100);
-              this._modelProgress = pct;
-              this._updateStatus(`Downloading Gemini Nano: ${pct}%`);
-            });
-          }
-        });
-        if (typeof probe.destroy === 'function') probe.destroy();
+        if (availability === 'downloadable' || availability === 'downloading') {
+          // Chrome requires a user gesture to start the model download, so we must
+          // NOT call create() at render time. Show a download affordance instead;
+          // the click handler performs the gesture-gated download.
+          this._renderNanoDownloadUI(availability);
+          this._emitBotEvent('wcbotdownloadrequired', 'bot:download-required', { botId, availability });
+          return; // `ready` intentionally NOT settled — this is a non-terminal state.
+        }
 
-        // Lightweight marker so readiness checks (and loadedModels parity) work.
-        this._engine = { type: 'gemini-nano' };
-        this._isModelReady = true;
-        this._sendButton.disabled = false;
-        this._updateStatus('');
-        this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: 'gemini-nano' });
-        localStorage.setItem('wc-ai-bot-success', 'true');
+        // availability === 'unavailable' (only reachable for explicit gemini-nano —
+        // auto resolves to WebLLM when Nano isn't already 'available').
+        if (this.getAttribute('hide-if-unavailable') === 'true') {
+          this._hideUnavailable();
+        } else {
+          this._renderNanoUnsupported(botId);
+        }
 
       } catch (error) {
         console.error('[wc-ai-bot] Failed to initialize Gemini Nano:', error);
 
-        // In auto/forced-nano mode, degrade gracefully to WebLLM rather than
-        // leaving the user with a dead bot.
-        if ((this.getAttribute('provider') || 'auto').toLowerCase() !== 'webllm') {
+        if (!explicit) {
+          // provider="auto": degrade to WebLLM rather than leaving a dead bot.
           if (this.getAttribute('debug') === 'true') {
-            console.warn('[wc-ai-bot] Falling back to WebLLM after Gemini Nano init failure');
+            console.warn('[wc-ai-bot] Falling back to WebLLM after Gemini Nano init failure (provider="auto")');
           }
           this._provider = 'webllm';
           return this._initializeModel();
         }
 
-        this._error = error.message;
-        this._updateStatus(`Error: ${error.message}`, 'error');
-        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
+        // provider="gemini-nano": never fall back — surface an error + Retry state.
+        this._renderNanoError(botId, error);
       }
+    }
+
+    // Activate Nano when the model is already downloaded ('available'). Probes a
+    // session to validate, then transitions to the ready state.
+    async _activateGeminiNano(botId) {
+      const probe = await self.LanguageModel.create(this._nanoLanguageOpts());
+      if (typeof probe.destroy === 'function') probe.destroy();
+      this._finalizeNanoReady(botId);
+    }
+
+    // Shared "Nano is usable" transition — used by both the already-available path
+    // and the post-download path.
+    _finalizeNanoReady(botId) {
+      this._engine = { type: 'gemini-nano' };
+      this._isModelReady = true;
+      this._sendButton.disabled = false;
+      this._updateStatus('');
+      this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: 'gemini-nano' });
+      localStorage.setItem('wc-ai-bot-success', 'true');
+    }
+
+    // Gesture-gated model download. Invoked from the Download button click so the
+    // create() call (which starts the multi-GB download) happens inside a user gesture.
+    async _downloadGeminiNano(panel) {
+      const botId = this.getAttribute('bot-id') || 'default';
+      const btn = panel.querySelector('.wc-ai-bot-nano-btn');
+      const progressEl = panel.querySelector('.wc-ai-bot-nano-progress');
+      const pctEl = panel.querySelector('.wc-ai-bot-nano-pct');
+
+      if (btn) btn.disabled = true;
+      this._sendButton.disabled = true;
+      if (progressEl) progressEl.style.display = 'flex';
+      this._updateStatus('Downloading Gemini Nano: 0%');
+
+      try {
+        const session = await self.LanguageModel.create({
+          ...this._nanoLanguageOpts(),
+          monitor: (m) => {
+            m.addEventListener('downloadprogress', (e) => {
+              const loaded = e.loaded || 0;
+              const pct = Math.round(loaded * 100);
+              this._modelProgress = pct;
+              this._updateStatus(`Downloading Gemini Nano: ${pct}%`);
+              if (pctEl) pctEl.textContent = `${pct}%`;
+              this._emitBotEvent('wcbotdownloadprogress', 'bot:download-progress', { botId, loaded });
+            });
+          }
+        });
+        if (typeof session.destroy === 'function') session.destroy();
+
+        if (panel.parentNode) panel.remove();
+        this._nanoDownloadPanel = null;
+        this._finalizeNanoReady(botId);
+
+      } catch (error) {
+        console.error('[wc-ai-bot] Gemini Nano download failed:', error);
+        // Retryable — re-enable the button and keep the non-terminal download state
+        // (do not settle `ready`).
+        if (btn) btn.disabled = false;
+        if (progressEl) progressEl.style.display = 'none';
+        this._updateStatus(`Download failed: ${error.message}`, 'error');
+      }
+    }
+
+    _renderNanoDownloadUI(availability) {
+      this._sendButton.disabled = true;
+      this._updateStatus('');
+
+      const panel = document.createElement('div');
+      panel.className = 'wc-ai-bot-nano-panel wc-ai-bot-nano-download';
+      panel.innerHTML = `
+        <wc-fa-icon name="robot" icon-style="solid" size="2rem"></wc-fa-icon>
+        <p class="wc-ai-bot-nano-text">This assistant runs a private on-device AI model that needs to be downloaded once before first use.</p>
+        <button class="wc-ai-bot-nano-btn" type="button">Download AI model</button>
+        <div class="wc-ai-bot-nano-progress" style="display:none;">
+          <wc-loader size="36px" speed="1s" thickness="5px"></wc-loader>
+          <span class="wc-ai-bot-nano-pct">0%</span>
+        </div>
+      `;
+      const btn = panel.querySelector('.wc-ai-bot-nano-btn');
+      btn.addEventListener('click', () => this._downloadGeminiNano(panel));
+
+      this._messagesContainer.appendChild(panel);
+      this._nanoDownloadPanel = panel;
+    }
+
+    _renderNanoUnsupported(botId) {
+      this._sendButton.disabled = true;
+      this._updateStatus('');
+
+      const panel = document.createElement('div');
+      panel.className = 'wc-ai-bot-nano-panel wc-ai-bot-nano-unsupported';
+      panel.innerHTML = `
+        <wc-fa-icon name="triangle-exclamation" icon-style="solid" size="1.5rem"></wc-fa-icon>
+        <p class="wc-ai-bot-nano-text">This AI assistant requires Chrome's built-in AI (Gemini Nano), which isn't available in this browser.</p>
+      `;
+      this._messagesContainer.appendChild(panel);
+
+      this._emitBotEvent('wcbotunsupported', 'bot:unsupported', {
+        botId,
+        reason: 'Gemini Nano is not available in this browser.',
+        provider: 'gemini-nano',
+        hidden: false
+      });
+    }
+
+    _renderNanoError(botId, error) {
+      this._error = error.message;
+      this._sendButton.disabled = true;
+      this._updateStatus('');
+
+      const panel = document.createElement('div');
+      panel.className = 'wc-ai-bot-nano-panel wc-ai-bot-nano-error';
+      panel.innerHTML = `
+        <wc-fa-icon name="triangle-exclamation" icon-style="solid" size="1.5rem"></wc-fa-icon>
+        <p class="wc-ai-bot-nano-text">Failed to initialize the on-device AI model.</p>
+        <p class="wc-ai-bot-nano-msg"></p>
+        <button class="wc-ai-bot-nano-btn" type="button">Retry</button>
+      `;
+      panel.querySelector('.wc-ai-bot-nano-msg').textContent = error.message;
+      const retry = panel.querySelector('.wc-ai-bot-nano-btn');
+      retry.addEventListener('click', () => {
+        panel.remove();
+        this._initGeminiNano();
+      });
+
+      this._messagesContainer.appendChild(panel);
+      this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
     }
 
     // --- Streaming Abstraction ---
@@ -1371,7 +1566,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       const initialPrompts = messages.slice(0, -1);
       const last = messages[messages.length - 1];
 
-      const createOpts = {};
+      const createOpts = { ...this._nanoLanguageOpts() };
       if (initialPrompts.length > 0) createOpts.initialPrompts = initialPrompts;
       // temperature and topK must be set together when overriding sampling.
       if (!Number.isNaN(temperature)) {
