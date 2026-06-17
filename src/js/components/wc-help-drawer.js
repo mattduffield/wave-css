@@ -461,8 +461,8 @@ if (!customElements.get("wc-help-drawer")) {
         "";
 
       if (!title.trim()) {
-        if (window.wc?.Prompt) {
-          wc.Prompt.toast({ title: "Title is required", icon: "warning" });
+        if (window.wc?.Notify) {
+          wc.Notify.showWarning("Title is required");
         }
         return;
       }
@@ -488,6 +488,11 @@ if (!customElements.get("wc-help-drawer")) {
       );
       if (submitBtn) submitBtn.disabled = true;
 
+      // Show the global busy indicator (#content-loader uses the htmx-indicator
+      // pattern; this is a raw fetch, so toggle htmx-request manually).
+      const loader = document.getElementById("content-loader");
+      if (loader) loader.classList.add("htmx-request");
+
       try {
         const headers = { "Content-Type": "application/x-www-form-urlencoded" };
         if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
@@ -499,8 +504,8 @@ if (!customElements.get("wc-help-drawer")) {
         });
         if (response.ok) {
           const data = await response.json().catch(() => ({}));
-          if (window.wc?.Prompt) {
-            wc.Prompt.toast({ title: "Ticket submitted", icon: "success" });
+          if (window.wc?.Notify) {
+            wc.Notify.showSuccess("Ticket submitted");
           }
           this._emitEvent("wchelpticketcreated", null, {
             bubbles: true,
@@ -516,19 +521,17 @@ if (!customElements.get("wc-help-drawer")) {
           if (descInput) descInput.value = "";
           if (ssStatus) ssStatus.textContent = "";
         } else {
-          if (window.wc?.Prompt) {
-            wc.Prompt.toast({
-              title: "Failed to submit ticket",
-              icon: "error",
-            });
+          if (window.wc?.Notify) {
+            wc.Notify.showError("Failed to submit ticket");
           }
         }
       } catch (e) {
-        if (window.wc?.Prompt) {
-          wc.Prompt.toast({ title: "Error: " + e.message, icon: "error" });
+        if (window.wc?.Notify) {
+          wc.Notify.showError("Error: " + e.message);
         }
       } finally {
         if (submitBtn) submitBtn.disabled = false;
+        if (loader) loader.classList.remove("htmx-request");
       }
     }
 

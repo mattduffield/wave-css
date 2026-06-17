@@ -8857,8 +8857,8 @@ if (!customElements.get("wc-help-drawer")) {
       const title = this._ticketPanel.querySelector('[name="ticket_title"]')?.value || "";
       const description = this._ticketPanel.querySelector('[name="ticket_description"]')?.value || "";
       if (!title.trim()) {
-        if (window.wc?.Prompt) {
-          wc.Prompt.toast({ title: "Title is required", icon: "warning" });
+        if (window.wc?.Notify) {
+          wc.Notify.showWarning("Title is required");
         }
         return;
       }
@@ -8881,6 +8881,8 @@ if (!customElements.get("wc-help-drawer")) {
         ".help-ticket-submit-btn"
       );
       if (submitBtn) submitBtn.disabled = true;
+      const loader = document.getElementById("content-loader");
+      if (loader) loader.classList.add("htmx-request");
       try {
         const headers = { "Content-Type": "application/x-www-form-urlencoded" };
         if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
@@ -8891,8 +8893,8 @@ if (!customElements.get("wc-help-drawer")) {
         });
         if (response.ok) {
           const data = await response.json().catch(() => ({}));
-          if (window.wc?.Prompt) {
-            wc.Prompt.toast({ title: "Ticket submitted", icon: "success" });
+          if (window.wc?.Notify) {
+            wc.Notify.showSuccess("Ticket submitted");
           }
           this._emitEvent("wchelpticketcreated", null, {
             bubbles: true,
@@ -8907,19 +8909,17 @@ if (!customElements.get("wc-help-drawer")) {
           if (descInput) descInput.value = "";
           if (ssStatus) ssStatus.textContent = "";
         } else {
-          if (window.wc?.Prompt) {
-            wc.Prompt.toast({
-              title: "Failed to submit ticket",
-              icon: "error"
-            });
+          if (window.wc?.Notify) {
+            wc.Notify.showError("Failed to submit ticket");
           }
         }
       } catch (e) {
-        if (window.wc?.Prompt) {
-          wc.Prompt.toast({ title: "Error: " + e.message, icon: "error" });
+        if (window.wc?.Notify) {
+          wc.Notify.showError("Error: " + e.message);
         }
       } finally {
         if (submitBtn) submitBtn.disabled = false;
+        if (loader) loader.classList.remove("htmx-request");
       }
     }
     // ── My Tickets ────────────────────────────────────────────────────────────
@@ -22997,6 +22997,7 @@ if (!customElements.get("wc-split-pane")) {
 if (!customElements.get("wc-ai-bot")) {
   let webllmModule = null;
   let markedModule = null;
+  let turnstileScriptPromise = null;
   const loadedModels = /* @__PURE__ */ new Map();
   const modelLoadingPromises = /* @__PURE__ */ new Map();
   class WcAiBot extends WcBaseComponent {
@@ -23006,6 +23007,8 @@ if (!customElements.get("wc-ai-bot")) {
         "mode",
         "model",
         "provider",
+        "endpoint",
+        "turnstile-site-key",
         "hide-if-unavailable",
         "system-prompt",
         "title",
@@ -23426,6 +23429,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._engine = null;
       this._provider = null;
       this._modelProgress = 0;
+      this._sessionId = null;
+      this._turnstileWidgetId = null;
       this._deferReady = true;
       this._isUnsupported = false;
       this._unsupportedReason = "";
@@ -23451,7 +23456,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       }
       this._provider = await this._resolveProvider();
       const checkGPU = this.getAttribute("check-gpu-compatibility") !== "false";
-      if (this._provider !== "gemini-nano" && checkGPU && !await this._checkSystemCapabilities()) {
+      if (this._provider !== "gemini-nano" && this._provider !== "server" && checkGPU && !await this._checkSystemCapabilities()) {
         this._renderUnsupportedUI();
         return;
       }
@@ -23818,6 +23823,45 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           color: var(--warning-contrast-color, white);
         }
 
+        /* Server-mode source links ("Learn more") */
+        .wc-ai-bot-sources {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-top: 0.75rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid var(--border-color);
+        }
+
+        .wc-ai-bot-sources-label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          opacity: 0.7;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+        }
+
+        .wc-ai-bot-source-link {
+          font-size: 0.85rem;
+          color: var(--primary-color);
+          text-decoration: none;
+        }
+
+        .wc-ai-bot-source-link:hover {
+          text-decoration: underline;
+        }
+
+        /* Server-mode Cloudflare Turnstile container */
+        .wc-ai-bot-turnstile {
+          display: flex;
+          justify-content: center;
+          padding: 0.5rem 1rem 0;
+        }
+
+        .wc-ai-bot-turnstile:empty {
+          display: none;
+        }
+
         /* Gemini Nano state panels (download / unsupported / error) */
         .wc-ai-bot-nano-panel {
           display: flex;
@@ -24078,6 +24122,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       }
     }
     async _initializeModel() {
+      if (this._provider === "server") {
+        return this._initServer();
+      }
       if (this._provider === "gemini-nano") {
         return this._initGeminiNano();
       }
@@ -24203,6 +24250,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     // Nano only when it is already downloaded so users never hit a surprise download.
     async _resolveProvider() {
       const pref = (this.getAttribute("provider") || "auto").toLowerCase();
+      if (pref === "server") return "server";
       if (pref === "webllm") return "webllm";
       if (pref === "gemini-nano") return "gemini-nano";
       const nano = await this._isGeminiNanoAvailable();
@@ -24226,6 +24274,225 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         provider: "gemini-nano",
         hidden: true
       });
+    }
+    // --- Server Backend (provider="server") ---
+    // No in-browser model: the backend owns the prompt, grounding, model and limits,
+    // and the model API key never reaches the browser. Sets up a stable session id and
+    // (optionally) a Cloudflare Turnstile challenge, then marks the bot ready.
+    async _initServer() {
+      const botId = this.getAttribute("bot-id") || "default";
+      if (!this._sessionId) this._sessionId = this._generateSessionId();
+      const siteKey = this.getAttribute("turnstile-site-key");
+      if (siteKey) {
+        this._turnstileContainer = document.createElement("div");
+        this._turnstileContainer.className = "wc-ai-bot-turnstile";
+        const inputContainer = this._container.querySelector(".wc-ai-bot-input-container");
+        if (inputContainer) {
+          this._container.insertBefore(this._turnstileContainer, inputContainer);
+        } else {
+          this._container.appendChild(this._turnstileContainer);
+        }
+        this._ensureTurnstile();
+      }
+      this._engine = { type: "server" };
+      this._isModelReady = true;
+      this._sendButton.disabled = false;
+      this._updateStatus("");
+      this._emitBotEvent("wcbotready", "bot:ready", { botId, model: "server" });
+    }
+    _generateSessionId() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+      } catch (e) {
+      }
+      return "sess-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+    }
+    // POST the full conversation to the backend and stream the SSE reply into the
+    // loading bubble. Handles the 503 JSON deny shape and the done/error SSE events.
+    async _streamServer(message, loadingId, botId) {
+      const endpoint = this.getAttribute("endpoint") || "/api/ai";
+      const messages = this._messages.filter((m) => !m.isLoading && (m.role === "user" || m.role === "bot")).map((m) => ({ role: m.role === "bot" ? "assistant" : "user", content: m.content }));
+      const turnstileToken = await this._getTurnstileToken();
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          messages,
+          session_id: this._sessionId,
+          turnstile_token: turnstileToken
+        })
+      });
+      const contentType = (resp.headers.get("content-type") || "").toLowerCase();
+      if (!resp.ok || contentType.includes("application/json")) {
+        let reason = "provider_unavailable";
+        try {
+          const data = await resp.json();
+          if (data && data.reason) reason = data.reason;
+        } catch (e) {
+        }
+        this._resetTurnstile();
+        this._updateMessage(loadingId, this._serverDenyMessage(reason));
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: reason, reason });
+        return;
+      }
+      if (!resp.body) {
+        throw new Error("Streaming not supported by this browser/response.");
+      }
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let answer = "";
+      let sources = [];
+      let streamError = null;
+      const processFrame = (frame) => {
+        let eventType = "message";
+        const dataLines = [];
+        frame.split("\n").forEach((line) => {
+          if (line.startsWith("event:")) {
+            eventType = line.slice(6).trim();
+          } else if (line.startsWith("data:")) {
+            dataLines.push(line.slice(5).replace(/^ /, ""));
+          }
+        });
+        const dataStr = dataLines.join("\n");
+        if (!dataStr) return;
+        let data;
+        try {
+          data = JSON.parse(dataStr);
+        } catch (e) {
+          return;
+        }
+        if (eventType === "delta") {
+          answer += data.text || "";
+          this._updateMessage(loadingId, answer);
+        } else if (eventType === "done") {
+          sources = Array.isArray(data.sources) ? data.sources : [];
+        } else if (eventType === "error") {
+          streamError = data.reason || "provider_error";
+        }
+      };
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+        let idx;
+        while ((idx = buffer.indexOf("\n\n")) !== -1) {
+          const frame = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          processFrame(frame);
+        }
+      }
+      if (buffer.trim()) processFrame(buffer);
+      this._resetTurnstile();
+      if (streamError) {
+        const friendly = this._serverDenyMessage(streamError);
+        this._updateMessage(loadingId, answer ? `${answer}
+
+_${friendly}_` : friendly);
+        this._emitBotEvent("wcboterror", "bot:error", { botId, error: streamError, reason: streamError });
+        return;
+      }
+      if (sources.length > 0) {
+        this._appendSources(loadingId, sources);
+      }
+      this._emitBotEvent("wcbotresponsereceived", "bot:response-received", { botId, response: answer, sources });
+    }
+    // Map a backend deny/error reason to a friendly, user-facing message.
+    _serverDenyMessage(reason) {
+      switch (reason) {
+        case "captcha":
+          return "Please complete the verification and try again.";
+        case "rate_limited":
+        case "session_cap":
+        case "global_cap":
+        case "breaker_velocity":
+          return "You've reached a limit. Please try again shortly.";
+        case "input_too_large":
+          return "Your message is too long. Please shorten it and try again.";
+        default:
+          return "The assistant is temporarily unavailable. Please try again.";
+      }
+    }
+    // Render "Learn more" source links beneath a bot message bubble.
+    _appendSources(messageId, sources) {
+      const messageEl = this._messagesContainer.querySelector(`[data-message-id="${messageId}"]`);
+      if (!messageEl) return;
+      const bubbleEl = messageEl.querySelector(".wc-ai-bot-message-bubble");
+      if (!bubbleEl) return;
+      const wrap = document.createElement("div");
+      wrap.className = "wc-ai-bot-sources";
+      const label = document.createElement("div");
+      label.className = "wc-ai-bot-sources-label";
+      label.textContent = "Learn more";
+      wrap.appendChild(label);
+      sources.forEach((src) => {
+        if (!src || !src.url) return;
+        const a = document.createElement("a");
+        a.className = "wc-ai-bot-source-link";
+        a.href = src.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = src.title || src.url;
+        if (src.text) a.title = src.text;
+        wrap.appendChild(a);
+      });
+      bubbleEl.appendChild(wrap);
+      this._messagesContainer.scrollTop = this._messagesContainer.scrollHeight;
+    }
+    // --- Cloudflare Turnstile (server mode, optional) ---
+    async _ensureTurnstile() {
+      const siteKey = this.getAttribute("turnstile-site-key");
+      if (!siteKey || !this._turnstileContainer) return;
+      if (!turnstileScriptPromise) {
+        turnstileScriptPromise = new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+          s.async = true;
+          s.defer = true;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error("Failed to load Turnstile script"));
+          document.head.appendChild(s);
+        });
+      }
+      try {
+        await turnstileScriptPromise;
+      } catch (e) {
+        console.warn("[wc-ai-bot] Turnstile failed to load:", e);
+        return;
+      }
+      if (window.turnstile && this._turnstileWidgetId == null) {
+        try {
+          this._turnstileWidgetId = window.turnstile.render(this._turnstileContainer, {
+            sitekey: siteKey,
+            size: "flexible"
+          });
+        } catch (e) {
+          console.warn("[wc-ai-bot] Turnstile render failed:", e);
+        }
+      }
+    }
+    async _getTurnstileToken() {
+      if (!this.getAttribute("turnstile-site-key")) return "";
+      if (this._turnstileWidgetId == null) {
+        await this._ensureTurnstile();
+      }
+      try {
+        if (window.turnstile && this._turnstileWidgetId != null) {
+          return window.turnstile.getResponse(this._turnstileWidgetId) || "";
+        }
+      } catch (e) {
+      }
+      return "";
+    }
+    _resetTurnstile() {
+      try {
+        if (window.turnstile && this._turnstileWidgetId != null) {
+          window.turnstile.reset(this._turnstileWidgetId);
+        }
+      } catch (e) {
+      }
     }
     // Input/output language hints for the Prompt API. Specifying these silences the
     // "No output language was specified" console warning and keeps responses in English.
@@ -24606,6 +24873,10 @@ ${json}`);
       this._sendButton.disabled = true;
       const loadingId = this._addMessage("bot", "...", true);
       try {
+        if (this._provider === "server") {
+          await this._streamServer(message, loadingId, botId);
+          return;
+        }
         const messages = this._prepareMessages(message);
         const temperature = parseFloat(this.getAttribute("temperature") || "0.7");
         const maxTokens = parseInt(this.getAttribute("max-tokens") || "1000");
@@ -27923,7 +28194,7 @@ if (!customElements.get("wc-notify")) {
             align-items: center;
             gap: 0.75rem;
             transition: transform 0.3s, top 0.3s ease-out, bottom 0.3s ease-out;
-            z-index: 2000;
+            z-index: 9999999;
             max-width: 400px;
         }
 

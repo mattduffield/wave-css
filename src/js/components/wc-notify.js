@@ -195,7 +195,7 @@ if (!customElements.get('wc-notify')) {
             align-items: center;
             gap: 0.75rem;
             transition: transform 0.3s, top 0.3s ease-out, bottom 0.3s ease-out;
-            z-index: 2000;
+            z-index: 9999999;
             max-width: 400px;
         }
 

@@ -12,6 +12,7 @@ if (!customElements.get('wc-ai-bot')) {
   // Global WebLLM management
   let webllmModule = null;
   let markedModule = null;
+  let turnstileScriptPromise = null; // Shared Cloudflare Turnstile script loader (server mode)
   const loadedModels = new Map(); // Share models between bot instances
   const modelLoadingPromises = new Map(); // Prevent duplicate model loads
   
@@ -22,6 +23,8 @@ if (!customElements.get('wc-ai-bot')) {
         'mode',
         'model',
         'provider',
+        'endpoint',
+        'turnstile-site-key',
         'hide-if-unavailable',
         'system-prompt',
         'title',
@@ -449,8 +452,10 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._isMinimized = true;
       this._error = null;
       this._engine = null;
-      this._provider = null;           // resolved backend: 'webllm' | 'gemini-nano'
+      this._provider = null;           // resolved backend: 'webllm' | 'gemini-nano' | 'server'
       this._modelProgress = 0;
+      this._sessionId = null;          // stable per-instance id for server mode
+      this._turnstileWidgetId = null;  // Cloudflare Turnstile widget handle (server mode)
       // Async init (model load): resolve the base `ready` promise manually once the
       // model is ready (or a terminal error/unsupported state is reached).
       this._deferReady = true;
@@ -491,10 +496,11 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       this._provider = await this._resolveProvider();
 
       // Check system capabilities before rendering. Gemini Nano runs via Chrome's
-      // on-device model component (not WebGPU), so the GPU compatibility gate only
-      // applies to the WebLLM backend.
+      // on-device model component (not WebGPU) and the server backend runs no model in
+      // the browser at all, so the GPU compatibility gate only applies to WebLLM.
       const checkGPU = this.getAttribute('check-gpu-compatibility') !== 'false';
-      if (this._provider !== 'gemini-nano' && checkGPU && !(await this._checkSystemCapabilities())) {
+      if (this._provider !== 'gemini-nano' && this._provider !== 'server'
+          && checkGPU && !(await this._checkSystemCapabilities())) {
         // System doesn't meet requirements - render minimal fallback UI
         this._renderUnsupportedUI();
         return;
@@ -898,6 +904,45 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           color: var(--warning-contrast-color, white);
         }
 
+        /* Server-mode source links ("Learn more") */
+        .wc-ai-bot-sources {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-top: 0.75rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid var(--border-color);
+        }
+
+        .wc-ai-bot-sources-label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          opacity: 0.7;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+        }
+
+        .wc-ai-bot-source-link {
+          font-size: 0.85rem;
+          color: var(--primary-color);
+          text-decoration: none;
+        }
+
+        .wc-ai-bot-source-link:hover {
+          text-decoration: underline;
+        }
+
+        /* Server-mode Cloudflare Turnstile container */
+        .wc-ai-bot-turnstile {
+          display: flex;
+          justify-content: center;
+          padding: 0.5rem 1rem 0;
+        }
+
+        .wc-ai-bot-turnstile:empty {
+          display: none;
+        }
+
         /* Gemini Nano state panels (download / unsupported / error) */
         .wc-ai-bot-nano-panel {
           display: flex;
@@ -1168,6 +1213,11 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
 
     async _initializeModel() {
+      // Server-backed: no in-browser model — wire up the endpoint and (optionally) Turnstile.
+      if (this._provider === 'server') {
+        return this._initServer();
+      }
+
       // Gemini Nano (Chrome built-in AI) has its own init path — no WebLLM download.
       if (this._provider === 'gemini-nano') {
         return this._initGeminiNano();
@@ -1334,6 +1384,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     async _resolveProvider() {
       const pref = (this.getAttribute('provider') || 'auto').toLowerCase();
 
+      // Server-backed: no in-browser model, talk to a backend endpoint.
+      if (pref === 'server') return 'server';
+
       if (pref === 'webllm') return 'webllm';
 
       // Explicit opt-in: always use Nano. _initGeminiNano decides what to render for
@@ -1365,6 +1418,256 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         provider: 'gemini-nano',
         hidden: true
       });
+    }
+
+    // --- Server Backend (provider="server") ---
+
+    // No in-browser model: the backend owns the prompt, grounding, model and limits,
+    // and the model API key never reaches the browser. Sets up a stable session id and
+    // (optionally) a Cloudflare Turnstile challenge, then marks the bot ready.
+    async _initServer() {
+      const botId = this.getAttribute('bot-id') || 'default';
+
+      if (!this._sessionId) this._sessionId = this._generateSessionId();
+
+      // Optional Cloudflare Turnstile challenge rendered above the input.
+      const siteKey = this.getAttribute('turnstile-site-key');
+      if (siteKey) {
+        this._turnstileContainer = document.createElement('div');
+        this._turnstileContainer.className = 'wc-ai-bot-turnstile';
+        const inputContainer = this._container.querySelector('.wc-ai-bot-input-container');
+        if (inputContainer) {
+          this._container.insertBefore(this._turnstileContainer, inputContainer);
+        } else {
+          this._container.appendChild(this._turnstileContainer);
+        }
+        this._ensureTurnstile(); // fire-and-forget render; token read per request
+      }
+
+      this._engine = { type: 'server' };
+      this._isModelReady = true;
+      this._sendButton.disabled = false;
+      this._updateStatus('');
+      this._emitBotEvent('wcbotready', 'bot:ready', { botId, model: 'server' });
+    }
+
+    _generateSessionId() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+      } catch (e) { /* fall through */ }
+      return 'sess-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    // POST the full conversation to the backend and stream the SSE reply into the
+    // loading bubble. Handles the 503 JSON deny shape and the done/error SSE events.
+    async _streamServer(message, loadingId, botId) {
+      const endpoint = this.getAttribute('endpoint') || '/api/ai';
+
+      // Full conversation as user/assistant turns (exclude the in-progress bot bubble).
+      const messages = this._messages
+        .filter(m => !m.isLoading && (m.role === 'user' || m.role === 'bot'))
+        .map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.content }));
+
+      const turnstileToken = await this._getTurnstileToken();
+
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          messages,
+          session_id: this._sessionId,
+          turnstile_token: turnstileToken
+        })
+      });
+
+      const contentType = (resp.headers.get('content-type') || '').toLowerCase();
+
+      // Denied → 503 application/json { reason }
+      if (!resp.ok || contentType.includes('application/json')) {
+        let reason = 'provider_unavailable';
+        try {
+          const data = await resp.json();
+          if (data && data.reason) reason = data.reason;
+        } catch (e) { /* keep default */ }
+        this._resetTurnstile();
+        this._updateMessage(loadingId, this._serverDenyMessage(reason));
+        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: reason, reason });
+        return;
+      }
+
+      if (!resp.body) {
+        throw new Error('Streaming not supported by this browser/response.');
+      }
+
+      // Allowed → 200 text/event-stream. POST means EventSource can't be used, so we
+      // read the body and parse SSE frames manually.
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let answer = '';
+      let sources = [];
+      let streamError = null;
+
+      const processFrame = (frame) => {
+        let eventType = 'message';
+        const dataLines = [];
+        frame.split('\n').forEach(line => {
+          if (line.startsWith('event:')) {
+            eventType = line.slice(6).trim();
+          } else if (line.startsWith('data:')) {
+            dataLines.push(line.slice(5).replace(/^ /, ''));
+          }
+        });
+        const dataStr = dataLines.join('\n');
+        if (!dataStr) return;
+        let data;
+        try { data = JSON.parse(dataStr); } catch (e) { return; }
+
+        if (eventType === 'delta') {
+          answer += data.text || '';
+          this._updateMessage(loadingId, answer);
+        } else if (eventType === 'done') {
+          sources = Array.isArray(data.sources) ? data.sources : [];
+        } else if (eventType === 'error') {
+          streamError = data.reason || 'provider_error';
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
+        let idx;
+        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+          const frame = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          processFrame(frame);
+        }
+      }
+      if (buffer.trim()) processFrame(buffer);
+
+      this._resetTurnstile();
+
+      if (streamError) {
+        const friendly = this._serverDenyMessage(streamError);
+        this._updateMessage(loadingId, answer ? `${answer}\n\n_${friendly}_` : friendly);
+        this._emitBotEvent('wcboterror', 'bot:error', { botId, error: streamError, reason: streamError });
+        return;
+      }
+
+      if (sources.length > 0) {
+        this._appendSources(loadingId, sources);
+      }
+
+      this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', { botId, response: answer, sources });
+    }
+
+    // Map a backend deny/error reason to a friendly, user-facing message.
+    _serverDenyMessage(reason) {
+      switch (reason) {
+        case 'captcha':
+          return 'Please complete the verification and try again.';
+        case 'rate_limited':
+        case 'session_cap':
+        case 'global_cap':
+        case 'breaker_velocity':
+          return 'You\'ve reached a limit. Please try again shortly.';
+        case 'input_too_large':
+          return 'Your message is too long. Please shorten it and try again.';
+        default:
+          return 'The assistant is temporarily unavailable. Please try again.';
+      }
+    }
+
+    // Render "Learn more" source links beneath a bot message bubble.
+    _appendSources(messageId, sources) {
+      const messageEl = this._messagesContainer.querySelector(`[data-message-id="${messageId}"]`);
+      if (!messageEl) return;
+      const bubbleEl = messageEl.querySelector('.wc-ai-bot-message-bubble');
+      if (!bubbleEl) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'wc-ai-bot-sources';
+
+      const label = document.createElement('div');
+      label.className = 'wc-ai-bot-sources-label';
+      label.textContent = 'Learn more';
+      wrap.appendChild(label);
+
+      sources.forEach(src => {
+        if (!src || !src.url) return;
+        const a = document.createElement('a');
+        a.className = 'wc-ai-bot-source-link';
+        a.href = src.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = src.title || src.url;
+        if (src.text) a.title = src.text;
+        wrap.appendChild(a);
+      });
+
+      bubbleEl.appendChild(wrap);
+      this._messagesContainer.scrollTop = this._messagesContainer.scrollHeight;
+    }
+
+    // --- Cloudflare Turnstile (server mode, optional) ---
+
+    async _ensureTurnstile() {
+      const siteKey = this.getAttribute('turnstile-site-key');
+      if (!siteKey || !this._turnstileContainer) return;
+
+      if (!turnstileScriptPromise) {
+        turnstileScriptPromise = new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+          s.async = true;
+          s.defer = true;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('Failed to load Turnstile script'));
+          document.head.appendChild(s);
+        });
+      }
+
+      try {
+        await turnstileScriptPromise;
+      } catch (e) {
+        console.warn('[wc-ai-bot] Turnstile failed to load:', e);
+        return;
+      }
+
+      if (window.turnstile && this._turnstileWidgetId == null) {
+        try {
+          this._turnstileWidgetId = window.turnstile.render(this._turnstileContainer, {
+            sitekey: siteKey,
+            size: 'flexible'
+          });
+        } catch (e) {
+          console.warn('[wc-ai-bot] Turnstile render failed:', e);
+        }
+      }
+    }
+
+    async _getTurnstileToken() {
+      if (!this.getAttribute('turnstile-site-key')) return '';
+      if (this._turnstileWidgetId == null) {
+        await this._ensureTurnstile();
+      }
+      try {
+        if (window.turnstile && this._turnstileWidgetId != null) {
+          return window.turnstile.getResponse(this._turnstileWidgetId) || '';
+        }
+      } catch (e) { /* fall through */ }
+      return '';
+    }
+
+    _resetTurnstile() {
+      try {
+        if (window.turnstile && this._turnstileWidgetId != null) {
+          window.turnstile.reset(this._turnstileWidgetId);
+        }
+      } catch (e) { /* ignore */ }
     }
 
     // Input/output language hints for the Prompt API. Specifying these silences the
@@ -1849,9 +2152,15 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       const loadingId = this._addMessage('bot', '...', true);
       
       try {
+        // Server backend owns prompt/grounding/model/limits — stream from the endpoint.
+        if (this._provider === 'server') {
+          await this._streamServer(message, loadingId, botId);
+          return;
+        }
+
         // Prepare messages for the model
         const messages = this._prepareMessages(message);
-        
+
         // Get completion
         const temperature = parseFloat(this.getAttribute('temperature') || '0.7');
         const maxTokens = parseInt(this.getAttribute('max-tokens') || '1000');
@@ -1868,7 +2177,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         if (this.getAttribute('debug') === 'true') {
           console.log('[wc-ai-bot] Raw LLM response:', response);
         }
-        
+
         // Emit response received event. For /query results, also surface the parsed
         // query parts so consumers can apply them without re-parsing the markdown.
         const detail = { botId, response };
@@ -1876,7 +2185,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           detail.parsed = this._parseQueryResponse(response);
         }
         this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', detail);
-        
+
       } catch (error) {
         console.error('[wc-ai-bot] Failed to get response:', error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
