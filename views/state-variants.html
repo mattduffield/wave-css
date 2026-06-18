@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wave CSS — Interactive State Color Variants</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css" />
+  <style>
+    /* Demo-only: spacing + optional easing. The Wave state utilities do the coloring. */
+    .demo { max-width: 640px; margin: 2rem auto; }
+    .row {
+      padding: 0.6rem 0.9rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo container mx-auto p-6">
+    <h1 class="text-1">Interactive state color variants</h1>
+    <p class="text-3">All interaction colors below come from Wave utilities — zero custom color CSS.</p>
+
+    <h3 class="text-2 mt-6">BEFORE — base only (no hover state)</h3>
+    <div class="surface-1 border-surface-3" style="border:1px solid; border-radius:8px; padding:0.5rem;">
+      <div class="row surface-1">Hover me — nothing changes (no state utility)</div>
+      <div class="row surface-1">Hover me — nothing changes (no state utility)</div>
+    </div>
+
+    <h3 class="text-2 mt-6">AFTER — with state utilities</h3>
+    <div class="surface-1 border-surface-3" style="border:1px solid; border-radius:8px; padding:0.5rem;">
+      <!-- row highlights on hover -->
+      <div class="row surface-1 hover:surface-3">class="hover:surface-3" — highlights on hover</div>
+      <!-- focusable item: focus + active states -->
+      <div class="row surface-1 hover:surface-3 focus:surface-2 active:surface-4" tabindex="0">
+        class="hover:surface-3 focus:surface-2 active:surface-4" — Tab to focus, click to activate
+      </div>
+      <!-- foreground + border on state -->
+      <div class="row surface-1 text-3 hover:text-1 hover:border-surface-6" tabindex="0">
+        class="text-3 hover:text-1 hover:border-surface-6" — text darkens + border on hover
+      </div>
+      <!-- semantic -->
+      <div class="row surface-1 hover:success-bg-color hover:surface-color-1">
+        class="hover:success-bg-color hover:surface-color-1" — semantic success bg on hover
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

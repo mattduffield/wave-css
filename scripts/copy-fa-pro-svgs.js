@@ -21,6 +21,7 @@ const ICON_ALIASES = {
   settings: "gear",
   cog: "gear",
   cogs: "gears",
+  beaker: "flask",
   "trash-alt": "trash-can",
   delete: "trash",
   remove: "xmark",
