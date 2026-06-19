@@ -104,7 +104,13 @@ class WcThemeSelector extends WcBaseComponent {
       "theme-avocado",
       "theme-lime",
       "theme-fern",
+      "theme-gold",
       "theme-yellow",
+      "theme-lemon",
+      "theme-sienna",
+      "theme-chocolate",
+      "theme-coffee",
+      "theme-tan",
       "theme-meadow",
       "theme-cornsilk",
       "theme-sage",
@@ -131,8 +137,6 @@ class WcThemeSelector extends WcBaseComponent {
       "theme-cottoncandy",
       "theme-blush",
       "theme-bubblegum",
-      "theme-gold",
-      "theme-lemon",
       "theme-silver",
       "theme-gray",
       "theme-charcoal",
@@ -193,6 +197,23 @@ class WcThemeSelector extends WcBaseComponent {
       wc-theme-selector .wc-theme-selector .theme-button {
         background-color: var(--primary-bg-color);
         padding: 0;
+      }
+      /* Neutral themes override --primary-bg-color to a colored accent (so CTAs pop),
+         which would make all three swatches look identically blue here. Show a
+         representative neutral tone instead — light/mid/dark so they read distinctly. */
+      wc-theme-selector .wc-theme-selector .theme-button.theme-silver {
+        background-color: var(--swatch-4);
+      }
+      wc-theme-selector .wc-theme-selector .theme-button.theme-gray {
+        background-color: var(--swatch-7);
+      }
+      wc-theme-selector .wc-theme-selector .theme-button.theme-charcoal {
+        background-color: var(--swatch-10);
+      }
+      /* High-contrast: show a fixed black/white split so the swatch reads as
+         "high contrast" and never inherits the active theme's color. */
+      wc-theme-selector .wc-theme-selector .theme-button.theme-high-contrast {
+        background: linear-gradient(135deg, #fff 0 50%, #000 50% 100%);
       }
       wc-theme-selector .wc-theme-selector .selectmark {
         padding: 0;

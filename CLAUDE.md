@@ -86,7 +86,8 @@ The build process (esbuild.config.js) generates:
 - 40+ predefined color themes using CSS variables
 - Themes modify `--hue` and related color variables
 - `--chroma-mult` (default 1) is a saturation multiplier baked into the swatch ramp (`oklch(L calc(C * var(--chroma-mult,1)) var(--hue))`). Set it to 0 for a neutral/gray theme or a small value (e.g. 0.15) for a muted tint — a second axis beyond hue, so neutrals are possible
-- Neutral themes: `theme-gray` (pure), `theme-silver` (cool), `theme-charcoal` (warm graphite) — gray surfaces via `--chroma-mult`, but keep a colored accent (`--primary-bg-color` overridden) so CTAs pop; they flip with light/dark (whitewashed ↔ charcoal). Vivid yellows: `theme-gold`, `theme-lemon`
+- Neutral themes: `theme-gray` (pure), `theme-silver` (cool), `theme-charcoal` (warm graphite) — gray surfaces via `--chroma-mult`, but keep a colored accent (`--primary-bg-color` overridden) so CTAs pop; they flip with light/dark (whitewashed ↔ charcoal). Vivid yellows: `theme-gold`, `theme-lemon`. Earth tones: `theme-sienna`, `theme-chocolate`, `theme-coffee`, `theme-tan` — hand-tuned warm low-lightness/muted ramps (browns can't come from the generator's vivid ramp); their own swatch-5 stays the accent
+- Yellow & earth-tone themes use hand-tuned explicit swatch ramps (in the theme block) rather than the generator, because those colors need lightness/chroma outside the shared ramp. The colored-accent override for neutral + high-contrast themes lives LAST in `@layer wc.themes` so it wins over the `.light`/`.dark` surface mappings
 - Components automatically adapt to the selected theme
 - Theme selector component (`wc-theme-selector`) for runtime switching
 - `theme-high-contrast` accessibility theme with WCAG AAA-level saturated semantic colors
