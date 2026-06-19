@@ -36770,13 +36770,21 @@ if (!customElements.get("wc-combobox")) {
       if (this.hasAttribute("autofocus")) input2.setAttribute("autofocus", "");
       this._input = input2;
       this.formElement = input2;
+      const control = document.createElement("div");
+      control.classList.add("wc-combobox-control");
+      const arrow = document.createElement("span");
+      arrow.classList.add("wc-combobox-arrow");
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
       const list = document.createElement("ul");
       list.classList.add("wc-combobox-list");
       list.setAttribute("role", "listbox");
       list.style.display = "none";
       this._list = list;
-      this.componentElement.appendChild(input2);
-      this.componentElement.appendChild(list);
+      control.appendChild(input2);
+      control.appendChild(arrow);
+      control.appendChild(list);
+      this.componentElement.appendChild(control);
       input2.addEventListener("focus", () => this._onFocus());
       input2.addEventListener("blur", () => this._onBlur());
       input2.addEventListener("keydown", (e) => this._onKeydown(e));
@@ -37010,24 +37018,27 @@ if (!customElements.get("wc-combobox")) {
         .wc-combobox label {
           font-size: 0.875rem;
         }
+        /* The input intentionally inherits the library's global input styling
+           (border, background, height, focus glow) so it matches wc-input / wc-select.
+           Only width + room for the chevron are component-specific. */
+        .wc-combobox-control {
+          position: relative;
+          width: 100%;
+        }
         .wc-combobox-input {
           width: 100%;
-          padding: 0.5rem 0.75rem;
-          font-size: 0.95rem;
-          color: var(--text-1);
-          background: var(--surface-1);
-          border: 1px solid var(--border-color, var(--surface-4));
-          border-radius: 0.375rem;
           box-sizing: border-box;
+          padding-right: 2rem;
         }
-        .wc-combobox-input:focus {
-          outline: none;
-          border-color: var(--primary-color);
-          box-shadow: 0 0 0 2px var(--primary-bg-color, rgba(59,130,246,0.25));
-        }
-        .wc-combobox-input:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
+        .wc-combobox-arrow {
+          position: absolute;
+          top: 50%;
+          right: 0.625rem;
+          transform: translateY(-50%);
+          display: inline-flex;
+          pointer-events: none;
+          color: var(--component-color);
+          opacity: 0.7;
         }
         .wc-combobox-list {
           position: absolute;
@@ -37040,16 +37051,17 @@ if (!customElements.get("wc-combobox")) {
           list-style: none;
           max-height: 16rem;
           overflow-y: auto;
-          background: var(--surface-1);
-          border: 1px solid var(--border-color, var(--surface-4));
-          border-radius: 0.375rem;
+          background: var(--component-bg-color);
+          color: var(--component-color);
+          border: 1px solid var(--component-border-color);
+          border-radius: 4px;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
         .wc-combobox-option {
           padding: 0.4rem 0.6rem;
           border-radius: 0.25rem;
           cursor: pointer;
-          color: var(--text-1);
+          color: var(--component-color);
           font-size: 0.9rem;
           white-space: nowrap;
           overflow: hidden;
@@ -37057,7 +37069,8 @@ if (!customElements.get("wc-combobox")) {
         }
         .wc-combobox-option:hover,
         .wc-combobox-option.is-active {
-          background: var(--surface-3);
+          background: var(--primary-bg-color);
+          color: var(--primary-color);
         }
       `.trim();
       this.loadStyle("wc-combobox-style", style);
