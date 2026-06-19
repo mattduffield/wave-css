@@ -1,4 +1,5 @@
 /* src/css/main.css */
+@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
 @layer wc.vars {
   :root {
     --hue: 0;

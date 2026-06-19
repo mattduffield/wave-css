@@ -1,3 +1,11 @@
+/* Explicit @layer order. Establishes cascade precedence regardless of where each
+   block first appears below. The interaction-state layers (hover, state, selected)
+   are placed LAST — AFTER the component layers (usage/tables/palette/ui/main) — so
+   utilities like hover:surface-3 / focus:badge-* / .is-active reliably win over
+   component classes (e.g. .btn), matching how .is-active already behaves. Base
+   utility layers (classes/utility) intentionally stay before components. */
+@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
+
 @layer wc.vars {
     :root {
         --hue: 0;

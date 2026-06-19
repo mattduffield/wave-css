@@ -21983,7 +21983,7 @@ if (!customElements.get("wc-tree")) {
           gap: 0.375rem;
           padding: 0.25rem 0.5rem;
           cursor: pointer;
-          border-left: 2px solid transparent;
+          border-left: 3px solid transparent;
           transition: background-color 0.15s, border-color 0.15s;
           outline: none;
           min-height: 1.625rem;
@@ -21996,8 +21996,12 @@ if (!customElements.get("wc-tree")) {
           background: var(--surface-3, rgba(255,255,255,0.05));
         }
         .tree-item-row.selected {
-          background: rgba(59, 151, 227, 0.15);
-          border-left-color: var(--primary-color, #3b97e3);
+          /* Unified selected look \u2014 matches the global .is-active utility
+             (surface-3 fill, text-1, primary left accent). Theme-token based
+             instead of the old hardcoded blue. */
+          background: var(--surface-3);
+          color: var(--text-1);
+          border-left-color: var(--primary-bg-color);
         }
 
         /* System items (names starting with _) */
