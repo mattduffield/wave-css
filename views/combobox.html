@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wave CSS — wc-combobox</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css" />
+</head>
+<body>
+  <div class="container mx-auto p-6" style="max-width: 680px;">
+    <h1 class="text-1">wc-combobox</h1>
+    <p class="text-3">Single-value combobox: type free text and/or pick a DB-loaded suggestion. The form value is the option's value-member, or your typed text for a custom entry.</p>
+
+    <h3 class="text-2 mt-6">Declarative options (label ≠ value), free-text allowed</h3>
+    <wc-combobox name="status" lbl-label="Status" value="open">
+      <option value="open">Open</option>
+      <option value="in_progress">In Progress</option>
+      <option value="closed">Closed</option>
+    </wc-combobox>
+
+    <h3 class="text-2 mt-6">DB-loaded, client-side filter</h3>
+    <wc-combobox name="manufacturer" lbl-label="Manufacturer"
+      url="/api/manufacturers" display-member="name" value-member="id" sort></wc-combobox>
+
+    <h3 class="text-2 mt-6">Server-side search (large dataset)</h3>
+    <wc-combobox name="city" lbl-label="City"
+      url="/api/cities?q={query}" display-member="name" value-member="code"
+      min-chars="2" debounce="250" placeholder="Type 2+ chars…"></wc-combobox>
+
+    <button class="btn mt-6" id="dump">Log current values</button>
+    <pre id="out" class="surface-2 p-3 mt-3" style="border-radius:6px;"></pre>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const out = document.getElementById('out');
+    document.getElementById('dump').addEventListener('click', () => {
+      const vals = {};
+      document.querySelectorAll('wc-combobox').forEach(c => { vals[c.getAttribute('name')] = c.value; });
+      out.textContent = JSON.stringify(vals, null, 2);
+    });
+    document.addEventListener('wccomboboxchange', (e) => {
+      console.log('wccomboboxchange', e.target.getAttribute('name'), e.detail);
+    });
+  </script>
+</body>
+</html>

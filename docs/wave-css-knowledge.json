@@ -479,6 +479,38 @@
         }
       },
       {
+        "name": "wc-combobox",
+        "description": "Single-value combobox: type free text AND/OR pick a DB-loaded suggestion. Always allows custom (typed) values — unlike wc-select.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "items",
+          "url",
+          "display-member",
+          "value-member",
+          "results-member",
+          "sort",
+          "search-param",
+          "min-chars",
+          "debounce",
+          "placeholder",
+          "lbl-label",
+          "disabled",
+          "required",
+          "autofocus",
+          "elt-class"
+        ],
+        "events": ["wccomboboxchange", "wccomboboxinput", "wcoptionsloaded"],
+        "notes": "Form-associated (extends WcBaseFormComponent). The SUBMITTED value is the selected option's value-member, or the raw typed text for a custom entry (display text != stored value). The visible <input> holds display text and has NO name, so the host's setFormValue() is the single value submitted (native forms + HTMX hx-include). Two data modes: (1) load-once + client filter when url returns a full list (defers `ready` until loaded, emits wcoptionsloaded); (2) server-side search when url contains a {query} placeholder (or search-param is set) — debounced fetch (debounce ms, default 250) after min-chars (default 1). display-member default 'key', value-member default 'value', optional results-member + sort (asc|desc). Keyboard: ArrowUp/Down navigate, Enter selects highlighted, Escape closes. wccomboboxchange detail: { value, label, custom }. Set .value programmatically (or via value attr) to load a record — display resolves to the matching option's label, else shows the raw value.",
+        "usage": {
+          "declarative": "<wc-combobox name=\"status\" lbl-label=\"Status\" value=\"open\">\n  <option value=\"open\">Open</option>\n  <option value=\"closed\">Closed</option>\n</wc-combobox>",
+          "urlClientFilter": "<wc-combobox name=\"manufacturer\" lbl-label=\"Manufacturer\"\n  url=\"/api/manufacturers\" display-member=\"name\" value-member=\"id\" sort></wc-combobox>",
+          "serverSearch": "<wc-combobox name=\"city\" lbl-label=\"City\"\n  url=\"/api/cities?q={query}\" display-member=\"name\" value-member=\"code\"\n  min-chars=\"2\" debounce=\"250\"></wc-combobox>"
+        }
+      },
+      {
         "name": "wc-textarea",
         "description": "Multi-line text input with optional emoji shortcode autocomplete",
         "attributes": [

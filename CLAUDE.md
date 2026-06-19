@@ -123,6 +123,7 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-form`: Form wrapper with validation
 - `wc-input`: Text input field
 - `wc-select`: Dropdown select; `wcoptionsloaded` event fires after URL options load
+- `wc-combobox`: Single-value combobox — type free text AND/OR pick a DB-loaded suggestion (always allows custom values). Loads options via `url` + `display-member`/`value-member`/`results-member`/`sort` (load-once + client filter), or server-side search when `url` contains a `{query}` placeholder (or `search-param`) with `min-chars`/`debounce`. Form-associated: submits the option's value-member or the raw typed text (display text ≠ stored value); visible input has no `name`. Events: `wccomboboxchange`, `wccomboboxinput`, `wcoptionsloaded`
 - `wc-textarea`: Multi-line text input
 - `wc-cron-picker`: Visual cron schedule picker; generates 5-field cron expressions; frequencies: minute, N minutes, hour, N hours, day, weekday, weekend, week, month, custom; `wccronchange` event; collapsible syntax reference
 

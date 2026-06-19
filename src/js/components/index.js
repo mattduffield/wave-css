@@ -97,6 +97,7 @@ import './wc-progress.js';
 import './wc-form.js';
 import './wc-input.js';
 import './wc-select.js';
+import './wc-combobox.js';
 import './wc-textarea.js';
 import './wc-wizard-step.js';
 import './wc-wizard.js';
