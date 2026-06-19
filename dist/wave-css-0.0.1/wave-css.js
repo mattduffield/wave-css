@@ -20744,6 +20744,11 @@ var WcThemeSelector = class extends WcBaseComponent {
       "theme-cottoncandy",
       "theme-blush",
       "theme-bubblegum",
+      "theme-gold",
+      "theme-lemon",
+      "theme-silver",
+      "theme-gray",
+      "theme-charcoal",
       "theme-high-contrast"
     ];
     const extraAttr = this.getAttribute("extra-themes");

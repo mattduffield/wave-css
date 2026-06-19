@@ -85,6 +85,8 @@ The build process (esbuild.config.js) generates:
 
 - 40+ predefined color themes using CSS variables
 - Themes modify `--hue` and related color variables
+- `--chroma-mult` (default 1) is a saturation multiplier baked into the swatch ramp (`oklch(L calc(C * var(--chroma-mult,1)) var(--hue))`). Set it to 0 for a neutral/gray theme or a small value (e.g. 0.15) for a muted tint — a second axis beyond hue, so neutrals are possible
+- Neutral themes: `theme-gray` (pure), `theme-silver` (cool), `theme-charcoal` (warm graphite) — gray surfaces via `--chroma-mult`, but keep a colored accent (`--primary-bg-color` overridden) so CTAs pop; they flip with light/dark (whitewashed ↔ charcoal). Vivid yellows: `theme-gold`, `theme-lemon`
 - Components automatically adapt to the selected theme
 - Theme selector component (`wc-theme-selector`) for runtime switching
 - `theme-high-contrast` accessibility theme with WCAG AAA-level saturated semantic colors

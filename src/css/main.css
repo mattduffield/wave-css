@@ -1,6 +1,10 @@
 @layer wc.vars {
     :root {
         --hue: 0;
+        /* Saturation multiplier for the generated swatch ramp. 1 = full chroma
+           (default, unchanged). Set to 0 for a neutral gray theme, or a small
+           value (e.g. 0.15) for a muted/desaturated tint. */
+        --chroma-mult: 1;
         --success-color: #22c55e;
         --success-light-color: #4ade80;
         --danger-color: #ef4444;
@@ -296,20 +300,25 @@
     .theme-fuchsia,
     .theme-cottoncandy,
     .theme-blush,
-    .theme-bubblegum {
-        --swatch-1: oklch(99% 0.05 var(--hue));
-        --swatch-2: oklch(95% 0.05 var(--hue));
-        --swatch-3: oklch(90% 0.1 var(--hue));
-        --swatch-4: oklch(85% 0.15 var(--hue));
-        --swatch-5: oklch(80% 0.2 var(--hue));
-        --swatch-6: oklch(72% 0.25 var(--hue));
-        --swatch-7: oklch(67% 0.31 var(--hue));
-        --swatch-8: oklch(50% 0.27 var(--hue));
-        --swatch-9: oklch(35% 0.25 var(--hue));
-        --swatch-10: oklch(25% 0.22 var(--hue));
-        --swatch-11: oklch(14% 0.2 var(--hue));
-        --swatch-12: oklch(10% 0.19 var(--hue));
-        --swatch-13: oklch(5% 0.1 var(--hue));
+    .theme-bubblegum,
+    .theme-gray,
+    .theme-silver,
+    .theme-charcoal,
+    .theme-gold,
+    .theme-lemon {
+        --swatch-1: oklch(99% calc(0.05 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-2: oklch(95% calc(0.05 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-3: oklch(90% calc(0.1 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-4: oklch(85% calc(0.15 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-5: oklch(80% calc(0.2 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-6: oklch(72% calc(0.25 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-7: oklch(67% calc(0.31 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-8: oklch(50% calc(0.27 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-9: oklch(35% calc(0.25 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-10: oklch(25% calc(0.22 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-11: oklch(14% calc(0.2 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-12: oklch(10% calc(0.19 * var(--chroma-mult, 1)) var(--hue));
+        --swatch-13: oklch(5% calc(0.1 * var(--chroma-mult, 1)) var(--hue));
     }
     .theme-designer-blue {
         --swatch-1: oklch(98% 0.03 230);
@@ -535,6 +544,43 @@
         --hue: 355;
     }
 
+    /* Neutral themes — gray surfaces via --chroma-mult, with a colored accent kept
+       for pop (the accent is overridden below). They flip with the light/dark toggle:
+       whitewashed in light, charcoal in dark. */
+    .theme-gray {
+        --hue: 250;
+        --chroma-mult: 0;        /* pure neutral */
+    }
+    .theme-silver {
+        --hue: 230;
+        --chroma-mult: 0.16;     /* faint cool tint */
+    }
+    .theme-charcoal {
+        --hue: 60;
+        --chroma-mult: 0.1;      /* faint warm graphite tint */
+    }
+
+    /* Vivid yellows (full chroma; tune lightness here if they read olive). */
+    .theme-gold {
+        --hue: 96;
+    }
+    .theme-lemon {
+        --hue: 110;
+    }
+
+    /* Keep a colored accent on the neutral themes so buttons/links still pop against
+       the gray surfaces. Specificity 0,2,0 + declared after the light/dark surface
+       mappings, so it wins in both modes (the .theme-* forms cover the no-mode case). */
+    .theme-gray, .theme-silver, .theme-charcoal,
+    .light.theme-gray, .dark.theme-gray,
+    .light.theme-silver, .dark.theme-silver,
+    .light.theme-charcoal, .dark.theme-charcoal {
+        --primary-bg-color: oklch(62% 0.17 250);
+        --primary-color: oklch(99% 0.01 250);
+        --primary-light: oklch(72% 0.15 250);
+        --primary-hover-color: oklch(55% 0.18 250);
+    }
+
     /* High-contrast accessibility theme — WCAG AAA-level saturated colors */
     .theme-high-contrast {
         --hue: 220;
@@ -601,7 +647,12 @@
         .theme-bubblegum,
         .theme-designer-blue,
         .theme-designer-gray,
-        .theme-designer {
+        .theme-designer,
+        .theme-gray,
+        .theme-silver,
+        .theme-charcoal,
+        .theme-gold,
+        .theme-lemon {
             --text-1: var(--swatch-13);
             --text-2: var(--swatch-12);
             --text-3: var(--swatch-11);
@@ -780,7 +831,12 @@
         .theme-bubblegum,
         .theme-designer-blue,
         .theme-designer-gray,
-        .theme-designer {
+        .theme-designer,
+        .theme-gray,
+        .theme-silver,
+        .theme-charcoal,
+        .theme-gold,
+        .theme-lemon {
             --text-1: var(--swatch-1);
             --text-2: var(--swatch-2);
             --text-3: var(--swatch-3);
@@ -901,7 +957,12 @@
     .light.theme-bubblegum,
     .light.theme-designer-blue,
     .light.theme-designer-gray,
-    .light.theme-designer {
+    .light.theme-designer,
+    .light.theme-gray,
+    .light.theme-silver,
+    .light.theme-charcoal,
+    .light.theme-gold,
+    .light.theme-lemon {
         --text-1: var(--swatch-13);
         --text-2: var(--swatch-12);
         --text-3: var(--swatch-11);
@@ -1067,7 +1128,12 @@
     .dark.theme-bubblegum,
     .dark.theme-designer-blue,
     .dark.theme-designer-gray,
-    .dark.theme-designer {
+    .dark.theme-designer,
+    .dark.theme-gray,
+    .dark.theme-silver,
+    .dark.theme-charcoal,
+    .dark.theme-gold,
+    .dark.theme-lemon {
         --text-1: var(--swatch-1);
         --text-2: var(--swatch-2);
         --text-3: var(--swatch-3);
