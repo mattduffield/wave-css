@@ -16471,3 +16471,49 @@ html[data-designer] .ld-canvas-dragover {
 body.has-impersonation-bar {
   padding-bottom: 36px;
 }
+.crisp {
+  --surface-1: oklch(96% 0.006 var(--hue));
+  --surface-2: oklch(93% 0.008 var(--hue));
+  --surface-3: oklch(89% 0.012 var(--hue));
+  --surface-4: oklch(82% 0.020 var(--hue));
+  --surface-5: oklch(99.4% 0.004 var(--hue));
+  --surface-6: oklch(90% 0.012 var(--hue));
+  --surface-7: oklch(78% 0.02 var(--hue));
+  --surface-8: oklch(60% 0.03 var(--hue));
+  --card-bg-color: oklch(99.4% 0.004 var(--hue));
+  --card-border-color: oklch(91% 0.010 var(--hue));
+  --container-bg-color: oklch(97% 0.006 var(--hue));
+  --container-border-color: oklch(91% 0.010 var(--hue));
+  --component-bg-color: oklch(99% 0.004 var(--hue));
+  --component-border-color: oklch(89% 0.012 var(--hue));
+  --accent: oklch(54% 0.21 var(--hue));
+  --accent-hover: oklch(47% 0.22 var(--hue));
+  --primary-bg-color: var(--accent);
+  --primary-color: oklch(99% 0.02 var(--hue));
+  --checkbox-checked-bg: var(--accent);
+  --radio-checked-bg: var(--accent);
+  --radio-checked-border: var(--accent);
+  --slider-thumb: var(--accent);
+  --component-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
+}
+html.dark .crisp,
+.dark .crisp,
+.crisp.dark,
+html.dark.crisp {
+  --surface-1: oklch(13% 0.016 var(--hue));
+  --surface-2: oklch(18% 0.020 var(--hue));
+  --surface-3: oklch(30% 0.030 var(--hue));
+  --surface-4: oklch(42% 0.035 var(--hue));
+  --surface-5: oklch(26% 0.030 var(--hue));
+  --surface-6: oklch(34% 0.032 var(--hue));
+  --surface-7: oklch(48% 0.035 var(--hue));
+  --surface-8: oklch(60% 0.035 var(--hue));
+  --card-bg-color: oklch(26% 0.030 var(--hue));
+  --card-border-color: oklch(34% 0.032 var(--hue));
+  --container-bg-color: oklch(20% 0.022 var(--hue));
+  --container-border-color: oklch(32% 0.030 var(--hue));
+  --component-bg-color: oklch(17% 0.020 var(--hue));
+  --component-border-color: oklch(30% 0.030 var(--hue));
+  --accent: oklch(64% 0.19 var(--hue));
+  --accent-hover: oklch(70% 0.18 var(--hue));
+}

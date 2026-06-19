@@ -481,6 +481,7 @@ const ICONS_TO_COPY = [
   "pen-ruler",
   "pen-to-square",
   "pencil",
+  "people",
   "percent",
   "period",
   "person-chalkboard",

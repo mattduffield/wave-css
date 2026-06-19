@@ -16471,15 +16471,7 @@ html[data-designer] .ld-canvas-dragover {
 body.has-impersonation-bar {
   padding-bottom: 36px;
 }
-
-/* === CRISP opt-in surface mode (added 2026-06) ============================
-   Neutral, crisply-separated surfaces driven by var(--hue) + a DECOUPLED
-   high-chroma accent. Works with any theme-* (any hue) in light or dark, and as
-   a per-screen opt-in: add `crisp` to a wrapper. Surfaces are set DIRECTLY (not
-   via the swatch scale) so the override applies even on a descendant element.
-   Existing screens are unaffected.
-   ------------------------------------------------------------------------- */
-.crisp {                                   /* light mode (default) */
+.crisp {
   --surface-1: oklch(96% 0.006 var(--hue));
   --surface-2: oklch(93% 0.008 var(--hue));
   --surface-3: oklch(89% 0.012 var(--hue));
@@ -16494,7 +16486,6 @@ body.has-impersonation-bar {
   --container-border-color: oklch(91% 0.010 var(--hue));
   --component-bg-color: oklch(99% 0.004 var(--hue));
   --component-border-color: oklch(89% 0.012 var(--hue));
-
   --accent: oklch(54% 0.21 var(--hue));
   --accent-hover: oklch(47% 0.22 var(--hue));
   --primary-bg-color: var(--accent);
@@ -16505,7 +16496,10 @@ body.has-impersonation-bar {
   --slider-thumb: var(--accent);
   --component-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
 }
-html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
+html.dark .crisp,
+.dark .crisp,
+.crisp.dark,
+html.dark.crisp {
   --surface-1: oklch(13% 0.016 var(--hue));
   --surface-2: oklch(18% 0.020 var(--hue));
   --surface-3: oklch(30% 0.030 var(--hue));
@@ -16520,8 +16514,6 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
   --container-border-color: oklch(32% 0.030 var(--hue));
   --component-bg-color: oklch(17% 0.020 var(--hue));
   --component-border-color: oklch(30% 0.030 var(--hue));
-
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
 }
-/* === end CRISP =========================================================== */
