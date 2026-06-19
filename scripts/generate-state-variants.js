@@ -92,14 +92,16 @@ function buildBaseUtilities() {
 
   // --- Badges (color-only variants; the structural `.badge` base is intentionally
   //     excluded so state variants never apply layout/padding). ---
-  const badge = (cls, bg, color) =>
-    utils.push({ cls, decls: [["background", bg], ["color", color]] });
-  badge("badge-success", "rgba(34, 197, 94, 0.15)", "var(--success-color)");
-  badge("badge-warning", "rgba(245, 158, 11, 0.15)", "var(--warning-color)");
-  badge("badge-danger", "rgba(239, 68, 68, 0.15)", "var(--danger-color)");
-  badge("badge-info", "rgba(59, 130, 246, 0.15)", "var(--info-color)");
-  badge("badge-muted", "var(--surface-3)", "var(--text-6)");
-  badge("badge-primary", "var(--primary-bg-color)", "var(--primary-text-color, #fff)");
+  // outline = same-hue 1px inset box-shadow so the pill stays delineated on a
+  // matching-hue surface (mirrors the base .badge-* rules in main.css).
+  const badge = (cls, bg, color, outline) =>
+    utils.push({ cls, decls: [["background", bg], ["color", color], ["box-shadow", `inset 0 0 0 1px ${outline}`]] });
+  badge("badge-success", "rgba(34, 197, 94, 0.15)", "var(--success-color)", "rgba(34, 197, 94, 0.4)");
+  badge("badge-warning", "rgba(245, 158, 11, 0.15)", "var(--warning-color)", "rgba(245, 158, 11, 0.4)");
+  badge("badge-danger", "rgba(239, 68, 68, 0.15)", "var(--danger-color)", "rgba(239, 68, 68, 0.4)");
+  badge("badge-info", "rgba(59, 130, 246, 0.15)", "var(--info-color)", "rgba(59, 130, 246, 0.4)");
+  badge("badge-muted", "var(--surface-3)", "var(--text-6)", "var(--surface-5)");
+  badge("badge-primary", "var(--primary-bg-color)", "var(--primary-color)", "color-mix(in srgb, var(--primary-color) 45%, transparent)");
 
   // --- Scope B (opt-in): raw Tailwind named palette ---
   if (INCLUDE_PALETTE) {

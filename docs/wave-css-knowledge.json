@@ -1818,6 +1818,15 @@
           "class=\"text-3 hover:text-1\"  (foreground darkens on hover)",
           "class=\"border-surface-4 focus:border-surface-6\"  (focus ring via border)"
         ]
+      },
+      "selectedState": {
+        "description": "Reusable selected/active list-row utility. `.is-active` (alias `.selected`) gives a clean selected look: surface-3 fill, text-1, and a primary left accent via inset box-shadow (no layout shift; the accent is color-mixed slightly toward the foreground so it never blends into a same-hue surface). Lives in the last @layer (wc.selected), so it reliably overrides component classes like .btn — `<button class=\"btn is-active\">` shows the selected look. Optional `.list` / `.list-item` base adds cursor + a subtle surface-2 hover affordance for non-active rows. Accessibility: inside a `.list-item`, `aria-selected=\"true\"` or `aria-current` ALSO triggers the selected look (visual stays coupled to the accessible state) — scoped to .list-item so it doesn't hijack other components' aria-selected. `.list-item:focus-visible` shows a theme-aware focus ring (--component-focus-border-color, not white). Honors prefers-reduced-motion (drops the transition) and forced-colors / Windows High Contrast (re-asserts the accent + focus as a real outline since box-shadow is dropped). Does not affect the specialized step-outline / CodeMirror .is-active markers (excluded via :not()).",
+        "classes": [".is-active", ".selected", ".list", ".list-item"],
+        "examples": [
+          "<div class=\"list\" role=\"listbox\"><div class=\"list-item\" role=\"option\" tabindex=\"0\" aria-selected=\"true\">Selected row</div></div>",
+          "<div class=\"list-item is-active\">Selected via class</div>",
+          "<button class=\"btn btn-outline is-active\">Selected (utility beats .btn)</button>"
+        ]
       }
     },
     "lineHeightUtilities": ["leading-none", "leading-tight", "leading-snug", "leading-normal", "leading-relaxed", "leading-loose", "leading-3", "leading-4", "leading-5", "leading-6", "leading-7", "leading-8", "leading-9", "leading-10"],

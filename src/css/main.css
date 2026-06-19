@@ -4766,7 +4766,11 @@
         border-color: var(--info-color);
     }
 
-    /* Badge — semantic status pills */
+    /* Badge — semantic status pills.
+       Each carries a faint same-hue 1px inset box-shadow outline so the pill stays
+       delineated even when its translucent fill lands on a same-hue theme surface
+       (e.g. a green success pill on an emerald surface). Inset box-shadow is used
+       instead of border so the pill footprint doesn't change. */
     .badge {
         display: inline-flex;
         align-items: center;
@@ -4778,30 +4782,49 @@
         white-space: nowrap;
         background: var(--surface-4);
         color: var(--text-2);
+        box-shadow: inset 0 0 0 1px var(--surface-6);
     }
     .badge-success {
         background: rgba(34, 197, 94, 0.15);
         color: var(--success-color);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
     .badge-warning {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning-color);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
     }
     .badge-danger {
         background: rgba(239, 68, 68, 0.15);
         color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
     }
     .badge-info {
         background: rgba(59, 130, 246, 0.15);
         color: var(--info-color);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
     .badge-muted {
         background: var(--surface-3);
         color: var(--text-6);
+        box-shadow: inset 0 0 0 1px var(--surface-5);
     }
     .badge-primary {
         background: var(--primary-bg-color);
-        color: var(--primary-text-color, #fff);
+        /* --primary-color is the theme-aware foreground designed to contrast with
+           --primary-bg-color — use it for both text and the outline so the pill
+           reads correctly in every theme (the old #fff text was invisible on
+           light-accent themes where --primary-bg-color is the lightest swatch). */
+        color: var(--primary-color);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
+    }
+    /* Forced-colors / Windows High Contrast drops box-shadow, so the badge outline
+       above would vanish — re-assert it with a real border (currentColor follows the
+       system text color, keeping every pill delineated). */
+    @media (forced-colors: active) {
+        .badge {
+            border: 1px solid currentColor;
+        }
     }
 
     .component-bg-color {
@@ -11344,26 +11367,32 @@
     .hover\:badge-success:hover {
         background: rgba(34, 197, 94, 0.15);
         color: var(--success-color);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
     .hover\:badge-warning:hover {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning-color);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
     }
     .hover\:badge-danger:hover {
         background: rgba(239, 68, 68, 0.15);
         color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
     }
     .hover\:badge-info:hover {
         background: rgba(59, 130, 246, 0.15);
         color: var(--info-color);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
     .hover\:badge-muted:hover {
         background: var(--surface-3);
         color: var(--text-6);
+        box-shadow: inset 0 0 0 1px var(--surface-5);
     }
     .hover\:badge-primary:hover {
         background: var(--primary-bg-color);
-        color: var(--primary-text-color, #fff);
+        color: var(--primary-color);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
     }
 
     /* focus: */
@@ -11778,26 +11807,32 @@
     .focus\:badge-success:focus {
         background: rgba(34, 197, 94, 0.15);
         color: var(--success-color);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
     .focus\:badge-warning:focus {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning-color);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
     }
     .focus\:badge-danger:focus {
         background: rgba(239, 68, 68, 0.15);
         color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
     }
     .focus\:badge-info:focus {
         background: rgba(59, 130, 246, 0.15);
         color: var(--info-color);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
     .focus\:badge-muted:focus {
         background: var(--surface-3);
         color: var(--text-6);
+        box-shadow: inset 0 0 0 1px var(--surface-5);
     }
     .focus\:badge-primary:focus {
         background: var(--primary-bg-color);
-        color: var(--primary-text-color, #fff);
+        color: var(--primary-color);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
     }
 
     /* focus-visible: */
@@ -12212,26 +12247,32 @@
     .focus-visible\:badge-success:focus-visible {
         background: rgba(34, 197, 94, 0.15);
         color: var(--success-color);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
     .focus-visible\:badge-warning:focus-visible {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning-color);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
     }
     .focus-visible\:badge-danger:focus-visible {
         background: rgba(239, 68, 68, 0.15);
         color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
     }
     .focus-visible\:badge-info:focus-visible {
         background: rgba(59, 130, 246, 0.15);
         color: var(--info-color);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
     .focus-visible\:badge-muted:focus-visible {
         background: var(--surface-3);
         color: var(--text-6);
+        box-shadow: inset 0 0 0 1px var(--surface-5);
     }
     .focus-visible\:badge-primary:focus-visible {
         background: var(--primary-bg-color);
-        color: var(--primary-text-color, #fff);
+        color: var(--primary-color);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
     }
 
     /* active: */
@@ -12646,26 +12687,32 @@
     .active\:badge-success:active {
         background: rgba(34, 197, 94, 0.15);
         color: var(--success-color);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
     }
     .active\:badge-warning:active {
         background: rgba(245, 158, 11, 0.15);
         color: var(--warning-color);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
     }
     .active\:badge-danger:active {
         background: rgba(239, 68, 68, 0.15);
         color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
     }
     .active\:badge-info:active {
         background: rgba(59, 130, 246, 0.15);
         color: var(--info-color);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
     .active\:badge-muted:active {
         background: var(--surface-3);
         color: var(--text-6);
+        box-shadow: inset 0 0 0 1px var(--surface-5);
     }
     .active\:badge-primary:active {
         background: var(--primary-bg-color);
-        color: var(--primary-text-color, #fff);
+        color: var(--primary-color);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
     }
 }
 /* === END AUTO-GENERATED state-variant color utilities === */
@@ -17288,3 +17335,70 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
   --accent-hover: oklch(70% 0.18 var(--hue));
 }
 /* === end CRISP =========================================================== */
+
+/* === Selected / active list-item utility ================================= *
+ * Declared last so this @layer outranks the component layers (wc.ui / wc.usage
+ * / wc.main) where classes like .btn live — that ordering is what lets
+ * `<button class="btn is-active">` reliably show the selected look. Uses theme
+ * tokens + an inset box-shadow accent (no border-width, so no layout shift).
+ * The :not() guards keep this general utility from overriding the specialized
+ * step-outline / CodeMirror step markers that have their own .is-active. */
+@layer wc.selected {
+    .list {
+        display: flex;
+        flex-direction: column;
+    }
+    .list-item {
+        cursor: pointer;
+        transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+    /* Subtle hover affordance for non-active rows. */
+    .list-item:hover:not(.is-active):not(.selected):not([aria-selected="true"]):not([aria-current]) {
+        background: var(--surface-2);
+    }
+    /* Keyboard focus ring — theme-aware (matches form-field focus), never white.
+       Inset outline: no layout shift, and outline survives forced-colors mode. */
+    .list-item:focus-visible {
+        outline: 2px solid var(--component-focus-border-color);
+        outline-offset: -2px;
+    }
+
+    /* Selected/active state. Keyed off .is-active / .selected anywhere, and off the
+       ARIA attributes WHEN scoped to a .list-item — so the visual stays coupled to the
+       accessible state without hijacking other components that use aria-selected
+       (wc-tab, wc-select, tabulator, etc.). */
+    .is-active:not(.cm-step-band):not(.wc-step-outline-row),
+    .selected:not(.cm-step-band):not(.wc-step-outline-row),
+    .list-item[aria-selected="true"],
+    .list-item[aria-current]:not([aria-current="false"]) {
+        background: var(--surface-3);
+        color: var(--text-1);
+        /* Nudge the accent slightly toward the foreground so it never blends into a
+           same-hue surface (accent-contrast edge case). */
+        box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1));
+        transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* Respect reduced-motion preference. */
+    @media (prefers-reduced-motion: reduce) {
+        .list-item,
+        .is-active,
+        .selected,
+        .list-item[aria-selected="true"],
+        .list-item[aria-current]:not([aria-current="false"]) {
+            transition: none;
+        }
+    }
+
+    /* Forced-colors / Windows High Contrast: box-shadow accents are dropped by the
+       OS, so re-assert the selected state with a real outline (which IS preserved). */
+    @media (forced-colors: active) {
+        .is-active:not(.cm-step-band):not(.wc-step-outline-row),
+        .selected:not(.cm-step-band):not(.wc-step-outline-row),
+        .list-item[aria-selected="true"],
+        .list-item[aria-current]:not([aria-current="false"]) {
+            outline: 2px solid Highlight;
+            outline-offset: -2px;
+        }
+    }
+}

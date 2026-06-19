@@ -4617,30 +4617,42 @@
     white-space: nowrap;
     background: var(--surface-4);
     color: var(--text-2);
+    box-shadow: inset 0 0 0 1px var(--surface-6);
   }
   .badge-success {
     background: rgba(34, 197, 94, 0.15);
     color: var(--success-color);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
   }
   .badge-warning {
     background: rgba(245, 158, 11, 0.15);
     color: var(--warning-color);
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
   }
   .badge-danger {
     background: rgba(239, 68, 68, 0.15);
     color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
   }
   .badge-info {
     background: rgba(59, 130, 246, 0.15);
     color: var(--info-color);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
   }
   .badge-muted {
     background: var(--surface-3);
     color: var(--text-6);
+    box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .badge-primary {
     background: var(--primary-bg-color);
-    color: var(--primary-text-color, #fff);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
+  }
+  @media (forced-colors: active) {
+    .badge {
+      border: 1px solid currentColor;
+    }
   }
   .component-bg-color {
     background-color: var(--component-bg-color);
@@ -10953,26 +10965,32 @@
   .hover\:badge-success:hover {
     background: rgba(34, 197, 94, 0.15);
     color: var(--success-color);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
   }
   .hover\:badge-warning:hover {
     background: rgba(245, 158, 11, 0.15);
     color: var(--warning-color);
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
   }
   .hover\:badge-danger:hover {
     background: rgba(239, 68, 68, 0.15);
     color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
   }
   .hover\:badge-info:hover {
     background: rgba(59, 130, 246, 0.15);
     color: var(--info-color);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
   }
   .hover\:badge-muted:hover {
     background: var(--surface-3);
     color: var(--text-6);
+    box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .hover\:badge-primary:hover {
     background: var(--primary-bg-color);
-    color: var(--primary-text-color, #fff);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .focus\:surface-1:focus {
     background-color: var(--surface-1);
@@ -11385,26 +11403,32 @@
   .focus\:badge-success:focus {
     background: rgba(34, 197, 94, 0.15);
     color: var(--success-color);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
   }
   .focus\:badge-warning:focus {
     background: rgba(245, 158, 11, 0.15);
     color: var(--warning-color);
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
   }
   .focus\:badge-danger:focus {
     background: rgba(239, 68, 68, 0.15);
     color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
   }
   .focus\:badge-info:focus {
     background: rgba(59, 130, 246, 0.15);
     color: var(--info-color);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
   }
   .focus\:badge-muted:focus {
     background: var(--surface-3);
     color: var(--text-6);
+    box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .focus\:badge-primary:focus {
     background: var(--primary-bg-color);
-    color: var(--primary-text-color, #fff);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .focus-visible\:surface-1:focus-visible {
     background-color: var(--surface-1);
@@ -11817,26 +11841,32 @@
   .focus-visible\:badge-success:focus-visible {
     background: rgba(34, 197, 94, 0.15);
     color: var(--success-color);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
   }
   .focus-visible\:badge-warning:focus-visible {
     background: rgba(245, 158, 11, 0.15);
     color: var(--warning-color);
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
   }
   .focus-visible\:badge-danger:focus-visible {
     background: rgba(239, 68, 68, 0.15);
     color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
   }
   .focus-visible\:badge-info:focus-visible {
     background: rgba(59, 130, 246, 0.15);
     color: var(--info-color);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
   }
   .focus-visible\:badge-muted:focus-visible {
     background: var(--surface-3);
     color: var(--text-6);
+    box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .focus-visible\:badge-primary:focus-visible {
     background: var(--primary-bg-color);
-    color: var(--primary-text-color, #fff);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .active\:surface-1:active {
     background-color: var(--surface-1);
@@ -12249,26 +12279,32 @@
   .active\:badge-success:active {
     background: rgba(34, 197, 94, 0.15);
     color: var(--success-color);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
   }
   .active\:badge-warning:active {
     background: rgba(245, 158, 11, 0.15);
     color: var(--warning-color);
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.4);
   }
   .active\:badge-danger:active {
     background: rgba(239, 68, 68, 0.15);
     color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
   }
   .active\:badge-info:active {
     background: rgba(59, 130, 246, 0.15);
     color: var(--info-color);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
   }
   .active\:badge-muted:active {
     background: var(--surface-3);
     color: var(--text-6);
+    box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .active\:badge-primary:active {
     background: var(--primary-bg-color);
-    color: var(--primary-text-color, #fff);
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
 }
 @layer wc.usage {
@@ -16516,4 +16552,51 @@ html.dark.crisp {
   --component-border-color: oklch(30% 0.030 var(--hue));
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
+}
+@layer wc.selected {
+  .list {
+    display: flex;
+    flex-direction: column;
+  }
+  .list-item {
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .list-item:hover:not(.is-active):not(.selected):not([aria-selected=true]):not([aria-current]) {
+    background: var(--surface-2);
+  }
+  .list-item:focus-visible {
+    outline: 2px solid var(--component-focus-border-color);
+    outline-offset: -2px;
+  }
+  .is-active:not(.cm-step-band):not(.wc-step-outline-row),
+  .selected:not(.cm-step-band):not(.wc-step-outline-row),
+  .list-item[aria-selected=true],
+  .list-item[aria-current]:not([aria-current=false]) {
+    background: var(--surface-3);
+    color: var(--text-1);
+    box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1));
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .list-item,
+    .is-active,
+    .selected,
+    .list-item[aria-selected=true],
+    .list-item[aria-current]:not([aria-current=false]) {
+      transition: none;
+    }
+  }
+  @media (forced-colors: active) {
+    .is-active:not(.cm-step-band):not(.wc-step-outline-row),
+    .selected:not(.cm-step-band):not(.wc-step-outline-row),
+    .list-item[aria-selected=true],
+    .list-item[aria-current]:not([aria-current=false]) {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
 }

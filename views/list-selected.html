@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wave CSS — .is-active / selected list utility</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css" />
+</head>
+<body>
+  <div class="container mx-auto p-6" style="max-width: 560px;">
+    <h1 class="text-1">Selected / active list utility</h1>
+    <p class="text-3">One class — <code>.is-active</code> (or <code>.selected</code>) — gives a clean selected look that wins the cascade even on <code>.btn</code>. Click rows to toggle.</p>
+
+    <h3 class="text-2 mt-6">Plain divs (.list / .list-item) — keyboard-focusable + ARIA</h3>
+    <p class="text-3">Rows are <code>role="option"</code> + <code>tabindex="0"</code>; selection uses <code>aria-selected</code> (no extra class needed inside <code>.list-item</code>). Tab to focus a row to see the theme-aware focus ring.</p>
+    <div class="list" id="divList" role="listbox" style="border:1px solid var(--surface-4); border-radius:6px; overflow:hidden;">
+      <div class="list-item p-3" role="option" tabindex="0" aria-selected="false" style="display:flex; justify-content:space-between;">
+        Schema <span class="badge badge-info">draft</span>
+      </div>
+      <div class="list-item p-3" role="option" tabindex="0" aria-selected="true" style="display:flex; justify-content:space-between;">
+        Template <span class="badge badge-success">applied</span>
+      </div>
+      <div class="list-item p-3" role="option" tabindex="0" aria-selected="false" style="display:flex; justify-content:space-between;">
+        Permission <span class="badge badge-muted">none</span>
+      </div>
+    </div>
+
+    <h3 class="text-2 mt-6">Buttons (acceptance test — utility must beat .btn)</h3>
+    <div class="list" id="btnList" style="display:flex; flex-direction:column; gap:0.4rem;">
+      <button class="btn btn-outline list-item" type="button">Customer</button>
+      <button class="btn btn-outline list-item is-active" type="button">Vehicle (selected)</button>
+      <button class="btn btn-outline list-item" type="button">Invoice</button>
+    </div>
+
+    <p class="text-3 mt-6">Both the selected div and the selected button show the identical selected look (surface-3 fill, text-1, primary left accent). The button's selected state survives despite <code>.btn</code> living in a component layer.</p>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script>
+    // Single-select toggle within each list. The div list drives selection via
+    // aria-selected (semantic); the button list uses the is-active class.
+    function selectIn(list, item, useAria) {
+      list.querySelectorAll('.list-item').forEach(i => {
+        if (useAria) i.setAttribute('aria-selected', i === item ? 'true' : 'false');
+        else i.classList.toggle('is-active', i === item);
+      });
+    }
+    document.querySelectorAll('#divList, #btnList').forEach(list => {
+      const useAria = list.id === 'divList';
+      list.addEventListener('click', (e) => {
+        const item = e.target.closest('.list-item');
+        if (item && list.contains(item)) selectIn(list, item, useAria);
+      });
+      // Keyboard: Enter/Space selects the focused row.
+      list.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const item = e.target.closest('.list-item');
+        if (item && list.contains(item)) { e.preventDefault(); selectIn(list, item, useAria); }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -180,7 +180,7 @@ if (!customElements.get('wc-combobox')) {
       const arrow = document.createElement('span');
       arrow.classList.add('wc-combobox-arrow');
       arrow.setAttribute('aria-hidden', 'true');
-      arrow.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+      arrow.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
       const list = document.createElement('ul');
       list.classList.add('wc-combobox-list');
@@ -464,18 +464,20 @@ if (!customElements.get('wc-combobox')) {
         }
         .wc-combobox-input {
           width: 100%;
-          box-sizing: border-box;
           padding-right: 2rem;
+          /* Inputs inherit line-height (selects don't), which can make them render
+             taller than the adjacent native <select>. Pin to normal so the height
+             matches wc-select regardless of any inherited line-height. */
+          line-height: normal;
         }
         .wc-combobox-arrow {
           position: absolute;
           top: 50%;
-          right: 0.625rem;
+          right: 0.75rem;
           transform: translateY(-50%);
           display: inline-flex;
           pointer-events: none;
           color: var(--component-color);
-          opacity: 0.7;
         }
         .wc-combobox-list {
           position: absolute;
