@@ -17584,12 +17584,19 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
     .selected:not(.cm-step-band):not(.wc-step-outline-row),
     .list-item[aria-selected="true"],
     .list-item[aria-current]:not([aria-current="false"]) {
-        background: var(--surface-3);
+        /* Primary-tinted fill so the selection reads as colored, not just a neutral surface. */
+        background: color-mix(in srgb, var(--primary-bg-color) 18%, var(--surface-2));
         color: var(--text-1);
-        /* Nudge the accent slightly toward the foreground so it never blends into a
-           same-hue surface (accent-contrast edge case). */
-        box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1));
-        transition: background-color 0.15s ease, box-shadow 0.15s ease;
+        font-weight: 600;
+        /* Neutralize a component's own border (e.g. .btn-outline) so the primary ring below is the
+           single, clean selection outline; no-op for borderless rows. */
+        border-color: transparent;
+        /* 4px left accent bar (nudged toward the foreground so it never blends into a same-hue
+           surface) + a 1.5px primary ring — prominent and persistent: this does NOT depend on
+           :focus, so the selected look survives blur (unlike a button's transient focus ring). */
+        box-shadow: inset 4px 0 0 0 color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1)),
+                    inset 0 0 0 1.5px color-mix(in srgb, var(--primary-bg-color) 60%, transparent);
+        transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
 
     /* Respect reduced-motion preference. */
