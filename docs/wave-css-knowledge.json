@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-04-13"
+    "lastUpdated": "2026-06-22"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -15,7 +15,7 @@
       "htmxIntegration": "Most components support HTMX attributes for server-driven interactions"
     },
     "lifecycle": [
-      "Constructor \u2192 _render() \u2192 connectedCallback() \u2192 _handleAttributeChange()",
+      "Constructor → _render() → connectedCallback() → _handleAttributeChange()",
       "Pending attributes are stored until component is ready",
       "Child components are detected and awaited before initialization completes",
       "All components expose ready (Promise) and isReady (boolean) — resolves when fully initialized",
@@ -46,7 +46,14 @@
       "pattern": "wc{component}{action} — e.g. wctreeitemclick, wcchartready, wcpivotcellclick, wcoptionsloaded",
       "reason": "Colons break Hyperscript parsing; this format works universally in Hyperscript, HTMX hx-trigger, addEventListener, and HTML on* attributes",
       "backwardCompat": "WcBaseComponent._emitEvent(newName, legacyName, opts, altTarget) fires both the new and legacy event names with a one-time console.warn deprecation notice for the old name",
-      "examples": ["wctreeitemclick", "wcchartready", "wcpivotcellclick", "wcsplitpanecollapse", "wcoptionsloaded", "wccodemirrorready"]
+      "examples": [
+        "wctreeitemclick",
+        "wcchartready",
+        "wcpivotcellclick",
+        "wcsplitpanecollapse",
+        "wcoptionsloaded",
+        "wccodemirrorready"
+      ]
     }
   },
   "components": {
@@ -502,7 +509,11 @@
           "autofocus",
           "elt-class"
         ],
-        "events": ["wccomboboxchange", "wccomboboxinput", "wcoptionsloaded"],
+        "events": [
+          "wccomboboxchange",
+          "wccomboboxinput",
+          "wcoptionsloaded"
+        ],
         "notes": "Form-associated (extends WcBaseFormComponent). The SUBMITTED value is the selected option's value-member, or the raw typed text for a custom entry (display text != stored value). The visible <input> holds display text and has NO name, so the host's setFormValue() is the single value submitted (native forms + HTMX hx-include). Two data modes: (1) load-once + client filter when url returns a full list (defers `ready` until loaded, emits wcoptionsloaded); (2) server-side search when url contains a {query} placeholder (or search-param is set) — debounced fetch (debounce ms, default 250) after min-chars (default 1). display-member default 'key', value-member default 'value', optional results-member + sort (asc|desc). Keyboard: ArrowUp/Down navigate, Enter selects highlighted, Escape closes. wccomboboxchange detail: { value, label, custom }. Set .value programmatically (or via value attr) to load a record — display resolves to the matching option's label, else shows the raw value.",
         "usage": {
           "declarative": "<wc-combobox name=\"status\" lbl-label=\"Status\" value=\"open\">\n  <option value=\"open\">Open</option>\n  <option value=\"closed\">Closed</option>\n</wc-combobox>",
@@ -585,6 +596,45 @@
           "link": "<wc-field label=\"Bill Plans\" link=\"/v/bill_plans/create\" value=\"Manage plans\"></wc-field>",
           "content": "<wc-field label=\"Total\" value-class=\"text-2xl text-success\">\n  <strong>$1,234.56</strong>\n</wc-field>"
         }
+      },
+      {
+        "name": "wc-form-array",
+        "description": "Declarative, repeatable sub-form for an array-of-objects, designed to live inside <wc-form>. Renders editable add/remove/re-indexable rows and emits REAL native form controls named with the dotted-index convention so the standard server save path reconstructs the array (no JSON serialization, no custom endpoint).",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "min-rows",
+          "max-rows",
+          "add-label",
+          "readonly"
+        ],
+        "events": [
+          "wcformarraychange"
+        ],
+        "notes": "Extends WcBaseComponent (NOT form-associated) — the host's own `name` is only a dotted-index PREFIX, never submitted; the per-row native controls submit. Columns are declared with <wc-form-array-column> children. `value` is a JSON array of row objects (one row per object); empty/absent starts with `min-rows` blank rows (default 1). Each control is named `${name}.${index}.${field}` (e.g. line_items.0.product_id) so the server's GeneratePayload rebuilds `name: [ {field:..}, .. ]`. HARD GUARANTEE: after any add/remove every control's name is renumbered so indices stay contiguous 0..n-1 — gaps would create null/empty holes in the saved array. `min-rows`/`max-rows` enforced (remove disabled at floor, add disabled at cap). Empty-row handling: on submission (native `submit` capture AND `htmx:configRequest`) fully-blank rows are excluded so a trailing blank row never serializes a junk empty object; the server pads any bracketed positional gap with an empty object so non-trailing blanks keep their position. `readonly` renders rows as non-editable static text (select shows the option LABEL), hides add/remove, and does not submit. htmx-swap-safe: idempotent render guards on the existing inner element and re-wires the enclosing-form submit guards on reconnect. Styles live in @layer wc.usage so .btn/.btn-sm (wc.ui) and responsive utilities still win. Event `wcformarraychange` (bubbles, composed) detail: { name, rows } where rows is the current array of row objects; fires on any add/remove/edit. Legacy alias `wc-form-array:change` is also fired (deprecated). Public API: addRow(data?), removeRow(rowOrIndex), get/set rows (array), get/set value (JSON string). Compose-friendly for code generation: each schema `def` field maps to one <wc-form-array-column>. Reference (FK) columns are a `select` whose options is a JSON array of records with option-value (e.g. _id) + option-label (e.g. name); the stored value is the option-value id (server converts the ObjectId).",
+        "usage": "<wc-form>\n  <wc-form-array name=\"line_items\"\n      value='{{ Record.line_items|toJSON|safe }}'\n      min-rows=\"1\" max-rows=\"8\" add-label=\"Add line item\">\n    <wc-form-array-column field=\"product_id\" label=\"Product\" type=\"select\" required\n                          options='{{ Data.product_options|toJSON|safe }}'\n                          option-value=\"_id\" option-label=\"name\"></wc-form-array-column>\n    <wc-form-array-column field=\"quantity\"   label=\"Qty\"        type=\"number\" min=\"1\" step=\"1\"></wc-form-array-column>\n    <wc-form-array-column field=\"unit_price\" label=\"Unit Price\" type=\"number\" min=\"0\" step=\"0.01\"></wc-form-array-column>\n  </wc-form-array>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>\n<!-- Submits: line_items.0.product_id, line_items.0.quantity, ... line_items.1.product_id, ... -->"
+      },
+      {
+        "name": "wc-form-array-column",
+        "description": "Configuration-only child of <wc-form-array>. Declares one column of the repeatable sub-form. Renders nothing itself (display:none) and never submits — the parent reads these attributes to build each row's native control.",
+        "attributes": [
+          "field",
+          "label",
+          "type",
+          "options",
+          "option-value",
+          "option-label",
+          "placeholder",
+          "min",
+          "max",
+          "step",
+          "required",
+          "col-class"
+        ],
+        "notes": "`field` (required) is the object key this column maps to — the `sub` in `${name}.${index}.${sub}`. `label` defaults to field. `type`: text | number | date | select (also accepts email/tel/time/datetime-local; anything else falls back to text). For `type=select`: `options` is a JSON array — either inline {key,value} option objects OR a collection of records (reference column); `option-value`/`option-label` pick which members are the stored value and visible label (defaults value/key). `min`/`max`/`step`/`placeholder` pass through to number/date/text inputs; `required` marks the per-row control required; `col-class` adds width/align class(es) to that column's header + cells. The parent reads these attributes directly (not via a method) so it works regardless of custom-element upgrade order.",
+        "usage": "<!-- child of <wc-form-array> — see wc-form-array usage -->\n<wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\" col-class=\"w-100\" required></wc-form-array-column>"
       }
     ],
     "display": [
@@ -1439,11 +1489,25 @@
         "postMessageProtocol": {
           "iframeToParent": {
             "source": "editor-bridge",
-            "actions": ["canvasReady", "select", "deselect", "componentRemoved", "componentMoved", "componentInserted", "duplicateRequest", "registryBuilt"]
+            "actions": [
+              "canvasReady",
+              "select",
+              "deselect",
+              "componentRemoved",
+              "componentMoved",
+              "componentInserted",
+              "duplicateRequest",
+              "registryBuilt"
+            ]
           },
           "parentToIframe": {
             "source": "live-designer",
-            "actions": ["insertHTML", "updateProperty", "selectById", "clear-selection"]
+            "actions": [
+              "insertHTML",
+              "updateProperty",
+              "selectById",
+              "clear-selection"
+            ]
           }
         },
         "presets": [
@@ -1471,13 +1535,63 @@
     "usage": "Apply theme class to <html> element or use <wc-theme> component",
     "semanticColors": {
       "description": "Four semantic color families with CSS variables and utility classes. Auto-adjust for light/dark mode.",
-      "variables": ["--success-color", "--success-light-color", "--danger-color", "--danger-light-color", "--warning-color", "--warning-light-color", "--info-color", "--info-light-color"],
-      "utilityClasses": ["success-color", "success-light-color", "success-bg-color", "success-border-color", "danger-color", "danger-light-color", "danger-bg-color", "danger-border-color", "warning-color", "warning-light-color", "warning-bg-color", "warning-border-color", "info-color", "info-light-color", "info-bg-color", "info-border-color", "secondary-bg-color"],
-      "badgeClasses": ["badge", "badge-success", "badge-warning", "badge-danger", "badge-info", "badge-muted", "badge-primary"],
+      "variables": [
+        "--success-color",
+        "--success-light-color",
+        "--danger-color",
+        "--danger-light-color",
+        "--warning-color",
+        "--warning-light-color",
+        "--info-color",
+        "--info-light-color"
+      ],
+      "utilityClasses": [
+        "success-color",
+        "success-light-color",
+        "success-bg-color",
+        "success-border-color",
+        "danger-color",
+        "danger-light-color",
+        "danger-bg-color",
+        "danger-border-color",
+        "warning-color",
+        "warning-light-color",
+        "warning-bg-color",
+        "warning-border-color",
+        "info-color",
+        "info-light-color",
+        "info-bg-color",
+        "info-border-color",
+        "secondary-bg-color"
+      ],
+      "badgeClasses": [
+        "badge",
+        "badge-success",
+        "badge-warning",
+        "badge-danger",
+        "badge-info",
+        "badge-muted",
+        "badge-primary"
+      ],
       "defaults": {
-        "dark": { "success": "#22c55e", "danger": "#ef4444", "warning": "#f59e0b", "info": "#3b82f6" },
-        "light": { "success": "#16a34a", "danger": "#dc2626", "warning": "#d97706", "info": "#2563eb" },
-        "highContrast": { "success": "#00d000", "danger": "#ff2020", "warning": "#ffaa00", "info": "#00ccff" }
+        "dark": {
+          "success": "#22c55e",
+          "danger": "#ef4444",
+          "warning": "#f59e0b",
+          "info": "#3b82f6"
+        },
+        "light": {
+          "success": "#16a34a",
+          "danger": "#dc2626",
+          "warning": "#d97706",
+          "info": "#2563eb"
+        },
+        "highContrast": {
+          "success": "#00d000",
+          "danger": "#ff2020",
+          "warning": "#ffaa00",
+          "info": "#00ccff"
+        }
       }
     },
     "themeList": [
@@ -1796,7 +1910,12 @@
       },
       "stateVariants": {
         "description": "Interactive-state (hover/focus/focus-visible/active) variants for every design-system COLOR utility. Generated by scripts/generate-state-variants.js into @layer wc.state. An explicit @layer order statement at the top of main.css places wc.hover/wc.state/wc.selected AFTER the component layers (usage/ui/main), so these state utilities reliably win over component classes like .btn (e.g. `hover:surface-3` works on a button). Base utility layers (classes/utility) stay before components. No custom CSS needed for row hovers, focus rings, etc. Transitions are NOT baked in (so they never override component internals) — add your own transition if you want easing.",
-        "states": ["hover:", "focus:", "focus-visible:", "active:"],
+        "states": [
+          "hover:",
+          "focus:",
+          "focus-visible:",
+          "active:"
+        ],
         "note": "The CSS property is encoded in the base class name, so background, text (foreground), and border are independently targetable per state. Tailwind named-palette colors (bg-red-500, etc.) are NOT included in state variants.",
         "families": {
           "surfaceBackground": "{state}:surface-1..13 (background-color)",
@@ -1821,7 +1940,12 @@
       },
       "selectedState": {
         "description": "Reusable selected/active list-row utility. `.is-active` (alias `.selected`) gives a clean selected look: surface-3 fill, text-1, and a primary left accent via inset box-shadow (no layout shift; the accent is color-mixed slightly toward the foreground so it never blends into a same-hue surface). Lives in the last @layer (wc.selected), so it reliably overrides component classes like .btn — `<button class=\"btn is-active\">` shows the selected look. Optional `.list` / `.list-item` base adds cursor + a subtle surface-2 hover affordance for non-active rows. Accessibility: inside a `.list-item`, `aria-selected=\"true\"` or `aria-current` ALSO triggers the selected look (visual stays coupled to the accessible state) — scoped to .list-item so it doesn't hijack other components' aria-selected. `.list-item:focus-visible` shows a theme-aware focus ring (--component-focus-border-color, not white). Honors prefers-reduced-motion (drops the transition) and forced-colors / Windows High Contrast (re-asserts the accent + focus as a real outline since box-shadow is dropped). Does not affect the specialized step-outline / CodeMirror .is-active markers (excluded via :not()).",
-        "classes": [".is-active", ".selected", ".list", ".list-item"],
+        "classes": [
+          ".is-active",
+          ".selected",
+          ".list",
+          ".list-item"
+        ],
         "examples": [
           "<div class=\"list\" role=\"listbox\"><div class=\"list-item\" role=\"option\" tabindex=\"0\" aria-selected=\"true\">Selected row</div></div>",
           "<div class=\"list-item is-active\">Selected via class</div>",
@@ -1829,7 +1953,22 @@
         ]
       }
     },
-    "lineHeightUtilities": ["leading-none", "leading-tight", "leading-snug", "leading-normal", "leading-relaxed", "leading-loose", "leading-3", "leading-4", "leading-5", "leading-6", "leading-7", "leading-8", "leading-9", "leading-10"],
+    "lineHeightUtilities": [
+      "leading-none",
+      "leading-tight",
+      "leading-snug",
+      "leading-normal",
+      "leading-relaxed",
+      "leading-loose",
+      "leading-3",
+      "leading-4",
+      "leading-5",
+      "leading-6",
+      "leading-7",
+      "leading-8",
+      "leading-9",
+      "leading-10"
+    ],
     "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
     "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95"
   },
@@ -1884,6 +2023,9 @@
       ],
       "theme": [
         "wcthemechange"
+      ],
+      "formArray": [
+        "wcformarraychange"
       ]
     }
   },
@@ -1892,7 +2034,8 @@
     "formTemplate": "<wc-form id=\"contactForm\" hx-post=\"/api/contacts\" hx-target=\"#result\">\n  <div class=\"col-1 gap-4\">\n    <wc-input name=\"first_name\" type=\"text\" lbl-label=\"First Name\" required></wc-input>\n    <wc-input name=\"last_name\" type=\"text\" lbl-label=\"Last Name\" required></wc-input>\n    <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\" required></wc-input>\n    <wc-input name=\"phone\" type=\"tel\" lbl-label=\"Phone\"></wc-input>\n    <wc-select name=\"status\" lbl-label=\"Status\" required>\n      <option value=\"active\">Active</option>\n      <option value=\"inactive\">Inactive</option>\n    </wc-select>\n    <wc-textarea name=\"notes\" lbl-label=\"Notes\" rows=\"4\"></wc-textarea>\n    <wc-save-button form=\"form#contactForm\" label=\"Save\"></wc-save-button>\n  </div>\n</wc-form>",
     "tabbedLayoutTemplate": "<wc-tab id=\"mainTabs\" animate>\n  <wc-tab-item class=\"active\" label=\"Details\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"name\" lbl-label=\"Name\" required></wc-input>\n      <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\"></wc-input>\n    </div>\n  </wc-tab-item>\n  <wc-tab-item label=\"Settings\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"active\" type=\"checkbox\" lbl-label=\"Active\" toggle-switch></wc-input>\n      <wc-select name=\"role\" lbl-label=\"Role\">\n        <option value=\"admin\">Admin</option>\n        <option value=\"user\">User</option>\n      </wc-select>\n    </div>\n  </wc-tab-item>\n</wc-tab>",
     "dataTableTemplate": "<wc-tabulator id=\"contactsTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Status\" field=\"status\" editor=\"select\" editor-params='{\"values\":[\"Active\",\"Inactive\"]}'></wc-tabulator-column>\n</wc-tabulator>",
-    "notificationPattern": "// Success notification\nwc.Notify.showSuccess('Record saved successfully!', 3000);\n\n// Error notification\nwc.Notify.showError('Failed to save record.', 5000, true);\n\n// Confirmation dialog\nwc.Prompt.question({\n  title: 'Delete Record?',\n  text: 'This action cannot be undone.',\n  callback: (result) => {\n    if (result.isConfirmed) {\n      // proceed with delete\n    }\n  }\n});"
+    "notificationPattern": "// Success notification\nwc.Notify.showSuccess('Record saved successfully!', 3000);\n\n// Error notification\nwc.Notify.showError('Failed to save record.', 5000, true);\n\n// Confirmation dialog\nwc.Prompt.question({\n  title: 'Delete Record?',\n  text: 'This action cannot be undone.',\n  callback: (result) => {\n    if (result.isConfirmed) {\n      // proceed with delete\n    }\n  }\n});",
+    "formArrayTemplate": "<!-- Array-of-objects sub-form. Submits dotted-index keys (field.0.sub, field.1.sub, ...) that the server reconstructs into an array. Indices are always renumbered contiguous after add/remove. -->\n<wc-form id=\"orderForm\" hx-post=\"/orders/save\" hx-target=\"#result\">\n  <wc-form-array name=\"line_items\" value='{{ Record.line_items|toJSON|safe }}' min-rows=\"1\" add-label=\"Add line item\">\n    <wc-form-array-column field=\"product_id\" label=\"Product\" type=\"select\"\n                          options='{{ Data.product_options|toJSON|safe }}' option-value=\"_id\" option-label=\"name\" required></wc-form-array-column>\n    <wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\"></wc-form-array-column>\n    <wc-form-array-column field=\"unit_price\" label=\"Unit Price\" type=\"number\" min=\"0\" step=\"0.01\"></wc-form-array-column>\n  </wc-form-array>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>"
   },
   "viewFiles": {
     "description": "Example HTML files in views/ directory demonstrating components",
@@ -1905,7 +2048,8 @@
       "views/form-elements.html — All form components showcase",
       "views/tabulator.html — Data table examples (including auto-columns)",
       "views/complete-example.html — Comprehensive standalone example",
-      "views/index.html — Main navigation hub using HTMX (includes chart-builder and pivot links)"
+      "views/index.html — Main navigation hub using HTMX (includes chart-builder and pivot links)",
+      "views/form-array.html — wc-form-array demos (edit with prefilled rows + reference select, create with min-rows blanks, readonly display, live derived total via wcformarraychange, dotted-index submit payload)"
     ]
   },
   "routing": {

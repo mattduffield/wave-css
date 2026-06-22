@@ -129,6 +129,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-combobox`: Single-value combobox — type free text AND/OR pick a DB-loaded suggestion (always allows custom values). Loads options via `url` + `display-member`/`value-member`/`results-member`/`sort` (load-once + client filter), or server-side search when `url` contains a `{query}` placeholder (or `search-param`) with `min-chars`/`debounce`. Form-associated: submits the option's value-member or the raw typed text (display text ≠ stored value); visible input has no `name`. Events: `wccomboboxchange`, `wccomboboxinput`, `wcoptionsloaded`
 - `wc-textarea`: Multi-line text input
 - `wc-cron-picker`: Visual cron schedule picker; generates 5-field cron expressions; frequencies: minute, N minutes, hour, N hours, day, weekday, weekend, week, month, custom; `wccronchange` event; collapsible syntax reference
+- `wc-form-array`: Declarative repeatable sub-form for an **array-of-objects**, lives inside `<wc-form>`. Extends `WcBaseComponent` (NOT form-associated — its `name` is only a dotted-index prefix). Renders native form controls named `${name}.${index}.${field}` (e.g. `line_items.0.product_id`) so the server's dotted-index save path reconstructs the array — no JSON serialization, no custom endpoint. Columns declared via `wc-form-array-column` children; `value` is a JSON array of row objects. **Hard guarantee: after any add/remove, every control name is renumbered so indices stay contiguous `0..n-1`** (gaps create null/empty array holes). `min-rows`/`max-rows` enforced; empty rows are excluded on submit (native `submit` capture + `htmx:configRequest`) so a blank trailing row never serializes a junk object. `readonly` renders non-editable static text (select shows the option label). htmx-swap-safe; styles in `@layer wc.usage`. Event: `wcformarraychange` (detail `{ name, rows }`; legacy alias `wc-form-array:change`). Public API: `addRow(data?)`, `removeRow(rowOrIndex)`, `rows` get/set, `value` get/set
+- `wc-form-array-column`: Configuration-only child of `wc-form-array` (renders nothing, never submits). Attributes: `field` (required — the object key / dotted `sub`), `label`, `type` (text/number/date/select), `options` (JSON array — inline `{key,value}` or a collection of records for a reference/FK column), `option-value`/`option-label` (which members are stored value vs visible label), `min`/`max`/`step`/`placeholder`/`required`, `col-class` (width/align). One `wc-form-array-column` per schema `def` field — generation-friendly
 
 ### Display Components
 - `wc-accordion`: Collapsible content sections
@@ -323,6 +325,7 @@ http://localhost:3015/views/index.html
 - `views/pivot.html` - Pivot table demos with heatmap, sorting, cell click events, CSV export
 - `views/explain-tree.html` - MongoDB explain plan viewer demos
 - `views/cron-picker.html` - Cron picker demos with all frequency options, form integration, events
+- `views/form-array.html` - wc-form-array demos: edit with prefilled rows + reference select, create with min-rows blanks, readonly display, live derived total via `wcformarraychange`, dotted-index submit payload
 
 ### Quick Start Example
 
