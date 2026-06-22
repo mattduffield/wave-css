@@ -536,6 +536,7 @@ const ICONS_TO_COPY = [
   "shield-check",
   "shield-halved",
   "shop",
+  "shopping_cart",
   "shovel",
   "sidebar",
   "sidebar-flip",
