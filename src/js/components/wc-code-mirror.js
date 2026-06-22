@@ -468,18 +468,6 @@ if (!customElements.get('wc-code-mirror')) {
       return this.getAttribute('name') || '';
     }
 
-    /**
-     * Refresh the editor display. Call after making the editor visible.
-     * Forces re-tokenization to fix syntax highlighting for editors created in hidden containers.
-     */
-    display() {
-      if (this.editor) {
-        const mode = this.editor.getOption('mode');
-        this.editor.setOption('mode', mode);
-        this.editor.refresh();
-      }
-    }
-
     get value() {
       if (this.editor) return this.editor.getValue();
       return this._pendingValue || this.getAttribute('value') || '';
@@ -959,6 +947,11 @@ if (!customElements.get('wc-code-mirror')) {
       }
     }
 
+    /**
+     * Refresh the editor display. Call after making the editor visible.
+     * Forces re-tokenization (and re-applies size/mode/theme) to fix syntax
+     * highlighting for editors created in hidden containers.
+     */
     async display(timeout=100) {
       await sleep(timeout);
       if (this.editor) {

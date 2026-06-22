@@ -99,5 +99,7 @@ import './wc-input.js';
 import './wc-select.js';
 import './wc-combobox.js';
 import './wc-textarea.js';
+import './wc-form-array-column.js';
+import './wc-form-array.js';
 import './wc-wizard-step.js';
 import './wc-wizard.js';

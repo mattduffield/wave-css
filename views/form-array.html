@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-form-array</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 900px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-form-array</h1>
+    <p class="mb-6 text-muted">
+      Repeatable sub-form for an array-of-objects. Renders native form controls named
+      <code>field.index.sub</code> so the standard dotted-index save path reconstructs the array.
+      Add/remove always renumbers indices to stay contiguous 0..n-1.
+    </p>
+
+    <div class="col-1 gap-6">
+
+      <!-- 1. EDIT: value pre-fills rows (incl. selected reference option) -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Edit (value with 2 rows + reference select)</h2>
+        <wc-form>
+          <wc-form-array id="orderItems" name="line_items"
+              min-rows="1" max-rows="8" add-label="Add line item"
+              value='[
+                {"product_id":"p2","quantity":"3","unit_price":"19.99"},
+                {"product_id":"p3","quantity":"1","unit_price":"149.00"}
+              ]'>
+            <wc-form-array-column field="product_id" label="Product" type="select" required
+                                  option-value="_id" option-label="name"
+                                  options='[
+                                    {"_id":"p1","name":"Bolt"},
+                                    {"_id":"p2","name":"Widget"},
+                                    {"_id":"p3","name":"Gizmo"},
+                                    {"_id":"p4","name":"Sprocket"}
+                                  ]'></wc-form-array-column>
+            <wc-form-array-column field="quantity"   label="Qty"        type="number" min="1" step="1" col-class="w-100" required></wc-form-array-column>
+            <wc-form-array-column field="unit_price" label="Unit Price" type="number" min="0" step="0.01" placeholder="0.00"></wc-form-array-column>
+          </wc-form-array>
+
+          <!-- Host owns the derived total; component just notifies via wcformarraychange -->
+          <div class="row gap-2 mt-3 justify-end items-center">
+            <span class="font-semibold">Order total:</span>
+            <span id="orderTotal" class="font-bold">$0.00</span>
+          </div>
+
+          <div class="row gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+          </div>
+        </wc-form>
+        <pre id="payloadOut" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+      </div>
+
+      <!-- 2. CREATE: empty value → starts with min-rows blank rows -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Create (no value → 2 blank rows via min-rows)</h2>
+        <wc-form>
+          <wc-form-array name="contacts" min-rows="2" add-label="Add contact">
+            <wc-form-array-column field="name"  label="Name"  type="text" required></wc-form-array-column>
+            <wc-form-array-column field="email" label="Email" type="email" placeholder="name@example.com"></wc-form-array-column>
+            <wc-form-array-column field="role"  label="Role"  type="select">
+              <!-- inline options via options attr -->
+            </wc-form-array-column>
+          </wc-form-array>
+        </wc-form>
+      </div>
+
+      <!-- 3. READONLY: same rows, non-editable static text -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Readonly (display-only, replaces a read-only table)</h2>
+        <wc-form-array name="line_items_ro" readonly
+            value='[
+              {"product_id":"p2","quantity":"3","unit_price":"19.99"},
+              {"product_id":"p3","quantity":"1","unit_price":"149.00"}
+            ]'>
+          <wc-form-array-column field="product_id" label="Product" type="select"
+                                option-value="_id" option-label="name"
+                                options='[
+                                  {"_id":"p2","name":"Widget"},
+                                  {"_id":"p3","name":"Gizmo"}
+                                ]'></wc-form-array-column>
+          <wc-form-array-column field="quantity"   label="Qty"></wc-form-array-column>
+          <wc-form-array-column field="unit_price" label="Unit Price"></wc-form-array-column>
+        </wc-form-array>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    // Set the "role" select options for the create demo (shows the options attr path too).
+    customElements.whenDefined('wc-form-array').then(() => {
+      const roleCol = document.querySelector('wc-form-array[name="contacts"] wc-form-array-column[field="role"]');
+      if (roleCol) {
+        roleCol.setAttribute('options', JSON.stringify([
+          { value: 'owner', key: 'Owner' },
+          { value: 'admin', key: 'Admin' },
+          { value: 'member', key: 'Member' }
+        ]));
+      }
+    });
+
+    // Acceptance #5: recompute a derived total from the change event detail.
+    const fa = document.getElementById('orderItems');
+    const totalEl = document.getElementById('orderTotal');
+    const recompute = (rows) => {
+      const total = rows.reduce((sum, r) =>
+        sum + (parseFloat(r.quantity) || 0) * (parseFloat(r.unit_price) || 0), 0);
+      totalEl.textContent = '$' + total.toFixed(2);
+    };
+    fa.addEventListener('wcformarraychange', (e) => recompute(e.detail.rows));
+    // Initial total once the component is ready.
+    fa.ready?.then(() => recompute(fa.rows));
+
+    // Acceptance #3: show what the form would submit (native dotted-index keys).
+    document.querySelector('#orderItems').closest('wc-form')
+      .querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const obj = {};
+        for (const [k, v] of fd.entries()) obj[k] = v;
+        document.getElementById('payloadOut').textContent = JSON.stringify(obj, null, 2);
+      });
+  </script>
+</body>
+</html>
