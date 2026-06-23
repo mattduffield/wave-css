@@ -34,6 +34,7 @@ class WcGoogleMap extends WcBaseComponent {
       'api-key', 'lat', 'lng', 'address', 'title',
       'zoom', 'map-type', 'center-lat', 'center-lng',
       'draggable', 'scrollwheel', 'disable-default-ui',
+      'markers', 'fit-bounds',
       'class', 'elt-class'
     ];
   }
@@ -108,10 +109,10 @@ class WcGoogleMap extends WcBaseComponent {
       if (this.map) {
         this._initializeMap();
       }
-    } else if (['lat', 'lng', 'address', 'title'].includes(attrName)) {
-      // Single pin attributes changed
+    } else if (['lat', 'lng', 'address', 'title', 'markers', 'fit-bounds'].includes(attrName)) {
+      // Pin source (single attrs or markers array) / framing changed
       if (this.map) {
-        this._updateSinglePin();
+        this._addPins();
       }
     } else if (['zoom', 'map-type', 'center-lat', 'center-lng'].includes(attrName)) {
       // Map configuration changed
@@ -308,10 +309,37 @@ class WcGoogleMap extends WcBaseComponent {
           lat: parseFloat(optLat),
           lng: parseFloat(optLng),
           address: option.getAttribute('data-address') || '',
-          title: option.getAttribute('data-title') || option.getAttribute('data-address') || 'Location'
+          title: option.getAttribute('data-title') || option.getAttribute('data-address') || 'Location',
+          link: option.getAttribute('data-link') || ''
         });
       }
     });
+
+    // Check for a declarative markers JSON attribute (the data-bound "map of records" mode).
+    // Additive: combines with single-pin attrs / option children. Each entry:
+    //   { lat, lng, label?, title?, address?, link? }
+    const markersAttr = this.getAttribute('markers');
+    if (markersAttr) {
+      try {
+        const arr = JSON.parse(markersAttr);
+        if (Array.isArray(arr)) {
+          arr.forEach(m => {
+            if (m && m.lat != null && m.lng != null) {
+              pins.push({
+                lat: parseFloat(m.lat),
+                lng: parseFloat(m.lng),
+                address: m.address || '',
+                title: m.label || m.title || m.address || 'Location',
+                label: m.label || '',
+                link: m.link || ''
+              });
+            }
+          });
+        }
+      } catch (ex) {
+        console.warn('wc-google-map: invalid markers JSON', ex);
+      }
+    }
 
     return pins;
   }
@@ -344,11 +372,12 @@ class WcGoogleMap extends WcBaseComponent {
 
       this.markers.push(marker);
 
-      // Create info window
+      // Create info window (includes a real <a> link when the pin carries one — htmx-boost friendly)
       const infoWindow = new google.maps.InfoWindow({
         content: `<div class="map-info-window">
           ${pin.title ? `<strong>${pin.title}</strong><br>` : ''}
           ${pin.address || ''}
+          ${pin.link ? `<div><a href="${pin.link}">View</a></div>` : ''}
         </div>`
       });
 
@@ -362,7 +391,7 @@ class WcGoogleMap extends WcBaseComponent {
         // Open this info window
         infoWindow.open(this.map, marker);
 
-        // Emit custom event
+        // Emit the legacy pin-clicked event (unchanged for existing consumers)
         this._emitEvent('wcpinclicked', 'pin-clicked', {
           detail: {
             pin: pin,
@@ -371,11 +400,22 @@ class WcGoogleMap extends WcBaseComponent {
           },
           bubbles: true
         });
+
+        // Emit the markers-mode event carrying the per-marker link (host may navigate)
+        this._emitEvent('wcgooglemapmarkerclick', 'wc-google-map:marker-click', {
+          detail: {
+            index: index,
+            link: pin.link || null,
+            pin: pin
+          },
+          bubbles: true
+        });
       });
     });
 
-    // Auto-fit bounds if multiple pins
-    if (pins.length > 1) {
+    // Auto-fit bounds for multiple pins, or whenever fit-bounds is explicitly set.
+    const fitBounds = this.hasAttribute('fit-bounds');
+    if (pins.length > 1 || (fitBounds && pins.length >= 1)) {
       const bounds = new google.maps.LatLngBounds();
       pins.forEach(pin => {
         bounds.extend({ lat: pin.lat, lng: pin.lng });

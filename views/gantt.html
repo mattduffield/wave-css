@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-gantt</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-gantt</h1>
+    <p class="mb-6 text-muted">
+      Duration bars across a time axis, grouped into swimlanes by <code>group-field</code>.
+      Drag a bar to move it, or drag its edge handles to resize — both fire
+      <code>wcganttchange</code> with day-snapped ISO dates. Zero-duration items render as
+      milestone diamonds. Sibling to <code>wc-timeline</code> (a vertical narrative timeline).
+    </p>
+
+    <div class="row gap-2 mb-3 items-center">
+      <span class="font-semibold">Scale:</span>
+      <button class="btn btn-sm" onclick="document.getElementById('g').scale='day'">Day</button>
+      <button class="btn btn-sm" onclick="document.getElementById('g').scale='week'">Week</button>
+      <button class="btn btn-sm" onclick="document.getElementById('g').scale='month'">Month</button>
+    </div>
+
+    <div class="card p-2 mb-4">
+      <wc-gantt id="g"
+          group-field="lane"
+          scale="week"
+          link-template="/x/task/{id}"
+          items='[
+            {"id":"t1","label":"Design","start":"2026-06-01","end":"2026-06-08","lane":"Phase 1","color":"#3b82f6"},
+            {"id":"t2","label":"Research","start":"2026-06-02","end":"2026-06-05","lane":"Phase 1","color":"#06b6d4"},
+            {"id":"t3","label":"Build","start":"2026-06-09","end":"2026-06-20","lane":"Phase 2","color":"#22c55e"},
+            {"id":"t4","label":"Review","start":"2026-06-15","end":"2026-06-18","lane":"Phase 2","color":"#f59e0b"},
+            {"id":"m1","label":"Launch","start":"2026-06-23","lane":"Phase 2"},
+            {"id":"t5","label":"Docs","start":"2026-06-10","end":"2026-06-14","lane":"Phase 3","color":"#a855f7"}
+          ]'>
+      </wc-gantt>
+    </div>
+
+    <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap; max-height:160px; overflow:auto;"></pre>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const g = document.getElementById('g');
+    const log = document.getElementById('log');
+    const write = (m) => { log.textContent = m + '\n' + log.textContent; };
+    g.addEventListener('wcganttchange', (e) =>
+      write(`change: ${e.detail.id} → ${e.detail.newStart}${e.detail.newEnd ? ' .. ' + e.detail.newEnd : ' (milestone)'}`));
+    g.addEventListener('wcganttopen', (e) => write(`open: ${e.detail.id}`));
+  </script>
+</body>
+</html>

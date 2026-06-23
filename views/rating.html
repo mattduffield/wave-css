@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-rating</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 620px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-rating</h1>
+    <p class="mb-6 text-muted">
+      Icon rating with distinct empty / half / full glyphs. Editable (click, hover, arrow keys)
+      or readonly; submits a number. Half values use a distinct partial glyph (e.g.
+      <code>star-half-stroke</code>), not a clipped full icon.
+    </p>
+
+    <div class="col-1 gap-8">
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Editable (half values) + readonly display</h2>
+        <wc-form>
+          <wc-rating name="satisfaction" lbl-label="Satisfaction" value="3.5" max="5"
+                     allow-half color="#f59e0b" size="1.5rem" required></wc-rating>
+          <wc-rating name="priority" lbl-label="Priority (whole, hearts)" value="2" max="5"
+                     icon-empty="heart" icon-full="heart" icon-empty-style="regular"
+                     icon-full-style="solid" color="#ef4444"></wc-rating>
+          <div class="row gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+          </div>
+        </wc-form>
+        <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+
+        <h3 class="text-sm font-semibold mt-4">Readonly (list/detail display, with count)</h3>
+        <wc-rating value="4.5" max="5" allow-half readonly show-value count="122" color="#f59e0b"></wc-rating>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const out = document.getElementById('out');
+    document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      out.textContent = JSON.stringify(obj, null, 2);
+    });
+    document.querySelector('[name="satisfaction"]').addEventListener('wcratingchange', (e) => {
+      out.textContent = 'satisfaction → ' + e.detail.value;
+    });
+  </script>
+</body>
+</html>

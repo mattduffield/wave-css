@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-file-upload</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 760px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-file-upload</h1>
+    <p class="mb-6 text-muted">
+      Dropzone upload field. Uploads (multipart) to <code>upload-url</code> (default
+      <code>/upload</code> → R2) and submits the returned <code>url</code> as a normal named
+      form value, so the standard save path stores it like any input. Shows a preview + progress.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- 1. Single image, with existing value (edit) -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Single (image) — seeded with an existing file</h2>
+        <wc-form>
+          <wc-file-upload
+              name="document_url"
+              lbl-label="Document"
+              accept="image/*,application/pdf"
+              max-size="10"
+              upload-url="/upload"
+              category="docs"
+              record-id="rec-123"
+              value="https://picsum.photos/seed/seeded/300/200.jpg"
+              required>
+          </wc-file-upload>
+          <div class="row gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+          </div>
+        </wc-form>
+        <pre id="out1" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+      </div>
+
+      <!-- 2. Multiple -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Multiple — value is a JSON array of urls</h2>
+        <wc-form>
+          <wc-file-upload
+              name="attachments"
+              lbl-label="Attachments"
+              max-size="10"
+              upload-url="/upload"
+              category="attachments"
+              multiple>
+          </wc-file-upload>
+        </wc-form>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    document.querySelector('#out1').closest('.card').querySelector('wc-form')
+      .querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const obj = {};
+        for (const [k, v] of fd.entries()) obj[k] = v;
+        document.getElementById('out1').textContent = JSON.stringify(obj, null, 2);
+      });
+  </script>
+</body>
+</html>

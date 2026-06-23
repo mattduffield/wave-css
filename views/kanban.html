@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-kanban</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-kanban</h1>
+    <p class="mb-6 text-muted">
+      Status board: lanes come from an enum's options, cards are records grouped by
+      <code>group-field</code>. Drag a card to another lane to fire
+      <code>wckanbanchange</code> — the host persists. Counts and an optional rollup sum
+      render in each lane header.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- 1. Interactive board: drag, quick-add, rollup, open -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Board (drag, quick-add, $ rollup, open)</h2>
+        <div style="height: 460px;">
+          <wc-kanban id="board"
+              group-field="status"
+              card-id-field="_id"
+              card-title-field="title"
+              card-fields='["priority","assignee"]'
+              rollup-field="amount" rollup-prefix="$"
+              quick-add
+              lanes='[
+                {"value":"backlog","label":"Backlog","color":"#64748b"},
+                {"value":"in_progress","label":"In Progress","color":"#3b82f6"},
+                {"value":"review","label":"Review","color":"#f59e0b"},
+                {"value":"done","label":"Done","color":"#22c55e"}
+              ]'
+              cards='[
+                {"_id":"1","title":"Wire up auth","status":"backlog","priority":"High","assignee":"Ana","amount":1200},
+                {"_id":"2","title":"Design tokens","status":"backlog","priority":"Low","assignee":"Bo","amount":400},
+                {"_id":"3","title":"Kanban DnD","status":"in_progress","priority":"High","assignee":"Cy","amount":2000},
+                {"_id":"4","title":"Rollup sums","status":"in_progress","priority":"Med","assignee":"Ana","amount":800},
+                {"_id":"5","title":"Empty states","status":"review","priority":"Low","assignee":"Bo","amount":300},
+                {"_id":"6","title":"Ship v1","status":"done","priority":"High","assignee":"Cy","amount":5000}
+              ]'>
+          </wc-kanban>
+        </div>
+        <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap; max-height:140px; overflow:auto;"></pre>
+      </div>
+
+      <!-- 2. Link cards + readonly -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Readonly + card-link-template (renders &lt;a href&gt;)</h2>
+        <div style="height: 300px;">
+          <wc-kanban
+              group-field="status" readonly
+              card-link-template="/x/order/{_id}"
+              card-fields='["priority"]'
+              lanes='[
+                {"value":"open","label":"Open","color":"#3b82f6"},
+                {"value":"closed","label":"Closed","color":"#22c55e"}
+              ]'
+              cards='[
+                {"_id":"a1","title":"Order #1001","status":"open","priority":"High"},
+                {"_id":"a2","title":"Order #1002","status":"closed","priority":"Low"}
+              ]'>
+          </wc-kanban>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const board = document.getElementById('board');
+    const log = document.getElementById('log');
+    const write = (msg) => { log.textContent = msg + '\n' + log.textContent; };
+
+    // Host owns persistence — here we just log the events.
+    board.addEventListener('wckanbanchange', (e) =>
+      write(`change: card ${e.detail.cardId} ${e.detail.fromValue} → ${e.detail.toValue} (idx ${e.detail.toIndex})`));
+    board.addEventListener('wckanbanadd', (e) =>
+      write(`add: "${e.detail.title}" to ${e.detail.laneValue}`));
+    board.addEventListener('wckanbanopen', (e) =>
+      write(`open: card ${e.detail.cardId}`));
+  </script>
+</body>
+</html>

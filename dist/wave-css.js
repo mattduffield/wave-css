@@ -9625,6 +9625,8 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       "draggable",
       "scrollwheel",
       "disable-default-ui",
+      "markers",
+      "fit-bounds",
       "class",
       "elt-class"
     ];
@@ -9678,9 +9680,9 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
       if (this.map) {
         this._initializeMap();
       }
-    } else if (["lat", "lng", "address", "title"].includes(attrName)) {
+    } else if (["lat", "lng", "address", "title", "markers", "fit-bounds"].includes(attrName)) {
       if (this.map) {
-        this._updateSinglePin();
+        this._addPins();
       }
     } else if (["zoom", "map-type", "center-lat", "center-lng"].includes(attrName)) {
       if (this.map) {
@@ -9826,10 +9828,33 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
           lat: parseFloat(optLat),
           lng: parseFloat(optLng),
           address: option.getAttribute("data-address") || "",
-          title: option.getAttribute("data-title") || option.getAttribute("data-address") || "Location"
+          title: option.getAttribute("data-title") || option.getAttribute("data-address") || "Location",
+          link: option.getAttribute("data-link") || ""
         });
       }
     });
+    const markersAttr = this.getAttribute("markers");
+    if (markersAttr) {
+      try {
+        const arr = JSON.parse(markersAttr);
+        if (Array.isArray(arr)) {
+          arr.forEach((m) => {
+            if (m && m.lat != null && m.lng != null) {
+              pins.push({
+                lat: parseFloat(m.lat),
+                lng: parseFloat(m.lng),
+                address: m.address || "",
+                title: m.label || m.title || m.address || "Location",
+                label: m.label || "",
+                link: m.link || ""
+              });
+            }
+          });
+        }
+      } catch (ex) {
+        console.warn("wc-google-map: invalid markers JSON", ex);
+      }
+    }
     return pins;
   }
   /**
@@ -9853,6 +9878,7 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
         content: `<div class="map-info-window">
           ${pin.title ? `<strong>${pin.title}</strong><br>` : ""}
           ${pin.address || ""}
+          ${pin.link ? `<div><a href="${pin.link}">View</a></div>` : ""}
         </div>`
       });
       this.infoWindows.push(infoWindow);
@@ -9867,9 +9893,18 @@ var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
           },
           bubbles: true
         });
+        this._emitEvent("wcgooglemapmarkerclick", "wc-google-map:marker-click", {
+          detail: {
+            index,
+            link: pin.link || null,
+            pin
+          },
+          bubbles: true
+        });
       });
     });
-    if (pins.length > 1) {
+    const fitBounds = this.hasAttribute("fit-bounds");
+    if (pins.length > 1 || fitBounds && pins.length >= 1) {
       const bounds = new google.maps.LatLngBounds();
       pins.forEach((pin) => {
         bounds.extend({ lat: pin.lat, lng: pin.lng });
@@ -34183,6 +34218,2076 @@ if (!customElements.get("wc-progress")) {
   customElements.define("wc-progress", WcProgress);
 }
 
+// src/js/components/wc-kanban.js
+var WcKanban = class extends WcBaseComponent {
+  static get is() {
+    return "wc-kanban";
+  }
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "group-field",
+      "lanes",
+      "cards",
+      "card-id-field",
+      "card-title-field",
+      "card-fields",
+      "rollup-field",
+      "rollup-prefix",
+      "card-link-template",
+      "quick-add",
+      "readonly"
+    ];
+  }
+  constructor() {
+    super();
+    this._lanes = [];
+    this._cards = [];
+    this._cardById = /* @__PURE__ */ new Map();
+    this._dragEl = null;
+    this._dragFrom = null;
+    this._onDragStart = this._handleDragStart.bind(this);
+    this._onDragOver = this._handleDragOver.bind(this);
+    this._onDragEnd = this._handleDragEnd.bind(this);
+    this._onDrop = this._handleDrop.bind(this);
+    this._onClick = this._handleClick.bind(this);
+    this._onKeydown = this._handleKeydown.bind(this);
+    this._onSubmit = this._handleQuickAddSubmit.bind(this);
+    const compEl = this.querySelector(":scope > .wc-kanban");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-kanban");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Public API -----------------------------------------------------------
+  get cards() {
+    return this._cards.slice();
+  }
+  set cards(arr) {
+    this._cards = Array.isArray(arr) ? arr : [];
+    this._indexCards();
+    this._renderBoard();
+  }
+  get lanes() {
+    return this._lanes.slice();
+  }
+  set lanes(arr) {
+    this._lanes = Array.isArray(arr) ? arr : [];
+    this._renderBoard();
+  }
+  refresh() {
+    this._renderBoard();
+  }
+  // ---- Rendering ------------------------------------------------------------
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderBoard();
+    this._wireEvents();
+    if (typeof htmx !== "undefined") {
+      htmx.process(this);
+    }
+  }
+  _readConfig() {
+    this._groupField = this.getAttribute("group-field") || "status";
+    this._cardIdField = this.getAttribute("card-id-field") || "_id";
+    this._cardTitleField = this.getAttribute("card-title-field") || "title";
+    this._cardFields = this._parseJSON("card-fields", []);
+    this._rollupField = this.getAttribute("rollup-field") || "";
+    this._rollupPrefix = this.getAttribute("rollup-prefix") || "";
+    this._cardLinkTemplate = this.getAttribute("card-link-template") || "";
+    this._lanes = this._parseJSON("lanes", []);
+    this._cards = this._parseJSON("cards", []);
+    this._indexCards();
+  }
+  _indexCards() {
+    this._cardById = /* @__PURE__ */ new Map();
+    this._cards.forEach((c) => {
+      if (c && c[this._cardIdField] != null) {
+        this._cardById.set(String(c[this._cardIdField]), c);
+      }
+    });
+  }
+  _renderBoard() {
+    if (!this.componentElement) return;
+    this.componentElement.innerHTML = "";
+    const readonly = this._isReadonly();
+    this._lanes.forEach((lane) => {
+      const laneEl = document.createElement("div");
+      laneEl.classList.add("wc-kanban-lane");
+      laneEl.dataset.laneValue = lane.value;
+      if (lane.color) laneEl.style.setProperty("--lane-color", lane.color);
+      const header = document.createElement("div");
+      header.classList.add("wc-kanban-lane-header");
+      const title = document.createElement("span");
+      title.classList.add("wc-kanban-lane-title");
+      title.textContent = lane.label != null ? lane.label : lane.value;
+      header.appendChild(title);
+      const meta = document.createElement("span");
+      meta.classList.add("wc-kanban-lane-meta");
+      const rollup = document.createElement("span");
+      rollup.classList.add("wc-kanban-lane-rollup");
+      const count = document.createElement("span");
+      count.classList.add("wc-kanban-lane-count", "badge", "badge-muted");
+      meta.appendChild(rollup);
+      meta.appendChild(count);
+      header.appendChild(meta);
+      laneEl.appendChild(header);
+      const body = document.createElement("div");
+      body.classList.add("wc-kanban-lane-body");
+      body.dataset.laneValue = lane.value;
+      const laneCards = this._cards.filter((c) => String(c[this._groupField]) === String(lane.value));
+      laneCards.forEach((card) => body.appendChild(this._createCard(card, lane)));
+      const empty = document.createElement("div");
+      empty.classList.add("wc-kanban-empty");
+      empty.textContent = "Drop here";
+      body.appendChild(empty);
+      laneEl.appendChild(body);
+      if (this.hasAttribute("quick-add") && !readonly) {
+        const foot = document.createElement("div");
+        foot.classList.add("wc-kanban-quick-add");
+        const form = document.createElement("form");
+        form.dataset.laneValue = lane.value;
+        const input2 = document.createElement("input");
+        input2.type = "text";
+        input2.classList.add("wc-kanban-quick-add-input");
+        input2.placeholder = "+ Add...";
+        input2.setAttribute("aria-label", `Add to ${lane.label || lane.value}`);
+        const btn = document.createElement("button");
+        btn.type = "submit";
+        btn.classList.add("btn", "btn-sm");
+        btn.textContent = "+";
+        form.appendChild(input2);
+        form.appendChild(btn);
+        foot.appendChild(form);
+        laneEl.appendChild(foot);
+      }
+      this.componentElement.appendChild(laneEl);
+      this._refreshLane(laneEl);
+    });
+  }
+  _createCard(card, lane) {
+    const id = String(card[this._cardIdField] != null ? card[this._cardIdField] : "");
+    const readonly = this._isReadonly();
+    let cardEl;
+    if (this._cardLinkTemplate) {
+      cardEl = document.createElement("a");
+      cardEl.href = this._resolveTemplate(this._cardLinkTemplate, card);
+    } else {
+      cardEl = document.createElement("div");
+      cardEl.setAttribute("role", "button");
+      cardEl.tabIndex = 0;
+    }
+    cardEl.classList.add("wc-kanban-card");
+    cardEl.dataset.cardId = id;
+    cardEl.draggable = !readonly;
+    const titleEl = document.createElement("div");
+    titleEl.classList.add("wc-kanban-card-title");
+    titleEl.textContent = card[this._cardTitleField] != null ? card[this._cardTitleField] : "";
+    cardEl.appendChild(titleEl);
+    const chips = this._cardFields.map((f) => card[f]).filter((v) => v != null && String(v).trim() !== "");
+    if (chips.length) {
+      const metaEl = document.createElement("div");
+      metaEl.classList.add("wc-kanban-card-meta");
+      chips.forEach((v) => {
+        const badge = document.createElement("span");
+        badge.classList.add("badge", "badge-muted");
+        badge.textContent = String(v);
+        metaEl.appendChild(badge);
+      });
+      cardEl.appendChild(metaEl);
+    }
+    return cardEl;
+  }
+  // ---- Helpers --------------------------------------------------------------
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed != null ? parsed : fallback;
+    } catch (ex) {
+      console.warn(`[wc-kanban] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _resolveTemplate(tpl, card) {
+    return tpl.replace(/\{([^}]+)\}/g, (m, key) => {
+      const v = card[key];
+      return v != null ? encodeURIComponent(String(v)) : "";
+    });
+  }
+  _isReadonly() {
+    return this.hasAttribute("readonly");
+  }
+  _laneBody(value) {
+    return this.componentElement.querySelector(`.wc-kanban-lane-body[data-lane-value="${CSS.escape(String(value))}"]`);
+  }
+  _refreshLane(laneEl) {
+    const body = laneEl.querySelector(".wc-kanban-lane-body");
+    const cards = body.querySelectorAll(".wc-kanban-card");
+    const countEl = laneEl.querySelector(".wc-kanban-lane-count");
+    if (countEl) countEl.textContent = String(cards.length);
+    const rollupEl = laneEl.querySelector(".wc-kanban-lane-rollup");
+    if (rollupEl) {
+      if (this._rollupField) {
+        let sum = 0;
+        cards.forEach((cardEl) => {
+          const card = this._cardById.get(cardEl.dataset.cardId);
+          const v = card ? parseFloat(card[this._rollupField]) : NaN;
+          if (!Number.isNaN(v)) sum += v;
+        });
+        rollupEl.textContent = this._rollupPrefix + sum.toLocaleString();
+        rollupEl.style.display = "";
+      } else {
+        rollupEl.style.display = "none";
+      }
+    }
+  }
+  // ---- Drag & drop (native HTML5) -------------------------------------------
+  _handleDragStart(e) {
+    const card = e.target.closest(".wc-kanban-card");
+    if (!card || this._isReadonly()) return;
+    this._dragEl = card;
+    this._dragFrom = card.closest(".wc-kanban-lane")?.dataset.laneValue ?? null;
+    card.classList.add("dragging");
+    this.componentElement.classList.add("is-dragging");
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = "move";
+      try {
+        e.dataTransfer.setData("text/plain", card.dataset.cardId || "");
+      } catch (ex) {
+      }
+    }
+  }
+  _handleDragOver(e) {
+    if (!this._dragEl) return;
+    const body = e.target.closest(".wc-kanban-lane-body");
+    if (!body) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+    body.classList.add("drag-over");
+    const after = this._getDragAfterElement(body, e.clientY);
+    if (after == null) {
+      body.insertBefore(this._dragEl, body.querySelector(".wc-kanban-empty"));
+    } else {
+      body.insertBefore(this._dragEl, after);
+    }
+  }
+  _handleDrop(e) {
+    if (!this._dragEl) return;
+    const body = e.target.closest(".wc-kanban-lane-body");
+    if (body) e.preventDefault();
+  }
+  _handleDragEnd() {
+    const card = this._dragEl;
+    this.componentElement.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    this.componentElement.classList.remove("is-dragging");
+    if (!card) return;
+    card.classList.remove("dragging");
+    const toLane = card.closest(".wc-kanban-lane");
+    const toValue = toLane?.dataset.laneValue ?? null;
+    const fromValue = this._dragFrom;
+    const body = toLane?.querySelector(".wc-kanban-lane-body");
+    const toIndex = body ? Array.from(body.querySelectorAll(".wc-kanban-card")).indexOf(card) : -1;
+    const cardId = card.dataset.cardId;
+    const data = this._cardById.get(cardId);
+    if (data && toValue != null) data[this._groupField] = toValue;
+    this.componentElement.querySelectorAll(".wc-kanban-lane").forEach((l) => this._refreshLane(l));
+    this._dragEl = null;
+    this._dragFrom = null;
+    this._emitEvent("wckanbanchange", "wc-kanban:change", {
+      bubbles: true,
+      composed: true,
+      detail: { cardId, fromValue, toValue, groupField: this._groupField, toIndex }
+    });
+  }
+  _getDragAfterElement(body, y) {
+    const els = Array.from(body.querySelectorAll(".wc-kanban-card:not(.dragging)"));
+    let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+    els.forEach((child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        closest = { offset, element: child };
+      }
+    });
+    return closest.element;
+  }
+  // ---- Activation & quick-add ----------------------------------------------
+  _handleClick(e) {
+    const card = e.target.closest(".wc-kanban-card");
+    if (!card || !this.componentElement.contains(card)) return;
+    if (card.tagName === "A") return;
+    this._emitOpen(card.dataset.cardId);
+  }
+  _handleKeydown(e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const card = e.target.closest(".wc-kanban-card");
+    if (!card || card.tagName === "A") return;
+    e.preventDefault();
+    this._emitOpen(card.dataset.cardId);
+  }
+  _emitOpen(cardId) {
+    this._emitEvent("wckanbanopen", "wc-kanban:open", {
+      bubbles: true,
+      composed: true,
+      detail: { cardId }
+    });
+  }
+  _handleQuickAddSubmit(e) {
+    const form = e.target.closest(".wc-kanban-quick-add form");
+    if (!form) return;
+    e.preventDefault();
+    const input2 = form.querySelector(".wc-kanban-quick-add-input");
+    const title = (input2?.value || "").trim();
+    if (!title) return;
+    const laneValue = form.dataset.laneValue;
+    if (input2) input2.value = "";
+    this._emitEvent("wckanbanadd", "wc-kanban:add", {
+      bubbles: true,
+      composed: true,
+      detail: { laneValue, title }
+    });
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    super._wireEvents();
+    const el = this.componentElement;
+    el.removeEventListener("dragstart", this._onDragStart);
+    el.addEventListener("dragstart", this._onDragStart);
+    el.removeEventListener("dragover", this._onDragOver);
+    el.addEventListener("dragover", this._onDragOver);
+    el.removeEventListener("drop", this._onDrop);
+    el.addEventListener("drop", this._onDrop);
+    el.removeEventListener("dragend", this._onDragEnd);
+    el.addEventListener("dragend", this._onDragEnd);
+    el.removeEventListener("click", this._onClick);
+    el.addEventListener("click", this._onClick);
+    el.removeEventListener("keydown", this._onKeydown);
+    el.addEventListener("keydown", this._onKeydown);
+    el.removeEventListener("submit", this._onSubmit);
+    el.addEventListener("submit", this._onSubmit);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    const el = this.componentElement;
+    if (!el) return;
+    el.removeEventListener("dragstart", this._onDragStart);
+    el.removeEventListener("dragover", this._onDragOver);
+    el.removeEventListener("drop", this._onDrop);
+    el.removeEventListener("dragend", this._onDragEnd);
+    el.removeEventListener("click", this._onClick);
+    el.removeEventListener("keydown", this._onKeydown);
+    el.removeEventListener("submit", this._onSubmit);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if ([
+      "group-field",
+      "lanes",
+      "cards",
+      "card-id-field",
+      "card-title-field",
+      "card-fields",
+      "rollup-field",
+      "rollup-prefix",
+      "card-link-template",
+      "quick-add",
+      "readonly"
+    ].includes(attrName)) {
+      this._readConfig();
+      this._renderBoard();
+    } else if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-kanban {
+        display: contents;
+      }
+
+      @layer wc.usage {
+        .wc-kanban {
+          display: flex;
+          flex-direction: row;
+          gap: 0.75rem;
+          align-items: flex-start;
+          width: 100%;
+          overflow-x: auto;
+          padding-bottom: 0.5rem;
+        }
+        .wc-kanban-lane {
+          display: flex;
+          flex-direction: column;
+          flex: 0 0 280px;
+          max-height: 100%;
+          background-color: var(--surface-2);
+          border: 1px solid var(--surface-4);
+          border-top: 3px solid var(--lane-color, var(--surface-4));
+          border-radius: 0.5rem;
+          overflow: hidden;
+        }
+        .wc-kanban-lane-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          padding: 0.625rem 0.75rem;
+          font-weight: 600;
+          border-bottom: 1px solid var(--surface-4);
+        }
+        .wc-kanban-lane-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.375rem;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wc-kanban-lane-meta {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.375rem;
+          flex: 0 0 auto;
+        }
+        .wc-kanban-lane-rollup {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--text-2, var(--component-alt-color));
+        }
+        .wc-kanban-lane-body {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          overflow-y: auto;
+          flex: 1 1 auto;
+          min-height: 80px;
+        }
+        .wc-kanban-lane-body.drag-over {
+          background-color: color-mix(in oklab, var(--lane-color, var(--primary-bg-color)) 12%, transparent);
+        }
+        .wc-kanban-card {
+          display: block;
+          background-color: var(--card-bg-color, var(--surface-3));
+          border: 1px solid var(--surface-4);
+          border-radius: 0.375rem;
+          padding: 0.5rem 0.625rem;
+          color: var(--text-1);
+          text-decoration: none;
+          cursor: grab;
+          transition: box-shadow 0.15s, border-color 0.15s;
+        }
+        .wc-kanban-card:hover {
+          border-color: var(--lane-color, var(--primary-bg-color));
+          box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .wc-kanban-card:focus-visible {
+          outline: var(--primary-bg-color) solid 2px;
+          outline-offset: 1px;
+        }
+        .wc-kanban-card.dragging {
+          opacity: 0.5;
+          cursor: grabbing;
+        }
+        .wc-kanban-card-title {
+          font-weight: 600;
+          font-size: 0.875rem;
+          margin-bottom: 0.25rem;
+        }
+        .wc-kanban-card-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.25rem;
+        }
+        .wc-kanban-empty {
+          display: none;
+          padding: 0.75rem;
+          text-align: center;
+          font-size: 0.75rem;
+          color: var(--text-3, var(--component-alt-color));
+          border: 1px dashed var(--surface-4);
+          border-radius: 0.375rem;
+        }
+        .wc-kanban-lane-body:not(:has(.wc-kanban-card)) .wc-kanban-empty {
+          display: block;
+        }
+        .wc-kanban-lane-body.drag-over .wc-kanban-empty {
+          border-color: var(--lane-color, var(--primary-bg-color));
+        }
+        .wc-kanban-quick-add {
+          padding: 0.5rem;
+          border-top: 1px solid var(--surface-4);
+        }
+        .wc-kanban-quick-add form {
+          display: flex;
+          gap: 0.5rem;
+          width: 100%;
+        }
+        .wc-kanban-quick-add-input {
+          flex: 1 1 auto;
+          min-width: 0;
+          padding: 0.375rem 0.5rem;
+          background-color: var(--surface-3);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.25rem;
+          color: var(--text-1);
+        }
+        wc-kanban[readonly] .wc-kanban-card {
+          cursor: default;
+        }
+      }
+    `.trim();
+    this.loadStyle("wc-kanban-style", style);
+  }
+};
+customElements.define(WcKanban.is, WcKanban);
+
+// src/js/components/wc-calendar.js
+var MAX_CHIPS = 3;
+var MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+var DOW_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var pad2 = (n) => String(n).padStart(2, "0");
+var WcCalendar = class extends WcBaseComponent {
+  static get is() {
+    return "wc-calendar";
+  }
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "events",
+      "view",
+      "initial-date",
+      "week-starts-on",
+      "timezone",
+      "event-link-template",
+      "selectable",
+      "readonly"
+    ];
+  }
+  constructor() {
+    super();
+    this._events = [];
+    this._cursorKey = "";
+    this._dragId = null;
+    this._onClick = this._handleClick.bind(this);
+    this._onDragStart = this._handleDragStart.bind(this);
+    this._onDragOver = this._handleDragOver.bind(this);
+    this._onDrop = this._handleDrop.bind(this);
+    this._onDragEnd = this._handleDragEnd.bind(this);
+    const compEl = this.querySelector(":scope > .wc-calendar");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-calendar");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Public API -----------------------------------------------------------
+  get events() {
+    return this._events.map((e) => e._raw);
+  }
+  set events(arr) {
+    this.setAttribute("events", JSON.stringify(Array.isArray(arr) ? arr : []));
+  }
+  get view() {
+    return this.getAttribute("view") || "month";
+  }
+  set view(v) {
+    this.setAttribute("view", v);
+  }
+  refresh() {
+    this._renderCalendar();
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderCalendar();
+    this._wireEvents();
+    if (typeof htmx !== "undefined") {
+      htmx.process(this);
+    }
+  }
+  _readConfig() {
+    this._tz = this.getAttribute("timezone") || "local";
+    this._weekStart = this.getAttribute("week-starts-on") === "1" ? 1 : 0;
+    this._linkTemplate = this.getAttribute("event-link-template") || "";
+    this._prepareEvents();
+    if (!this._cursorKey) {
+      const init = this.getAttribute("initial-date");
+      this._cursorKey = init && /^\d{4}-\d{2}-\d{2}$/.test(init) ? init : this._todayKey();
+    }
+  }
+  // ---- Date / timezone helpers ---------------------------------------------
+  _zoneParts(date) {
+    const tz = this._tz;
+    if (tz === "utc") {
+      return { y: date.getUTCFullYear(), m: date.getUTCMonth() + 1, d: date.getUTCDate(), hh: date.getUTCHours(), mm: date.getUTCMinutes() };
+    }
+    if (!tz || tz === "local") {
+      return { y: date.getFullYear(), m: date.getMonth() + 1, d: date.getDate(), hh: date.getHours(), mm: date.getMinutes() };
+    }
+    try {
+      const f = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      const p = Object.fromEntries(f.formatToParts(date).map((x) => [x.type, x.value]));
+      return { y: +p.year, m: +p.month, d: +p.day, hh: +p.hour % 24, mm: +p.minute };
+    } catch (ex) {
+      return { y: date.getFullYear(), m: date.getMonth() + 1, d: date.getDate(), hh: date.getHours(), mm: date.getMinutes() };
+    }
+  }
+  _zoneKey(date) {
+    const p = this._zoneParts(date);
+    return `${p.y}-${pad2(p.m)}-${pad2(p.d)}`;
+  }
+  _todayKey() {
+    return this._zoneKey(/* @__PURE__ */ new Date());
+  }
+  // Calendar-date arithmetic anchored at UTC noon (DST-safe, zone-independent grid).
+  _addDays(key, n) {
+    const t = Date.parse(key + "T12:00:00Z") + n * 864e5;
+    const d = new Date(t);
+    return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
+  }
+  _dow(key) {
+    return (/* @__PURE__ */ new Date(key + "T12:00:00Z")).getUTCDay();
+  }
+  _daysBetween(aKey, bKey) {
+    return Math.round((Date.parse(bKey + "T12:00:00Z") - Date.parse(aKey + "T12:00:00Z")) / 864e5);
+  }
+  _isDateOnly(raw) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(raw) || /T00:00:00(\.0+)?Z?$/.test(raw);
+  }
+  _prepareEvents(rawList) {
+    const arr = rawList || this._parseJSON("events", []);
+    this._events = arr.filter((e) => e && e.start != null).map((e) => {
+      const startRaw = String(e.start);
+      const dateOnly = this._isDateOnly(startRaw);
+      const startDate = new Date(/^\d{4}-\d{2}-\d{2}$/.test(startRaw) ? startRaw + "T00:00:00Z" : startRaw);
+      const startKey = dateOnly ? startRaw.slice(0, 10) : this._zoneKey(startDate);
+      let endDate = null, endKey = startKey;
+      if (e.end != null) {
+        const endRaw = String(e.end);
+        endDate = new Date(/^\d{4}-\d{2}-\d{2}$/.test(endRaw) ? endRaw + "T00:00:00Z" : endRaw);
+        endKey = this._isDateOnly(endRaw) ? endRaw.slice(0, 10) : this._zoneKey(endDate);
+        if (endKey < startKey) endKey = startKey;
+      }
+      return {
+        _raw: e,
+        id: e.id != null ? String(e.id) : "",
+        title: e.title != null ? String(e.title) : "",
+        color: e.color || "",
+        dateOnly,
+        startDate,
+        endDate,
+        startKey,
+        endKey,
+        time: dateOnly ? "" : this._formatTime(startDate)
+      };
+    });
+  }
+  _formatTime(date) {
+    const p = this._zoneParts(date);
+    const h12 = (p.hh + 11) % 12 + 1;
+    const ampm = p.hh < 12 ? "a" : "p";
+    return p.mm ? `${h12}:${pad2(p.mm)}${ampm}` : `${h12}${ampm}`;
+  }
+  _eventsForKey(key) {
+    return this._events.filter((e) => key >= e.startKey && key <= e.endKey).sort((a, b) => {
+      const aAll = a.dateOnly ? 0 : 1, bAll = b.dateOnly ? 0 : 1;
+      if (aAll !== bAll) return aAll - bAll;
+      if (aAll === 1) {
+        const t = a.startDate.getTime() - b.startDate.getTime();
+        if (t) return t;
+      }
+      return a.title.localeCompare(b.title);
+    });
+  }
+  // ---- Rendering ------------------------------------------------------------
+  _renderCalendar() {
+    if (!this.componentElement) return;
+    const view = this.view;
+    this.componentElement.innerHTML = "";
+    this.componentElement.dataset.view = view;
+    this.componentElement.appendChild(this._buildToolbar(view));
+    const body = document.createElement("div");
+    body.classList.add("wc-calendar-body");
+    if (view === "month") this._buildMonth(body);
+    else if (view === "week") this._buildDays(body, this._weekKeys(), "week");
+    else if (view === "day") this._buildDays(body, [this._cursorKey], "day");
+    else this._buildAgenda(body);
+    this.componentElement.appendChild(body);
+  }
+  _buildToolbar(view) {
+    const bar = document.createElement("div");
+    bar.classList.add("wc-calendar-toolbar");
+    const nav = document.createElement("div");
+    nav.classList.add("wc-calendar-nav");
+    const mk = (cls, label2) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn btn-sm";
+      b.classList.add(cls);
+      b.textContent = label2;
+      return b;
+    };
+    nav.appendChild(mk("wc-calendar-prev", "\u2039"));
+    nav.appendChild(mk("wc-calendar-today", "Today"));
+    nav.appendChild(mk("wc-calendar-next", "\u203A"));
+    bar.appendChild(nav);
+    const label = document.createElement("div");
+    label.classList.add("wc-calendar-label");
+    label.textContent = this._periodLabel(view);
+    bar.appendChild(label);
+    const switcher = document.createElement("div");
+    switcher.classList.add("wc-calendar-views");
+    ["month", "week", "day", "agenda"].forEach((v) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn btn-sm wc-calendar-view-btn";
+      b.dataset.view = v;
+      b.textContent = v.charAt(0).toUpperCase() + v.slice(1);
+      if (v === view) b.classList.add("active");
+      switcher.appendChild(b);
+    });
+    bar.appendChild(switcher);
+    return bar;
+  }
+  _periodLabel(view) {
+    const [y, m, d] = this._cursorKey.split("-").map(Number);
+    if (view === "month") return `${MONTHS[m - 1]} ${y}`;
+    if (view === "day") return `${DOW_LONG[this._dow(this._cursorKey)]}, ${MONTHS[m - 1]} ${d}, ${y}`;
+    if (view === "agenda") return "Agenda";
+    const keys = this._weekKeys();
+    const [sy, sm, sd] = keys[0].split("-").map(Number);
+    const [ey, em, ed] = keys[6].split("-").map(Number);
+    if (sm === em) return `${MONTHS[sm - 1]} ${sd} \u2013 ${ed}, ${ey}`;
+    return `${MONTHS[sm - 1]} ${sd} \u2013 ${MONTHS[em - 1]} ${ed}, ${ey}`;
+  }
+  _weekKeys() {
+    const start = this._addDays(this._cursorKey, -((this._dow(this._cursorKey) - this._weekStart + 7) % 7));
+    return Array.from({ length: 7 }, (_, i) => this._addDays(start, i));
+  }
+  _buildWeekdayHeader(parent, keys) {
+    const head = document.createElement("div");
+    head.classList.add("wc-calendar-weekdays");
+    const order = Array.from({ length: 7 }, (_, i) => (this._weekStart + i) % 7);
+    const labels = keys ? keys.map((k) => `${DOW[this._dow(k)]} ${k.split("-")[2]}`) : order.map((i) => DOW[i]);
+    labels.forEach((l) => {
+      const c = document.createElement("div");
+      c.classList.add("wc-calendar-weekday");
+      c.textContent = l;
+      head.appendChild(c);
+    });
+    parent.appendChild(head);
+  }
+  _buildMonth(parent) {
+    this._buildWeekdayHeader(parent);
+    const [y, m] = this._cursorKey.split("-").map(Number);
+    const firstKey = `${y}-${pad2(m)}-01`;
+    const gridStart = this._addDays(firstKey, -((this._dow(firstKey) - this._weekStart + 7) % 7));
+    const today = this._todayKey();
+    const grid = document.createElement("div");
+    grid.classList.add("wc-calendar-grid");
+    for (let i = 0; i < 42; i++) {
+      const key = this._addDays(gridStart, i);
+      const inMonth = +key.split("-")[1] === m;
+      const cell = this._buildCell(key, { compact: true, today, inMonth });
+      grid.appendChild(cell);
+      if (i % 7 === 6 && i >= 27 && this._addDays(gridStart, i).split("-")[1] != pad2(m) && i >= 34) {
+      }
+    }
+    parent.appendChild(grid);
+  }
+  _buildDays(parent, keys, mode) {
+    this._buildWeekdayHeader(parent, keys);
+    const today = this._todayKey();
+    const grid = document.createElement("div");
+    grid.classList.add("wc-calendar-grid", mode === "day" ? "is-day" : "is-week");
+    keys.forEach((key) => grid.appendChild(this._buildCell(key, { compact: false, today, inMonth: true })));
+    parent.appendChild(grid);
+  }
+  _buildCell(key, { compact, today, inMonth }) {
+    const cell = document.createElement("div");
+    cell.classList.add("wc-calendar-cell");
+    cell.dataset.date = key;
+    if (!inMonth) cell.classList.add("is-out");
+    if (key === today) cell.classList.add("is-today");
+    if (this.hasAttribute("selectable")) cell.classList.add("is-selectable");
+    if (compact) {
+      const num = document.createElement("div");
+      num.classList.add("wc-calendar-daynum");
+      num.textContent = key.split("-")[2];
+      cell.appendChild(num);
+    }
+    const list = document.createElement("div");
+    list.classList.add("wc-calendar-events");
+    const evts = this._eventsForKey(key);
+    const limit = compact ? MAX_CHIPS : evts.length;
+    evts.slice(0, limit).forEach((e) => list.appendChild(this._buildEventChip(e, key)));
+    if (compact && evts.length > limit) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "wc-calendar-more";
+      more.dataset.date = key;
+      more.textContent = `+${evts.length - limit} more`;
+      list.appendChild(more);
+    }
+    cell.appendChild(list);
+    return cell;
+  }
+  _buildEventChip(e, cellKey) {
+    let chip;
+    if (this._linkTemplate) {
+      chip = document.createElement("a");
+      chip.href = this._resolveTemplate(this._linkTemplate, e._raw);
+    } else {
+      chip = document.createElement("div");
+      chip.setAttribute("role", "button");
+      chip.tabIndex = 0;
+    }
+    chip.classList.add("wc-calendar-event");
+    chip.dataset.id = e.id;
+    chip.draggable = !this.hasAttribute("readonly");
+    if (e.color) {
+      chip.style.setProperty("--event-color", e.color);
+      chip.classList.add("has-color");
+    }
+    if (e.startKey !== e.endKey) {
+      chip.classList.add("is-span");
+      if (cellKey === e.startKey) chip.classList.add("is-span-start");
+      else if (cellKey === e.endKey) chip.classList.add("is-span-end");
+      else chip.classList.add("is-span-mid");
+    }
+    if (e.time && cellKey === e.startKey) {
+      const t = document.createElement("span");
+      t.className = "wc-calendar-event-time";
+      t.textContent = e.time;
+      chip.appendChild(t);
+    }
+    const title = document.createElement("span");
+    title.className = "wc-calendar-event-title";
+    title.textContent = e.title;
+    chip.appendChild(title);
+    return chip;
+  }
+  _buildAgenda(parent) {
+    const list = document.createElement("div");
+    list.classList.add("wc-calendar-agenda");
+    const sorted = this._events.slice().sort((a, b) => (a.startKey + (a.time || "")).localeCompare(b.startKey + (b.time || "")));
+    if (!sorted.length) {
+      const empty = document.createElement("div");
+      empty.classList.add("wc-calendar-empty");
+      empty.textContent = "No events";
+      list.appendChild(empty);
+      parent.appendChild(list);
+      return;
+    }
+    let lastKey = null;
+    sorted.forEach((e) => {
+      if (e.startKey !== lastKey) {
+        lastKey = e.startKey;
+        const [yy, mm, dd] = e.startKey.split("-").map(Number);
+        const h = document.createElement("div");
+        h.classList.add("wc-calendar-agenda-date");
+        h.textContent = `${DOW[this._dow(e.startKey)]} ${MONTHS[mm - 1]} ${dd}, ${yy}`;
+        list.appendChild(h);
+      }
+      const row = document.createElement("div");
+      row.classList.add("wc-calendar-agenda-row");
+      row.appendChild(this._buildEventChip(e, e.startKey));
+      list.appendChild(row);
+    });
+    parent.appendChild(list);
+  }
+  // ---- Helpers --------------------------------------------------------------
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const v = JSON.parse(raw);
+      return v != null ? v : fallback;
+    } catch (ex) {
+      console.warn(`[wc-calendar] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _resolveTemplate(tpl, obj) {
+    return tpl.replace(/\{([^}]+)\}/g, (m, key) => {
+      const v = obj[key];
+      return v != null ? encodeURIComponent(String(v)) : "";
+    });
+  }
+  // ---- Navigation -----------------------------------------------------------
+  _navigate(dir) {
+    const view = this.view;
+    if (view === "month" || view === "agenda") {
+      let [y, m, d] = this._cursorKey.split("-").map(Number);
+      m += dir;
+      if (m < 1) {
+        m = 12;
+        y--;
+      } else if (m > 12) {
+        m = 1;
+        y++;
+      }
+      const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      d = Math.min(d, lastDay);
+      this._cursorKey = `${y}-${pad2(m)}-${pad2(d)}`;
+    } else if (view === "week") {
+      this._cursorKey = this._addDays(this._cursorKey, dir * 7);
+    } else {
+      this._cursorKey = this._addDays(this._cursorKey, dir);
+    }
+    this._renderCalendar();
+    this._emitViewChange();
+  }
+  _goToday() {
+    this._cursorKey = this._todayKey();
+    this._renderCalendar();
+    this._emitViewChange();
+  }
+  _setView(v) {
+    this.setAttribute("view", v);
+  }
+  _emitViewChange() {
+    this._emitEvent("wccalendarviewchange", "wc-calendar:viewchange", {
+      bubbles: true,
+      composed: true,
+      detail: { view: this.view, date: this._cursorKey }
+    });
+  }
+  // ---- Interaction ----------------------------------------------------------
+  _handleClick(e) {
+    const viewBtn = e.target.closest(".wc-calendar-view-btn");
+    if (viewBtn) {
+      this._setView(viewBtn.dataset.view);
+      return;
+    }
+    if (e.target.closest(".wc-calendar-prev")) {
+      this._navigate(-1);
+      return;
+    }
+    if (e.target.closest(".wc-calendar-next")) {
+      this._navigate(1);
+      return;
+    }
+    if (e.target.closest(".wc-calendar-today")) {
+      this._goToday();
+      return;
+    }
+    const more = e.target.closest(".wc-calendar-more");
+    if (more) {
+      this._cursorKey = more.dataset.date;
+      this._setView("day");
+      return;
+    }
+    const chip = e.target.closest(".wc-calendar-event");
+    if (chip) {
+      if (chip.tagName === "A") return;
+      this._emitEvent("wccalendaropen", "wc-calendar:open", {
+        bubbles: true,
+        composed: true,
+        detail: { id: chip.dataset.id }
+      });
+      return;
+    }
+    const cell = e.target.closest(".wc-calendar-cell");
+    if (cell && this.hasAttribute("selectable")) {
+      this._emitEvent("wccalendaradd", "wc-calendar:add", {
+        bubbles: true,
+        composed: true,
+        detail: { date: cell.dataset.date }
+      });
+    }
+  }
+  _handleKeydown(e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const chip = e.target.closest(".wc-calendar-event");
+    if (!chip || chip.tagName === "A") return;
+    e.preventDefault();
+    this._emitEvent("wccalendaropen", "wc-calendar:open", {
+      bubbles: true,
+      composed: true,
+      detail: { id: chip.dataset.id }
+    });
+  }
+  _handleDragStart(e) {
+    const chip = e.target.closest(".wc-calendar-event");
+    if (!chip || this.hasAttribute("readonly")) return;
+    this._dragId = chip.dataset.id;
+    chip.classList.add("dragging");
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = "move";
+      try {
+        e.dataTransfer.setData("text/plain", chip.dataset.id || "");
+      } catch (ex) {
+      }
+    }
+  }
+  _handleDragOver(e) {
+    if (this._dragId == null) return;
+    const cell = e.target.closest(".wc-calendar-cell");
+    if (!cell) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+    this.componentElement.querySelectorAll(".wc-calendar-cell.drag-over").forEach((c) => c.classList.remove("drag-over"));
+    cell.classList.add("drag-over");
+  }
+  _handleDrop(e) {
+    if (this._dragId == null) return;
+    const cell = e.target.closest(".wc-calendar-cell");
+    if (!cell) return;
+    e.preventDefault();
+    const targetKey = cell.dataset.date;
+    const evt = this._events.find((x) => x.id === this._dragId);
+    if (!evt) return;
+    const delta = this._daysBetween(evt.startKey, targetKey);
+    if (delta !== 0) this._reschedule(evt, delta);
+  }
+  _handleDragEnd() {
+    this.componentElement.querySelectorAll(".drag-over").forEach((c) => c.classList.remove("drag-over"));
+    const chip = this.componentElement.querySelector(".wc-calendar-event.dragging");
+    if (chip) chip.classList.remove("dragging");
+    this._dragId = null;
+  }
+  _reschedule(evt, dayDelta) {
+    const ms = dayDelta * 864e5;
+    const newStartDate = new Date(evt.startDate.getTime() + ms);
+    const newEndDate = evt.endDate ? new Date(evt.endDate.getTime() + ms) : null;
+    const newStart = evt.dateOnly ? `${this._addDays(evt.startKey, dayDelta)}T00:00:00.000Z` : newStartDate.toISOString();
+    const newEnd = newEndDate ? evt.dateOnly ? `${this._addDays(evt.endKey, dayDelta)}T00:00:00.000Z` : newEndDate.toISOString() : null;
+    evt._raw.start = newStart;
+    if (newEnd != null) evt._raw.end = newEnd;
+    this._prepareEvents(this._events.map((x) => x._raw));
+    this._renderCalendar();
+    this._emitEvent("wccalendarchange", "wc-calendar:change", {
+      bubbles: true,
+      composed: true,
+      detail: { id: evt.id, newStart, newEnd }
+    });
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    super._wireEvents();
+    const el = this.componentElement;
+    const pairs = [
+      ["click", this._onClick],
+      ["keydown", this._onKeydownBound || (this._onKeydownBound = this._handleKeydown.bind(this))],
+      ["dragstart", this._onDragStart],
+      ["dragover", this._onDragOver],
+      ["drop", this._onDrop],
+      ["dragend", this._onDragEnd]
+    ];
+    pairs.forEach(([type, fn]) => {
+      el.removeEventListener(type, fn);
+      el.addEventListener(type, fn);
+    });
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    const el = this.componentElement;
+    if (!el) return;
+    [
+      ["click", this._onClick],
+      ["keydown", this._onKeydownBound],
+      ["dragstart", this._onDragStart],
+      ["dragover", this._onDragOver],
+      ["drop", this._onDrop],
+      ["dragend", this._onDragEnd]
+    ].forEach(([type, fn]) => fn && el.removeEventListener(type, fn));
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    if ([
+      "events",
+      "view",
+      "initial-date",
+      "week-starts-on",
+      "timezone",
+      "event-link-template",
+      "selectable",
+      "readonly"
+    ].includes(attrName)) {
+      if (attrName === "initial-date" && newValue && /^\d{4}-\d{2}-\d{2}$/.test(newValue)) {
+        this._cursorKey = newValue;
+      }
+      this._readConfig();
+      this._renderCalendar();
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-calendar { display: contents; }
+
+      @layer wc.usage {
+        .wc-calendar {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          width: 100%;
+          background-color: var(--surface-2);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.5rem;
+          padding: 0.75rem;
+        }
+        .wc-calendar-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+        .wc-calendar-nav { display: inline-flex; gap: 0.25rem; }
+        .wc-calendar-label { font-weight: 600; font-size: 1rem; flex: 1 1 auto; text-align: center; }
+        .wc-calendar-views { display: inline-flex; gap: 0.25rem; }
+        .wc-calendar-view-btn.active {
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
+        }
+        .wc-calendar-weekdays {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 1px;
+        }
+        .wc-calendar-weekday {
+          padding: 0.25rem;
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: var(--text-2, var(--component-alt-color));
+          text-align: center;
+        }
+        .wc-calendar-grid {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 1px;
+          background-color: var(--surface-4);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.375rem;
+          overflow: hidden;
+        }
+        .wc-calendar-grid.is-week { grid-auto-rows: minmax(180px, auto); }
+        .wc-calendar-grid.is-day { grid-template-columns: 1fr; grid-auto-rows: minmax(360px, auto); }
+        .wc-calendar-cell {
+          background-color: var(--surface-2);
+          min-height: 92px;
+          padding: 0.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.125rem;
+        }
+        .wc-calendar-grid.is-week .wc-calendar-cell,
+        .wc-calendar-grid.is-day .wc-calendar-cell { overflow-y: auto; }
+        .wc-calendar-cell.is-out { background-color: var(--surface-1, var(--surface-3)); opacity: 0.55; }
+        .wc-calendar-cell.is-today .wc-calendar-daynum {
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
+          border-radius: 999px;
+        }
+        .wc-calendar-cell.is-selectable { cursor: pointer; }
+        .wc-calendar-cell.drag-over { outline: 2px dashed var(--primary-bg-color); outline-offset: -2px; }
+        .wc-calendar-daynum {
+          align-self: flex-end;
+          font-size: 0.75rem;
+          min-width: 1.25rem;
+          height: 1.25rem;
+          line-height: 1.25rem;
+          text-align: center;
+        }
+        .wc-calendar-events { display: flex; flex-direction: column; gap: 0.125rem; min-width: 0; }
+        .wc-calendar-event {
+          display: flex;
+          align-items: baseline;
+          gap: 0.25rem;
+          padding: 0.0625rem 0.375rem;
+          font-size: 0.75rem;
+          border-radius: 0.25rem;
+          background-color: var(--event-color, var(--primary-bg-color));
+          color: var(--primary-color);
+          text-decoration: none;
+          cursor: grab;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wc-calendar-event.dragging { opacity: 0.5; cursor: grabbing; }
+        .wc-calendar-event:focus-visible { outline: 2px solid var(--text-1); outline-offset: 1px; }
+        .wc-calendar-event.is-span-mid,
+        .wc-calendar-event.is-span-end { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .wc-calendar-event.is-span-start,
+        .wc-calendar-event.is-span-mid { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .wc-calendar-event-time { font-weight: 600; opacity: 0.85; }
+        .wc-calendar-event-title { overflow: hidden; text-overflow: ellipsis; }
+        .wc-calendar-more {
+          font-size: 0.7rem;
+          color: var(--text-2, var(--component-alt-color));
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          padding: 0 0.375rem;
+        }
+        .wc-calendar-more:hover { color: var(--primary-bg-color); text-decoration: underline; }
+        .wc-calendar-agenda { display: flex; flex-direction: column; gap: 0.25rem; }
+        .wc-calendar-agenda-date {
+          font-weight: 600;
+          font-size: 0.8rem;
+          margin-top: 0.5rem;
+          padding-bottom: 0.125rem;
+          border-bottom: 1px solid var(--surface-4);
+          color: var(--text-2, var(--component-alt-color));
+        }
+        .wc-calendar-agenda-row .wc-calendar-event { white-space: normal; }
+        .wc-calendar-empty {
+          padding: 1.5rem;
+          text-align: center;
+          color: var(--text-3, var(--component-alt-color));
+        }
+        wc-calendar[readonly] .wc-calendar-event { cursor: default; }
+
+        @media (max-width: 640px) {
+          .wc-calendar-label { order: -1; width: 100%; }
+          .wc-calendar-cell { min-height: 64px; }
+        }
+      }
+    `.trim();
+    this.loadStyle("wc-calendar-style", style);
+  }
+};
+customElements.define(WcCalendar.is, WcCalendar);
+
+// src/js/components/wc-gantt.js
+var SCALES = {
+  day: { pxPerDay: 34 },
+  week: { pxPerDay: 20 },
+  month: { pxPerDay: 6 }
+};
+var MONTHS2 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var BAR_H = 22;
+var ROW_GAP = 6;
+var DRAG_THRESHOLD = 4;
+var WcGantt = class extends WcBaseComponent {
+  static get is() {
+    return "wc-gantt";
+  }
+  static get observedAttributes() {
+    return ["id", "class", "items", "group-field", "scale", "link-template", "readonly", "label-field", "id-field"];
+  }
+  constructor() {
+    super();
+    this._items = [];
+    this._drag = null;
+    this._suppressClick = false;
+    this._onClick = this._handleClick.bind(this);
+    this._onPointerDown = this._handlePointerDown.bind(this);
+    this._onPointerMove = this._handlePointerMove.bind(this);
+    this._onPointerUp = this._handlePointerUp.bind(this);
+    const compEl = this.querySelector(":scope > .wc-gantt");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-gantt");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Public API -----------------------------------------------------------
+  get items() {
+    return this._items.map((i) => i._raw);
+  }
+  set items(arr) {
+    this.setAttribute("items", JSON.stringify(Array.isArray(arr) ? arr : []));
+  }
+  get scale() {
+    return SCALES[this.getAttribute("scale")] ? this.getAttribute("scale") : "week";
+  }
+  set scale(v) {
+    this.setAttribute("scale", v);
+  }
+  refresh() {
+    this._renderGantt();
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderGantt();
+    this._wireEvents();
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _readConfig() {
+    this._groupField = this.getAttribute("group-field") || "lane";
+    this._labelField = this.getAttribute("label-field") || "label";
+    this._idField = this.getAttribute("id-field") || "id";
+    this._linkTemplate = this.getAttribute("link-template") || "";
+    this._prepareItems();
+  }
+  // ---- Date helpers (day-number math, UTC-noon anchored) --------------------
+  _toDay(str) {
+    if (!str) return null;
+    const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(str) ? str + "T12:00:00Z" : str);
+    if (isNaN(d.getTime())) return null;
+    return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12) / 864e5);
+  }
+  _dayToISO(dayNum) {
+    return new Date(dayNum * 864e5).toISOString();
+  }
+  _dayParts(dayNum) {
+    const d = new Date(dayNum * 864e5);
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), dow: d.getUTCDay() };
+  }
+  _prepareItems(rawList) {
+    const arr = rawList || this._parseJSON("items", []);
+    this._items = arr.filter((it) => it && it.start != null).map((it) => {
+      const s = this._toDay(String(it.start));
+      let e = it.end != null ? this._toDay(String(it.end)) : null;
+      const milestone = e == null || e <= s;
+      if (milestone) e = s;
+      return {
+        _raw: it,
+        id: it[this._idField] != null ? String(it[this._idField]) : "",
+        label: it[this._labelField] != null ? String(it[this._labelField]) : "",
+        lane: it[this._groupField] != null ? String(it[this._groupField]) : "\u2014",
+        color: it.color || "",
+        _s: s,
+        _e: e,
+        milestone
+      };
+    }).filter((it) => it._s != null);
+    if (this._items.length) {
+      const minS = Math.min(...this._items.map((i) => i._s));
+      const maxE = Math.max(...this._items.map((i) => i._e));
+      this._axisStart = this._snapStart(minS);
+      this._axisEnd = this._snapEnd(maxE);
+    } else {
+      const today = this._toDay((/* @__PURE__ */ new Date()).toISOString());
+      this._axisStart = this._snapStart(today);
+      this._axisEnd = this._snapEnd(today + 14);
+    }
+  }
+  _snapStart(dayNum) {
+    const scale = this.scale;
+    if (scale === "day") return dayNum - 1;
+    if (scale === "week") return dayNum - this._dayParts(dayNum).dow;
+    const p = this._dayParts(dayNum);
+    return Math.floor(Date.UTC(p.y, p.m, 1, 12) / 864e5);
+  }
+  _snapEnd(dayNum) {
+    const scale = this.scale;
+    if (scale === "day") return dayNum + 1;
+    if (scale === "week") return dayNum + (6 - this._dayParts(dayNum).dow);
+    const p = this._dayParts(dayNum);
+    return Math.floor(Date.UTC(p.y, p.m + 1, 0, 12) / 864e5);
+  }
+  _pxPerDay() {
+    return SCALES[this.scale].pxPerDay;
+  }
+  _totalDays() {
+    return this._axisEnd - this._axisStart + 1;
+  }
+  _totalWidth() {
+    return this._totalDays() * this._pxPerDay();
+  }
+  // ---- Rendering ------------------------------------------------------------
+  _renderGantt() {
+    if (!this.componentElement) return;
+    this.componentElement.innerHTML = "";
+    const px = this._pxPerDay();
+    const totalWidth = this._totalWidth();
+    const header = document.createElement("div");
+    header.classList.add("wc-gantt-header");
+    const corner = document.createElement("div");
+    corner.classList.add("wc-gantt-corner");
+    header.appendChild(corner);
+    const axis = document.createElement("div");
+    axis.classList.add("wc-gantt-axis");
+    axis.style.width = totalWidth + "px";
+    this._buildTicks().forEach((t) => {
+      const tick = document.createElement("div");
+      tick.classList.add("wc-gantt-tick");
+      tick.style.left = t.left + "px";
+      tick.style.width = t.width + "px";
+      tick.textContent = t.label;
+      axis.appendChild(tick);
+    });
+    header.appendChild(axis);
+    this.componentElement.appendChild(header);
+    const body = document.createElement("div");
+    body.classList.add("wc-gantt-body");
+    const lanes = [];
+    const laneMap = /* @__PURE__ */ new Map();
+    this._items.forEach((it) => {
+      if (!laneMap.has(it.lane)) {
+        laneMap.set(it.lane, []);
+        lanes.push(it.lane);
+      }
+      laneMap.get(it.lane).push(it);
+    });
+    lanes.forEach((laneName) => {
+      const laneItems = laneMap.get(laneName);
+      const { rowCount } = this._packRows(laneItems);
+      const trackHeight = rowCount * (BAR_H + ROW_GAP) + ROW_GAP;
+      const lane = document.createElement("div");
+      lane.classList.add("wc-gantt-lane");
+      const label = document.createElement("div");
+      label.classList.add("wc-gantt-lane-label");
+      label.textContent = laneName;
+      label.style.height = trackHeight + "px";
+      lane.appendChild(label);
+      const track = document.createElement("div");
+      track.classList.add("wc-gantt-lane-track");
+      track.style.width = totalWidth + "px";
+      track.style.height = trackHeight + "px";
+      track.dataset.lane = laneName;
+      laneItems.forEach((it) => track.appendChild(this._buildBar(it, px)));
+      lane.appendChild(track);
+      body.appendChild(lane);
+    });
+    if (!lanes.length) {
+      const empty = document.createElement("div");
+      empty.classList.add("wc-gantt-empty");
+      empty.textContent = "No items";
+      body.appendChild(empty);
+    }
+    this.componentElement.appendChild(body);
+  }
+  // Greedy row packing: each item in the first row whose last bar ends before it starts.
+  _packRows(items) {
+    const sorted = items.slice().sort((a, b) => a._s - b._s);
+    const rowEnds = [];
+    sorted.forEach((it) => {
+      let placed = false;
+      for (let r = 0; r < rowEnds.length; r++) {
+        if (it._s > rowEnds[r]) {
+          it._row = r;
+          rowEnds[r] = it._e;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        it._row = rowEnds.length;
+        rowEnds.push(it._e);
+      }
+    });
+    return { rowCount: Math.max(rowEnds.length, 1) };
+  }
+  _buildBar(it, px) {
+    const left = (it._s - this._axisStart) * px;
+    const top = ROW_GAP + it._row * (BAR_H + ROW_GAP);
+    let bar;
+    if (this._linkTemplate) {
+      bar = document.createElement("a");
+      bar.href = this._resolveTemplate(this._linkTemplate, it._raw);
+    } else {
+      bar = document.createElement("div");
+      bar.setAttribute("role", "button");
+      bar.tabIndex = 0;
+    }
+    bar.dataset.id = it.id;
+    bar.draggable = false;
+    bar.style.left = left + "px";
+    bar.style.top = top + "px";
+    if (it.color) bar.style.setProperty("--bar-color", it.color);
+    if (it.milestone) {
+      bar.classList.add("wc-gantt-milestone");
+      bar.title = it.label;
+    } else {
+      bar.classList.add("wc-gantt-bar");
+      bar.style.width = Math.max((it._e - it._s + 1) * px, 6) + "px";
+      const lbl = document.createElement("span");
+      lbl.classList.add("wc-gantt-bar-label");
+      lbl.textContent = it.label;
+      bar.appendChild(lbl);
+      if (!this.hasAttribute("readonly")) {
+        const lh = document.createElement("span");
+        lh.classList.add("wc-gantt-handle", "wc-gantt-handle-l");
+        const rh = document.createElement("span");
+        rh.classList.add("wc-gantt-handle", "wc-gantt-handle-r");
+        bar.appendChild(lh);
+        bar.appendChild(rh);
+      }
+    }
+    return bar;
+  }
+  _buildTicks() {
+    const px = this._pxPerDay();
+    const ticks = [];
+    const scale = this.scale;
+    let cur = this._axisStart;
+    while (cur <= this._axisEnd) {
+      const p = this._dayParts(cur);
+      let span, label;
+      if (scale === "day") {
+        span = 1;
+        label = `${p.m + 1}/${p.d}`;
+      } else if (scale === "week") {
+        span = 7;
+        label = `${MONTHS2[p.m]} ${p.d}`;
+      } else {
+        span = this._dayParts(Math.floor(Date.UTC(p.y, p.m + 1, 0, 12) / 864e5)).d;
+        label = `${MONTHS2[p.m]} ${String(p.y).slice(2)}`;
+      }
+      ticks.push({ left: (cur - this._axisStart) * px, width: span * px, label });
+      cur += span;
+    }
+    return ticks;
+  }
+  // ---- Helpers --------------------------------------------------------------
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const v = JSON.parse(raw);
+      return v != null ? v : fallback;
+    } catch (ex) {
+      console.warn(`[wc-gantt] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _resolveTemplate(tpl, obj) {
+    return tpl.replace(/\{([^}]+)\}/g, (m, k) => obj[k] != null ? encodeURIComponent(String(obj[k])) : "");
+  }
+  // ---- Interaction: activate ------------------------------------------------
+  _handleClick(e) {
+    if (this._suppressClick) {
+      this._suppressClick = false;
+      e.preventDefault();
+      return;
+    }
+    const bar = e.target.closest(".wc-gantt-bar, .wc-gantt-milestone");
+    if (!bar || !this.componentElement.contains(bar)) return;
+    if (bar.tagName === "A") return;
+    this._emitEvent("wcganttopen", "wc-gantt:open", {
+      bubbles: true,
+      composed: true,
+      detail: { id: bar.dataset.id }
+    });
+  }
+  // ---- Interaction: pointer drag / resize -----------------------------------
+  _handlePointerDown(e) {
+    if (this.hasAttribute("readonly") || e.button !== 0) return;
+    const bar = e.target.closest(".wc-gantt-bar, .wc-gantt-milestone");
+    if (!bar) return;
+    const it = this._items.find((x) => x.id === bar.dataset.id);
+    if (!it) return;
+    let mode = "move";
+    if (e.target.classList.contains("wc-gantt-handle-l")) mode = "resize-l";
+    else if (e.target.classList.contains("wc-gantt-handle-r")) mode = "resize-r";
+    this._drag = { it, bar, mode, startX: e.clientX, origS: it._s, origE: it._e, moved: false };
+    document.addEventListener("pointermove", this._onPointerMove);
+    document.addEventListener("pointerup", this._onPointerUp);
+  }
+  _handlePointerMove(e) {
+    const d = this._drag;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+    d.moved = true;
+    const px = this._pxPerDay();
+    const deltaDays = Math.round(dx / px);
+    let s = d.origS, ed = d.origE;
+    if (d.mode === "move") {
+      s = d.origS + deltaDays;
+      ed = d.origE + deltaDays;
+    } else if (d.mode === "resize-l") {
+      s = Math.min(d.origS + deltaDays, d.origE);
+    } else if (d.mode === "resize-r") {
+      ed = Math.max(d.origE + deltaDays, d.origS);
+    }
+    d.bar.style.left = (s - this._axisStart) * px + "px";
+    if (!d.it.milestone) d.bar.style.width = Math.max((ed - s + 1) * px, 6) + "px";
+    d._s = s;
+    d._e = ed;
+  }
+  _handlePointerUp() {
+    const d = this._drag;
+    document.removeEventListener("pointermove", this._onPointerMove);
+    document.removeEventListener("pointerup", this._onPointerUp);
+    this._drag = null;
+    if (!d || !d.moved) return;
+    this._suppressClick = true;
+    const it = d.it;
+    it._s = d._s != null ? d._s : it._s;
+    it._e = d._e != null ? d._e : it._e;
+    if (it.milestone) it._e = it._s;
+    const newStart = this._dayToISO(it._s);
+    const newEnd = it.milestone ? null : this._dayToISO(it._e);
+    it._raw.start = newStart;
+    if (!it.milestone) it._raw.end = newEnd;
+    this._prepareItems(this._items.map((x) => x._raw));
+    this._renderGantt();
+    this._emitEvent("wcganttchange", "wc-gantt:change", {
+      bubbles: true,
+      composed: true,
+      detail: { id: it.id, newStart, newEnd }
+    });
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    super._wireEvents();
+    const el = this.componentElement;
+    el.removeEventListener("click", this._onClick);
+    el.addEventListener("click", this._onClick);
+    el.removeEventListener("pointerdown", this._onPointerDown);
+    el.addEventListener("pointerdown", this._onPointerDown);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.componentElement) {
+      this.componentElement.removeEventListener("click", this._onClick);
+      this.componentElement.removeEventListener("pointerdown", this._onPointerDown);
+    }
+    document.removeEventListener("pointermove", this._onPointerMove);
+    document.removeEventListener("pointerup", this._onPointerUp);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    if (["items", "group-field", "scale", "link-template", "readonly", "label-field", "id-field"].includes(attrName)) {
+      this._readConfig();
+      this._renderGantt();
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-gantt { display: contents; }
+
+      @layer wc.usage {
+        .wc-gantt {
+          display: block;
+          width: 100%;
+          overflow-x: auto;
+          background-color: var(--surface-2);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.5rem;
+          --wc-gantt-label-w: 140px;
+        }
+        .wc-gantt-header {
+          display: flex;
+          position: sticky;
+          top: 0;
+          z-index: 3;
+          background-color: var(--surface-3);
+          border-bottom: 1px solid var(--surface-4);
+        }
+        .wc-gantt-corner {
+          flex: 0 0 var(--wc-gantt-label-w);
+          position: sticky;
+          left: 0;
+          z-index: 4;
+          background-color: var(--surface-3);
+          border-right: 1px solid var(--surface-4);
+        }
+        .wc-gantt-axis { position: relative; height: 1.75rem; }
+        .wc-gantt-tick {
+          position: absolute;
+          top: 0;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          padding-left: 0.25rem;
+          font-size: 0.7rem;
+          color: var(--text-2, var(--component-alt-color));
+          border-left: 1px solid var(--surface-4);
+          white-space: nowrap;
+          overflow: hidden;
+        }
+        .wc-gantt-body { display: flex; flex-direction: column; }
+        .wc-gantt-lane { display: flex; border-bottom: 1px solid var(--surface-4); }
+        .wc-gantt-lane-label {
+          flex: 0 0 var(--wc-gantt-label-w);
+          position: sticky;
+          left: 0;
+          z-index: 2;
+          display: flex;
+          align-items: center;
+          padding: 0 0.5rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+          background-color: var(--surface-2);
+          border-right: 1px solid var(--surface-4);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .wc-gantt-lane-track { position: relative; flex: 1 1 auto; }
+        .wc-gantt-bar {
+          position: absolute;
+          height: ${BAR_H}px;
+          display: flex;
+          align-items: center;
+          padding: 0 0.5rem;
+          font-size: 0.72rem;
+          color: var(--primary-color);
+          background-color: var(--bar-color, var(--primary-bg-color));
+          border-radius: 0.25rem;
+          cursor: grab;
+          text-decoration: none;
+          overflow: hidden;
+          user-select: none;
+          touch-action: none;
+        }
+        .wc-gantt-bar:focus-visible,
+        .wc-gantt-milestone:focus-visible {
+          outline: 2px solid var(--text-1);
+          outline-offset: 1px;
+        }
+        .wc-gantt-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+        .wc-gantt-handle {
+          position: absolute;
+          top: 0;
+          width: 6px;
+          height: 100%;
+          cursor: ew-resize;
+        }
+        .wc-gantt-handle-l { left: 0; }
+        .wc-gantt-handle-r { right: 0; }
+        .wc-gantt-milestone {
+          position: absolute;
+          width: ${BAR_H}px;
+          height: ${BAR_H}px;
+          background-color: var(--bar-color, var(--warning-color, #f59e0b));
+          transform: translateX(-50%) rotate(45deg);
+          border-radius: 3px;
+          cursor: grab;
+          touch-action: none;
+        }
+        wc-gantt[readonly] .wc-gantt-bar,
+        wc-gantt[readonly] .wc-gantt-milestone { cursor: pointer; }
+        .wc-gantt-empty {
+          padding: 1.5rem;
+          text-align: center;
+          color: var(--text-3, var(--component-alt-color));
+        }
+      }
+    `.trim();
+    this.loadStyle("wc-gantt-style", style);
+  }
+};
+customElements.define(WcGantt.is, WcGantt);
+
+// src/js/components/wc-data-cards.js
+var WcDataCards = class extends WcBaseComponent {
+  static get is() {
+    return "wc-data-cards";
+  }
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "items",
+      "image-field",
+      "title-field",
+      "subtitle-field",
+      "fields",
+      "columns",
+      "link-template",
+      "id-field"
+    ];
+  }
+  constructor() {
+    super();
+    this._items = [];
+    this._onClick = this._handleClick.bind(this);
+    const compEl = this.querySelector(":scope > .wc-data-cards");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-data-cards");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  get items() {
+    return this._items.slice();
+  }
+  set items(arr) {
+    this.setAttribute("items", JSON.stringify(Array.isArray(arr) ? arr : []));
+  }
+  refresh() {
+    this._renderCards();
+  }
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderCards();
+    this._wireEvents();
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _readConfig() {
+    this._imageField = this.getAttribute("image-field") || "";
+    this._titleField = this.getAttribute("title-field") || "title";
+    this._subtitleField = this.getAttribute("subtitle-field") || "";
+    this._fields = this._parseJSON("fields", []);
+    this._idField = this.getAttribute("id-field") || "_id";
+    this._linkTemplate = this.getAttribute("link-template") || "";
+    this._columns = parseInt(this.getAttribute("columns"), 10) || 3;
+    this._items = this._parseJSON("items", []);
+  }
+  _renderCards() {
+    if (!this.componentElement) return;
+    this.componentElement.style.setProperty("--wc-dc-cols", this._columns);
+    this.componentElement.innerHTML = "";
+    if (!this._items.length) {
+      const empty = document.createElement("div");
+      empty.classList.add("wc-data-cards-empty");
+      empty.textContent = "No items";
+      this.componentElement.appendChild(empty);
+      return;
+    }
+    this._items.forEach((item) => this.componentElement.appendChild(this._buildCard(item)));
+  }
+  _buildCard(item) {
+    let card;
+    if (this._linkTemplate) {
+      card = document.createElement("a");
+      card.href = this._resolveTemplate(this._linkTemplate, item);
+    } else {
+      card = document.createElement("div");
+      card.setAttribute("role", "button");
+      card.tabIndex = 0;
+    }
+    card.classList.add("card", "wc-data-cards-card");
+    const idVal = item[this._idField];
+    if (idVal != null) card.dataset.id = String(idVal);
+    const imgUrl = this._imageField ? item[this._imageField] : null;
+    if (imgUrl) {
+      const fig = document.createElement("div");
+      fig.classList.add("wc-data-cards-cover");
+      const img = document.createElement("img");
+      img.src = String(imgUrl);
+      img.alt = item[this._titleField] != null ? String(item[this._titleField]) : "";
+      img.loading = "lazy";
+      fig.appendChild(img);
+      card.appendChild(fig);
+    }
+    const body = document.createElement("div");
+    body.classList.add("wc-data-cards-body");
+    const title = document.createElement("div");
+    title.classList.add("wc-data-cards-title");
+    title.textContent = item[this._titleField] != null ? String(item[this._titleField]) : "";
+    body.appendChild(title);
+    if (this._subtitleField && item[this._subtitleField] != null && String(item[this._subtitleField]).trim() !== "") {
+      const sub = document.createElement("div");
+      sub.classList.add("wc-data-cards-subtitle");
+      sub.textContent = String(item[this._subtitleField]);
+      body.appendChild(sub);
+    }
+    const chips = this._fields.map((f) => item[f]).filter((v) => v != null && String(v).trim() !== "");
+    if (chips.length) {
+      const meta = document.createElement("div");
+      meta.classList.add("wc-data-cards-meta");
+      chips.forEach((v) => {
+        const badge = document.createElement("span");
+        badge.classList.add("badge", "badge-muted");
+        badge.textContent = String(v);
+        meta.appendChild(badge);
+      });
+      body.appendChild(meta);
+    }
+    card.appendChild(body);
+    return card;
+  }
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const v = JSON.parse(raw);
+      return v != null ? v : fallback;
+    } catch (ex) {
+      console.warn(`[wc-data-cards] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _resolveTemplate(tpl, obj) {
+    return tpl.replace(/\{([^}]+)\}/g, (m, k) => obj[k] != null ? encodeURIComponent(String(obj[k])) : "");
+  }
+  _handleClick(e) {
+    const card = e.target.closest(".wc-data-cards-card");
+    if (!card || !this.componentElement.contains(card)) return;
+    if (card.tagName === "A") return;
+    this._emitEvent("wcdatacardsopen", "wc-data-cards:open", {
+      bubbles: true,
+      composed: true,
+      detail: { id: card.dataset.id }
+    });
+  }
+  _wireEvents() {
+    super._wireEvents();
+    this.componentElement.removeEventListener("click", this._onClick);
+    this.componentElement.addEventListener("click", this._onClick);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.componentElement) this.componentElement.removeEventListener("click", this._onClick);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    if (["items", "image-field", "title-field", "subtitle-field", "fields", "columns", "link-template", "id-field"].includes(attrName)) {
+      this._readConfig();
+      this._renderCards();
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-data-cards { display: contents; }
+
+      @layer wc.usage {
+        .wc-data-cards {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+          width: 100%;
+        }
+        @media (min-width: 640px) {
+          .wc-data-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+          .wc-data-cards { grid-template-columns: repeat(var(--wc-dc-cols, 3), minmax(0, 1fr)); }
+        }
+        .wc-data-cards-card {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          padding: 0;
+          text-decoration: none;
+          color: var(--text-1);
+          transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+        }
+        a.wc-data-cards-card,
+        [role="button"].wc-data-cards-card { cursor: pointer; }
+        .wc-data-cards-card:hover {
+          box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+          border-color: var(--primary-bg-color);
+          transform: translateY(-1px);
+        }
+        .wc-data-cards-card:focus-visible {
+          outline: var(--primary-bg-color) solid 2px;
+          outline-offset: 2px;
+        }
+        .wc-data-cards-cover {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          overflow: hidden;
+          background-color: var(--surface-3);
+        }
+        .wc-data-cards-cover img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .wc-data-cards-body {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          padding: 0.75rem 1rem;
+        }
+        .wc-data-cards-title { font-weight: 600; font-size: 0.95rem; }
+        .wc-data-cards-subtitle {
+          font-size: 0.8rem;
+          color: var(--text-2, var(--component-alt-color));
+        }
+        .wc-data-cards-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.25rem;
+          margin-top: 0.375rem;
+        }
+        .wc-data-cards-empty {
+          grid-column: 1 / -1;
+          padding: 1.5rem;
+          text-align: center;
+          color: var(--text-3, var(--component-alt-color));
+        }
+      }
+    `.trim();
+    this.loadStyle("wc-data-cards-style", style);
+  }
+};
+customElements.define(WcDataCards.is, WcDataCards);
+
 // src/js/components/wc-form.js
 var WcForm = class extends WcBaseComponent {
   static get observedAttributes() {
@@ -38050,6 +40155,2139 @@ var WcFormArray = class extends WcBaseComponent {
   }
 };
 customElements.define(WcFormArray.is, WcFormArray);
+
+// src/js/components/wc-rich-text.js
+var LIBS = {
+  marked: { url: "https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js", global: "marked" },
+  turndown: { url: "https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.3/turndown.min.js", global: "TurndownService" },
+  dompurify: { url: "https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js", global: "DOMPurify" }
+};
+var TOOLBAR = {
+  bold: { icon: "bold", title: "Bold", cmd: "bold" },
+  italic: { icon: "italic", title: "Italic", cmd: "italic" },
+  h2: { icon: "heading", title: "Heading", block: "h2" },
+  h3: { icon: "heading", title: "Subheading", block: "h3" },
+  ul: { icon: "list-ul", title: "Bullet list", cmd: "insertUnorderedList" },
+  ol: { icon: "list-ol", title: "Numbered list", cmd: "insertOrderedList" },
+  link: { icon: "link", title: "Link", special: "link" },
+  quote: { icon: "quote-right", title: "Quote", block: "blockquote" },
+  code: { icon: "code", title: "Inline code", special: "code" },
+  image: { icon: "image", title: "Image", special: "image" },
+  table: { icon: "table", title: "Table", special: "table" }
+};
+var SETS = {
+  basic: ["bold", "italic", "h2", "ul", "ol", "link", "quote", "code"],
+  full: ["bold", "italic", "h2", "h3", "ul", "ol", "link", "quote", "code", "image", "table"]
+};
+var WcRichText = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-rich-text";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "mode",
+      "toolbar",
+      "lbl-label",
+      "min-height",
+      "placeholder",
+      "required",
+      "readonly",
+      "disabled"
+    ];
+  }
+  constructor() {
+    super();
+    this._deferReady = true;
+    this._libsReady = false;
+    this._value = "";
+    this._pendingValue = null;
+    this._previewOn = false;
+    this._onToolbarClick = this._handleToolbarClick.bind(this);
+    this._onToolbarMouseDown = (e) => {
+      if (e.target.closest(".wc-rich-text-btn")) e.preventDefault();
+    };
+    this._onEditorInput = this._handleEditorInput.bind(this);
+    this._onPaste = this._handlePaste.bind(this);
+    const compEl = this.querySelector(":scope > .wc-rich-text");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-rich-text", "relative");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    await this._loadLibs();
+    this._libsReady = true;
+    this._seedContent();
+    this._updateValidity();
+    this._setReady();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._pendingValue = v == null ? "" : String(v);
+    this._value = this._pendingValue;
+    this._internals.setFormValue(this._value);
+    if (this._libsReady) {
+      this._seedContent();
+      this._updateValidity();
+    }
+  }
+  get mode() {
+    return (this.getAttribute("mode") || "markdown").toLowerCase() === "html" ? "html" : "markdown";
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    const built = this.componentElement.querySelector(":scope > .wc-rich-text-editor");
+    if (!built) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const name = this.getAttribute("name") || "";
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      lbl.setAttribute("for", name);
+      this.componentElement.appendChild(lbl);
+    }
+    const toolbar = document.createElement("div");
+    toolbar.classList.add("wc-rich-text-toolbar");
+    this._toolbarKeys().forEach((key) => {
+      const def = TOOLBAR[key];
+      if (!def) return;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.classList.add("wc-rich-text-btn");
+      b.dataset.cmd = key;
+      b.title = def.title;
+      b.setAttribute("aria-label", def.title);
+      b.innerHTML = `<wc-fa-icon name="${def.icon}" size="0.875rem"></wc-fa-icon>`;
+      toolbar.appendChild(b);
+    });
+    if (this.mode === "markdown") {
+      const sep = document.createElement("span");
+      sep.classList.add("wc-rich-text-sep");
+      toolbar.appendChild(sep);
+      const pv = document.createElement("button");
+      pv.type = "button";
+      pv.classList.add("wc-rich-text-btn", "wc-rich-text-preview-toggle");
+      pv.dataset.cmd = "preview";
+      pv.title = "Toggle preview";
+      pv.setAttribute("aria-label", "Toggle preview");
+      pv.innerHTML = `<wc-fa-icon name="eye" size="0.875rem"></wc-fa-icon>`;
+      toolbar.appendChild(pv);
+    }
+    this.componentElement.appendChild(toolbar);
+    this.toolbarEl = toolbar;
+    const editor = document.createElement("div");
+    editor.classList.add("wc-rich-text-editor");
+    editor.setAttribute("role", "textbox");
+    editor.setAttribute("aria-multiline", "true");
+    const ro = this.hasAttribute("readonly") || this.hasAttribute("disabled");
+    editor.contentEditable = ro ? "false" : "true";
+    const minH = this.getAttribute("min-height") || "200px";
+    editor.style.minHeight = minH;
+    const ph = this.getAttribute("placeholder");
+    if (ph) editor.dataset.placeholder = ph;
+    this.componentElement.appendChild(editor);
+    this.editorEl = editor;
+    if (this.mode === "markdown") {
+      const preview = document.createElement("wc-markdown-viewer");
+      preview.classList.add("wc-rich-text-preview");
+      preview.hidden = true;
+      preview.style.minHeight = minH;
+      this.componentElement.appendChild(preview);
+      this.previewEl = preview;
+    }
+  }
+  _toolbarKeys() {
+    const raw = (this.getAttribute("toolbar") || "basic").trim();
+    if (SETS[raw]) return SETS[raw];
+    const keys = raw.split(",").map((s) => s.trim()).filter((k) => TOOLBAR[k]);
+    return keys.length ? keys : SETS.basic;
+  }
+  async _loadLibs() {
+    const needed = this.mode === "markdown" ? ["marked", "turndown", "dompurify"] : ["dompurify"];
+    await Promise.all(needed.map((k) => {
+      const lib = LIBS[k];
+      if (window[lib.global]) return Promise.resolve();
+      return this.loadLibrary(lib.url, lib.global).catch(() => {
+        console.warn(`[wc-rich-text] failed to load ${k}; degraded to plain text`);
+      });
+    }));
+    if (window.TurndownService && !this._turndown) {
+      this._turndown = new window.TurndownService({
+        headingStyle: "atx",
+        codeBlockStyle: "fenced",
+        bulletListMarker: "-"
+      });
+    }
+  }
+  // ---- Content conversion ---------------------------------------------------
+  _sanitize(html) {
+    return window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+  }
+  _mdToHtml(md) {
+    if (window.marked) return this._sanitize(window.marked.parse(md || ""));
+    const esc = (md || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc.replace(/\n/g, "<br>");
+  }
+  _htmlToMd(html) {
+    const safe = this._sanitize(html);
+    if (this._turndown) return this._turndown.turndown(safe);
+    const tmp = document.createElement("div");
+    tmp.innerHTML = safe;
+    return tmp.textContent || "";
+  }
+  _seedContent() {
+    if (!this.editorEl) return;
+    const value = this._pendingValue != null ? this._pendingValue : this.getAttribute("value") || "";
+    if (this.mode === "markdown") {
+      this.editorEl.innerHTML = this._mdToHtml(value);
+      this._value = value;
+    } else {
+      const safe = this._sanitize(value);
+      this.editorEl.innerHTML = safe;
+      this._value = safe;
+    }
+    this._internals.setFormValue(this._value);
+    this._pendingValue = null;
+  }
+  _readEditor() {
+    if (this.mode === "markdown") {
+      return this._htmlToMd(this.editorEl.innerHTML);
+    }
+    return this._sanitize(this.editorEl.innerHTML);
+  }
+  _plainText() {
+    return this.editorEl ? this.editorEl.textContent.trim() : "";
+  }
+  // ---- Validation -----------------------------------------------------------
+  _updateValidity() {
+    if (!this.editorEl) return;
+    const empty = !this._plainText();
+    if (this.hasAttribute("required") && empty) {
+      this._internals.setValidity({ valueMissing: true }, "Please fill out this field.", this.editorEl);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  // ---- Interaction ----------------------------------------------------------
+  _handleEditorInput() {
+    this._value = this._readEditor();
+    this._internals.setFormValue(this._value);
+    this._updateValidity();
+    if (this._previewOn) this._renderPreview();
+    this._emitEvent("wcrichtextchange", "wc-rich-text:change", {
+      bubbles: true,
+      composed: true,
+      detail: { name: this.getAttribute("name") || "", value: this._value, mode: this.mode }
+    });
+  }
+  _handlePaste(e) {
+    e.preventDefault();
+    const cd = e.clipboardData || window.clipboardData;
+    const html = cd && cd.getData("text/html");
+    const text = cd && cd.getData("text/plain");
+    if (html) {
+      const safe = this._sanitize(html);
+      document.execCommand("insertHTML", false, safe);
+    } else if (text != null) {
+      document.execCommand("insertText", false, text);
+    }
+  }
+  _handleToolbarClick(e) {
+    const btn = e.target.closest(".wc-rich-text-btn");
+    if (!btn || !this.toolbarEl.contains(btn)) return;
+    e.preventDefault();
+    const key = btn.dataset.cmd;
+    if (key === "preview") {
+      this._togglePreview();
+      return;
+    }
+    if (this.hasAttribute("readonly") || this.hasAttribute("disabled")) return;
+    this._exec(key);
+  }
+  _exec(key) {
+    const def = TOOLBAR[key];
+    if (!def) return;
+    this.editorEl.focus();
+    if (def.cmd) {
+      document.execCommand(def.cmd, false, null);
+    } else if (def.block) {
+      document.execCommand("formatBlock", false, def.block);
+    } else if (def.special === "link") {
+      const url = window.prompt("Link URL:");
+      if (url) document.execCommand("createLink", false, url);
+    } else if (def.special === "image") {
+      const url = window.prompt("Image URL:");
+      if (url) document.execCommand("insertImage", false, url);
+    } else if (def.special === "code") {
+      this._wrapInlineCode();
+    } else if (def.special === "table") {
+      document.execCommand(
+        "insertHTML",
+        false,
+        "<table><thead><tr><th>Header</th><th>Header</th></tr></thead><tbody><tr><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td></tr></tbody></table><p></p>"
+      );
+    }
+    this._handleEditorInput();
+  }
+  _wrapInlineCode() {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    const code = document.createElement("code");
+    try {
+      range.surroundContents(code);
+    } catch (ex) {
+      code.appendChild(range.extractContents());
+      range.insertNode(code);
+    }
+    sel.removeAllRanges();
+  }
+  _togglePreview() {
+    if (this.mode !== "markdown" || !this.previewEl) return;
+    this._previewOn = !this._previewOn;
+    if (this._previewOn) {
+      this._renderPreview();
+      this.editorEl.hidden = true;
+      this.previewEl.hidden = false;
+    } else {
+      this.editorEl.hidden = false;
+      this.previewEl.hidden = true;
+    }
+    const btn = this.toolbarEl.querySelector(".wc-rich-text-preview-toggle");
+    if (btn) btn.classList.toggle("active", this._previewOn);
+  }
+  _renderPreview() {
+    if (!this.previewEl) return;
+    this.previewEl.innerHTML = this._mdToHtml(this._value);
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    super._wireEvents();
+    if (this.toolbarEl) {
+      this.toolbarEl.removeEventListener("mousedown", this._onToolbarMouseDown);
+      this.toolbarEl.addEventListener("mousedown", this._onToolbarMouseDown);
+      this.toolbarEl.removeEventListener("click", this._onToolbarClick);
+      this.toolbarEl.addEventListener("click", this._onToolbarClick);
+    }
+    if (this.editorEl) {
+      this.editorEl.removeEventListener("input", this._onEditorInput);
+      this.editorEl.addEventListener("input", this._onEditorInput);
+      this.editorEl.removeEventListener("paste", this._onPaste);
+      this.editorEl.addEventListener("paste", this._onPaste);
+    }
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.toolbarEl) {
+      this.toolbarEl.removeEventListener("mousedown", this._onToolbarMouseDown);
+      this.toolbarEl.removeEventListener("click", this._onToolbarClick);
+    }
+    if (this.editorEl) {
+      this.editorEl.removeEventListener("input", this._onEditorInput);
+      this.editorEl.removeEventListener("paste", this._onPaste);
+    }
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "value") {
+      this._pendingValue = newValue == null ? "" : String(newValue);
+      this._value = this._pendingValue;
+      this._internals.setFormValue(this._value);
+      if (this._libsReady) {
+        this._seedContent();
+        this._updateValidity();
+      }
+      return;
+    }
+    if (attrName === "required") {
+      this._updateValidity();
+      return;
+    }
+    if (["mode", "toolbar", "min-height", "placeholder", "lbl-label", "readonly", "disabled"].includes(attrName)) {
+      const current = this._libsReady ? this._value : this.getAttribute("value") || "";
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+      this._wireEvents();
+      this._pendingValue = current;
+      if (this._libsReady) {
+        this._loadLibs().then(() => {
+          this._seedContent();
+          this._updateValidity();
+        });
+      }
+      return;
+    }
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _applyStyle() {
+    const style = `
+      wc-rich-text { display: contents; }
+
+      @layer wc.usage {
+        .wc-rich-text { display: flex; flex-direction: column; width: 100%; }
+        .wc-rich-text > label { margin-bottom: 0.25rem; }
+        .wc-rich-text:has(.wc-rich-text-editor[contenteditable="true"]):has([required]) > label::after { content: ' *'; }
+        wc-rich-text[required] .wc-rich-text > label::after,
+        wc-rich-text[required] > .wc-rich-text > label::after { content: ' *'; font-weight: bold; }
+
+        .wc-rich-text-toolbar {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.125rem;
+          padding: 0.25rem;
+          background-color: var(--surface-3);
+          border: 1px solid var(--surface-4);
+          border-bottom: none;
+          border-radius: 0.375rem 0.375rem 0 0;
+        }
+        .wc-rich-text-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.75rem;
+          height: 1.75rem;
+          padding: 0;
+          border: 1px solid transparent;
+          border-radius: 0.25rem;
+          background: none;
+          color: var(--text-1);
+          cursor: pointer;
+        }
+        .wc-rich-text-btn:hover {
+          background-color: var(--surface-4);
+        }
+        .wc-rich-text-btn.active {
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
+        }
+        .wc-rich-text-sep {
+          width: 1px;
+          height: 1.25rem;
+          margin: 0 0.25rem;
+          background-color: var(--surface-4);
+        }
+        .wc-rich-text-editor,
+        .wc-rich-text-preview {
+          padding: 0.5rem 0.625rem;
+          background-color: var(--surface-3);
+          border: 1px solid var(--surface-4);
+          border-radius: 0 0 0.375rem 0.375rem;
+          color: var(--text-1);
+          overflow-y: auto;
+          line-height: 1.6;
+        }
+        .wc-rich-text-editor:focus-visible {
+          outline: var(--primary-bg-color) solid 2px;
+          outline-offset: -1px;
+        }
+        .wc-rich-text-editor[contenteditable="false"] {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+        .wc-rich-text-editor:empty::before {
+          content: attr(data-placeholder);
+          color: var(--text-3, var(--component-alt-color));
+          pointer-events: none;
+        }
+        /* In-editor formatting (mirrors viewer conventions) */
+        .wc-rich-text-editor h1 { font-size: 1.5rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+        .wc-rich-text-editor h2 { font-size: 1.25rem; font-weight: 600; margin: 0.75rem 0 0.5rem; }
+        .wc-rich-text-editor h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; }
+        .wc-rich-text-editor p { margin: 0.375rem 0; }
+        .wc-rich-text-editor ul, .wc-rich-text-editor ol { margin: 0.375rem 0; padding-left: 1.5rem; }
+        .wc-rich-text-editor blockquote {
+          margin: 0.5rem 0;
+          padding: 0.25rem 0.75rem;
+          border-left: 3px solid var(--primary-bg-color);
+          background: var(--surface-2);
+        }
+        .wc-rich-text-editor code {
+          padding: 0.0625rem 0.25rem;
+          background: var(--surface-2);
+          border-radius: 0.25rem;
+          font-family: 'SF Mono', 'Fira Code', monospace;
+          font-size: 0.85em;
+        }
+        .wc-rich-text-editor a { color: var(--primary-bg-color); }
+        .wc-rich-text-editor table { border-collapse: collapse; margin: 0.5rem 0; }
+        .wc-rich-text-editor th, .wc-rich-text-editor td {
+          border: 1px solid var(--surface-5); padding: 0.25rem 0.5rem;
+        }
+      }
+    `.trim();
+    this.loadStyle("wc-rich-text-style", style);
+  }
+};
+customElements.define(WcRichText.is, WcRichText);
+
+// src/js/components/wc-file-upload.js
+var IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?|#|$)/i;
+var WcFileUpload = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-file-upload";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "lbl-label",
+      "accept",
+      "max-size",
+      "upload-url",
+      "category",
+      "record-id",
+      "multiple",
+      "required",
+      "disabled"
+    ];
+  }
+  constructor() {
+    super();
+    this._files = [];
+    this._value = "";
+    this._activeUploads = 0;
+    this._onDropzoneClick = this._handleDropzoneClick.bind(this);
+    this._onInputChange = this._handleInputChange.bind(this);
+    this._onDragOver = (e) => {
+      e.preventDefault();
+      this.dropzoneEl?.classList.add("drag-over");
+    };
+    this._onDragLeave = () => this.dropzoneEl?.classList.remove("drag-over");
+    this._onDrop = this._handleDrop.bind(this);
+    this._onPreviewClick = this._handlePreviewClick.bind(this);
+    const compEl = this.querySelector(":scope > .wc-file-upload");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-file-upload");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._seedValue();
+    this._updateValidity();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._seedFromValue(v);
+    this._syncValue(false);
+    this._renderPreviews();
+  }
+  get multiple() {
+    return this.hasAttribute("multiple");
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    const built = this.componentElement.querySelector(":scope > .wc-file-upload-dropzone");
+    if (!built) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      this.componentElement.appendChild(lbl);
+    }
+    const dz = document.createElement("div");
+    dz.classList.add("wc-file-upload-dropzone");
+    dz.setAttribute("role", "button");
+    dz.tabIndex = 0;
+    const accept = this.getAttribute("accept") || "";
+    const maxSize = this.getAttribute("max-size") || "";
+    dz.innerHTML = `
+      <wc-fa-icon name="cloud-arrow-up" size="1.25rem"></wc-fa-icon>
+      <div class="wc-file-upload-prompt">Drop a file or <span class="wc-file-upload-browse">browse</span></div>
+      <div class="wc-file-upload-hint">${accept ? accept : "Any file"}${maxSize ? ` \xB7 up to ${maxSize}MB` : ""}</div>
+    `.trim();
+    const input2 = document.createElement("input");
+    input2.type = "file";
+    input2.classList.add("wc-file-upload-input");
+    if (accept) input2.accept = accept;
+    if (this.multiple) input2.multiple = true;
+    dz.appendChild(input2);
+    this.componentElement.appendChild(dz);
+    this.dropzoneEl = dz;
+    this.inputEl = input2;
+    const progress = document.createElement("wc-progress");
+    progress.classList.add("wc-file-upload-progress");
+    progress.setAttribute("percent", "0");
+    progress.setAttribute("size", "sm");
+    progress.hidden = true;
+    this.componentElement.appendChild(progress);
+    this.progressEl = progress;
+    const msg = document.createElement("div");
+    msg.classList.add("wc-file-upload-message");
+    msg.hidden = true;
+    this.componentElement.appendChild(msg);
+    this.messageEl = msg;
+    const previews = document.createElement("div");
+    previews.classList.add("wc-file-upload-previews");
+    this.componentElement.appendChild(previews);
+    this.previewsEl = previews;
+    if (this.hasAttribute("disabled")) dz.classList.add("is-disabled");
+  }
+  // ---- Value seeding --------------------------------------------------------
+  _seedValue() {
+    const raw = this.getAttribute("value");
+    if (raw) this._seedFromValue(raw);
+    this._syncValue(false);
+    this._renderPreviews();
+  }
+  _seedFromValue(raw) {
+    this._files = [];
+    if (raw == null || raw === "") return;
+    let urls = [];
+    if (this.multiple) {
+      try {
+        const parsed = JSON.parse(raw);
+        urls = Array.isArray(parsed) ? parsed : typeof parsed === "string" ? [parsed] : [];
+      } catch (ex) {
+        urls = String(raw).split(",").map((s) => s.trim()).filter(Boolean);
+      }
+    } else {
+      urls = [String(raw)];
+    }
+    urls.filter(Boolean).forEach((url) => this._files.push(this._fileFromUrl(String(url))));
+  }
+  _fileFromUrl(url) {
+    let name = url;
+    try {
+      name = decodeURIComponent(url.split("/").pop().split("?")[0]) || url;
+    } catch (ex) {
+    }
+    const isImage = IMAGE_EXT.test(url) || /^data:image\//i.test(url);
+    return { url, name, type: isImage ? "image/*" : "", size: null };
+  }
+  // ---- Upload ---------------------------------------------------------------
+  _handleDropzoneClick(e) {
+    if (this.hasAttribute("disabled")) return;
+    if (e.target.closest(".wc-file-upload-input")) return;
+    this.inputEl.click();
+  }
+  _handleInputChange() {
+    if (this.inputEl.files && this.inputEl.files.length) {
+      this._handleFiles(this.inputEl.files);
+      this.inputEl.value = "";
+    }
+  }
+  _handleDrop(e) {
+    e.preventDefault();
+    this.dropzoneEl?.classList.remove("drag-over");
+    if (this.hasAttribute("disabled")) return;
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length) this._handleFiles(files);
+  }
+  _handleFiles(fileList) {
+    this._clearMessage();
+    const files = Array.from(fileList);
+    const toUpload = this.multiple ? files : files.slice(0, 1);
+    if (!this.multiple) this._files = [];
+    for (const file of toUpload) {
+      const err = this._validate(file);
+      if (err) {
+        this._showMessage(err);
+        continue;
+      }
+      this._uploadFile(file);
+    }
+  }
+  _validate(file) {
+    const accept = this.getAttribute("accept");
+    if (accept && !this._matchesAccept(file, accept)) {
+      return `"${file.name}" is not an accepted type (${accept}).`;
+    }
+    const maxSize = parseFloat(this.getAttribute("max-size"));
+    if (!isNaN(maxSize) && maxSize > 0 && file.size > maxSize * 1024 * 1024) {
+      return `"${file.name}" exceeds the ${maxSize}MB limit.`;
+    }
+    return null;
+  }
+  _matchesAccept(file, accept) {
+    const patterns = accept.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+    const type = (file.type || "").toLowerCase();
+    const name = (file.name || "").toLowerCase();
+    return patterns.some((p) => {
+      if (p.endsWith("/*")) return type.startsWith(p.slice(0, -1));
+      if (p.startsWith(".")) return name.endsWith(p);
+      return type === p;
+    });
+  }
+  _uploadFile(file) {
+    const url = this.getAttribute("upload-url") || "/upload";
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("category", this.getAttribute("category") || "attachments");
+    fd.append("record_id", this.getAttribute("record-id") || "general");
+    const xhr = new XMLHttpRequest();
+    this._activeUploads++;
+    this._showProgress(0);
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) this._showProgress(e.loaded / e.total * 100);
+    });
+    xhr.addEventListener("load", () => {
+      this._activeUploads = Math.max(0, this._activeUploads - 1);
+      let data = {};
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch (ex) {
+      }
+      if (xhr.status >= 200 && xhr.status < 300 && data && data.url) {
+        this._files.push({
+          url: data.url,
+          name: data.originalName || data.filename || this._fileFromUrl(data.url).name,
+          type: data.contentType || file.type || "",
+          size: data.size != null ? data.size : file.size
+        });
+        this._syncValue(true);
+        this._renderPreviews();
+      } else {
+        this._showMessage(data && data.error ? data.error : `Upload failed (${xhr.status}).`);
+      }
+      if (this._activeUploads === 0) this._hideProgress();
+    });
+    xhr.addEventListener("error", () => {
+      this._activeUploads = Math.max(0, this._activeUploads - 1);
+      this._showMessage("Upload failed \u2014 network error.");
+      if (this._activeUploads === 0) this._hideProgress();
+    });
+    xhr.open("POST", url);
+    xhr.send(fd);
+  }
+  // ---- Value sync -----------------------------------------------------------
+  _syncValue(emit) {
+    if (this.multiple) {
+      this._value = this._files.length ? JSON.stringify(this._files.map((f) => f.url)) : "";
+    } else {
+      this._value = this._files.length ? this._files[0].url : "";
+    }
+    this._internals.setFormValue(this._value);
+    this._updateValidity();
+    if (emit) {
+      this._emitEvent("wcfileuploadchange", "wc-file-upload:change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this._value }
+      });
+    }
+  }
+  _updateValidity() {
+    if (this.hasAttribute("required") && !this._files.length) {
+      this._internals.setValidity({ valueMissing: true }, "Please add a file.", this.dropzoneEl || this);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  // ---- Preview --------------------------------------------------------------
+  _renderPreviews() {
+    if (!this.previewsEl) return;
+    this.previewsEl.innerHTML = "";
+    this._files.forEach((f, idx) => {
+      const item = document.createElement("div");
+      item.classList.add("wc-file-upload-item");
+      item.dataset.index = idx;
+      const isImage = f.type && f.type.startsWith("image/") || IMAGE_EXT.test(f.url);
+      if (isImage) {
+        const img = document.createElement("img");
+        img.classList.add("wc-file-upload-thumb");
+        img.src = f.url;
+        img.alt = f.name;
+        img.loading = "lazy";
+        item.appendChild(img);
+      } else {
+        const icon = document.createElement("wc-fa-icon");
+        icon.setAttribute("name", "file");
+        icon.setAttribute("size", "1rem");
+        icon.classList.add("wc-file-upload-fileicon");
+        item.appendChild(icon);
+      }
+      const meta = document.createElement("div");
+      meta.classList.add("wc-file-upload-itemmeta");
+      const link = document.createElement("a");
+      link.classList.add("wc-file-upload-itemname");
+      link.href = f.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = f.name;
+      meta.appendChild(link);
+      if (f.size != null) {
+        const size = document.createElement("span");
+        size.classList.add("wc-file-upload-itemsize", "badge", "badge-muted");
+        size.textContent = this._formatSize(f.size);
+        meta.appendChild(size);
+      }
+      item.appendChild(meta);
+      if (!this.hasAttribute("disabled")) {
+        const rm = document.createElement("button");
+        rm.type = "button";
+        rm.classList.add("wc-file-upload-remove", "btn", "btn-sm");
+        rm.setAttribute("aria-label", "Remove file");
+        rm.innerHTML = "&times;";
+        item.appendChild(rm);
+      }
+      this.previewsEl.appendChild(item);
+    });
+  }
+  _handlePreviewClick(e) {
+    const rm = e.target.closest(".wc-file-upload-remove");
+    if (!rm) return;
+    e.preventDefault();
+    const item = rm.closest(".wc-file-upload-item");
+    const idx = parseInt(item.dataset.index, 10);
+    if (idx >= 0) {
+      this._files.splice(idx, 1);
+      this._syncValue(true);
+      this._renderPreviews();
+    }
+  }
+  _formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+  // ---- Progress / messages --------------------------------------------------
+  _showProgress(pct) {
+    if (!this.progressEl) return;
+    this.progressEl.hidden = false;
+    this.progressEl.setAttribute("percent", String(Math.round(pct)));
+  }
+  _hideProgress() {
+    if (this.progressEl) {
+      this.progressEl.hidden = true;
+      this.progressEl.setAttribute("percent", "0");
+    }
+  }
+  _showMessage(msg) {
+    if (!this.messageEl) return;
+    this.messageEl.textContent = msg;
+    this.messageEl.hidden = false;
+  }
+  _clearMessage() {
+    if (this.messageEl) {
+      this.messageEl.textContent = "";
+      this.messageEl.hidden = true;
+    }
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    this.formElement = null;
+    super._wireEvents();
+    if (!this.dropzoneEl) return;
+    this.dropzoneEl.removeEventListener("click", this._onDropzoneClick);
+    this.dropzoneEl.addEventListener("click", this._onDropzoneClick);
+    this.dropzoneEl.removeEventListener("dragover", this._onDragOver);
+    this.dropzoneEl.addEventListener("dragover", this._onDragOver);
+    this.dropzoneEl.removeEventListener("dragleave", this._onDragLeave);
+    this.dropzoneEl.addEventListener("dragleave", this._onDragLeave);
+    this.dropzoneEl.removeEventListener("drop", this._onDrop);
+    this.dropzoneEl.addEventListener("drop", this._onDrop);
+    this.inputEl.removeEventListener("change", this._onInputChange);
+    this.inputEl.addEventListener("change", this._onInputChange);
+    this.previewsEl.removeEventListener("click", this._onPreviewClick);
+    this.previewsEl.addEventListener("click", this._onPreviewClick);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.dropzoneEl) {
+      this.dropzoneEl.removeEventListener("click", this._onDropzoneClick);
+      this.dropzoneEl.removeEventListener("dragover", this._onDragOver);
+      this.dropzoneEl.removeEventListener("dragleave", this._onDragLeave);
+      this.dropzoneEl.removeEventListener("drop", this._onDrop);
+    }
+    if (this.inputEl) this.inputEl.removeEventListener("change", this._onInputChange);
+    if (this.previewsEl) this.previewsEl.removeEventListener("click", this._onPreviewClick);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "value") {
+      this._seedFromValue(newValue);
+      this._syncValue(false);
+      this._renderPreviews();
+      return;
+    }
+    if (attrName === "required") {
+      this._updateValidity();
+      return;
+    }
+    if (["accept", "max-size", "multiple", "lbl-label", "disabled"].includes(attrName)) {
+      const files = this._files.slice();
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+      this._wireEvents();
+      this._files = files;
+      this._renderPreviews();
+      return;
+    }
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    if (["name", "id"].includes(attrName)) {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _applyStyle() {
+    const style = `
+      wc-file-upload { display: contents; }
+
+      @layer wc.usage {
+        .wc-file-upload { display: flex; flex-direction: column; gap: 0.375rem; width: 100%; }
+        .wc-file-upload > label { font-weight: 500; }
+        .wc-file-upload-dropzone {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          padding: 1.25rem 1rem;
+          text-align: center;
+          color: var(--text-2, var(--component-alt-color));
+          background-color: var(--surface-3);
+          border: 2px dashed var(--surface-4);
+          border-radius: 0.5rem;
+          cursor: pointer;
+          transition: border-color 0.15s, background-color 0.15s;
+        }
+        .wc-file-upload-dropzone:hover,
+        .wc-file-upload-dropzone:focus-visible {
+          border-color: var(--primary-bg-color);
+          outline: none;
+        }
+        .wc-file-upload-dropzone.drag-over {
+          border-color: var(--primary-bg-color);
+          background-color: color-mix(in oklab, var(--primary-bg-color) 12%, var(--surface-3));
+        }
+        .wc-file-upload-dropzone.is-disabled { opacity: 0.6; cursor: not-allowed; }
+        .wc-file-upload-input { display: none; }
+        .wc-file-upload-browse { color: var(--primary-bg-color); text-decoration: underline; }
+        .wc-file-upload-hint { font-size: 0.72rem; opacity: 0.8; }
+        .wc-file-upload-progress { width: 100%; }
+        .wc-file-upload-message {
+          font-size: 0.8rem;
+          color: var(--danger-color, #ef4444);
+        }
+        .wc-file-upload-previews { display: flex; flex-direction: column; gap: 0.375rem; }
+        .wc-file-upload-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.375rem 0.5rem;
+          background-color: var(--surface-2);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.375rem;
+        }
+        .wc-file-upload-thumb {
+          width: 40px; height: 40px;
+          object-fit: cover;
+          border-radius: 0.25rem;
+          flex: 0 0 auto;
+        }
+        .wc-file-upload-fileicon {
+          width: 40px; height: 40px;
+          display: flex; align-items: center; justify-content: center;
+          background-color: var(--surface-3);
+          border-radius: 0.25rem;
+          flex: 0 0 auto;
+        }
+        .wc-file-upload-itemmeta {
+          display: flex; flex-direction: column; gap: 0.125rem;
+          min-width: 0; flex: 1 1 auto;
+        }
+        .wc-file-upload-itemname {
+          color: var(--text-1);
+          font-size: 0.85rem;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .wc-file-upload-itemsize { align-self: flex-start; }
+        .wc-file-upload-remove {
+          flex: 0 0 auto;
+          line-height: 1;
+          padding: 0.125rem 0.5rem;
+          font-size: 1rem;
+        }
+        wc-file-upload[required] .wc-file-upload > label::after { content: ' *'; font-weight: bold; }
+      }
+    `.trim();
+    this.loadStyle("wc-file-upload-style", style);
+  }
+};
+customElements.define(WcFileUpload.is, WcFileUpload);
+
+// src/js/components/wc-color.js
+var WcColor = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-color";
+  }
+  static get observedAttributes() {
+    return ["name", "id", "class", "value", "lbl-label", "format", "swatches", "allow-custom", "required", "disabled"];
+  }
+  constructor() {
+    super();
+    this._hex = "";
+    this._value = "";
+    this._onSwatchClick = this._handleSwatchClick.bind(this);
+    this._onNativeInput = this._handleNativeInput.bind(this);
+    this._onPresetClick = this._handlePresetClick.bind(this);
+    const compEl = this.querySelector(":scope > .wc-color");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-color");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._seedValue();
+    this._updateValidity();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._setFromString(v);
+    this._reflect(false);
+  }
+  get format() {
+    const f = (this.getAttribute("format") || "hex").toLowerCase();
+    return ["hex", "rgb", "hsl"].includes(f) ? f : "hex";
+  }
+  get allowCustom() {
+    return this.getAttribute("allow-custom") !== "false";
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    const built = this.componentElement.querySelector(":scope > .wc-color-control");
+    if (!built) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      this.componentElement.appendChild(lbl);
+    }
+    const control = document.createElement("div");
+    control.classList.add("wc-color-control");
+    const swatch = document.createElement("button");
+    swatch.type = "button";
+    swatch.classList.add("wc-color-swatch");
+    swatch.setAttribute("aria-label", "Choose color");
+    if (!this.allowCustom) swatch.classList.add("is-locked");
+    control.appendChild(swatch);
+    this.swatchEl = swatch;
+    const valueText = document.createElement("span");
+    valueText.classList.add("wc-color-value");
+    control.appendChild(valueText);
+    this.valueEl = valueText;
+    const native = document.createElement("input");
+    native.type = "color";
+    native.classList.add("wc-color-native");
+    native.tabIndex = -1;
+    native.setAttribute("aria-hidden", "true");
+    if (this.hasAttribute("disabled")) native.disabled = true;
+    control.appendChild(native);
+    this.nativeEl = native;
+    this.componentElement.appendChild(control);
+    const swatches = this._parseJSON("swatches", []);
+    if (swatches.length) {
+      const presets = document.createElement("div");
+      presets.classList.add("wc-color-presets");
+      swatches.forEach((c) => {
+        const hex = this._toHex(String(c));
+        if (!hex) return;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.classList.add("wc-color-preset");
+        b.dataset.hex = hex;
+        b.style.backgroundColor = hex;
+        b.title = String(c);
+        b.setAttribute("aria-label", String(c));
+        presets.appendChild(b);
+      });
+      this.componentElement.appendChild(presets);
+      this.presetsEl = presets;
+    }
+  }
+  // ---- Value seeding / reflection ------------------------------------------
+  _seedValue() {
+    this._setFromString(this.getAttribute("value"));
+    this._reflect(false);
+  }
+  _setFromString(str) {
+    const hex = this._toHex(str);
+    this._hex = hex || "";
+    this._value = hex ? this._toFormat(hex) : "";
+  }
+  // Push current state into the DOM + form value.
+  _reflect(emit) {
+    if (this.swatchEl) {
+      if (this._hex) {
+        this.swatchEl.style.backgroundColor = this._hex;
+        this.swatchEl.classList.remove("is-empty");
+      } else {
+        this.swatchEl.style.backgroundColor = "";
+        this.swatchEl.classList.add("is-empty");
+      }
+    }
+    if (this.valueEl) this.valueEl.textContent = this._value || "No color";
+    if (this.nativeEl && this._hex) this.nativeEl.value = this._hex;
+    if (this.presetsEl) {
+      this.presetsEl.querySelectorAll(".wc-color-preset").forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.hex.toLowerCase() === this._hex.toLowerCase());
+      });
+    }
+    this._internals.setFormValue(this._value);
+    this._updateValidity();
+    if (emit) {
+      this._emitEvent("wccolorchange", "wc-color:change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this._value }
+      });
+    }
+  }
+  _setHex(hex, emit) {
+    const norm = this._toHex(hex);
+    if (!norm) return;
+    this._hex = norm;
+    this._value = this._toFormat(norm);
+    this._reflect(emit);
+  }
+  _updateValidity() {
+    if (this.hasAttribute("required") && !this._value) {
+      this._internals.setValidity({ valueMissing: true }, "Please choose a color.", this.swatchEl || this);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  // ---- Interaction ----------------------------------------------------------
+  _handleSwatchClick(e) {
+    if (this.hasAttribute("disabled") || !this.allowCustom) return;
+    this.nativeEl.click();
+  }
+  _handleNativeInput() {
+    this._setHex(this.nativeEl.value, true);
+  }
+  _handlePresetClick(e) {
+    const b = e.target.closest(".wc-color-preset");
+    if (!b || this.hasAttribute("disabled")) return;
+    this._setHex(b.dataset.hex, true);
+  }
+  // ---- Color conversion -----------------------------------------------------
+  _toHex(str) {
+    if (str == null) return null;
+    let s = String(str).trim().toLowerCase();
+    if (!s) return null;
+    let m;
+    if (m = s.match(/^#([0-9a-f]{3})$/)) {
+      const c = m[1];
+      return `#${c[0]}${c[0]}${c[1]}${c[1]}${c[2]}${c[2]}`;
+    }
+    if (m = s.match(/^#([0-9a-f]{6})$/)) return s;
+    if (m = s.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/)) {
+      return this._rgbToHex(+m[1], +m[2], +m[3]);
+    }
+    if (m = s.match(/^hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%/)) {
+      const { r, g, b } = this._hslToRgb(+m[1], +m[2], +m[3]);
+      return this._rgbToHex(r, g, b);
+    }
+    return null;
+  }
+  _toFormat(hex) {
+    const fmt = this.format;
+    if (fmt === "hex") return hex;
+    const { r, g, b } = this._hexToRgb(hex);
+    if (fmt === "rgb") return `rgb(${r}, ${g}, ${b})`;
+    const { h, s, l } = this._rgbToHsl(r, g, b);
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  }
+  _hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return { r: n >> 16 & 255, g: n >> 8 & 255, b: n & 255 };
+  }
+  _rgbToHex(r, g, b) {
+    const c = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+    return `#${c(r)}${c(g)}${c(b)}`;
+  }
+  _rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    const d = max - min;
+    if (d !== 0) {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+  _hslToRgb(h, s, l) {
+    h /= 360;
+    s /= 100;
+    l /= 100;
+    if (s === 0) {
+      const v = Math.round(l * 255);
+      return { r: v, g: v, b: v };
+    }
+    const hue2rgb = (p2, q2, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p2 + (q2 - p2) * 6 * t;
+      if (t < 1 / 2) return q2;
+      if (t < 2 / 3) return p2 + (q2 - p2) * (2 / 3 - t) * 6;
+      return p2;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    return {
+      r: Math.round(hue2rgb(p, q, h + 1 / 3) * 255),
+      g: Math.round(hue2rgb(p, q, h) * 255),
+      b: Math.round(hue2rgb(p, q, h - 1 / 3) * 255)
+    };
+  }
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : fallback;
+    } catch (ex) {
+      console.warn(`[wc-color] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    this.formElement = null;
+    super._wireEvents();
+    if (this.swatchEl) {
+      this.swatchEl.removeEventListener("click", this._onSwatchClick);
+      this.swatchEl.addEventListener("click", this._onSwatchClick);
+    }
+    if (this.nativeEl) {
+      this.nativeEl.removeEventListener("input", this._onNativeInput);
+      this.nativeEl.addEventListener("input", this._onNativeInput);
+      this.nativeEl.removeEventListener("change", this._onNativeInput);
+      this.nativeEl.addEventListener("change", this._onNativeInput);
+    }
+    if (this.presetsEl) {
+      this.presetsEl.removeEventListener("click", this._onPresetClick);
+      this.presetsEl.addEventListener("click", this._onPresetClick);
+    }
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.swatchEl) this.swatchEl.removeEventListener("click", this._onSwatchClick);
+    if (this.nativeEl) {
+      this.nativeEl.removeEventListener("input", this._onNativeInput);
+      this.nativeEl.removeEventListener("change", this._onNativeInput);
+    }
+    if (this.presetsEl) this.presetsEl.removeEventListener("click", this._onPresetClick);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "value") {
+      this._setFromString(newValue);
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "required") {
+      this._updateValidity();
+      return;
+    }
+    if (["format", "swatches", "allow-custom", "lbl-label", "disabled"].includes(attrName)) {
+      const hex = this._hex;
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+      this._wireEvents();
+      this._hex = hex;
+      this._value = hex ? this._toFormat(hex) : "";
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _applyStyle() {
+    const style = `
+      wc-color { display: contents; }
+
+      @layer wc.usage {
+        .wc-color { display: flex; flex-direction: column; gap: 0.375rem; }
+        .wc-color > label { font-weight: 500; }
+        .wc-color-control { display: flex; align-items: center; gap: 0.5rem; }
+        .wc-color-swatch {
+          width: 2rem; height: 2rem;
+          flex: 0 0 auto;
+          padding: 0;
+          border: 1px solid var(--surface-4);
+          border-radius: 0.375rem;
+          cursor: pointer;
+          /* checkerboard shows through when empty */
+          background-image:
+            linear-gradient(45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--surface-4) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--surface-4) 75%);
+          background-size: 10px 10px;
+          background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+        }
+        .wc-color-swatch:not(.is-empty) { background-image: none; }
+        .wc-color-swatch:focus-visible { outline: var(--primary-bg-color) solid 2px; outline-offset: 1px; }
+        .wc-color-swatch.is-locked { cursor: default; }
+        .wc-color-value {
+          font-family: 'SF Mono', 'Fira Code', monospace;
+          font-size: 0.85rem;
+          color: var(--text-1);
+        }
+        .wc-color-native {
+          position: absolute;
+          width: 1px; height: 1px;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .wc-color-presets { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+        .wc-color-preset {
+          width: 1.5rem; height: 1.5rem;
+          padding: 0;
+          border: 1px solid var(--surface-4);
+          border-radius: 0.25rem;
+          cursor: pointer;
+        }
+        .wc-color-preset:hover { transform: scale(1.1); }
+        .wc-color-preset.is-active {
+          outline: 2px solid var(--text-1);
+          outline-offset: 1px;
+        }
+        wc-color[required] .wc-color > label::after { content: ' *'; font-weight: bold; }
+      }
+    `.trim();
+    this.loadStyle("wc-color-style", style);
+  }
+};
+customElements.define(WcColor.is, WcColor);
+
+// src/js/components/wc-rating.js
+var WcRating = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-rating";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "lbl-label",
+      "max",
+      "allow-half",
+      "icon-empty",
+      "icon-half",
+      "icon-full",
+      "icon-empty-style",
+      "icon-half-style",
+      "icon-full-style",
+      "color",
+      "size",
+      "readonly",
+      "required",
+      "disabled",
+      "show-value",
+      "count"
+    ];
+  }
+  constructor() {
+    super();
+    this._value = 0;
+    this._onClick = this._handleClick.bind(this);
+    this._onMove = this._handleMove.bind(this);
+    this._onLeave = this._handleLeave.bind(this);
+    this._onKeydown = this._handleKeydown.bind(this);
+    const compEl = this.querySelector(":scope > .wc-rating");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-rating");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._seedValue();
+    this._updateValidity();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._value = this._clamp(parseFloat(v));
+    this._renderStars(this._value);
+    this._reflect(false);
+  }
+  get max() {
+    return Math.max(1, parseInt(this.getAttribute("max"), 10) || 5);
+  }
+  get allowHalf() {
+    return this.hasAttribute("allow-half");
+  }
+  get step() {
+    return this.allowHalf ? 0.5 : 1;
+  }
+  get interactive() {
+    return !this.hasAttribute("readonly") && !this.hasAttribute("disabled");
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    const built = this.componentElement.querySelector(":scope > .wc-rating-stars");
+    if (!built) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      this.componentElement.appendChild(lbl);
+    }
+    const row = document.createElement("div");
+    row.classList.add("wc-rating-row");
+    const stars = document.createElement("div");
+    stars.classList.add("wc-rating-stars");
+    stars.setAttribute("role", "slider");
+    stars.setAttribute("aria-valuemin", "0");
+    stars.setAttribute("aria-valuemax", String(this.max));
+    if (this.interactive) stars.tabIndex = 0;
+    if (this.hasAttribute("readonly")) stars.setAttribute("aria-readonly", "true");
+    const color = this.getAttribute("color");
+    if (color) this.componentElement.style.setProperty("--wc-rating-color", color);
+    const size = this.getAttribute("size") || "1.25rem";
+    for (let i = 1; i <= this.max; i++) {
+      const star = document.createElement("span");
+      star.classList.add("wc-rating-star");
+      star.dataset.pos = String(i);
+      const icon = document.createElement("wc-fa-icon");
+      icon.setAttribute("size", size);
+      star.appendChild(icon);
+      stars.appendChild(star);
+    }
+    row.appendChild(stars);
+    this.starsEl = stars;
+    const suffix = document.createElement("span");
+    suffix.classList.add("wc-rating-suffix");
+    row.appendChild(suffix);
+    this.suffixEl = suffix;
+    this.componentElement.appendChild(row);
+  }
+  // ---- State / rendering ----------------------------------------------------
+  _seedValue() {
+    this._value = this._clamp(parseFloat(this.getAttribute("value")));
+    this._renderStars(this._value);
+    this._reflect(false);
+  }
+  _clamp(v) {
+    if (isNaN(v)) return 0;
+    v = Math.max(0, Math.min(this.max, v));
+    const step = this.step;
+    return Math.round(v / step) * step;
+  }
+  // Paint each position for a given display value using the three distinct glyphs.
+  _renderStars(displayValue) {
+    if (!this.starsEl) return;
+    const full = Math.floor(displayValue);
+    const hasHalf = this.allowHalf && displayValue - full >= 0.5;
+    const emptyName = this.getAttribute("icon-empty") || "star";
+    const halfName = this.getAttribute("icon-half") || "star-half-stroke";
+    const fullName = this.getAttribute("icon-full") || "star";
+    const emptyStyle = this.getAttribute("icon-empty-style") || "regular";
+    const halfStyle = this.getAttribute("icon-half-style") || "regular";
+    const fullStyle = this.getAttribute("icon-full-style") || "solid";
+    const stars = this.starsEl.querySelectorAll(".wc-rating-star");
+    stars.forEach((star, idx) => {
+      const pos = idx + 1;
+      const icon = star.querySelector("wc-fa-icon");
+      let state, name, iconStyle;
+      if (pos <= full) {
+        state = "full";
+        name = fullName;
+        iconStyle = fullStyle;
+      } else if (hasHalf && pos === full + 1) {
+        state = "half";
+        name = halfName;
+        iconStyle = halfStyle;
+      } else {
+        state = "empty";
+        name = emptyName;
+        iconStyle = emptyStyle;
+      }
+      star.classList.toggle("is-full", state === "full");
+      star.classList.toggle("is-half", state === "half");
+      star.classList.toggle("is-empty", state === "empty");
+      if (icon.getAttribute("name") !== name) icon.setAttribute("name", name);
+      if (icon.getAttribute("icon-style") !== iconStyle) icon.setAttribute("icon-style", iconStyle);
+    });
+  }
+  _reflect(emit) {
+    if (this.starsEl) this.starsEl.setAttribute("aria-valuenow", String(this._value));
+    if (this.suffixEl) {
+      let txt = "";
+      if (this.hasAttribute("show-value")) txt += String(this._value);
+      if (this.hasAttribute("count")) txt += `${txt ? " " : ""}(${this.getAttribute("count")})`;
+      this.suffixEl.textContent = txt;
+      this.suffixEl.hidden = !txt;
+    }
+    this._internals.setFormValue(String(this._value));
+    this._updateValidity();
+    if (emit) {
+      this._emitEvent("wcratingchange", "wc-rating:change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this._value }
+      });
+    }
+  }
+  _setValue(v, emit) {
+    const nv = this._clamp(v);
+    this._value = nv;
+    this._renderStars(nv);
+    this._reflect(emit);
+  }
+  _updateValidity() {
+    if (this.hasAttribute("required") && !(this._value > 0)) {
+      this._internals.setValidity({ valueMissing: true }, "Please choose a rating.", this.starsEl || this);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  // ---- Interaction ----------------------------------------------------------
+  _valueFromPointer(e) {
+    const star = e.target.closest(".wc-rating-star");
+    if (!star || !this.starsEl.contains(star)) return null;
+    const pos = parseInt(star.dataset.pos, 10);
+    if (this.allowHalf) {
+      const r = star.getBoundingClientRect();
+      return e.clientX - r.left < r.width / 2 ? pos - 0.5 : pos;
+    }
+    return pos;
+  }
+  _handleMove(e) {
+    if (!this.interactive) return;
+    const v = this._valueFromPointer(e);
+    if (v != null) this._renderStars(v);
+  }
+  _handleLeave() {
+    if (!this.interactive) return;
+    this._renderStars(this._value);
+  }
+  _handleClick(e) {
+    if (!this.interactive) return;
+    const v = this._valueFromPointer(e);
+    if (v != null) this._setValue(v, true);
+  }
+  _handleKeydown(e) {
+    if (!this.interactive) return;
+    let handled = true;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") this._setValue(this._value + this.step, true);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") this._setValue(this._value - this.step, true);
+    else if (e.key === "Home") this._setValue(0, true);
+    else if (e.key === "End") this._setValue(this.max, true);
+    else handled = false;
+    if (handled) e.preventDefault();
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    this.formElement = null;
+    super._wireEvents();
+    if (!this.starsEl) return;
+    this.starsEl.removeEventListener("click", this._onClick);
+    this.starsEl.addEventListener("click", this._onClick);
+    this.starsEl.removeEventListener("mousemove", this._onMove);
+    this.starsEl.addEventListener("mousemove", this._onMove);
+    this.starsEl.removeEventListener("mouseleave", this._onLeave);
+    this.starsEl.addEventListener("mouseleave", this._onLeave);
+    this.starsEl.removeEventListener("keydown", this._onKeydown);
+    this.starsEl.addEventListener("keydown", this._onKeydown);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.starsEl) {
+      this.starsEl.removeEventListener("click", this._onClick);
+      this.starsEl.removeEventListener("mousemove", this._onMove);
+      this.starsEl.removeEventListener("mouseleave", this._onLeave);
+      this.starsEl.removeEventListener("keydown", this._onKeydown);
+    }
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "value") {
+      this._value = this._clamp(parseFloat(newValue));
+      this._renderStars(this._value);
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "required") {
+      this._updateValidity();
+      return;
+    }
+    if ([
+      "max",
+      "allow-half",
+      "icon-empty",
+      "icon-half",
+      "icon-full",
+      "icon-empty-style",
+      "icon-half-style",
+      "icon-full-style",
+      "color",
+      "size",
+      "readonly",
+      "disabled",
+      "lbl-label",
+      "show-value",
+      "count"
+    ].includes(attrName)) {
+      const v = this._value;
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+      this._wireEvents();
+      this._value = this._clamp(v);
+      this._renderStars(this._value);
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _applyStyle() {
+    const style = `
+      wc-rating { display: contents; }
+
+      @layer wc.usage {
+        .wc-rating { display: flex; flex-direction: column; gap: 0.25rem; --wc-rating-color: var(--warning-color, #f59e0b); }
+        .wc-rating > label { font-weight: 500; }
+        .wc-rating-row { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .wc-rating-stars {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.125rem;
+          line-height: 1;
+        }
+        .wc-rating-stars:focus-visible {
+          outline: var(--primary-bg-color) solid 2px;
+          outline-offset: 2px;
+          border-radius: 0.25rem;
+        }
+        .wc-rating-star {
+          display: inline-flex;
+          color: var(--wc-rating-color);
+        }
+        .wc-rating-star.is-empty {
+          color: var(--text-3, var(--component-alt-color));
+          opacity: 0.55;
+        }
+        wc-rating:not([readonly]):not([disabled]) .wc-rating-star { cursor: pointer; }
+        wc-rating[disabled] .wc-rating-stars { opacity: 0.6; cursor: not-allowed; }
+        .wc-rating-suffix {
+          font-size: 0.85rem;
+          color: var(--text-2, var(--component-alt-color));
+        }
+        wc-rating[required] .wc-rating > label::after { content: ' *'; font-weight: bold; }
+      }
+    `.trim();
+    this.loadStyle("wc-rating-style", style);
+  }
+};
+customElements.define(WcRating.is, WcRating);
+
+// src/js/components/wc-slider.js
+var WcSlider = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-slider";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "lbl-label",
+      "min",
+      "max",
+      "step",
+      "show-value",
+      "unit",
+      "marks",
+      "range",
+      "required",
+      "disabled"
+    ];
+  }
+  constructor() {
+    super();
+    this._value = "";
+    this._lo = null;
+    this._hi = null;
+    this._touched = false;
+    this._onInput = this._handleInput.bind(this);
+    this._onChange = this._handleChange.bind(this);
+    const compEl = this.querySelector(":scope > .wc-slider");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-slider");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._seedValue();
+    this._updateValidity();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._seedFromValue(v, true);
+    this._reflect(false);
+  }
+  get range() {
+    return this.hasAttribute("range");
+  }
+  get min() {
+    const n = parseFloat(this.getAttribute("min"));
+    return isNaN(n) ? 0 : n;
+  }
+  get max() {
+    const n = parseFloat(this.getAttribute("max"));
+    return isNaN(n) ? 100 : n;
+  }
+  get step() {
+    const n = parseFloat(this.getAttribute("step"));
+    return isNaN(n) || n <= 0 ? 1 : n;
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    const built = this.componentElement.querySelector(":scope > .wc-slider-control");
+    if (!built) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      this.componentElement.appendChild(lbl);
+    }
+    const control = document.createElement("div");
+    control.classList.add("wc-slider-control");
+    const track = document.createElement("div");
+    track.classList.add("wc-slider-track-wrap");
+    if (this.range) track.classList.add("is-range");
+    const mkInput = (cls) => {
+      const i = document.createElement("input");
+      i.type = "range";
+      i.classList.add("wc-slider-input", cls);
+      i.min = this.min;
+      i.max = this.max;
+      i.step = this.step;
+      if (this.hasAttribute("disabled")) i.disabled = true;
+      return i;
+    };
+    if (this.range) {
+      const rail = document.createElement("div");
+      rail.classList.add("wc-slider-rail");
+      const fill = document.createElement("div");
+      fill.classList.add("wc-slider-fill");
+      track.appendChild(rail);
+      track.appendChild(fill);
+      this.fillEl = fill;
+      this.loInput = mkInput("wc-slider-lo");
+      this.hiInput = mkInput("wc-slider-hi");
+      track.appendChild(this.loInput);
+      track.appendChild(this.hiInput);
+    } else {
+      this.input = mkInput("wc-slider-single");
+      track.appendChild(this.input);
+    }
+    control.appendChild(track);
+    this.trackEl = track;
+    if (this.hasAttribute("show-value")) {
+      const readout = document.createElement("span");
+      readout.classList.add("wc-slider-readout");
+      control.appendChild(readout);
+      this.readoutEl = readout;
+    }
+    this.componentElement.appendChild(control);
+    const marks = this._parseJSON("marks", []);
+    if (marks.length) {
+      const wrap = document.createElement("div");
+      wrap.classList.add("wc-slider-marks");
+      const span = this.max - this.min || 1;
+      marks.forEach((m) => {
+        const num = parseFloat(m);
+        if (isNaN(num)) return;
+        const pct = (num - this.min) / span * 100;
+        const tick = document.createElement("span");
+        tick.classList.add("wc-slider-mark");
+        tick.style.left = `${pct}%`;
+        tick.textContent = String(m);
+        wrap.appendChild(tick);
+      });
+      this.componentElement.appendChild(wrap);
+    }
+  }
+  // ---- Value seeding / reflection ------------------------------------------
+  _seedValue() {
+    const raw = this.getAttribute("value");
+    if (raw != null && raw !== "") {
+      this._seedFromValue(raw, false);
+    } else {
+      if (this.range) {
+        this._lo = this.min;
+        this._hi = this.max;
+      } else {
+        this._single = this.min;
+      }
+      this._value = "";
+    }
+    this._reflect(false);
+  }
+  _seedFromValue(raw, touched) {
+    if (this.range) {
+      let lo = this.min, hi = this.max;
+      const parsed = this._parseRange(raw);
+      if (parsed) {
+        lo = parsed[0];
+        hi = parsed[1];
+      }
+      this._lo = this._clamp(lo);
+      this._hi = this._clamp(hi);
+      if (this._lo > this._hi) {
+        const t = this._lo;
+        this._lo = this._hi;
+        this._hi = t;
+      }
+      this._value = `${this._lo},${this._hi}`;
+    } else {
+      const n = this._clamp(parseFloat(raw));
+      this._single = isNaN(n) ? this.min : n;
+      this._value = isNaN(n) ? "" : String(this._single);
+    }
+    if (touched) this._touched = true;
+  }
+  _parseRange(raw) {
+    if (raw == null) return null;
+    if (Array.isArray(raw)) return [parseFloat(raw[0]), parseFloat(raw[1])];
+    if (typeof raw === "object") return [parseFloat(raw.min), parseFloat(raw.max)];
+    const s = String(raw).trim();
+    try {
+      const j = JSON.parse(s);
+      if (Array.isArray(j)) return [parseFloat(j[0]), parseFloat(j[1])];
+      if (j && typeof j === "object") return [parseFloat(j.min), parseFloat(j.max)];
+    } catch (ex) {
+    }
+    const parts = s.split(",").map((p) => parseFloat(p.trim()));
+    if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return [parts[0], parts[1]];
+    return null;
+  }
+  _clamp(n) {
+    if (isNaN(n)) return n;
+    n = Math.max(this.min, Math.min(this.max, n));
+    const steps = Math.round((n - this.min) / this.step);
+    return Math.round((this.min + steps * this.step) * 1e6) / 1e6;
+  }
+  // Push state into inputs + fill + readout + form value.
+  _reflect(emit) {
+    const span = this.max - this.min || 1;
+    if (this.range) {
+      if (this.loInput && this._lo != null) this.loInput.value = this._lo;
+      if (this.hiInput && this._hi != null) this.hiInput.value = this._hi;
+      if (this.fillEl) {
+        const loPct = (this._lo - this.min) / span * 100;
+        const hiPct = (this._hi - this.min) / span * 100;
+        this.fillEl.style.left = `${loPct}%`;
+        this.fillEl.style.right = `${100 - hiPct}%`;
+      }
+    } else if (this.input && this._single != null) {
+      this.input.value = this._single;
+      const pct = (this._single - this.min) / span * 100;
+      this.input.style.setProperty("--wc-slider-pct", `${pct}%`);
+    }
+    if (this.readoutEl) this.readoutEl.textContent = this._readoutText();
+    this._internals.setFormValue(this._value);
+    this._updateValidity();
+    if (emit) {
+      this._emitEvent("wcsliderchange", "wc-slider:change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this._value }
+      });
+    }
+  }
+  _readoutText() {
+    const u = this.getAttribute("unit") || "";
+    if (this.range) return `${this._lo}${u} \u2013 ${this._hi}${u}`;
+    return this._value === "" ? `${this._single}${u}` : `${this._single}${u}`;
+  }
+  _updateValidity() {
+    if (this.hasAttribute("required") && this._value === "") {
+      this._internals.setValidity({ valueMissing: true }, "Please choose a value.", this.trackEl || this);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : fallback;
+    } catch (ex) {
+      console.warn(`[wc-slider] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  // ---- Interaction ----------------------------------------------------------
+  _handleInput(e) {
+    this._touched = true;
+    if (this.range) {
+      let lo = parseFloat(this.loInput.value);
+      let hi = parseFloat(this.hiInput.value);
+      if (e.target === this.loInput && lo > hi) lo = hi;
+      if (e.target === this.hiInput && hi < lo) hi = lo;
+      this._lo = lo;
+      this._hi = hi;
+      this._value = `${lo},${hi}`;
+    } else {
+      this._single = parseFloat(this.input.value);
+      this._value = String(this._single);
+    }
+    this._reflect(false);
+    this._emitEvent("wcsliderinput", "wc-slider:input", {
+      bubbles: true,
+      composed: true,
+      detail: { value: this._value }
+    });
+  }
+  _handleChange() {
+    this._emitEvent("wcsliderchange", "wc-slider:change", {
+      bubbles: true,
+      composed: true,
+      detail: { value: this._value }
+    });
+  }
+  // ---- Wiring ---------------------------------------------------------------
+  _wireEvents() {
+    this.formElement = null;
+    super._wireEvents();
+    const inputs = this.range ? [this.loInput, this.hiInput] : [this.input];
+    inputs.forEach((i) => {
+      if (!i) return;
+      i.removeEventListener("input", this._onInput);
+      i.addEventListener("input", this._onInput);
+      i.removeEventListener("change", this._onChange);
+      i.addEventListener("change", this._onChange);
+    });
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    [this.input, this.loInput, this.hiInput].forEach((i) => {
+      if (!i) return;
+      i.removeEventListener("input", this._onInput);
+      i.removeEventListener("change", this._onChange);
+    });
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "value") {
+      this._seedFromValue(newValue, false);
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "required") {
+      this._updateValidity();
+      return;
+    }
+    if (["min", "max", "step", "show-value", "unit", "marks", "range", "lbl-label", "disabled"].includes(attrName)) {
+      const prev = this._value;
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+      this._wireEvents();
+      if (prev) this._seedFromValue(prev, this._touched);
+      else this._seedValue();
+      this._reflect(false);
+      return;
+    }
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _applyStyle() {
+    const style = `
+      wc-slider { display: contents; }
+
+      @layer wc.usage {
+        .wc-slider { display: flex; flex-direction: column; gap: 0.375rem; --wc-slider-color: var(--primary-bg-color); }
+        .wc-slider > label { font-weight: 500; }
+        .wc-slider-control { display: flex; align-items: center; gap: 0.75rem; }
+        .wc-slider-track-wrap { position: relative; flex: 1 1 auto; height: 1.5rem; display: flex; align-items: center; }
+
+        .wc-slider-single {
+          width: 100%;
+          accent-color: var(--wc-slider-color);
+          cursor: pointer;
+        }
+        .wc-slider-readout {
+          flex: 0 0 auto;
+          min-width: 2.5rem;
+          font-variant-numeric: tabular-nums;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--text-1);
+        }
+
+        /* Dual-thumb range */
+        .wc-slider-track-wrap.is-range { }
+        .wc-slider-rail {
+          position: absolute; left: 0; right: 0; height: 4px;
+          background: var(--surface-4); border-radius: 999px;
+        }
+        .wc-slider-fill {
+          position: absolute; height: 4px;
+          background: var(--wc-slider-color); border-radius: 999px;
+        }
+        .wc-slider-track-wrap.is-range .wc-slider-input {
+          position: absolute; left: 0; right: 0; width: 100%;
+          margin: 0; background: none; pointer-events: none;
+          -webkit-appearance: none; appearance: none;
+        }
+        .wc-slider-track-wrap.is-range .wc-slider-input::-webkit-slider-thumb {
+          -webkit-appearance: none; appearance: none;
+          pointer-events: auto;
+          width: 16px; height: 16px; border-radius: 50%;
+          background: var(--wc-slider-color); border: 2px solid var(--surface-1, #fff);
+          cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .wc-slider-track-wrap.is-range .wc-slider-input::-moz-range-thumb {
+          pointer-events: auto;
+          width: 16px; height: 16px; border: 2px solid var(--surface-1, #fff); border-radius: 50%;
+          background: var(--wc-slider-color); cursor: pointer;
+        }
+        .wc-slider-track-wrap.is-range .wc-slider-input::-webkit-slider-runnable-track { background: none; }
+        .wc-slider-track-wrap.is-range .wc-slider-input::-moz-range-track { background: none; }
+        .wc-slider-track-wrap.is-range .wc-slider-hi { z-index: 4; }
+        .wc-slider-track-wrap.is-range .wc-slider-lo { z-index: 3; }
+        .wc-slider-input:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--wc-slider-color); outline-offset: 2px; }
+
+        .wc-slider-marks {
+          position: relative; height: 1rem; margin: 0 0.25rem;
+        }
+        .wc-slider-mark {
+          position: absolute; transform: translateX(-50%);
+          font-size: 0.68rem; color: var(--text-3, var(--component-alt-color));
+          white-space: nowrap;
+        }
+        .wc-slider-mark::before {
+          content: ''; position: absolute; top: -0.375rem; left: 50%;
+          width: 1px; height: 0.25rem; background: var(--surface-4);
+        }
+        wc-slider[disabled] .wc-slider-control { opacity: 0.6; }
+        wc-slider[required] .wc-slider > label::after { content: ' *'; font-weight: bold; }
+      }
+    `.trim();
+    this.loadStyle("wc-slider-style", style);
+  }
+};
+customElements.define(WcSlider.is, WcSlider);
 
 // src/js/components/wc-wizard-step.js
 if (!customElements.get("wc-wizard-step")) {

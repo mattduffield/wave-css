@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-data-cards</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-data-cards</h1>
+    <p class="mb-6 text-muted">
+      Data-bound responsive card gallery. Bind an array + field mappings → a grid of
+      <code>.card</code>s with cover image, title, subtitle, badge details, and click-through.
+      The generic counterpart to <code>wc-article-card</code>/<code>wc-contact-card</code>.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- 1. With cover images + link-template -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Gallery (images, link-template, 3 columns)</h2>
+        <wc-data-cards id="cards"
+            image-field="photo"
+            title-field="name"
+            subtitle-field="sku"
+            fields='["price","status"]'
+            columns="3"
+            link-template="/x/product/{_id}"
+            items='[
+              {"_id":"p1","name":"Aurora Lamp","sku":"LMP-001","price":"$59","status":"In stock","photo":"https://picsum.photos/seed/p1/480/270"},
+              {"_id":"p2","name":"Nimbus Chair","sku":"CHR-014","price":"$149","status":"Low","photo":"https://picsum.photos/seed/p2/480/270"},
+              {"_id":"p3","name":"Vela Desk","sku":"DSK-007","price":"$329","status":"In stock","photo":"https://picsum.photos/seed/p3/480/270"},
+              {"_id":"p4","name":"Lumen Shelf","sku":"SHF-022","price":"$89","status":"Backorder","photo":"https://picsum.photos/seed/p4/480/270"}
+            ]'>
+        </wc-data-cards>
+      </div>
+
+      <!-- 2. No image field → tidy text cards + open event -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">No image (graceful text cards) + open event</h2>
+        <wc-data-cards id="textCards"
+            title-field="name"
+            subtitle-field="role"
+            fields='["team"]'
+            columns="4"
+            items='[
+              {"_id":"u1","name":"Ana Reyes","role":"Engineer","team":"Platform"},
+              {"_id":"u2","name":"Bo Tran","role":"Designer","team":"Brand"},
+              {"_id":"u3","name":"Cy Okafor","role":"PM","team":"Growth"}
+            ]'>
+        </wc-data-cards>
+        <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const log = document.getElementById('log');
+    document.getElementById('textCards').addEventListener('wcdatacardsopen', (e) => {
+      log.textContent = `open: ${e.detail.id}\n` + log.textContent;
+    });
+  </script>
+</body>
+</html>

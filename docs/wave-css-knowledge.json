@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.3.0",
+    "version": "1.13.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-06-22"
+    "lastUpdated": "2026-06-23"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -635,6 +635,131 @@
         ],
         "notes": "`field` (required) is the object key this column maps to — the `sub` in `${name}.${index}.${sub}`. `label` defaults to field. `type`: text | number | date | select (also accepts email/tel/time/datetime-local; anything else falls back to text). For `type=select`: `options` is a JSON array — either inline {key,value} option objects OR a collection of records (reference column); `option-value`/`option-label` pick which members are the stored value and visible label (defaults value/key). `min`/`max`/`step`/`placeholder` pass through to number/date/text inputs; `required` marks the per-row control required; `col-class` adds width/align class(es) to that column's header + cells. The parent reads these attributes directly (not via a method) so it works regardless of custom-element upgrade order.",
         "usage": "<!-- child of <wc-form-array> — see wc-form-array usage -->\n<wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\" col-class=\"w-100\" required></wc-form-array-column>"
+      },
+      {
+        "name": "wc-rich-text",
+        "description": "Form-associated rich-text / markdown editor. Lives inside <wc-form> and submits its content as a normal named value (FACE) for the standard save path — like a wc-textarea. Editing surface is a contenteditable with an execCommand toolbar; pairs with wc-markdown-viewer for display.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "mode",
+          "toolbar",
+          "lbl-label",
+          "min-height",
+          "placeholder",
+          "required",
+          "readonly",
+          "disabled"
+        ],
+        "events": [
+          "wcrichtextchange"
+        ],
+        "notes": "Extends WcBaseFormComponent (form-associated). The submitted value is set via _internals.setFormValue and is submitted under the host element's `name` (no native input/textarea — the contenteditable is not a form control), so `name=body` arrives in the POST exactly like wc-textarea (native forms + HTMX hx-include). `mode` = markdown (default) | html — controls the STORED/submitted format: markdown submits Markdown text, html submits DOMPurify-sanitized HTML. `value` seeds initial content (markdown text or HTML per mode) and round-trips (save→reopen→same). `toolbar` = basic (default: bold,italic,h2,ul,ol,link,quote,code) | full (adds h3,image,table) | a comma list of command keys. ASYNC: marked (md→html), turndown (html→md) and DOMPurify (sanitize) are lazily loaded from cdnjs — the same CDN-load pattern as wc-code-mirror; the component sets _deferReady and resolves `ready` after the libs load (await el.ready before reading/setting value in tests/automation). SECURITY: html mode sanitizes on input and value-set; pasted content is sanitized in BOTH modes (script tags + event-handler attributes stripped). VALIDATION: `required` participates in form validity via setValidity (empty → valueMissing → element & form .checkValidity() false). PREVIEW: in markdown mode a toolbar eye button toggles a real wc-markdown-viewer rendering of the markdown (matching display output); editor hides while previewing. Toolbar uses wc-fa-icon; link/image use a prompt() for the URL (v1). execCommand-based formatting with mousedown-preventDefault to preserve the selection. htmx-safe: re-seeds on value/mode/toolbar change and initializes on dynamic insert (no DOMContentLoaded). Event wcrichtextchange detail { name, value, mode } on edit; legacy alias wc-rich-text:change (deprecated). Storage default markdown is recommended (portable + viewer-friendly) unless the schema requires HTML. Public API: get/set value (mode-correct), get mode.",
+        "usage": "<wc-form>\n  <wc-rich-text name=\"body\" value=\"{{ Record.body }}\" lbl-label=\"Body\"\n      mode=\"markdown\" toolbar=\"basic\" min-height=\"200px\" required>\n  </wc-rich-text>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>\n<!-- Submits body=<markdown text>. Display elsewhere with <wc-markdown-viewer> over server-rendered HTML. -->"
+      },
+      {
+        "name": "wc-file-upload",
+        "description": "Form-associated file/image upload field. Drop or click to pick a file; it uploads (multipart) to a configurable endpoint and submits the returned URL as a normal named form value (FACE) — the standard save path stores the URL string under `name` with no special handling. Works out-of-the-box with the /upload → Cloudflare R2 endpoint.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "accept",
+          "max-size",
+          "upload-url",
+          "category",
+          "record-id",
+          "multiple",
+          "required",
+          "disabled"
+        ],
+        "events": [
+          "wcfileuploadchange"
+        ],
+        "notes": "Extends WcBaseFormComponent (form-associated). On pick/drop it validates `accept` (mime patterns: image/*, application/pdf, .ext) and `max-size` (MB) CLIENT-SIDE (clear message on reject, no upload), then POSTs multipart/form-data to `upload-url` (default /upload) via XHR with progress: fields file (the binary), category (default 'attachments'), record_id (default 'general'). Success → JSON { url, filename, originalName, contentType, size }; the component stores `url` via _internals.setFormValue under the host `name` and shows a preview. Error → non-200 { error } surfaced as a message, field left unset. VALUE: single → the URL string; `multiple` → a JSON array of URL strings (host preference over CSV). `value` seeds an existing file on edit (shows its preview, basename-derived name) and round-trips. PREVIEW: image (contentType image/*, image extension, or data:image URI) → thumbnail <img>; otherwise a file chip (wc-fa-icon + name + size badge + link). A remove control clears the value (one entry in multiple mode). `required` participates in form validity via setValidity (no file → valueMissing → element & form invalid). The internal file <input> carries NO name (raw file never submitted — only the FACE url value); the base formElement is nulled so it isn't mistaken for the value source. Uses wc-progress for the upload bar. htmx-safe: re-seeds on value change and initializes on dynamic insert. Styles in @layer wc.usage. Event wcfileuploadchange detail { value } on add/remove (legacy alias wc-file-upload:change). Generation: schema fields typed file/image/attachment → category = entity name, record-id = the record id. Direct-to-R2 presigned upload (for >10MB) is out of scope; the /upload proxy handles it.",
+        "usage": "<wc-file-upload name=\"document_url\" value=\"{{ Record.document_url }}\" lbl-label=\"Document\"\n    accept=\"image/*,application/pdf\" max-size=\"10\" upload-url=\"/upload\"\n    category=\"attachments\" record-id=\"{{ RecordID }}\" required>\n</wc-file-upload>\n<!-- Submits document_url=<public R2 url>. multiple → JSON array of urls. -->"
+      },
+      {
+        "name": "wc-color",
+        "description": "Form-associated color picker field. Shows a swatch + the text value; clicking opens the native color picker; optional preset swatches allow one-click selection. Submits a normal named value in the chosen format (hex by default) — stored under `name` with no special handling. Useful for color-typed schema fields (theme/category/label colors, e.g. the per-lane colors wc-kanban consumes).",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "format",
+          "swatches",
+          "allow-custom",
+          "required",
+          "disabled"
+        ],
+        "events": [
+          "wccolorchange"
+        ],
+        "notes": "Extends WcBaseFormComponent. Foundation is the native <input type=color> (hex picking); the stored/submitted value is converted to `format` (hex default | rgb | hsl) from the picked hex, and any incoming color string (hex / rgb() / hsl()) is parsed back to hex to seed the swatch. `swatches` (JSON array of colors) renders one-click preset buttons; `allow-custom=\"false\"` locks the free picker (presets only). `value` seeds + round-trips (save→reopen→same, modulo canonical spacing); `required` participates in form validity via setValidity (empty → valueMissing → element & form invalid). The native <input type=color> is nulled out of the base formElement so it isn't auto-bound as the value source (the component converts hex→format itself and calls setFormValue under the host `name`). Alpha is NOT supported (native picker limitation; out of scope). htmx-safe: re-seeds on value change and initializes on dynamic insert. Styles in @layer wc.usage (empty state shows a checkerboard swatch). Event wccolorchange detail { value } (legacy alias wc-color:change). Generation: emit for color-typed fields or field names ending _color; pass swatches from a palette when available.",
+        "usage": "<wc-color name=\"label_color\" value=\"{{ Record.label_color }}\" lbl-label=\"Label Color\"\n    format=\"hex\" swatches='[\"#ef4444\",\"#f59e0b\",\"#22c55e\",\"#3b82f6\",\"#a855f7\"]' required>\n</wc-color>"
+      },
+      {
+        "name": "wc-rating",
+        "description": "Form-associated icon rating field. Renders `max` icons using THREE distinct wc-fa-icon glyphs (empty / half / full) so a partial value shows a visually distinct half glyph (e.g. star-half-stroke) rather than a CSS-clipped full icon. Editable or readonly; submits a number under `name`. For bounded scores (review rating, priority, satisfaction).",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "max",
+          "allow-half",
+          "icon-empty",
+          "icon-half",
+          "icon-full",
+          "icon-empty-style",
+          "icon-half-style",
+          "icon-full-style",
+          "color",
+          "size",
+          "readonly",
+          "required",
+          "disabled",
+          "show-value",
+          "count"
+        ],
+        "events": [
+          "wcratingchange"
+        ],
+        "notes": "Extends WcBaseFormComponent. Renders `max` (default 5) positions; for a value, fills floor(value) with icon-full, renders icon-half when the remainder >= .5 (and allow-half), and icon-empty for the rest — three DISTINCT glyphs. The empty/full distinction is by ICON STYLE as much as name (e.g. `star` regular outline vs `star` solid): per-state style defaults empty/half → regular, full → solid, overridable via icon-empty-style / icon-half-style / icon-full-style. icon-empty default 'star', icon-half 'star-half-stroke', icon-full 'star'. EDITABLE (not readonly/disabled): click sets the value (with allow-half, clicking the LEFT half of an icon sets .5), hover previews, keyboard ArrowRight/Up +step, ArrowLeft/Down -step (step = .5 if allow-half else 1), Home → 0, End → max. Submits the NUMBER as a string via FACE setFormValue under the host `name` (no native input — base formElement nulled); value seeds + round-trips; required → invalid at 0/unset (valueMissing). READONLY renders the same fill non-interactively (list/detail display); optional show-value appends the numeric value and count appends ' (N)'. color + size passed to the icons (empty positions render muted). htmx-safe: re-renders on attribute change; inits on dynamic insert. Styles in @layer wc.usage. Event wcratingchange detail { value } (legacy alias wc-rating:change). Generation: editable in forms, readonly in list/detail; for bounded-int fields (e.g. 0-5) or fields named rating/score/stars.",
+        "usage": "<wc-rating name=\"satisfaction\" value=\"3.5\" lbl-label=\"Satisfaction\" max=\"5\" allow-half\n    icon-empty=\"star\" icon-half=\"star-half-stroke\" icon-full=\"star\" color=\"#f59e0b\" size=\"1.25rem\" required>\n</wc-rating>"
+      },
+      {
+        "name": "wc-slider",
+        "description": "Form-associated bounded numeric slider. Styled range track + thumb with a value readout, optional unit + tick marks, and an optional dual-thumb range mode. Submits a normal named number value — stored under `name` with no special handling. For numeric fields that declare both a minimum and maximum.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "min",
+          "max",
+          "step",
+          "show-value",
+          "unit",
+          "marks",
+          "range",
+          "required",
+          "disabled"
+        ],
+        "events": [
+          "wcsliderchange",
+          "wcsliderinput"
+        ],
+        "notes": "Extends WcBaseFormComponent. Built on native <input type=range> (free drag + keyboard: arrows = step, Home/End = min/max), styled via CSS (accent-color fill for single). `min` (0) / `max` (100) / `step` (1) honored; `show-value` renders a readout (with optional `unit` suffix); `marks` (JSON array of numbers) renders ticks/labels positioned by percent. VALUE ENCODING: single → the number as a string ('15'); `range` (dual-thumb: two overlaid range inputs + a fill bar, thumbs clamped so they can't cross) → 'min,max' ('20,80'). value= accepts the same forms (range also accepts a JSON array [20,80] or {min,max}). `required` blocks an UNSEEDED + UNTOUCHED slider: the submitted value is empty ('') until a value is provided or the user interacts, so a never-set required slider is invalid (valueMissing) and the server isn't handed a spurious min. Submits via FACE setFormValue under the host `name` (the native input is nulled out of the base formElement so it isn't auto-bound). Events: wcsliderchange detail { value } on commit (change); wcsliderinput detail { value } while dragging (input). Legacy aliases wc-slider:change / wc-slider:input. htmx-safe: re-renders on attribute change; inits on dynamic insert. Styles in @layer wc.usage. Generation: emit for a numeric field declaring BOTH @minimum and @maximum (bounded → slider; unbounded → plain wc-input type=number); range mode for two-bound 'band' fields.",
+        "usage": "<wc-slider name=\"discount_pct\" value=\"15\" lbl-label=\"Discount %\" min=\"0\" max=\"100\" step=\"5\"\n    show-value unit=\"%\" marks='[0,25,50,75,100]' required></wc-slider>\n<!-- dual-thumb: <wc-slider name=\"price_band\" range value=\"20,80\" min=\"0\" max=\"200\" step=\"10\" unit=\"$\" show-value></wc-slider> → submits \"20,80\" -->"
       }
     ],
     "display": [
@@ -727,7 +852,9 @@
           "scrollwheel",
           "disable-default-ui",
           "class",
-          "elt-class"
+          "elt-class",
+          "markers",
+          "fit-bounds"
         ],
         "events": {
           "emits": [
@@ -739,7 +866,8 @@
             "wcmapboundschanged",
             "wcmapdragstart",
             "wcmapdragging",
-            "wcmapdragend"
+            "wcmapdragend",
+            "wcgooglemapmarkerclick"
           ]
         },
         "methods": [
@@ -749,7 +877,7 @@
           "getMap()",
           "getMarkers()"
         ],
-        "notes": "Multiple pins via <option data-lat data-lng data-title> children. Uses AdvancedMarkerElement.",
+        "notes": "Multiple pins via <option data-lat data-lng data-title> children. Uses AdvancedMarkerElement. MARKERS MODE (data-bound 'map of records'): a declarative `markers` JSON attribute ([{lat,lng,label?,title?,address?,link?}]) drops a pin per entry — ADDITIVE, combines with the single-location lat/lng attrs and <option data-lat data-lng data-title data-address data-link> children. `fit-bounds` auto-frames all pins (already automatic for >1). Per-marker `link` renders an <a> in the info window and rides the marker-click event: `wcgooglemapmarkerclick` detail { index, link, pin } (legacy alias wc-google-map:marker-click). The existing wcpinclicked/pin-clicked event and single-location + <option> multi-pin usage are unchanged (non-breaking).",
         "usage": {
           "single": "<wc-google-map api-key=\"YOUR_KEY\" lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-google-map>",
           "multiple": "<wc-google-map api-key=\"YOUR_KEY\" zoom=\"10\">\n  <option data-lat=\"40.7128\" data-lng=\"-74.0060\" data-title=\"New York\"></option>\n  <option data-lat=\"34.0522\" data-lng=\"-118.2437\" data-title=\"Los Angeles\"></option>\n</wc-google-map>"
@@ -992,6 +1120,98 @@
         "events": {},
         "notes": "Summary bar with green/yellow/red status indicators. Stage nodes with color-coded types: COLLSCAN=red, IXSCAN=green, FETCH=blue, SORT=yellow. Bottom-to-top flow with connectors. Branching for $or queries. Aggregation pipeline support. Click-to-expand raw JSON detail (inline). Loading indicator. data property setter accepts object or JSON string. Unwraps Go Kart { raw, summary } wrapper. Host element: wc-explain-tree { display: contents; }.",
         "usage": "<wc-explain-tree data='{\"queryPlanner\":{...},\"executionStats\":{...}}'></wc-explain-tree>"
+      },
+      {
+        "name": "wc-kanban",
+        "description": "Declarative status board: lanes come from a categorical/enum field's options (inline `lanes` JSON), cards are record objects (`cards` JSON) grouped into lanes by `group-field`. Owns rendering, native HTML5 drag/drop between lanes (+ within-lane reorder), per-lane count and optional rollup sum. The HOST owns persistence via bubbling events. Replaces a hand-rolled kanban board template.",
+        "attributes": [
+          "id",
+          "class",
+          "group-field",
+          "lanes",
+          "cards",
+          "card-id-field",
+          "card-title-field",
+          "card-fields",
+          "rollup-field",
+          "rollup-prefix",
+          "card-link-template",
+          "quick-add",
+          "readonly"
+        ],
+        "events": [
+          "wckanbanchange",
+          "wckanbanadd",
+          "wckanbanopen"
+        ],
+        "notes": "Extends WcBaseComponent (display/interactive — not form-associated). `group-field` (required) is the card member whose value places a card in a lane. `lanes` (required) is a JSON array of { value, label, color? } rendered in order; `color` accents the lane header (the only allowed hard color — it is passed in). `cards` is a JSON array of records; a card is placed in the lane whose value === String(card[group-field]). Each card shows `card-title-field` (default 'title') plus the `card-fields` subset rendered as `.badge .badge-muted` chips (empty values skipped); `card-id-field` defaults '_id'. Optional `rollup-field` sums that numeric member per lane in the header (formatted via toLocaleString, with optional `rollup-prefix` like '$'). DRAG: native HTML5 (no DnD library) — dragging a card to another lane optimistically moves it and fires `wckanbanchange` detail { cardId, fromValue, toValue, groupField, toIndex }; within-lane reorder also fires it (fromValue === toValue). The host persists (htmx/fetch) and may roll back by resetting the `cards` attribute. QUICK-ADD: when `quick-add` is set, each lane foot has a small input that fires `wckanbanadd` detail { laneValue, title } on submit. ACTIVATE: if `card-link-template` is set (a URL with {field} tokens, e.g. /x/order/{_id}), the card renders as a real <a href> (htmx-boost friendly, opens via #viewport); otherwise clicking/Enter fires `wckanbanopen` detail { cardId }. `readonly` disables drag (sets draggable=false — note <a>/<img> default to draggable=true, so this is an explicit opt-out) and hides quick-add; activation/links still work. Empty lanes show a subtle 'Drop here' placeholder (CSS :has). htmx-safe: re-renders when group-field/lanes/cards/etc. attributes change and initializes on dynamic insert (no DOMContentLoaded dependency). Styles live in @layer wc.usage so .btn/.badge/utilities win. Board scrolls horizontally; each lane body scrolls vertically. Detail panel is host-side (pair with wc-sidenav). Legacy colon-form aliases wc-kanban:change / :add / :open are also fired (deprecated). Public API: get/set cards, get/set lanes, refresh(). Generation-friendly: lanes = the enum options, cards = the list API rows, one board per status field.",
+        "usage": "<wc-kanban\n    group-field=\"status\"\n    lanes='[{\"value\":\"backlog\",\"label\":\"Backlog\",\"color\":\"#64748b\"},\n            {\"value\":\"in_progress\",\"label\":\"In Progress\",\"color\":\"#3b82f6\"},\n            {\"value\":\"done\",\"label\":\"Done\",\"color\":\"#22c55e\"}]'\n    cards='{{ Data.cards|toJSON|safe }}'\n    card-id-field=\"_id\" card-title-field=\"title\"\n    card-fields='[\"priority\",\"assignee\"]'\n    rollup-field=\"amount\" rollup-prefix=\"$\"\n    card-link-template=\"/x/order/{_id}\"\n    quick-add>\n</wc-kanban>\n<!-- Host listens for wckanbanchange and PUTs the new status; resets cards= to roll back -->"
+      },
+      {
+        "name": "wc-calendar",
+        "description": "Binds an array of record-like events onto a date grid (month / week / day / agenda). Owns rendering, prev/today/next navigation, view switching, native HTML5 drag-to-reschedule, per-event color, and '+N more' overflow. The HOST owns persistence via bubbling events. Generation target: a calendar view for any entity with a date field.",
+        "attributes": [
+          "id",
+          "class",
+          "events",
+          "view",
+          "initial-date",
+          "week-starts-on",
+          "timezone",
+          "event-link-template",
+          "selectable",
+          "readonly"
+        ],
+        "events": [
+          "wccalendarchange",
+          "wccalendaradd",
+          "wccalendaropen",
+          "wccalendarviewchange"
+        ],
+        "notes": "Extends WcBaseComponent (display/interactive). `events` (required) is a JSON array of { id, title, start, end?, color? } with ISO dates; a single `start` is an all-day event, `start`+`end` spans days (rendered as a chip on each covered day with is-span-start/mid/end classes). `view` = month|week|day|agenda (default month); `initial-date` (YYYY-MM-DD) sets the focal date (default today) and is preserved across view switches; `week-starts-on` 0 (Sun, default) or 1 (Mon). TIMEZONE (documented choice): date-only values ('YYYY-MM-DD' or UTC-midnight '...T00:00:00Z') are treated as FLOATING dates — bucketed by their literal calendar date with NO zone conversion, which is correct for UTC-native business date fields and avoids off-by-one drift in zones west of UTC; datetime values are bucketed by their date in the configured `timezone` (browser-local by default; set timezone='utc' or an IANA name like 'America/Chicago' to pin). DRAG: when not `readonly`, dragging an event to another day fires `wccalendarchange` detail { id, newStart, newEnd } — a whole-day shift that preserves the original time-of-day and duration and emits ISO UTC strings (date-only events emit '...T00:00:00.000Z'); optimistic (host rolls back by resetting `events`). ADD: with `selectable`, clicking an empty day fires `wccalendaradd` detail { date } (YYYY-MM-DD). ACTIVATE: `event-link-template` (URL with {field} tokens, e.g. /x/appointment/{id}) renders each event as a real <a href> (htmx-boost friendly); otherwise click/Enter fires `wccalendaropen` detail { id }. `wccalendarviewchange` detail { view, date } fires on nav/view change. Per-event `color` sets --event-color (falls back to the primary accent). Month cells show up to 3 chips then '+N more' (click drills into that day's day-view). week/day place timed events as a time-ordered list per day column (all-day/spans first, then chronological) — not an absolute hour grid; hour-precise drag is future work. agenda is a flat chronological list grouped by day (good mobile fallback). htmx-safe: re-renders when events/view/initial-date/timezone/week-starts-on change and initializes on dynamic insert. Styles in @layer wc.usage; pair with wc-sidenav host-side for a detail panel. Legacy colon aliases wc-calendar:change / :add / :open also fired (deprecated). Public API: get/set events, get/set view, refresh().",
+        "usage": "<wc-calendar\n    events='{{ Data.events|toJSON|safe }}'\n    view=\"month\" initial-date=\"2026-06-23\" week-starts-on=\"0\"\n    timezone=\"local\"\n    event-link-template=\"/x/appointment/{id}\"\n    selectable>\n</wc-calendar>\n<!-- events: [{id,title,start,end?,color?}] ISO dates. Host listens for wccalendarchange and PUTs newStart/newEnd; reset events= to roll back. -->"
+      },
+      {
+        "name": "wc-gantt",
+        "description": "Horizontal Gantt / swimlane chart. Items with a start + end render as duration bars on a time axis, grouped into swimlanes by group-field (greedy row-packing per lane); zero-duration items render as milestone diamonds. Owns rendering, scale/zoom, and pointer drag-to-move / resize. The HOST owns persistence via bubbling events. Sibling to wc-timeline (a VERTICAL narrative timeline) — NOT a mode of it; the two share no layout.",
+        "attributes": [
+          "id",
+          "class",
+          "items",
+          "group-field",
+          "scale",
+          "link-template",
+          "readonly",
+          "label-field",
+          "id-field"
+        ],
+        "events": [
+          "wcganttchange",
+          "wcganttopen"
+        ],
+        "notes": "Extends WcBaseComponent (display/interactive). Item shape is SHARED with wc-calendar / wc-kanban: { id, label, start, end?, <group-field>?, color? } — a two-date entity maps directly (start/end fields → start/end; a status/owner field → group-field). `items` (required) JSON array; `group-field` (default 'lane') sets swimlanes rendered in first-seen order; within a lane, overlapping bars are greedily packed onto separate rows. `scale` = day | week | month (default week) controls pixels-per-day (day 34, week 20, month 6) and the axis tick labels; the axis range is derived from min start / max end snapped to the scale boundary. A bar with no `end` (or end<=start) renders as a milestone diamond. `link-template` (URL with {field} tokens) renders each bar as a real <a href> (htmx-boost friendly); native HTML5 drag is disabled on bars (draggable=false) since interaction is POINTER-based. DRAG: when not `readonly`, dragging a bar moves it (start+end shift together); left/right edge handles resize one end; both snap to whole days and fire `wcganttchange` detail { id, newStart, newEnd } (ISO UTC midnight; newEnd null for milestones). Move is optimistic — host rolls back by resetting `items`. ACTIVATE: a non-link bar click/Enter fires `wcganttopen` detail { id } (a trailing click after a drag is suppressed). `id-field`/`label-field` override the id/label members. Sticky lane labels (left) + sticky axis header (top); horizontal scroll for long ranges. Dependency arrows are intentionally OUT of scope for v1 (documented follow-up); milestones ARE supported. htmx-safe: re-renders on items/scale/group-field change and initializes on dynamic insert. Styles in @layer wc.usage. Legacy colon aliases wc-gantt:change / :open also fired (deprecated). Public API: get/set items, get/set scale, refresh().",
+        "usage": "<wc-gantt\n    items='{{ Data.tasks|toJSON|safe }}'\n    group-field=\"lane\" scale=\"week\"\n    link-template=\"/x/task/{id}\">\n</wc-gantt>\n<!-- items: [{id,label,start,end?,lane?,color?}]. Host listens for wcganttchange and PUTs newStart/newEnd; reset items= to roll back. Scaffold rule: one date → wc-calendar; two dates → wc-gantt. -->"
+      },
+      {
+        "name": "wc-data-cards",
+        "description": "Generic, data-bound responsive card gallery. Bind an array of records + field mappings (cover image / title / subtitle / detail subset) → a responsive grid of .card elements with click-through. The generic counterpart to the opinionated wc-article-card / wc-contact-card; composes the same .card look.",
+        "attributes": [
+          "id",
+          "class",
+          "items",
+          "image-field",
+          "title-field",
+          "subtitle-field",
+          "fields",
+          "columns",
+          "link-template",
+          "id-field"
+        ],
+        "events": [
+          "wcdatacardsopen"
+        ],
+        "notes": "Extends WcBaseComponent. `items` (required) JSON array of records. `image-field` (optional) names the cover-image URL member — if the attribute is absent OR a record lacks a value, the card renders WITHOUT an <img> (no broken image), degrading to a tidy text card. `title-field` (default 'title'), optional `subtitle-field`, and `fields` (JSON array) rendered as .badge .badge-muted chips (empty values skipped). `columns` (default 3) is the MAX columns on wide screens; the grid is responsive 1 → 2 (>=640px) → columns (>=1024px) via a --wc-dc-cols custom property. `link-template` (URL with {field} tokens) renders each card as a real <a href>; otherwise click/Enter fires `wcdatacardsopen` detail { id } from `id-field` (default '_id'). htmx-safe; styles in @layer wc.usage. Legacy alias wc-data-cards:open. Public API: get/set items, refresh(). Generation: entity with an image field → gallery (image-field=that field); else tidy text cards.",
+        "usage": "<wc-data-cards items='{{ Data.items|toJSON|safe }}' image-field=\"photo\" title-field=\"name\" subtitle-field=\"sku\" fields='[\"price\",\"status\"]' columns=\"3\" link-template=\"/x/product/{_id}\"></wc-data-cards>"
       }
     ],
     "interactive": [
@@ -2026,6 +2246,44 @@
       ],
       "formArray": [
         "wcformarraychange"
+      ],
+      "kanban": [
+        "wckanbanchange",
+        "wckanbanadd",
+        "wckanbanopen"
+      ],
+      "calendar": [
+        "wccalendarchange",
+        "wccalendaradd",
+        "wccalendaropen",
+        "wccalendarviewchange"
+      ],
+      "richText": [
+        "wcrichtextchange"
+      ],
+      "gantt": [
+        "wcganttchange",
+        "wcganttopen"
+      ],
+      "dataCards": [
+        "wcdatacardsopen"
+      ],
+      "googleMap": [
+        "wcgooglemapmarkerclick",
+        "wcpinclicked"
+      ],
+      "fileUpload": [
+        "wcfileuploadchange"
+      ],
+      "color": [
+        "wccolorchange"
+      ],
+      "rating": [
+        "wcratingchange"
+      ],
+      "slider": [
+        "wcsliderchange",
+        "wcsliderinput"
       ]
     }
   },
@@ -2035,7 +2293,13 @@
     "tabbedLayoutTemplate": "<wc-tab id=\"mainTabs\" animate>\n  <wc-tab-item class=\"active\" label=\"Details\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"name\" lbl-label=\"Name\" required></wc-input>\n      <wc-input name=\"email\" type=\"email\" lbl-label=\"Email\"></wc-input>\n    </div>\n  </wc-tab-item>\n  <wc-tab-item label=\"Settings\">\n    <div class=\"p-4 col-1 gap-4\">\n      <wc-input name=\"active\" type=\"checkbox\" lbl-label=\"Active\" toggle-switch></wc-input>\n      <wc-select name=\"role\" lbl-label=\"Role\">\n        <option value=\"admin\">Admin</option>\n        <option value=\"user\">User</option>\n      </wc-select>\n    </div>\n  </wc-tab-item>\n</wc-tab>",
     "dataTableTemplate": "<wc-tabulator id=\"contactsTable\">\n  <wc-tabulator-column title=\"Name\" field=\"name\" editor=\"input\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Email\" field=\"email\" sorter=\"string\"></wc-tabulator-column>\n  <wc-tabulator-column title=\"Status\" field=\"status\" editor=\"select\" editor-params='{\"values\":[\"Active\",\"Inactive\"]}'></wc-tabulator-column>\n</wc-tabulator>",
     "notificationPattern": "// Success notification\nwc.Notify.showSuccess('Record saved successfully!', 3000);\n\n// Error notification\nwc.Notify.showError('Failed to save record.', 5000, true);\n\n// Confirmation dialog\nwc.Prompt.question({\n  title: 'Delete Record?',\n  text: 'This action cannot be undone.',\n  callback: (result) => {\n    if (result.isConfirmed) {\n      // proceed with delete\n    }\n  }\n});",
-    "formArrayTemplate": "<!-- Array-of-objects sub-form. Submits dotted-index keys (field.0.sub, field.1.sub, ...) that the server reconstructs into an array. Indices are always renumbered contiguous after add/remove. -->\n<wc-form id=\"orderForm\" hx-post=\"/orders/save\" hx-target=\"#result\">\n  <wc-form-array name=\"line_items\" value='{{ Record.line_items|toJSON|safe }}' min-rows=\"1\" add-label=\"Add line item\">\n    <wc-form-array-column field=\"product_id\" label=\"Product\" type=\"select\"\n                          options='{{ Data.product_options|toJSON|safe }}' option-value=\"_id\" option-label=\"name\" required></wc-form-array-column>\n    <wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\"></wc-form-array-column>\n    <wc-form-array-column field=\"unit_price\" label=\"Unit Price\" type=\"number\" min=\"0\" step=\"0.01\"></wc-form-array-column>\n  </wc-form-array>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>"
+    "formArrayTemplate": "<!-- Array-of-objects sub-form. Submits dotted-index keys (field.0.sub, field.1.sub, ...) that the server reconstructs into an array. Indices are always renumbered contiguous after add/remove. -->\n<wc-form id=\"orderForm\" hx-post=\"/orders/save\" hx-target=\"#result\">\n  <wc-form-array name=\"line_items\" value='{{ Record.line_items|toJSON|safe }}' min-rows=\"1\" add-label=\"Add line item\">\n    <wc-form-array-column field=\"product_id\" label=\"Product\" type=\"select\"\n                          options='{{ Data.product_options|toJSON|safe }}' option-value=\"_id\" option-label=\"name\" required></wc-form-array-column>\n    <wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\"></wc-form-array-column>\n    <wc-form-array-column field=\"unit_price\" label=\"Unit Price\" type=\"number\" min=\"0\" step=\"0.01\"></wc-form-array-column>\n  </wc-form-array>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>",
+    "kanbanBoardTemplate": "<!-- Status board from an enum field. lanes = enum options; cards = list rows. Host persists on wckanbanchange (optimistic move; reset cards= to roll back). -->\n<wc-kanban id=\"board\" group-field=\"status\"\n    lanes='[{\"value\":\"backlog\",\"label\":\"Backlog\",\"color\":\"#64748b\"},{\"value\":\"in_progress\",\"label\":\"In Progress\",\"color\":\"#3b82f6\"},{\"value\":\"done\",\"label\":\"Done\",\"color\":\"#22c55e\"}]'\n    cards='{{ Data.cards|toJSON|safe }}' card-id-field=\"_id\" card-title-field=\"title\"\n    card-fields='[\"priority\",\"assignee\"]' rollup-field=\"amount\" rollup-prefix=\"$\"\n    card-link-template=\"/x/ticket/{_id}\" quick-add>\n</wc-kanban>\n<script>\n  document.getElementById('board').addEventListener('wckanbanchange', (e) => {\n    htmx.ajax('PUT', `/x/ticket/${e.detail.cardId}`, { values: { status: e.detail.toValue }, swap: 'none' });\n  });\n</script>",
+    "calendarTemplate": "<!-- Calendar from an entity's date field. events = list rows mapped to {id,title,start}. Host persists on wccalendarchange (optimistic; reset events= to roll back). Date-only/UTC-midnight values are floating (no tz shift). -->\n<wc-calendar id=\"cal\" view=\"month\"\n    events='{{ Data.events|toJSON|safe }}'\n    event-link-template=\"/x/appointment/{id}\" selectable>\n</wc-calendar>\n<script>\n  const cal = document.getElementById('cal');\n  cal.addEventListener('wccalendarchange', (e) => {\n    htmx.ajax('PUT', `/x/appointment/${e.detail.id}`, { values: { start: e.detail.newStart, end: e.detail.newEnd || '' }, swap: 'none' });\n  });\n  cal.addEventListener('wccalendaradd', (e) =>\n    htmx.ajax('GET', `/x/appointment/create?date=${e.detail.date}`, { target: '#viewport', swap: 'innerHTML' }));\n</script>",
+    "richTextFieldTemplate": "<!-- Long-text / markdown field. Submits like any input (FACE), stored by the standard save path. Display with wc-markdown-viewer over server-rendered HTML. -->\n<wc-form hx-post=\"/x/article/save\" hx-target=\"#viewport\">\n  <wc-input name=\"title\" lbl-label=\"Title\" required></wc-input>\n  <wc-rich-text name=\"body\" value=\"{{ Record.body }}\" lbl-label=\"Body\" mode=\"markdown\" toolbar=\"full\" required></wc-rich-text>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>",
+    "ganttTemplate": "<!-- Gantt from a two-date entity. items = list rows {id,label,start,end,lane}. Host persists on wcganttchange (optimistic; reset items= to roll back). Scaffold rule: one date field → wc-calendar; two date fields → wc-gantt. -->\n<wc-gantt id=\"g\" group-field=\"status\" scale=\"week\"\n    items='{{ Data.tasks|toJSON|safe }}' link-template=\"/x/task/{id}\">\n</wc-gantt>\n<script>\n  document.getElementById('g').addEventListener('wcganttchange', (e) => {\n    htmx.ajax('PUT', `/x/task/${e.detail.id}`, { values: { start: e.detail.newStart, end: e.detail.newEnd || '' }, swap: 'none' });\n  });\n</script>",
+    "dataCardsTemplate": "<!-- Gallery for an entity with an image field. -->\n<wc-data-cards items='{{ Data.items|toJSON|safe }}' image-field=\"photo\" title-field=\"name\"\n    subtitle-field=\"sku\" fields='[\"price\",\"status\"]' columns=\"3\" link-template=\"/x/product/{_id}\"></wc-data-cards>",
+    "fileUploadFieldTemplate": "<!-- File/image field. Uploads to /upload (R2) and submits the returned url like any input. -->\n<wc-form hx-post=\"/x/document/save\" hx-target=\"#viewport\">\n  <wc-input name=\"title\" lbl-label=\"Title\" required></wc-input>\n  <wc-file-upload name=\"document_url\" value=\"{{ Record.document_url }}\" lbl-label=\"File\"\n      accept=\"image/*,application/pdf\" max-size=\"10\" category=\"document\" record-id=\"{{ RecordID }}\" required></wc-file-upload>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>"
   },
   "viewFiles": {
     "description": "Example HTML files in views/ directory demonstrating components",
@@ -2049,7 +2313,16 @@
       "views/tabulator.html — Data table examples (including auto-columns)",
       "views/complete-example.html — Comprehensive standalone example",
       "views/index.html — Main navigation hub using HTMX (includes chart-builder and pivot links)",
-      "views/form-array.html — wc-form-array demos (edit with prefilled rows + reference select, create with min-rows blanks, readonly display, live derived total via wcformarraychange, dotted-index submit payload)"
+      "views/form-array.html — wc-form-array demos (edit with prefilled rows + reference select, create with min-rows blanks, readonly display, live derived total via wcformarraychange, dotted-index submit payload)",
+      "views/kanban.html — wc-kanban demos (drag between lanes, per-lane count + $ rollup, quick-add, open event, and a readonly board with card-link-template <a> cards)",
+      "views/calendar.html — wc-calendar demos (month grid with all-day + multi-day spans, drag-reschedule, selectable add, per-event color, '+N more' overflow, and a readonly agenda view with event-link-template <a> events)",
+      "views/rich-text.html — wc-rich-text demos (markdown mode with full toolbar + preview, FACE submit payload, and an HTML mode editor that sanitizes on input/paste)",
+      "views/gantt.html — wc-gantt demos (duration bars in swimlanes, day/week/month scale switch, milestone diamond, pointer drag-move + edge-resize firing wcganttchange, link-template <a> bars)",
+      "views/data-cards.html — wc-data-cards demos (image gallery with link-template + responsive columns, and graceful no-image text cards with the open event)",
+      "views/file-upload.html — wc-file-upload demos (single image seeded with an existing file + FACE submit payload, and a multiple-file field whose value is a JSON array of urls)",
+      "views/color.html — wc-color demos (hex with presets + seeded value, rgb-format conversion, and a presets-only field)",
+      "views/rating.html — wc-rating demos (editable half-value stars + a whole-value hearts variant, and a readonly display with show-value + count)",
+      "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')"
     ]
   },
   "routing": {
@@ -2067,5 +2340,133 @@
       "/screen/contact/create",
       "/screen/contact_list/list"
     ]
+  },
+  "scaffoldHints": {
+    "description": "Decision table for the Go Kart AI Builder: pick the Wave component from a schema field's type/shape. FORM FIELDS render inside <wc-form> to edit ONE record; COLLECTION VIEWS render an array of records. All emit lowercase events (+ deprecated colon aliases), persist via events or FACE (no bespoke server work), are htmx-swap-safe, and place styles in @layer wc.usage.",
+    "formFields": [
+      {
+        "when": "string / short text",
+        "component": "wc-input",
+        "notes": "type=text; email/tel/url/password/search/number/date via type="
+      },
+      {
+        "when": "number (int/decimal)",
+        "component": "wc-input",
+        "notes": "type=number with min/max/step (or type=currency)"
+      },
+      {
+        "when": "boolean",
+        "component": "wc-input",
+        "notes": "type=checkbox (add toggle-switch for a switch)"
+      },
+      {
+        "when": "long text / richtext / markdown",
+        "component": "wc-rich-text",
+        "notes": "mode=markdown (default, viewer-friendly) or html; display elsewhere with wc-markdown-viewer"
+      },
+      {
+        "when": "multi-line plain text",
+        "component": "wc-textarea",
+        "notes": "when formatting is not needed"
+      },
+      {
+        "when": "enum / fixed option list",
+        "component": "wc-select",
+        "notes": "options inline or via url; chip mode for multi-select"
+      },
+      {
+        "when": "enum + free text (allow custom)",
+        "component": "wc-combobox",
+        "notes": "DB-loaded suggestions AND arbitrary typed values"
+      },
+      {
+        "when": "reference / foreign key",
+        "component": "wc-select",
+        "notes": "url + display-member/value-member; stores the id (server converts ObjectId)"
+      },
+      {
+        "when": "color / field name ends _color",
+        "component": "wc-color",
+        "notes": "format hex|rgb|hsl; pass a palette via swatches"
+      },
+      {
+        "when": "file / image / attachment",
+        "component": "wc-file-upload",
+        "notes": "category=entity name, record-id=record id; submits the returned URL (multiple → JSON array)"
+      },
+      {
+        "when": "cron / schedule expression",
+        "component": "wc-cron-picker",
+        "notes": "5-field cron; wccronchange"
+      },
+      {
+        "when": "array of sub-objects (embedded)",
+        "component": "wc-form-array",
+        "notes": "one <wc-form-array-column> per def field; submits dotted-index keys field.N.sub"
+      },
+      {
+        "when": "date / datetime (single value)",
+        "component": "wc-input",
+        "notes": "type=date|datetime-local for editing a single record's date"
+      },
+      {
+        "when": "bounded score / field named rating|score|stars (0..N)",
+        "component": "wc-rating",
+        "notes": "allow-half for .5 steps; editable in forms, readonly in list/detail; submits a number"
+      },
+      {
+        "when": "bounded number (field declares BOTH @minimum and @maximum)",
+        "component": "wc-slider",
+        "notes": "unbounded number → wc-input type=number; range mode (two bounds) submits 'min,max'"
+      }
+    ],
+    "collectionViews": [
+      {
+        "when": "entity has a low-cardinality status/enum field",
+        "component": "wc-kanban",
+        "notes": "lanes = enum options; cards = records; drag → wckanbanchange persists the field"
+      },
+      {
+        "when": "entity has ONE business date field",
+        "component": "wc-calendar",
+        "notes": "events placed by that date; map the date field → start, display field → title"
+      },
+      {
+        "when": "entity has TWO date fields (start + end)",
+        "component": "wc-gantt",
+        "notes": "duration bars + swimlanes by a status/owner field; drag/resize → wcganttchange"
+      },
+      {
+        "when": "entity has an image field",
+        "component": "wc-data-cards",
+        "notes": "image-field=that field → gallery; else tidy text cards"
+      },
+      {
+        "when": "entity has geo/address (lat/lng)",
+        "component": "wc-google-map",
+        "notes": "markers JSON array + fit-bounds; per-marker link"
+      },
+      {
+        "when": "tabular / sortable rows (default list)",
+        "component": "wc-table",
+        "notes": "or wc-tabulator for advanced (grouping, editing, big data)"
+      },
+      {
+        "when": "cross-tabulation / aggregation",
+        "component": "wc-pivot",
+        "notes": "rows/cols/values/filters, heatmap, CSV export"
+      }
+    ],
+    "decisionOrder": [
+      "For a LIST/COLLECTION screen, pick a view in this priority when the salient field exists: status/enum → wc-kanban; two dates → wc-gantt; one date → wc-calendar; image → wc-data-cards; geo → wc-google-map; otherwise wc-table/wc-tabulator.",
+      "For a FORM screen, map each field by type via formFields; long-text defaults to wc-rich-text (markdown), files to wc-file-upload, colors to wc-color, embedded arrays to wc-form-array."
+    ],
+    "conventions": {
+      "events": "All custom events are all-lowercase, no separators (e.g. wckanbanchange); a deprecated colon alias (wc-kanban:change) is also emitted.",
+      "persistence": "Components are pure UI: they emit an event with the change; the host persists (htmx/fetch) and rolls back by resetting the source attribute (optimistic).",
+      "formValue": "Form fields are form-associated (FACE) or render a named control, so the value submits under `name` like any input — no JSON serialization server-side.",
+      "sharedItemShape": "wc-calendar / wc-kanban / wc-gantt / wc-data-cards share { id, label|title, start, end?, color? } so a two-date or record list maps to any of them.",
+      "ready": "Components that lazy-load libs (wc-rich-text, wc-code-mirror) set _deferReady; await el.ready before setting their value programmatically."
+    }
   }
 }

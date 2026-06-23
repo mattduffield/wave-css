@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-slider</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 620px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-slider</h1>
+    <p class="mb-6 text-muted">
+      Bounded numeric slider: styled track honoring min/max/step, value readout + unit, optional
+      tick marks, and an optional dual-thumb range mode. Submits a number (range submits
+      <code>"min,max"</code>).
+    </p>
+
+    <div class="card p-4 col-1 gap-5">
+      <wc-form>
+        <wc-slider name="discount_pct" lbl-label="Discount %" value="15"
+                   min="0" max="100" step="5" show-value unit="%"
+                   marks='[0,25,50,75,100]' required></wc-slider>
+
+        <wc-slider name="price_band" lbl-label="Price band" range value="20,80"
+                   min="0" max="200" step="10" unit="$" show-value
+                   marks='[0,50,100,150,200]'></wc-slider>
+
+        <div class="row gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+        </div>
+      </wc-form>
+      <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const out = document.getElementById('out');
+    document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      out.textContent = JSON.stringify(obj, null, 2);
+    });
+  </script>
+</body>
+</html>

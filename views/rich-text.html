@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-rich-text</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-rich-text</h1>
+    <p class="mb-6 text-muted">
+      A form-associated rich-text / markdown editor. Submits its content as a normal named
+      value (FACE), so the standard save path stores it like a <code>wc-textarea</code>.
+      Pairs with <code>wc-markdown-viewer</code> for display.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- 1. Markdown mode, full toolbar, preview -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Markdown mode (full toolbar + preview)</h2>
+        <wc-form>
+          <wc-rich-text id="rt"
+              name="body"
+              lbl-label="Body"
+              mode="markdown"
+              toolbar="full"
+              min-height="180px"
+              placeholder="Write something…"
+              value="# Hello
+
+This is **bold**, *italic*, and `code`.
+
+- one
+- two
+
+> a quote"
+              required>
+          </wc-rich-text>
+          <div class="row gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+          </div>
+        </wc-form>
+        <pre id="payloadOut" class="card p-3 text-xs" style="white-space:pre-wrap; max-height:160px; overflow:auto;"></pre>
+      </div>
+
+      <!-- 2. HTML mode (sanitized) -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">HTML mode (sanitized on input/paste)</h2>
+        <wc-form>
+          <wc-rich-text
+              name="description"
+              lbl-label="Description"
+              mode="html"
+              toolbar="basic"
+              min-height="140px"
+              value="<p>Edit me — stored as <strong>sanitized HTML</strong>.</p>">
+          </wc-rich-text>
+        </wc-form>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const rt = document.getElementById('rt');
+    const out = document.getElementById('payloadOut');
+    rt.closest('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      out.textContent = JSON.stringify(obj, null, 2);
+    });
+  </script>
+</body>
+</html>

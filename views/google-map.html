@@ -86,6 +86,28 @@
         </div>
       </div>
 
+      <div class="mb-6">
+        <h3 class="mb-2">Markers Array Example (data-bound)</h3>
+        <p class="mb-4">
+          Declarative <code>markers</code> JSON (the "map of records" mode) with per-marker
+          <code>link</code> and <code>fit-bounds</code>. Marker click fires
+          <code>wcgooglemapmarkerclick</code> <code>{index, link, pin}</code>; the info window shows a link.
+        </p>
+        <div class="map-wrapper" style="height: 400px;">
+          <wc-google-map
+            id="mapMarkers"
+            api-key=""
+            map-type="roadmap"
+            fit-bounds
+            markers='[
+              {"lat":35.2271,"lng":-80.8431,"label":"Store #1 (Charlotte)","link":"/x/store/clt"},
+              {"lat":35.7796,"lng":-78.6382,"label":"Store #2 (Raleigh)","link":"/x/store/rdu"},
+              {"lat":36.0726,"lng":-79.7920,"label":"Store #3 (Greensboro)","link":"/x/store/gso"}
+            ]'>
+          </wc-google-map>
+        </div>
+      </div>
+
       <!-- Example 3: Different Map Types -->
       <div class="mb-6">
         <h3 class="mb-2">Map Type Variations</h3>

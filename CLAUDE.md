@@ -113,6 +113,27 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 
 `.modal-flex-fill` — composable utility for fixed-pixel modals (`w-700 h-650`). Establishes a flex column chain so `.modal-body` fills the space between header and footer, and children like `wc-code-mirror` can use `flex-1 min-h-0 height="100%"` to fill. Usage: `{% block modalContentCss %}modal-flex-fill w-700 h-650{% endblock %}`
 
+## Scaffold Component Selection (schema field → component)
+
+The AI Builder picks components by field type/shape. Full detail (with notes, decision order, and conventions) lives in `scaffoldHints` in `docs/wave-css-knowledge.json`. Quick reference:
+
+**Form fields (edit one record, inside `<wc-form>`):**
+- string / number / boolean / single date → `wc-input` (type=text|number|checkbox|date…)
+- bounded number (min AND max) → `wc-slider` (range mode → `"min,max"`); unbounded number → `wc-input type=number`
+- long-text / richtext / markdown → `wc-rich-text` (display with `wc-markdown-viewer`)
+- multi-line plain text → `wc-textarea`
+- enum / fixed options → `wc-select`; enum + free text → `wc-combobox`; reference/FK → `wc-select` (url)
+- color / `*_color` → `wc-color`
+- bounded score / `rating`/`score`/`stars` → `wc-rating`
+- file / image / attachment → `wc-file-upload`
+- cron / schedule → `wc-cron-picker`
+- array of sub-objects → `wc-form-array` (+ `wc-form-array-column`)
+
+**Collection views (render an array of records) — pick by salient field, in priority:**
+- status/enum field → `wc-kanban` · two date fields → `wc-gantt` · one date field → `wc-calendar` · image field → `wc-data-cards` · geo/address → `wc-google-map` (markers) · else → `wc-table`/`wc-tabulator` (or `wc-pivot` for cross-tab)
+
+**Conventions:** lowercase events (+ deprecated colon alias); pure-UI components persist via events (host rolls back by resetting the source attribute); form fields submit under `name` via FACE/named control; `wc-calendar`/`wc-kanban`/`wc-gantt`/`wc-data-cards` share `{id, label|title, start, end?, color?}`; await `.ready` before setting `value` on lazy-loading fields (`wc-rich-text`).
+
 ## Component Categories
 
 ### Layout Components
@@ -128,9 +149,14 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-select`: Dropdown select; `wcoptionsloaded` event fires after URL options load
 - `wc-combobox`: Single-value combobox — type free text AND/OR pick a DB-loaded suggestion (always allows custom values). Loads options via `url` + `display-member`/`value-member`/`results-member`/`sort` (load-once + client filter), or server-side search when `url` contains a `{query}` placeholder (or `search-param`) with `min-chars`/`debounce`. Form-associated: submits the option's value-member or the raw typed text (display text ≠ stored value); visible input has no `name`. Events: `wccomboboxchange`, `wccomboboxinput`, `wcoptionsloaded`
 - `wc-textarea`: Multi-line text input
+- `wc-slider`: Form-associated bounded numeric slider. Styled native `<input type=range>` honoring `min`/`max`/`step`; `show-value` readout (+ optional `unit`), optional `marks` (JSON array → ticks/labels). Drag + keyboard (arrows = step, Home/End = min/max). `range` (dual-thumb: two overlaid inputs + fill, clamped so thumbs can't cross) submits **`"min,max"`**; single submits the number. `value` seeds + round-trips; `required` blocks an unseeded+untouched slider (submitted value empty until set). FACE `setFormValue` under host `name` (base `formElement` nulled). htmx-safe; `@layer wc.usage`. Events `wcsliderchange` `{value}` (commit) + `wcsliderinput` `{value}` (dragging) (legacy `wc-slider:change`/`:input`). Generation: numeric field with BOTH `@minimum` and `@maximum` (unbounded → `wc-input type=number`)
+- `wc-rating`: Form-associated icon rating field. Renders `max` icons using THREE distinct `wc-fa-icon` glyphs — `icon-empty`/`icon-half`/`icon-full` (default `star` regular / `star-half-stroke` regular / `star` solid; per-state `icon-*-style` overridable) — so a partial value shows a distinct half glyph, not a clipped icon. `allow-half` enables .5 steps; editable (click; left-half→.5; hover preview; arrow/Home/End keys) or `readonly` (same fill, non-interactive, optional `show-value`/`count` suffix for list display). Submits the **number** under `name` via FACE; `value` seeds + round-trips; `required` invalid at 0. `color`/`size` attrs. htmx-safe; `@layer wc.usage`. Event `wcratingchange` `{value}` (legacy `wc-rating:change`). Generation: bounded-int fields (0–5) or names `rating`/`score`/`stars`
+- `wc-color`: Form-associated color picker field. Swatch + text value; clicking opens the native `<input type=color>` (hex); optional preset `swatches` (one-click); `allow-custom="false"` → presets only. Stores/submits in `format` (`hex` default / `rgb` / `hsl`) — picked hex is converted to the format, and any incoming color string is parsed back to hex to seed; `value` round-trips. `required` → form validity. Native input nulled out of base `formElement` so it isn't auto-bound (component converts + `setFormValue` under host `name`). No alpha (native limitation). htmx-safe; `@layer wc.usage`. Event `wccolorchange` `{value}` (legacy `wc-color:change`). Generation: `color`-typed fields or names ending `_color`
 - `wc-cron-picker`: Visual cron schedule picker; generates 5-field cron expressions; frequencies: minute, N minutes, hour, N hours, day, weekday, weekend, week, month, custom; `wccronchange` event; collapsible syntax reference
 - `wc-form-array`: Declarative repeatable sub-form for an **array-of-objects**, lives inside `<wc-form>`. Extends `WcBaseComponent` (NOT form-associated — its `name` is only a dotted-index prefix). Renders native form controls named `${name}.${index}.${field}` (e.g. `line_items.0.product_id`) so the server's dotted-index save path reconstructs the array — no JSON serialization, no custom endpoint. Columns declared via `wc-form-array-column` children; `value` is a JSON array of row objects. **Hard guarantee: after any add/remove, every control name is renumbered so indices stay contiguous `0..n-1`** (gaps create null/empty array holes). `min-rows`/`max-rows` enforced; empty rows are excluded on submit (native `submit` capture + `htmx:configRequest`) so a blank trailing row never serializes a junk object. `readonly` renders non-editable static text (select shows the option label). htmx-swap-safe; styles in `@layer wc.usage`. Event: `wcformarraychange` (detail `{ name, rows }`; legacy alias `wc-form-array:change`). Public API: `addRow(data?)`, `removeRow(rowOrIndex)`, `rows` get/set, `value` get/set
 - `wc-form-array-column`: Configuration-only child of `wc-form-array` (renders nothing, never submits). Attributes: `field` (required — the object key / dotted `sub`), `label`, `type` (text/number/date/select), `options` (JSON array — inline `{key,value}` or a collection of records for a reference/FK column), `option-value`/`option-label` (which members are stored value vs visible label), `min`/`max`/`step`/`placeholder`/`required`, `col-class` (width/align). One `wc-form-array-column` per schema `def` field — generation-friendly
+- `wc-file-upload`: Form-associated file/image upload field. Drop/click → validates `accept` (mime patterns) + `max-size` (MB) client-side → multipart `POST` (`file`/`category`/`record_id`) to `upload-url` (default `/upload` → R2) via XHR with a `wc-progress` bar → submits the returned `url` as a normal named value (FACE `setFormValue` under host `name`). Single → URL string; `multiple` → JSON array of urls. `value` seeds an existing file's preview + round-trips. Image → thumbnail, non-image → file chip (icon + name + size + link); remove clears. `required` → form validity. The internal file `<input>` has NO `name` (raw file never submitted — only the url); base `formElement` nulled so it isn't mistaken for the value. htmx-safe; `@layer wc.usage`. Event `wcfileuploadchange` `{value}` (legacy `wc-file-upload:change`). Generation: file/image/attachment fields → `category`=entity, `record-id`=record id
+- `wc-rich-text`: Form-associated rich-text / markdown EDITOR (the editable counterpart to `wc-markdown-viewer`). Lives in `<wc-form>` and submits its content as a normal named value (FACE — `setFormValue` under the host `name`), so the standard save path stores it like a `wc-textarea`. `mode="markdown"` (default, submits Markdown) or `"html"` (submits DOMPurify-sanitized HTML). `value` seeds + round-trips. `toolbar` = `basic`/`full`/comma-list (bold,italic,h2,h3,ul,ol,link,quote,code,image,table) via `wc-fa-icon`. `required` integrates with form validity (`setValidity`/valueMissing). Lazily loads marked/turndown/DOMPurify from cdnjs (like `wc-code-mirror`); sets `_deferReady` → **await `.ready`** before reading/setting `value`. Sanitizes on input + paste in both modes. Markdown-mode preview toggle renders into a real `wc-markdown-viewer`. htmx-safe; styles in `@layer wc.usage`. Event: `wcrichtextchange` `{name, value, mode}` (legacy `wc-rich-text:change`). Default to `markdown` storage for long-text/richtext schema fields
 
 ### Display Components
 - `wc-accordion`: Collapsible content sections
@@ -138,7 +164,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-contact-card`: Contact information card
 - `wc-contact-chip`: Compact contact display
 - `wc-flip-box`: Flippable content box
-- `wc-google-map`: Google Maps integration with single/multiple pins
+- `wc-google-map`: Google Maps integration with single/multiple pins. **Markers mode (data-bound):** declarative `markers` JSON attribute (`[{lat,lng,label?,title?,address?,link?}]`) drops a pin per entry — additive, combines with single-location `lat`/`lng` and `<option data-lat data-lng data-title data-address data-link>` children. `fit-bounds` auto-frames all pins (already automatic for >1). Per-marker `link` renders an `<a>` in the info window and rides `wcgooglemapmarkerclick` `{index, link, pin}` (legacy `wc-google-map:marker-click`); existing `wcpinclicked` + single-location usage unchanged
+- `wc-data-cards`: Generic data-bound responsive card gallery (the generic counterpart to `wc-article-card`/`wc-contact-card`; composes `.card`). `items` JSON → grid; `image-field` (optional cover — absent/missing value degrades to a tidy text card, no broken `<img>`), `title-field`, `subtitle-field`, `fields` subset → `.badge` chips, `columns` (responsive max: 1 → 2 → columns), `link-template` `<a href>` (htmx-boost) else `wcdatacardsopen` `{id}` (from `id-field`, default `_id`). htmx-safe; styles in `@layer wc.usage`. Generation: entity with an image field → gallery view
 - `wc-image`: Enhanced image component
 - `wc-background-image`: Background image container
 
@@ -165,7 +192,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 - `wc-tabulator-column`: Table column definition
 - `wc-tabulator-func`: Table function helpers
 - `wc-tabulator-row-menu`: Row context menu
-- `wc-timeline`: Timeline visualization
+- `wc-timeline`: Timeline visualization (vertical, alternating narrative cards; item shape `{label, content}` — for a horizontal duration/Gantt view use `wc-gantt`)
+- `wc-gantt`: Horizontal Gantt / swimlane chart — `items` JSON (`[{id,label,start,end?,lane?,color?}]`, same shape as `wc-calendar`/`wc-kanban`) rendered as duration bars on a time axis, grouped into swimlanes by `group-field` (greedy row-packing). `scale` = `day`/`week`/`month` (zoom + axis ticks); zero-duration items (no `end`) render as milestone diamonds. **Pointer-based** drag to move + left/right edge handles to resize → `wcganttchange` `{id, newStart, newEnd}` (ISO UTC, day-snapped, optimistic — reset `items=` to roll back); activate → `link-template` `<a href>` or `wcganttopen` `{id}`. `readonly` disables drag. Sticky lane labels + axis header, horizontal scroll. Sibling to `wc-timeline` (NOT a mode — they share no layout); dependency arrows are a documented v1 follow-up. htmx-safe; styles in `@layer wc.usage`. Scaffold rule: **one date field → `wc-calendar`; two date fields → `wc-gantt`**. Legacy aliases `wc-gantt:change`/`:open`
 - `wc-document-tree`: MongoDB document viewer with expandable/collapsible tree; declarative context menu via `wc-document-tree-context-menu` children (action receives `(e, node)` with key/value/path/documentId/type)
 - `wc-explain-tree`: Visual MongoDB explain plan viewer with stage flow diagram, color-coded stages, branching, aggregation pipeline support, click-to-expand detail
 - `wc-pivot`: Cross-tabulation pivot table with four-zone field panel (Rows/Columns/Values/Filters), value filters, drill-down with inline detail tables, heatmap, column sorting, date grouping (year/quarter/month/day/datetime), compact layout toggle, config save/load (`getConfig()`/`loadConfig()`), CSV export
@@ -192,6 +220,8 @@ Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-
 ### Data Components
 - `wc-table`: Lightweight data-driven table (url, items, sorting, formatting, events)
 - `wc-table-col`: Column definition for wc-table (field, label, sortable, align, format)
+- `wc-kanban`: Declarative status board — lanes from a categorical/enum field's options (`lanes` JSON of `{value,label,color}`), cards from record objects (`cards` JSON) grouped by `group-field`. Native HTML5 drag/drop between lanes (+ within-lane reorder), per-lane count, optional `rollup-field` sum (with `rollup-prefix`). Shows `card-title-field` + `card-fields` subset as `.badge` chips. Host owns persistence via events: `wckanbanchange` `{cardId, fromValue, toValue, groupField, toIndex}` (optimistic move — reset `cards=` to roll back), `wckanbanadd` `{laneValue, title}` (when `quick-add`), `wckanbanopen` `{cardId}` (or `card-link-template` renders a real `<a href>` with `{field}` tokens). `readonly` disables drag/add. htmx-safe (re-renders on attr change); styles in `@layer wc.usage`; pair with `wc-sidenav` host-side for a detail panel. Legacy aliases `wc-kanban:change`/`:add`/`:open`
+- `wc-calendar`: Records on a date grid — `events` JSON (`[{id,title,start,end?,color?}]`, ISO dates) placed by `start` (spanning to `end`). Views: `month`/`week`/`day`/`agenda` via `view`; nav bar (prev/today/next + switcher) with period label; `initial-date`, `week-starts-on` (0/1). **Timezone:** date-only / UTC-midnight values are floating (bucketed by literal calendar date — no shift, avoids drift for UTC-native business dates); datetimes render in browser-local zone by default, pinnable via `timezone` (`utc` or IANA). Native HTML5 drag to reschedule (whole-day shift preserving time/duration) → `wccalendarchange` `{id, newStart, newEnd}` (optimistic — reset `events=` to roll back); `selectable` empty-day click → `wccalendaradd` `{date}`; activate → `event-link-template` `<a href>` or `wccalendaropen` `{id}`; `wccalendarviewchange` `{view, date}` on nav. Per-event `color` (→ `--event-color`), month cells cap at 3 chips then `+N more` (drills to day view). `readonly` disables drag. htmx-safe; styles in `@layer wc.usage`; pair with `wc-sidenav` host-side. Legacy aliases `wc-calendar:change`/`:add`/`:open`
 
 ### AI/Bot Components
 - `wc-ai-bot`: AI chatbot interface
@@ -326,6 +356,16 @@ http://localhost:3015/views/index.html
 - `views/explain-tree.html` - MongoDB explain plan viewer demos
 - `views/cron-picker.html` - Cron picker demos with all frequency options, form integration, events
 - `views/form-array.html` - wc-form-array demos: edit with prefilled rows + reference select, create with min-rows blanks, readonly display, live derived total via `wcformarraychange`, dotted-index submit payload
+- `views/kanban.html` - wc-kanban demos: drag between lanes, per-lane count + `$` rollup, quick-add, open event, and a readonly board with `card-link-template` `<a>` cards
+- `views/calendar.html` - wc-calendar demos: month grid with all-day + multi-day spans, drag-reschedule, selectable add, per-event color, `+N more` overflow, and a readonly agenda view with `event-link-template` `<a>` events
+- `views/rich-text.html` - wc-rich-text demos: markdown mode with full toolbar + preview and FACE submit payload, plus an HTML mode editor that sanitizes on input/paste
+- `views/gantt.html` - wc-gantt demos: duration bars in swimlanes, day/week/month scale switch, milestone diamond, pointer drag-move + edge-resize firing `wcganttchange`, `link-template` `<a>` bars
+- `views/data-cards.html` - wc-data-cards demos: image gallery with `link-template` + responsive columns, and graceful no-image text cards with the open event
+- `views/file-upload.html` - wc-file-upload demos: single image seeded with an existing file + FACE submit payload, and a multiple-file field (value = JSON array of urls)
+- `views/color.html` - wc-color demos: hex with presets + seeded value, rgb-format conversion, and a presets-only field
+- `views/rating.html` - wc-rating demos: editable half-value stars + a whole-value hearts variant, and a readonly display with `show-value` + `count`
+- `views/slider.html` - wc-slider demos: single with unit + marks + step snapping, and a dual-thumb range submitting `"min,max"`
+- `views/google-map.html` - wc-google-map demos: single pin, `<option>` multi-pin, and the data-bound `markers` array mode with `fit-bounds` + per-marker `link`
 
 ### Quick Start Example
 
@@ -381,7 +421,7 @@ http://localhost:3015/views/index.html
 
 Structured JSON knowledge bases exist for this project and its related projects. Read the relevant ones when generating code, answering questions, or using slash commands.
 
-- **Wave CSS**: `docs/wave-css-knowledge.json` (37.7 KB) — component catalog, attributes, CSS utilities, themes
+- **Wave CSS**: `docs/wave-css-knowledge.json` — component catalog, attributes, CSS utilities, themes, and a `scaffoldHints` decision table (schema field type/shape → component)
 - **Go Kart**: `/Users/matthewduffield/Documents/_learn/go-kart/docs/go-kart-knowledge.json` (38.7 KB) — template system, code tab patterns, field rules, web pilots
 - **LiteSpec**: `/Users/matthewduffield/Documents/_dev/lite-spec/docs/lite-spec-knowledge.json` (16.5 KB) — schema DSL syntax, attributes, conditional validation
 

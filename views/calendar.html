@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-calendar</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-calendar</h1>
+    <p class="mb-6 text-muted">
+      Binds an <code>events</code> array onto a date grid. Prev/Today/Next + month/week/day/agenda
+      switching, drag to reschedule (<code>wccalendarchange</code>), per-event color, and
+      "+N more" overflow. Date-only / UTC-midnight values are treated as floating dates (no
+      timezone shift); datetimes render in the browser's local zone unless <code>timezone</code> is pinned.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- 1. Interactive calendar -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Month view (drag, selectable, color, overflow)</h2>
+        <wc-calendar id="cal"
+            view="month"
+            initial-date="2026-06-15"
+            week-starts-on="0"
+            selectable
+            events='[
+              {"id":"1","title":"Kickoff","start":"2026-06-03","color":"#3b82f6"},
+              {"id":"2","title":"Design review","start":"2026-06-10T15:00:00Z","color":"#f59e0b"},
+              {"id":"3","title":"Sprint","start":"2026-06-10","end":"2026-06-12","color":"#22c55e"},
+              {"id":"4","title":"1:1","start":"2026-06-10T16:00:00Z"},
+              {"id":"5","title":"Standup","start":"2026-06-10T17:00:00Z"},
+              {"id":"6","title":"Demo","start":"2026-06-10T18:00:00Z"},
+              {"id":"7","title":"Retro","start":"2026-06-10T19:00:00Z"},
+              {"id":"8","title":"Launch","start":"2026-06-23","color":"#ef4444"}
+            ]'>
+        </wc-calendar>
+        <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap; max-height:140px; overflow:auto;"></pre>
+      </div>
+
+      <!-- 2. Readonly + link template + agenda -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Agenda view, readonly, card-link-template (&lt;a href&gt;)</h2>
+        <wc-calendar
+            view="agenda" readonly
+            initial-date="2026-06-15"
+            event-link-template="/x/appointment/{id}"
+            events='[
+              {"id":"a1","title":"Intake call","start":"2026-06-09T14:00:00Z"},
+              {"id":"a2","title":"Follow-up","start":"2026-06-23"}
+            ]'>
+        </wc-calendar>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const cal = document.getElementById('cal');
+    const log = document.getElementById('log');
+    const write = (m) => { log.textContent = m + '\n' + log.textContent; };
+    cal.addEventListener('wccalendarchange', (e) =>
+      write(`change: ${e.detail.id} → ${e.detail.newStart}${e.detail.newEnd ? ' .. ' + e.detail.newEnd : ''}`));
+    cal.addEventListener('wccalendaradd', (e) => write(`add: ${e.detail.date}`));
+    cal.addEventListener('wccalendaropen', (e) => write(`open: ${e.detail.id}`));
+    cal.addEventListener('wccalendarviewchange', (e) => write(`view: ${e.detail.view} @ ${e.detail.date}`));
+  </script>
+</body>
+</html>
