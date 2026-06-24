@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-icon-picker</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 620px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-icon-picker</h1>
+    <p class="mb-6 text-muted">
+      Searchable visual icon picker. The trigger shows the selected icon + name; clicking opens a
+      searchable grid of previews (sourced from Wave's own icon bundle). Selecting submits the icon
+      <strong>name string</strong> (e.g. <code>cart-shopping</code>) — exactly what
+      <code>wc-fa-icon</code> and <code>_app.icon</code> expect.
+    </p>
+
+    <div class="card p-4 col-1 gap-4">
+      <wc-form>
+        <wc-icon-picker name="icon" lbl-label="App Icon" value="cart-shopping"
+                        variant="solid" placeholder="Search icons…" columns="8" clearable required>
+        </wc-icon-picker>
+        <div class="row gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+        </div>
+      </wc-form>
+      <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const out = document.getElementById('out');
+    document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      out.textContent = JSON.stringify(obj, null, 2);
+    });
+    document.querySelector('wc-icon-picker').addEventListener('wciconpickerchange', (e) => {
+      out.textContent = 'icon → ' + JSON.stringify(e.detail.value);
+    });
+  </script>
+</body>
+</html>

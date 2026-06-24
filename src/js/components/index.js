@@ -110,5 +110,6 @@ import './wc-file-upload.js';
 import './wc-color.js';
 import './wc-rating.js';
 import './wc-slider.js';
+import './wc-icon-picker.js';
 import './wc-wizard-step.js';
 import './wc-wizard.js';

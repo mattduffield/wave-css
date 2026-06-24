@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.13.1",
+    "version": "1.14.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-06-23"
   },
@@ -760,6 +760,28 @@
         ],
         "notes": "Extends WcBaseFormComponent. Built on native <input type=range> (free drag + keyboard: arrows = step, Home/End = min/max), styled via CSS (accent-color fill for single). `min` (0) / `max` (100) / `step` (1) honored; `show-value` renders a readout (with optional `unit` suffix); `marks` (JSON array of numbers) renders ticks/labels positioned by percent. VALUE ENCODING: single → the number as a string ('15'); `range` (dual-thumb: two overlaid range inputs + a fill bar, thumbs clamped so they can't cross) → 'min,max' ('20,80'). value= accepts the same forms (range also accepts a JSON array [20,80] or {min,max}). `required` blocks an UNSEEDED + UNTOUCHED slider: the submitted value is empty ('') until a value is provided or the user interacts, so a never-set required slider is invalid (valueMissing) and the server isn't handed a spurious min. Submits via FACE setFormValue under the host `name` (the native input is nulled out of the base formElement so it isn't auto-bound). Events: wcsliderchange detail { value } on commit (change); wcsliderinput detail { value } while dragging (input). Legacy aliases wc-slider:change / wc-slider:input. htmx-safe: re-renders on attribute change; inits on dynamic insert. Styles in @layer wc.usage. Generation: emit for a numeric field declaring BOTH @minimum and @maximum (bounded → slider; unbounded → plain wc-input type=number); range mode for two-bound 'band' fields.",
         "usage": "<wc-slider name=\"discount_pct\" value=\"15\" lbl-label=\"Discount %\" min=\"0\" max=\"100\" step=\"5\"\n    show-value unit=\"%\" marks='[0,25,50,75,100]' required></wc-slider>\n<!-- dual-thumb: <wc-slider name=\"price_band\" range value=\"20,80\" min=\"0\" max=\"200\" step=\"10\" unit=\"$\" show-value></wc-slider> → submits \"20,80\" -->"
+      },
+      {
+        "name": "wc-icon-picker",
+        "description": "Form-associated searchable visual icon picker. Trigger shows the selected icon (wc-fa-icon preview + name); clicking opens a popover with a search box + grid of icon previews. Typing filters by name; clicking a glyph selects it. Submits the icon NAME string under `name` — exactly what wc-fa-icon / _app.icon / navigation_items[].icon expect, so no transform on save.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "variant",
+          "placeholder",
+          "columns",
+          "clearable",
+          "required",
+          "disabled"
+        ],
+        "events": [
+          "wciconpickerchange"
+        ],
+        "notes": "Extends WcBaseFormComponent. The icon list is sourced INTERNALLY from Wave's own bundle manifest (fetched from WcIconConfig.bundleBaseUrl/<variant>-icons.json — the keys are icon names; cached per variant across instances) — the host never supplies the ~579 names. `variant` (default solid) selects which bundle (solid|regular|light|thin|duotone…) and previews render in that style (icon-style). Search filters by NAME SUBSTRING (the manifest carries no synonyms/aliases, so name-only). Select via click or Enter sets `value` to the name string, updates the trigger, closes, and fires wciconpickerchange { value }. Keyboard: ArrowDown from search enters the grid; arrows navigate (by `columns`, default 8); Enter selects; Escape closes and returns focus to the trigger. `value` seeds + round-trips; `required` → form validity (valueMissing when empty); `clearable` shows a clear control that empties the value — automatically HIDDEN when `required` (clearing a required field is contradictory). PERFORMANCE: the popover is appended to <body> (never clipped by overflow ancestors; position:fixed, z-index 10000, flips above when low on space, mirrors the html theme/.dark/.crisp classes) and preview SVGs are LAZY-rendered via IntersectionObserver, so opening/filtering stays smooth across the full set (verified: ~128 of 579 rendered on open). Submits via FACE setFormValue under the host `name` (the search <input> is nulled out of the base formElement so it isn't treated as the value). htmx-safe: re-renders on attribute change; tears down the body panel on disconnect; inits on dynamic insert. Styles in @layer wc.usage. Legacy alias wc-icon-picker:change. Generation: emit for any icon field (app icon, nav item, or a schema field typed as icon); default value = the Builder's validated auto-pick.",
+        "usage": "<wc-icon-picker name=\"icon\" value=\"cart-shopping\" lbl-label=\"App Icon\"\n    variant=\"solid\" placeholder=\"Search icons…\" columns=\"8\" clearable required>\n</wc-icon-picker>"
       }
     ],
     "display": [
@@ -2284,6 +2306,9 @@
       "slider": [
         "wcsliderchange",
         "wcsliderinput"
+      ],
+      "iconPicker": [
+        "wciconpickerchange"
       ]
     }
   },
@@ -2322,7 +2347,8 @@
       "views/file-upload.html — wc-file-upload demos (single image seeded with an existing file + FACE submit payload, and a multiple-file field whose value is a JSON array of urls)",
       "views/color.html — wc-color demos (hex with presets + seeded value, rgb-format conversion, and a presets-only field)",
       "views/rating.html — wc-rating demos (editable half-value stars + a whole-value hearts variant, and a readonly display with show-value + count)",
-      "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')"
+      "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')",
+      "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)"
     ]
   },
   "routing": {
@@ -2418,6 +2444,11 @@
         "when": "bounded number (field declares BOTH @minimum and @maximum)",
         "component": "wc-slider",
         "notes": "unbounded number → wc-input type=number; range mode (two bounds) submits 'min,max'"
+      },
+      {
+        "when": "icon field (app icon, nav item, or schema field typed icon)",
+        "component": "wc-icon-picker",
+        "notes": "submits the FA icon NAME string (e.g. cart-shopping) — what wc-fa-icon/_app.icon expect; default value = the validated auto-pick"
       }
     ],
     "collectionViews": [
