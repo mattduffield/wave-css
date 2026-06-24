@@ -180,7 +180,7 @@ The AI Builder picks components by field type/shape. Full detail (with notes, de
 - `wc-menu`: Menu system with HTMX support
 - `wc-breadcrumb`: Breadcrumb navigation
 - `wc-breadcrumb-item`: Individual breadcrumb item
-- `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally; `no-hash` attribute suppresses URL hash updates on tab click)
+- `wc-tab`: Tab container (supports right-click context menu on removable tabs with Close, Close Others, Close All, Close to Right, Close to Left; public methods: `closeOthers(label)`, `closeAll()`, `closeToRight(label)`, `closeToLeft(label)`; uses wc-context-menu internally; `no-hash` attribute suppresses URL hash updates on tab click). Active tab is shown by an **accent indicator** (inset underline, `--wc-tab-indicator-color` → `--accent`/`--primary-bg-color`) + bolder label — legible regardless of background contrast (`.crisp` light/dark, or a strip on a `.card`); hover is a separate subtle highlight. Theme-tunable tokens (with fallbacks): `--wc-tab-active-bg`, `--wc-tab-hover-bg`, `--wc-tab-body-bg`, `--wc-tab-indicator-color`, `--wc-tab-active-color`, and nested depth `--wc-tab-body-bg-1`/`-2` (default `--surface-3`/`--surface-4` — nesting steps through surfaces, not `#000`-mix, so it works in light themes)
 - `wc-tab-item`: Individual tab item
 - `wc-dropdown`: Dropdown menu; `btn-class` attribute for trigger button styling
 - `wc-dropdown-item`: Dropdown menu item

@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.13.0",
+    "version": "1.13.1",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-06-23"
   },
@@ -217,7 +217,7 @@
           "closeToRight(label)",
           "closeToLeft(label)"
         ],
-        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). no-hash attribute suppresses URL hash updates on tab click (default behavior unchanged for backwards compatibility). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback). removable attribute adds close buttons on dynamically added tabs and enables right-click context menu (Close, Close Others, Close to Right, Close to Left, Close All) powered by wc-context-menu.",
+        "notes": "Active tab stored in URL hash (e.g., #Tab1+NestedTab). no-hash attribute suppresses URL hash updates on tab click (default behavior unchanged for backwards compatibility). Supports nested tabs with automatic contrast adjustment. tab-overflow attribute controls how tabs behave when they exceed available width: \"scroll\" (horizontal scroll, hidden scrollbar), \"wrap\" (tabs wrap to multiple lines), \"scroll-wrap\" (wrap with scroll fallback). removable attribute adds close buttons on dynamically added tabs and enables right-click context menu (Close, Close Others, Close to Right, Close to Left, Close All) powered by wc-context-menu. ACTIVE-STATE THEMING: the active tab shows an accent indicator (inset underline via box-shadow using --wc-tab-indicator-color, default --accent/--primary-bg-color) plus a bolder label, so it stays legible independent of background contrast — including the .crisp theme (light + dark) and a tab strip sitting directly on a --card-bg-color surface (e.g. inside a .card). Hover is a separate, subtle surface highlight (no indicator). Theme-tunable tokens (all with fallbacks): --wc-tab-active-bg, --wc-tab-hover-bg, --wc-tab-body-bg, --wc-tab-indicator-color, --wc-tab-active-color, and nested-depth --wc-tab-body-bg-1 / --wc-tab-body-bg-2 (default to --surface-3 / --surface-4 — nesting steps through theme surfaces instead of mixing toward #000, so it works in light themes too). Vertical tabs place the indicator on the inline-start edge.",
         "usage": "<wc-tab id=\"cities\" animate>\n  <wc-tab-item class=\"active\" label=\"London\">\n    <div class=\"p-4\"><h3>London</h3><p>Content...</p></div>\n  </wc-tab-item>\n  <wc-tab-item label=\"New York\">\n    <div class=\"p-4\"><h3>New York</h3><p>Content...</p></div>\n  </wc-tab-item>\n</wc-tab>\n\n<!-- Removable tabs -->\n<wc-tab id=\"editors\" animate removable>\n  <wc-tab-item class=\"active\" label=\"Main\">...</wc-tab-item>\n</wc-tab>\n\n<!-- With scrollable tabs -->\n<wc-tab tab-overflow=\"scroll\" animate>\n  <wc-tab-item class=\"active\" label=\"Tab 1\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 2\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 3\">...</wc-tab-item>\n  <wc-tab-item label=\"Tab 4\">...</wc-tab-item>\n</wc-tab>"
       },
       {
