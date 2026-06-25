@@ -39109,6 +39109,28 @@ if (!customElements.get("wc-combobox")) {
       if (!q) return this._items;
       return this._items.filter((i) => i.label.toLowerCase().includes(q) || String(i.value).toLowerCase().includes(q));
     }
+    // List to show when OPENING (focus/keyboard), as opposed to while typing. If the input
+    // still shows the committed selection's label (or is empty), the user is browsing — show
+    // ALL options. Once they've typed a new query, filter. This is what makes a picker with a
+    // committed value (server-rendered / select-first / user-picked) reveal the full list on open
+    // instead of collapsing to the one selected option.
+    _openList() {
+      const sel = this._items.find((i) => String(i.value) === String(this._value));
+      const browsing = !this._input.value || sel && this._input.value === sel.label;
+      return browsing ? this._items : this._filter(this._input.value);
+    }
+    // After rendering on open, highlight + scroll the committed option into view.
+    _highlightSelected() {
+      if (!this._visible || this._value == null || this._value === "") return;
+      const idx = this._visible.findIndex((i) => String(i.value) === String(this._value));
+      if (idx >= 0) this._highlight(idx);
+    }
+    // Open the menu for a browse action (focus / ArrowDown), not a typed query.
+    _openMenu() {
+      if (this._isServerSearch()) return;
+      this._renderSuggestions(this._openList());
+      this._highlightSelected();
+    }
     _renderSuggestions(list) {
       this._list.innerHTML = "";
       this._highlightedIndex = -1;
@@ -39156,9 +39178,7 @@ if (!customElements.get("wc-combobox")) {
     }
     _onFocus() {
       this._focusValue = this._value;
-      if (!this._isServerSearch()) {
-        this._renderSuggestions(this._filter(this._input.value));
-      }
+      this._openMenu();
     }
     _onBlur() {
       setTimeout(() => {
@@ -39179,7 +39199,7 @@ if (!customElements.get("wc-combobox")) {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          if (!this._isOpen && !this._isServerSearch()) this._renderSuggestions(this._filter(this._input.value));
+          if (!this._isOpen && !this._isServerSearch()) this._openMenu();
           else this._highlight(this._highlightedIndex + 1);
           break;
         case "ArrowUp":
