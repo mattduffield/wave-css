@@ -39087,11 +39087,17 @@ if (!customElements.get("wc-combobox")) {
         });
       }
       if (this._value) this._syncDisplayFromValue(this._value);
+      let autoSelected = null;
+      if (this.hasAttribute("select-first") && !this._value && this._items.length > 0) {
+        autoSelected = this._items[0];
+        this._setValue(autoSelected.value, true);
+      }
       this._emitEvent("wcoptionsloaded", "optionsloaded", {
         bubbles: true,
         composed: true,
         detail: { value: this._value, optionCount: this._items.length }
       });
+      if (autoSelected) this._emitChange(autoSelected, false);
     }
     _extractResults(data) {
       if (data == null) return [];

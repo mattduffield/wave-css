@@ -368,10 +368,26 @@ if (!customElements.get('wc-combobox')) {
       }
       // Re-resolve display in case value was set before items arrived.
       if (this._value) this._syncDisplayFromValue(this._value);
+
+      // select-first (opt-in): when enabled AND no value is set yet AND options exist,
+      // default to the first option (post-sort, so it honors `sort`). Goes through the
+      // normal commit + change path so dependent comboboxes cascade. NEVER clobbers a
+      // value that's already set (server-rendered, restored, or user-picked). Applies on
+      // every empty-at-load (initial + later reloads), so a parent change re-defaults children.
+      let autoSelected = null;
+      if (this.hasAttribute('select-first') && !this._value && this._items.length > 0) {
+        autoSelected = this._items[0];
+        this._setValue(autoSelected.value, true);
+      }
+
       this._emitEvent('wcoptionsloaded', 'optionsloaded', {
         bubbles: true, composed: true,
         detail: { value: this._value, optionCount: this._items.length }
       });
+
+      // Emit a normal change AFTER wcoptionsloaded so `on change or wccomboboxchange`
+      // cascade wiring fires exactly as it would for a user selection.
+      if (autoSelected) this._emitChange(autoSelected, false);
     }
 
     _extractResults(data) {

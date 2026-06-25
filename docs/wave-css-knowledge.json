@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.14.0",
+    "version": "1.14.1",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-06-23"
+    "lastUpdated": "2026-06-24"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -507,14 +507,15 @@
           "disabled",
           "required",
           "autofocus",
-          "elt-class"
+          "elt-class",
+          "select-first"
         ],
         "events": [
           "wccomboboxchange",
           "wccomboboxinput",
           "wcoptionsloaded"
         ],
-        "notes": "Form-associated (extends WcBaseFormComponent). The SUBMITTED value is the selected option's value-member, or the raw typed text for a custom entry (display text != stored value). The visible <input> holds display text and has NO name, so the host's setFormValue() is the single value submitted (native forms + HTMX hx-include). Two data modes: (1) load-once + client filter when url returns a full list (defers `ready` until loaded, emits wcoptionsloaded); (2) server-side search when url contains a {query} placeholder (or search-param is set) — debounced fetch (debounce ms, default 250) after min-chars (default 1). display-member default 'key', value-member default 'value', optional results-member + sort (asc|desc). Keyboard: ArrowUp/Down navigate, Enter selects highlighted, Escape closes. wccomboboxchange detail: { value, label, custom }. Set .value programmatically (or via value attr) to load a record — display resolves to the matching option's label, else shows the raw value.",
+        "notes": "Form-associated (extends WcBaseFormComponent). The SUBMITTED value is the selected option's value-member, or the raw typed text for a custom entry (display text != stored value). The visible <input> holds display text and has NO name, so the host's setFormValue() is the single value submitted (native forms + HTMX hx-include). Two data modes: (1) load-once + client filter when url returns a full list (defers `ready` until loaded, emits wcoptionsloaded); (2) server-side search when url contains a {query} placeholder (or search-param is set) — debounced fetch (debounce ms, default 250) after min-chars (default 1). display-member default 'key', value-member default 'value', optional results-member + sort (asc|desc). Keyboard: ArrowUp/Down navigate, Enter selects highlighted, Escape closes. wccomboboxchange detail: { value, label, custom }. Set .value programmatically (or via value attr) to load a record — display resolves to the matching option's label, else shows the raw value. SELECT-FIRST (opt-in boolean attribute): after options load/normalize (the _setItems/wcoptionsloaded point — for url-loaded AND static options), if `select-first` is present AND the value is still empty AND there is >=1 option, the combobox defaults to the FIRST option (post-`sort`, so it honors sort=asc/desc), updates the display, and emits a normal wccomboboxchange (+ change) so dependent comboboxes cascade exactly like a user pick. It NEVER overrides a value that is already set (server-rendered value=, restored, or user-selected) — the critical guard. Rule is 'empty-at-load → first', so it also re-defaults on a later reload when empty (e.g. a parent change re-points the child url); a value the user set is left alone. Default off (no behavior change for existing comboboxes). Use for cascading connection→database→collection pickers so a fresh tab always has a working selection.",
         "usage": {
           "declarative": "<wc-combobox name=\"status\" lbl-label=\"Status\" value=\"open\">\n  <option value=\"open\">Open</option>\n  <option value=\"closed\">Closed</option>\n</wc-combobox>",
           "urlClientFilter": "<wc-combobox name=\"manufacturer\" lbl-label=\"Manufacturer\"\n  url=\"/api/manufacturers\" display-member=\"name\" value-member=\"id\" sort></wc-combobox>",
