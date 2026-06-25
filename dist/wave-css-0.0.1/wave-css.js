@@ -38863,17 +38863,30 @@ if (!customElements.get("wc-combobox")) {
       const d = this.getAttribute("depends-on");
       return !!(d && d.trim());
     }
-    // Scope parent lookup so duplicate picker sets (e.g. per-tab) don't cross-wire.
-    _depScope() {
-      return this.closest('[data-combobox-scope], form, dialog, [role="dialog"], wc-tab-item') || document;
+    // Resolve a parent token to the NEAREST matching combobox (by DOM proximity), so repeated
+    // picker sets (e.g. per-tab conn/db/coll with identical names) self-scope with no wrapper:
+    //   1. An explicit scope ancestor ([data-combobox-scope]/form/dialog/[role=dialog]/wc-tab-item)
+    //      wins — resolve within it (falls back to global to preserve prior behavior).
+    //   2. Otherwise walk up from the dependent; return the first match in the LOWEST ancestor that
+    //      contains one (i.e. the parent in the same logical group — siblings share a low ancestor).
+    //   3. Only if no ancestor contains a match, fall back to the global first match (single-instance).
+    _resolveParentEl(sel) {
+      const explicit = this.closest('[data-combobox-scope], form, dialog, [role="dialog"], wc-tab-item');
+      if (explicit) return explicit.querySelector(sel) || document.querySelector(sel);
+      let node = this.parentElement;
+      while (node) {
+        const found = node.querySelector(sel);
+        if (found && found !== this) return found;
+        node = node.parentElement;
+      }
+      return document.querySelector(sel);
     }
-    // Resolve each parent token to a combobox by name OR data-name, scoped first then global.
+    // Resolve each parent token to a combobox by name OR data-name (nearest match).
     _resolveParents() {
       const tokens = (this.getAttribute("depends-on") || "").split(/\s+/).filter(Boolean);
-      const scope = this._depScope();
       return tokens.map((tok) => {
         const sel = `wc-combobox[name="${CSS.escape(tok)}"], wc-combobox[data-name="${CSS.escape(tok)}"]`;
-        const el = scope.querySelector(sel) || document.querySelector(sel);
+        const el = this._resolveParentEl(sel);
         return { token: tok, el, value: el ? el.value || "" : "" };
       });
     }
