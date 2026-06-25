@@ -145,6 +145,8 @@ The AI Builder picks components by field type/shape. Full detail (with notes, de
 - `wc-split-end`: End pane content wrapper for wc-split-pane
 
 ### Form Components (extend WcBaseFormComponent)
+> **FACE convention:** form components are form-associated — the **host keeps `name`** and submits via `setFormValue` (native forms + HTMX); inner controls carry an `id` (for `<label for>`) but no name. `wc-input`/`wc-select`/`wc-textarea` were migrated to this from the older "relocate name to the inner control" pattern (behavior identical: same name, same submitted value). Exception: `wc-select` **`multiple`/chip** keep the name on the inner `<select>` for robust native multi-value submission (incl. HTMX `selectedOptions`).
+
 - `wc-form`: Form wrapper with validation
 - `wc-input`: Text input field
 - `wc-select`: Dropdown select; `wcoptionsloaded` event fires after URL options load

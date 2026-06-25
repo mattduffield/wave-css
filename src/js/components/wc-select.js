@@ -257,7 +257,14 @@ class WcSelect extends WcBaseFormComponent {
 
     const select = document.createElement('select');
     select.id = name;
-    select.name = name;
+    // FACE (standard single select): the host keeps `name` and submits via setFormValue; the inner
+    // <select> has an id only. multiple/chip KEEP the name on the inner <select> for robust native
+    // multi-value submission (incl. HTMX selectedOptions) — their host name is relocated as before.
+    const _isMultiSel = this.hasAttribute('multiple');
+    const _isChipSel = this.getAttribute('mode') === 'chip';
+    if (_isMultiSel || _isChipSel) {
+      select.name = name;
+    }
     if (this.getAttribute('multiple')) {
       select.multiple = true;
       select.setAttribute('multiple', '');
@@ -369,8 +376,16 @@ class WcSelect extends WcBaseFormComponent {
       this.componentElement.appendChild(select);
     }
 
-    if (!WcSelect.designerMode) {
+    // multiple/chip relocate the name onto the inner <select> (native multi submission), so drop it
+    // from the host. Standard single keeps `name` on the host and submits via setFormValue (FACE).
+    if (!WcSelect.designerMode && (_isMultiSel || _isChipSel)) {
       this.removeAttribute('name');
+    }
+    if (!_isMultiSel && !_isChipSel) {
+      // FACE: seed the submitted value from the initial selection (covers a declared
+      // <option selected> with no value= attribute).
+      this._value = select.value || '';
+      this._internals.setFormValue(this._value);
     }
 
     this.attachEventListeners();

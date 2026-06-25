@@ -37938,7 +37938,11 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     }
     const select = document.createElement("select");
     select.id = name;
-    select.name = name;
+    const _isMultiSel = this.hasAttribute("multiple");
+    const _isChipSel = this.getAttribute("mode") === "chip";
+    if (_isMultiSel || _isChipSel) {
+      select.name = name;
+    }
     if (this.getAttribute("multiple")) {
       select.multiple = true;
       select.setAttribute("multiple", "");
@@ -38032,8 +38036,12 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     } else {
       this.componentElement.appendChild(select);
     }
-    if (!_WcSelect.designerMode) {
+    if (!_WcSelect.designerMode && (_isMultiSel || _isChipSel)) {
       this.removeAttribute("name");
+    }
+    if (!_isMultiSel && !_isChipSel) {
+      this._value = select.value || "";
+      this._internals.setFormValue(this._value);
     }
     this.attachEventListeners();
   }
