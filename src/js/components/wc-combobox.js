@@ -40,7 +40,7 @@ if (!customElements.get('wc-combobox')) {
       return ['name', 'id', 'class', 'value', 'items', 'url', 'display-member',
         'value-member', 'results-member', 'sort', 'search-param', 'min-chars',
         'debounce', 'placeholder', 'lbl-label', 'disabled', 'required', 'autofocus',
-        'elt-class'];
+        'elt-class', 'depends-on'];
     }
 
     constructor() {
@@ -50,6 +50,10 @@ if (!customElements.get('wc-combobox')) {
       this._isOpen = false;
       this._focusValue = '';         // value at focus time, to detect real changes
       this._debounceTimer = null;
+      // depends-on (cascading pickers)
+      this._depsResolvedOnce = false;
+      this._lastDepUrl = '';
+      this._onAnyComboChange = this._onAnyComboChange.bind(this);
 
       const compEl = this.querySelector('.wc-combobox');
       if (compEl) {
@@ -86,6 +90,81 @@ if (!customElements.get('wc-combobox')) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
+      if (this._hasDeps()) {
+        // React to ANY combobox change via delegation (htmx-robust: parents can be
+        // inserted/swapped without us holding stale subscriptions). Resolve live per event.
+        document.addEventListener('wccomboboxchange', this._onAnyComboChange);
+        // Evaluate the gate once siblings have upgraded and applied their values.
+        requestAnimationFrame(() => this._maybeLoadDependent());
+      }
+    }
+
+    disconnectedCallback() {
+      if (super.disconnectedCallback) super.disconnectedCallback();
+      document.removeEventListener('wccomboboxchange', this._onAnyComboChange);
+    }
+
+    // --- depends-on (declarative cascading pickers) ---
+    _hasDeps() {
+      const d = this.getAttribute('depends-on');
+      return !!(d && d.trim());
+    }
+
+    // Scope parent lookup so duplicate picker sets (e.g. per-tab) don't cross-wire.
+    _depScope() {
+      return this.closest('[data-combobox-scope], form, dialog, [role="dialog"], wc-tab-item') || document;
+    }
+
+    // Resolve each parent token to a combobox by name OR data-name, scoped first then global.
+    _resolveParents() {
+      const tokens = (this.getAttribute('depends-on') || '').split(/\s+/).filter(Boolean);
+      const scope = this._depScope();
+      return tokens.map(tok => {
+        const sel = `wc-combobox[name="${CSS.escape(tok)}"], wc-combobox[data-name="${CSS.escape(tok)}"]`;
+        const el = scope.querySelector(sel) || document.querySelector(sel);
+        return { token: tok, el, value: el ? (el.value || '') : '' };
+      });
+    }
+
+    _onAnyComboChange(e) {
+      if (!this._hasDeps()) return;
+      const parents = this._resolveParents();
+      if (parents.some(p => p.el === e.target)) this._maybeLoadDependent();
+    }
+
+    // Gate → substitute → fetch. Composes with select-first (runs in _setItems).
+    _maybeLoadDependent() {
+      if (!this._hasDeps()) return;
+      const tmpl = this.getAttribute('url') || '';
+      const parents = this._resolveParents();
+      const satisfied = parents.length > 0 &&
+        parents.every(p => p.el && p.value !== '' && p.value != null);
+
+      if (!satisfied) {
+        this._items = [];
+        this._lastDepUrl = '';
+        // Only collapse (clear value + cascade) if a parent that was previously satisfied
+        // went empty. On the INITIAL gate (parent simply hasn't loaded yet) we preserve a
+        // server-rendered/restored value so it isn't wiped before the parent resolves.
+        if (this._depsResolvedOnce && this._value) {
+          this._setValue('', true);
+          this._emitChange({ value: '', label: '' }, false);
+        }
+        this._setReady();
+        return;
+      }
+
+      let url = tmpl;
+      parents.forEach(p => { url = url.split(`{${p.token}}`).join(encodeURIComponent(p.value)); });
+      if (url === this._lastDepUrl) { this._setReady(); return; } // already loaded this exact url
+
+      // On a parent-driven RELOAD (not the first satisfied load), drop our old value so
+      // select-first re-picks a fresh option valid for the new parent. The FIRST load
+      // preserves a server-rendered/restored value (select-first only fills when empty).
+      if (this._depsResolvedOnce && this._value) this._setValue('', false);
+      this._depsResolvedOnce = true;
+      this._lastDepUrl = url;
+      this._loadFromUrlOnce(url);
     }
 
     // --- Value handling (display text != stored value) ---
@@ -338,6 +417,7 @@ if (!customElements.get('wc-combobox')) {
 
     _emitChange(item, custom) {
       this._emitEvent('wccomboboxchange', 'combobox:change', {
+        bubbles: true, composed: true,
         detail: { value: this._value, label: item ? item.label : this._input.value, custom }
       });
       this.dispatchEvent(new Event('change', { bubbles: true }));
@@ -435,10 +515,16 @@ if (!customElements.get('wc-combobox')) {
       if (attrName === 'value') {
         this._setValue(newValue, true);
       } else if (attrName === 'url') {
-        if (newValue && !this._isServerSearch()) {
+        if (this._hasDeps()) {
+          // Dependent URL is a template with {name} placeholders — gate + substitute,
+          // never fetch it literally.
+          this._maybeLoadDependent();
+        } else if (newValue && !this._isServerSearch()) {
           this._loadFromUrlOnce(newValue);
         }
         // Server-search URLs load on demand (in _serverSearch), nothing to do here.
+      } else if (attrName === 'depends-on') {
+        this._maybeLoadDependent();
       } else if (attrName === 'items') {
         if (typeof newValue === 'string' && newValue.trim()) {
           try { this._setItems(JSON.parse(newValue)); }
