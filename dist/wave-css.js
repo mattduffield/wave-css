@@ -37943,7 +37943,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     if (_isMultiSel || _isChipSel) {
       select.name = name;
     }
-    if (this.getAttribute("multiple")) {
+    if (_isMultiSel) {
       select.multiple = true;
       select.setAttribute("multiple", "");
     }
@@ -37968,6 +37968,11 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
         select.appendChild(optgroup);
       }
     });
+    if (select.multiple) {
+      select.querySelectorAll("option").forEach((o) => {
+        o.selected = o.hasAttribute("selected");
+      });
+    }
     this.formElement = select;
     if (this.getAttribute("mode") === "chip") {
       select.name = name;

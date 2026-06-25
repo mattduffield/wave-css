@@ -265,7 +265,7 @@ class WcSelect extends WcBaseFormComponent {
     if (_isMultiSel || _isChipSel) {
       select.name = name;
     }
-    if (this.getAttribute('multiple')) {
+    if (_isMultiSel) {  // hasAttribute — a bare `multiple` attribute is "" (falsy via getAttribute)
       select.multiple = true;
       select.setAttribute('multiple', '');
     }
@@ -292,7 +292,16 @@ class WcSelect extends WcBaseFormComponent {
         select.appendChild(optgroup);
       }
     });
-    
+
+    // Restore multi-selection from markup: appending cloned <option>s one-by-one drops all but
+    // the last `selected`, so reassert the .selected PROPERTY (not just the attribute) for every
+    // option marked selected. Only needed for `multiple` — a single select correctly keeps one.
+    if (select.multiple) {
+      select.querySelectorAll('option').forEach(o => {
+        o.selected = o.hasAttribute('selected');
+      });
+    }
+
     this.formElement = select;
 
     if (this.getAttribute('mode') === 'chip') {

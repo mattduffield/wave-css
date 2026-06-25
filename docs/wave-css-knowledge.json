@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.16.0",
+    "version": "1.16.1",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-06-24"
   },
@@ -477,7 +477,7 @@
           "onkeypress",
           "onclick"
         ],
-        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values. Value getter proxies to inner <select> element. Change events dispatch with bubbles:true from the outer wc-select element. Chip mode change events also bubble. optionsloaded event fires after URL-based options are populated and value is applied. Detail: { value, optionCount }. Hyperscript-compatible (no colons). FACE: the STANDARD (single) select is form-associated — the host keeps `name` and submits via setFormValue; the inner <select> has an id only. `multiple` and chip mode are UNCHANGED — they keep the name on the inner <select> for robust native multi-value submission (incl. HTMX selectedOptions), and relocate the host name as before (multi-selects aren't depends-on/select-first targets, and FACE multi-value via setFormValue(FormData) isn't reliably collected by HTMX). The value setter selects the inner option; data-url-depends (Pattern 7) is unaffected. Pre-existing (separate from this migration): declared multiple `<option selected>` collapse to the last selected — runtime selection submits all.",
+        "notes": "Supports standard mode and chip mode. URL loading fetches JSON with optional results-member, display-member, value-member. Supports optgroups. allow-dynamic lets users add custom values. Value getter proxies to inner <select> element. Change events dispatch with bubbles:true from the outer wc-select element. Chip mode change events also bubble. optionsloaded event fires after URL-based options are populated and value is applied. Detail: { value, optionCount }. Hyperscript-compatible (no colons). FACE: the STANDARD (single) select is form-associated — the host keeps `name` and submits via setFormValue; the inner <select> has an id only. `multiple` and chip mode are UNCHANGED — they keep the name on the inner <select> for robust native multi-value submission (incl. HTMX selectedOptions), and relocate the host name as before (multi-selects aren't depends-on/select-first targets, and FACE multi-value via setFormValue(FormData) isn't reliably collected by HTMX). The value setter selects the inner option; data-url-depends (Pattern 7) is unaffected. Multiple-select multi-preselect: declared `<option selected>` are all honored on load (the .selected property is reasserted after options are cloned in, fixing an earlier collapse-to-last); a single select correctly keeps the last.",
         "usage": {
           "standard": "<wc-select name=\"status\" lbl-label=\"Status\" required>\n  <option value=\"active\">Active</option>\n  <option value=\"inactive\">Inactive</option>\n</wc-select>",
           "chip": "<wc-select name=\"tags\" lbl-label=\"Tags\" mode=\"chip\"\n  items='[{\"key\":\"JavaScript\",\"value\":\"js\"},{\"key\":\"React\",\"value\":\"react\"}]'>\n</wc-select>",
