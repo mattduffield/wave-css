@@ -36635,6 +36635,53 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     super.connectedCallback();
     this._applyStyle();
   }
+  // ---- FACE value contract (host carries `name`, submits via setFormValue) ----
+  // Checkbox submits a single value: checked → bool:True; unchecked → bool:False (toggle) or
+  // absent (plain checkbox, preserving the legacy "no submission when unchecked" behavior).
+  _checkboxSubmitValue(isChecked) {
+    if (isChecked) return "bool:True";
+    return this.hasAttribute("toggle-switch") ? "bool:False" : null;
+  }
+  get value() {
+    if (this._isCheckbox()) return this.checked;
+    if (this._isRadio()) {
+      const r = this.querySelector('input[type="radio"]:checked');
+      return r ? r.value : "";
+    }
+    return this.formElement ? this.formElement.value : this._value || "";
+  }
+  set value(newValue) {
+    if (this._isCheckbox()) {
+      this.checked = newValue;
+      return;
+    }
+    if (this._isRadio()) {
+      const val = newValue == null ? "" : String(newValue);
+      const radios = Array.from(this.querySelectorAll('input[type="radio"]'));
+      let matched = false;
+      radios.forEach((r) => {
+        const on = r.value === val;
+        r.checked = on;
+        r.tabIndex = on ? 0 : -1;
+        if (on) matched = true;
+      });
+      if (!matched && radios[0]) radios[0].tabIndex = 0;
+      this._value = val;
+      this._internals.setFormValue(val || null);
+      return;
+    }
+    this._value = newValue == null ? "" : String(newValue);
+    if (this.formElement) this.formElement.value = this._value;
+    this._internals.setFormValue(this._value);
+  }
+  set checked(isChecked) {
+    if (!this._isCheckbox() || !this.formElement) return;
+    this.formElement.checked = !!isChecked;
+    this._internals.setFormValue(this._checkboxSubmitValue(!!isChecked));
+  }
+  get checked() {
+    return this.formElement?.checked || false;
+  }
   getDesignerHTML() {
     if (this.getAttribute("type") !== "radio") return null;
     const options = this.querySelectorAll("option");
@@ -36726,7 +36773,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
           this.formElement?.removeAttribute("checked");
           this.formElement?.setAttribute("value", "bool:False");
         }
+        this._internals.setFormValue(this._checkboxSubmitValue(this.hasAttribute("checked")));
       }
+    } else if (attrName === "name") {
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -36769,6 +36818,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     this.formElement = document.createElement("input");
     this.formElement.setAttribute("form-element", "");
     this.formElement.setAttribute("type", type);
+    if (name && type !== "radio") this.formElement.id = name;
     if (type === "radio") {
       let options = [];
       let optionList = this.querySelectorAll("option");
@@ -36802,7 +36852,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       const radioContainer = document.createElement("div");
       radioContainer.classList.add("radio-group");
-      options.forEach((option) => {
+      const radios = [];
+      options.forEach((option, optIdx) => {
         const radioLabel = document.createElement("label");
         radioLabel.classList.add("radio-option");
         radioLabel.textContent = option.key;
@@ -36811,11 +36862,15 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         }
         const radioInput = document.createElement("input");
         radioInput.setAttribute("type", "radio");
-        radioInput.setAttribute("name", name);
         radioInput.setAttribute("value", option.value);
-        if (option.value === this.getAttribute("value")) {
-          radioInput.setAttribute("checked", "");
-        }
+        if (optIdx === 0 && name) radioInput.id = name;
+        const isChecked = option.value === this.getAttribute("value");
+        if (isChecked) radioInput.setAttribute("checked", "");
+        radioInput.tabIndex = isChecked ? 0 : -1;
+        radioInput.addEventListener("change", () => {
+          if (radioInput.checked) this.value = radioInput.value;
+        });
+        radios.push(radioInput);
         this.eventAttributes.forEach((attr) => {
           const value = this.getAttribute(attr);
           if (value) {
@@ -36834,6 +36889,20 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         radioLabel.prepend(radioInput);
         radioContainer.appendChild(radioLabel);
       });
+      if (!radios.some((r) => r.hasAttribute("checked")) && radios[0]) radios[0].tabIndex = 0;
+      radioContainer.addEventListener("keydown", (e) => {
+        const idx = radios.indexOf(e.target);
+        if (idx < 0) return;
+        let next = -1;
+        if (e.key === "ArrowDown" || e.key === "ArrowRight") next = (idx + 1) % radios.length;
+        else if (e.key === "ArrowUp" || e.key === "ArrowLeft") next = (idx - 1 + radios.length) % radios.length;
+        else return;
+        e.preventDefault();
+        const r = radios[next];
+        r.checked = true;
+        this.value = r.value;
+        r.focus();
+      });
       this.componentElement.appendChild(radioContainer);
     } else if (type === "checkbox" && isToggle) {
       this.formElement.classList.add("toggle-checkbox");
@@ -36844,12 +36913,6 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       toggleSwitch.classList.add("toggle-switch");
       toggleWrapper.appendChild(toggleSwitch);
       this.componentElement.appendChild(toggleWrapper);
-      const hiddenCheckbox = document.createElement("input");
-      hiddenCheckbox.name = name;
-      hiddenCheckbox.type = "hidden";
-      hiddenCheckbox.checked = true;
-      hiddenCheckbox.value = "bool:False";
-      this.componentElement.appendChild(hiddenCheckbox);
     } else if (type === "currency") {
       this.formElement.setAttribute("type", "number");
       const icon = document.createElement("span");
@@ -39350,6 +39413,17 @@ var WcTextarea = class extends WcBaseFormComponent {
     super.connectedCallback();
     this._applyStyle();
   }
+  // FACE value: keep the inner <textarea> AND the submitted (setFormValue) value in sync.
+  // (The base setter only updated _value/setFormValue, so a programmatic `.value =` never
+  // reached the visible textarea — fixed here as part of the FACE migration.)
+  get value() {
+    return this.formElement ? this.formElement.value : this._value || "";
+  }
+  set value(v) {
+    this._value = v == null ? "" : String(v);
+    if (this.formElement) this.formElement.value = this._value;
+    this._internals.setFormValue(this._value);
+  }
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
@@ -39372,6 +39446,8 @@ var WcTextarea = class extends WcBaseFormComponent {
       this.formElement?.setAttribute("rows", newValue);
     } else if (attrName === "emoji-shortcodes") {
       this._wireEmojiShortcodes();
+    } else if (attrName === "name") {
+      if (this.formElement && newValue) this.formElement.id = newValue;
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -39402,6 +39478,7 @@ var WcTextarea = class extends WcBaseFormComponent {
     }
     this.formElement = document.createElement("textarea");
     this.formElement.setAttribute("form-element", "");
+    if (name) this.formElement.id = name;
     this.componentElement.appendChild(this.formElement);
     const value = this.getAttribute("value") || "";
     if (this.firstContent && !value) {

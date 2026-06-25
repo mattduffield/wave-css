@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.14.3",
+    "version": "1.15.1",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-06-24"
   },
@@ -435,7 +435,7 @@
           "checkbox",
           "radio"
         ],
-        "notes": "Radio buttons use <option> children. Toggle switch creates visual toggle UI. Password has visibility toggle. Currency/email/tel/search have built-in icons.",
+        "notes": "Radio buttons use <option> children. Toggle switch creates visual toggle UI. Password has visibility toggle. Currency/email/tel/search have built-in icons. FACE: form-associated — the host keeps `name` and submits via setFormValue; the inner <input> carries an id (for <label for>) but NO name. Checkbox submits a single value (checked → bool:True, unchecked toggle → bool:False, unchecked plain checkbox → absent), fixing the old toggle double-submit (it no longer emits a hidden bool:False alongside). Radios carry NO name (so they never submit a stray field); selection exclusivity + arrow-key navigation + roving tabindex are managed in JS, and the host submits the chosen value. Wire format is unchanged for consumers (same name/value); programmatic `.value=` now syncs the visible control.",
         "usage": {
           "text": "<wc-input name=\"email\" type=\"email\" lbl-label=\"Email\" required placeholder=\"Enter email\"></wc-input>",
           "radio": "<wc-input name=\"gender\" type=\"radio\" lbl-label=\"Gender\" value=\"male\" auto-flex>\n  <option value=\"male\">Male</option>\n  <option value=\"female\">Female</option>\n</wc-input>",
@@ -542,7 +542,7 @@
           "elt-class",
           "emoji-shortcodes"
         ],
-        "notes": "With emoji-shortcodes attribute, typing ':' triggers autocomplete popup for emoji insertion.",
+        "notes": "With emoji-shortcodes attribute, typing ':' triggers autocomplete popup for emoji insertion. FACE: form-associated — the host keeps `name` and submits via setFormValue (native + HTMX); the inner <textarea> carries an id (for <label for>) but NO name. Setting `.value` now syncs the visible textarea + the submitted value. (Migrated from the legacy name-relocation pattern; behavior is identical for consumers — same name, same submitted value.)",
         "usage": "<wc-textarea name=\"message\" lbl-label=\"Message\" rows=\"5\" emoji-shortcodes placeholder=\"Type :smile: for emoji\"></wc-textarea>"
       },
       {

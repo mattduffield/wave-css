@@ -60,6 +60,19 @@ class WcTextarea extends WcBaseFormComponent {
     // console.log('connectedCallback:wc-textarea');
   }
 
+  // FACE value: keep the inner <textarea> AND the submitted (setFormValue) value in sync.
+  // (The base setter only updated _value/setFormValue, so a programmatic `.value =` never
+  // reached the visible textarea — fixed here as part of the FACE migration.)
+  get value() {
+    return this.formElement ? this.formElement.value : (this._value || '');
+  }
+
+  set value(v) {
+    this._value = v == null ? '' : String(v);
+    if (this.formElement) this.formElement.value = this._value;
+    this._internals.setFormValue(this._value);
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unWireEvents();
@@ -84,6 +97,11 @@ class WcTextarea extends WcBaseFormComponent {
       this.formElement?.setAttribute('rows', newValue);
     } else if (attrName === 'emoji-shortcodes') {
       this._wireEmojiShortcodes();
+    } else if (attrName === 'name') {
+      // FACE: keep `name` on the host (submits via setFormValue, consistent with the modern
+      // components). Link the inner <textarea> by id only so <label for> works; it carries
+      // NO name and never submits. Intentionally NOT calling super → no name→inner relocation.
+      if (this.formElement && newValue) this.formElement.id = newValue;
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -120,6 +138,8 @@ class WcTextarea extends WcBaseFormComponent {
     }
     this.formElement = document.createElement('textarea');
     this.formElement.setAttribute('form-element', '');
+    // FACE: id (for <label for>) but NO name — the host carries the name and submits the value.
+    if (name) this.formElement.id = name;
     this.componentElement.appendChild(this.formElement);
     const value = this.getAttribute('value') || '';
     if (this.firstContent && !value) {
