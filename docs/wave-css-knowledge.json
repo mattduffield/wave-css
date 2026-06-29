@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.16.1",
+    "version": "1.17.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-06-24"
+    "lastUpdated": "2026-06-29"
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
@@ -1028,7 +1028,7 @@
             "wctablesort"
           ]
         },
-        "notes": "Column definitions via <wc-table-col> children. auto-columns generates columns from data keys. url attribute fetches JSON data. items attribute accepts JSON array. clickable enables row click/dblclick events.",
+        "notes": "Column definitions via <wc-table-col> children. auto-columns generates columns from data keys. url attribute fetches JSON data. items attribute accepts JSON array. clickable enables row click/dblclick events. Cells support rich rendering via wc-table-col `type=\"html\"` / `formatter` (badge/link/datetime); sorting stays on the raw value.",
         "usage": "<wc-table url=\"/api/users\" striped hoverable clickable>\n  <wc-table-col field=\"name\" label=\"Name\" sortable></wc-table-col>\n  <wc-table-col field=\"email\" label=\"Email\" sortable></wc-table-col>\n  <wc-table-col field=\"role\" label=\"Role\" align=\"center\" width=\"120px\"></wc-table-col>\n</wc-table>"
       },
       {
@@ -1041,9 +1041,15 @@
           "align",
           "width",
           "format",
-          "class"
+          "class",
+          "type",
+          "formatter",
+          "formatter-map",
+          "formatter-href",
+          "formatter-format"
         ],
-        "usage": "<wc-table-col field=\"name\" label=\"Full Name\" sortable align=\"left\" width=\"200px\"></wc-table-col>"
+        "usage": "<wc-table-col field=\"name\" label=\"Full Name\" sortable align=\"left\" width=\"200px\"></wc-table-col>",
+        "notes": "RICH CELLS: `type=\"html\"` renders the field value as TRUSTED innerHTML (caller owns escaping). `formatter=\"<name>\"` runs a named cell renderer returning HTML (built-ins ESCAPE their own text, so they're XSS-safe on untrusted values): badge → <span class=\"badge badge-{variant}\"> with variant from `formatter-map` ({value:variant} JSON; default muted; variants success|warning|danger|info|muted|primary); link → <a href> from `formatter-href` token template (e.g. /x/order/{_id}, tokens URL-encoded from the row; htmx-boost friendly); datetime → `formatter-format` luxon-preset NAME (DATE_MED, DATETIME_MED, etc.) via Intl, consistent with wc-tabulator. formatter and type=html are mutually exclusive (formatter wins + console warning). SORTING always uses the RAW field value, not the rendered HTML. Columns with neither attr render as plain escaped text (unchanged)."
       },
       {
         "name": "wc-chart-builder",

@@ -17,10 +17,17 @@ if (!customElements.get('wc-table-col')) {
     }
 
     static get observedAttributes() {
-      return ['field', 'label', 'sortable', 'align', 'width', 'format', 'class'];
+      return ['field', 'label', 'sortable', 'align', 'width', 'format', 'class',
+        'type', 'formatter', 'formatter-map', 'formatter-href', 'formatter-format'];
     }
 
     get config() {
+      let formatterMap = {};
+      const rawMap = this.getAttribute('formatter-map');
+      if (rawMap) {
+        try { const m = JSON.parse(rawMap); if (m && typeof m === 'object') formatterMap = m; }
+        catch (ex) { console.warn('[wc-table-col] invalid formatter-map JSON for field', this.getAttribute('field'), ex); }
+      }
       return {
         field: this.getAttribute('field') || '',
         label: this.getAttribute('label') || this.getAttribute('field') || '',
@@ -28,7 +35,14 @@ if (!customElements.get('wc-table-col')) {
         align: this.getAttribute('align') || 'left',
         width: this.getAttribute('width') || '',
         format: this.getAttribute('format') || '',
-        css: this.getAttribute('class') || ''
+        css: this.getAttribute('class') || '',
+        // type="html" → render the field value as trusted innerHTML (caller owns the markup).
+        type: this.getAttribute('type') || '',
+        // formatter → named cell renderer returning HTML (badge | link | datetime).
+        formatter: this.getAttribute('formatter') || '',
+        formatterMap,
+        formatterHref: this.getAttribute('formatter-href') || '',
+        formatterFormat: this.getAttribute('formatter-format') || ''
       };
     }
   }

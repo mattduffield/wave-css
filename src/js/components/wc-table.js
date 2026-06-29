@@ -103,6 +103,9 @@ if (!customElements.get('wc-table')) {
       this._columns = Array.from(cols).map(col => {
         // Handle case where wc-table-col isn't upgraded yet
         if (typeof col.config === 'object') return col.config;
+        let formatterMap = {};
+        const rawMap = col.getAttribute('formatter-map');
+        if (rawMap) { try { const m = JSON.parse(rawMap); if (m && typeof m === 'object') formatterMap = m; } catch (ex) {} }
         return {
           field: col.getAttribute('field') || '',
           label: col.getAttribute('label') || col.getAttribute('field') || '',
@@ -110,7 +113,12 @@ if (!customElements.get('wc-table')) {
           align: col.getAttribute('align') || 'left',
           width: col.getAttribute('width') || '',
           format: col.getAttribute('format') || '',
-          css: col.getAttribute('class') || ''
+          css: col.getAttribute('class') || '',
+          type: col.getAttribute('type') || '',
+          formatter: col.getAttribute('formatter') || '',
+          formatterMap,
+          formatterHref: col.getAttribute('formatter-href') || '',
+          formatterFormat: col.getAttribute('formatter-format') || ''
         };
       }).filter(c => c.field);
 
@@ -224,7 +232,7 @@ if (!customElements.get('wc-table')) {
           if (this._columns.length > 0) {
             this._columns.forEach(col => {
               const value = this._getNestedValue(row, col.field);
-              const formatted = this._formatValue(value, col.format);
+              const formatted = this._renderCell(value, col, row);
               const alignClass = col.align !== 'left' ? ` class="wc-text-${col.align}"` : '';
               const cssClass = col.css ? ` class="${col.css}"` : '';
               const cls = alignClass || cssClass;
@@ -308,6 +316,89 @@ if (!customElements.get('wc-table')) {
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
+    }
+
+    // Escape for an HTML attribute value (double-quoted context).
+    _escapeAttr(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Decide how a cell renders: formatter > type="html" > legacy escaped/format text.
+    // NOTE: sorting always uses the RAW field value (_getSortedData), never this output.
+    _renderCell(value, col, row) {
+      if (col.formatter) {
+        if (col.type === 'html') {
+          console.warn(`[wc-table-col] field "${col.field}": both type="html" and formatter set — formatter wins.`);
+        }
+        return this._applyFormatter(col.formatter, value, col, row);
+      }
+      if (col.type === 'html') {
+        // Trusted markup — caller owns escaping of any interpolated user data.
+        return value == null ? '' : String(value);
+      }
+      return this._formatValue(value, col.format);
+    }
+
+    // Built-in formatters return an HTML string and ESCAPE their own text content
+    // (so they're XSS-safe even on untrusted values). Mirrors wc-tabulator's formatters.
+    _applyFormatter(name, value, col, row) {
+      switch (name) {
+        case 'badge': {
+          if (value == null || value === '') return '';
+          const variant = this._safeBadgeVariant((col.formatterMap && col.formatterMap[value]) || 'muted');
+          return `<span class="badge badge-${variant}">${this._escapeHtml(String(value))}</span>`;
+        }
+        case 'link': {
+          if (value == null || value === '') return '';
+          const href = this._resolveTokens(col.formatterHref || '#', row);
+          return `<a href="${this._escapeAttr(href)}">${this._escapeHtml(String(value))}</a>`;
+        }
+        case 'datetime':
+          return this._formatDateTime(value, col.formatterFormat);
+        default:
+          console.warn(`[wc-table] unknown formatter "${name}" — rendering as text.`);
+          return this._escapeHtml(String(value ?? ''));
+      }
+    }
+
+    _safeBadgeVariant(v) {
+      const s = String(v).toLowerCase();
+      return /^[a-z0-9-]+$/.test(s) ? s : 'muted';
+    }
+
+    // Replace {field} tokens in a href template with URL-encoded row values.
+    _resolveTokens(tpl, row) {
+      return String(tpl).replace(/\{([^}]+)\}/g, (m, key) => {
+        const v = this._getNestedValue(row, key.trim());
+        return v == null || v === '' ? '' : encodeURIComponent(String(v));
+      });
+    }
+
+    // datetime formatter — luxon-style preset NAMES (consistent with wc-tabulator) mapped to
+    // Intl.DateTimeFormat options, so wc-table stays dependency-free.
+    _formatDateTime(value, fmt) {
+      if (value == null || value === '') return '';
+      const raw = (value && typeof value === 'object' && value.$date) ? value.$date : value;
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) return this._escapeHtml(String(value));
+      const PRESETS = {
+        DATE_SHORT: { year: 'numeric', month: 'numeric', day: 'numeric' },
+        DATE_MED: { year: 'numeric', month: 'short', day: 'numeric' },
+        DATE_MED_WITH_WEEKDAY: { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' },
+        DATE_FULL: { year: 'numeric', month: 'long', day: 'numeric' },
+        DATE_HUGE: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+        DATETIME_SHORT: { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        DATETIME_SHORT_WITH_SECONDS: { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' },
+        DATETIME_STANDARD: { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true },
+        DATETIME_MED: { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        DATETIME_MED_WITH_SECONDS: { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' },
+        DATETIME_MED_WITH_WEEKDAY: { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        DATETIME_FULL: { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }
+      };
+      const opts = PRESETS[fmt] || PRESETS.DATETIME_MED;
+      return this._escapeHtml(d.toLocaleString(undefined, opts));
     }
 
     _wireTableEvents() {
