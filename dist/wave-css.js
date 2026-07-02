@@ -22199,7 +22199,11 @@ if (!customElements.get("wc-table-col")) {
         "formatter",
         "formatter-map",
         "formatter-href",
-        "formatter-format"
+        "formatter-format",
+        "formatter-active-field",
+        "formatter-events-url",
+        "formatter-live-field",
+        "formatter-done-when"
       ];
     }
     get config() {
@@ -22227,7 +22231,12 @@ if (!customElements.get("wc-table-col")) {
         formatter: this.getAttribute("formatter") || "",
         formatterMap,
         formatterHref: this.getAttribute("formatter-href") || "",
-        formatterFormat: this.getAttribute("formatter-format") || ""
+        formatterFormat: this.getAttribute("formatter-format") || "",
+        // run-status formatter (live SSE cell)
+        formatterActiveField: this.getAttribute("formatter-active-field") || "",
+        formatterEventsUrl: this.getAttribute("formatter-events-url") || "",
+        formatterLiveField: this.getAttribute("formatter-live-field") || "",
+        formatterDoneWhen: this.getAttribute("formatter-done-when") || ""
       };
     }
   }
@@ -22266,6 +22275,9 @@ if (!customElements.get("wc-table")) {
       this._sortField = "";
       this._sortDir = "";
       this._currentPage = 0;
+      this._runStreams = /* @__PURE__ */ new Map();
+      this._runStatusRows = {};
+      this._completedRuns = /* @__PURE__ */ new Set();
       const compEl = this.querySelector(":scope > .wc-table-container");
       if (compEl) {
         this.componentElement = compEl;
@@ -22301,6 +22313,7 @@ if (!customElements.get("wc-table")) {
     }
     disconnectedCallback() {
       super.disconnectedCallback();
+      this._closeAllRunStreams();
     }
     _render() {
       super._render();
@@ -22330,7 +22343,11 @@ if (!customElements.get("wc-table")) {
           formatter: col.getAttribute("formatter") || "",
           formatterMap,
           formatterHref: col.getAttribute("formatter-href") || "",
-          formatterFormat: col.getAttribute("formatter-format") || ""
+          formatterFormat: col.getAttribute("formatter-format") || "",
+          formatterActiveField: col.getAttribute("formatter-active-field") || "",
+          formatterEventsUrl: col.getAttribute("formatter-events-url") || "",
+          formatterLiveField: col.getAttribute("formatter-live-field") || "",
+          formatterDoneWhen: col.getAttribute("formatter-done-when") || ""
         };
       }).filter((c) => c.field);
       if (this._columns.length === 0) {
@@ -22387,6 +22404,7 @@ if (!customElements.get("wc-table")) {
     _renderTable() {
       const data = this._getSortedData();
       const emptyMessage = this.getAttribute("empty-message") || "No data available";
+      this._runStatusRows = {};
       const classes = ["wc-table"];
       if (this.hasAttribute("striped")) classes.push("wc-table-striped");
       if (this.hasAttribute("hoverable")) classes.push("wc-table-hover");
@@ -22447,6 +22465,7 @@ if (!customElements.get("wc-table")) {
       }
       this.componentElement.innerHTML = html;
       this._wireTableEvents();
+      this._reconcileRunStreams();
     }
     _getSortedData() {
       if (!this._sortField) return [...this._data];
@@ -22533,6 +22552,8 @@ if (!customElements.get("wc-table")) {
         }
         case "datetime":
           return this._formatDateTime(value, col.formatterFormat);
+        case "run-status":
+          return this._renderRunStatus(value, col, row);
         default:
           console.warn(`[wc-table] unknown formatter "${name}" \u2014 rendering as text.`);
           return this._escapeHtml(String(value ?? ""));
@@ -22572,6 +22593,152 @@ if (!customElements.get("wc-table")) {
       };
       const opts = PRESETS[fmt] || PRESETS.DATETIME_MED;
       return this._escapeHtml(d.toLocaleString(void 0, opts));
+    }
+    // ---- run-status formatter: live SSE cell -------------------------------------------------
+    // Renders a spinner + streaming step text for an ACTIVE (running) row, or the same resting
+    // badge as formatter="badge" otherwise. The cell markup carries data-* the reconciler reads
+    // after innerHTML is set. The stream lifecycle is owned by _reconcileRunStreams (below).
+    _tokensResolve(tpl, row) {
+      const tokens = String(tpl || "").match(/\{[^}]+\}/g) || [];
+      if (!tokens.length) return false;
+      return tokens.every((tok) => {
+        const v = this._getNestedValue(row, tok.slice(1, -1).trim());
+        return v != null && v !== "";
+      });
+    }
+    _runStatusRunId(col, row) {
+      const m = String(col.formatterEventsUrl || "").match(/\{([^}]+)\}/);
+      if (m) {
+        const v = this._getNestedValue(row, m[1].trim());
+        if (v != null && v !== "") return String(v);
+      }
+      return this._resolveTokens(col.formatterEventsUrl || "", row);
+    }
+    _renderRunStatus(value, col, row) {
+      const activeField = col.formatterActiveField;
+      const active = activeField ? !!this._getNestedValue(row, activeField) : String(value) === "running" && this._tokensResolve(col.formatterEventsUrl, row);
+      if (!active) {
+        return this._applyFormatter("badge", value, col, row);
+      }
+      const url = this._resolveTokens(col.formatterEventsUrl || "", row);
+      const runId = this._runStatusRunId(col, row);
+      const liveField = col.formatterLiveField || "status";
+      const doneField = col.formatterDoneWhen || "";
+      const variant = this._safeBadgeVariant(col.formatterMap && col.formatterMap[value] || "info");
+      const initial = value != null && value !== "" && String(value) !== "running" ? String(value) : "Starting\u2026";
+      if (runId) this._runStatusRows[runId] = row;
+      return `<span class="badge badge-${variant} inline-flex items-center gap-2" data-run-status data-events-url="${this._escapeAttr(url)}" data-run-id="${this._escapeAttr(runId)}" data-live-field="${this._escapeAttr(liveField)}" data-done-field="${this._escapeAttr(doneField)}"><wc-fa-icon name="spinner" icon-style="solid" size="1rem" spin></wc-fa-icon><span data-run-status-text>${this._escapeHtml(initial)}</span></span>`;
+    }
+    // Reconcile open streams against the current run-status cells (called after every render).
+    _reconcileRunStreams() {
+      const cells = this.componentElement.querySelectorAll("[data-run-status]");
+      const activeNow = /* @__PURE__ */ new Map();
+      cells.forEach((cell) => {
+        const id = cell.dataset.runId;
+        if (id) activeNow.set(id, cell);
+      });
+      for (const runId of Array.from(this._runStreams.keys())) {
+        if (!activeNow.has(runId)) this._closeRunStream(runId);
+      }
+      for (const runId of Array.from(this._completedRuns)) {
+        if (!activeNow.has(runId)) this._completedRuns.delete(runId);
+      }
+      activeNow.forEach((cell, runId) => {
+        if (this._completedRuns.has(runId)) {
+          const icon = cell.querySelector("wc-fa-icon");
+          if (icon) icon.removeAttribute("spin");
+          return;
+        }
+        const existing = this._runStreams.get(runId);
+        if (existing) {
+          existing.cellEl = cell;
+        } else {
+          this._openRunStream(runId, cell);
+        }
+      });
+    }
+    _openRunStream(runId, cell) {
+      const url = cell.dataset.eventsUrl;
+      if (!url || typeof EventSource === "undefined") return;
+      let es;
+      try {
+        es = new EventSource(url);
+      } catch (ex) {
+        console.warn("[wc-table] run-status: EventSource failed", ex);
+        return;
+      }
+      const stream = {
+        es,
+        cellEl: cell,
+        runId,
+        url,
+        gotData: false,
+        done: false,
+        retries: 0,
+        liveField: cell.dataset.liveField || "status",
+        doneField: cell.dataset.doneField || ""
+      };
+      this._runStreams.set(runId, stream);
+      es.onmessage = (e) => this._onRunMessage(runId, e);
+      es.onerror = () => this._onRunError(runId);
+    }
+    _onRunMessage(runId, e) {
+      const stream = this._runStreams.get(runId);
+      if (!stream || stream.done) return;
+      let msg;
+      try {
+        msg = JSON.parse(e.data);
+      } catch (ex) {
+        return;
+      }
+      stream.gotData = true;
+      stream.retries = 0;
+      const live = msg[stream.liveField];
+      if (live != null) {
+        const t = stream.cellEl && stream.cellEl.querySelector("[data-run-status-text]");
+        if (t) t.textContent = String(live);
+      }
+      if (stream.doneField && msg[stream.doneField]) this._terminateRun(runId);
+    }
+    _onRunError(runId) {
+      const stream = this._runStreams.get(runId);
+      if (!stream || stream.done) return;
+      if (stream.gotData) {
+        this._terminateRun(runId);
+        return;
+      }
+      stream.retries = (stream.retries || 0) + 1;
+      if (stream.retries > 5) this._closeRunStream(runId);
+    }
+    _terminateRun(runId) {
+      const stream = this._runStreams.get(runId);
+      if (!stream || stream.done) return;
+      stream.done = true;
+      this._completedRuns.add(runId);
+      const icon = stream.cellEl && stream.cellEl.querySelector("wc-fa-icon");
+      if (icon) icon.removeAttribute("spin");
+      const row = this._runStatusRows ? this._runStatusRows[runId] || null : null;
+      this._emitEvent("wcrunstatuscomplete", "wc-run-status:complete", {
+        bubbles: true,
+        composed: true,
+        detail: { runId, row }
+      });
+      this._closeRunStream(runId);
+    }
+    _closeRunStream(runId) {
+      const stream = this._runStreams.get(runId);
+      if (stream) {
+        try {
+          stream.es.close();
+        } catch (ex) {
+        }
+        this._runStreams.delete(runId);
+      }
+    }
+    _closeAllRunStreams() {
+      if (!this._runStreams) return;
+      for (const runId of Array.from(this._runStreams.keys())) this._closeRunStream(runId);
+      if (this._completedRuns) this._completedRuns.clear();
     }
     _wireTableEvents() {
       const table = this.componentElement.querySelector("table");

@@ -18,7 +18,8 @@ if (!customElements.get('wc-table-col')) {
 
     static get observedAttributes() {
       return ['field', 'label', 'sortable', 'align', 'width', 'format', 'class',
-        'type', 'formatter', 'formatter-map', 'formatter-href', 'formatter-format'];
+        'type', 'formatter', 'formatter-map', 'formatter-href', 'formatter-format',
+        'formatter-active-field', 'formatter-events-url', 'formatter-live-field', 'formatter-done-when'];
     }
 
     get config() {
@@ -42,7 +43,12 @@ if (!customElements.get('wc-table-col')) {
         formatter: this.getAttribute('formatter') || '',
         formatterMap,
         formatterHref: this.getAttribute('formatter-href') || '',
-        formatterFormat: this.getAttribute('formatter-format') || ''
+        formatterFormat: this.getAttribute('formatter-format') || '',
+        // run-status formatter (live SSE cell)
+        formatterActiveField: this.getAttribute('formatter-active-field') || '',
+        formatterEventsUrl: this.getAttribute('formatter-events-url') || '',
+        formatterLiveField: this.getAttribute('formatter-live-field') || '',
+        formatterDoneWhen: this.getAttribute('formatter-done-when') || ''
       };
     }
   }
