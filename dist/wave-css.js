@@ -22203,7 +22203,9 @@ if (!customElements.get("wc-table-col")) {
         "formatter-active-field",
         "formatter-events-url",
         "formatter-live-field",
-        "formatter-done-when"
+        "formatter-done-when",
+        "formatter-event-name",
+        "formatter-live-path"
       ];
     }
     get config() {
@@ -22236,7 +22238,11 @@ if (!customElements.get("wc-table-col")) {
         formatterActiveField: this.getAttribute("formatter-active-field") || "",
         formatterEventsUrl: this.getAttribute("formatter-events-url") || "",
         formatterLiveField: this.getAttribute("formatter-live-field") || "",
-        formatterDoneWhen: this.getAttribute("formatter-done-when") || ""
+        formatterDoneWhen: this.getAttribute("formatter-done-when") || "",
+        // named SSE event to bind (e.g. step_change; default message) + a path extractor for the
+        // display text (e.g. stack.-1.name), for run-state streams that aren't flat messages.
+        formatterEventName: this.getAttribute("formatter-event-name") || "",
+        formatterLivePath: this.getAttribute("formatter-live-path") || ""
       };
     }
   }
@@ -22347,7 +22353,9 @@ if (!customElements.get("wc-table")) {
           formatterActiveField: col.getAttribute("formatter-active-field") || "",
           formatterEventsUrl: col.getAttribute("formatter-events-url") || "",
           formatterLiveField: col.getAttribute("formatter-live-field") || "",
-          formatterDoneWhen: col.getAttribute("formatter-done-when") || ""
+          formatterDoneWhen: col.getAttribute("formatter-done-when") || "",
+          formatterEventName: col.getAttribute("formatter-event-name") || "",
+          formatterLivePath: col.getAttribute("formatter-live-path") || ""
         };
       }).filter((c) => c.field);
       if (this._columns.length === 0) {
@@ -22622,12 +22630,15 @@ if (!customElements.get("wc-table")) {
       }
       const url = this._resolveTokens(col.formatterEventsUrl || "", row);
       const runId = this._runStatusRunId(col, row);
+      const eventName = col.formatterEventName || "message";
+      const isRunState = eventName === "step_change";
+      const livePath = col.formatterLivePath || (isRunState ? "stack.-1.name" : "");
       const liveField = col.formatterLiveField || "status";
-      const doneField = col.formatterDoneWhen || "";
+      const doneWhen = col.formatterDoneWhen || (isRunState ? "event=end" : "");
       const variant = this._safeBadgeVariant(col.formatterMap && col.formatterMap[value] || "info");
       const initial = value != null && value !== "" && String(value) !== "running" ? String(value) : "Starting\u2026";
       if (runId) this._runStatusRows[runId] = row;
-      return `<span class="badge badge-${variant} inline-flex items-center gap-2" data-run-status data-events-url="${this._escapeAttr(url)}" data-run-id="${this._escapeAttr(runId)}" data-live-field="${this._escapeAttr(liveField)}" data-done-field="${this._escapeAttr(doneField)}"><wc-fa-icon name="spinner" icon-style="solid" size="1rem" spin></wc-fa-icon><span data-run-status-text>${this._escapeHtml(initial)}</span></span>`;
+      return `<span class="badge badge-${variant} inline-flex items-center gap-2" data-run-status data-events-url="${this._escapeAttr(url)}" data-run-id="${this._escapeAttr(runId)}" data-event-name="${this._escapeAttr(eventName)}" data-live-path="${this._escapeAttr(livePath)}" data-live-field="${this._escapeAttr(liveField)}" data-done-when="${this._escapeAttr(doneWhen)}"><wc-fa-icon name="spinner" icon-style="solid" size="1rem" spin></wc-fa-icon><span data-run-status-text>${this._escapeHtml(initial)}</span></span>`;
     }
     // Reconcile open streams against the current run-status cells (called after every render).
     _reconcileRunStreams() {
@@ -22667,6 +22678,7 @@ if (!customElements.get("wc-table")) {
         console.warn("[wc-table] run-status: EventSource failed", ex);
         return;
       }
+      const eventName = cell.dataset.eventName || "message";
       const stream = {
         es,
         cellEl: cell,
@@ -22675,11 +22687,14 @@ if (!customElements.get("wc-table")) {
         gotData: false,
         done: false,
         retries: 0,
+        eventName,
+        livePath: cell.dataset.livePath || "",
         liveField: cell.dataset.liveField || "status",
-        doneField: cell.dataset.doneField || ""
+        doneWhen: cell.dataset.doneWhen || ""
       };
       this._runStreams.set(runId, stream);
-      es.onmessage = (e) => this._onRunMessage(runId, e);
+      stream._onMsg = (e) => this._onRunMessage(runId, e);
+      es.addEventListener(eventName, stream._onMsg);
       es.onerror = () => this._onRunError(runId);
     }
     _onRunMessage(runId, e) {
@@ -22693,22 +22708,52 @@ if (!customElements.get("wc-table")) {
       }
       stream.gotData = true;
       stream.retries = 0;
-      const live = msg[stream.liveField];
-      if (live != null) {
+      const live = stream.livePath ? this._readRunPath(msg, stream.livePath) : msg[stream.liveField];
+      if (live != null && live !== "") {
         const t = stream.cellEl && stream.cellEl.querySelector("[data-run-status-text]");
         if (t) t.textContent = String(live);
       }
-      if (stream.doneField && msg[stream.doneField]) this._terminateRun(runId);
+      if (this._isRunTerminal(msg, stream.doneWhen)) this._terminateRun(runId);
     }
     _onRunError(runId) {
       const stream = this._runStreams.get(runId);
       if (!stream || stream.done) return;
       if (stream.gotData) {
-        this._terminateRun(runId);
+        if (!stream.doneWhen) this._terminateRun(runId);
         return;
       }
       stream.retries = (stream.retries || 0) + 1;
       if (stream.retries > 5) this._closeRunStream(runId);
+    }
+    // Read a dotted path with negative array indices, e.g. "stack.-1.name".
+    _readRunPath(obj, path) {
+      if (obj == null) return void 0;
+      const parts = String(path).split(".");
+      let cur = obj;
+      for (let i = 0; i < parts.length; i++) {
+        if (cur == null) return void 0;
+        const p = parts[i];
+        if (Array.isArray(cur)) {
+          let idx = parseInt(p, 10);
+          if (isNaN(idx)) return void 0;
+          if (idx < 0) idx = cur.length + idx;
+          cur = cur[idx];
+        } else {
+          cur = cur[p];
+        }
+      }
+      return cur;
+    }
+    // Terminal detection: "prop" (truthy) or "prop=value" (match, e.g. event=end).
+    _isRunTerminal(msg, doneWhen) {
+      if (!doneWhen) return false;
+      const eq = doneWhen.indexOf("=");
+      if (eq >= 0) {
+        const key = doneWhen.slice(0, eq).trim();
+        const val = doneWhen.slice(eq + 1).trim();
+        return String(this._readRunPath(msg, key)) === val;
+      }
+      return !!this._readRunPath(msg, doneWhen.trim());
     }
     _terminateRun(runId) {
       const stream = this._runStreams.get(runId);

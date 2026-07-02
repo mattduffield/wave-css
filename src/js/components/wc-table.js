@@ -127,7 +127,9 @@ if (!customElements.get('wc-table')) {
           formatterActiveField: col.getAttribute('formatter-active-field') || '',
           formatterEventsUrl: col.getAttribute('formatter-events-url') || '',
           formatterLiveField: col.getAttribute('formatter-live-field') || '',
-          formatterDoneWhen: col.getAttribute('formatter-done-when') || ''
+          formatterDoneWhen: col.getAttribute('formatter-done-when') || '',
+          formatterEventName: col.getAttribute('formatter-event-name') || '',
+          formatterLivePath: col.getAttribute('formatter-live-path') || ''
         };
       }).filter(c => c.field);
 
@@ -453,15 +455,25 @@ if (!customElements.get('wc-table')) {
 
       const url = this._resolveTokens(col.formatterEventsUrl || '', row);
       const runId = this._runStatusRunId(col, row);
+      // Named SSE event to bind (default `message`). For the node-playwright run stream the frames
+      // are `event: step_change` (no default message event) — set formatter-event-name="step_change".
+      const eventName = col.formatterEventName || 'message';
+      const isRunState = eventName === 'step_change';
+      // Where the display text lives: a path (e.g. stack.-1.name) or a flat key (default `status`).
+      // run-state (step_change) defaults to the last stack frame's name.
+      const livePath = col.formatterLivePath || (isRunState ? 'stack.-1.name' : '');
       const liveField = col.formatterLiveField || 'status';
-      const doneField = col.formatterDoneWhen || '';
+      // Terminal: `prop` (truthy) or `prop=value` (match). run-state defaults to `event=end`
+      // (the socket may stay open with heartbeats after end, so never rely on close for terminal).
+      const doneWhen = col.formatterDoneWhen || (isRunState ? 'event=end' : '');
       const variant = this._safeBadgeVariant((col.formatterMap && col.formatterMap[value]) || 'info');
       const initial = (value != null && value !== '' && String(value) !== 'running') ? String(value) : 'Starting…';
       if (runId) this._runStatusRows[runId] = row;
 
       return `<span class="badge badge-${variant} inline-flex items-center gap-2" data-run-status`
         + ` data-events-url="${this._escapeAttr(url)}" data-run-id="${this._escapeAttr(runId)}"`
-        + ` data-live-field="${this._escapeAttr(liveField)}" data-done-field="${this._escapeAttr(doneField)}">`
+        + ` data-event-name="${this._escapeAttr(eventName)}" data-live-path="${this._escapeAttr(livePath)}"`
+        + ` data-live-field="${this._escapeAttr(liveField)}" data-done-when="${this._escapeAttr(doneWhen)}">`
         + `<wc-fa-icon name="spinner" icon-style="solid" size="1rem" spin></wc-fa-icon>`
         + `<span data-run-status-text>${this._escapeHtml(initial)}</span></span>`;
     }
@@ -503,12 +515,19 @@ if (!customElements.get('wc-table')) {
       let es;
       try { es = new EventSource(url); }
       catch (ex) { console.warn('[wc-table] run-status: EventSource failed', ex); return; }
+      const eventName = cell.dataset.eventName || 'message';
       const stream = {
         es, cellEl: cell, runId, url, gotData: false, done: false, retries: 0,
-        liveField: cell.dataset.liveField || 'status', doneField: cell.dataset.doneField || ''
+        eventName,
+        livePath: cell.dataset.livePath || '',
+        liveField: cell.dataset.liveField || 'status',
+        doneWhen: cell.dataset.doneWhen || ''
       };
       this._runStreams.set(runId, stream);
-      es.onmessage = (e) => this._onRunMessage(runId, e);
+      // Bind the NAMED SSE event (the run stream emits `step_change`, not the default `message`
+      // event — so es.onmessage would never fire). addEventListener('message') == onmessage.
+      stream._onMsg = (e) => this._onRunMessage(runId, e);
+      es.addEventListener(eventName, stream._onMsg);
       es.onerror = () => this._onRunError(runId);
     }
 
@@ -519,25 +538,60 @@ if (!customElements.get('wc-table')) {
       try { msg = JSON.parse(e.data); } catch (ex) { return; }
       stream.gotData = true;
       stream.retries = 0;
-      const live = msg[stream.liveField];
-      if (live != null) {
+      // Display text: a path (e.g. stack.-1.name — empty stack ⇒ undefined ⇒ keep current) or flat key.
+      const live = stream.livePath ? this._readRunPath(msg, stream.livePath) : msg[stream.liveField];
+      if (live != null && live !== '') {
         const t = stream.cellEl && stream.cellEl.querySelector('[data-run-status-text]');
         if (t) t.textContent = String(live); // text only — never inject HTML from the stream
       }
-      if (stream.doneField && msg[stream.doneField]) this._terminateRun(runId);
+      if (this._isRunTerminal(msg, stream.doneWhen)) this._terminateRun(runId);
     }
 
     _onRunError(runId) {
       const stream = this._runStreams.get(runId);
       if (!stream || stream.done) return;
       if (stream.gotData) {
-        // Errored/closed after receiving data → treat as terminal.
-        this._terminateRun(runId);
+        // A long-lived run-state stream (payload-driven terminal via done-when) survives transient
+        // drops — let EventSource auto-reconnect. Only a flat stream with NO done-when treats
+        // error/close-after-data as terminal.
+        if (!stream.doneWhen) this._terminateRun(runId);
         return;
       }
       // Errored before any data → EventSource auto-reconnects; bound the attempts, then give up.
       stream.retries = (stream.retries || 0) + 1;
       if (stream.retries > 5) this._closeRunStream(runId);
+    }
+
+    // Read a dotted path with negative array indices, e.g. "stack.-1.name".
+    _readRunPath(obj, path) {
+      if (obj == null) return undefined;
+      const parts = String(path).split('.');
+      let cur = obj;
+      for (let i = 0; i < parts.length; i++) {
+        if (cur == null) return undefined;
+        const p = parts[i];
+        if (Array.isArray(cur)) {
+          let idx = parseInt(p, 10);
+          if (isNaN(idx)) return undefined;
+          if (idx < 0) idx = cur.length + idx;
+          cur = cur[idx];
+        } else {
+          cur = cur[p];
+        }
+      }
+      return cur;
+    }
+
+    // Terminal detection: "prop" (truthy) or "prop=value" (match, e.g. event=end).
+    _isRunTerminal(msg, doneWhen) {
+      if (!doneWhen) return false;
+      const eq = doneWhen.indexOf('=');
+      if (eq >= 0) {
+        const key = doneWhen.slice(0, eq).trim();
+        const val = doneWhen.slice(eq + 1).trim();
+        return String(this._readRunPath(msg, key)) === val;
+      }
+      return !!this._readRunPath(msg, doneWhen.trim());
     }
 
     _terminateRun(runId) {

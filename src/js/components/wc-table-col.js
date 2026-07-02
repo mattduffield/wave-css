@@ -19,7 +19,8 @@ if (!customElements.get('wc-table-col')) {
     static get observedAttributes() {
       return ['field', 'label', 'sortable', 'align', 'width', 'format', 'class',
         'type', 'formatter', 'formatter-map', 'formatter-href', 'formatter-format',
-        'formatter-active-field', 'formatter-events-url', 'formatter-live-field', 'formatter-done-when'];
+        'formatter-active-field', 'formatter-events-url', 'formatter-live-field', 'formatter-done-when',
+        'formatter-event-name', 'formatter-live-path'];
     }
 
     get config() {
@@ -48,7 +49,11 @@ if (!customElements.get('wc-table-col')) {
         formatterActiveField: this.getAttribute('formatter-active-field') || '',
         formatterEventsUrl: this.getAttribute('formatter-events-url') || '',
         formatterLiveField: this.getAttribute('formatter-live-field') || '',
-        formatterDoneWhen: this.getAttribute('formatter-done-when') || ''
+        formatterDoneWhen: this.getAttribute('formatter-done-when') || '',
+        // named SSE event to bind (e.g. step_change; default message) + a path extractor for the
+        // display text (e.g. stack.-1.name), for run-state streams that aren't flat messages.
+        formatterEventName: this.getAttribute('formatter-event-name') || '',
+        formatterLivePath: this.getAttribute('formatter-live-path') || ''
       };
     }
   }
