@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.18.1",
+    "version": "1.18.2",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -1320,6 +1320,8 @@
           "position",
           "auto-open",
           "max-height",
+          "panel-width",
+          "panel-height",
           "temperature",
           "max-tokens",
           "debug",
@@ -1354,7 +1356,7 @@
           "getAvailableModels()",
           "clearStoredPreferences()"
         ],
-        "notes": "Runs LLMs in browser via WebGPU. Auto-detects GPU capability. Supports streaming responses. Markdown rendering via marked library.",
+        "notes": "Runs LLMs in browser via WebGPU (or provider=\"server\" for a hosted SSE backend). Auto-detects GPU capability. Supports streaming responses. Markdown rendering via marked library (compact, table-friendly: GFM tables render bordered/padded with a shaded header and scroll horizontally on overflow; lists are tightly spaced; long tokens wrap; fenced code scrolls). Bubble-theme panel size is configurable via panel-width/panel-height attributes (or the --wc-ai-bot-panel-width/--wc-ai-bot-panel-height CSS custom properties), clamped to 92vw/85vh (calc(100v*-2rem) on <=640px viewports). Defaults remain 350x500. panel-height is the preferred alias for the bubble panel height (falls back to max-height).",
         "usage": "<wc-ai-bot model=\"Llama-3.2-3B-Instruct-q4f16_1-MLC\" system-prompt=\"You are a helpful assistant.\" title=\"AI Assistant\" theme=\"sidebar\"></wc-ai-bot>"
       },
       {

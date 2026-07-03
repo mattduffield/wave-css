@@ -33,6 +33,8 @@ if (!customElements.get('wc-ai-bot')) {
         'position',
         'auto-open',
         'max-height',
+        'panel-width',
+        'panel-height',
         'temperature',
         'max-tokens',
         'debug',
@@ -706,12 +708,15 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           padding: 0.75rem;
           border-radius: 0.5rem;
           word-wrap: break-word;
-          white-space: pre-wrap;
+          overflow-wrap: anywhere;
         }
 
         .wc-ai-bot-message--user .wc-ai-bot-message-bubble {
           background: var(--primary-color);
           color: var(--primary-bg-color);
+          /* Preserve the user's own line breaks; bot bubbles hold rendered markdown
+             where pre-wrap would surface marked's inter-element newlines as big gaps. */
+          white-space: pre-wrap;
         }
 
         .wc-ai-bot-message--bot .wc-ai-bot-message-bubble {
@@ -730,32 +735,68 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         
         .wc-ai-bot-message-bubble ul,
         .wc-ai-bot-message-bubble ol {
-          margin: 0 0 0.5rem 0;
-          padding-left: 1.5rem;
+          margin: 0.25rem 0;
+          padding-left: 1.35rem;
         }
-        
+
+        /* Nested lists sit snug against their parent item. */
+        .wc-ai-bot-message-bubble li > ul,
+        .wc-ai-bot-message-bubble li > ol {
+          margin: 0.1rem 0 0.1rem 0;
+        }
+
         .wc-ai-bot-message-bubble li {
-          margin-bottom: 0.25rem;
+          margin: 0.15rem 0;
+          overflow-wrap: anywhere;
         }
-        
+
+        /* GFM tables: bordered, padded, shaded header, horizontal scroll on overflow
+           so wide cells don't squish inside the panel. Theme-safe via currentColor mix. */
+        .wc-ai-bot-message-bubble table {
+          border-collapse: collapse;
+          display: block;
+          overflow-x: auto;
+          max-width: 100%;
+          margin: 0.5rem 0;
+          font-size: 0.85em;
+        }
+
+        .wc-ai-bot-message-bubble th,
+        .wc-ai-bot-message-bubble td {
+          border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+          padding: 0.4rem 0.6rem;
+          text-align: left;
+          white-space: nowrap;
+          vertical-align: top;
+        }
+
+        .wc-ai-bot-message-bubble th {
+          background: color-mix(in srgb, currentColor 10%, transparent);
+          font-weight: 600;
+        }
+
         .wc-ai-bot-message-bubble pre {
-          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          background: var(--code-bg-color, color-mix(in srgb, currentColor 12%, transparent));
           padding: 0.5rem;
           border-radius: 0.25rem;
           overflow-x: auto;
           margin: 0.5rem 0;
         }
-        
+
         .wc-ai-bot-message-bubble code {
-          background: var(--code-bg-color, rgba(0,0,0,0.1));
+          background: var(--code-bg-color, color-mix(in srgb, currentColor 12%, transparent));
           padding: 0.125rem 0.25rem;
           border-radius: 0.125rem;
           font-size: 0.875em;
+          overflow-wrap: anywhere;
         }
-        
+
         .wc-ai-bot-message-bubble pre code {
           background: none;
           padding: 0;
+          /* Fenced blocks keep their own whitespace and scroll rather than wrap. */
+          white-space: pre;
+          overflow-wrap: normal;
         }
 
         /* Code block language labels */
@@ -1064,8 +1105,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         /* Theme: Bubble */
         .wc-ai-bot--bubble .wc-ai-bot-container {
           position: fixed;
-          width: 350px;
-          height: 500px;
+          /* Grow to the configured size (attr → --wc-ai-bot-panel-*), clamped to the viewport. */
+          width: min(var(--wc-ai-bot-panel-width, 350px), 92vw);
+          height: min(var(--wc-ai-bot-panel-height, 500px), 85vh);
           z-index: 1000;
           transition: opacity 0.3s, transform 0.3s;
           opacity: 0;
@@ -1077,6 +1119,11 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           opacity: 1;
           transform: scale(1);
           pointer-events: auto;
+        }
+
+        /* Bubble: let the messages area fill the (now sizable) panel instead of the 400px cap. */
+        .wc-ai-bot--bubble .wc-ai-bot-messages {
+          max-height: none;
         }
 
         /* Bubble positions */
@@ -1132,10 +1179,11 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         /* Responsive */
         @media (max-width: 640px) {
           .wc-ai-bot--bubble .wc-ai-bot-container {
-            width: calc(100vw - 2rem);
-            height: calc(100vh - 2rem);
-            max-width: 350px;
-            max-height: 500px;
+            /* Honor the configured panel size but never exceed the phone viewport. */
+            width: min(var(--wc-ai-bot-panel-width, 350px), calc(100vw - 2rem));
+            height: min(var(--wc-ai-bot-panel-height, 500px), calc(100vh - 2rem));
+            max-width: none;
+            max-height: none;
           }
         }
 
@@ -1202,6 +1250,16 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       } else if (this._container) {
         this._container.style.maxHeight = '';
       }
+
+      // Panel size (bubble): set the CSS custom properties the container clamps against.
+      // Consumers can also set --wc-ai-bot-panel-width/height directly in CSS. `panel-height`
+      // is the preferred alias for the bubble panel's height (falls back to max-height).
+      const panelWidth = this.getAttribute('panel-width');
+      const panelHeight = this.getAttribute('panel-height') || (theme === 'bubble' ? maxHeight : null);
+      if (panelWidth) this.style.setProperty('--wc-ai-bot-panel-width', panelWidth);
+      else this.style.removeProperty('--wc-ai-bot-panel-width');
+      if (panelHeight) this.style.setProperty('--wc-ai-bot-panel-height', panelHeight);
+      else this.style.removeProperty('--wc-ai-bot-panel-height');
       
       // Show/hide toggle button based on theme
       if (this._container) {
@@ -2055,7 +2113,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       if (name === 'system-prompt' && this._isModelReady) {
         // System prompt changes can be applied to next conversation
         // We'll use it in the next message
-      } else if (name === 'theme' || name === 'position' || name === 'max-height') {
+      } else if (name === 'theme' || name === 'position' || name === 'max-height'
+                 || name === 'panel-width' || name === 'panel-height') {
         // Re-apply styles
         this._applyStyles();
       } else if (name === 'title' && this._container) {
