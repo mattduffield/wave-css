@@ -450,6 +450,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // Internal state
       this._messages = [];
       this._isLoading = false;
+      this._activeController = null;    // AbortController for the in-flight turn (supersede/recover)
       this._isModelReady = false;
       this._isMinimized = true;
       this._error = null;
@@ -712,16 +713,27 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         }
 
         .wc-ai-bot-message--user .wc-ai-bot-message-bubble {
-          background: var(--primary-color);
-          color: var(--primary-bg-color);
+          /* Theme surface + on-surface text so contrast follows the active light/dark theme.
+             A light accent tint marks the bubble as "mine" without hurting readability. */
+          background: color-mix(in srgb, var(--accent, var(--primary-bg-color)) 16%, var(--surface-3, var(--component-bg-color)));
+          color: var(--text-1, var(--component-color));
           /* Preserve the user's own line breaks; bot bubbles hold rendered markdown
              where pre-wrap would surface marked's inter-element newlines as big gaps. */
           white-space: pre-wrap;
         }
 
         .wc-ai-bot-message--bot .wc-ai-bot-message-bubble {
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--surface-2, var(--component-bg-color));
+          color: var(--text-1, var(--component-color));
+          border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+        }
+
+        /* Links in rendered answers read against the (surface) bubble background. */
+        .wc-ai-bot-message-bubble a {
+          color: var(--accent, var(--primary-color));
+          text-decoration: underline;
+          font-weight: 500;
+          overflow-wrap: anywhere;
         }
 
         /* Markdown content styling */
@@ -1520,7 +1532,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
 
     // POST the full conversation to the backend and stream the SSE reply into the
     // loading bubble. Handles the 503 JSON deny shape and the done/error SSE events.
-    async _streamServer(message, loadingId, botId) {
+    async _streamServer(message, loadingId, botId, signal) {
       const endpoint = this.getAttribute('endpoint') || '/api/ai';
 
       // Full conversation as user/assistant turns (exclude the in-progress bot bubble).
@@ -1537,7 +1549,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           messages,
           session_id: this._sessionId,
           turnstile_token: turnstileToken
-        })
+        }),
+        signal
       });
 
       const contentType = (resp.headers.get('content-type') || '').toLowerCase();
@@ -1567,6 +1580,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       let answer = '';
       let sources = [];
       let streamError = null;
+      // Complete on the `done`/`error` SSE event — the backend may keep the socket open
+      // (heartbeats) after it, so waiting only for EOF would hang the turn forever.
+      let streamDone = false;
 
       const processFrame = (frame) => {
         let eventType = 'message';
@@ -1588,23 +1604,31 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           this._updateMessage(loadingId, answer);
         } else if (eventType === 'done') {
           sources = Array.isArray(data.sources) ? data.sources : [];
+          streamDone = true;
         } else if (eventType === 'error') {
           streamError = data.reason || 'provider_error';
+          streamDone = true;
         }
       };
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
-        let idx;
-        while ((idx = buffer.indexOf('\n\n')) !== -1) {
-          const frame = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 2);
-          processFrame(frame);
+      try {
+        while (!streamDone) {
+          const { value, done } = await reader.read();
+          if (done) break; // EOF — server closed the stream without an explicit done frame
+          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
+          let idx;
+          while ((idx = buffer.indexOf('\n\n')) !== -1) {
+            const frame = buffer.slice(0, idx);
+            buffer = buffer.slice(idx + 2);
+            processFrame(frame);
+          }
         }
+        if (buffer.trim()) processFrame(buffer);
+      } finally {
+        // Stop reading promptly (turn done, EOF, error, or abort) so a socket held open
+        // by heartbeats can't keep the turn — and thus the busy state — alive.
+        try { await reader.cancel(); } catch (e) { /* already closed */ }
       }
-      if (buffer.trim()) processFrame(buffer);
 
       this._resetTurnstile();
 
@@ -2128,7 +2152,14 @@ If the user's request is ambiguous, generate the most likely interpretation and 
 
     _handleSend() {
       const message = this._input.value.trim();
-      if (!message || !this._isModelReady || this._isLoading) return;
+      if (!message || !this._isModelReady) return;
+
+      // Resilience: never no-op forever. If a prior turn is still marked busy (whether
+      // genuinely in flight or wedged by an earlier error), abort it and reset so this
+      // message can proceed rather than being silently dropped.
+      if (this._isLoading) {
+        this._recoverFromStuckTurn();
+      }
 
       // In assistant mode, intercept /commands
       if (this._isAssistantMode()) {
@@ -2150,6 +2181,18 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       }
 
       this._sendMessage(message);
+    }
+
+    // Abort any in-flight request and clear the busy state so a new send can proceed.
+    // The aborted turn's own finally is guarded by controller identity, so it won't
+    // stomp the state of the turn that supersedes it.
+    _recoverFromStuckTurn() {
+      if (this._activeController) {
+        try { this._activeController.abort(); } catch (e) { /* ignore */ }
+        this._activeController = null;
+      }
+      this._isLoading = false;
+      if (this._sendButton) this._sendButton.disabled = false;
     }
 
     _handleKeydown(e) {
@@ -2205,15 +2248,18 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // Emit message sent event
       this._emitBotEvent('wcbotmessagesent', 'bot:message-sent', { botId, message });
       
-      // Show loading state
+      // Show loading state. Each turn gets its own AbortController so a later send can
+      // supersede a wedged/in-flight one without the two turns racing on shared state.
       this._isLoading = true;
       this._sendButton.disabled = true;
+      const controller = new AbortController();
+      this._activeController = controller;
       const loadingId = this._addMessage('bot', '...', true);
-      
+
       try {
         // Server backend owns prompt/grounding/model/limits — stream from the endpoint.
         if (this._provider === 'server') {
-          await this._streamServer(message, loadingId, botId);
+          await this._streamServer(message, loadingId, botId, controller.signal);
           return;
         }
 
@@ -2246,13 +2292,23 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         this._emitBotEvent('wcbotresponsereceived', 'bot:response-received', detail);
 
       } catch (error) {
+        // A superseding send aborts this turn — leave its partial answer as-is, no error bubble.
+        if (error && error.name === 'AbortError') {
+          return;
+        }
         console.error('[wc-ai-bot] Failed to get response:', error);
         this._updateMessage(loadingId, `Error: ${error.message}`);
         this._emitBotEvent('wcboterror', 'bot:error', { botId, error: error.message });
       } finally {
-        this._isLoading = false;
-        this._sendButton.disabled = false;
-        this._input.focus();
+        // Only the turn that is still current resets shared state. A superseded older
+        // turn's controller was already replaced, so it must not clear the newer turn's
+        // busy flag / send button.
+        if (this._activeController === controller) {
+          this._activeController = null;
+          this._isLoading = false;
+          this._sendButton.disabled = false;
+          this._input.focus();
+        }
       }
     }
 
@@ -2428,7 +2484,11 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     }
 
     _addMessage(role, content, isLoading = false) {
-      const messageId = Date.now().toString();
+      // Unique per message — a bare Date.now() collides when the user bubble and the bot
+      // loading bubble are appended in the same millisecond, which would make _updateMessage
+      // (which looks up by id) stream the answer into the user's bubble instead.
+      this._msgSeq = (this._msgSeq || 0) + 1;
+      const messageId = `${Date.now().toString(36)}-${this._msgSeq}`;
       const message = { id: messageId, role, content, timestamp: new Date(), isLoading };
       this._messages.push(message);
       
@@ -2444,13 +2504,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         bubbleEl.innerHTML = '<wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>';
       } else {
         // Use markdown for bot messages, plain text for user messages
-        if (role === 'bot' && markedModule && markedModule.marked) {
-          const html = markedModule.marked.parse(content);
-          bubbleEl.innerHTML = html;
-          this._addCopyButtons(bubbleEl);
-          if (this.getAttribute('debug') === 'true') {
-            console.log('[wc-ai-bot] Parsed HTML:', html);
-          }
+        if (role === 'bot') {
+          this._renderBotMarkdown(bubbleEl, content);
         } else {
           bubbleEl.textContent = content;
         }
@@ -2472,18 +2527,9 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         if (bubbleEl) {
           // Remove loading class when updating content
           bubbleEl.classList.remove('wc-ai-bot-message-bubble--loading');
-          
-          // Use markdown parser for bot messages
-          if (markedModule && markedModule.marked) {
-            const html = markedModule.marked.parse(content);
-            bubbleEl.innerHTML = html;
-            this._addCopyButtons(bubbleEl);
-            if (this.getAttribute('debug') === 'true') {
-              console.log('[wc-ai-bot] Updated HTML:', html);
-            }
-          } else {
-            bubbleEl.textContent = content;
-          }
+
+          // Render markdown for bot messages (safe — never throws out to the stream loop).
+          this._renderBotMarkdown(bubbleEl, content);
         }
       }
       
@@ -2496,6 +2542,26 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       
       // Scroll to bottom
       this._messagesContainer.scrollTop = this._messagesContainer.scrollHeight;
+    }
+
+    // Render a bot bubble's markdown. A rich answer (GFM tables, inline <a> anchors)
+    // must NEVER throw and wedge the streaming turn — on any failure we fall back to
+    // plain text and keep going, so the turn still finishes and input re-enables.
+    _renderBotMarkdown(bubbleEl, content) {
+      try {
+        if (markedModule && markedModule.marked) {
+          const html = markedModule.marked.parse(content);
+          bubbleEl.innerHTML = html;
+          this._addCopyButtons(bubbleEl);
+          if (this.getAttribute('debug') === 'true') {
+            console.log('[wc-ai-bot] Parsed HTML:', html);
+          }
+          return;
+        }
+      } catch (err) {
+        console.error('[wc-ai-bot] Markdown render failed; falling back to plain text:', err);
+      }
+      bubbleEl.textContent = content;
     }
 
     _addCopyButtons(containerEl) {
