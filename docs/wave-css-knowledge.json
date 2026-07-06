@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.18.3",
+    "version": "1.18.4",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -1831,6 +1831,11 @@
         "badge-muted",
         "badge-primary"
       ],
+      "onSurfaceForeground": {
+        "note": "A saturated accent legible as a FILL is usually illegible as TEXT on a light surface (e.g. --success-color #22c55e on white ~1.9:1, fails WCAG AA). For any accent rendered as text/icon on a surface, mix it 55% toward --text-1 (near-black in light themes, near-white in dark) so the same declaration stays >=4.5:1 in both. Badge foregrounds now use this inline mix (color-mix(in srgb, var(--<state>-color) 55%, var(--text-1))). Inlined per rule, NOT an inherited :root token — a :root token bakes in the page-root --text-1 and goes stale inside a nested theme.",
+        "utilities": [".on-surface-accent (set --accent inline/parent)", ".on-surface-success", ".on-surface-danger", ".on-surface-warning", ".on-surface-info"],
+        "guidance": "Use --*-color / .success-color for fills (backgrounds, borders, filled icons); use the on-surface utilities for accent-colored text/icons on a surface."
+      },
       "defaults": {
         "dark": {
           "success": "#22c55e",

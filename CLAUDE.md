@@ -101,7 +101,9 @@ Four semantic color families with CSS variables and utility classes:
 - **Warning**: `--warning-color` (#f59e0b), `--warning-light-color` — classes: `warning-color`, `warning-light-color`, `warning-bg-color`, `warning-border-color`
 - **Info**: `--info-color` (#3b82f6), `--info-light-color` — classes: `info-color`, `info-light-color`, `info-bg-color`, `info-border-color`
 
-**Badge variants** — semantic status pills: `badge badge-success`, `badge badge-warning`, `badge badge-danger`, `badge badge-info`, `badge badge-muted`, `badge badge-primary`
+**Badge variants** — semantic status pills: `badge badge-success`, `badge badge-warning`, `badge badge-danger`, `badge badge-info`, `badge badge-muted`, `badge badge-primary`. Badge **foreground** is the accent mixed 55% toward `--text-1` (`color-mix(in srgb, var(--success-color) 55%, var(--text-1))`), so it stays WCAG AA (≥4.5:1) on both light and dark surfaces — the raw `--*-color` accent is a fill color and fails as text on a light surface (≈1.9:1). The mix is inlined per rule (not routed through an inherited `:root` token, which would bake in the page-root `--text-1` and go stale inside a nested theme).
+
+**On-surface foreground utilities** — legible foreground for any accent in the current theme (same mix-toward-`--text-1` mechanism): `.on-surface-accent` (set `--accent` inline/parent, e.g. `<span class="on-surface-accent" style="--accent:#8b5cf6">`) plus semantic conveniences `.on-surface-success` / `.on-surface-danger` / `.on-surface-warning` / `.on-surface-info`. Use these (not the raw `--*-color`) whenever an accent is rendered as **text/icon on a surface**; keep `--*-color` / `.success-color` for **fills** (backgrounds, borders, filled icons).
 
 **Secondary background** — `.secondary-bg-color` uses `--secondary-bg-color`
 
