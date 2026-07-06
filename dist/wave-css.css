@@ -4808,6 +4808,17 @@
   .on-surface-info {
     color: color-mix(in srgb, var(--info-color) 55%, var(--text-1, #111));
   }
+  .accent-fill {
+    background: var(--accent-fill-bg, var(--accent, var(--primary-bg-color)));
+    color: var(--on-accent, #fff);
+  }
+  .accent-soft-fill {
+    background: var(--accent-soft, color-mix(in oklab, var(--accent, var(--primary-bg-color)) 15%, var(--surface-1)));
+    color: var(--on-accent-soft, var(--text-1));
+  }
+  .accent-border-color {
+    border-color: var(--accent-border, var(--accent, var(--primary-bg-color)));
+  }
   .badge {
     display: inline-flex;
     align-items: center;
@@ -16726,6 +16737,11 @@ body.has-impersonation-bar {
   --component-border-color: oklch(89% 0.012 var(--hue));
   --accent: oklch(54% 0.21 var(--hue));
   --accent-hover: oklch(47% 0.22 var(--hue));
+  --on-accent: oklch(99% 0.02 var(--hue));
+  --accent-fill-bg: color-mix(in oklab, var(--accent) 82%, #000);
+  --accent-soft: oklch(90% 0.06 var(--hue));
+  --on-accent-soft: oklch(32% 0.09 var(--hue));
+  --accent-border: oklch(62% 0.16 var(--hue));
   --primary-bg-color: var(--accent);
   --primary-color: oklch(99% 0.02 var(--hue));
   --checkbox-checked-bg: var(--accent);
@@ -16754,6 +16770,11 @@ html.dark.crisp {
   --component-border-color: oklch(30% 0.030 var(--hue));
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
+  --on-accent: oklch(20% 0.03 var(--hue));
+  --accent-fill-bg: var(--accent);
+  --accent-soft: oklch(34% 0.075 var(--hue));
+  --on-accent-soft: oklch(96% 0.02 var(--hue));
+  --accent-border: oklch(58% 0.14 var(--hue));
 }
 @layer wc.selected {
   .list {

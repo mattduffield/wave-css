@@ -5004,6 +5004,25 @@
         color: color-mix(in srgb, var(--info-color) 55%, var(--text-1, #111));
     }
 
+    /* Accent fills — a legible accent bubble/pill/callout with ZERO hardcoded colors.
+       .accent-fill      → the loud, full-strength accent (uses --accent-fill-bg, which is the
+                           accent deepened in light themes so --on-accent clears WCAG AA per hue).
+       .accent-soft-fill → the subtle, offset accent tint (bubbles/callouts) — distinct from the
+                           card in BOTH themes, with its own guaranteed-legible --on-accent-soft.
+       .accent-border-color → accent-derived border/ring that reads on the card.
+       Fallbacks keep them sane outside .crisp (where the accent family is defined). */
+    .accent-fill {
+        background: var(--accent-fill-bg, var(--accent, var(--primary-bg-color)));
+        color: var(--on-accent, #fff);
+    }
+    .accent-soft-fill {
+        background: var(--accent-soft, color-mix(in oklab, var(--accent, var(--primary-bg-color)) 15%, var(--surface-1)));
+        color: var(--on-accent-soft, var(--text-1));
+    }
+    .accent-border-color {
+        border-color: var(--accent-border, var(--accent, var(--primary-bg-color)));
+    }
+
     /* Badge — semantic status pills.
        Each carries a faint same-hue 1px inset box-shadow outline so the pill stays
        delineated even when its translucent fill lands on a same-hue theme surface
@@ -17552,6 +17571,15 @@ body.has-impersonation-bar {
 
   --accent: oklch(54% 0.21 var(--hue));
   --accent-hover: oklch(47% 0.22 var(--hue));
+  /* Accent family — legible on-accent fg + a subtle offset fill, hue- AND theme-aware.
+     The full-saturation --accent at L54% is too mid-toned to carry AA text on EVERY hue,
+     so .accent-fill paints --accent-fill-bg (the accent deepened ~18%) which lets the
+     near-white --on-accent clear AA (>=4.5:1) across the whole hue range. Verified per hue. */
+  --on-accent: oklch(99% 0.02 var(--hue));            /* fg on --accent-fill-bg */
+  --accent-fill-bg: color-mix(in oklab, var(--accent) 82%, #000);
+  --accent-soft: oklch(90% 0.06 var(--hue));          /* subtle accent FILL, distinct from the card */
+  --on-accent-soft: oklch(32% 0.09 var(--hue));       /* fg on --accent-soft */
+  --accent-border: oklch(62% 0.16 var(--hue));        /* accent-derived border/ring, reads on the card */
   --primary-bg-color: var(--accent);
   --primary-color: oklch(99% 0.02 var(--hue));
   --checkbox-checked-bg: var(--accent);
@@ -17578,6 +17606,14 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
 
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
+  /* Accent family (dark). The dark --accent sits at L64% (lighter), so a near-BLACK
+     --on-accent is AA on the RAW accent — no deepening needed; --accent-fill-bg = --accent.
+     --accent-soft is an elevated tint distinct from the dark card, with a near-white fg. */
+  --on-accent: oklch(20% 0.03 var(--hue));            /* fg on --accent-fill-bg (= --accent) */
+  --accent-fill-bg: var(--accent);
+  --accent-soft: oklch(34% 0.075 var(--hue));         /* elevated accent FILL, distinct from the card */
+  --on-accent-soft: oklch(96% 0.02 var(--hue));       /* fg on --accent-soft */
+  --accent-border: oklch(58% 0.14 var(--hue));        /* accent-derived border/ring, reads on the card */
 }
 /* === end CRISP =========================================================== */
 

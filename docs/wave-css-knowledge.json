@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.18.4",
+    "version": "1.18.5",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -1835,6 +1835,19 @@
         "note": "A saturated accent legible as a FILL is usually illegible as TEXT on a light surface (e.g. --success-color #22c55e on white ~1.9:1, fails WCAG AA). For any accent rendered as text/icon on a surface, mix it 55% toward --text-1 (near-black in light themes, near-white in dark) so the same declaration stays >=4.5:1 in both. Badge foregrounds now use this inline mix (color-mix(in srgb, var(--<state>-color) 55%, var(--text-1))). Inlined per rule, NOT an inherited :root token — a :root token bakes in the page-root --text-1 and goes stale inside a nested theme.",
         "utilities": [".on-surface-accent (set --accent inline/parent)", ".on-surface-success", ".on-surface-danger", ".on-surface-warning", ".on-surface-info"],
         "guidance": "Use --*-color / .success-color for fills (backgrounds, borders, filled icons); use the on-surface utilities for accent-colored text/icons on a surface."
+      },
+      "accentFillFamily": {
+        "note": "Completes the --accent family (.crisp mode) so accent bubbles/pills/callouts need zero hardcoded colors. Tokens are hue- AND theme-aware, defined in both .crisp light & dark blocks. The full-saturation --accent (L54% light) is too mid-toned for a single AA foreground across all hues, so .accent-fill paints --accent-fill-bg (the accent deepened ~18% in light themes via color-mix(in oklab, var(--accent) 82%, #000)); dark-theme accent (L64%) is light enough to keep --accent-fill-bg = raw --accent with a near-black --on-accent. All pairings verified WCAG AA (>=4.5:1) across all 45 theme hues in both themes (tests/accent-family-test.py).",
+        "tokens": {
+          "--on-accent": "legible fg on --accent-fill-bg (near-white in light, near-black in dark)",
+          "--accent-fill-bg": "the .accent-fill background (deepened accent in light, raw accent in dark)",
+          "--accent-soft": "subtle OFFSET accent fill, visibly distinct from the card in both themes (unlike --primary-bg-color, which is a pale wash that matches a light card)",
+          "--on-accent-soft": "legible fg on --accent-soft",
+          "--accent-border": "accent-derived border/ring that reads on the card",
+          "--accent-hover": "(pre-existing) hover state of --accent"
+        },
+        "utilities": [".accent-fill (loud full accent)", ".accent-soft-fill (subtle bubble/callout — prefer for chat bubbles)", ".accent-border-color"],
+        "guidance": "For a legible accent bubble/pill just add class=accent-fill or class=accent-soft-fill — no color: needed. Prefer .accent-soft-fill for chat bubbles/callouts (full --accent is loud)."
       },
       "defaults": {
         "dark": {
