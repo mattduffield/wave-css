@@ -28273,27 +28273,27 @@ if (!customElements.get("wc-prompt")) {
     }
     async success(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "success", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
+      const { value: result } = await Swal.fire({ icon: "success", title, text, footer, focusConfirm: false, reverseButtons: true, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async error(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "error", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
+      const { value: result } = await Swal.fire({ icon: "error", title, text, footer, focusConfirm: false, reverseButtons: true, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async warning(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "warning", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
+      const { value: result } = await Swal.fire({ icon: "warning", title, text, footer, focusConfirm: false, reverseButtons: true, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async info(c) {
       const { title = "", text = "", footer = "", callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "info", title, text, footer, focusConfirm: false, backdrop: false, scrollbarPadding: false });
+      const { value: result } = await Swal.fire({ icon: "info", title, text, footer, focusConfirm: false, reverseButtons: true, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async question(c) {
       const { title = "", text = "", footer = "", showCancelButton = true, callback = null } = c;
-      const { value: result } = await Swal.fire({ icon: "question", title, text, footer, showCancelButton, focusConfirm: false, backdrop: false, scrollbarPadding: false });
+      const { value: result } = await Swal.fire({ icon: "question", title, text, footer, showCancelButton, focusConfirm: false, reverseButtons: true, backdrop: false, scrollbarPadding: false });
       return this.handleResult(c, result);
     }
     async notify(c) {
@@ -28340,6 +28340,7 @@ if (!customElements.get("wc-prompt")) {
         inputPlaceholder,
         backdrop: false,
         focusConfirm: false,
+        reverseButtons: true,
         showCancelButton: true,
         showConfirmButton,
         willOpen: () => {
@@ -28416,6 +28417,9 @@ if (!customElements.get("wc-prompt")) {
         customClass,
         backdrop: false,
         focusConfirm: false,
+        // CTA (confirm) on the right, cancel on the left. Placed in defaultArgs so a
+        // caller can still override per-call via `reverseButtons: false` in the config.
+        reverseButtons: true,
         showCancelButton: true,
         showConfirmButton: true,
         willOpen: () => {

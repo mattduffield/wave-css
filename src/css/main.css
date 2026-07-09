@@ -13870,6 +13870,83 @@
         padding: 0.25rem 0.5rem;
     }
 
+    /* ---- Button color variants -------------------------------------------------
+       Compose with .btn (e.g. class="btn btn-primary"). Each variant simply reassigns
+       the shared --button-* tokens, so the base .btn structure — padding, radius, and
+       the hover / active / focus / disabled rules above — is reused as-is (no per-variant
+       state selectors, no specificity battles: element-level custom props beat the
+       inherited theme values).
+
+       • primary / secondary / cancel TRACK theme tokens (adapt to every theme + light/dark).
+         - primary uses the crisp accent fill (--accent-fill-bg / --on-accent) when present
+           so it's WCAG-legible per hue, falling back to --primary-bg-color/--primary-color.
+         - cancel is the visual opposite of primary: --text-1 fill (black in light themes,
+           a light chip in dark) with --surface-1 label — always maximal contrast.
+       • success / danger / warning / info are FIXED semantic fills, deepened just enough
+         that white text clears WCAG AA in EVERY theme and both light & dark modes
+         (the raw --*-color accents are too light for white text). */
+    .btn-primary {
+        /* --primary-bg-color spans bright (yellow L88%) to dark (coffee) across themes, so the
+           theme's own --primary-color is not reliably AA on it. Deepen the accent fill enough
+           that WHITE text clears AA in EVERY theme + light/dark (verified per theme). In .crisp
+           the ready-made --accent-fill-bg/--on-accent (a lighter, per-hue-verified deepen) win
+           via the fallback, keeping the crisp accent brighter. */
+        --button-bg-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+        --button-color: var(--on-accent, #ffffff);
+        --button-border-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+        --button-hover-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 50%, #000));
+        --button-hover-color: var(--on-accent, #ffffff);
+        --button-active-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 45%, #000));
+    }
+    .btn-secondary {
+        --button-bg-color: var(--secondary-bg-color);
+        --button-color: var(--component-color, var(--text-1));
+        --button-border-color: var(--component-border-color, var(--secondary-bg-color));
+        --button-hover-bg-color: var(--surface-3, var(--secondary-bg-color));
+        --button-hover-color: var(--component-color, var(--text-1));
+        --button-active-bg-color: var(--surface-4, var(--secondary-bg-color));
+    }
+    .btn-cancel {
+        --button-bg-color: var(--text-1);
+        --button-color: var(--surface-1);
+        --button-border-color: var(--text-1);
+        --button-hover-bg-color: var(--text-2, var(--text-1));
+        --button-hover-color: var(--surface-1);
+        --button-active-bg-color: var(--text-2, var(--text-1));
+    }
+    .btn-success {
+        --button-bg-color: #15803d;
+        --button-color: #ffffff;
+        --button-border-color: #15803d;
+        --button-hover-bg-color: #166534;
+        --button-hover-color: #ffffff;
+        --button-active-bg-color: #14532d;
+    }
+    .btn-danger {
+        --button-bg-color: #b91c1c;
+        --button-color: #ffffff;
+        --button-border-color: #b91c1c;
+        --button-hover-bg-color: #991b1b;
+        --button-hover-color: #ffffff;
+        --button-active-bg-color: #7f1d1d;
+    }
+    .btn-warning {
+        --button-bg-color: #b45309;
+        --button-color: #ffffff;
+        --button-border-color: #b45309;
+        --button-hover-bg-color: #92400e;
+        --button-hover-color: #ffffff;
+        --button-active-bg-color: #78350f;
+    }
+    .btn-info {
+        --button-bg-color: #1d4ed8;
+        --button-color: #ffffff;
+        --button-border-color: #1d4ed8;
+        --button-hover-bg-color: #1e40af;
+        --button-hover-color: #ffffff;
+        --button-active-bg-color: #1e3a8a;
+    }
+
     hr {
         border: none;
         height: 1px;

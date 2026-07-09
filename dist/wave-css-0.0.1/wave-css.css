@@ -13262,6 +13262,62 @@
   button.btn.btn-sm {
     padding: 0.25rem 0.5rem;
   }
+  .btn-primary {
+    --button-bg-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+    --button-color: var(--on-accent, #ffffff);
+    --button-border-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+    --button-hover-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 50%, #000));
+    --button-hover-color: var(--on-accent, #ffffff);
+    --button-active-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 45%, #000));
+  }
+  .btn-secondary {
+    --button-bg-color: var(--secondary-bg-color);
+    --button-color: var(--component-color, var(--text-1));
+    --button-border-color: var(--component-border-color, var(--secondary-bg-color));
+    --button-hover-bg-color: var(--surface-3, var(--secondary-bg-color));
+    --button-hover-color: var(--component-color, var(--text-1));
+    --button-active-bg-color: var(--surface-4, var(--secondary-bg-color));
+  }
+  .btn-cancel {
+    --button-bg-color: var(--text-1);
+    --button-color: var(--surface-1);
+    --button-border-color: var(--text-1);
+    --button-hover-bg-color: var(--text-2, var(--text-1));
+    --button-hover-color: var(--surface-1);
+    --button-active-bg-color: var(--text-2, var(--text-1));
+  }
+  .btn-success {
+    --button-bg-color: #15803d;
+    --button-color: #ffffff;
+    --button-border-color: #15803d;
+    --button-hover-bg-color: #166534;
+    --button-hover-color: #ffffff;
+    --button-active-bg-color: #14532d;
+  }
+  .btn-danger {
+    --button-bg-color: #b91c1c;
+    --button-color: #ffffff;
+    --button-border-color: #b91c1c;
+    --button-hover-bg-color: #991b1b;
+    --button-hover-color: #ffffff;
+    --button-active-bg-color: #7f1d1d;
+  }
+  .btn-warning {
+    --button-bg-color: #b45309;
+    --button-color: #ffffff;
+    --button-border-color: #b45309;
+    --button-hover-bg-color: #92400e;
+    --button-hover-color: #ffffff;
+    --button-active-bg-color: #78350f;
+  }
+  .btn-info {
+    --button-bg-color: #1d4ed8;
+    --button-color: #ffffff;
+    --button-border-color: #1d4ed8;
+    --button-hover-bg-color: #1e40af;
+    --button-hover-color: #ffffff;
+    --button-active-bg-color: #1e3a8a;
+  }
   hr {
     border: none;
     height: 1px;

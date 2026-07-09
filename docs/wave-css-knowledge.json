@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.18.5",
+    "version": "1.18.6",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -1835,6 +1835,13 @@
         "note": "A saturated accent legible as a FILL is usually illegible as TEXT on a light surface (e.g. --success-color #22c55e on white ~1.9:1, fails WCAG AA). For any accent rendered as text/icon on a surface, mix it 55% toward --text-1 (near-black in light themes, near-white in dark) so the same declaration stays >=4.5:1 in both. Badge foregrounds now use this inline mix (color-mix(in srgb, var(--<state>-color) 55%, var(--text-1))). Inlined per rule, NOT an inherited :root token — a :root token bakes in the page-root --text-1 and goes stale inside a nested theme.",
         "utilities": [".on-surface-accent (set --accent inline/parent)", ".on-surface-success", ".on-surface-danger", ".on-surface-warning", ".on-surface-info"],
         "guidance": "Use --*-color / .success-color for fills (backgrounds, borders, filled icons); use the on-surface utilities for accent-colored text/icons on a surface."
+      },
+      "buttonVariants": {
+        "note": "Semantic + neutral button color variants. Compose with .btn (e.g. class='btn btn-primary'; also .btn-sm). Each variant just reassigns the shared --button-* tokens so the base .btn structure/hover/active/focus/disabled is reused. Previously these (except .btn/.btn-outline/.btn-sm) were PHANTOM classes — referenced in templates but defined in no CSS, so they rendered as a plain neutral .btn. Now real and verified WCAG AA (>=4.5:1 label vs fill) across all themes in light & dark (tests/button-variants-test.py).",
+        "classes": [".btn (base)", ".btn-outline", ".btn-sm (size)", ".btn-primary", ".btn-secondary", ".btn-cancel", ".btn-success", ".btn-danger", ".btn-warning", ".btn-info"],
+        "primary": ".btn-primary deepens --primary-bg-color 60% toward black + white label so it's AA in every theme (the theme's --primary-color isn't reliably AA; --primary-bg-color ranges bright-yellow to dark-coffee). In .crisp it uses the lighter per-hue --accent-fill-bg/--on-accent via fallback.",
+        "semantic": "success/danger/warning/info are FIXED deepened fills (#15803d / #b91c1c / #b45309 / #1d4ed8) with white text — AA in every theme + light/dark (raw --*-color accents are too light for white).",
+        "cancel": ".btn-cancel is the dark 'opposite-of-primary' dismiss button (like the swal cancel): --text-1 fill (black-ish in light themes, a light chip in dark) with a --surface-1 label. The swal dialog's own cancel button styles via --secondary-bg-color in wc-prompt.js; .btn-secondary matches that neutral look."
       },
       "accentFillFamily": {
         "note": "Completes the --accent family (.crisp mode) so accent bubbles/pills/callouts need zero hardcoded colors. Tokens are hue- AND theme-aware, defined in both .crisp light & dark blocks. The full-saturation --accent (L54% light) is too mid-toned for a single AA foreground across all hues, so .accent-fill paints --accent-fill-bg (the accent deepened ~18% in light themes via color-mix(in oklab, var(--accent) 82%, #000)); dark-theme accent (L64%) is light enough to keep --accent-fill-bg = raw --accent with a near-black --on-accent. All pairings verified WCAG AA (>=4.5:1) across all 45 theme hues in both themes (tests/accent-family-test.py).",
