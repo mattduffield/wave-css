@@ -10813,6 +10813,910 @@ var WcGoogleAddress = class _WcGoogleAddress extends WcBaseFormComponent {
 };
 customElements.define(WcGoogleAddress.is, WcGoogleAddress);
 
+// src/js/components/wc-map.js
+var MAPLIBRE_JS = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";
+var MAPLIBRE_CSS = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
+var DEFAULT_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+var WcMap = class _WcMap extends WcBaseComponent {
+  static get observedAttributes() {
+    return [
+      "api-key",
+      "lat",
+      "lng",
+      "address",
+      "title",
+      "zoom",
+      "map-type",
+      "center-lat",
+      "center-lng",
+      "draggable",
+      "scrollwheel",
+      "disable-default-ui",
+      "markers",
+      "fit-bounds",
+      "tiles",
+      "map-style",
+      "class",
+      "elt-class"
+    ];
+  }
+  static maplibreLoadPromise = null;
+  constructor() {
+    super();
+    this.map = null;
+    this.markers = [];
+    this.mapElement = null;
+    const compEl = this.querySelector(".wc-map");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-map");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    if (this._disconnectTimeout) {
+      clearTimeout(this._disconnectTimeout);
+      this._disconnectTimeout = null;
+    }
+    this._setupResizeHandling();
+    if (this.map) return;
+    try {
+      await this._ensureMapLibreLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await this._initializeMap();
+    } catch (error) {
+      console.error("wc-map: Error initializing map:", error);
+      this._showError("Failed to load the map library.");
+    }
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disconnectTimeout = setTimeout(() => this._cleanup(), 1e3);
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (["lat", "lng", "address", "title", "markers", "fit-bounds"].includes(attrName)) {
+      if (this.map) this._addPins();
+    } else if (["zoom", "map-type", "center-lat", "center-lng"].includes(attrName)) {
+      if (this.map) this._updateMapConfig();
+    } else if (attrName === "api-key") {
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  _render() {
+    super._render();
+    if (!this.mapElement) {
+      this.mapElement = document.createElement("div");
+      this.mapElement.classList.add("map-container");
+      this.componentElement.innerHTML = "";
+      this.componentElement.appendChild(this.mapElement);
+    }
+  }
+  /** Load MapLibre GL JS + CSS once across all instances (skips if already present). */
+  async _ensureMapLibreLoaded() {
+    if (window.maplibregl) return Promise.resolve();
+    if (_WcMap.maplibreLoadPromise) return _WcMap.maplibreLoadPromise;
+    _WcMap.maplibreLoadPromise = (async () => {
+      try {
+        await this.loadCSS(MAPLIBRE_CSS);
+      } catch (e) {
+      }
+      await this.loadLibrary(MAPLIBRE_JS, "maplibregl");
+    })();
+    return _WcMap.maplibreLoadPromise;
+  }
+  _styleUrl() {
+    return this.getAttribute("tiles") || this.getAttribute("map-style") || this.getAttribute("style-url") || DEFAULT_STYLE;
+  }
+  async _initializeMap() {
+    if (!window.maplibregl || !this.mapElement) return;
+    if (this.map) return;
+    if (this.mapElement.offsetWidth === 0 || this.mapElement.offsetHeight === 0) return;
+    const zoom = parseInt(this.getAttribute("zoom")) || 12;
+    const disableDefaultUI = this.hasAttribute("disable-default-ui");
+    const draggable = this.hasAttribute("draggable") ? this.getAttribute("draggable") !== "false" : true;
+    const scrollwheel = this.hasAttribute("scrollwheel") ? this.getAttribute("scrollwheel") !== "false" : true;
+    let center = [0, 0];
+    const centerLat = this.getAttribute("center-lat");
+    const centerLng = this.getAttribute("center-lng");
+    if (centerLat && centerLng) {
+      center = [parseFloat(centerLng), parseFloat(centerLat)];
+    } else {
+      const pins = this._getPins();
+      if (pins.length > 0) center = [pins[0].lng, pins[0].lat];
+    }
+    try {
+      this.map = new maplibregl.Map({
+        container: this.mapElement,
+        style: this._styleUrl(),
+        center,
+        zoom,
+        attributionControl: true
+        // keep the mandatory OpenFreeMap/OSM attribution visible
+      });
+      if (!disableDefaultUI && maplibregl.NavigationControl) {
+        try {
+          this.map.addControl(new maplibregl.NavigationControl(), "top-right");
+        } catch (e) {
+        }
+      }
+      if (!draggable && this.map.dragPan) this.map.dragPan.disable();
+      if (!scrollwheel && this.map.scrollZoom) this.map.scrollZoom.disable();
+      const onReady = () => {
+        this._emitEvent("wcmaploaded", "map-loaded", { detail: { map: this.map }, bubbles: true });
+        this._addMapEventListeners();
+        this._addPins();
+      };
+      if (typeof this.map.on === "function") this.map.on("load", onReady);
+      if (typeof this.map.loaded === "function" && this.map.loaded()) onReady();
+    } catch (error) {
+      console.error("wc-map: Error creating map:", error);
+      this._showError("Error creating map: " + error.message);
+    }
+  }
+  /** Pins from single lat/lng attrs, <option> children, and/or a markers JSON array (additive). */
+  _getPins() {
+    const pins = [];
+    const lat = this.getAttribute("lat");
+    const lng = this.getAttribute("lng");
+    if (lat && lng) {
+      pins.push({
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        address: this.getAttribute("address") || "",
+        title: this.getAttribute("title") || this.getAttribute("address") || "Location"
+      });
+    }
+    this.querySelectorAll("option").forEach((option) => {
+      const optLat = option.getAttribute("data-lat");
+      const optLng = option.getAttribute("data-lng");
+      if (optLat && optLng) {
+        pins.push({
+          lat: parseFloat(optLat),
+          lng: parseFloat(optLng),
+          address: option.getAttribute("data-address") || "",
+          title: option.getAttribute("data-title") || option.getAttribute("data-address") || "Location",
+          link: option.getAttribute("data-link") || ""
+        });
+      }
+    });
+    const markersAttr = this.getAttribute("markers");
+    if (markersAttr) {
+      try {
+        const arr = JSON.parse(markersAttr);
+        if (Array.isArray(arr)) {
+          arr.forEach((m) => {
+            if (m && m.lat != null && m.lng != null) {
+              pins.push({
+                lat: parseFloat(m.lat),
+                lng: parseFloat(m.lng),
+                address: m.address || "",
+                title: m.label || m.title || m.address || "Location",
+                label: m.label || "",
+                link: m.link || ""
+              });
+            }
+          });
+        }
+      } catch (ex) {
+        console.warn("wc-map: invalid markers JSON", ex);
+      }
+    }
+    return pins;
+  }
+  _escape(str) {
+    return String(str == null ? "" : str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  _addPins() {
+    if (!this.map) return;
+    this._clearMarkers();
+    const pins = this._getPins();
+    if (pins.length === 0) return;
+    pins.forEach((pin, index) => {
+      const popupHtml = `<div class="map-info-window">
+          ${pin.title ? `<strong>${this._escape(pin.title)}</strong><br>` : ""}
+          ${this._escape(pin.address)}
+          ${pin.link ? `<div><a href="${this._escape(pin.link)}">View</a></div>` : ""}
+        </div>`;
+      const popup = new maplibregl.Popup({ offset: 24 }).setHTML(popupHtml);
+      const marker = new maplibregl.Marker().setLngLat([pin.lng, pin.lat]).setPopup(popup).addTo(this.map);
+      this.markers.push(marker);
+      const el = typeof marker.getElement === "function" ? marker.getElement() : null;
+      if (el) {
+        el.style.cursor = "pointer";
+        el.addEventListener("click", () => {
+          this._emitEvent("wcpinclicked", "pin-clicked", {
+            detail: { pin, marker, index },
+            bubbles: true
+          });
+          const detail = { index, link: pin.link || null, pin };
+          const opts = { detail, bubbles: true };
+          this.dispatchEvent(new CustomEvent("wcmapmarkerclick", opts));
+          this.dispatchEvent(new CustomEvent("wcgooglemapmarkerclick", opts));
+          this.dispatchEvent(new CustomEvent("wc-google-map:marker-click", opts));
+        });
+      }
+    });
+    const fitBounds = this.hasAttribute("fit-bounds");
+    if (pins.length > 1 || fitBounds && pins.length >= 1) {
+      const bounds = new maplibregl.LngLatBounds();
+      pins.forEach((pin) => bounds.extend([pin.lng, pin.lat]));
+      this.map.fitBounds(bounds, { padding: 48, maxZoom: 15 });
+    } else if (pins.length === 1) {
+      this.map.setCenter([pins[0].lng, pins[0].lat]);
+    }
+  }
+  _clearMarkers() {
+    this.markers.forEach((marker) => {
+      try {
+        marker.remove();
+      } catch (e) {
+      }
+    });
+    this.markers = [];
+  }
+  _updateMapConfig() {
+    if (!this.map) return;
+    const zoom = parseInt(this.getAttribute("zoom"));
+    const centerLat = this.getAttribute("center-lat");
+    const centerLng = this.getAttribute("center-lng");
+    if (zoom && !isNaN(zoom) && this.map.setZoom) this.map.setZoom(zoom);
+    if (centerLat && centerLng && this.map.setCenter) {
+      this.map.setCenter([parseFloat(centerLng), parseFloat(centerLat)]);
+    }
+  }
+  _addMapEventListeners() {
+    if (!this.map || typeof this.map.on !== "function") return;
+    this.map.on("click", (e) => {
+      const ll = e.lngLat || {};
+      this._emitEvent("wcmapclicked", "map-clicked", {
+        detail: { lat: ll.lat, lng: ll.lng, event: e },
+        bubbles: true
+      });
+    });
+    this.map.on("move", () => {
+      const c = this.map.getCenter();
+      this._emitEvent("wcmapcenterchanged", "center-changed", {
+        detail: { lat: c.lat, lng: c.lng },
+        bubbles: true
+      });
+    });
+    this.map.on("zoom", () => {
+      this._emitEvent("wcmapzoomchanged", "zoom-changed", {
+        detail: { zoom: this.map.getZoom() },
+        bubbles: true
+      });
+    });
+    this.map.on("moveend", () => {
+      const bounds = this.map.getBounds ? this.map.getBounds() : null;
+      if (bounds) {
+        this._emitEvent("wcmapboundschanged", "bounds-changed", { detail: { bounds }, bubbles: true });
+      }
+    });
+    this.map.on("dragstart", () => this._emitEvent("wcmapdragstart", "drag-start", { bubbles: true }));
+    this.map.on("drag", () => this._emitEvent("wcmapdragging", "dragging", { bubbles: true }));
+    this.map.on("dragend", () => this._emitEvent("wcmapdragend", "drag-end", { bubbles: true }));
+  }
+  /** Public API: add a pin dynamically (as an <option> child). */
+  addPin(lat, lng, address, title) {
+    const option = document.createElement("option");
+    option.setAttribute("data-lat", lat);
+    option.setAttribute("data-lng", lng);
+    option.setAttribute("data-address", address || "");
+    option.setAttribute("data-title", title || address || "Location");
+    this.appendChild(option);
+    if (this.map) this._addPins();
+  }
+  /** Public API: clear ALL pin sources (option children + single-pin attrs + markers JSON). */
+  clearPins() {
+    this.querySelectorAll("option").forEach((opt) => opt.remove());
+    this.removeAttribute("lat");
+    this.removeAttribute("lng");
+    this.removeAttribute("address");
+    this.removeAttribute("title");
+    this.removeAttribute("markers");
+    this._clearMarkers();
+  }
+  /** Public API: replace pins with an array of {lat,lng,title?,address?} objects. */
+  updatePins(pins) {
+    if (!Array.isArray(pins)) {
+      console.error("wc-map: updatePins expects an array of pin objects");
+      return;
+    }
+    this.clearPins();
+    if (pins.length === 1) {
+      const pin = pins[0];
+      this.setAttribute("lat", pin.lat);
+      this.setAttribute("lng", pin.lng);
+      if (pin.title) this.setAttribute("title", pin.title);
+      if (pin.address) this.setAttribute("address", pin.address);
+    } else if (pins.length > 1) {
+      pins.forEach((pin) => {
+        const option = document.createElement("option");
+        option.setAttribute("data-lat", pin.lat);
+        option.setAttribute("data-lng", pin.lng);
+        if (pin.title) option.setAttribute("data-title", pin.title);
+        if (pin.address) option.setAttribute("data-address", pin.address);
+        this.appendChild(option);
+      });
+    }
+    if (this.map) this._addPins();
+  }
+  getMap() {
+    return this.map;
+  }
+  getMarkers() {
+    return this.markers;
+  }
+  _cleanup() {
+    this._clearMarkers();
+    if (this.map && typeof this.map.remove === "function") {
+      try {
+        this.map.remove();
+      } catch (e) {
+      }
+    }
+    this.map = null;
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+  }
+  _setupResizeHandling() {
+    if (typeof ResizeObserver !== "undefined" && !this.resizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => this._handleResize());
+      this.resizeObserver.observe(this.mapElement);
+    }
+    document.body.addEventListener("htmx:afterSettle", () => setTimeout(() => this._handleResize(), 50));
+    if (typeof IntersectionObserver !== "undefined") {
+      const visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) this._handleResize();
+        });
+      });
+      visibilityObserver.observe(this);
+    }
+  }
+  _handleResize() {
+    const width = this.mapElement.offsetWidth;
+    const height = this.mapElement.offsetHeight;
+    if (!this.map && width > 0 && height > 0) {
+      this._initializeMap();
+      return;
+    }
+    if (this.map && width > 0 && height > 0 && typeof this.map.resize === "function") {
+      this.map.resize();
+    }
+  }
+  _showError(message) {
+    if (this.mapElement) {
+      this.mapElement.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; background: var(--surface-2); color: var(--text-1);">
+          <div>
+            <p style="font-weight: bold; margin-bottom: 0.5rem;">\u26A0\uFE0F Map Error</p>
+            <p>${this._escape(message)}</p>
+          </div>
+        </div>`;
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-map {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 150px;
+      }
+      wc-map .wc-map {
+        width: 100%;
+        height: 100%;
+        min-height: 150px;
+        position: relative;
+      }
+      wc-map .map-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0.375rem;
+        overflow: hidden;
+      }
+      .map-info-window {
+        padding: 0.25rem;
+        font-family: inherit;
+        color: var(--text-1);
+      }
+      .map-info-window strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-1);
+      }
+      wc-map option {
+        display: none;
+      }
+    `.trim();
+    this.loadStyle("wc-map-style", style);
+  }
+};
+customElements.define("wc-map", WcMap);
+
+// src/js/components/wc-address.js
+var WcAddress = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-address";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "placeholder",
+      "lbl-label",
+      "lbl-class",
+      "elt-class",
+      "disabled",
+      "readonly",
+      "required",
+      "autocomplete",
+      "geocode-url",
+      "address-group",
+      "target-map",
+      "countries",
+      "types",
+      "icon-name",
+      "api-key",
+      "fields",
+      "data-lat",
+      "data-lng",
+      "data-address",
+      "onchange",
+      "oninput",
+      "onblur",
+      "onfocus",
+      "tooltip",
+      "tooltip-position"
+    ];
+  }
+  constructor() {
+    super();
+    this.passThruAttributes = ["id", "value", "placeholder", "autocomplete"];
+    this.passThruEmptyAttributes = ["disabled", "readonly", "required"];
+    this.ignoreAttributes = [
+      "lbl-class",
+      "lbl-label",
+      "geocode-url",
+      "address-group",
+      "target-map",
+      "countries",
+      "types",
+      "icon-name",
+      "api-key",
+      "fields",
+      "data-lat",
+      "data-lng",
+      "data-address"
+    ];
+    this.eventAttributes = ["onchange", "oninput", "onblur", "onfocus"];
+    const compEl = this.querySelector(".wc-address");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-address", "relative");
+      this.appendChild(this.componentElement);
+    }
+    this.selectedPlace = null;
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._updateMapFromInitialData();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+    this.selectedPlace = null;
+  }
+  _geocodeBase() {
+    return (this.getAttribute("geocode-url") || "/api/geocode").replace(/\/$/, "");
+  }
+  _wireEvents() {
+    super._wireEvents();
+    if (!this.formElement) return;
+    if (this._autocompleteEventsWired) return;
+    this._autocompleteEventsWired = true;
+    this._suggestionsContainer = this.querySelector(".address-suggestions");
+    if (!this._suggestionsContainer) {
+      this._suggestionsContainer = document.createElement("div");
+      this._suggestionsContainer.classList.add("address-suggestions", "hidden");
+      this.componentElement.appendChild(this._suggestionsContainer);
+    }
+    let debounceTimer;
+    const debounce = (func, delay) => (...args) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+    this._handleInputDebounced = debounce((e) => {
+      const input2 = e.target.value.trim();
+      if (input2.length < 3) {
+        this._hideSuggestions(this._suggestionsContainer);
+        return;
+      }
+      this._fetchSuggestions(input2, this._suggestionsContainer);
+    }, 300);
+    this.formElement.addEventListener("input", this._handleInputDebounced);
+    this._handleKeydown = (e) => {
+      const suggestions = this._suggestionsContainer.querySelectorAll(".address-suggestion-item");
+      if (suggestions.length === 0) return;
+      const currentIndex = Array.from(suggestions).findIndex((item) => item.classList.contains("highlighted"));
+      switch (e.key) {
+        case "ArrowDown": {
+          e.preventDefault();
+          let nextIndex;
+          if (currentIndex === -1) nextIndex = 0;
+          else if (currentIndex < suggestions.length - 1) nextIndex = currentIndex + 1;
+          else nextIndex = 0;
+          this._highlightSuggestion(suggestions, nextIndex);
+          break;
+        }
+        case "ArrowUp": {
+          e.preventDefault();
+          let prevIndex;
+          if (currentIndex === -1) prevIndex = suggestions.length - 1;
+          else if (currentIndex > 0) prevIndex = currentIndex - 1;
+          else prevIndex = suggestions.length - 1;
+          this._highlightSuggestion(suggestions, prevIndex);
+          break;
+        }
+        case "Enter":
+          if (currentIndex >= 0) {
+            e.preventDefault();
+            const item = suggestions[currentIndex];
+            this._selectPlace(item.dataset.placeId, item);
+            this._hideSuggestions(this._suggestionsContainer);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          this._hideSuggestions(this._suggestionsContainer);
+          break;
+      }
+    };
+    this.formElement.addEventListener("keydown", this._handleKeydown);
+    this._handleDocumentClick = (e) => {
+      if (!this.contains(e.target)) this._hideSuggestions(this._suggestionsContainer);
+    };
+    document.addEventListener("click", this._handleDocumentClick);
+    this._handleBlur = () => {
+      setTimeout(() => {
+        if (!this.querySelector(".address-suggestions:hover")) {
+          this._hideSuggestions(this._suggestionsContainer);
+        }
+      }, 200);
+    };
+    this.formElement.addEventListener("blur", this._handleBlur);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    if (this.formElement) {
+      if (this._handleInputDebounced) this.formElement.removeEventListener("input", this._handleInputDebounced);
+      if (this._handleKeydown) this.formElement.removeEventListener("keydown", this._handleKeydown);
+      if (this._handleBlur) this.formElement.removeEventListener("blur", this._handleBlur);
+    }
+    if (this._handleDocumentClick) document.removeEventListener("click", this._handleDocumentClick);
+    if (this._suggestionsContainer) {
+      this._suggestionsContainer.remove();
+      this._suggestionsContainer = null;
+    }
+    this._autocompleteEventsWired = false;
+  }
+  async _fetchSuggestions(input2, container2) {
+    const params = new URLSearchParams({ q: input2 });
+    const countries = this.getAttribute("countries");
+    if (countries) params.set("countries", countries);
+    const url = `${this._geocodeBase()}/autocomplete?${params.toString()}`;
+    try {
+      const resp = await fetch(url, { headers: { accept: "application/json" } });
+      if (!resp.ok) {
+        this._hideSuggestions(container2);
+        return;
+      }
+      const data = await resp.json();
+      const suggestions = Array.isArray(data) ? data : data && Array.isArray(data.results) ? data.results : [];
+      if (!suggestions.length) {
+        this._hideSuggestions(container2);
+        return;
+      }
+      this._displaySuggestions(suggestions, container2);
+    } catch (error) {
+      console.error("wc-address: Error fetching suggestions:", error);
+      this._hideSuggestions(container2);
+    }
+  }
+  _displaySuggestions(suggestions, container2) {
+    container2.innerHTML = "";
+    container2.classList.remove("hidden");
+    suggestions.forEach((suggestion) => {
+      const item = document.createElement("div");
+      item.classList.add("address-suggestion-item");
+      item.textContent = suggestion.label || suggestion.formatted_address || "";
+      item.dataset.placeId = suggestion.id != null ? String(suggestion.id) : "";
+      if (suggestion.lat != null) item.dataset.lat = suggestion.lat;
+      if (suggestion.lng != null) item.dataset.lng = suggestion.lng;
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this._selectPlace(item.dataset.placeId, item);
+        this._hideSuggestions(container2);
+      });
+      container2.appendChild(item);
+    });
+  }
+  _hideSuggestions(container2) {
+    if (!container2) return;
+    container2.classList.add("hidden");
+    container2.innerHTML = "";
+  }
+  _highlightSuggestion(suggestions, index) {
+    suggestions.forEach((item) => item.classList.remove("highlighted"));
+    if (suggestions[index]) {
+      suggestions[index].classList.add("highlighted");
+      suggestions[index].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }
+  async _selectPlace(id, item) {
+    const url = `${this._geocodeBase()}/details?id=${encodeURIComponent(id)}`;
+    try {
+      const resp = await fetch(url, { headers: { accept: "application/json" } });
+      if (resp.ok) {
+        const detail = await resp.json();
+        this._processResult(detail, id);
+        return;
+      }
+    } catch (error) {
+      console.error("wc-address: Error fetching place details:", error);
+    }
+    if (item) {
+      this._processResult({
+        formatted_address: item.textContent || "",
+        lat: item.dataset.lat != null ? parseFloat(item.dataset.lat) : null,
+        lng: item.dataset.lng != null ? parseFloat(item.dataset.lng) : null
+      }, id);
+    }
+  }
+  _processResult(detail, id) {
+    const addressData = this._toAddressData(detail, id);
+    if (this.formElement) {
+      this.formElement.value = addressData.street || addressData.formatted_address || this.formElement.value;
+    }
+    this.selectedPlace = addressData;
+    this._broadcastAddressChange(addressData);
+    const targetMap = this.getAttribute("target-map");
+    if (targetMap) this._updateMap(targetMap, addressData);
+    if (this.formElement) {
+      this.formElement.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+  _toAddressData(d, id) {
+    d = d || {};
+    const formattedAddress = d.formatted_address || "";
+    return {
+      addressGroup: this.getAttribute("address-group") || "address",
+      street: d.street || "",
+      city: d.city || "",
+      state: d.state || "",
+      postal_code: d.postal_code || "",
+      county: d.county || "",
+      country: d.country || "",
+      lat: d.lat != null ? d.lat : null,
+      lng: d.lng != null ? d.lng : null,
+      formatted_address: formattedAddress,
+      formatted_address_encoded: encodeURIComponent(formattedAddress),
+      formatted_address_slug: this._createAddressSlug(formattedAddress),
+      place_id: id != null ? String(id) : "",
+      source: d.source || "",
+      approximate: d.approximate != null ? d.approximate : void 0
+    };
+  }
+  _createAddressSlug(formattedAddress) {
+    if (!formattedAddress) return "";
+    return formattedAddress.replace(/,?\s*(USA|United States|US)$/i, "").replace(/,/g, "").replace(/\s+/g, " ").trim().replace(/\s/g, "-");
+  }
+  _broadcastAddressChange(addressData) {
+    const names = ["wcaddresschange", "wc-address:change", "wcgoogleaddresschange", "google-address:change"];
+    names.forEach((name) => {
+      this.dispatchEvent(new CustomEvent(name, { detail: addressData, bubbles: true, composed: true }));
+      document.dispatchEvent(new CustomEvent(name, { detail: addressData, bubbles: true, composed: true }));
+    });
+    if (window.wc?.EventHub) {
+      wc.EventHub.broadcast("wcaddresschange", [], addressData);
+    }
+  }
+  _updateMap(targetMapId, addressData) {
+    if (addressData.lat == null || addressData.lng == null) return;
+    const mapElement = document.getElementById(targetMapId);
+    if (!mapElement) {
+      console.warn(`wc-address: Map element with id "${targetMapId}" not found`);
+      return;
+    }
+    const tag = mapElement.tagName.toLowerCase();
+    if (tag !== "wc-map" && tag !== "wc-google-map") {
+      console.warn(`wc-address: target-map "${targetMapId}" is not a wc-map/wc-google-map`);
+      return;
+    }
+    mapElement.setAttribute("lat", addressData.lat);
+    mapElement.setAttribute("lng", addressData.lng);
+    mapElement.setAttribute("address", addressData.formatted_address);
+  }
+  _updateMapFromInitialData() {
+    const lat = this.getAttribute("data-lat");
+    const lng = this.getAttribute("data-lng");
+    const targetMap = this.getAttribute("target-map");
+    if (!lat || !lng || !targetMap) return;
+    const mapElement = document.getElementById(targetMap);
+    if (!mapElement) return;
+    const pins = [{
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      title: this.getAttribute("data-address") || this.getAttribute("value") || ""
+    }];
+    if (mapElement.updatePins) {
+      mapElement.updatePins(pins);
+    } else {
+      mapElement.addEventListener("map-loaded", () => {
+        if (mapElement.updatePins) mapElement.updatePins(pins);
+      }, { once: true });
+    }
+  }
+  _handleAttributeChange(attrName, newValue) {
+    if (this.eventAttributes.includes(attrName)) {
+      if (this.formElement && newValue) {
+        const eventHandler = new Function("event", `
+          const element = event.target;
+          const value = element.value;
+          with (element) {
+            ${newValue}
+          }
+        `);
+        const eventName = attrName.substring(2);
+        this.formElement.addEventListener(eventName, eventHandler);
+      }
+      return;
+    }
+    if (this.passThruAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, newValue);
+      return;
+    }
+    if (this.passThruEmptyAttributes.includes(attrName)) {
+      this.formElement?.setAttribute(attrName, "");
+      return;
+    }
+    if (this.ignoreAttributes.includes(attrName)) {
+      return;
+    }
+    if (attrName === "tooltip" || attrName === "tooltip-position") {
+      this._createTooltipElement();
+      return;
+    }
+    if (attrName === "lbl-class") {
+      const name = this.getAttribute("name");
+      const lbl = this.querySelector(`label[for="${name}"]`);
+      lbl?.classList.add(newValue);
+      return;
+    }
+    super._handleAttributeChange(attrName, newValue);
+  }
+  _render() {
+    const name = this.getAttribute("name") || "address";
+    const lblLabel = this.getAttribute("lbl-label") || "";
+    const placeholder = this.getAttribute("placeholder") || "Start typing an address...";
+    const value = this.getAttribute("value") || "";
+    this.componentElement.innerHTML = "";
+    if (lblLabel) {
+      const label = document.createElement("label");
+      label.setAttribute("for", name);
+      label.textContent = lblLabel;
+      this.componentElement.appendChild(label);
+    }
+    this.formElement = document.createElement("input");
+    this.formElement.setAttribute("type", "text");
+    this.formElement.setAttribute("name", name);
+    this.formElement.setAttribute("id", name);
+    this.formElement.setAttribute("form-element", "");
+    this.formElement.setAttribute("class", "form-control");
+    this.formElement.setAttribute("placeholder", placeholder);
+    this.formElement.setAttribute("autocomplete", "off");
+    if (value) this.formElement.value = value;
+    const eltClass = this.getAttribute("elt-class");
+    if (eltClass) this.formElement.setAttribute("class", eltClass);
+    this.componentElement.appendChild(this.formElement);
+    const iconName = this.getAttribute("icon-name") || "house";
+    const icon = document.createElement("wc-fa-icon");
+    icon.setAttribute("name", iconName);
+    icon.setAttribute("icon-style", "solid");
+    icon.setAttribute("size", "1rem");
+    icon.classList.add("address-icon");
+    this.componentElement.appendChild(icon);
+    this.labelElement = this.componentElement.querySelector("label");
+  }
+  _applyStyle() {
+    const style = `
+      wc-address {
+        display: contents;
+      }
+      wc-address input[type="text"] {
+        padding-left: 30px;
+        min-width: 120px;
+      }
+      wc-address wc-fa-icon.address-icon {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        pointer-events: none;
+        align-items: center;
+        justify-content: center;
+      }
+      wc-address input:focus {
+        outline: none;
+        border-color: var(--component-border-color, #3b82f6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      .address-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 2px;
+        background: var(--component-bg-color, #fff);
+        color: var(--component-color, #1f2937);
+        border-radius: 0.375rem;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .address-suggestions.hidden {
+        display: none;
+      }
+      .address-suggestion-item {
+        padding: 0.875rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--component-border-color, #e5e7eb);
+        transition: all 0.15s ease;
+        font-size: 0.95rem;
+        color: var(--component-color, #1f2937);
+      }
+      .address-suggestion-item:last-child {
+        border-bottom: none;
+      }
+      .address-suggestion-item:hover {
+        background-color: var(--surface-2, #f3f4f6);
+      }
+      .address-suggestion-item.highlighted {
+        background-color: var(--primary-bg-color, #3b82f6);
+        color: var(--primary-color, #fff);
+        font-weight: 500;
+      }
+      /* Attribution required by LocationIQ / provider ToS \u2014 the app surfaces this once
+         near the field (e.g. "Search by LocationIQ"); component keeps markup minimal. */
+    `.trim();
+    this.loadStyle("wc-address-style", style);
+  }
+  get value() {
+    return this.formElement?.value || "";
+  }
+  set value(val) {
+    if (this.formElement) this.formElement.value = val;
+  }
+  getPlaceData() {
+    return this.selectedPlace;
+  }
+};
+customElements.define(WcAddress.is, WcAddress);
+
 // src/js/components/wc-address-listener.js
 var WcAddressListener = class extends WcBaseComponent {
   static get is() {

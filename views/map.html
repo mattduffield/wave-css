@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-map / wc-address (no Google)</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    body { padding: 2rem; }
+    .map-wrapper { height: 380px; margin: 1rem 0 2rem; border: 2px solid var(--surface-4); border-radius: 0.5rem; overflow: hidden; }
+    .note { padding: 1rem; background: var(--surface-2); border-left: 4px solid var(--info-color); border-radius: 0.25rem; margin: 1rem 0; }
+    h2 { margin-top: 2rem; }
+    .attribution { font-size: 0.75rem; color: var(--text-3); margin-top: 0.25rem; }
+  </style>
+</head>
+<body class="theme-ocean dark">
+  <div class="container mx-auto">
+    <h1>wc-map + wc-address — keyless, $0/mo Maps & Address</h1>
+    <p>Provider-agnostic drop-ins for <code>wc-google-map</code> / <code>wc-google-address</code>.
+       <code>wc-map</code> uses MapLibre GL JS + free, keyless OpenFreeMap tiles. <code>wc-address</code>
+       calls the app's own <code>/api/geocode</code> proxy (LocationIQ/Nominatim, server-side).</p>
+
+    <h2>Single pin (no API key)</h2>
+    <div class="map-wrapper">
+      <wc-map lat="40.7128" lng="-74.0060" address="New York, NY" zoom="11"></wc-map>
+    </div>
+
+    <h2>Multiple pins + fit-bounds</h2>
+    <div class="map-wrapper">
+      <wc-map zoom="4" fit-bounds
+        markers='[
+          {"lat":40.7128,"lng":-74.0060,"label":"New York","link":"#ny"},
+          {"lat":34.0522,"lng":-118.2437,"label":"Los Angeles","link":"#la"},
+          {"lat":41.8781,"lng":-87.6298,"label":"Chicago","link":"#chi"}
+        ]'></wc-map>
+    </div>
+
+    <h2>Address type-ahead → map</h2>
+    <div class="note">
+      <strong>Backend required:</strong> <code>wc-address</code> needs the go-kart geocode proxy at
+      <code>/api/geocode</code> (<code>/autocomplete</code>, <code>/details</code>, <code>/forward</code>).
+      In this static preview there's no proxy, so suggestions won't load — but the markup is the
+      drop-in shape (find-replace <code>wc-google-address</code> → <code>wc-address</code>).
+    </div>
+    <wc-form>
+      <wc-address
+        name="address.street"
+        lbl-label="Street Address"
+        address-group="address"
+        target-map="detailMap"
+        countries="us"
+        geocode-url="/api/geocode">
+      </wc-address>
+      <div class="attribution">Search by LocationIQ</div>
+    </wc-form>
+    <div class="map-wrapper" style="height:300px;">
+      <wc-map id="detailMap" lat="39.8283" lng="-98.5795" zoom="4"></wc-map>
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

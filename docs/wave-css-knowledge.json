@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.18.6",
+    "version": "1.19.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -905,6 +905,47 @@
         "usage": {
           "single": "<wc-google-map api-key=\"YOUR_KEY\" lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-google-map>",
           "multiple": "<wc-google-map api-key=\"YOUR_KEY\" zoom=\"10\">\n  <option data-lat=\"40.7128\" data-lng=\"-74.0060\" data-title=\"New York\"></option>\n  <option data-lat=\"34.0522\" data-lng=\"-118.2437\" data-title=\"Los Angeles\"></option>\n</wc-google-map>"
+        }
+      },
+      {
+        "name": "wc-map",
+        "description": "Keyless, $0/mo drop-in for wc-google-map — MapLibre GL JS + free OpenFreeMap vector tiles. Same attributes/pins/methods/events; no API key, no billing.",
+        "attributes": [
+          "lat", "lng", "address", "title", "zoom", "map-type", "center-lat", "center-lng",
+          "draggable", "scrollwheel", "disable-default-ui", "markers", "fit-bounds",
+          "tiles", "map-style", "api-key (accepted but ignored)", "class", "elt-class"
+        ],
+        "events": {
+          "emits": [
+            "wcmaploaded", "wcpinclicked", "wcmapmarkerclick", "wcgooglemapmarkerclick",
+            "wcmapclicked", "wcmapcenterchanged", "wcmapzoomchanged", "wcmapboundschanged",
+            "wcmapdragstart", "wcmapdragging", "wcmapdragend"
+          ]
+        },
+        "methods": ["addPin(lat, lng, address, title)", "clearPins()", "updatePins(pins)", "getMap()", "getMarkers()"],
+        "notes": "Provider-agnostic map on MapLibre GL JS + OpenFreeMap (https://tiles.openfreemap.org/styles/liberty — no key, commercial OK, MIT). Preserves wc-google-map's whole contract so migration is find-replace of the tag name (attributes/pins/methods/events identical, incl. legacy wc-google-map:marker-click alias). Pins from single lat/lng attrs, <option data-lat data-lng data-title data-address data-link> children, and/or a markers JSON array ([{lat,lng,label?,title?,address?,link?}]) — additive. fit-bounds frames all pins (auto for >1). Override tiles with `tiles` (or `map-style`) — e.g. a self-hosted PMTiles style — for zero third-party dependency. NB: MapLibre uses [lng,lat] internally (component converts); the reserved `style` HTML attribute is deliberately NOT used for the tiles URL. clearPins()/updatePins() also clear the markers attr (true full replace). Loads MapLibre from CDN once; disconnect defers cleanup 1s (HTMX-swap safe). Scaffold: geo/address entity → prefer wc-map over wc-google-map.",
+        "usage": {
+          "single": "<wc-map lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-map>",
+          "markers": "<wc-map fit-bounds markers='[{\"lat\":40.7,\"lng\":-74,\"label\":\"HQ\",\"link\":\"/x/1\"}]'></wc-map>"
+        }
+      },
+      {
+        "name": "wc-address",
+        "description": "Keyless, $0/mo drop-in for wc-google-address — address type-ahead via the app's own /api/geocode proxy (LocationIQ/Nominatim server-side). No provider key in the browser.",
+        "attributes": [
+          "name", "value", "placeholder", "lbl-label", "lbl-class", "elt-class",
+          "disabled", "readonly", "required", "autocomplete",
+          "geocode-url (default /api/geocode)", "address-group", "target-map",
+          "countries", "types", "icon-name", "api-key (ignored)", "fields (ignored)",
+          "data-lat", "data-lng", "data-address", "tooltip", "tooltip-position"
+        ],
+        "events": {
+          "emits": ["wcaddresschange", "wc-address:change", "google-address:change", "wcgoogleaddresschange"]
+        },
+        "methods": ["getPlaceData()", "value (get/set)"],
+        "notes": "Provider-agnostic address autocomplete. Talks ONLY to the app's geocode proxy (default geocode-url=/api/geocode): GET {base}/autocomplete?q=<partial> -> [{id,label,lat,lng}]; on select GET {base}/details?id=<id> -> {street,city,state,postal_code,county,country,lat,lng,formatted_address,source,approximate}. Same UX as wc-google-address (debounced >=3 chars, dropdown, ArrowUp/Down/Enter/Esc, click-outside/blur close). Fires wcaddresschange (canonical) + aliases wc-address:change / google-address:change / wcgoogleaddresschange on the element AND document (so wc-address-listener, which listens for wcgoogleaddresschange, and existing screens keep working after a find-replace). Change detail: {addressGroup, street, city, state, postal_code, county, country, lat, lng, formatted_address, formatted_address_encoded, formatted_address_slug (Zillow-style), place_id, source, approximate}. target-map pushes lat/lng/address to a wc-map OR wc-google-map by id. api-key/fields accepted but ignored. Details-404 falls back to the suggestion's own label + lat/lng. Requires a visible 'Search by LocationIQ' attribution per provider ToS.",
+        "usage": {
+          "basic": "<wc-address name=\"address.street\" lbl-label=\"Street Address\" address-group=\"address\" target-map=\"map1\" countries=\"us\" geocode-url=\"/api/geocode\"></wc-address>"
         }
       },
       {

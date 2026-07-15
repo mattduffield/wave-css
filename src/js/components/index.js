@@ -31,6 +31,8 @@ import './wc-help-drawer.js';
 import './wc-ref-key.js';
 import './wc-google-map.js';
 import './wc-google-address.js';
+import './wc-map.js';
+import './wc-address.js';
 import './wc-address-listener.js';
 import './wc-vin-decoder.js';
 import './wc-vin-listener.js';
