@@ -10836,6 +10836,7 @@ var WcMap = class _WcMap extends WcBaseComponent {
       "fit-bounds",
       "tiles",
       "map-style",
+      "attribution-compact",
       "class",
       "elt-class"
     ];
@@ -10920,6 +10921,7 @@ var WcMap = class _WcMap extends WcBaseComponent {
     const disableDefaultUI = this.hasAttribute("disable-default-ui");
     const draggable = this.hasAttribute("draggable") ? this.getAttribute("draggable") !== "false" : true;
     const scrollwheel = this.hasAttribute("scrollwheel") ? this.getAttribute("scrollwheel") !== "false" : true;
+    const attributionCompact = this.getAttribute("attribution-compact") !== "false";
     let center = [0, 0];
     const centerLat = this.getAttribute("center-lat");
     const centerLng = this.getAttribute("center-lng");
@@ -10935,8 +10937,8 @@ var WcMap = class _WcMap extends WcBaseComponent {
         style: this._styleUrl(),
         center,
         zoom,
-        attributionControl: true
-        // keep the mandatory OpenFreeMap/OSM attribution visible
+        // Keep the mandatory OpenFreeMap/OpenMapTiles/OSM credit visible — compact by default.
+        attributionControl: { compact: attributionCompact }
       });
       if (!disableDefaultUI && maplibregl.NavigationControl) {
         try {

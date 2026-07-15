@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.19.0",
+    "version": "1.19.1",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-02"
   },
@@ -913,7 +913,7 @@
         "attributes": [
           "lat", "lng", "address", "title", "zoom", "map-type", "center-lat", "center-lng",
           "draggable", "scrollwheel", "disable-default-ui", "markers", "fit-bounds",
-          "tiles", "map-style", "api-key (accepted but ignored)", "class", "elt-class"
+          "tiles", "map-style", "attribution-compact", "api-key (accepted but ignored)", "class", "elt-class"
         ],
         "events": {
           "emits": [
@@ -923,7 +923,7 @@
           ]
         },
         "methods": ["addPin(lat, lng, address, title)", "clearPins()", "updatePins(pins)", "getMap()", "getMarkers()"],
-        "notes": "Provider-agnostic map on MapLibre GL JS + OpenFreeMap (https://tiles.openfreemap.org/styles/liberty — no key, commercial OK, MIT). Preserves wc-google-map's whole contract so migration is find-replace of the tag name (attributes/pins/methods/events identical, incl. legacy wc-google-map:marker-click alias). Pins from single lat/lng attrs, <option data-lat data-lng data-title data-address data-link> children, and/or a markers JSON array ([{lat,lng,label?,title?,address?,link?}]) — additive. fit-bounds frames all pins (auto for >1). Override tiles with `tiles` (or `map-style`) — e.g. a self-hosted PMTiles style — for zero third-party dependency. NB: MapLibre uses [lng,lat] internally (component converts); the reserved `style` HTML attribute is deliberately NOT used for the tiles URL. clearPins()/updatePins() also clear the markers attr (true full replace). Loads MapLibre from CDN once; disconnect defers cleanup 1s (HTMX-swap safe). Scaffold: geo/address entity → prefer wc-map over wc-google-map.",
+        "notes": "Provider-agnostic map on MapLibre GL JS + OpenFreeMap (https://tiles.openfreemap.org/styles/liberty — no key, commercial OK, MIT). Preserves wc-google-map's whole contract so migration is find-replace of the tag name (attributes/pins/methods/events identical, incl. legacy wc-google-map:marker-click alias). Pins from single lat/lng attrs, <option data-lat data-lng data-title data-address data-link> children, and/or a markers JSON array ([{lat,lng,label?,title?,address?,link?}]) — additive. fit-bounds frames all pins (auto for >1). Override tiles with `tiles` (or `map-style`) — e.g. a self-hosted PMTiles style — for zero third-party dependency. attribution-compact (default true) collapses the mandatory OpenFreeMap/OpenMapTiles/OSM credit to a small ⓘ that expands on click (so it doesn't cover small maps); attribution-compact=\"false\" forces the always-expanded box. NB: MapLibre uses [lng,lat] internally (component converts); the reserved `style` HTML attribute is deliberately NOT used for the tiles URL. clearPins()/updatePins() also clear the markers attr (true full replace). Loads MapLibre from CDN once; disconnect defers cleanup 1s (HTMX-swap safe). Scaffold: geo/address entity → prefer wc-map over wc-google-map.",
         "usage": {
           "single": "<wc-map lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-map>",
           "markers": "<wc-map fit-bounds markers='[{\"lat\":40.7,\"lng\":-74,\"label\":\"HQ\",\"link\":\"/x/1\"}]'></wc-map>"

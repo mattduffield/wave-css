@@ -21,7 +21,8 @@
  *  zero-third-party-dependency deployment.
  *
  *  Attributes: lat, lng, address, title, zoom, map-type, center-lat, center-lng,
- *    draggable, scrollwheel, disable-default-ui, markers, fit-bounds, tiles (or map-style).
+ *    draggable, scrollwheel, disable-default-ui, markers, fit-bounds, tiles (or map-style),
+ *    attribution-compact (default true — the ⓘ collapses the credit; "false" = expanded box).
  *    (api-key is accepted but ignored — no key is needed.)
  *  Methods: updatePins(pins), addPin(lat,lng,address,title), clearPins(), getMap(), getMarkers().
  *  Events (neutral + legacy aliases, bubbling): map-loaded/wcmaploaded, pin-clicked/wcpinclicked,
@@ -41,7 +42,7 @@ class WcMap extends WcBaseComponent {
       'api-key', 'lat', 'lng', 'address', 'title',
       'zoom', 'map-type', 'center-lat', 'center-lng',
       'draggable', 'scrollwheel', 'disable-default-ui',
-      'markers', 'fit-bounds', 'tiles', 'map-style',
+      'markers', 'fit-bounds', 'tiles', 'map-style', 'attribution-compact',
       'class', 'elt-class'
     ];
   }
@@ -149,6 +150,9 @@ class WcMap extends WcBaseComponent {
     const disableDefaultUI = this.hasAttribute('disable-default-ui');
     const draggable = this.hasAttribute('draggable') ? this.getAttribute('draggable') !== 'false' : true;
     const scrollwheel = this.hasAttribute('scrollwheel') ? this.getAttribute('scrollwheel') !== 'false' : true;
+    // Compact attribution by default — a small ⓘ that expands on click, so it doesn't cover
+    // small maps. attribution-compact="false" forces the always-expanded credit box.
+    const attributionCompact = this.getAttribute('attribution-compact') !== 'false';
 
     // Center: explicit center-* → first pin → [0,0]. MapLibre uses [lng, lat] order.
     let center = [0, 0];
@@ -167,7 +171,8 @@ class WcMap extends WcBaseComponent {
         style: this._styleUrl(),
         center,
         zoom,
-        attributionControl: true // keep the mandatory OpenFreeMap/OSM attribution visible
+        // Keep the mandatory OpenFreeMap/OpenMapTiles/OSM credit visible — compact by default.
+        attributionControl: { compact: attributionCompact }
       });
 
       if (!disableDefaultUI && maplibregl.NavigationControl) {
