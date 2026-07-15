@@ -17,6 +17,8 @@
  * console.log('All Wave CSS dependencies loaded!');
  */
 
+import { waveLocalAssetUrl } from '../components/helper-function.js';
+
 class WcDependencyManager {
   constructor() {
     // Debug mode - set to true to enable verbose logging
@@ -167,9 +169,17 @@ class WcDependencyManager {
   }
 
   /**
-   * Load a single resource (JS or CSS) with timeout
+   * Load a single resource (JS or CSS) with timeout.
+   * Honors window.WaveAssetBase (self-hosting) — try the local mirror first, fall back to
+   * the CDN URL on failure. Unset base → _loadResourceDirect (verbatim legacy behavior).
    */
   _loadResource(url, timeout) {
+    const local = waveLocalAssetUrl(url);
+    if (!local) return this._loadResourceDirect(url, timeout);
+    return this._loadResourceFallback(local, url, timeout);
+  }
+
+  _loadResourceDirect(url, timeout) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error(`Timeout loading ${url} after ${timeout}ms`));
@@ -205,6 +215,40 @@ class WcDependencyManager {
         };
         document.head.appendChild(script);
       }
+    });
+  }
+
+  _loadResourceFallback(local, cdn, timeout) {
+    const isCSS = cdn.endsWith('.css');
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Timeout loading ${cdn} after ${timeout}ms`));
+      }, timeout);
+
+      const attempt = (href, isLocal) => {
+        let el;
+        if (isCSS) {
+          el = document.createElement('link');
+          el.rel = 'stylesheet';
+          el.href = href;
+        } else {
+          el = document.createElement('script');
+          el.src = href;
+        }
+        el.onload = () => { clearTimeout(timeoutId); resolve(); };
+        el.onerror = () => {
+          el.remove();
+          if (isLocal) {
+            console.warn(`[wave-css] Local asset not found (${href}); falling back to CDN: ${cdn}`);
+            attempt(cdn, false);
+          } else {
+            clearTimeout(timeoutId);
+            reject(new Error(`Failed to load ${isCSS ? 'CSS' : 'script'}: ${cdn}`));
+          }
+        };
+        document.head.appendChild(el);
+      };
+      attempt(local, true);
     });
   }
 

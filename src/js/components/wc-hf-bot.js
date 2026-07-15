@@ -1,4 +1,5 @@
 import { WcBaseComponent } from './wc-base-component.js';
+import { waveImport } from './helper-function.js';
 
 if (!customElements.get('wc-hf-bot')) {
   // Global Transformers.js management
@@ -185,7 +186,7 @@ if (!customElements.get('wc-hf-bot')) {
       // Load marked for markdown parsing
       if (!markedModule) {
         try {
-          const module = await import('https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js');
+          const module = await waveImport('https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js');
           markedModule = module;
           console.log('[wc-hf-bot] Marked module loaded successfully');
         } catch (error) {
@@ -655,7 +656,7 @@ if (!customElements.get('wc-hf-bot')) {
         // Load Transformers.js module if not already loaded
         if (!transformersModule) {
           this._updateStatus('Loading Transformers.js...');
-          transformersModule = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.0');
+          transformersModule = await waveImport('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.0');
         }
         
         // Check if model is already loaded
@@ -1194,7 +1195,7 @@ if (!customElements.get('wc-hf-bot')) {
     static async getAvailableModels() {
       // Load Transformers.js module if not already loaded
       if (!transformersModule) {
-        transformersModule = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+        transformersModule = await waveImport('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
       }
       
       // Common Hugging Face models that work with Transformers.js v2

@@ -51,7 +51,9 @@ var WaveHelpers = (() => {
     waitForResourcePolling: () => waitForResourcePolling,
     waitForSelectorPolling: () => waitForSelectorPolling,
     waitForSelectorsPolling: () => waitForSelectorsPolling,
-    waitForThenHideAndShow: () => waitForThenHideAndShow
+    waitForThenHideAndShow: () => waitForThenHideAndShow,
+    waveImport: () => waveImport,
+    waveLocalAssetUrl: () => waveLocalAssetUrl
   });
   function isCustomElement(element) {
     return element.tagName.includes("-");
@@ -61,7 +63,59 @@ var WaveHelpers = (() => {
       return (Math.random() * 16 | 0).toString(16);
     });
   }
+  function waveLocalAssetUrl(cdnUrl) {
+    const raw = typeof window !== "undefined" && window.WaveAssetBase ? String(window.WaveAssetBase) : "";
+    if (!raw) return null;
+    const base = raw.replace(/\/+$/, "");
+    let u;
+    try {
+      u = new URL(cdnUrl, typeof location !== "undefined" ? location.href : void 0);
+    } catch (e) {
+      return null;
+    }
+    const host = u.hostname;
+    const path = u.pathname;
+    let libVer = "";
+    let rest = "";
+    if (host.includes("cdnjs.cloudflare.com")) {
+      const m = path.replace(/^\/ajax\/libs\//, "").match(/^([^/]+)\/([^/]+)\/(.*)$/);
+      if (!m) return null;
+      libVer = `${m[1]}-${m[2]}`;
+      rest = m[3];
+    } else if (host.includes("cdn.sheetjs.com")) {
+      return `${base}${path}`;
+    } else if (host.includes("jsdelivr.net") || host.includes("unpkg.com")) {
+      let s = path.replace(/^\/npm\//, "").replace(/^\//, "");
+      let scope = "";
+      if (s.startsWith("@")) {
+        const slash = s.indexOf("/");
+        if (slash === -1) return null;
+        scope = s.slice(0, slash + 1);
+        s = s.slice(slash + 1);
+      }
+      const at = s.indexOf("@");
+      if (at === -1) return null;
+      const name = s.slice(0, at);
+      const afterAt = s.slice(at + 1);
+      const slash2 = afterAt.indexOf("/");
+      const ver = slash2 === -1 ? afterAt : afterAt.slice(0, slash2);
+      rest = slash2 === -1 ? "" : afterAt.slice(slash2 + 1);
+      if (!name || !ver) return null;
+      libVer = `${scope}${name}-${ver}`;
+    } else {
+      return null;
+    }
+    return `${base}/${libVer}${rest ? "/" + rest : ""}`;
+  }
+  function _waveWarnFallback(localUrl, cdnUrl) {
+    console.warn(`[wave-css] Local asset not found (${localUrl}); falling back to CDN: ${cdnUrl}`);
+  }
   function loadCSS(url) {
+    const local = waveLocalAssetUrl(url);
+    if (!local) return _loadCSSDirect(url);
+    return _loadCSSFallback(local, url);
+  }
+  function _loadCSSDirect(url) {
     return new Promise((resolve, reject) => {
       if (document.querySelector(`link[rel="stylesheet"][href="${url}"]`)) {
         resolve();
@@ -81,8 +135,37 @@ var WaveHelpers = (() => {
       }, 50);
     });
   }
+  function _loadCSSFallback(local, cdn) {
+    if (document.querySelector(`link[rel="stylesheet"][href="${cdn}"]`) || document.querySelector(`link[rel="stylesheet"][href="${local}"]`)) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      const attempt = (href, isLocal) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.onload = () => resolve();
+        link.onerror = () => {
+          link.remove();
+          if (isLocal) {
+            _waveWarnFallback(local, cdn);
+            attempt(cdn, false);
+          } else {
+            resolve();
+          }
+        };
+        document.head.appendChild(link);
+      };
+      attempt(local, true);
+    });
+  }
   var _scriptLoadPromises = /* @__PURE__ */ new Map();
   function loadScript(url) {
+    const local = waveLocalAssetUrl(url);
+    if (!local) return _loadScriptDirect(url);
+    return _loadScriptFallback(local, url);
+  }
+  function _loadScriptDirect(url) {
     const existing = document.querySelector(`script[src="${url}"]`);
     if (existing && !_scriptLoadPromises.has(url)) {
       return Promise.resolve();
@@ -106,7 +189,44 @@ var WaveHelpers = (() => {
     _scriptLoadPromises.set(url, promise);
     return promise;
   }
+  function _loadScriptFallback(local, cdn) {
+    if ((document.querySelector(`script[src="${cdn}"]`) || document.querySelector(`script[src="${local}"]`)) && !_scriptLoadPromises.has(cdn)) {
+      return Promise.resolve();
+    }
+    if (_scriptLoadPromises.has(cdn)) {
+      return _scriptLoadPromises.get(cdn);
+    }
+    const promise = new Promise((resolve, reject) => {
+      const attempt = (src, isLocal) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => {
+          _scriptLoadPromises.delete(cdn);
+          resolve();
+        };
+        script.onerror = () => {
+          script.remove();
+          if (isLocal) {
+            _waveWarnFallback(local, cdn);
+            attempt(cdn, false);
+          } else {
+            _scriptLoadPromises.delete(cdn);
+            reject(new Error(`Failed to load script: ${cdn}`));
+          }
+        };
+        document.head.appendChild(script);
+      };
+      attempt(local, true);
+    });
+    _scriptLoadPromises.set(cdn, promise);
+    return promise;
+  }
   function loadLibrary(url, globalObjectName) {
+    const local = waveLocalAssetUrl(url);
+    if (!local) return _loadLibraryDirect(url, globalObjectName);
+    return _loadLibraryFallback(local, url, globalObjectName);
+  }
+  function _loadLibraryDirect(url, globalObjectName) {
     return new Promise((resolve, reject) => {
       if (document.querySelector(`script[src="${url}"]`)) {
         if (globalObjectName && window[globalObjectName]) {
@@ -139,6 +259,54 @@ var WaveHelpers = (() => {
         reject(error);
       };
       document.head.appendChild(script);
+    });
+  }
+  function _loadLibraryFallback(local, cdn, globalObjectName) {
+    return new Promise((resolve, reject) => {
+      if (globalObjectName && window[globalObjectName]) {
+        resolve();
+        return;
+      }
+      const pollGlobal = () => {
+        if (!globalObjectName || window[globalObjectName]) {
+          resolve();
+          return;
+        }
+        const iv = setInterval(() => {
+          if (window[globalObjectName]) {
+            clearInterval(iv);
+            resolve();
+          }
+        }, 50);
+      };
+      if (document.querySelector(`script[src="${cdn}"]`) || document.querySelector(`script[src="${local}"]`)) {
+        pollGlobal();
+        return;
+      }
+      const attempt = (src, isLocal) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => pollGlobal();
+        script.onerror = () => {
+          script.remove();
+          if (isLocal) {
+            _waveWarnFallback(local, cdn);
+            attempt(cdn, false);
+          } else {
+            reject(new Error(`Failed to load library: ${cdn}`));
+          }
+        };
+        document.head.appendChild(script);
+      };
+      attempt(local, true);
+    });
+  }
+  function waveImport(cdnUrl) {
+    const local = waveLocalAssetUrl(cdnUrl);
+    if (!local) return import(cdnUrl);
+    return import(local).catch(() => {
+      _waveWarnFallback(local, cdnUrl);
+      return import(cdnUrl);
     });
   }
   function loadStyle(id, content) {

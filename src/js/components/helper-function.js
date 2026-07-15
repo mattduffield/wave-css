@@ -8,7 +8,84 @@ export function generateUniqueId() {
   });
 }
 
+// ─── Self-hostable third-party asset loading ─────────────────────────────────
+// Opt-in: set `window.WaveAssetBase` (e.g. '/static/js') to load third-party libs
+// from a local mirror FIRST, with automatic CDN fallback on any load failure.
+//
+//   UNSET (default) → every asset loads from its original CDN URL, exactly as before
+//                     (the *Direct helpers below are the verbatim legacy behavior).
+//   SET             → try `${WaveAssetBase}/<lib>-<version>/<path-after-cdn-version>`,
+//                     and on failure fall back to the CDN URL + one console.warn.
+//
+// The local path mirrors the CDN sub-path AFTER the version, using Wave's existing
+// `<lib>-<version>/` folder convention (no vendor/ subfolder). Recognized hosts:
+//   jsdelivr: /npm/<pkg>@<ver>/<rest>   → ${base}/<pkg>-<ver>/<rest>
+//   unpkg:    /<pkg>@<ver>/<rest>       → ${base}/<pkg>-<ver>/<rest>
+//   cdnjs:    /ajax/libs/<pkg>/<ver>/<rest> → ${base}/<pkg>-<ver>/<rest>
+// Any other host (incl. same-origin/already-local paths, esm.run, or unversioned
+// URLs) returns null → the asset loads from its given URL unchanged.
+export function waveLocalAssetUrl(cdnUrl) {
+  const raw = (typeof window !== 'undefined' && window.WaveAssetBase) ? String(window.WaveAssetBase) : '';
+  if (!raw) return null;
+  const base = raw.replace(/\/+$/, '');
+
+  let u;
+  try {
+    u = new URL(cdnUrl, (typeof location !== 'undefined' ? location.href : undefined));
+  } catch (e) {
+    return null;
+  }
+
+  const host = u.hostname;
+  const path = u.pathname;
+  let libVer = '';
+  let rest = '';
+
+  if (host.includes('cdnjs.cloudflare.com')) {
+    const m = path.replace(/^\/ajax\/libs\//, '').match(/^([^/]+)\/([^/]+)\/(.*)$/);
+    if (!m) return null;
+    libVer = `${m[1]}-${m[2]}`;
+    rest = m[3];
+  } else if (host.includes('cdn.sheetjs.com')) {
+    // sheetjs paths already start with the versioned folder: /xlsx-<ver>/package/dist/...
+    // (used by wc-tabulator for xlsx export). Mirror the path verbatim under the base.
+    return `${base}${path}`;
+  } else if (host.includes('jsdelivr.net') || host.includes('unpkg.com')) {
+    let s = path.replace(/^\/npm\//, '').replace(/^\//, '');
+    let scope = '';
+    if (s.startsWith('@')) {                 // scoped package: @scope/name@ver/rest
+      const slash = s.indexOf('/');
+      if (slash === -1) return null;
+      scope = s.slice(0, slash + 1);
+      s = s.slice(slash + 1);
+    }
+    const at = s.indexOf('@');
+    if (at === -1) return null;              // no pinned version → can't mirror deterministically
+    const name = s.slice(0, at);
+    const afterAt = s.slice(at + 1);
+    const slash2 = afterAt.indexOf('/');
+    const ver = slash2 === -1 ? afterAt : afterAt.slice(0, slash2);
+    rest = slash2 === -1 ? '' : afterAt.slice(slash2 + 1);
+    if (!name || !ver) return null;
+    libVer = `${scope}${name}-${ver}`;
+  } else {
+    return null;
+  }
+
+  return `${base}/${libVer}${rest ? '/' + rest : ''}`;
+}
+
+function _waveWarnFallback(localUrl, cdnUrl) {
+  console.warn(`[wave-css] Local asset not found (${localUrl}); falling back to CDN: ${cdnUrl}`);
+}
+
 export function loadCSS(url) {
+  const local = waveLocalAssetUrl(url);
+  if (!local) return _loadCSSDirect(url);
+  return _loadCSSFallback(local, url);
+}
+
+function _loadCSSDirect(url) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`link[rel="stylesheet"][href="${url}"]`)) {
       resolve();
@@ -32,10 +109,39 @@ export function loadCSS(url) {
   });
 }
 
+function _loadCSSFallback(local, cdn) {
+  // Dedup on BOTH urls — a stylesheet already present as local OR cdn counts as loaded.
+  if (document.querySelector(`link[rel="stylesheet"][href="${cdn}"]`) ||
+      document.querySelector(`link[rel="stylesheet"][href="${local}"]`)) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const attempt = (href, isLocal) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.onload = () => resolve();
+      link.onerror = () => {
+        link.remove();
+        if (isLocal) { _waveWarnFallback(local, cdn); attempt(cdn, false); }
+        else { resolve(); } // best-effort (a missing stylesheet must not hard-break the component)
+      };
+      document.head.appendChild(link);
+    };
+    attempt(local, true);
+  });
+}
+
 // Track in-flight script loads so concurrent callers share the same promise
 const _scriptLoadPromises = new Map();
 
 export function loadScript(url) {
+  const local = waveLocalAssetUrl(url);
+  if (!local) return _loadScriptDirect(url);
+  return _loadScriptFallback(local, url);
+}
+
+function _loadScriptDirect(url) {
   // Already fully loaded — resolve immediately
   const existing = document.querySelector(`script[src="${url}"]`);
   if (existing && !_scriptLoadPromises.has(url)) {
@@ -65,7 +171,46 @@ export function loadScript(url) {
   return promise;
 }
 
+function _loadScriptFallback(local, cdn) {
+  // Dedup on BOTH urls. This is what keeps components that run their OWN
+  // `document.querySelector('script[src="<cdn url>"]')` guard (e.g. wc-code-mirror's
+  // progressive mode loading) safe: even though their cdn-only check misses a
+  // locally-loaded script and re-calls loadScript(cdn), we find the local <script>
+  // here and resolve instantly instead of loading it twice.
+  if ((document.querySelector(`script[src="${cdn}"]`) || document.querySelector(`script[src="${local}"]`))
+      && !_scriptLoadPromises.has(cdn)) {
+    return Promise.resolve();
+  }
+  if (_scriptLoadPromises.has(cdn)) {
+    return _scriptLoadPromises.get(cdn);
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    const attempt = (src, isLocal) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => { _scriptLoadPromises.delete(cdn); resolve(); };
+      script.onerror = () => {
+        script.remove();
+        if (isLocal) { _waveWarnFallback(local, cdn); attempt(cdn, false); }
+        else { _scriptLoadPromises.delete(cdn); reject(new Error(`Failed to load script: ${cdn}`)); }
+      };
+      document.head.appendChild(script);
+    };
+    attempt(local, true);
+  });
+
+  _scriptLoadPromises.set(cdn, promise);
+  return promise;
+}
+
 export function loadLibrary(url, globalObjectName) {
+  const local = waveLocalAssetUrl(url);
+  if (!local) return _loadLibraryDirect(url, globalObjectName);
+  return _loadLibraryFallback(local, url, globalObjectName);
+}
+
+function _loadLibraryDirect(url, globalObjectName) {
   return new Promise((resolve, reject) => {
     // If the script is already loaded, resolve immediately
     if (document.querySelector(`script[src="${url}"]`)) {
@@ -103,6 +248,51 @@ export function loadLibrary(url, globalObjectName) {
     };
 
     document.head.appendChild(script);
+  });
+}
+
+function _loadLibraryFallback(local, cdn, globalObjectName) {
+  return new Promise((resolve, reject) => {
+    // Skip-if-already-present guard (the real dedup: the global is set).
+    if (globalObjectName && window[globalObjectName]) { resolve(); return; }
+
+    const pollGlobal = () => {
+      if (!globalObjectName || window[globalObjectName]) { resolve(); return; }
+      const iv = setInterval(() => {
+        if (window[globalObjectName]) { clearInterval(iv); resolve(); }
+      }, 50);
+    };
+
+    // A matching <script> (local OR cdn) is already present — just wait for the global.
+    if (document.querySelector(`script[src="${cdn}"]`) || document.querySelector(`script[src="${local}"]`)) {
+      pollGlobal();
+      return;
+    }
+
+    const attempt = (src, isLocal) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => pollGlobal();
+      script.onerror = () => {
+        script.remove();
+        if (isLocal) { _waveWarnFallback(local, cdn); attempt(cdn, false); }
+        else { reject(new Error(`Failed to load library: ${cdn}`)); }
+      };
+      document.head.appendChild(script);
+    };
+    attempt(local, true);
+  });
+}
+
+// Dynamic ESM import with the same local-first / CDN-fallback behavior, for call
+// sites that use `import(<url>)` directly (e.g. marked / transformers). Unset base
+// (or an unmirrorable URL) → a plain `import(cdnUrl)`, identical to before.
+export function waveImport(cdnUrl) {
+  const local = waveLocalAssetUrl(cdnUrl);
+  if (!local) return import(cdnUrl);
+  return import(local).catch(() => {
+    _waveWarnFallback(local, cdnUrl);
+    return import(cdnUrl);
   });
 }
 

@@ -81,6 +81,20 @@ The build process (esbuild.config.js) generates:
 - `wave-helpers.js` - IIFE bundle with helper functions
 - `wave-css.min.css` / `wave-css.css` - CSS bundles with all themes
 
+### Self-hosting third-party assets (`window.WaveAssetBase`)
+
+Wave lazy-loads third-party libs (chart.js, CodeMirror, maplibre, dompurify, marked, prism, jspdf, luxon, transformers, …) from public CDNs. To self-host them (CDN-outage resilience) set a **single global before the bundle runs**:
+
+```html
+<script>window.WaveAssetBase = '/static/js';</script>
+<script type="module" src="/static/js/wave-css-0.0.1/wave-css.min.js"></script>
+```
+
+- **Unset (default):** every asset loads from its original CDN URL — **no behavior change**.
+- **Set:** each asset tries `${WaveAssetBase}/<lib>-<version>/<path-after-cdn-version>` **first**, and on any load failure (script `onerror`, stylesheet error/non-2xx, or `import()` rejection) **falls back to the original CDN URL** with one `console.warn` naming the missing local file. Covers all three load mechanisms; preserves lazy-loading + skip-if-already-present guards. Implemented centrally in `helper-function.js` (`waveLocalAssetUrl` + `loadScript`/`loadCSS`/`loadLibrary`/`waveImport`) so **progressively-loaded** files (e.g. CodeMirror modes/themes/addons pulled in as you use new languages) resolve locally too — and the loader dedups on **both** the local and CDN src, so a component's own CDN-url dedup check (wc-code-mirror does this) can't cause a double-load.
+
+**Path rule:** normalize `<pkg>@<ver>` (jsdelivr/unpkg) and `<pkg>/<ver>` (cdnjs) both to `<pkg>-<ver>/`, keep the rest (no `vendor/` subfolder). `cdn.sheetjs.com` (xlsx export) is also recognized — its path already starts with the versioned folder, so it's mirrored verbatim under the base. e.g. `cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js` → `${base}/chart.js-4.4.1/dist/chart.umd.min.js`; `cdnjs…/codemirror/5.65.13/addon/dialog/dialog.min.js` → `${base}/codemirror-5.65.13/addon/dialog/dialog.min.js`. Unversioned URLs (unpkg `notie`), same-origin paths, and unknown hosts (`esm.run` web-llm) are left on their given URL. The same fallback also covers the **`WcDependencyManager`** loader (`src/js/utils/dependency-manager.js`) — which is how **IMask** (phone/date/currency masking in `wc-input` via `wc-mask-hub`), **CodeMirror core**, and **Tabulator core** load — not just the `helper-function.js` loaders. **Pinned versions to mirror** (folder → key file): `imask-7.6.1/imask.min.js`, `chart.js-4.4.1/dist/chart.umd.min.js`, `chartjs-plugin-datalabels-2.2.0/dist/…`, `codemirror-5.65.13/**` (whole tree — core `codemirror.min.js`/`.css` + addons/modes/themes/keymap), `cm-show-invisibles-3.1.0/lib/…`, `dompurify-3.0.9/purify.min.js`, `html2canvas-1.4.1/html2canvas.min.js`, `jspdf-2.5.1/jspdf.umd.min.js`, `jspdf-autotable-3.8.4/dist/…`, `luxon-2.3.1/build/global/luxon.min.js`, `maplibre-gl-4.7.1/dist/{maplibre-gl.js,maplibre-gl.css}`, `marked-12.0.2/marked.min.js`, `marked-4/lib/marked.esm.js`, `prism-1.29.0/**` (prism.min.js + components/ + themes/), `sweetalert2-11.15.10/dist/sweetalert2.all.js`, `tabulator-tables-6.3.0/dist/{js,css}/…`, `xlsx-0.20.3/package/dist/xlsx.full.min.js` (sheetjs — tabulator xlsx export), `turndown-7.1.3/turndown.min.js`, `@huggingface/transformers-3.5.0/`, `@xenova/transformers-2.17.2/`. Helpers exposed for hosts: `window.wc.waveLocalAssetUrl(url)` and `window.wc.waveImport(url)`.
+
 ### Theme System
 
 - 40+ predefined color themes using CSS variables

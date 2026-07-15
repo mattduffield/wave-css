@@ -7,6 +7,7 @@
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
+import { waveImport } from './helper-function.js';
 
 if (!customElements.get('wc-ai-bot')) {
   // Global WebLLM management
@@ -602,7 +603,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
       // Load marked for markdown parsing
       if (!markedModule) {
         try {
-          const module = await import('https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js');
+          const module = await waveImport('https://cdn.jsdelivr.net/npm/marked@4/lib/marked.esm.js');
           markedModule = module;
           console.log('[wc-ai-bot] Marked module loaded successfully');
         } catch (error) {
@@ -1321,7 +1322,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
         // Load WebLLM module if not already loaded
         if (!webllmModule) {
           this._updateStatus('Loading WebLLM...');
-          webllmModule = await import('https://esm.run/@mlc-ai/web-llm');
+          webllmModule = await waveImport('https://esm.run/@mlc-ai/web-llm');
         }
         
         // Check if model is already loaded
@@ -2663,7 +2664,7 @@ If the user's request is ambiguous, generate the most likely interpretation and 
     static async getAvailableModels() {
       // Load WebLLM module if not already loaded
       if (!webllmModule) {
-        webllmModule = await import('https://esm.run/@mlc-ai/web-llm');
+        webllmModule = await waveImport('https://esm.run/@mlc-ai/web-llm');
       }
       
       // Return the list of available models

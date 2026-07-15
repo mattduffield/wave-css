@@ -10,7 +10,7 @@
  *    The purpose of this component is to allow you to add script tags regardless if this
  *    is a standard request/response or HTMX.
  */
-import { loadCSS, loadScript, loadLibrary, loadStyle } from './helper-function.js';
+import { loadCSS, loadScript, loadLibrary, loadStyle, waveLocalAssetUrl, waveImport } from './helper-function.js';
 
 if (!customElements.get('wc-javascript')) {
 
@@ -38,6 +38,9 @@ if (!customElements.get('wc-javascript')) {
           window.wc.loadScript = loadScript;
           window.wc.loadLibrary = loadLibrary;
           window.wc.loadStyle = loadStyle;
+          // Self-hostable asset helpers (see window.WaveAssetBase).
+          window.wc.waveLocalAssetUrl = waveLocalAssetUrl;
+          window.wc.waveImport = waveImport;
 
           const defer = this.hasAttribute('defer');
           const script = document.createElement('script');
