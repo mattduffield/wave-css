@@ -2555,8 +2555,13 @@ if (!customElements.get('wc-tabulator')) {
     background-color: var(--card-border-color);
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page.active {
-    color: var(--card-color);
-    background-color: var(--card-border-color);
+    /* Distinct highlight for the current page. --primary-color on --surface-1 is
+       near-invisible in some themes (e.g. theme-gray/crisp light, ~1:1), so use the
+       guaranteed-contrast inverted-neutral pair — --text-1 on --surface-1 is ~18:1 in
+       every theme, light and dark. */
+    color: var(--surface-1);
+    background-color: var(--text-1);
+    font-weight: 600;
   }
   .wc-tabulator.tabulator .tabulator-footer .tabulator-footer-contents .tabulator-page[disabled] {
     pointer-events: none;
