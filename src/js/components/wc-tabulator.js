@@ -1091,6 +1091,9 @@ if (!customElements.get('wc-tabulator')) {
     _generateAutoColumns(data) {
       const sampleSize = Math.min(data.length, 100);
       const sample = data.slice(0, sampleSize);
+      // Opt-in header filters for auto-columns (declarative columns use header-filter=…).
+      // Without this, auto-generated columns have no headerFilter so no filter row shows.
+      const autoHeaderFilter = this.hasAttribute('auto-header-filter');
 
       // Collect all unique field paths by flattening nested objects
       const fieldMap = new Map(); // path → { type, count }
@@ -1255,6 +1258,12 @@ if (!customElements.get('wc-tabulator')) {
         } else {
           // string
           col.minWidth = 120;
+        }
+
+        // Opt-in header filter: a text input for scalar fields. Object/array columns
+        // render JSON text, so a text filter there wouldn't be meaningful — skip them.
+        if (autoHeaderFilter && info.type !== 'object' && info.type !== 'array') {
+          col.headerFilter = 'input';
         }
 
         columns.push(col);
@@ -1487,9 +1496,19 @@ if (!customElements.get('wc-tabulator')) {
       cell.getRow().toggleSelect();
     }
 
+    // True when columns were auto-generated (auto-columns attr + no declarative
+    // <wc-tabulator-column> children).
+    _isAutoColumns() {
+      return this.hasAttribute('auto-columns')
+        && this.querySelectorAll('wc-tabulator-column').length === 0;
+    }
+
     headerMenu() {
       var menu = [];
       var columns = this.table.getColumns();
+      // header-menu-columns="3" lays the column-toggle list out in N side-by-side
+      // columns (default 1 = the original single vertical list).
+      const menuCols = parseInt(this.getAttribute('header-menu-columns')) || 1;
 
       let hideLabel = this.createMenuLabel('Hide Filter', this.icons.eyeSlash);
       menu.push({
@@ -1508,16 +1527,66 @@ if (!customElements.get('wc-tabulator')) {
       menu.push({
         label:showLabel,
         action: (e) => {
-          let cols = this.getColumnsConfig();
           //prevent menu closing
           e.stopPropagation();
-          this.table.setColumns(cols)
+          // Restore columns WITH their header filters. For auto-columns there are no
+          // declarative <wc-tabulator-column> children, so regenerate from the current
+          // rows — getColumnsConfig() would return [] and blank the table.
+          if (this._isAutoColumns()) {
+            this.table.setColumns(this._generateAutoColumns(this.table.getData()));
+          } else {
+            this.table.setColumns(this.getColumnsConfig());
+          }
         }
       });
       menu.push({
         separator:true,
       });
 
+      if (menuCols >= 2) {
+        // Lay the column toggles out as a single grid menu item with N columns.
+        // Clicks are dispatched to the clicked cell (Tabulator gives one action per
+        // menu item), so each cell toggles its own column without closing the menu.
+        const grid = document.createElement("div");
+        grid.classList.add("wc-tabulator-colmenu-grid");
+        grid.style.gridTemplateColumns = `repeat(${menuCols}, minmax(140px, 1fr))`;
+
+        columns.forEach((column, idx) => {
+          const cell = document.createElement("div");
+          cell.classList.add("wc-tabulator-colmenu-cell");
+          cell.dataset.colIndex = String(idx);
+
+          const icon = this.createHeaderMenuIcon(column, this.icons.square, this.icons.squareCheck);
+          const title = document.createElement("span");
+          title.textContent = " " + (column.getDefinition().title || "");
+          title.textContent = title.textContent.replace("null", "").replace("undefined", "");
+          title.classList.add("pointer-events-none", "truncate");
+
+          cell.appendChild(icon);
+          cell.appendChild(title);
+          grid.appendChild(cell);
+        });
+
+        menu.push({
+          label: grid,
+          action: (e) => {
+            //prevent menu closing
+            e.stopPropagation();
+            const cell = e.target && e.target.closest && e.target.closest(".wc-tabulator-colmenu-cell");
+            if (!cell) return;
+            const column = columns[parseInt(cell.dataset.colIndex)];
+            if (!column) return;
+            column.toggle();
+            const path = cell.querySelector("path");
+            if (path) {
+              path.setAttribute("d", column.isVisible() ? this.icons.squareCheck.d : this.icons.square.d);
+              path.classList.add("pointer-events-none");
+            }
+            this.table.redraw();
+          }
+        });
+        return menu;
+      }
 
       for (let column of columns) {
         let icon = this.createHeaderMenuIcon(column, this.icons.square, this.icons.squareCheck);
@@ -2467,6 +2536,37 @@ if (!customElements.get('wc-tabulator')) {
   /* Tabulator */
   wc-tabulator {
     display: contents;
+  }
+
+  /* Multi-column header (column-toggle) menu — header-menu-columns="N".
+     The Tabulator menu popup is appended outside .wc-tabulator, so these are
+     intentionally unscoped (the classes are unique). */
+  .wc-tabulator-colmenu-grid {
+    display: grid;
+    gap: 2px 10px;
+    padding: 2px 2px;
+    max-width: min(92vw, 640px);
+  }
+  .wc-tabulator-colmenu-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .wc-tabulator-colmenu-cell:hover {
+    background: var(--surface-3, rgba(0, 0, 0, 0.08));
+  }
+  /* The single grid menu item shouldn't get Tabulator's own row padding/hover. */
+  .tabulator-menu .tabulator-menu-item:has(.wc-tabulator-colmenu-grid) {
+    padding: 0;
+  }
+  .tabulator-menu .tabulator-menu-item:has(.wc-tabulator-colmenu-grid):hover {
+    background: transparent;
   }
   .wc-tabulator.tabulator {
     background-color: var(--card-bg-color);
