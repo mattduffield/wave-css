@@ -20034,9 +20034,6 @@ if (!customElements.get("wc-tabulator")) {
         ajaxConfig: this.getAjaxConfig(),
         ajaxResponse: this.handleAjaxResponse.bind(this)
       };
-      if (useAutoColumns) {
-        options.nestedFieldSeparator = ".";
-      }
       if (inlineData) {
         options.data = inlineData;
       }
@@ -20542,27 +20539,23 @@ if (!customElements.get("wc-tabulator")) {
         }
         return "string";
       };
-      const collectFields = (obj, prefix) => {
+      const collectFields = (obj) => {
         for (const key of Object.keys(obj)) {
-          const value = obj[key];
-          const path = prefix ? `${prefix}.${key}` : key;
-          const type = detectType(value);
-          if (type === "object" && !value.$oid && !value.$date) {
-            collectFields(value, path);
+          const type = detectType(obj[key]);
+          const existing = fieldMap.get(key);
+          if (!existing) {
+            fieldMap.set(key, { type, count: 1 });
           } else {
-            const existing = fieldMap.get(path);
-            if (!existing) {
-              fieldMap.set(path, { type, count: 1 });
-            } else {
-              existing.count++;
-              if (existing.type === "null" && type !== "null") {
-                existing.type = type;
-              }
+            existing.count++;
+            if (existing.type === "null" && type !== "null") {
+              existing.type = type;
+            } else if (type !== "null" && existing.type !== type && (existing.type === "object" || existing.type === "array" || type === "object" || type === "array")) {
+              existing.type = "object";
             }
           }
         }
       };
-      sample.forEach((row) => collectFields(row, ""));
+      sample.forEach((row) => collectFields(row));
       const toTitle = (path) => path.split(/[._]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
       const columns = [];
       const headerMenu = this.headerMenu.bind(this);
@@ -20644,6 +20637,33 @@ if (!customElements.get("wc-tabulator")) {
             } catch (e2) {
               return `[${val.length} items]`;
             }
+          };
+        } else if (info.type === "object") {
+          col.minWidth = 120;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (val == null) return "";
+            if (Array.isArray(val)) return `[${val.length} items]`;
+            if (typeof val === "object") {
+              try {
+                return JSON.stringify(val);
+              } catch (e) {
+                return String(val);
+              }
+            }
+            return val;
+          };
+          col.tooltip = (e, cell) => {
+            const val = cell.getValue();
+            if (val == null) return "";
+            if (typeof val === "object") {
+              try {
+                return JSON.stringify(val, null, 2);
+              } catch (e2) {
+                return String(val);
+              }
+            }
+            return val;
           };
         } else {
           col.minWidth = 120;

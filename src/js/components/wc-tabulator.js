@@ -449,10 +449,11 @@ if (!customElements.get('wc-tabulator')) {
         ajaxResponse: this.handleAjaxResponse.bind(this),
       };
 
-      // Enable nested field access for auto-columns with dot-notation paths
-      if (useAutoColumns) {
-        options.nestedFieldSeparator = '.';
-      }
+      // Auto-columns are FLAT (one column per top-level key), so we leave Tabulator's
+      // default nestedFieldSeparator. Forcing '.' made Tabulator traverse/mutate nested
+      // paths (e.g. `assignto.staffid`) and throw on rows where that field is a scalar
+      // ("Cannot create property 'staffid' on number '119'"). Declarative columns can
+      // still opt into nesting themselves.
 
       // If inline data is provided, add it to options and use local pagination
       if (inlineData) {
@@ -1114,30 +1115,35 @@ if (!customElements.get('wc-tabulator')) {
         return 'string';
       };
 
-      const collectFields = (obj, prefix) => {
+      // FLAT: one column per top-level key. Nested objects/arrays are NOT exploded into
+      // `parent.child` columns — they become a single column rendered as compact JSON /
+      // "[N items]". This keeps auto-columns safe on heterogeneous collections where a
+      // field is an object in some rows and a scalar in others (a dotted field would make
+      // Tabulator traverse the nested path and throw on the scalar rows).
+      const collectFields = (obj) => {
         for (const key of Object.keys(obj)) {
-          const value = obj[key];
-          const path = prefix ? `${prefix}.${key}` : key;
-          const type = detectType(value);
-
-          if (type === 'object' && !value.$oid && !value.$date) {
-            collectFields(value, path);
+          const type = detectType(obj[key]);
+          const existing = fieldMap.get(key);
+          if (!existing) {
+            fieldMap.set(key, { type, count: 1 });
           } else {
-            const existing = fieldMap.get(path);
-            if (!existing) {
-              fieldMap.set(path, { type, count: 1 });
-            } else {
-              existing.count++;
-              // Upgrade type if we see a more specific type
-              if (existing.type === 'null' && type !== 'null') {
-                existing.type = type;
-              }
+            existing.count++;
+            if (existing.type === 'null' && type !== 'null') {
+              // Upgrade from a placeholder null to the first concrete type seen.
+              existing.type = type;
+            } else if (type !== 'null' && existing.type !== type &&
+                       (existing.type === 'object' || existing.type === 'array' ||
+                        type === 'object' || type === 'array')) {
+              // Heterogeneous shape across rows (object/array in some, scalar in others):
+              // render as a single JSON/text cell. The 'object' formatter handles objects,
+              // arrays, and scalars, so this can't traverse a nested path.
+              existing.type = 'object';
             }
           }
         }
       };
 
-      sample.forEach(row => collectFields(row, ''));
+      sample.forEach(row => collectFields(row));
 
       // Convert to title case: "address.state" → "Address State"
       const toTitle = (path) => path.split(/[._]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -1223,6 +1229,28 @@ if (!customElements.get('wc-tabulator')) {
             const val = cell.getValue();
             if (!Array.isArray(val)) return val;
             try { return JSON.stringify(val); } catch (e) { return `[${val.length} items]`; }
+          };
+        } else if (info.type === 'object') {
+          // Nested object (or a field whose shape varies across rows). Render the whole
+          // value in one cell: compact JSON for objects, "[N items]" for arrays, and
+          // scalars as-is (so a mixed object/scalar field never explodes or throws).
+          col.minWidth = 120;
+          col.formatter = (cell) => {
+            const val = cell.getValue();
+            if (val == null) return '';
+            if (Array.isArray(val)) return `[${val.length} items]`;
+            if (typeof val === 'object') {
+              try { return JSON.stringify(val); } catch (e) { return String(val); }
+            }
+            return val;
+          };
+          col.tooltip = (e, cell) => {
+            const val = cell.getValue();
+            if (val == null) return '';
+            if (typeof val === 'object') {
+              try { return JSON.stringify(val, null, 2); } catch (e) { return String(val); }
+            }
+            return val;
           };
         } else {
           // string
