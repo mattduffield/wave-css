@@ -4,9 +4,9 @@
  *   <wc-ref-key value="DST-4002" label="Data Compare"></wc-ref-key>
  *
  * Description:
- *   Displays a reference key as a small, semi-transparent pill badge positioned
- *   at a corner of its closest positioned parent. Used by wc-help-drawer to scan
- *   for contextual help keys on the current page.
+ *   Displays a reference key as a small, semi-transparent pill badge fixed to a
+ *   corner of the viewport (out of flow, so it never affects page layout). Used by
+ *   wc-help-drawer to scan for contextual help keys on the current page.
  *
  * Attributes:
  *   - value: The reference key string (e.g. "DST-4002")
@@ -37,7 +37,7 @@ if (!customElements.get('wc-ref-key')) {
       super.connectedCallback();
       this._applyStyle();
 
-      // No parent positioning needed — sticky handles its own context
+      // No parent positioning needed — position:fixed anchors to the viewport corner.
     }
 
     _render() {
@@ -110,7 +110,10 @@ if (!customElements.get('wc-ref-key')) {
           display: contents;
         }
         .wc-ref-key {
-          position: sticky;
+          /* fixed (not sticky) so the badge floats OUT of flow — sticky kept it in
+             normal flow and reserved its height, stealing space from flex siblings
+             when the display:contents host sat in a flex container (e.g. <main>). */
+          position: fixed;
           z-index: 1;
           display: flex;
           flex-direction: column;
@@ -126,22 +129,22 @@ if (!customElements.get('wc-ref-key')) {
         }
         .wc-ref-key[data-position="top-right"] {
           top: 8px;
-          margin-left: auto;
+          right: 8px;
           padding-right: 6px;
         }
         .wc-ref-key[data-position="top-left"] {
           top: 8px;
-          margin-right: auto;
+          left: 8px;
           padding-left: 6px;
         }
         .wc-ref-key[data-position="bottom-right"] {
           bottom: 8px;
-          margin-left: auto;
+          right: 8px;
           padding-right: 6px;
         }
         .wc-ref-key[data-position="bottom-left"] {
           bottom: 8px;
-          margin-right: auto;
+          left: 8px;
           padding-left: 6px;
         }
         .ref-key-badge {

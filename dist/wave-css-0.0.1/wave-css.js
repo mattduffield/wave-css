@@ -9740,7 +9740,10 @@ if (!customElements.get("wc-ref-key")) {
           display: contents;
         }
         .wc-ref-key {
-          position: sticky;
+          /* fixed (not sticky) so the badge floats OUT of flow \u2014 sticky kept it in
+             normal flow and reserved its height, stealing space from flex siblings
+             when the display:contents host sat in a flex container (e.g. <main>). */
+          position: fixed;
           z-index: 1;
           display: flex;
           flex-direction: column;
@@ -9756,22 +9759,22 @@ if (!customElements.get("wc-ref-key")) {
         }
         .wc-ref-key[data-position="top-right"] {
           top: 8px;
-          margin-left: auto;
+          right: 8px;
           padding-right: 6px;
         }
         .wc-ref-key[data-position="top-left"] {
           top: 8px;
-          margin-right: auto;
+          left: 8px;
           padding-left: 6px;
         }
         .wc-ref-key[data-position="bottom-right"] {
           bottom: 8px;
-          margin-left: auto;
+          right: 8px;
           padding-right: 6px;
         }
         .wc-ref-key[data-position="bottom-left"] {
           bottom: 8px;
-          margin-right: auto;
+          left: 8px;
           padding-left: 6px;
         }
         .ref-key-badge {
