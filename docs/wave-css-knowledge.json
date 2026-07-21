@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.22.0",
+    "version": "1.23.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-15"
   },
@@ -32,7 +32,9 @@
       "@xenova/transformers-2.17.2": "ESM entry (wc-hf-bot)"
     },
     "hostApi": ["window.wc.waveLocalAssetUrl(url)", "window.wc.waveImport(url)"],
-    "usage": "<script>window.WaveAssetBase='/static/js';</script> then load wave-css.min.js"
+    "usage": "<script>window.WaveAssetBase='/static/js';</script> then load wave-css.min.js",
+    "vendorScript": "npm run vendor-assets -- <outDir>  (scripts/vendor-assets.mjs) downloads the pinned set into <outDir>/<lib>-<version>/…; copy into static/js/. CodeMirror and Prism modes/themes/components load ON DEMAND by name, so it pulls the WHOLE minified tree via the cdnjs file-list API (CodeMirror ~262 files: 122 modes + 65 themes + addons; Prism ~298 components) — cherry-picking only literal-URL files leaves gaps and a data editor 404s on mode/sql, mode/javascript, or a selected theme (then falls back to CDN). Flags: --only=codemirror,prism,files, --force, --concurrency=N; skips files already present.",
+    "mimeNote": "The static server must serve .js as text/javascript and .css as text/css. A text/plain MIME (including the text/plain 404 page for a missing file) is refused under strict MIME checking."
   },
   "overview": {
     "description": "Wave CSS is a web component library using native Custom Elements without Shadow DOM. This allows seamless integration with third-party libraries and frameworks.",
