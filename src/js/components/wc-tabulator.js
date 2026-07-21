@@ -305,6 +305,36 @@ if (!customElements.get('wc-tabulator')) {
       }
     }
 
+    // Public: counterpart to setRemoteData() — switch the table back to a local,
+    // in-memory dataset paged locally. Accepts the same shapes as the `data` attr/setter
+    // (a JSON string or an array). Reverses the remote switch: clears the ajax URL and
+    // flips pagination/sort/filter modes back to 'local'.
+    setLocalData(data) {
+      if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) { data = []; }
+      }
+      const rows = Array.isArray(data) ? data : [];
+      this._inlineData = rows;
+      const self = this;
+      const doSet = () => {
+        if (!self.table) return;
+        if (self.hasAttribute('auto-columns')) {
+          const cols = self._generateAutoColumns(self._inlineData);
+          self.table.setColumns(cols);
+        }
+        self.table.options.ajaxURL = '';
+        self.table.options.paginationMode = 'local';
+        self.table.options.sortMode = 'local';
+        self.table.options.filterMode = 'local';
+        self.table.setData(self._inlineData);
+      };
+      if (this.table && this._isReady) {
+        setTimeout(doSet, 0);
+      } else {
+        this.ready.then(doSet);
+      }
+    }
+
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === 'data' && this.table) {
         try {
