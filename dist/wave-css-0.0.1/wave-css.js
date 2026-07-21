@@ -19643,7 +19643,7 @@ if (!customElements.get("wc-tabulator-row-menu")) {
 if (!customElements.get("wc-tabulator")) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ["id", "class", "data", "projection-fields", "auto-columns"];
+      return ["id", "class", "data", "projection-fields", "auto-columns", "ajax-url"];
     }
     icons = {
       "eye": {
@@ -19889,6 +19889,28 @@ if (!customElements.get("wc-tabulator")) {
         }
       }
     }
+    // Public: switch the table to a new remote (server-side paginated) query at runtime.
+    // Works even if inline `data` was previously set — flips the table back to remote and
+    // reloads from page 1 via ajax.
+    setRemoteData(url) {
+      if (!url) return;
+      const self2 = this;
+      const doSet = () => {
+        if (!self2.table) return;
+        self2._inlineData = null;
+        self2.table.options.data = void 0;
+        self2.table.options.ajaxURL = url;
+        self2.table.options.paginationMode = "remote";
+        self2.table.options.filterMode = "remote";
+        self2.table.options.sortMode = "remote";
+        self2.table.setData(url);
+      };
+      if (this.table && this._isReady) {
+        setTimeout(doSet, 0);
+      } else {
+        this.ready.then(doSet);
+      }
+    }
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === "data" && this.table) {
         try {
@@ -19897,6 +19919,8 @@ if (!customElements.get("wc-tabulator")) {
         } catch (e) {
           console.error("[wc-tabulator] Error updating data:", e);
         }
+      } else if (attrName === "ajax-url") {
+        if (newValue) this.setRemoteData(newValue);
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -21379,19 +21403,29 @@ if (!customElements.get("wc-tabulator")) {
         return true;
       });
     }
+    // Resolve the optional `ajax-response-transform="fnName"` to a (rows) => rows fn,
+    // via the existing funcs (wc-tabulator-func) mechanism, then class/global/inline.
+    _resolveResponseTransform() {
+      const name = this.getAttribute("ajax-response-transform");
+      if (!name) return null;
+      const fn = this.funcs && this.funcs[name] || this.resolveFunc(name);
+      return typeof fn === "function" ? fn : null;
+    }
     handleAjaxResponse(url, params, response) {
+      const transform = this._resolveResponseTransform();
+      const applyTransform = (rows) => transform && Array.isArray(rows) ? transform(rows) : rows;
       const { results } = response;
       if (this.hasAttribute("pagination")) {
         const { data, last_page, last_row } = response;
         if (data == null && last_page === 0) {
           return { last_page: 0, last_row: 0, data: [] };
         } else if (data && last_page && last_row) {
-          return { last_page, last_row, data };
+          return { last_page, last_row, data: applyTransform(data) };
         } else {
-          return { last_page: 10, data: results };
+          return { last_page: 10, data: applyTransform(results) };
         }
       } else {
-        return results;
+        return applyTransform(results);
       }
     }
     _setupFormSync() {

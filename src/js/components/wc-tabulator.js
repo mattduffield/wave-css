@@ -15,7 +15,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 if (!customElements.get('wc-tabulator')) {
   class WcTabulator extends WcBaseComponent {
     static get observedAttributes() {
-      return ['id', 'class', 'data', 'projection-fields', 'auto-columns'];
+      return ['id', 'class', 'data', 'projection-fields', 'auto-columns', 'ajax-url'];
     }
 
     icons = {
@@ -280,6 +280,31 @@ if (!customElements.get('wc-tabulator')) {
       }
     }
 
+    // Public: switch the table to a new remote (server-side paginated) query at runtime.
+    // Works even if inline `data` was previously set — flips the table back to remote and
+    // reloads from page 1 via ajax.
+    setRemoteData(url) {
+      if (!url) return;
+      const self = this;
+      const doSet = () => {
+        if (!self.table) return;
+        // Clear any inline data state so it can't shadow the remote source.
+        self._inlineData = null;
+        self.table.options.data = undefined;
+        self.table.options.ajaxURL = url;
+        self.table.options.paginationMode = 'remote';
+        self.table.options.filterMode = 'remote';
+        self.table.options.sortMode = 'remote';
+        // Loading a URL string reloads from page 1 via ajax.
+        self.table.setData(url);
+      };
+      if (this.table && this._isReady) {
+        setTimeout(doSet, 0);
+      } else {
+        this.ready.then(doSet);
+      }
+    }
+
     async _handleAttributeChange(attrName, newValue) {
       if (attrName === 'data' && this.table) {
         try {
@@ -288,6 +313,9 @@ if (!customElements.get('wc-tabulator')) {
         } catch (e) {
           console.error('[wc-tabulator] Error updating data:', e);
         }
+      } else if (attrName === 'ajax-url') {
+        // Non-empty ajax-url (re)loads the table remotely; empty/removed is a no-op.
+        if (newValue) this.setRemoteData(newValue);
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -2221,9 +2249,20 @@ if (!customElements.get('wc-tabulator')) {
       });
     }
 
+    // Resolve the optional `ajax-response-transform="fnName"` to a (rows) => rows fn,
+    // via the existing funcs (wc-tabulator-func) mechanism, then class/global/inline.
+    _resolveResponseTransform() {
+      const name = this.getAttribute('ajax-response-transform');
+      if (!name) return null;
+      const fn = (this.funcs && this.funcs[name]) || this.resolveFunc(name);
+      return (typeof fn === 'function') ? fn : null;
+    }
+
     handleAjaxResponse(url, params, response) {
       // Custom response processing if needed
       // For example, adapting to a specific API format
+      const transform = this._resolveResponseTransform();
+      const applyTransform = (rows) => (transform && Array.isArray(rows)) ? transform(rows) : rows;
       const {results} = response;
       if (this.hasAttribute('pagination')) {
         const {data, last_page, last_row} = response;
@@ -2231,12 +2270,12 @@ if (!customElements.get('wc-tabulator')) {
           return {last_page: 0, last_row: 0, data: []};
         }
         else if (data && last_page && last_row) {
-          return {last_page, last_row, data};
+          return {last_page, last_row, data: applyTransform(data)};
         } else {
-          return {last_page: 10, data: results};
+          return {last_page: 10, data: applyTransform(results)};
         }
       } else {
-        return results;
+        return applyTransform(results);
       }
     }
 

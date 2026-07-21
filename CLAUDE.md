@@ -214,7 +214,7 @@ The AI Builder picks components by field type/shape. Full detail (with notes, de
 - `wc-wizard-step`: Child element for wc-wizard containing inline step content (label, icon, before-navigate)
 
 ### Data Components
-- `wc-tabulator`: Advanced data table; supports `auto-columns` attribute for auto-generating columns from data, `data` attribute for inline JSON arrays
+- `wc-tabulator`: Advanced data table; supports `auto-columns` attribute for auto-generating columns from data, `data` attribute for inline JSON arrays. **Dynamic server-side (remote) pagination:** public method `setRemoteData(url)` switches the table to a new remote query at runtime — sets `ajaxURL`, flips `paginationMode`/`filterMode`/`sortMode` to `'remote'`, clears inline data, and reloads from page 1 (`this.table.setData(url)`); works even after inline `data` was set (flips local→remote). `ajax-url` is an observed attribute — setting it non-empty calls `setRemoteData` (empty/removed = no-op). The endpoint returns `{data, last_page, last_row}` and the built-in First/Prev/Next/Last controls fetch each page. **Per-response transform:** `ajax-response-transform="fnName"` (resolved via the `wc-tabulator-func` funcs mechanism, then class/global/inline) passes `response.data` (the rows array) through `(rows) => rows` before render, preserving `last_page`/`last_row` — use it to convert Extended-JSON to plain values. Existing inline-`data` local-pagination tables are unaffected
 - `wc-tabulator-column`: Table column definition
 - `wc-tabulator-func`: Table function helpers
 - `wc-tabulator-row-menu`: Row context menu
