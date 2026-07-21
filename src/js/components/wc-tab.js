@@ -657,6 +657,17 @@ class WcTab extends WcBaseComponent {
         display: flex;
         flex-direction: row;
       }
+      /* Horizontal (default): make .wc-tab a full-height flex column so the
+         .tab-body (flex:1) → .wc-tab-item.active → content (flex-1) chain can fill.
+         height:100% is inert without a definite-height parent, so tabs in normal
+         flow are unaffected; in a full-height flex column they fill it. */
+      wc-tab:not([vertical]) .wc-tab {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0%;
+        min-height: 0;
+        height: 100%;
+      }
       wc-tab .wc-tab .tab-nav {
         position: relative;
         display: flex;
@@ -777,6 +788,10 @@ class WcTab extends WcBaseComponent {
       }
       wc-tab .wc-tab .tab-body wc-tab-item .wc-tab-item.active {
         display: flex;
+        /* Fill .tab-body instead of sizing to content, so short-content tabs don't
+           leave a gap and tall content scrolls internally (min-height:0 allows it). */
+        flex: 1 1 0%;
+        min-height: 0;
       }
 
       /* Add styling for nested tabs */
