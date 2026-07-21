@@ -19903,6 +19903,7 @@ if (!customElements.get("wc-tabulator")) {
         self2.table.options.paginationMode = "remote";
         self2.table.options.filterMode = "remote";
         self2.table.options.sortMode = "remote";
+        self2._remoteAutoColumnsDone = false;
         self2.table.setData(url);
       };
       if (this.table && this._isReady) {
@@ -21444,6 +21445,17 @@ if (!customElements.get("wc-tabulator")) {
       const fn = this.funcs && this.funcs[name] || this.resolveFunc(name);
       return typeof fn === "function" ? fn : null;
     }
+    // Auto-columns for a REMOTE source: the inline `data` path builds columns up front,
+    // but remote paging has no data at init, so generate them from the first page's rows.
+    // Guarded so it runs only once per remote source (setRemoteData resets the guard).
+    _maybeGenerateRemoteColumns(rows) {
+      if (this._remoteAutoColumnsDone || !this.table) return;
+      if (!Array.isArray(rows) || rows.length === 0) return;
+      const useAutoColumns = this.hasAttribute("auto-columns") && this.querySelectorAll("wc-tabulator-column").length === 0;
+      if (!useAutoColumns) return;
+      this.table.setColumns(this._generateAutoColumns(rows));
+      this._remoteAutoColumnsDone = true;
+    }
     handleAjaxResponse(url, params, response) {
       const transform = this._resolveResponseTransform();
       const applyTransform = (rows) => transform && Array.isArray(rows) ? transform(rows) : rows;
@@ -21452,10 +21464,16 @@ if (!customElements.get("wc-tabulator")) {
         const { data, last_page, last_row } = response;
         if (data == null && last_page === 0) {
           return { last_page: 0, last_row: 0, data: [] };
-        } else if (data && last_page && last_row) {
-          return { last_page, last_row, data: applyTransform(data) };
+        } else if (data) {
+          const rows = applyTransform(data);
+          this._maybeGenerateRemoteColumns(rows);
+          return {
+            last_page: last_page || 1,
+            last_row: last_row || (Array.isArray(rows) ? rows.length : 0),
+            data: rows
+          };
         } else {
-          return { last_page: 10, data: applyTransform(results) };
+          return { last_page: last_page || 1, data: applyTransform(data) };
         }
       } else {
         return applyTransform(results);

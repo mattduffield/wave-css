@@ -295,6 +295,9 @@ if (!customElements.get('wc-tabulator')) {
         self.table.options.paginationMode = 'remote';
         self.table.options.filterMode = 'remote';
         self.table.options.sortMode = 'remote';
+        // Regenerate auto-columns from the first page of the NEW remote source (shape
+        // may differ from the previous query). handleAjaxResponse does the generation.
+        self._remoteAutoColumnsDone = false;
         // Loading a URL string reloads from page 1 via ajax.
         self.table.setData(url);
       };
@@ -2288,6 +2291,19 @@ if (!customElements.get('wc-tabulator')) {
       return (typeof fn === 'function') ? fn : null;
     }
 
+    // Auto-columns for a REMOTE source: the inline `data` path builds columns up front,
+    // but remote paging has no data at init, so generate them from the first page's rows.
+    // Guarded so it runs only once per remote source (setRemoteData resets the guard).
+    _maybeGenerateRemoteColumns(rows) {
+      if (this._remoteAutoColumnsDone || !this.table) return;
+      if (!Array.isArray(rows) || rows.length === 0) return;
+      const useAutoColumns = this.hasAttribute('auto-columns')
+        && this.querySelectorAll('wc-tabulator-column').length === 0;
+      if (!useAutoColumns) return;
+      this.table.setColumns(this._generateAutoColumns(rows));
+      this._remoteAutoColumnsDone = true;
+    }
+
     handleAjaxResponse(url, params, response) {
       // Custom response processing if needed
       // For example, adapting to a specific API format
@@ -2299,10 +2315,24 @@ if (!customElements.get('wc-tabulator')) {
         if (data == null && last_page === 0) {
           return {last_page: 0, last_row: 0, data: []};
         }
-        else if (data && last_page && last_row) {
-          return {last_page, last_row, data: applyTransform(data)};
+        else if (data) {
+          // Render whenever rows are present. Only `data` (+ `last_page`) are truly
+          // required — default `last_page` to 1 and `last_row` to the row count when
+          // missing/0, so a `{data, last_page:1, last_row:0}` response still renders
+          // instead of blanking.
+          const rows = applyTransform(data);
+          // Build auto-columns from the first page's shape (remote sources have no data
+          // at init, so this is the earliest point columns can be inferred).
+          this._maybeGenerateRemoteColumns(rows);
+          return {
+            last_page: last_page || 1,
+            last_row: last_row || (Array.isArray(rows) ? rows.length : 0),
+            data: rows
+          };
         } else {
-          return {last_page: 10, data: applyTransform(results)};
+          // Fallback (no rows array): transform `data` (was mistakenly `results`,
+          // which is undefined in this branch).
+          return {last_page: last_page || 1, data: applyTransform(data)};
         }
       } else {
         return applyTransform(results);
