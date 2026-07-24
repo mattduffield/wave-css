@@ -197,10 +197,34 @@ class WcAddress extends WcBaseFormComponent {
     this._autocompleteEventsWired = false;
   }
 
+  // _addressContext reads the sibling State/Zip/City inputs in this address group
+  // (by the `${address-group}.state|postal_code|city` name convention), scoped to
+  // the enclosing form when there is one. Works with wc-input/wc-select or native
+  // inputs (all expose `.value`). Returns {} when none are present.
+  _addressContext() {
+    const group = this.getAttribute('address-group') || 'address';
+    const scope = this.closest('form') || document;
+    const read = (field) => {
+      const el = scope.querySelector(`[name="${group}.${field}"]`);
+      if (!el) return '';
+      const v = el.value != null ? el.value : el.getAttribute('value');
+      return v == null ? '' : String(v).trim();
+    };
+    return { state: read('state'), postal_code: read('postal_code'), city: read('city') };
+  }
+
   async _fetchSuggestions(input, container) {
     const params = new URLSearchParams({ q: input });
     const countries = this.getAttribute('countries');
     if (countries) params.set('countries', countries);
+    // Bias by the geographic context the form ALREADY has — the sibling
+    // State/Zip/City fields in this address group. Lets the geocode proxy rank
+    // in-region matches first (e.g. avoids returning "Professional Dr" in six
+    // other states). No hardcoded region: absent fields are simply omitted.
+    const ctx = this._addressContext();
+    if (ctx.state) params.set('state', ctx.state);
+    if (ctx.postal_code) params.set('postal_code', ctx.postal_code);
+    if (ctx.city) params.set('city', ctx.city);
     const url = `${this._geocodeBase()}/autocomplete?${params.toString()}`;
 
     try {
