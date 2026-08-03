@@ -268,6 +268,7 @@ const ICONS_TO_COPY = [
   "code",
   "code-branch",
   "code-compare",
+  "code-merge",
   "columns-3",
   "comment",
   "comment-dots",
