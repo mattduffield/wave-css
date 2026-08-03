@@ -397,6 +397,7 @@ const ICONS_TO_COPY = [
   "hexagon-exclamation",
   "horizontal-rule",
   "house",
+  "house-circle-check",
   "house-user",
   "hurricane",
   "hyphen",
