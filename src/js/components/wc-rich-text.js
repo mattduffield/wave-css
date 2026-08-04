@@ -25,7 +25,17 @@
  *    lbl-label              — field label (matches wc-input/wc-textarea)
  *    min-height             — editor min height (default 200px)
  *    placeholder            — empty-state hint
+ *    image-upload-url       — when set, the toolbar image button opens a device file picker
+ *                             (accept="image/*"), POSTs the file as multipart field `image`
+ *                             (+ `csrf_token` when `csrf` is set) to this same-origin URL,
+ *                             expects JSON { url }, and inserts the HOSTED url at the caret
+ *                             (DOMPurify-sanitized). Absent → today's Image-URL prompt (no
+ *                             regression). Email clients need hosted images, not data URIs.
+ *    csrf                   — CSRF token sent as the `csrf_token` upload field (if present)
  *    required / readonly / disabled
+ *
+ *    Toolbar keys: bold, italic, underline, h2, h3, ul, ol, link, quote, code, image, table
+ *    (sets: basic, full). e.g. toolbar="bold,italic,underline,h2,ul,ol,link,image".
  *
  *  Events (bubbling, composed):
  *    wcrichtextchange — content changed; detail { name, value, mode }
@@ -51,8 +61,9 @@ const LIBS = {
 };
 
 const TOOLBAR = {
-  bold:   { icon: 'bold', title: 'Bold', cmd: 'bold' },
-  italic: { icon: 'italic', title: 'Italic', cmd: 'italic' },
+  bold:      { icon: 'bold', title: 'Bold', cmd: 'bold' },
+  italic:    { icon: 'italic', title: 'Italic', cmd: 'italic' },
+  underline: { icon: 'underline', title: 'Underline', cmd: 'underline' },
   h2:     { icon: 'heading', title: 'Heading', block: 'h2' },
   h3:     { icon: 'heading', title: 'Subheading', block: 'h3' },
   ul:     { icon: 'list-ul', title: 'Bullet list', cmd: 'insertUnorderedList' },
@@ -65,7 +76,7 @@ const TOOLBAR = {
 };
 const SETS = {
   basic: ['bold', 'italic', 'h2', 'ul', 'ol', 'link', 'quote', 'code'],
-  full: ['bold', 'italic', 'h2', 'h3', 'ul', 'ol', 'link', 'quote', 'code', 'image', 'table']
+  full: ['bold', 'italic', 'underline', 'h2', 'h3', 'ul', 'ol', 'link', 'quote', 'code', 'image', 'table']
 };
 
 class WcRichText extends WcBaseFormComponent {
@@ -75,7 +86,8 @@ class WcRichText extends WcBaseFormComponent {
 
   static get observedAttributes() {
     return ['name', 'id', 'class', 'value', 'mode', 'toolbar', 'lbl-label',
-      'min-height', 'placeholder', 'required', 'readonly', 'disabled'];
+      'min-height', 'placeholder', 'required', 'readonly', 'disabled',
+      'image-upload-url', 'csrf'];
   }
 
   constructor() {
@@ -92,6 +104,8 @@ class WcRichText extends WcBaseFormComponent {
     this._onToolbarMouseDown = (e) => { if (e.target.closest('.wc-rich-text-btn')) e.preventDefault(); };
     this._onEditorInput = this._handleEditorInput.bind(this);
     this._onPaste = this._handlePaste.bind(this);
+    this._onFileChosen = this._handleFileChosen.bind(this);
+    this._savedRange = null;
 
     const compEl = this.querySelector(':scope > .wc-rich-text');
     if (compEl) {
@@ -343,6 +357,12 @@ class WcRichText extends WcBaseFormComponent {
       const url = window.prompt('Link URL:');
       if (url) document.execCommand('createLink', false, url);
     } else if (def.special === 'image') {
+      // With image-upload-url: pick a device file, upload, insert the HOSTED url (email
+      // clients need hosted images, not data URIs). Without it: keep the URL-prompt behavior.
+      if (this.getAttribute('image-upload-url')) {
+        this._pickAndUploadImage();
+        return; // async — _handleEditorInput runs after the insert, not now
+      }
       const url = window.prompt('Image URL:');
       if (url) document.execCommand('insertImage', false, url);
     } else if (def.special === 'code') {
@@ -368,6 +388,114 @@ class WcRichText extends WcBaseFormComponent {
       range.insertNode(code);
     }
     sel.removeAllRanges();
+  }
+
+  // ---- Device image upload (image-upload-url) -------------------------------
+
+  _pickAndUploadImage() {
+    // Save the caret BEFORE the file dialog steals focus, so we can insert back at it.
+    this._savedRange = this._saveSelection();
+    if (!this._fileInput) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.style.display = 'none';
+      input.addEventListener('change', this._onFileChosen);
+      this._fileInput = input;
+    }
+    if (!this.componentElement.contains(this._fileInput)) {
+      this.componentElement.appendChild(this._fileInput);
+    }
+    this._fileInput.value = '';
+    this._fileInput.click();
+  }
+
+  async _handleFileChosen(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    await this._uploadImage(file);
+  }
+
+  async _uploadImage(file) {
+    const url = this.getAttribute('image-upload-url');
+    if (!url) return;
+    this._setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const csrf = this.getAttribute('csrf');
+      if (csrf) fd.append('csrf_token', csrf);
+      const resp = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+      if (!resp.ok) throw new Error(`Upload failed (${resp.status})`);
+      const data = await resp.json();
+      const hostedUrl = data && data.url;
+      if (!hostedUrl) throw new Error('Server did not return a url');
+      this._insertImageAtCaret(hostedUrl);
+    } catch (err) {
+      // Fail safe: no insert on failure.
+      window.alert('Image upload failed: ' + (err && err.message ? err.message : 'unknown error'));
+    } finally {
+      this._setUploading(false);
+    }
+  }
+
+  _insertImageAtCaret(hostedUrl) {
+    this.editorEl.focus();
+    this._restoreSelection(this._savedRange);
+    this._savedRange = null;
+    // Build the <img> as an element (so the url can't break out of the attribute), then
+    // sanitize with DOMPurify before inserting — keeps sanitization on the result.
+    const img = document.createElement('img');
+    img.src = hostedUrl;
+    img.alt = '';
+    const safe = this._sanitize(img.outerHTML);
+    if (!safe) return;
+    if (!document.execCommand('insertHTML', false, safe)) {
+      document.execCommand('insertImage', false, hostedUrl);
+    }
+    this._handleEditorInput();
+  }
+
+  _saveSelection() {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      if (this.editorEl && this.editorEl.contains(range.commonAncestorContainer)) {
+        return range.cloneRange();
+      }
+    }
+    return null;
+  }
+
+  _restoreSelection(range) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    if (range) {
+      sel.addRange(range);
+    } else {
+      // No prior caret in the editor — insert at the end.
+      const r = document.createRange();
+      r.selectNodeContents(this.editorEl);
+      r.collapse(false);
+      sel.addRange(r);
+    }
+  }
+
+  _setUploading(on) {
+    this._uploading = on;
+    let el = this.componentElement.querySelector(':scope > .wc-rich-text-uploading');
+    if (on) {
+      if (!el) {
+        el = document.createElement('div');
+        el.classList.add('wc-rich-text-uploading');
+        el.textContent = 'Inserting image…';
+        this.componentElement.appendChild(el);
+      }
+      this.componentElement.setAttribute('aria-busy', 'true');
+    } else {
+      if (el) el.remove();
+      this.componentElement.removeAttribute('aria-busy');
+    }
   }
 
   _togglePreview() {
@@ -419,6 +547,10 @@ class WcRichText extends WcBaseFormComponent {
       this.editorEl.removeEventListener('input', this._onEditorInput);
       this.editorEl.removeEventListener('paste', this._onPaste);
     }
+    if (this._fileInput) {
+      this._fileInput.removeEventListener('change', this._onFileChosen);
+      this._fileInput = null;
+    }
   }
 
   _handleAttributeChange(attrName, newValue, oldValue) {
@@ -431,6 +563,10 @@ class WcRichText extends WcBaseFormComponent {
     }
     if (attrName === 'required') {
       this._updateValidity();
+      return;
+    }
+    if (attrName === 'image-upload-url' || attrName === 'csrf') {
+      // Read live at click/upload time — no rebuild, no formElement passthrough.
       return;
     }
     if (['mode', 'toolbar', 'min-height', 'placeholder', 'lbl-label', 'readonly', 'disabled'].includes(attrName)) {
@@ -497,6 +633,20 @@ class WcRichText extends WcBaseFormComponent {
           height: 1.25rem;
           margin: 0 0.25rem;
           background-color: var(--surface-4);
+        }
+        .wc-rich-text { position: relative; }
+        .wc-rich-text-uploading {
+          position: absolute;
+          right: 0.5rem;
+          bottom: 0.5rem;
+          padding: 0.25rem 0.625rem;
+          font-size: 0.8rem;
+          border-radius: 0.375rem;
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          pointer-events: none;
+          z-index: 5;
         }
         .wc-rich-text-editor,
         .wc-rich-text-preview {

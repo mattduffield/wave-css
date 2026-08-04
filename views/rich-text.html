@@ -66,7 +66,49 @@ This is **bold**, *italic*, and `code`.
         </wc-form>
       </div>
 
+      <!-- 3. Email compose: underline + device image upload (hosted url) -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Email compose (underline + device image upload)</h2>
+        <p class="text-xs text-muted">
+          The <strong>image</strong> button opens a device file picker, uploads to
+          <code>image-upload-url</code>, and inserts the returned <em>hosted</em> URL (email clients
+          need hosted images, not data URIs). This demo mocks the upload to a local
+          <code>blob:</code> URL so it works offline.
+        </p>
+        <wc-form>
+          <wc-rich-text
+              name="message"
+              lbl-label="Message"
+              mode="html"
+              toolbar="bold,italic,underline,h2,h3,ul,ol,link,image"
+              image-upload-url="/demo/upload-image"
+              csrf="DEMO-CSRF"
+              min-height="200px"
+              placeholder="Compose your email… try Underline and the Image button">
+          </wc-rich-text>
+        </wc-form>
+      </div>
+
     </div>
+
+    <wc-javascript>
+      // Offline mock for the image upload endpoint: return a blob: URL from the picked file,
+      // standing in for the server's hosted URL. Scoped to the demo endpoint; all other
+      // requests pass through. Lives in <wc-javascript> so it runs after an htmx swap too.
+      (function () {
+        if (window.__rtUploadPatched) return;
+        window.__rtUploadPatched = true;
+        const orig = window.fetch.bind(window);
+        window.fetch = async (url, opts) => {
+          if (typeof url === 'string' && url.indexOf('/demo/upload-image') !== -1) {
+            const file = opts && opts.body && opts.body.get ? opts.body.get('image') : null;
+            const objectUrl = file ? URL.createObjectURL(file) : '';
+            return { ok: true, json: async () => ({ url: objectUrl }) };
+          }
+          return orig(url, opts);
+        };
+      })();
+    </wc-javascript>
   </div>
 
   <script type="module" src="../dist/wave-css.min.js"></script>

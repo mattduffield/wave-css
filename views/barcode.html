@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-barcode</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="theme-ocean dark">
+  <div id="page-contents" class="p-6">
+    <!-- Styles live INSIDE #page-contents so they survive the index nav's
+         hx-select="#page-contents" (which drops the <head>). Scoped to #page-contents
+         so they don't leak into the index shell. -->
+    <style>
+      #page-contents .row { display: flex; flex-wrap: wrap; gap: 2rem 3rem; align-items: flex-start; margin: 1.5rem 0 3.5rem; }
+      #page-contents .label { border: 1px solid var(--card-border-color); border-radius: 8px; padding: 18px 24px; background: var(--card-bg-color); }
+      #page-contents .label .barcode-main { gap: 16px; }
+      #page-contents h2 { margin-top: 3rem; margin-bottom: 0.25rem; }
+      #page-contents code { background: var(--surface-2); padding: 0 4px; border-radius: 3px; }
+    </style>
+    <h1>wc-barcode — scannable QR / Code128 labels (offline, print-quality SVG)</h1>
+    <p>The code is always pure black-on-white so scanners read it in any theme; the caption/label follow <code>--text-1</code>. Try <strong>Print</strong> — it forces a clean black-on-white label.</p>
+
+    <h2>QR (default) — wristband label with caption</h2>
+    <div class="row">
+      <div class="label"><wc-barcode value="IE-4F9K2" caption="Ava Noble"></wc-barcode></div>
+      <div class="label"><wc-barcode value="IE-4F9K2" label="bottom" size="120"></wc-barcode></div>
+      <div class="label"><wc-barcode value="https://example.com/checkin/AVA-2026" ec-level="Q" label="none"></wc-barcode></div>
+    </div>
+
+    <h2>Code128</h2>
+    <div class="row">
+      <div class="label"><wc-barcode value="IE-4F9K2" symbology="code128"></wc-barcode></div>
+      <div class="label"><wc-barcode value="IE-4F9K2" symbology="code128" label="bottom" size="64"></wc-barcode></div>
+      <div class="label"><wc-barcode value="ORDER-00194223" symbology="code128" caption="Pickup" size="72"></wc-barcode></div>
+    </div>
+
+    <h2>Error-correction levels (QR)</h2>
+    <div class="row">
+      <div class="label"><wc-barcode value="Wave CSS" ec-level="L" caption="L"></wc-barcode></div>
+      <div class="label"><wc-barcode value="Wave CSS" ec-level="M" caption="M"></wc-barcode></div>
+      <div class="label"><wc-barcode value="Wave CSS" ec-level="Q" caption="Q"></wc-barcode></div>
+      <div class="label"><wc-barcode value="Wave CSS" ec-level="H" caption="H"></wc-barcode></div>
+    </div>
+
+    <p><button class="btn btn-primary" onclick="window.print()">Print this page</button></p>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

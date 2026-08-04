@@ -9820,6 +9820,1691 @@ if (!customElements.get("wc-ref-key")) {
   customElements.define("wc-ref-key", WcRefKey);
 }
 
+// src/js/components/wc-barcode.js
+var QR = /* @__PURE__ */ (() => {
+  const ECC = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+  const ECC_CODEWORDS_PER_BLOCK = [
+    [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+    [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+  ];
+  const NUM_EC_BLOCKS = [
+    [-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+    [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+    [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+    [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]
+  ];
+  const getBit = (x, i) => (x >>> i & 1) !== 0;
+  function gfMul(x, y) {
+    let z = 0;
+    for (let i = 7; i >= 0; i--) {
+      z = z << 1 ^ (z >>> 7) * 285;
+      z ^= (y >>> i & 1) * x;
+    }
+    return z & 255;
+  }
+  function rsDivisor(degree) {
+    const result = new Array(degree).fill(0);
+    result[degree - 1] = 1;
+    let root = 1;
+    for (let i = 0; i < degree; i++) {
+      for (let j = 0; j < degree; j++) {
+        result[j] = gfMul(result[j], root);
+        if (j + 1 < degree) result[j] ^= result[j + 1];
+      }
+      root = gfMul(root, 2);
+    }
+    return result;
+  }
+  function rsRemainder(data, divisor) {
+    const result = new Array(divisor.length).fill(0);
+    for (const b of data) {
+      const factor = b ^ result.shift();
+      result.push(0);
+      divisor.forEach((coef, i) => {
+        result[i] ^= gfMul(coef, factor);
+      });
+    }
+    return result;
+  }
+  function numRawDataModules(ver) {
+    let result = (16 * ver + 128) * ver + 64;
+    if (ver >= 2) {
+      const numAlign = Math.floor(ver / 7) + 2;
+      result -= (25 * numAlign - 10) * numAlign - 55;
+      if (ver >= 7) result -= 36;
+    }
+    return result;
+  }
+  const numDataCodewords = (ver, ord) => Math.floor(numRawDataModules(ver) / 8) - ECC_CODEWORDS_PER_BLOCK[ord][ver] * NUM_EC_BLOCKS[ord][ver];
+  const ccBits = (ver) => ver <= 9 ? 8 : 16;
+  function utf8Bytes(str) {
+    const out = [];
+    for (const ch of str) {
+      let cp = ch.codePointAt(0);
+      if (cp < 128) out.push(cp);
+      else if (cp < 2048) out.push(192 | cp >> 6, 128 | cp & 63);
+      else if (cp < 65536) out.push(224 | cp >> 12, 128 | cp >> 6 & 63, 128 | cp & 63);
+      else out.push(240 | cp >> 18, 128 | cp >> 12 & 63, 128 | cp >> 6 & 63, 128 | cp & 63);
+    }
+    return out;
+  }
+  function alignmentPositions(ver, size) {
+    if (ver === 1) return [];
+    const numAlign = Math.floor(ver / 7) + 2;
+    const step = ver === 32 ? 26 : Math.ceil((size - 13) / (numAlign * 2 - 2)) * 2;
+    const result = [6];
+    for (let pos = size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
+    return result;
+  }
+  function encode(text, eccName) {
+    if (!text) return null;
+    const ecc = ECC[eccName] || ECC.M;
+    const ord = ecc[0], fmt = ecc[1];
+    const bytes = utf8Bytes(text);
+    let version = 1;
+    for (; version <= 40; version++) {
+      if (4 + ccBits(version) + 8 * bytes.length <= numDataCodewords(version, ord) * 8) break;
+    }
+    if (version > 40) throw new Error("wc-barcode: value too long to encode as QR");
+    const bb = [];
+    const appendBits = (val, len) => {
+      for (let i = len - 1; i >= 0; i--) bb.push(val >>> i & 1);
+    };
+    appendBits(4, 4);
+    appendBits(bytes.length, ccBits(version));
+    for (const b of bytes) appendBits(b, 8);
+    const capacityBits = numDataCodewords(version, ord) * 8;
+    appendBits(0, Math.min(4, capacityBits - bb.length));
+    appendBits(0, (8 - bb.length % 8) % 8);
+    for (let pad = 236; bb.length < capacityBits; pad ^= 236 ^ 17) appendBits(pad, 8);
+    const dataCw = new Array(bb.length / 8).fill(0);
+    bb.forEach((bit, i) => {
+      dataCw[i >>> 3] |= bit << 7 - (i & 7);
+    });
+    const numBlocks = NUM_EC_BLOCKS[ord][version];
+    const blockEccLen = ECC_CODEWORDS_PER_BLOCK[ord][version];
+    const rawCw = Math.floor(numRawDataModules(version) / 8);
+    const numShort = numBlocks - rawCw % numBlocks;
+    const shortLen = Math.floor(rawCw / numBlocks);
+    const div = rsDivisor(blockEccLen);
+    const blocks = [];
+    let k = 0;
+    for (let i = 0; i < numBlocks; i++) {
+      const dat = dataCw.slice(k, k + shortLen - blockEccLen + (i < numShort ? 0 : 1));
+      k += dat.length;
+      const rem = rsRemainder(dat, div);
+      if (i < numShort) dat.push(0);
+      blocks.push(dat.concat(rem));
+    }
+    const codewords = [];
+    for (let i = 0; i < blocks[0].length; i++) {
+      for (let j = 0; j < blocks.length; j++) {
+        if (i !== shortLen - blockEccLen || j >= numShort) codewords.push(blocks[j][i]);
+      }
+    }
+    const size = version * 4 + 17;
+    const modules = Array.from({ length: size }, () => new Array(size).fill(false));
+    const isFn = Array.from({ length: size }, () => new Array(size).fill(false));
+    const setFn = (x, y, dark) => {
+      modules[y][x] = dark;
+      isFn[y][x] = true;
+    };
+    for (let i = 0; i < size; i++) {
+      setFn(6, i, i % 2 === 0);
+      setFn(i, 6, i % 2 === 0);
+    }
+    const drawFinder = (cx, cy) => {
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        const dist = Math.max(Math.abs(dx), Math.abs(dy));
+        const x = cx + dx, y = cy + dy;
+        if (x >= 0 && x < size && y >= 0 && y < size) setFn(x, y, dist !== 2 && dist !== 4);
+      }
+    };
+    drawFinder(3, 3);
+    drawFinder(size - 4, 3);
+    drawFinder(3, size - 4);
+    const ap = alignmentPositions(version, size);
+    const n = ap.length;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      if (i === 0 && j === 0 || i === 0 && j === n - 1 || i === n - 1 && j === 0) continue;
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+        setFn(ap[j] + dx, ap[i] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }
+    }
+    const drawFormat = (mask) => {
+      const data = fmt << 3 | mask;
+      let rem = data;
+      for (let i = 0; i < 10; i++) rem = rem << 1 ^ (rem >>> 9) * 1335;
+      const bits = ((data << 10 | rem) ^ 21522) & 32767;
+      for (let i = 0; i <= 5; i++) setFn(8, i, getBit(bits, i));
+      setFn(8, 7, getBit(bits, 6));
+      setFn(8, 8, getBit(bits, 7));
+      setFn(7, 8, getBit(bits, 8));
+      for (let i = 9; i < 15; i++) setFn(14 - i, 8, getBit(bits, i));
+      for (let i = 0; i < 8; i++) setFn(size - 1 - i, 8, getBit(bits, i));
+      for (let i = 8; i < 15; i++) setFn(8, size - 15 + i, getBit(bits, i));
+      setFn(8, size - 8, true);
+    };
+    const drawVersion = () => {
+      if (version < 7) return;
+      let rem = version;
+      for (let i = 0; i < 12; i++) rem = rem << 1 ^ (rem >>> 11) * 7973;
+      const bits = version << 12 | rem;
+      for (let i = 0; i < 18; i++) {
+        const bit = getBit(bits, i), a = size - 11 + i % 3, b = Math.floor(i / 3);
+        setFn(a, b, bit);
+        setFn(b, a, bit);
+      }
+    };
+    drawFormat(0);
+    drawVersion();
+    let bi = 0;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let vert = 0; vert < size; vert++) {
+        for (let jj = 0; jj < 2; jj++) {
+          const x = right - jj;
+          const upward = (right + 1 & 2) === 0;
+          const y = upward ? size - 1 - vert : vert;
+          if (!isFn[y][x] && bi < codewords.length * 8) {
+            modules[y][x] = getBit(codewords[bi >>> 3], 7 - (bi & 7));
+            bi++;
+          }
+        }
+      }
+    }
+    const applyMask = (mask) => {
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        if (isFn[y][x]) continue;
+        let inv = false;
+        switch (mask) {
+          case 0:
+            inv = (x + y) % 2 === 0;
+            break;
+          case 1:
+            inv = y % 2 === 0;
+            break;
+          case 2:
+            inv = x % 3 === 0;
+            break;
+          case 3:
+            inv = (x + y) % 3 === 0;
+            break;
+          case 4:
+            inv = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+            break;
+          case 5:
+            inv = x * y % 2 + x * y % 3 === 0;
+            break;
+          case 6:
+            inv = (x * y % 2 + x * y % 3) % 2 === 0;
+            break;
+          case 7:
+            inv = ((x + y) % 2 + x * y % 3) % 2 === 0;
+            break;
+        }
+        if (inv) modules[y][x] = !modules[y][x];
+      }
+    };
+    const penalty = () => {
+      let score = 0;
+      for (let y = 0; y < size; y++) {
+        let run = 1;
+        for (let x = 1; x < size; x++) {
+          if (modules[y][x] === modules[y][x - 1]) {
+            run++;
+            if (run === 5) score += 3;
+            else if (run > 5) score++;
+          } else run = 1;
+        }
+      }
+      for (let x = 0; x < size; x++) {
+        let run = 1;
+        for (let y = 1; y < size; y++) {
+          if (modules[y][x] === modules[y - 1][x]) {
+            run++;
+            if (run === 5) score += 3;
+            else if (run > 5) score++;
+          } else run = 1;
+        }
+      }
+      for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) {
+        const c = modules[y][x];
+        if (c === modules[y][x + 1] && c === modules[y + 1][x] && c === modules[y + 1][x + 1]) score += 3;
+      }
+      let dark = 0;
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (modules[y][x]) dark++;
+      const total = size * size;
+      score += (Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1) * 10;
+      return score;
+    };
+    let best = 0, min = Infinity;
+    for (let m = 0; m < 8; m++) {
+      applyMask(m);
+      drawFormat(m);
+      const p = penalty();
+      if (p < min) {
+        min = p;
+        best = m;
+      }
+      applyMask(m);
+    }
+    applyMask(best);
+    drawFormat(best);
+    return { size, modules };
+  }
+  return { encode };
+})();
+var CODE128 = /* @__PURE__ */ (() => {
+  const PATTERNS = [
+    "212222",
+    "222122",
+    "222221",
+    "121223",
+    "121322",
+    "131222",
+    "122213",
+    "122312",
+    "132212",
+    "221213",
+    "221312",
+    "231212",
+    "112232",
+    "122132",
+    "122231",
+    "113222",
+    "123122",
+    "123221",
+    "223211",
+    "221132",
+    "221231",
+    "213212",
+    "223112",
+    "312131",
+    "311222",
+    "321122",
+    "321221",
+    "312212",
+    "322112",
+    "322211",
+    "212123",
+    "212321",
+    "232121",
+    "111323",
+    "131123",
+    "131321",
+    "112313",
+    "132113",
+    "132311",
+    "211313",
+    "231113",
+    "231311",
+    "112133",
+    "112331",
+    "132131",
+    "113123",
+    "113321",
+    "133121",
+    "313121",
+    "211331",
+    "231131",
+    "213113",
+    "213311",
+    "213131",
+    "311123",
+    "311321",
+    "331121",
+    "312113",
+    "312311",
+    "332111",
+    "314111",
+    "221411",
+    "431111",
+    "111224",
+    "111422",
+    "121124",
+    "121421",
+    "141122",
+    "141221",
+    "112214",
+    "112412",
+    "122114",
+    "122411",
+    "142112",
+    "142211",
+    "241211",
+    "221114",
+    "413111",
+    "241112",
+    "134111",
+    "111242",
+    "121142",
+    "121241",
+    "114212",
+    "124112",
+    "124211",
+    "411212",
+    "421112",
+    "421211",
+    "212141",
+    "214121",
+    "412121",
+    "111143",
+    "111341",
+    "131141",
+    "114113",
+    "114311",
+    "411113",
+    "411311",
+    "113141",
+    "114131",
+    "311141",
+    "411131",
+    "211412",
+    "211214",
+    "211232",
+    "2331112"
+    // 106 = stop (7 widths)
+  ];
+  const START_B = 104, STOP = 106;
+  function encode(text) {
+    if (!text) return null;
+    const vals = [];
+    for (const ch of text) {
+      const code = ch.codePointAt(0);
+      if (code < 32 || code > 126) return null;
+      vals.push(code - 32);
+    }
+    let sum = START_B;
+    vals.forEach((v, i) => {
+      sum += v * (i + 1);
+    });
+    const checksum = sum % 103;
+    const symbols = [START_B, ...vals, checksum, STOP];
+    const modules = [];
+    symbols.forEach((sym) => {
+      const widths = PATTERNS[sym];
+      for (let i = 0; i < widths.length; i++) {
+        const w = parseInt(widths[i], 10);
+        const bar = i % 2 === 0 ? 1 : 0;
+        for (let j = 0; j < w; j++) modules.push(bar);
+      }
+    });
+    return { modules, quiet: 10 };
+  }
+  return { encode };
+})();
+if (!customElements.get("wc-barcode")) {
+  class WcBarcode extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["value", "symbology", "label", "size", "ec-level", "caption", "class"];
+    }
+    constructor() {
+      super();
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-barcode");
+    }
+    connectedCallback() {
+      const existing = this.querySelector(":scope > .wc-barcode");
+      if (existing) this.componentElement = existing;
+      else if (!this.contains(this.componentElement)) this.appendChild(this.componentElement);
+      super.connectedCallback();
+      this._applyStyle();
+    }
+    _render() {
+      super._render();
+      this._draw();
+    }
+    _handleAttributeChange(attrName, newValue) {
+      if (["value", "symbology", "label", "size", "ec-level", "caption"].includes(attrName)) {
+        this._draw();
+      } else {
+        super._handleAttributeChange(attrName, newValue);
+      }
+    }
+    get value() {
+      return this.getAttribute("value") || "";
+    }
+    set value(val) {
+      if (val == null || val === "") this.removeAttribute("value");
+      else this.setAttribute("value", String(val));
+      this._draw();
+    }
+    _escape(s) {
+      return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+    _draw() {
+      const el = this.componentElement;
+      if (!el) return;
+      const value = this.getAttribute("value") || "";
+      if (!value) {
+        el.innerHTML = "";
+        this.removeAttribute("role");
+        this.removeAttribute("aria-label");
+        return;
+      }
+      const symbology = (this.getAttribute("symbology") || "qr").toLowerCase();
+      const labelPos = (this.getAttribute("label") || "right").toLowerCase();
+      const caption = this.getAttribute("caption") || "";
+      const ecLevel = (this.getAttribute("ec-level") || "M").toUpperCase();
+      const sizeAttr = parseInt(this.getAttribute("size"), 10);
+      this.setAttribute("role", "img");
+      this.setAttribute("aria-label", `barcode ${value}`);
+      let codeSvg = "";
+      try {
+        codeSvg = symbology === "code128" ? this._renderCode128(value, Number.isFinite(sizeAttr) ? sizeAttr : 64) : this._renderQr(value, ecLevel, Number.isFinite(sizeAttr) ? sizeAttr : 96);
+      } catch (e) {
+        console.error("[wc-barcode]", e);
+        el.innerHTML = "";
+        return;
+      }
+      const labelHtml = labelPos === "none" ? "" : `<span class="barcode-label">${this._escape(value)}</span>`;
+      const captionHtml = caption ? `<span class="barcode-caption">${this._escape(caption)}</span>` : "";
+      el.innerHTML = `
+        ${captionHtml}
+        <div class="barcode-main label-${labelPos}">
+          <span class="barcode-code">${codeSvg}</span>
+          ${labelHtml}
+        </div>`;
+    }
+    _renderQr(value, ecLevel, px) {
+      const qr = QR.encode(value, ecLevel);
+      if (!qr) return "";
+      const quiet = 4;
+      const dim = qr.size + quiet * 2;
+      let rects = "";
+      for (let y = 0; y < qr.size; y++) {
+        let x = 0;
+        while (x < qr.size) {
+          if (qr.modules[y][x]) {
+            let w = 1;
+            while (x + w < qr.size && qr.modules[y][x + w]) w++;
+            rects += `<rect x="${x + quiet}" y="${y + quiet}" width="${w}" height="1"/>`;
+            x += w;
+          } else x++;
+        }
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 ${dim} ${dim}" shape-rendering="crispEdges" role="presentation"><rect width="${dim}" height="${dim}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
+    }
+    _renderCode128(value, barHeight) {
+      const bc = CODE128.encode(value);
+      if (!bc) throw new Error(`value contains characters Code128-B can't encode: ${value}`);
+      const mod = 2;
+      const h = barHeight;
+      const total = bc.modules.length + bc.quiet * 2;
+      const width = total * mod;
+      let rects = "";
+      let x = 0;
+      const m = bc.modules;
+      while (x < m.length) {
+        if (m[x]) {
+          let w = 1;
+          while (x + w < m.length && m[x + w]) w++;
+          rects += `<rect x="${(bc.quiet + x) * mod}" y="0" width="${w * mod}" height="${h}"/>`;
+          x += w;
+        } else x++;
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h}" viewBox="0 0 ${width} ${h}" shape-rendering="crispEdges" role="presentation"><rect width="${width}" height="${h}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
+    }
+    _applyStyle() {
+      const style = `
+        wc-barcode {
+          display: inline-block;
+        }
+        .wc-barcode {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+        .wc-barcode:empty {
+          display: none;
+        }
+        .wc-barcode .barcode-caption {
+          font-size: 0.75rem;
+          line-height: 1.1;
+          color: var(--text-1);
+        }
+        .wc-barcode .barcode-main {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+        }
+        .wc-barcode .barcode-main.label-bottom {
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .wc-barcode .barcode-code {
+          display: inline-flex;
+          background: #fff; /* code is always black-on-white for scanners */
+          line-height: 0;
+        }
+        .wc-barcode .barcode-code svg {
+          display: block;
+        }
+        .wc-barcode .barcode-label {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-weight: 600;
+          font-size: 0.9rem;
+          letter-spacing: 0.02em;
+          white-space: nowrap;
+          color: var(--text-1);
+        }
+        /* Clean printed label: no shadows/margins, forced black-on-white. */
+        @media print {
+          .wc-barcode {
+            box-shadow: none !important;
+            margin: 0 !important;
+            background: #fff !important;
+          }
+          .wc-barcode .barcode-caption,
+          .wc-barcode .barcode-label {
+            color: #000 !important;
+          }
+        }
+      `.trim();
+      this.loadStyle("wc-barcode-style", style);
+    }
+  }
+  customElements.define("wc-barcode", WcBarcode);
+  window.WcBarcode = WcBarcode;
+}
+
+// src/js/components/wc-checkin.js
+var ZXING_URL = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+if (!customElements.get("wc-checkin")) {
+  class WcCheckin extends WcBaseComponent {
+    static get observedAttributes() {
+      return ["mode", "scan-source", "endpoint", "event-id", "session-id", "csrf", "allow-override", "beep", "class"];
+    }
+    constructor() {
+      super();
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-checkin");
+      this._state = "idle";
+      this._awaitPickup = false;
+      this._attendee = null;
+      this._lastPayload = null;
+      this._resetTimer = null;
+      this._buf = "";
+      this._lastKeyTime = 0;
+      this._MAX_INTERKEY = 60;
+      this._MIN_LEN = 3;
+      this._stream = null;
+      this._detector = null;
+      this._rafId = 0;
+      this._zxingReader = null;
+      this._frameCanvas = null;
+      this._onKeydown = this._handleKeydown.bind(this);
+      this._onClick = this._handleClick.bind(this);
+    }
+    connectedCallback() {
+      const existing = this.querySelector(":scope > .wc-checkin");
+      if (existing) this.componentElement = existing;
+      else if (!this.contains(this.componentElement)) this.appendChild(this.componentElement);
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+      this._renderIdle();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+      this._stopCamera();
+      if (this._resetTimer) clearTimeout(this._resetTimer);
+    }
+    _render() {
+      super._render();
+      if (typeof htmx !== "undefined") htmx.process(this);
+    }
+    // ---- Config getters -------------------------------------------------------
+    get mode() {
+      return (this.getAttribute("mode") || "in").toLowerCase() === "out" ? "out" : "in";
+    }
+    get scanSource() {
+      const s = (this.getAttribute("scan-source") || "usb").toLowerCase();
+      return ["usb", "camera", "both"].includes(s) ? s : "usb";
+    }
+    get usesUsb() {
+      return this.scanSource === "usb" || this.scanSource === "both";
+    }
+    get usesCamera() {
+      return this.scanSource === "camera" || this.scanSource === "both";
+    }
+    get beepEnabled() {
+      return this.getAttribute("beep") !== "false";
+    }
+    get canOverride() {
+      return this.hasAttribute("allow-override");
+    }
+    // ---- Events ---------------------------------------------------------------
+    _emit(newName, legacyName, detail) {
+      this._emitEvent(newName, legacyName, { bubbles: true, composed: true, detail }, document);
+    }
+    // ---- Scan capture: USB keyboard-wedge -------------------------------------
+    _handleKeydown(e) {
+      if (!this.usesUsb) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+      const gap = now - this._lastKeyTime;
+      if (e.key === "Enter") {
+        const code = this._buf.trim();
+        this._buf = "";
+        if (code.length >= this._MIN_LEN) {
+          e.preventDefault();
+          this._handleScan(code, "usb");
+        }
+        return;
+      }
+      if (e.key.length === 1) {
+        if (gap > this._MAX_INTERKEY) this._buf = "";
+        this._buf += e.key;
+        this._lastKeyTime = now;
+      }
+    }
+    // ---- Scan capture: camera (native BarcodeDetector) ------------------------
+    async _startCamera() {
+      const native = "BarcodeDetector" in window;
+      if (!native) {
+        try {
+          await this._loadZxing();
+        } catch (_) {
+          this._renderCameraUnsupported();
+          return;
+        }
+      }
+      this._renderCamera();
+      try {
+        if (native && !this._detector) this._detector = new window.BarcodeDetector();
+        this._stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
+        });
+        const video = this.componentElement.querySelector(".ci-video");
+        if (!video) {
+          this._stopCamera();
+          return;
+        }
+        video.srcObject = this._stream;
+        await video.play();
+        this._scanLoop(video, native);
+      } catch (err) {
+        this._stopCamera();
+        this._fail("Camera unavailable \u2014 " + (err && err.message ? err.message : "access denied"));
+      }
+    }
+    _loadZxing() {
+      if (window.ZXing && window.ZXing.MultiFormatReader) return Promise.resolve();
+      return this.loadLibrary(ZXING_URL, "ZXing");
+    }
+    _scanLoop(video, native) {
+      const tick = async () => {
+        if (!this._stream) return;
+        try {
+          let value = null;
+          if (native) {
+            const codes = await this._detector.detect(video);
+            if (codes && codes.length) value = codes[0].rawValue;
+          } else {
+            value = this._zxingDecodeFrame(video);
+          }
+          if (value) {
+            this._stopCamera();
+            this._handleScan(value, "camera");
+            return;
+          }
+        } catch (_) {
+        }
+        this._rafId = requestAnimationFrame(tick);
+      };
+      this._rafId = requestAnimationFrame(tick);
+    }
+    // Fallback: draw the current video frame to an offscreen canvas and decode with ZXing.
+    _zxingDecodeFrame(video) {
+      const w = video.videoWidth, h = video.videoHeight;
+      if (!w || !h) return null;
+      const cv = this._frameCanvas || (this._frameCanvas = document.createElement("canvas"));
+      cv.width = w;
+      cv.height = h;
+      const ctx = cv.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, w, h);
+      return this._zxingDecode(cv);
+    }
+    // Decode a canvas with ZXing core (QR + common 1-D formats). Returns the text or null.
+    _zxingDecode(canvas) {
+      const Z = window.ZXing;
+      if (!Z || !Z.MultiFormatReader) return null;
+      if (!this._zxingReader) {
+        this._zxingReader = new Z.MultiFormatReader();
+        const hints = /* @__PURE__ */ new Map();
+        hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [
+          Z.BarcodeFormat.QR_CODE,
+          Z.BarcodeFormat.CODE_128,
+          Z.BarcodeFormat.CODE_39,
+          Z.BarcodeFormat.EAN_13,
+          Z.BarcodeFormat.EAN_8,
+          Z.BarcodeFormat.UPC_A,
+          Z.BarcodeFormat.UPC_E,
+          Z.BarcodeFormat.ITF,
+          Z.BarcodeFormat.CODABAR
+        ]);
+        hints.set(Z.DecodeHintType.TRY_HARDER, true);
+        this._zxingReader.setHints(hints);
+      }
+      try {
+        const src = new Z.HTMLCanvasElementLuminanceSource(canvas);
+        const bmp = new Z.BinaryBitmap(new Z.HybridBinarizer(src));
+        const result = this._zxingReader.decode(bmp);
+        return result && result.getText ? result.getText() : null;
+      } catch (_) {
+        return null;
+      }
+    }
+    _stopCamera() {
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
+        this._rafId = 0;
+      }
+      if (this._stream) {
+        this._stream.getTracks().forEach((t) => t.stop());
+        this._stream = null;
+      }
+    }
+    // ---- Server round-trip ----------------------------------------------------
+    _handleScan(code, source) {
+      if (!code) return;
+      if (this._state === "scanning") return;
+      const step = this.mode === "out" && this._awaitPickup ? "authorize" : "identify";
+      this._emit("wccheckinscanned", "checkin:scanned", { code, source, step });
+      const payload = {
+        mode: this.mode,
+        scanned_barcode: code,
+        event_id: this.getAttribute("event-id") || "",
+        session_id: this.getAttribute("session-id") || "",
+        step
+      };
+      if (step === "authorize" && this._attendee) payload.attendee_id = this._attendee.id;
+      const csrf = this.getAttribute("csrf");
+      if (csrf) payload.csrf_token = csrf;
+      this._lastPayload = payload;
+      this._post(payload);
+    }
+    async _post(payload) {
+      this._renderScanning();
+      let res;
+      try {
+        if (typeof this.requestHandler === "function") {
+          res = await this.requestHandler(payload);
+        } else {
+          const endpoint = this.getAttribute("endpoint");
+          if (!endpoint) throw new Error("No endpoint configured");
+          const headers = { "Content-Type": "application/json" };
+          const csrf = this.getAttribute("csrf");
+          if (csrf) headers["X-CSRF-Token"] = csrf;
+          const r = await fetch(endpoint, {
+            method: "POST",
+            headers,
+            credentials: "same-origin",
+            body: JSON.stringify(payload)
+          });
+          if (!r.ok) throw new Error(`Server error (${r.status})`);
+          res = await r.json();
+        }
+      } catch (err) {
+        this._fail(err && err.message ? err.message : "Network error");
+        return;
+      }
+      this._handleResult(res || {}, payload);
+    }
+    _handleResult(res, payload) {
+      this._emit("wccheckinresult", "checkin:result", res);
+      if (this.mode === "out" && payload.step === "identify" && res.requires_pickup_scan) {
+        this._attendee = res.attendee || null;
+        this._awaitPickup = true;
+        this._renderPickup(res);
+        return;
+      }
+      this._awaitPickup = false;
+      this._beep(!!res.allowed);
+      this._renderResult(res, payload);
+    }
+    _fail(message) {
+      this._emit("wccheckinerror", "checkin:error", { message });
+      this._beep(false);
+      this._awaitPickup = false;
+      this._renderError(message);
+    }
+    _override() {
+      if (!this._lastPayload) return;
+      const payload = { ...this._lastPayload, step: "authorize", override: true };
+      this._lastPayload = payload;
+      this._post(payload);
+    }
+    // ---- Success / fail tone (WebAudio, no asset) -----------------------------
+    _beep(ok) {
+      if (!this.beepEnabled) return;
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        this._audio = this._audio || new Ctx();
+        const ctx = this._audio;
+        if (ctx.state === "suspended") ctx.resume();
+        const now = ctx.currentTime;
+        const tones = ok ? [880, 1320] : [200];
+        tones.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = ok ? "sine" : "square";
+          osc.frequency.value = f;
+          const t = now + i * 0.12;
+          gain.gain.setValueAtTime(1e-4, t);
+          gain.gain.exponentialRampToValueAtTime(0.2, t + 0.01);
+          gain.gain.exponentialRampToValueAtTime(1e-4, t + 0.11);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.12);
+        });
+      } catch (_) {
+      }
+    }
+    // ---- Rendering ------------------------------------------------------------
+    _escape(s) {
+      return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+    _setStage(state, html) {
+      this._state = state;
+      const el = this.componentElement;
+      el.className = `wc-checkin state-${state} mode-${this.mode}`;
+      el.innerHTML = html;
+      this.setAttribute("role", "group");
+      this.setAttribute("aria-label", this.mode === "out" ? "Check-out station" : "Check-in station");
+    }
+    _cameraButton() {
+      if (!this.usesCamera) return "";
+      return `<button type="button" class="ci-btn ci-btn-ghost" data-ci="camera-start">
+        <span class="ci-cam-ico" aria-hidden="true">\u{1F4F7}</span> Use camera
+      </button>`;
+    }
+    _attendeeCard(attendee) {
+      if (!attendee) return "";
+      const name = this._escape(attendee.name || "");
+      const id = this._escape(attendee.id || "");
+      const initials = (attendee.name || "?").trim().split(/\s+/).map((w) => w[0] || "").slice(0, 2).join("").toUpperCase();
+      const avatar = attendee.photo ? `<img class="ci-photo" src="${this._escape(attendee.photo)}" alt="">` : `<div class="ci-photo ci-photo-initials" aria-hidden="true">${this._escape(initials)}</div>`;
+      return `<div class="ci-attendee">
+        ${avatar}
+        <div class="ci-attendee-text">
+          <div class="ci-name">${name}</div>
+          ${id ? `<div class="ci-id">${id}</div>` : ""}
+        </div>
+      </div>`;
+    }
+    _renderIdle() {
+      this._stopCamera();
+      this._awaitPickup = false;
+      this._attendee = null;
+      const title = this.mode === "out" ? "Scan a wristband to check out" : "Scan a wristband";
+      this._setStage("idle", `
+        <div class="ci-panel">
+          <div class="ci-scanmark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="56" height="56" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M6 16V9a3 3 0 0 1 3-3h7M42 16V9a3 3 0 0 0-3-3h-7M6 32v7a3 3 0 0 0 3 3h7M42 32v7a3 3 0 0 1-3 3h-7"/>
+              <line x1="4" y1="24" x2="44" y2="24" stroke-width="4"/>
+            </svg>
+          </div>
+          <div class="ci-title" role="status" aria-live="polite">${this._escape(title)}</div>
+          <div class="ci-sub">${this.mode === "out" ? "Check-out" : "Check-in"} station</div>
+          ${this._cameraButton()}
+        </div>`);
+    }
+    _renderScanning() {
+      this._setStage("scanning", `
+        <div class="ci-panel">
+          <div class="ci-spinner" aria-hidden="true"></div>
+          <div class="ci-title" role="status" aria-live="polite">Checking\u2026</div>
+        </div>`);
+    }
+    _renderResult(res, payload) {
+      const allowed = !!res.allowed;
+      const verdict = allowed ? "ALLOWED" : "DENIED";
+      const reason = res.reason ? `<div class="ci-reason">${this._escape(res.reason)}</div>` : "";
+      let extra = "";
+      if (allowed && this.mode === "out" && payload && payload.step === "authorize") {
+        extra = `<div class="ci-released">Released</div>`;
+      }
+      let override = "";
+      if (!allowed && this.mode === "out" && this.canOverride && res.override_allowed) {
+        override = `<button type="button" class="ci-btn ci-btn-warn" data-ci="override">Override</button>`;
+      }
+      this._setStage("result", `
+        <div class="ci-panel ci-${allowed ? "allow" : "deny"}">
+          <div class="ci-verdict" role="status" aria-live="assertive">${verdict}</div>
+          ${this._attendeeCard(res.attendee)}
+          ${extra}
+          ${reason}
+          <div class="ci-actions">
+            ${override}
+            <button type="button" class="ci-btn ci-btn-primary" data-ci="next">Next</button>
+          </div>
+        </div>`);
+      this._scheduleReset(allowed ? 4e3 : 6e3);
+    }
+    _renderError(message) {
+      this._setStage("error", `
+        <div class="ci-panel ci-error">
+          <div class="ci-verdict" role="alert" aria-live="assertive">ERROR</div>
+          <div class="ci-reason">${this._escape(message)}</div>
+          <div class="ci-actions">
+            <button type="button" class="ci-btn ci-btn-primary" data-ci="next">Try again</button>
+          </div>
+        </div>`);
+    }
+    _renderCamera() {
+      this._setStage("camera", `
+        <div class="ci-panel ci-camera">
+          <div class="ci-videowrap">
+            <video class="ci-video" playsinline muted></video>
+            <div class="ci-reticle" aria-hidden="true"></div>
+          </div>
+          <div class="ci-title" role="status" aria-live="polite">Point the camera at the code</div>
+          <div class="ci-actions">
+            <button type="button" class="ci-btn ci-btn-cancel" data-ci="camera-stop">Stop camera</button>
+          </div>
+        </div>`);
+    }
+    _renderCameraUnsupported() {
+      this._setStage("idle", `
+        <div class="ci-panel">
+          <div class="ci-title">Camera scanning isn't available.</div>
+          <div class="ci-sub">Use a USB barcode scanner at this station.</div>
+          <div class="ci-actions">
+            <button type="button" class="ci-btn ci-btn-primary" data-ci="next">OK</button>
+          </div>
+        </div>`);
+    }
+    _scheduleReset(ms) {
+      if (this._resetTimer) clearTimeout(this._resetTimer);
+      this._resetTimer = setTimeout(() => this._renderIdle(), ms);
+    }
+    // ---- Click delegation -----------------------------------------------------
+    _handleClick(e) {
+      const btn = e.target.closest("[data-ci]");
+      if (!btn || !this.componentElement.contains(btn)) return;
+      const action = btn.getAttribute("data-ci");
+      if (this._resetTimer) {
+        clearTimeout(this._resetTimer);
+        this._resetTimer = null;
+      }
+      switch (action) {
+        case "next":
+          this._renderIdle();
+          break;
+        case "cancel":
+          this._renderIdle();
+          break;
+        case "override":
+          this._override();
+          break;
+        case "camera-start":
+          this._startCamera();
+          break;
+        case "camera-stop":
+          this._stopCamera();
+          this._awaitPickup ? this._renderPickupPrompt() : this._renderIdle();
+          break;
+      }
+    }
+    // Re-show the pickup prompt after stopping the camera mid-checkout.
+    _renderPickupPrompt() {
+      this._renderPickup({ attendee: this._attendee, authorized_names: this._lastAuthNames || [] });
+    }
+    // ---- Wiring ---------------------------------------------------------------
+    _wireEvents() {
+      super._wireEvents();
+      document.addEventListener("keydown", this._onKeydown, true);
+      this.componentElement.addEventListener("click", this._onClick);
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+      document.removeEventListener("keydown", this._onKeydown, true);
+      if (this.componentElement) this.componentElement.removeEventListener("click", this._onClick);
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      if (attrName === "class") {
+        super._handleAttributeChange(attrName, newValue, oldValue);
+        return;
+      }
+      if (["mode", "scan-source"].includes(attrName)) {
+        if (this._isConnected) this._renderIdle();
+        return;
+      }
+    }
+    // Keep the authorized names around so a camera detour can restore the pickup prompt.
+    _renderPickup(res) {
+      this._lastAuthNames = Array.isArray(res.authorized_names) ? res.authorized_names : [];
+      const names = this._lastAuthNames;
+      const list = names.length ? `<ul class="ci-authlist">${names.map((n) => `<li>${this._escape(n)}</li>`).join("")}</ul>` : `<div class="ci-sub">No authorized pickups on file.</div>`;
+      this._setStage("pickup", `
+        <div class="ci-panel ci-pickup">
+          ${this._attendeeCard(res.attendee)}
+          <div class="ci-authhead">Authorized pickups</div>
+          ${list}
+          <div class="ci-prompt" role="status" aria-live="polite">Scan an authorized pickup</div>
+          <div class="ci-actions">
+            ${this.usesCamera ? `<button type="button" class="ci-btn ci-btn-ghost" data-ci="camera-start"><span aria-hidden="true">\u{1F4F7}</span> Use camera</button>` : ""}
+            <button type="button" class="ci-btn ci-btn-cancel" data-ci="cancel">Cancel</button>
+          </div>
+        </div>`);
+    }
+    _applyStyle() {
+      const style = `
+        wc-checkin { display: contents; }
+
+        @layer wc.usage {
+          .wc-checkin {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-height: 20rem;
+            border: 1px solid var(--card-border-color, var(--surface-4));
+            border-radius: 0.75rem;
+            background: var(--card-bg-color, var(--surface-1));
+            color: var(--text-1);
+            overflow: hidden;
+            --ci-accent: var(--primary-bg-color);
+          }
+          .wc-checkin .ci-panel {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-align: center;
+            padding: 2rem 1.5rem;
+          }
+          .wc-checkin.state-result .ci-panel,
+          .wc-checkin.state-error .ci-panel { padding-top: 2.5rem; }
+
+          .wc-checkin .ci-scanmark { color: var(--ci-accent); opacity: 0.85; }
+          .wc-checkin .ci-title { font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+          .wc-checkin .ci-sub { font-size: 0.95rem; color: var(--text-2, var(--text-1)); opacity: 0.8; }
+
+          /* Big glanceable verdict */
+          .wc-checkin .ci-verdict {
+            font-size: clamp(2.25rem, 8vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            line-height: 1;
+          }
+          .wc-checkin .ci-panel.ci-allow { --ci-tone: var(--success-color, #22c55e); }
+          .wc-checkin .ci-panel.ci-deny,
+          .wc-checkin .ci-panel.ci-error { --ci-tone: var(--danger-color, #ef4444); }
+          .wc-checkin .ci-panel.ci-allow .ci-verdict,
+          .wc-checkin .ci-panel.ci-deny .ci-verdict,
+          .wc-checkin .ci-panel.ci-error .ci-verdict { color: var(--ci-tone); }
+          .wc-checkin.state-result,
+          .wc-checkin.state-error { border-width: 2px; }
+          .wc-checkin.state-result .ci-panel.ci-allow,
+          .wc-checkin.state-result .ci-panel.ci-deny,
+          .wc-checkin.state-error .ci-panel.ci-error {
+            box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--ci-tone) 8%, transparent);
+          }
+
+          .wc-checkin .ci-released {
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--success-color, #22c55e);
+            text-transform: uppercase; letter-spacing: 0.08em;
+          }
+          .wc-checkin .ci-reason { font-size: 1.05rem; max-width: 28rem; }
+
+          /* Attendee card */
+          .wc-checkin .ci-attendee {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            background: var(--surface-2);
+            border-radius: 0.625rem;
+          }
+          .wc-checkin .ci-photo {
+            width: 3.5rem; height: 3.5rem; flex: 0 0 auto;
+            border-radius: 50%; object-fit: cover;
+            background: var(--surface-3);
+          }
+          .wc-checkin .ci-photo-initials {
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.25rem; color: var(--text-1);
+          }
+          .wc-checkin .ci-attendee-text { text-align: left; }
+          .wc-checkin .ci-name { font-size: 1.25rem; font-weight: 600; }
+          .wc-checkin .ci-id { font-size: 0.85rem; opacity: 0.7; font-family: ui-monospace, Menlo, monospace; }
+
+          /* Pickup list */
+          .wc-checkin .ci-authhead { font-weight: 600; margin-top: 0.25rem; }
+          .wc-checkin .ci-authlist {
+            list-style: none; margin: 0; padding: 0;
+            display: flex; flex-wrap: wrap; gap: 0.375rem; justify-content: center;
+          }
+          .wc-checkin .ci-authlist li {
+            padding: 0.25rem 0.75rem;
+            background: var(--surface-2);
+            border-radius: 999px;
+            font-size: 0.95rem;
+          }
+          .wc-checkin .ci-prompt {
+            margin-top: 0.5rem;
+            font-size: 1.25rem; font-weight: 600;
+            color: var(--ci-accent);
+          }
+
+          /* Buttons \u2014 large tap targets */
+          .wc-checkin .ci-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 0.5rem; }
+          .wc-checkin .ci-btn {
+            min-height: 3rem;
+            padding: 0.75rem 1.75rem;
+            font-size: 1.05rem; font-weight: 600;
+            border: 1px solid transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: var(--surface-3);
+            color: var(--text-1);
+          }
+          .wc-checkin .ci-btn:focus-visible { outline: 2px solid var(--ci-accent); outline-offset: 2px; }
+          .wc-checkin .ci-btn-primary { background: var(--ci-accent); color: var(--primary-color, #fff); }
+          .wc-checkin .ci-btn-ghost { background: transparent; border-color: var(--surface-4); }
+          .wc-checkin .ci-btn-cancel { background: transparent; border-color: var(--surface-4); }
+          .wc-checkin .ci-btn-warn { background: var(--warning-color, #f59e0b); color: #1a1a1a; }
+
+          /* Spinner */
+          .wc-checkin .ci-spinner {
+            width: 3rem; height: 3rem;
+            border: 4px solid var(--surface-3);
+            border-top-color: var(--ci-accent);
+            border-radius: 50%;
+            animation: wc-checkin-spin 0.8s linear infinite;
+          }
+          @keyframes wc-checkin-spin { to { transform: rotate(360deg); } }
+
+          /* Camera */
+          .wc-checkin .ci-videowrap {
+            position: relative;
+            width: 100%; max-width: 22rem;
+            aspect-ratio: 4 / 3;
+            background: #000;
+            border-radius: 0.625rem;
+            overflow: hidden;
+          }
+          .wc-checkin .ci-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+          .wc-checkin .ci-reticle {
+            position: absolute; inset: 18%;
+            border: 3px solid rgba(255,255,255,0.85);
+            border-radius: 0.5rem;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.25);
+          }
+        }
+      `.trim();
+      this.loadStyle("wc-checkin-style", style);
+    }
+  }
+  customElements.define("wc-checkin", WcCheckin);
+  window.WcCheckin = WcCheckin;
+}
+
+// src/js/components/wc-record-lookup.js
+if (!customElements.get("wc-record-lookup")) {
+  class WcRecordLookup extends WcBaseComponent {
+    static get observedAttributes() {
+      return [
+        "endpoint",
+        "min-chars",
+        "debounce",
+        "label-field",
+        "value-field",
+        "mode",
+        "fill-map",
+        "keep-text",
+        "placeholder",
+        "lbl-label",
+        "disabled",
+        "name",
+        "class"
+      ];
+    }
+    constructor() {
+      super();
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-record-lookup", "relative");
+      this._lastResults = [];
+      this._debTimer = null;
+      this._onInput = this._handleInput.bind(this);
+      this._onKeydown = this._handleKeydown.bind(this);
+      this._onDocClick = this._handleDocClick.bind(this);
+      this._onBlur = this._handleBlur.bind(this);
+    }
+    connectedCallback() {
+      const existing = this.querySelector(":scope > .wc-record-lookup");
+      if (existing) this.componentElement = existing;
+      else if (!this.contains(this.componentElement)) this.appendChild(this.componentElement);
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+      if (this._debTimer) clearTimeout(this._debTimer);
+    }
+    // ---- Config getters -------------------------------------------------------
+    get mode() {
+      const m = (this.getAttribute("mode") || "select").toLowerCase();
+      return ["select", "fill", "hint"].includes(m) ? m : "select";
+    }
+    get minChars() {
+      const n = parseInt(this.getAttribute("min-chars"), 10);
+      return Number.isFinite(n) && n >= 0 ? n : 2;
+    }
+    get debounceMs() {
+      const n = parseInt(this.getAttribute("debounce"), 10);
+      return Number.isFinite(n) && n >= 0 ? n : 300;
+    }
+    get labelField() {
+      return this.getAttribute("label-field") || "label";
+    }
+    get valueField() {
+      return this.getAttribute("value-field") || "id";
+    }
+    // ---- Rendering ------------------------------------------------------------
+    _render() {
+      super._render();
+      const el = this.componentElement;
+      el.innerHTML = "";
+      const name = this.getAttribute("name") || `rl-${this.wcId}`;
+      const lbl = this.getAttribute("lbl-label");
+      if (lbl) {
+        const label = document.createElement("label");
+        label.setAttribute("for", name);
+        label.textContent = lbl;
+        el.appendChild(label);
+      }
+      const input2 = document.createElement("input");
+      input2.type = "text";
+      input2.id = name;
+      input2.setAttribute("autocomplete", "off");
+      input2.classList.add("form-control", "rl-input");
+      input2.placeholder = this.getAttribute("placeholder") || "Search\u2026";
+      if (this.hasAttribute("disabled")) input2.disabled = true;
+      el.appendChild(input2);
+      this._input = input2;
+      const icon = document.createElement("wc-fa-icon");
+      icon.setAttribute("name", "magnifying-glass");
+      icon.setAttribute("icon-style", "solid");
+      icon.setAttribute("size", "0.9rem");
+      icon.classList.add("rl-icon");
+      el.appendChild(icon);
+      const sugg = document.createElement("div");
+      sugg.classList.add("rl-suggestions", "hidden");
+      el.appendChild(sugg);
+      this._suggestions = sugg;
+      const hint = document.createElement("div");
+      hint.classList.add("rl-hint", "hidden");
+      el.appendChild(hint);
+      this._hint = hint;
+      if (typeof htmx !== "undefined") htmx.process(this);
+    }
+    // ---- Events ---------------------------------------------------------------
+    _fire(canonical, alias, detail) {
+      [canonical, alias].forEach((name) => {
+        this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+        document.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+      });
+    }
+    _handleInput() {
+      if (this._debTimer) clearTimeout(this._debTimer);
+      const q = (this._input.value || "").trim();
+      if (q.length < this.minChars) {
+        this._clearResults();
+        return;
+      }
+      this._debTimer = setTimeout(() => this._search(q), this.debounceMs);
+    }
+    _handleKeydown(e) {
+      const items = this._suggestions.querySelectorAll(".rl-suggestion-item");
+      if (!items.length) {
+        if (e.key === "Escape") {
+          this._clearResults();
+        }
+        return;
+      }
+      const cur = Array.from(items).findIndex((i) => i.classList.contains("highlighted"));
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          this._highlight(items, cur < 0 || cur === items.length - 1 ? 0 : cur + 1);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          this._highlight(items, cur <= 0 ? items.length - 1 : cur - 1);
+          break;
+        case "Enter":
+          if (cur >= 0) {
+            e.preventDefault();
+            this._selectRecord(this._lastResults[parseInt(items[cur].dataset.index, 10)]);
+          }
+          break;
+        case "Escape":
+          e.preventDefault();
+          this._clearResults();
+          break;
+      }
+    }
+    _handleDocClick(e) {
+      if (!this.contains(e.target)) this._clearResults();
+    }
+    _handleBlur() {
+      setTimeout(() => {
+        if (!this.componentElement.querySelector(".rl-suggestions:hover, .rl-hint:hover")) {
+          this._hideSuggestions();
+        }
+      }, 200);
+    }
+    // ---- Search ---------------------------------------------------------------
+    _extraParams() {
+      const params = {};
+      for (const attr of Array.from(this.attributes)) {
+        if (attr.name.startsWith("param-")) params[attr.name.slice(6)] = attr.value;
+      }
+      return params;
+    }
+    async _search(q) {
+      this._fire("wcrecordsearch", "record:search", { q });
+      const params = this._extraParams();
+      let results;
+      try {
+        if (typeof this.searchHandler === "function") {
+          results = await this.searchHandler(q, params);
+        } else {
+          const endpoint = this.getAttribute("endpoint");
+          if (!endpoint) {
+            this._clearResults();
+            return;
+          }
+          const url = new URL(endpoint, window.location.origin);
+          url.searchParams.set("q", q);
+          Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+          const resp = await fetch(url.toString(), { headers: { accept: "application/json" } });
+          if (!resp.ok) {
+            this._clearResults();
+            return;
+          }
+          results = await resp.json();
+        }
+      } catch (err) {
+        console.error("[wc-record-lookup]", err);
+        this._clearResults();
+        return;
+      }
+      const list = Array.isArray(results) ? results : results && Array.isArray(results.results) ? results.results : [];
+      if (!list.length) {
+        this._clearResults();
+        return;
+      }
+      this._lastResults = list;
+      if (this.mode === "hint") this._showHint(list[0]);
+      else this._showSuggestions(list);
+    }
+    // ---- Suggestions dropdown (select / fill) --------------------------------
+    _showSuggestions(results) {
+      this._hideHint();
+      const c = this._suggestions;
+      c.innerHTML = "";
+      c.classList.remove("hidden");
+      results.forEach((rec, idx) => {
+        const item = document.createElement("div");
+        item.classList.add("rl-suggestion-item");
+        item.dataset.index = String(idx);
+        item.textContent = this._displayLabel(rec);
+        item.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this._selectRecord(rec);
+        });
+        c.appendChild(item);
+      });
+    }
+    _highlight(items, index) {
+      items.forEach((i) => i.classList.remove("highlighted"));
+      if (items[index]) {
+        items[index].classList.add("highlighted");
+        items[index].scrollIntoView({ block: "nearest" });
+      }
+    }
+    _hideSuggestions() {
+      if (!this._suggestions) return;
+      this._suggestions.classList.add("hidden");
+      this._suggestions.innerHTML = "";
+    }
+    // ---- Hint banner (hint) ---------------------------------------------------
+    _showHint(record) {
+      this._hideSuggestions();
+      const label = this._displayLabel(record);
+      const h = this._hint;
+      h.innerHTML = "";
+      h.classList.remove("hidden");
+      const text = document.createElement("span");
+      text.classList.add("rl-hint-text");
+      text.append("Looks like ");
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      text.append(strong, " \u2014 use existing?");
+      const use = document.createElement("button");
+      use.type = "button";
+      use.classList.add("rl-hint-use");
+      use.textContent = "Use existing";
+      use.addEventListener("click", () => this._selectRecord(record));
+      const dismiss = document.createElement("button");
+      dismiss.type = "button";
+      dismiss.classList.add("rl-hint-dismiss");
+      dismiss.setAttribute("aria-label", "Dismiss");
+      dismiss.textContent = "\xD7";
+      dismiss.addEventListener("click", () => this._hideHint());
+      h.append(text, use, dismiss);
+    }
+    _hideHint() {
+      if (!this._hint) return;
+      this._hint.classList.add("hidden");
+      this._hint.innerHTML = "";
+    }
+    _clearResults() {
+      this._lastResults = [];
+      this._hideSuggestions();
+      this._hideHint();
+    }
+    // ---- Selection ------------------------------------------------------------
+    _selectRecord(record) {
+      if (!record) return;
+      if (this.mode === "fill") {
+        this._applyFill(record);
+      } else if (this.mode === "select" && !this.hasAttribute("keep-text")) {
+        this._input.value = "";
+      }
+      this._clearResults();
+      this._fire("wcrecordselected", "record:selected", { record });
+    }
+    _applyFill(record) {
+      const map = this._parseJSON("fill-map", {});
+      const scope = this.closest("form") || document;
+      Object.entries(map).forEach(([target, path]) => {
+        const val = this._getPath(record, path);
+        this._setField(scope, target, val == null ? "" : val);
+      });
+    }
+    // Set a sibling field's value by `name` — works for wc-input / plain input / select /
+    // textarea: property + attribute + inner control, dispatching input & change.
+    _setField(scope, name, val) {
+      const el = scope.querySelector(`[name="${name}"]`);
+      if (!el) return false;
+      try {
+        el.value = val;
+      } catch (_) {
+      }
+      if (el.setAttribute) el.setAttribute("value", String(val));
+      const isNative = el.matches("input, select, textarea");
+      const inner = isNative ? null : el.querySelector("input, select, textarea, [form-element]");
+      if (inner) {
+        try {
+          inner.value = val;
+        } catch (_) {
+        }
+        inner.dispatchEvent(new Event("input", { bubbles: true }));
+        inner.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }
+    // ---- Helpers --------------------------------------------------------------
+    _displayLabel(rec) {
+      const v = this._getPath(rec, this.labelField);
+      if (v != null && v !== "") return String(v);
+      return String(rec.label != null ? rec.label : this._getPath(rec, this.valueField) ?? "");
+    }
+    _getPath(obj, path) {
+      if (obj == null || !path) return void 0;
+      if (Object.prototype.hasOwnProperty.call(obj, path)) return obj[path];
+      return String(path).split(".").reduce((acc, key) => acc == null ? acc : acc[key], obj);
+    }
+    _parseJSON(attr, fallback) {
+      const raw = this.getAttribute(attr);
+      if (!raw) return fallback;
+      try {
+        const v = JSON.parse(raw);
+        return v && typeof v === "object" ? v : fallback;
+      } catch (ex) {
+        console.warn(`[wc-record-lookup] invalid JSON for ${attr}`, ex);
+        return fallback;
+      }
+    }
+    // ---- Wiring ---------------------------------------------------------------
+    _wireEvents() {
+      super._wireEvents();
+      if (!this._input) return;
+      this._input.addEventListener("input", this._onInput);
+      this._input.addEventListener("keydown", this._onKeydown);
+      this._input.addEventListener("blur", this._onBlur);
+      document.addEventListener("click", this._onDocClick);
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+      if (this._input) {
+        this._input.removeEventListener("input", this._onInput);
+        this._input.removeEventListener("keydown", this._onKeydown);
+        this._input.removeEventListener("blur", this._onBlur);
+      }
+      document.removeEventListener("click", this._onDocClick);
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      if (attrName === "class") {
+        super._handleAttributeChange(attrName, newValue, oldValue);
+        return;
+      }
+      if (attrName === "disabled") {
+        if (this._input) this._input.disabled = this.hasAttribute("disabled");
+        return;
+      }
+      if (["mode", "lbl-label", "placeholder", "name"].includes(attrName)) {
+        if (this._isConnected) {
+          this._unWireEvents();
+          this._render();
+          this._wireEvents();
+        }
+        return;
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-record-lookup { display: contents; }
+
+        @layer wc.usage {
+          .wc-record-lookup { display: block; }
+          .wc-record-lookup.relative { position: relative; }
+          .wc-record-lookup > label { display: block; font-weight: 500; margin-bottom: 0.25rem; }
+          .wc-record-lookup .rl-input { width: 100%; padding-left: 2rem; }
+          .wc-record-lookup .rl-icon {
+            position: absolute; left: 0.6rem; bottom: 0.7rem;
+            pointer-events: none; color: var(--text-2, var(--text-1)); opacity: 0.7;
+          }
+          .wc-record-lookup .rl-input:focus {
+            outline: none;
+            border-color: var(--primary-bg-color, #3b82f6);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-bg-color, #3b82f6) 18%, transparent);
+          }
+
+          /* Suggestions dropdown */
+          .wc-record-lookup .rl-suggestions {
+            position: absolute; top: 100%; left: 0; right: 0;
+            margin-top: 2px;
+            background: var(--component-bg-color, var(--surface-1, #fff));
+            border: 1px solid var(--component-border-color, var(--surface-4, #e5e7eb));
+            border-radius: 0.375rem;
+            max-height: 300px; overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+          }
+          .wc-record-lookup .rl-suggestions.hidden,
+          .wc-record-lookup .rl-hint.hidden { display: none; }
+          .wc-record-lookup .rl-suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--surface-3, #eef0f2);
+            font-size: 0.95rem;
+            /* Learned lesson: color suggestion text explicitly \u2014 don't rely on inherited color. */
+            color: var(--text-1, #1f2937);
+          }
+          .wc-record-lookup .rl-suggestion-item:last-child { border-bottom: none; }
+          .wc-record-lookup .rl-suggestion-item:hover { background: var(--surface-2, #f3f4f6); }
+          .wc-record-lookup .rl-suggestion-item.highlighted {
+            background: var(--primary-bg-color, #3b82f6);
+            color: var(--primary-color, #fff);
+            font-weight: 500;
+          }
+
+          /* Hint banner */
+          .wc-record-lookup .rl-hint {
+            display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+            margin-top: 0.4rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--surface-2, #f3f4f6);
+            border: 1px solid var(--primary-bg-color, #3b82f6);
+            border-radius: 0.5rem;
+            color: var(--text-1, #1f2937);
+          }
+          .wc-record-lookup .rl-hint-text { flex: 1 1 auto; font-size: 0.95rem; color: var(--text-1, #1f2937); }
+          .wc-record-lookup .rl-hint-text strong { color: var(--text-1, #1f2937); }
+          .wc-record-lookup .rl-hint-use {
+            min-height: 2.25rem; padding: 0.4rem 1rem;
+            border: 1px solid transparent; border-radius: 0.375rem;
+            font-weight: 600; cursor: pointer;
+            background: var(--primary-bg-color, #3b82f6);
+            color: var(--primary-color, #fff);
+          }
+          .wc-record-lookup .rl-hint-use:focus-visible { outline: 2px solid var(--text-1); outline-offset: 2px; }
+          .wc-record-lookup .rl-hint-dismiss {
+            border: none; background: transparent; cursor: pointer;
+            font-size: 1.25rem; line-height: 1; padding: 0 0.25rem;
+            color: var(--text-1, #1f2937);
+          }
+        }
+      `.trim();
+      this.loadStyle("wc-record-lookup-style", style);
+    }
+  }
+  customElements.define("wc-record-lookup", WcRecordLookup);
+  window.WcRecordLookup = WcRecordLookup;
+}
+
 // src/js/components/wc-google-map.js
 var WcGoogleMap = class _WcGoogleMap extends WcBaseComponent {
   static get observedAttributes() {
@@ -42168,6 +43853,7 @@ var LIBS = {
 var TOOLBAR = {
   bold: { icon: "bold", title: "Bold", cmd: "bold" },
   italic: { icon: "italic", title: "Italic", cmd: "italic" },
+  underline: { icon: "underline", title: "Underline", cmd: "underline" },
   h2: { icon: "heading", title: "Heading", block: "h2" },
   h3: { icon: "heading", title: "Subheading", block: "h3" },
   ul: { icon: "list-ul", title: "Bullet list", cmd: "insertUnorderedList" },
@@ -42180,7 +43866,7 @@ var TOOLBAR = {
 };
 var SETS = {
   basic: ["bold", "italic", "h2", "ul", "ol", "link", "quote", "code"],
-  full: ["bold", "italic", "h2", "h3", "ul", "ol", "link", "quote", "code", "image", "table"]
+  full: ["bold", "italic", "underline", "h2", "h3", "ul", "ol", "link", "quote", "code", "image", "table"]
 };
 var WcRichText = class extends WcBaseFormComponent {
   static get is() {
@@ -42199,7 +43885,9 @@ var WcRichText = class extends WcBaseFormComponent {
       "placeholder",
       "required",
       "readonly",
-      "disabled"
+      "disabled",
+      "image-upload-url",
+      "csrf"
     ];
   }
   constructor() {
@@ -42215,6 +43903,8 @@ var WcRichText = class extends WcBaseFormComponent {
     };
     this._onEditorInput = this._handleEditorInput.bind(this);
     this._onPaste = this._handlePaste.bind(this);
+    this._onFileChosen = this._handleFileChosen.bind(this);
+    this._savedRange = null;
     const compEl = this.querySelector(":scope > .wc-rich-text");
     if (compEl) {
       this.componentElement = compEl;
@@ -42442,6 +44132,10 @@ var WcRichText = class extends WcBaseFormComponent {
       const url = window.prompt("Link URL:");
       if (url) document.execCommand("createLink", false, url);
     } else if (def.special === "image") {
+      if (this.getAttribute("image-upload-url")) {
+        this._pickAndUploadImage();
+        return;
+      }
       const url = window.prompt("Image URL:");
       if (url) document.execCommand("insertImage", false, url);
     } else if (def.special === "code") {
@@ -42468,6 +44162,101 @@ var WcRichText = class extends WcBaseFormComponent {
       range.insertNode(code);
     }
     sel.removeAllRanges();
+  }
+  // ---- Device image upload (image-upload-url) -------------------------------
+  _pickAndUploadImage() {
+    this._savedRange = this._saveSelection();
+    if (!this._fileInput) {
+      const input2 = document.createElement("input");
+      input2.type = "file";
+      input2.accept = "image/*";
+      input2.style.display = "none";
+      input2.addEventListener("change", this._onFileChosen);
+      this._fileInput = input2;
+    }
+    if (!this.componentElement.contains(this._fileInput)) {
+      this.componentElement.appendChild(this._fileInput);
+    }
+    this._fileInput.value = "";
+    this._fileInput.click();
+  }
+  async _handleFileChosen(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    await this._uploadImage(file);
+  }
+  async _uploadImage(file) {
+    const url = this.getAttribute("image-upload-url");
+    if (!url) return;
+    this._setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const csrf = this.getAttribute("csrf");
+      if (csrf) fd.append("csrf_token", csrf);
+      const resp = await fetch(url, { method: "POST", body: fd, credentials: "same-origin" });
+      if (!resp.ok) throw new Error(`Upload failed (${resp.status})`);
+      const data = await resp.json();
+      const hostedUrl = data && data.url;
+      if (!hostedUrl) throw new Error("Server did not return a url");
+      this._insertImageAtCaret(hostedUrl);
+    } catch (err) {
+      window.alert("Image upload failed: " + (err && err.message ? err.message : "unknown error"));
+    } finally {
+      this._setUploading(false);
+    }
+  }
+  _insertImageAtCaret(hostedUrl) {
+    this.editorEl.focus();
+    this._restoreSelection(this._savedRange);
+    this._savedRange = null;
+    const img = document.createElement("img");
+    img.src = hostedUrl;
+    img.alt = "";
+    const safe = this._sanitize(img.outerHTML);
+    if (!safe) return;
+    if (!document.execCommand("insertHTML", false, safe)) {
+      document.execCommand("insertImage", false, hostedUrl);
+    }
+    this._handleEditorInput();
+  }
+  _saveSelection() {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      if (this.editorEl && this.editorEl.contains(range.commonAncestorContainer)) {
+        return range.cloneRange();
+      }
+    }
+    return null;
+  }
+  _restoreSelection(range) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    if (range) {
+      sel.addRange(range);
+    } else {
+      const r = document.createRange();
+      r.selectNodeContents(this.editorEl);
+      r.collapse(false);
+      sel.addRange(r);
+    }
+  }
+  _setUploading(on) {
+    this._uploading = on;
+    let el = this.componentElement.querySelector(":scope > .wc-rich-text-uploading");
+    if (on) {
+      if (!el) {
+        el = document.createElement("div");
+        el.classList.add("wc-rich-text-uploading");
+        el.textContent = "Inserting image\u2026";
+        this.componentElement.appendChild(el);
+      }
+      this.componentElement.setAttribute("aria-busy", "true");
+    } else {
+      if (el) el.remove();
+      this.componentElement.removeAttribute("aria-busy");
+    }
   }
   _togglePreview() {
     if (this.mode !== "markdown" || !this.previewEl) return;
@@ -42513,6 +44302,10 @@ var WcRichText = class extends WcBaseFormComponent {
       this.editorEl.removeEventListener("input", this._onEditorInput);
       this.editorEl.removeEventListener("paste", this._onPaste);
     }
+    if (this._fileInput) {
+      this._fileInput.removeEventListener("change", this._onFileChosen);
+      this._fileInput = null;
+    }
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === "value") {
@@ -42527,6 +44320,9 @@ var WcRichText = class extends WcBaseFormComponent {
     }
     if (attrName === "required") {
       this._updateValidity();
+      return;
+    }
+    if (attrName === "image-upload-url" || attrName === "csrf") {
       return;
     }
     if (["mode", "toolbar", "min-height", "placeholder", "lbl-label", "readonly", "disabled"].includes(attrName)) {
@@ -42596,6 +44392,20 @@ var WcRichText = class extends WcBaseFormComponent {
           height: 1.25rem;
           margin: 0 0.25rem;
           background-color: var(--surface-4);
+        }
+        .wc-rich-text { position: relative; }
+        .wc-rich-text-uploading {
+          position: absolute;
+          right: 0.5rem;
+          bottom: 0.5rem;
+          padding: 0.25rem 0.625rem;
+          font-size: 0.8rem;
+          border-radius: 0.375rem;
+          background-color: var(--primary-bg-color);
+          color: var(--primary-color);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          pointer-events: none;
+          z-index: 5;
         }
         .wc-rich-text-editor,
         .wc-rich-text-preview {

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wc-checkin</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css" />
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</head>
+<body class="theme-ocean">
+  <div id="page-contents" class="p-6">
+    <!-- Styles + mock live INSIDE #page-contents so they survive the index nav's
+         hx-select="#page-contents" (which drops the <head>). -->
+    <style>
+      #page-contents .ci-demos {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        gap: 2rem; margin: 1.5rem 0 2rem; align-items: start;
+      }
+      #page-contents .ci-demo h2 { margin: 0 0 0.25rem; }
+      #page-contents .ci-demo p.hint { margin: 0 0 0.75rem; opacity: 0.75; font-size: 0.9rem; }
+      #page-contents wc-checkin { max-width: 28rem; }
+      #page-contents .ci-sim { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+      #page-contents .ci-sim input {
+        flex: 1 1 8rem; min-width: 8rem; padding: 0.5rem 0.75rem;
+        border: 1px solid var(--surface-4); border-radius: 0.375rem;
+        background: var(--surface-1); color: var(--text-1);
+      }
+      #page-contents .ci-log {
+        margin-top: 2rem; padding: 0.75rem 1rem;
+        background: var(--surface-2); border-radius: 0.5rem;
+        font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem;
+        max-height: 12rem; overflow: auto; white-space: pre-wrap;
+      }
+      #page-contents code { background: var(--surface-2); padding: 0 4px; border-radius: 3px; }
+    </style>
+
+    <h1>wc-checkin — scan-to-check-in / check-out station</h1>
+    <p>
+      The component captures a scanned code (USB keyboard-wedge and/or camera), POSTs it to the
+      server, and renders the server's <strong>allow/deny</strong> verdict — the server is
+      authoritative. These demos use an in-page mock (<code>el.requestHandler</code>) instead of a
+      real endpoint. Use the <em>Simulate scan</em> boxes to test without a physical scanner.
+    </p>
+
+    <div class="ci-demos">
+      <div class="ci-demo">
+        <h2>Check-IN (usb + camera)</h2>
+        <p class="hint">Scan starting with <code>OK</code> → ALLOWED, anything else → DENIED.</p>
+        <wc-checkin id="ci-in" mode="in" scan-source="both"
+                    event-id="EVT-1" session-id="SES-1"></wc-checkin>
+        <div class="ci-sim">
+          <input id="in-code" type="text" placeholder="e.g. OK-AVA-01" value="OK-AVA-01" />
+          <button class="btn btn-primary" data-sim="ci-in" data-src="in-code">Simulate scan</button>
+        </div>
+      </div>
+
+      <div class="ci-demo">
+        <h2>Check-OUT (two-step, with override)</h2>
+        <p class="hint">
+          First scan a child (<code>CH-*</code>) → shows authorized pickups + "scan pickup".
+          Then scan a pickup: <code>PU-OK</code> releases; anything else denies (with Override).
+        </p>
+        <wc-checkin id="ci-out" mode="out" scan-source="usb"
+                    event-id="EVT-1" allow-override></wc-checkin>
+        <div class="ci-sim">
+          <input id="out-code" type="text" placeholder="CH-01, then PU-OK / PU-NO" value="CH-01" />
+          <button class="btn btn-primary" data-sim="ci-out" data-src="out-code">Simulate scan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ci-log" id="ci-log">event log…</div>
+
+    <wc-javascript>
+      (function () {
+        const log = document.getElementById('ci-log');
+        const write = (msg) => {
+          if (!log) return;
+          log.textContent = (new Date().toLocaleTimeString() + '  ' + msg + '\n') + log.textContent;
+        };
+
+        // ── Mock "server" (authoritative decision lives here, NOT in the component) ──
+        const mockIn = (p) => {
+          const ok = /^OK/i.test(p.scanned_barcode);
+          return {
+            allowed: ok,
+            reason: ok ? 'Registered for this session' : 'Not on the roster for this event',
+            attendee: { id: p.scanned_barcode, name: ok ? 'Ava Noble' : 'Unknown wristband' }
+          };
+        };
+        const mockOut = (p) => {
+          if (p.step === 'identify') {
+            return {
+              allowed: false,
+              requires_pickup_scan: true,
+              attendee: { id: p.scanned_barcode, name: 'Ava Noble' },
+              authorized_names: ['Jordan Noble (parent)', 'Sam Rivera (guardian)']
+            };
+          }
+          // authorize
+          const ok = /^PU-OK/i.test(p.scanned_barcode) || p.override === true;
+          return {
+            allowed: ok,
+            reason: p.override ? 'Released by staff override'
+                  : ok ? 'Matched an authorized pickup'
+                       : 'Pickup is not on the authorized list',
+            attendee: { id: p.attendee_id, name: 'Ava Noble' },
+            recorded_id: ok ? 'REL-' + Date.now() : undefined,
+            override_allowed: !ok
+          };
+        };
+
+        const wire = (id, mock) => {
+          const el = document.getElementById(id);
+          if (!el || el.__wired) return;
+          el.__wired = true;
+          el.requestHandler = async (payload) => {
+            write('POST ' + JSON.stringify(payload));
+            await new Promise(r => setTimeout(r, 250)); // simulate latency
+            const res = mock(payload);
+            return res;
+          };
+        };
+        wire('ci-in', mockIn);
+        wire('ci-out', mockOut);
+
+        // Log the component's own events.
+        ['wccheckinscanned', 'wccheckinresult', 'wccheckinerror'].forEach(name => {
+          document.addEventListener(name, (e) => write(name + '  ' + JSON.stringify(e.detail)));
+        });
+
+        // Simulate-scan buttons (stand in for a physical scanner).
+        document.querySelectorAll('[data-sim]').forEach(btn => {
+          if (btn.__wired) return;
+          btn.__wired = true;
+          btn.addEventListener('click', () => {
+            const el = document.getElementById(btn.getAttribute('data-sim'));
+            const src = document.getElementById(btn.getAttribute('data-src'));
+            const code = (src && src.value || '').trim();
+            if (el && code) el._handleScan(code, 'usb');
+          });
+        });
+      })();
+    </wc-javascript>
+  </div>
+</body>
+</html>

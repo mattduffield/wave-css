@@ -58,6 +58,7 @@ const FILES = [
   'https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.3/turndown.min.js',
   'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+  'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js',
 ];
 
 // Map a CDN URL to its <lib>-<version>/<rest> local sub-path — same rules as waveLocalAssetUrl.

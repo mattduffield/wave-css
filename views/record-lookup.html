@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" class="theme-ocean">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wc-record-lookup</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css" />
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</head>
+<body class="theme-ocean">
+  <div id="page-contents" class="p-6">
+    <!-- Styles + mock live INSIDE #page-contents so they survive the index nav's
+         hx-select="#page-contents" (which drops the <head>). -->
+    <style>
+      #page-contents .rl-demos {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+        gap: 2rem; margin: 1.5rem 0 2rem; align-items: start;
+      }
+      #page-contents .rl-demo { padding: 1.25rem; background: var(--surface-1); border: 1px solid var(--surface-4); border-radius: 0.5rem; }
+      #page-contents .rl-demo h2 { margin: 0 0 0.25rem; }
+      #page-contents .rl-demo p.hint { margin: 0 0 1rem; opacity: 0.75; font-size: 0.9rem; }
+      #page-contents .rl-fields { display: grid; gap: 0.6rem; margin-top: 1rem; }
+      #page-contents .rl-fields label { display: block; font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.15rem; }
+      #page-contents .rl-fields input {
+        width: 100%; padding: 0.45rem 0.6rem;
+        border: 1px solid var(--surface-4); border-radius: 0.375rem;
+        background: var(--surface-2); color: var(--text-1);
+      }
+      #page-contents .rl-log {
+        margin-top: 2rem; padding: 0.75rem 1rem;
+        background: var(--surface-2); border-radius: 0.5rem;
+        font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem;
+        max-height: 12rem; overflow: auto; white-space: pre-wrap;
+      }
+      #page-contents code { background: var(--surface-2); padding: 0 4px; border-radius: 3px; }
+    </style>
+
+    <h1>wc-record-lookup — search an existing collection, then emit or fill</h1>
+    <p>
+      Typeahead that searches a server endpoint (source of truth) and, on select, emits the record
+      or fills sibling fields. These demos use an in-page mock (<code>el.searchHandler</code>) instead
+      of a real endpoint. Type <code>av</code> / <code>no</code> / <code>ri</code> to see matches.
+    </p>
+
+    <div class="rl-demos">
+      <div class="rl-demo">
+        <h2>mode="select"</h2>
+        <p class="hint">Emits <code>record:selected</code> with the full record; clears the box.</p>
+        <wc-record-lookup id="rl-select" mode="select" endpoint="/x/lookup/attendee"
+                          lbl-label="Find attendee" placeholder="Type a name…"></wc-record-lookup>
+      </div>
+
+      <div class="rl-demo">
+        <h2>mode="hint"</h2>
+        <p class="hint">Non-blocking banner: "Looks like … — use existing?" with an action button.</p>
+        <wc-record-lookup id="rl-hint" mode="hint" endpoint="/x/lookup/attendee"
+                          param-master_event="EVT-1" lbl-label="Child name"
+                          placeholder="Start typing…"></wc-record-lookup>
+      </div>
+
+      <div class="rl-demo">
+        <h2>mode="fill" — "use this family"</h2>
+        <p class="hint">Fills the fields below from the chosen household record.</p>
+        <form id="rl-form">
+          <wc-record-lookup id="rl-fill" mode="fill" endpoint="/x/lookup/household"
+              lbl-label="Find household" placeholder="Type a family name…"
+              fill-map='{"parents.0.first_name":"primary.first_name","parents.0.last_name":"primary.last_name","parents.0.address_street":"address.street","parents.0.city":"address.city"}'>
+          </wc-record-lookup>
+          <div class="rl-fields">
+            <div><label>parents.0.first_name</label><input name="parents.0.first_name" /></div>
+            <div><label>parents.0.last_name</label><input name="parents.0.last_name" /></div>
+            <div><label>parents.0.address_street</label><input name="parents.0.address_street" /></div>
+            <div><label>parents.0.city</label><input name="parents.0.city" /></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="rl-log" id="rl-log">event log…</div>
+
+    <wc-javascript>
+      (function () {
+        const log = document.getElementById('rl-log');
+        const write = (msg) => { if (log) log.textContent = (new Date().toLocaleTimeString() + '  ' + msg + '\n') + log.textContent; };
+
+        // ── Mock "server" datasets ──
+        const ATTENDEES = [
+          { id: 'A1', label: 'Ava Noble (age 7)', first_name: 'Ava' },
+          { id: 'A2', label: 'Avery Rivera (age 5)', first_name: 'Avery' },
+          { id: 'A3', label: 'Noah Kim (age 8)', first_name: 'Noah' },
+          { id: 'A4', label: 'Riley Chen (age 6)', first_name: 'Riley' }
+        ];
+        const HOUSEHOLDS = [
+          { id: 'H1', label: 'Noble family — 12 Oak St', primary: { first_name: 'Jordan', last_name: 'Noble' }, address: { street: '12 Oak St', city: 'Springfield' } },
+          { id: 'H2', label: 'Rivera family — 88 Pine Ave', primary: { first_name: 'Sam', last_name: 'Rivera' }, address: { street: '88 Pine Ave', city: 'Fairview' } }
+        ];
+        const search = (rows) => async (q, params) => {
+          write('GET ?q=' + q + (params && Object.keys(params).length ? ' ' + JSON.stringify(params) : ''));
+          await new Promise(r => setTimeout(r, 150));
+          const s = q.toLowerCase();
+          return rows.filter(r => (r.label || '').toLowerCase().includes(s));
+        };
+
+        const wire = (id, rows) => {
+          const el = document.getElementById(id);
+          if (!el || el.__wired) return;
+          el.__wired = true;
+          el.searchHandler = search(rows);
+        };
+        wire('rl-select', ATTENDEES);
+        wire('rl-hint', ATTENDEES);
+        wire('rl-fill', HOUSEHOLDS);
+
+        ['wcrecordselected', 'wcrecordsearch'].forEach(name => {
+          if (document['__rl_' + name]) return;
+          document['__rl_' + name] = true;
+          document.addEventListener(name, (e) => write(name + '  ' + JSON.stringify(e.detail)));
+        });
+      })();
+    </wc-javascript>
+  </div>
+</body>
+</html>
