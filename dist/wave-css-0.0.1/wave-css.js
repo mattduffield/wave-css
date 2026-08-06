@@ -25305,7 +25305,13 @@ if (!customElements.get("wc-table")) {
         "search-input",
         "filter-attr",
         "filter-input",
-        "filter-value"
+        "filter-value",
+        "column-widths",
+        "fixed-columns",
+        "layout",
+        "sync-url",
+        "url-key",
+        "url-history"
       ];
     }
     static get is() {
@@ -25330,6 +25336,13 @@ if (!customElements.get("wc-table")) {
       this._extSearchHandler = null;
       this._extFilterEl = null;
       this._extFilterHandler = null;
+      this._colgroupEl = null;
+      this._resizeObs = null;
+      this._resizeTimer = null;
+      this._pinning = false;
+      this._restoringUrl = false;
+      this._popBound = false;
+      this._onPopState = this._handlePopState.bind(this);
       this._runStreams = /* @__PURE__ */ new Map();
       this._runStatusRows = {};
       this._completedRuns = /* @__PURE__ */ new Set();
@@ -25359,6 +25372,8 @@ if (!customElements.get("wc-table")) {
       this._seedFilters();
       this._bindExternalSearch();
       this._bindExternalFilter();
+      this._restoreFromUrl();
+      this._setupUrlSync();
       const url = this.getAttribute("url");
       const items = this.getAttribute("items");
       if (url) {
@@ -25382,6 +25397,12 @@ if (!customElements.get("wc-table")) {
       this._closeAllRunStreams();
       this._unbindExternalSearch();
       this._unbindExternalFilter();
+      if (this._resizeObs) {
+        this._resizeObs.disconnect();
+        this._resizeObs = null;
+      }
+      clearTimeout(this._resizeTimer);
+      this._teardownUrlSync();
     }
     _render() {
       super._render();
@@ -25527,17 +25548,8 @@ if (!customElements.get("wc-table")) {
       const input2 = this.componentElement.querySelector(".wc-table-search");
       if (!input2) return;
       input2.addEventListener("input", () => {
-        this._searchRaw = input2.value;
         clearTimeout(this._searchTimer);
-        this._searchTimer = setTimeout(() => {
-          this._query = input2.value.trim().toLowerCase();
-          this._currentPage = 0;
-          this._renderBody();
-          this._emitEvent("wctablefilter", "wc-table:filter", {
-            bubbles: true,
-            detail: { query: this._query }
-          });
-        }, 200);
+        this._searchTimer = setTimeout(() => this.setSearch(input2.value), 200);
       });
     }
     // ---- External search / filter binding (both modes) ----------------------
@@ -25555,16 +25567,20 @@ if (!customElements.get("wc-table")) {
         bubbles: true,
         detail: { query: this._query }
       });
+      this._writeUrlState();
     }
     // Public: set the attr-filter value (filter-attr predicate). '' clears it.
     setFilter(value) {
       this._filterValue = value == null ? "" : String(value).trim();
       this._currentPage = 0;
       if (this._initialized) this._rerenderView();
+      this._writeUrlState();
     }
     _rerenderView() {
-      if (this._enhanceMode) this._applyEnhanceView();
-      else this._renderBody();
+      if (this._enhanceMode) {
+        this._pinColumnWidths();
+        this._applyEnhanceView();
+      } else this._renderBody();
     }
     // Resolve + bind the external search input named by `search-input`. Re-resolvable on
     // (re)connect so it survives an htmx swap that replaces this <wc-table> (the external
@@ -25622,6 +25638,129 @@ if (!customElements.get("wc-table")) {
       if (!this._filterValue || !this.filterAttr) return true;
       const tokens = String(tokenStr || "").split(/\s+/).filter(Boolean);
       return tokens.includes(this._filterValue) || String(tokenStr || "").trim() === this._filterValue;
+    }
+    // ---- URL state sync (sync-url) ------------------------------------------
+    get syncUrl() {
+      return this.hasAttribute("sync-url");
+    }
+    get urlKey() {
+      return this.getAttribute("url-key") || "";
+    }
+    get urlHistoryPush() {
+      return (this.getAttribute("url-history") || "").toLowerCase() === "push";
+    }
+    _urlParam(name) {
+      return this.urlKey ? `${this.urlKey}_${name}` : name;
+    }
+    // Sort as a URL token: "col:dir" (col = sort field / th label, lowercased) or '' (default).
+    _currentSortToken() {
+      if (this._enhanceMode) {
+        if (this._sortTh && this._sortDir) return `${this._sortTh.textContent.trim().toLowerCase()}:${this._sortDir}`;
+        return "";
+      }
+      if (this._sortField && this._sortDir) return `${this._sortField}:${this._sortDir}`;
+      return "";
+    }
+    _setupUrlSync() {
+      if (!this.syncUrl || this._popBound) return;
+      this._popBound = true;
+      window.addEventListener("popstate", this._onPopState);
+    }
+    _teardownUrlSync() {
+      if (this._popBound) {
+        window.removeEventListener("popstate", this._onPopState);
+        this._popBound = false;
+      }
+    }
+    // Write current state to the query string. Only touches this table's own params
+    // (namespaced by url-key); a value at its DEFAULT is removed entirely (clean URL).
+    _writeUrlState() {
+      if (!this.syncUrl || this._restoringUrl || !this._initialized) return;
+      const params = new URLSearchParams(window.location.search);
+      const put = (name, val, def) => {
+        const key = this._urlParam(name);
+        if (val == null || val === "" || val === def) params.delete(key);
+        else params.set(key, val);
+      };
+      put("page", String(this._currentPage + 1), "1");
+      put("q", this._query, "");
+      put("filter", this._filterValue, "");
+      put("sort", this._currentSortToken(), "");
+      const qs = params.toString();
+      const url = window.location.pathname + (qs ? "?" + qs : "") + window.location.hash;
+      try {
+        history[this.urlHistoryPush ? "pushState" : "replaceState"](history.state, "", url);
+      } catch (e) {
+      }
+    }
+    _readUrlState() {
+      const params = new URLSearchParams(window.location.search);
+      const get = (name) => params.get(this._urlParam(name));
+      return {
+        page: Math.max(1, parseInt(get("page"), 10) || 1),
+        q: get("q") || "",
+        filter: get("filter") || "",
+        sort: get("sort") || ""
+      };
+    }
+    // Apply parsed state to the component (no URL write). Reflects search/filter into the
+    // bound external inputs (and the internal search box) so restore is two-way.
+    _applyUrlState(state) {
+      this._restoringUrl = true;
+      try {
+        this._query = (state.q || "").trim().toLowerCase();
+        this._searchRaw = state.q || "";
+        this._filterValue = (state.filter || "").trim();
+        this._currentPage = Math.max(0, state.page - 1);
+        if (this._extSearchEl) this._extSearchEl.value = state.q || "";
+        if (this._extFilterEl) this._extFilterEl.value = state.filter || "";
+        if (this._searchEl) this._searchEl.value = state.q || "";
+        const internal = this.componentElement && this.componentElement.querySelector(".wc-table-search");
+        if (internal) internal.value = state.q || "";
+        if (this._enhanceMode) this._applySortTokenEnhance(state.sort);
+        else this._applySortTokenData(state.sort);
+      } finally {
+        this._restoringUrl = false;
+      }
+    }
+    _applySortTokenData(token) {
+      if (!token) {
+        this._sortField = "";
+        this._sortDir = "";
+        return;
+      }
+      const i = token.lastIndexOf(":");
+      const field = i >= 0 ? token.slice(0, i) : token;
+      const dir = i >= 0 ? token.slice(i + 1) : "asc";
+      this._sortField = field;
+      this._sortDir = dir === "desc" ? "desc" : "asc";
+    }
+    _applySortTokenEnhance(token) {
+      if (this._theadRow) this._theadRow.querySelectorAll("th").forEach((c) => c.classList.remove("wc-sort-asc", "wc-sort-desc"));
+      this._sortTh = null;
+      this._sortDir = "";
+      if (!token || !this._theadRow) return;
+      const i = token.lastIndexOf(":");
+      const name = (i >= 0 ? token.slice(0, i) : token).toLowerCase();
+      const dir = (i >= 0 ? token.slice(i + 1) : "asc") === "desc" ? "desc" : "asc";
+      const th = Array.from(this._theadRow.children).find((c) => c.classList.contains("wc-sortable") && c.textContent.trim().toLowerCase() === name);
+      if (th) this._enhanceSortApply(th, dir);
+    }
+    _restoreFromUrl() {
+      if (!this.syncUrl) return;
+      this._applyUrlState(this._readUrlState());
+    }
+    _handlePopState() {
+      if (!this.syncUrl) return;
+      this._applyUrlState(this._readUrlState());
+      if (this._enhanceMode) {
+        this._pinColumnWidths();
+        this._applyEnhanceView();
+      } else this._renderBody();
+    }
+    // Public: jump to a page (1-based). Alongside setSearch/setFilter.
+    goToPage(n) {
+      this._goToPage(n);
     }
     // Renders only the table + pager/footer region (keeps the toolbar/search input intact).
     _renderBody() {
@@ -25824,6 +25963,7 @@ if (!customElements.get("wc-table")) {
         bubbles: true,
         detail: { page: clamped, totalPages: this._lastTotalPages }
       });
+      this._writeUrlState();
     }
     _getNestedValue(obj, path) {
       if (!path) return "";
@@ -26141,6 +26281,7 @@ if (!customElements.get("wc-table")) {
             detail: { field: this._sortField, direction: this._sortDir }
           });
           this._renderBody();
+          this._writeUrlState();
         });
       });
       table.querySelectorAll("tbody tr[data-row-index]").forEach((tr) => {
@@ -26184,7 +26325,11 @@ if (!customElements.get("wc-table")) {
       this._seedFilters();
       this._bindExternalSearch();
       this._bindExternalFilter();
+      this._restoreFromUrl();
+      this._setupUrlSync();
       this._applyEnhanceView();
+      this._pinColumnWidths();
+      this._setupResizeObserver();
     }
     _enhanceApplyClasses() {
       if (!this._table) return;
@@ -26238,15 +26383,7 @@ if (!customElements.get("wc-table")) {
         this._searchEl = input2;
         input2.addEventListener("input", () => {
           clearTimeout(this._searchTimer);
-          this._searchTimer = setTimeout(() => {
-            this._query = input2.value.trim().toLowerCase();
-            this._currentPage = 0;
-            this._applyEnhanceView();
-            this._emitEvent("wctablefilter", "wc-table:filter", {
-              bubbles: true,
-              detail: { query: this._query }
-            });
-          }, 200);
+          this._searchTimer = setTimeout(() => this.setSearch(input2.value), 200);
         });
       }
       if (!this._chromeEl) {
@@ -26268,17 +26405,14 @@ if (!customElements.get("wc-table")) {
         th.addEventListener("click", () => this._enhanceSort(th));
       });
     }
-    _enhanceSort(th) {
+    // Pure reorder + header classes for an explicit direction (no emit/render/url) — shared
+    // by the click handler and URL restore.
+    _enhanceSortApply(th, dir) {
       const cells = Array.from(this._theadRow.children);
       const colIndex = cells.indexOf(th);
       if (colIndex < 0) return;
       const type = (th.dataset.type || "").toLowerCase();
-      if (this._sortTh === th) this._sortDir = this._sortDir === "asc" ? "desc" : "asc";
-      else {
-        this._sortTh = th;
-        this._sortDir = "asc";
-      }
-      const dir = this._sortDir === "desc" ? -1 : 1;
+      const mul = dir === "desc" ? -1 : 1;
       const cellVal = (tr) => {
         const td = tr.children[colIndex];
         if (!td) return "";
@@ -26288,22 +26422,29 @@ if (!customElements.get("wc-table")) {
         const va = cellVal(a), vb = cellVal(b);
         if (type === "num") {
           const na = parseFloat(va), nb = parseFloat(vb);
-          return ((isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb)) * dir;
+          return ((isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb)) * mul;
         }
         if (type === "date") {
           const da = Date.parse(va), db = Date.parse(vb);
-          return ((isNaN(da) ? 0 : da) - (isNaN(db) ? 0 : db)) * dir;
+          return ((isNaN(da) ? 0 : da) - (isNaN(db) ? 0 : db)) * mul;
         }
-        return String(va).localeCompare(String(vb)) * dir;
+        return String(va).localeCompare(String(vb)) * mul;
       });
       cells.forEach((c) => c.classList.remove("wc-sort-asc", "wc-sort-desc"));
-      th.classList.add(this._sortDir === "asc" ? "wc-sort-asc" : "wc-sort-desc");
+      th.classList.add(dir === "asc" ? "wc-sort-asc" : "wc-sort-desc");
+      this._sortTh = th;
+      this._sortDir = dir;
+    }
+    _enhanceSort(th) {
+      const dir = this._sortTh === th && this._sortDir === "asc" ? "desc" : "asc";
+      this._enhanceSortApply(th, dir);
       this._currentPage = 0;
       this._emitEvent("wctablesort", "table:sort", {
         bubbles: true,
         detail: { field: th.textContent.trim(), direction: this._sortDir }
       });
       this._applyEnhanceView();
+      this._writeUrlState();
     }
     _enhanceRowMatches(tr) {
       if (this._filterValue && this.filterAttr && !this._attrFilterPass(tr.getAttribute(this.filterAttr))) {
@@ -26356,10 +26497,92 @@ if (!customElements.get("wc-table")) {
       this._wireEnhanceSort();
       this._buildEnhanceChrome();
       this._applyEnhanceView();
+      this._pinColumnWidths();
+      this._setupResizeObserver();
+    }
+    // ---- Stable column widths (enhance + paginate / fixed-columns) -----------
+    // Paged tables default to table-layout:auto, so each page's differing cell content
+    // recomputes column widths and the headers visibly jump on Prev/Next. We measure the
+    // natural widths once over the full matching set, pin them via a generated <colgroup>,
+    // and switch to table-layout:fixed — so paging/sorting only swap row content.
+    _shouldPinColumns() {
+      if (!this._enhanceMode || !this._table) return false;
+      const layout = (this.getAttribute("layout") || "").toLowerCase();
+      if (layout === "auto") return false;
+      if (this.getAttribute("fixed-columns") === "false") return false;
+      return this.paginate || this.hasAttribute("fixed-columns") || layout === "fixed";
+    }
+    _removeColgroup() {
+      const existing = this._table && this._table.querySelector(":scope > colgroup.wc-colgroup");
+      if (existing) existing.remove();
+      this._colgroupEl = null;
+      if (this._table) this._table.style.tableLayout = "";
+    }
+    // Per-column author overrides: `column-widths="120px,,30%"` (aligned to header cells,
+    // including the # column) or a `<th width>` / inline th width. '' = measure it.
+    _columnWidthOverrides(headers) {
+      const attr = this.getAttribute("column-widths");
+      const list = attr ? attr.split(",").map((s) => s.trim()) : [];
+      return headers.map((th, i) => {
+        if (list[i]) return list[i];
+        const w = th.getAttribute("width") || th.style.width;
+        return w || "";
+      });
+    }
+    _pinColumnWidths() {
+      if (this._pinning) return;
+      if (!this._table || !this._theadRow) return;
+      if (!this._shouldPinColumns()) {
+        this._removeColgroup();
+        return;
+      }
+      const headers = Array.from(this._theadRow.children);
+      if (!headers.length) return;
+      this._pinning = true;
+      try {
+        this._removeColgroup();
+        this._table.style.tableLayout = "auto";
+        const filtered = this._allRows.filter((tr) => this._enhanceRowMatches(tr));
+        const measureRows = filtered.length ? filtered : this._allRows;
+        const backup = Array.from(this._tbody.children);
+        this._tbody.replaceChildren(...measureRows);
+        const widths = headers.map((th) => Math.round(th.getBoundingClientRect().width));
+        this._tbody.replaceChildren(...backup);
+        const overrides = this._columnWidthOverrides(headers);
+        const cg = document.createElement("colgroup");
+        cg.className = "wc-colgroup";
+        headers.forEach((th, i) => {
+          const col = document.createElement("col");
+          col.style.width = overrides[i] || (widths[i] ? widths[i] + "px" : "");
+          cg.appendChild(col);
+        });
+        this._table.insertBefore(cg, this._table.firstChild);
+        this._table.style.tableLayout = "fixed";
+        this._colgroupEl = cg;
+      } finally {
+        this._pinning = false;
+      }
+    }
+    _setupResizeObserver() {
+      if (this._resizeObs || typeof ResizeObserver === "undefined" || !this._table) return;
+      if (!this._shouldPinColumns()) return;
+      const target = this._table.parentElement || this._table;
+      this._resizeObs = new ResizeObserver(() => {
+        clearTimeout(this._resizeTimer);
+        this._resizeTimer = setTimeout(() => {
+          this._pinColumnWidths();
+          this._applyEnhanceView();
+        }, 150);
+      });
+      this._resizeObs.observe(target);
     }
     async _handleAttributeChange(attrName, newValue) {
       if (!this._initialized) {
         if (attrName === "class" || attrName === "id") super._handleAttributeChange(attrName, newValue);
+        return;
+      }
+      if (["sync-url", "url-key", "url-history"].includes(attrName)) {
+        this._setupUrlSync();
         return;
       }
       if (this._enhanceMode) {
@@ -26383,6 +26606,11 @@ if (!customElements.get("wc-table")) {
           this._bindExternalSearch();
           this._bindExternalFilter();
           this._reinitEnhance();
+        } else if (["column-widths", "fixed-columns", "layout"].includes(attrName)) {
+          this._removeColgroup();
+          this._pinColumnWidths();
+          this._applyEnhanceView();
+          this._setupResizeObserver();
         } else {
           super._handleAttributeChange(attrName, newValue);
         }

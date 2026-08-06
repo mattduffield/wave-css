@@ -266,7 +266,9 @@
         <code>&lt;select&gt;</code>), bound via <code>search-input="#p-search"</code>. The select
         filters client-side by <code>tr[data-event]</code> via <code>filter-attr</code> +
         <code>filter-input</code> — zero round-trips, and the <code>&lt;wc-table&gt;</code> renders
-        no internal search box.
+        no internal search box. With <code>sync-url url-key="participants"</code> the
+        page/search/filter/sort mirror into the URL (watch it change as you page/search) so
+        reload / share / Back returns to the same view; params drop out at their default.
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <div class="col gap-1">
@@ -283,7 +285,8 @@
         </div>
       </div>
       <wc-table paginate page-size="5" row-numbers
-                search-input="#p-search" filter-attr="data-event" filter-input="#p-event">
+                search-input="#p-search" filter-attr="data-event" filter-input="#p-event"
+                sync-url url-key="participants">
         <table class="wc-table w-full" striped hoverable>
           <thead><tr>
             <th>#</th><th class="wc-sortable">Name</th>
