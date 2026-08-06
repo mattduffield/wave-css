@@ -498,6 +498,10 @@ if (!customElements.get('wc-record-lookup')) {
             color: var(--text-1, #1f2937);
           }
         }
+
+        /* UNLAYERED (wins over the layered \`input { padding }\` in @layer wc.ui, which would
+           otherwise reset padding-left and push the placeholder under the search icon). */
+        .wc-record-lookup .rl-input { padding-left: 2rem; }
       `.trim();
       this.loadStyle('wc-record-lookup-style', style);
     }

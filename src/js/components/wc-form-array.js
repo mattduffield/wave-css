@@ -69,9 +69,21 @@ class WcFormArray extends WcBaseComponent {
     return 'wc-form-array';
   }
 
-  // Address sub-fields carried as hidden inputs (the visible wc-address is `street`).
+  // Address sub-fields carried alongside the visible street (wc-address).
   static get ADDRESS_SUBFIELDS() {
     return ['formatted_address', 'city', 'state', 'postal_code', 'county', 'country', 'lat', 'lng'];
+  }
+  static get ADDRESS_LABELS() {
+    return { street: 'Street', city: 'City', state: 'State', postal_code: 'Zip', county: 'County',
+             country: 'Country', formatted_address: 'Address', lat: 'Lat', lng: 'Lng' };
+  }
+
+  // Resolve `show-fields`: null/absent → none visible; boolean ('') → City/State/Zip; else the list.
+  _addressVisibleFields(showFields) {
+    if (showFields == null) return [];
+    const raw = String(showFields).trim();
+    if (raw === '') return ['city', 'state', 'postal_code'];
+    return raw.split(',').map(s => s.trim()).filter(s => WcFormArray.ADDRESS_SUBFIELDS.indexOf(s) !== -1);
   }
 
   static get observedAttributes() {
@@ -196,7 +208,9 @@ class WcFormArray extends WcBaseComponent {
     const wrap = addrEl.closest('.wc-fa-address');
     if (!wrap || !this.componentElement.contains(wrap)) return;
     const d = e.detail || {};
-    wrap.querySelectorAll('input[type="hidden"][data-col]').forEach(h => {
+    // Fill BOTH hidden and visible (editable) sub-field inputs — the wc-address (street) sets
+    // its own value, so it's excluded (data-col is on the host, not on any <input> here).
+    wrap.querySelectorAll('input[data-col]').forEach(h => {
       const sub = h.getAttribute('data-col').split('.').pop();
       if (d[sub] != null) h.value = d[sub];
     });
@@ -463,7 +477,38 @@ class WcFormArray extends WcBaseComponent {
       tmp.innerHTML = `<wc-address ${attrs.join(' ')}></wc-address>`;
       wrap.appendChild(tmp.firstElementChild);
 
+      // Which parts are shown as VISIBLE editable inputs (else hidden). Auto-filled on geocode
+      // select via _handleAddressChange, but the user can see + correct them.
+      const visible = this._addressVisibleFields(col.showFields);
+      let grid = null;
+      if (visible.length) {
+        grid = document.createElement('div');
+        grid.classList.add('wc-fa-address-fields');
+        visible.forEach(sub => {
+          const sf = document.createElement('div');
+          sf.classList.add('wc-fa-subfield');
+          const subName = `${this._prefix}.${index}.${col.field}.${sub}`;
+          const lbl = document.createElement('label');
+          lbl.setAttribute('for', subName);
+          lbl.textContent = WcFormArray.ADDRESS_LABELS[sub] || sub;
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.classList.add('wc-form-array-control');
+          inp.setAttribute('data-col', `${col.field}.${sub}`);
+          inp.name = subName;
+          inp.id = subName;
+          inp.placeholder = WcFormArray.ADDRESS_LABELS[sub] || sub;
+          inp.value = a[sub] != null ? a[sub] : '';
+          sf.appendChild(lbl);
+          sf.appendChild(inp);
+          grid.appendChild(sf);
+        });
+        wrap.appendChild(grid);
+      }
+
+      // Remaining sub-fields stay hidden (still submit + auto-fill on geocode).
       WcFormArray.ADDRESS_SUBFIELDS.forEach(sub => {
+        if (visible.indexOf(sub) !== -1) return;
         const h = document.createElement('input');
         h.type = 'hidden';
         h.setAttribute('data-col', `${col.field}.${sub}`);
@@ -572,6 +617,12 @@ class WcFormArray extends WcBaseComponent {
           ctrl.id = name;
         }
       });
+      // Keep visible address sub-field <label for> pointing at the renumbered input id.
+      row.querySelectorAll('.wc-fa-subfield').forEach(sf => {
+        const inp = sf.querySelector('input[data-col]');
+        const lbl = sf.querySelector('label[for]');
+        if (inp && lbl) lbl.setAttribute('for', inp.id);
+      });
       if (this._layout === 'card') {
         // Keep <label for> in sync with the renumbered control ids, and refresh the title.
         row.querySelectorAll(':scope > .wc-fa-card-grid > .wc-fa-field > label[for]').forEach((lbl, ci) => {
@@ -619,6 +670,7 @@ class WcFormArray extends WcBaseComponent {
         mask: el.getAttribute('mask') || '',
         geocodeUrl: el.getAttribute('geocode-url') || '',
         countries: el.getAttribute('countries') || '',
+        showFields: el.getAttribute('show-fields'),
         required: el.hasAttribute('required'),
         colClass: el.getAttribute('col-class') || ''
       };
@@ -1047,6 +1099,18 @@ class WcFormArray extends WcBaseComponent {
         .wc-fa-field wc-address {
           display: block;
           width: 100%;
+        }
+        /* Visible address parts (show-fields): City / State / Zip beneath the street. */
+        .wc-fa-address-fields {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+          gap: 0.375rem 0.5rem;
+          margin-top: 0.375rem;
+        }
+        .wc-fa-subfield { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+        .wc-fa-subfield > label {
+          font-size: 0.7rem; font-weight: 500;
+          color: var(--text-2, var(--component-alt-color));
         }
       }
     `.trim();

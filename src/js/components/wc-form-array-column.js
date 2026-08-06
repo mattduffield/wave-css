@@ -31,6 +31,10 @@
  *                               `type="tel"` implies `mask="phone"` — formats exactly like wc-input type=tel
  *    geocode-url              — for `type="address"`: the geocode proxy URL passed to the per-row wc-address
  *    countries                — for `type="address"`: country filter passed through to wc-address
+ *    show-fields              — for `type="address"`: render address parts as VISIBLE editable
+ *                               inputs beneath the street. Boolean → City/State/Zip; or a comma
+ *                               list of sub-fields (e.g. "city,state,postal_code,country").
+ *                               Absent → all parts stay hidden (backward-compat).
  *
  *  type="address" note: on select the geocoded parts fill the row's address SUB-FIELDS under
  *  `${name}.${index}.${field}.{street,city,state,postal_code,county,country,lat,lng,formatted_address}`
@@ -54,7 +58,7 @@ class WcFormArrayColumn extends WcBaseComponent {
     return [
       'field', 'label', 'type', 'options', 'option-value', 'option-label',
       'placeholder', 'min', 'max', 'step', 'required', 'col-class',
-      'rows', 'full-width', 'mask', 'geocode-url', 'countries'
+      'rows', 'full-width', 'mask', 'geocode-url', 'countries', 'show-fields'
     ];
   }
 
@@ -115,6 +119,7 @@ class WcFormArrayColumn extends WcBaseComponent {
       mask: this.getAttribute('mask') || '',
       geocodeUrl: this.getAttribute('geocode-url') || '',
       countries: this.getAttribute('countries') || '',
+      showFields: this.getAttribute('show-fields'),
       required: this.hasAttribute('required'),
       colClass: this.getAttribute('col-class') || ''
     };
