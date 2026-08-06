@@ -44636,7 +44636,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
         if (ctrl.tagName && ctrl.tagName.indexOf("-") !== -1) {
           ctrl.setAttribute("name", name);
           ctrl.setAttribute("id", name);
-          ctrl.querySelectorAll("[name]").forEach((inner) => inner.setAttribute("name", name));
+          ctrl.querySelectorAll("input[name], select[name], textarea[name]").forEach((inner) => inner.setAttribute("name", name));
         } else {
           if ("name" in ctrl) ctrl.name = name;
           ctrl.id = name;

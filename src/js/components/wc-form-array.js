@@ -607,11 +607,13 @@ class WcFormArray extends WcBaseComponent {
         const field = ctrl.getAttribute('data-col');
         const name = `${this._prefix}.${i}.${field}`;
         if (ctrl.tagName && ctrl.tagName.indexOf('-') !== -1) {
-          // Custom-element control (e.g. wc-address): set the attribute and rename any inner
-          // named input so the dotted-index name that actually submits stays contiguous.
+          // Custom-element control (e.g. wc-address): set the attribute and rename only the inner
+          // FORM CONTROL (input/select/textarea) so the dotted-index name that actually submits
+          // stays contiguous — NOT decorative named children like <wc-fa-icon name="house">.
           ctrl.setAttribute('name', name);
           ctrl.setAttribute('id', name);
-          ctrl.querySelectorAll('[name]').forEach(inner => inner.setAttribute('name', name));
+          ctrl.querySelectorAll('input[name], select[name], textarea[name]')
+            .forEach(inner => inner.setAttribute('name', name));
         } else {
           if ('name' in ctrl) ctrl.name = name;
           ctrl.id = name;
