@@ -44086,7 +44086,8 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       "mask",
       "geocode-url",
       "countries",
-      "show-fields"
+      "show-fields",
+      "icon"
     ];
   }
   constructor() {
@@ -44138,6 +44139,7 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       geocodeUrl: this.getAttribute("geocode-url") || "",
       countries: this.getAttribute("countries") || "",
       showFields: this.getAttribute("show-fields"),
+      icon: this.getAttribute("icon") || "",
       required: this.hasAttribute("required"),
       colClass: this.getAttribute("col-class") || ""
     };
@@ -44541,6 +44543,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
       ];
       if (col.geocodeUrl) attrs.push(`geocode-url="${this._escAttr(col.geocodeUrl)}"`);
       if (col.countries) attrs.push(`countries="${this._escAttr(col.countries)}"`);
+      if (col.icon) attrs.push(`icon-name="${this._escAttr(col.icon)}"`);
       if (col.placeholder) attrs.push(`placeholder="${this._escAttr(col.placeholder)}"`);
       if (col.required) attrs.push("required");
       if (a.street != null && a.street !== "") attrs.push(`value="${this._escAttr(String(a.street))}"`);
@@ -44631,7 +44634,28 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
     if (col.required) input2.required = true;
     const maskType = col.mask || (col.type === "tel" ? "phone" : "");
     if (maskType) this._applyMask(input2, maskType);
+    const iconName = col.icon || this._defaultIconForType(col.type);
+    if (iconName) return this._wrapWithIcon(input2, iconName);
     return input2;
+  }
+  _defaultIconForType(type) {
+    if (type === "tel") return "phone";
+    if (type === "email") return "envelope";
+    return "";
+  }
+  _wrapWithIcon(input2, iconName) {
+    input2.classList.add("has-icon");
+    const wrap = document.createElement("div");
+    wrap.classList.add("wc-fa-control-wrap");
+    const icon = document.createElement("wc-fa-icon");
+    icon.setAttribute("name", iconName);
+    icon.setAttribute("icon-style", "solid");
+    icon.setAttribute("size", "0.9rem");
+    icon.classList.add("wc-fa-input-icon");
+    icon.setAttribute("aria-hidden", "true");
+    wrap.appendChild(input2);
+    wrap.appendChild(icon);
+    return wrap;
   }
   _escAttr(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -44720,6 +44744,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
         geocodeUrl: el.getAttribute("geocode-url") || "",
         countries: el.getAttribute("countries") || "",
         showFields: el.getAttribute("show-fields"),
+        icon: el.getAttribute("icon") || "",
         required: el.hasAttribute("required"),
         colClass: el.getAttribute("col-class") || ""
       };
@@ -45127,7 +45152,19 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
           font-size: 0.7rem; font-weight: 500;
           color: var(--text-2, var(--component-alt-color));
         }
+
+        /* Leading decorative icon inside an input (icon attr / type default) */
+        .wc-fa-control-wrap { position: relative; display: block; width: 100%; }
+        .wc-fa-input-icon {
+          position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%);
+          pointer-events: none; line-height: 0;
+          color: var(--text-2, var(--text-1)); opacity: 0.7;
+        }
       }
+
+      /* UNLAYERED so the icon offset beats the layered \`input { padding }\` in @layer wc.ui
+         (a later layer than wc.usage) which would otherwise reset padding-left. */
+      .wc-form-array-control.has-icon { padding-left: 1.9rem; }
     `.trim();
     this.loadStyle("wc-form-array-style", style);
   }

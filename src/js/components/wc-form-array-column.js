@@ -35,6 +35,10 @@
  *                               inputs beneath the street. Boolean → City/State/Zip; or a comma
  *                               list of sub-fields (e.g. "city,state,postal_code,country").
  *                               Absent → all parts stay hidden (backward-compat).
+ *    icon                     — leading decorative wc-fa-icon inside the input (e.g. "envelope",
+ *                               "phone", "qrcode"). Defaults by type where obvious (tel→phone,
+ *                               email→envelope). For type="address" it becomes the inner
+ *                               wc-address's icon-name (e.g. "location-dot" instead of house).
  *
  *  type="address" note: on select the geocoded parts fill the row's address SUB-FIELDS under
  *  `${name}.${index}.${field}.{street,city,state,postal_code,county,country,lat,lng,formatted_address}`
@@ -58,7 +62,7 @@ class WcFormArrayColumn extends WcBaseComponent {
     return [
       'field', 'label', 'type', 'options', 'option-value', 'option-label',
       'placeholder', 'min', 'max', 'step', 'required', 'col-class',
-      'rows', 'full-width', 'mask', 'geocode-url', 'countries', 'show-fields'
+      'rows', 'full-width', 'mask', 'geocode-url', 'countries', 'show-fields', 'icon'
     ];
   }
 
@@ -120,6 +124,7 @@ class WcFormArrayColumn extends WcBaseComponent {
       geocodeUrl: this.getAttribute('geocode-url') || '',
       countries: this.getAttribute('countries') || '',
       showFields: this.getAttribute('show-fields'),
+      icon: this.getAttribute('icon') || '',
       required: this.hasAttribute('required'),
       colClass: this.getAttribute('col-class') || ''
     };
