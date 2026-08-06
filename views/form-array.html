@@ -91,6 +91,57 @@
         </wc-form-array>
       </div>
 
+      <!-- 4. CARD layout: many fields per item, readable + labeled cards -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Card layout (<code>layout="card"</code>) — many-field sub-form</h2>
+        <p class="text-sm" style="color: var(--text-5);">
+          Each item is a bordered card with the fields in a responsive label-above grid — readable
+          even with 10 fields. Same dotted-index naming, add/remove/reindex, and blank-row exclusion
+          as table mode. The button dispatches <code>wc-form-array:populate</code> to load a household.
+        </p>
+        <div class="row gap-2 mb-1">
+          <button type="button" class="btn btn-sm btn-secondary" id="useFamily">Use this family</button>
+        </div>
+        <wc-form>
+          <wc-form-array id="guardians" name="guardians" layout="card"
+              item-title="Parent / Guardian {index1}" add-label="Add guardian"
+              value='[
+                {"first_name":"Jane","last_name":"Adamo","relationship":"parent","phone":"555-0101","email":"jane@x.com","role":"Mother","primary":"yes"}
+              ]'>
+            <wc-form-array-column field="first_name"  label="First name" required></wc-form-array-column>
+            <wc-form-array-column field="last_name"   label="Last name"></wc-form-array-column>
+            <wc-form-array-column field="relationship" label="Relationship" type="select"
+                                  option-value="value" option-label="key"
+                                  options='[{"key":"Parent","value":"parent"},{"key":"Guardian","value":"guardian"},{"key":"Grandparent","value":"grandparent"}]'></wc-form-array-column>
+            <wc-form-array-column field="phone"       label="Phone" type="tel"></wc-form-array-column>
+            <wc-form-array-column field="email"       label="Email" type="email"></wc-form-array-column>
+            <wc-form-array-column field="role"        label="Role"></wc-form-array-column>
+            <wc-form-array-column field="contact_pref" label="Contact preference" type="select"
+                                  option-value="value" option-label="key"
+                                  options='[{"key":"Email","value":"email"},{"key":"Phone","value":"phone"},{"key":"Text","value":"text"}]'></wc-form-array-column>
+            <wc-form-array-column field="primary"     label="Primary" type="select"
+                                  option-value="value" option-label="key"
+                                  options='[{"key":"Yes","value":"yes"},{"key":"No","value":"no"}]'></wc-form-array-column>
+          </wc-form-array>
+        </wc-form>
+      </div>
+
+      <wc-javascript>
+        // "Use this family" — a record lookup would return a household; here we append two children.
+        (function () {
+          const btn = document.getElementById('useFamily');
+          const fa = document.getElementById('guardians');
+          if (!btn || !fa || btn.__wired) return;
+          btn.__wired = true;
+          btn.addEventListener('click', () => {
+            fa.dispatchEvent(new CustomEvent('wc-form-array:populate', { detail: { rows: [
+              { first_name: 'Rick', last_name: 'Adamo', relationship: 'parent', phone: '555-0102', email: 'rick@x.com', role: 'Father', contact_pref: 'phone', primary: 'no' },
+              { first_name: 'Mary', last_name: 'Adamo', relationship: 'grandparent', phone: '555-0103', email: 'mary@x.com', role: 'Grandmother', contact_pref: 'text', primary: 'no' }
+            ]}}));
+          });
+        })();
+      </wc-javascript>
+
     </div>
   </div>
 

@@ -34,6 +34,18 @@
  *    max-rows               — optional maximum number of rows (blank = unlimited)
  *    add-label              — label for the add button (default "Add")
  *    readonly               — render rows as non-editable static text (no add/remove, no submission)
+ *    layout                 — "table" (default) | "card". Card mode renders each item as a bordered
+ *                             card with the columns in a responsive label-above grid (readable for
+ *                             many-field sub-forms); table mode is the original one-row-per-item.
+ *    item-title             — card-header title template; tokens {index} (0-based), {index1}
+ *                             (1-based), and {field} (a column value), e.g. "Guardian {index1}"
+ *
+ *  Programmatic row API (so a wc-record-lookup can drive it):
+ *    addRow(data)           — append a row pre-filled from { field: value } (reindexes as usual)
+ *    setRow(index, data)    — fill/replace the row at index (partial data merges onto current)
+ *    removeRow(rowOrIndex)  — remove a row (honors min-rows)
+ *    Declarative: dispatch a `wc-form-array:populate` (or `wcformarraypopulate`) CustomEvent on the
+ *    element with detail { rows: [ {field:value}, … ] } to append those rows.
  *
  *  Events (bubbling, composed):
  *    wcformarraychange      — fired on any add/remove/edit; detail = { name, rows }
@@ -58,7 +70,8 @@ class WcFormArray extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['id', 'class', 'name', 'value', 'min-rows', 'max-rows', 'add-label', 'readonly'];
+    return ['id', 'class', 'name', 'value', 'min-rows', 'max-rows', 'add-label', 'readonly',
+            'layout', 'item-title'];
   }
 
   constructor() {
@@ -70,6 +83,7 @@ class WcFormArray extends WcBaseComponent {
     this._onInput = this._handleRowInput.bind(this);
     this._onSubmitCapture = this._handleFormSubmitCapture.bind(this);
     this._onHtmxConfig = this._handleHtmxConfigRequest.bind(this);
+    this._onPopulate = this._handlePopulate.bind(this);
     this._guardForm = null;
 
     const compEl = this.querySelector(':scope > .wc-form-array');
@@ -93,6 +107,10 @@ class WcFormArray extends WcBaseComponent {
   }
 
   // ---- Public API -----------------------------------------------------------
+
+  get _layout() {
+    return (this.getAttribute('layout') || 'table').toLowerCase() === 'card' ? 'card' : 'table';
+  }
 
   get rows() {
     return this._collectRows();
@@ -143,6 +161,27 @@ class WcFormArray extends WcBaseComponent {
     this._emitChange();
   }
 
+  /** Fill/replace the row at `index` from { field: value } (partial data merges onto current). */
+  setRow(index, data = {}) {
+    if (this._isReadonly() || !this.rowsEl) return null;
+    const existing = this.rowsEl.querySelectorAll(':scope > .wc-form-array-row')[index];
+    if (!existing) return null;
+    const merged = { ...this._rowToObject(existing), ...(data || {}) };
+    const fresh = this._createRow(index, merged);
+    existing.replaceWith(fresh);
+    this._renumber();
+    this._updateControlsState();
+    this._emitChange();
+    return fresh;
+  }
+
+  /** Declarative populate: dispatch `wc-form-array:populate` {rows:[…]} to append those rows. */
+  _handlePopulate(e) {
+    if (this._isReadonly()) return;
+    const rows = e && e.detail && Array.isArray(e.detail.rows) ? e.detail.rows : [];
+    rows.forEach(r => this.addRow(r || {}));
+  }
+
   // ---- Rendering ------------------------------------------------------------
 
   _render() {
@@ -165,28 +204,33 @@ class WcFormArray extends WcBaseComponent {
   }
 
   _buildSkeleton() {
-    // CSS grid template: one flexible track per column + a max-content actions track.
-    const cols = `repeat(${this._columns.length}, minmax(0, 1fr)) max-content`;
-    this.componentElement.style.setProperty('--wc-fa-cols', cols);
+    const card = this._layout === 'card';
 
     const table = document.createElement('div');
     table.classList.add('wc-form-array-table');
+    if (card) table.classList.add('wc-fa-layout-card');
 
-    // Header
-    const head = document.createElement('div');
-    head.classList.add('wc-form-array-head');
-    this._columns.forEach(col => {
-      const hcell = document.createElement('div');
-      hcell.classList.add('wc-form-array-hcell');
-      if (col.colClass) hcell.classList.add(...col.colClass.split(' ').filter(Boolean));
-      hcell.textContent = col.label;
-      if (col.required) hcell.classList.add('is-required');
-      head.appendChild(hcell);
-    });
-    const actionsHead = document.createElement('div');
-    actionsHead.classList.add('wc-form-array-hcell', 'wc-form-array-actions-col');
-    head.appendChild(actionsHead);
-    table.appendChild(head);
+    // Table mode: a shared column-label header + a CSS grid template. Card mode labels each
+    // field inside its own card, so it needs neither.
+    if (!card) {
+      const cols = `repeat(${this._columns.length}, minmax(0, 1fr)) max-content`;
+      this.componentElement.style.setProperty('--wc-fa-cols', cols);
+
+      const head = document.createElement('div');
+      head.classList.add('wc-form-array-head');
+      this._columns.forEach(col => {
+        const hcell = document.createElement('div');
+        hcell.classList.add('wc-form-array-hcell');
+        if (col.colClass) hcell.classList.add(...col.colClass.split(' ').filter(Boolean));
+        hcell.textContent = col.label;
+        if (col.required) hcell.classList.add('is-required');
+        head.appendChild(hcell);
+      });
+      const actionsHead = document.createElement('div');
+      actionsHead.classList.add('wc-form-array-hcell', 'wc-form-array-actions-col');
+      head.appendChild(actionsHead);
+      table.appendChild(head);
+    }
 
     // Rows container
     const rows = document.createElement('div');
@@ -210,6 +254,16 @@ class WcFormArray extends WcBaseComponent {
     this.footerEl = footer;
   }
 
+  // Rebuild the skeleton in the current mode, preserving current row values.
+  _rebuild() {
+    const current = this._collectRows();
+    this.componentElement.innerHTML = '';
+    this._buildSkeleton();
+    this._renderRows(current);
+    this._updateControlsState();
+    this._wireEvents();
+  }
+
   _renderRows(rowData) {
     if (!this.rowsEl) return;
     this.rowsEl.innerHTML = '';
@@ -227,7 +281,16 @@ class WcFormArray extends WcBaseComponent {
     const row = document.createElement('div');
     row.classList.add('wc-form-array-row');
     row.dataset.index = index;
+    if (this._layout === 'card') {
+      row.classList.add('wc-fa-card');
+      this._buildCardRow(row, index, data || {});
+    } else {
+      this._buildTableRow(row, index, data || {});
+    }
+    return row;
+  }
 
+  _buildTableRow(row, index, data) {
     this._columns.forEach(col => {
       const cell = document.createElement('div');
       cell.classList.add('wc-form-array-cell');
@@ -240,16 +303,72 @@ class WcFormArray extends WcBaseComponent {
     // Actions cell
     const actions = document.createElement('div');
     actions.classList.add('wc-form-array-cell', 'wc-form-array-actions');
-    if (!this._isReadonly()) {
-      const rm = document.createElement('button');
-      rm.type = 'button';
-      rm.classList.add('btn', 'btn-sm', 'wc-form-array-remove');
-      rm.setAttribute('aria-label', 'Remove row');
-      rm.innerHTML = '&times;';
-      actions.appendChild(rm);
-    }
+    if (!this._isReadonly()) actions.appendChild(this._makeRemoveButton());
     row.appendChild(actions);
-    return row;
+  }
+
+  _buildCardRow(row, index, data) {
+    // Header: title + remove button.
+    const header = document.createElement('div');
+    header.classList.add('wc-fa-card-header');
+    const title = document.createElement('span');
+    title.classList.add('wc-fa-card-title');
+    header.appendChild(title);
+    if (!this._isReadonly()) header.appendChild(this._makeRemoveButton());
+    row.appendChild(header);
+
+    // Responsive field grid (label above each control).
+    const grid = document.createElement('div');
+    grid.classList.add('wc-fa-card-grid');
+    this._columns.forEach(col => {
+      const field = document.createElement('div');
+      field.classList.add('wc-fa-field');
+      if (col.colClass) field.classList.add(...col.colClass.split(' ').filter(Boolean));
+      if (col.required) field.classList.add('is-required');
+      const ctrlId = `${this._prefix}.${index}.${col.field}`;
+      const label = document.createElement('label');
+      label.setAttribute('for', ctrlId);
+      label.textContent = col.label;
+      field.appendChild(label);
+      const rawVal = data && data[col.field] != null ? data[col.field] : '';
+      field.appendChild(this._createControl(col, index, rawVal));
+      grid.appendChild(field);
+    });
+    row.appendChild(grid);
+
+    // Title is derived from index (+ optional field tokens) — set after controls exist.
+    this._updateCardTitle(row, index);
+  }
+
+  _makeRemoveButton() {
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.classList.add('btn', 'btn-sm', 'wc-form-array-remove');
+    rm.setAttribute('aria-label', 'Remove row');
+    rm.innerHTML = '&times;';
+    return rm;
+  }
+
+  // Resolve `item-title` for a card: {index} (0-based), {index1} (1-based), {field} (column value).
+  _formatItemTitle(index, row) {
+    const tpl = this.getAttribute('item-title') || '';
+    if (!tpl) return '';
+    return tpl.replace(/\{([^}]+)\}/g, (m, key) => {
+      const k = key.trim();
+      if (k === 'index') return String(index);
+      if (k === 'index1') return String(index + 1);
+      if (row) {
+        const ctrl = row.querySelector(`[data-col="${k}"]`);
+        if (ctrl) return 'value' in ctrl ? String(ctrl.value) : String(ctrl.dataset.value || '');
+      }
+      return '';
+    });
+  }
+
+  _updateCardTitle(row, index) {
+    if (this._layout !== 'card') return;
+    const titleEl = row.querySelector(':scope > .wc-fa-card-header > .wc-fa-card-title');
+    if (titleEl) titleEl.textContent = this._formatItemTitle(index, row);
   }
 
   _createControl(col, index, value) {
@@ -333,6 +452,14 @@ class WcFormArray extends WcBaseComponent {
         if ('name' in ctrl) ctrl.name = name;
         ctrl.id = name;
       });
+      if (this._layout === 'card') {
+        // Keep <label for> in sync with the renumbered control ids, and refresh the title.
+        row.querySelectorAll(':scope > .wc-fa-card-grid > .wc-fa-field > label[for]').forEach((lbl, ci) => {
+          const col = this._columns[ci];
+          if (col) lbl.setAttribute('for', `${this._prefix}.${i}.${col.field}`);
+        });
+        this._updateCardTitle(row, i);
+      }
     });
   }
 
@@ -401,14 +528,16 @@ class WcFormArray extends WcBaseComponent {
   _collectRows() {
     if (!this.rowsEl) return [];
     const rows = this.rowsEl.querySelectorAll(':scope > .wc-form-array-row');
-    return Array.from(rows).map(row => {
-      const obj = {};
-      row.querySelectorAll('[data-col]').forEach(ctrl => {
-        const field = ctrl.getAttribute('data-col');
-        obj[field] = 'value' in ctrl ? ctrl.value : (ctrl.dataset.value || '');
-      });
-      return obj;
+    return Array.from(rows).map(row => this._rowToObject(row));
+  }
+
+  _rowToObject(row) {
+    const obj = {};
+    row.querySelectorAll('[data-col]').forEach(ctrl => {
+      const field = ctrl.getAttribute('data-col');
+      obj[field] = 'value' in ctrl ? ctrl.value : (ctrl.dataset.value || '');
     });
+    return obj;
   }
 
   _isRowEmpty(row) {
@@ -481,7 +610,10 @@ class WcFormArray extends WcBaseComponent {
   }
 
   _handleRowInput(e) {
-    if (e.target.closest('.wc-form-array-row')) {
+    const row = e.target.closest('.wc-form-array-row');
+    if (row) {
+      // Card titles may reference a {field} value — keep the header live.
+      if (this._layout === 'card') this._updateCardTitle(row, parseInt(row.dataset.index, 10) || 0);
       this._emitChange();
     }
   }
@@ -532,6 +664,12 @@ class WcFormArray extends WcBaseComponent {
     this.componentElement.removeEventListener('change', this._onInput);
     this.componentElement.addEventListener('change', this._onInput);
 
+    // Declarative populate hook (append rows from a record lookup). Canonical + legacy names.
+    this.removeEventListener('wcformarraypopulate', this._onPopulate);
+    this.addEventListener('wcformarraypopulate', this._onPopulate);
+    this.removeEventListener('wc-form-array:populate', this._onPopulate);
+    this.addEventListener('wc-form-array:populate', this._onPopulate);
+
     // Submit guards on the enclosing form (re-resolve each time — the form
     // ancestor can change when wc-form reparents us into its <form>).
     this._unwireFormGuard();
@@ -558,6 +696,8 @@ class WcFormArray extends WcBaseComponent {
       this.componentElement.removeEventListener('input', this._onInput);
       this.componentElement.removeEventListener('change', this._onInput);
     }
+    this.removeEventListener('wcformarraypopulate', this._onPopulate);
+    this.removeEventListener('wc-form-array:populate', this._onPopulate);
     this._unwireFormGuard();
   }
 
@@ -580,14 +720,14 @@ class WcFormArray extends WcBaseComponent {
     } else if (attrName === 'add-label') {
       const addBtn = this.componentElement.querySelector('.wc-form-array-add');
       if (addBtn) addBtn.textContent = newValue || 'Add';
-    } else if (attrName === 'readonly') {
+    } else if (attrName === 'readonly' || attrName === 'layout') {
       // Re-render in the new mode, preserving current values.
-      const current = this._collectRows();
-      this.componentElement.innerHTML = '';
-      this._buildSkeleton();
-      this._renderRows(current);
-      this._updateControlsState();
-      this._wireEvents();
+      this._rebuild();
+    } else if (attrName === 'item-title') {
+      if (this._layout === 'card' && this.rowsEl) {
+        this.rowsEl.querySelectorAll(':scope > .wc-form-array-row')
+          .forEach((row, i) => this._updateCardTitle(row, i));
+      }
     } else if (attrName === 'class') {
       super._handleAttributeChange(attrName, newValue);
     } else {
@@ -687,6 +827,61 @@ class WcFormArray extends WcBaseComponent {
         }
         .wc-form-array-footer:empty {
           display: none;
+        }
+
+        /* ---- Card layout (layout="card") ---- */
+        .wc-form-array-table.wc-fa-layout-card {
+          border: none;
+          background: transparent;
+          padding: 0;
+          gap: 0.75rem;
+        }
+        .wc-fa-layout-card .wc-form-array-rows {
+          gap: 0.75rem;
+        }
+        .wc-fa-layout-card .wc-form-array-row.wc-fa-card {
+          display: block;                 /* override the table-mode grid row */
+          padding: 0.75rem 0.875rem;
+          border: 1px solid var(--card-border-color, var(--surface-4));
+          border-radius: 0.5rem;
+          background-color: var(--card-bg-color, var(--surface-1));
+        }
+        .wc-fa-card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          margin-bottom: 0.625rem;
+        }
+        .wc-fa-card-title {
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: var(--text-1);
+        }
+        .wc-fa-card-title:empty {
+          display: none;
+        }
+        .wc-fa-card-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+          gap: 0.625rem 0.75rem;
+        }
+        .wc-fa-field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          min-width: 0;
+        }
+        .wc-fa-field > label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: var(--text-2, var(--component-alt-color));
+        }
+        .wc-fa-field.is-required > label::after {
+          content: ' *';
+          color: var(--danger-color, #ef4444);
         }
       }
     `.trim();
