@@ -44404,7 +44404,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
       if (col.fullWidth) cell.classList.add("is-full");
       if (col.colClass) cell.classList.add(...col.colClass.split(" ").filter(Boolean));
       const rawVal = data && data[col.field] != null ? data[col.field] : "";
-      cell.appendChild(this._createControl(col, index, rawVal));
+      cell.appendChild(this._safeCreateControl(col, index, rawVal));
       row.appendChild(cell);
     });
     const actions = document.createElement("div");
@@ -44434,7 +44434,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
       label.textContent = col.label;
       field.appendChild(label);
       const rawVal = data && data[col.field] != null ? data[col.field] : "";
-      field.appendChild(this._createControl(col, index, rawVal));
+      field.appendChild(this._safeCreateControl(col, index, rawVal));
       grid.appendChild(field);
     });
     row.appendChild(grid);
@@ -44467,6 +44467,32 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
     if (this._layout !== "card") return;
     const titleEl = row.querySelector(":scope > .wc-fa-card-header > .wc-fa-card-title");
     if (titleEl) titleEl.textContent = this._formatItemTitle(index, row);
+  }
+  // Never let one column's control creation throw out of the row loop (which would abort
+  // _renderRows and blank the whole array). On failure, fall back to a plain named input so the
+  // row still renders + submits, and log the cause.
+  _safeCreateControl(col, index, value) {
+    try {
+      return this._createControl(col, index, value);
+    } catch (e) {
+      console.error(`[wc-form-array] failed to create control for column "${col.field}"`, e);
+      if (this._isReadonly()) {
+        const span = document.createElement("span");
+        span.classList.add("wc-form-array-readonly");
+        span.setAttribute("data-col", col.field);
+        span.dataset.value = value != null && typeof value !== "object" ? String(value) : "";
+        span.textContent = span.dataset.value || "\u2014";
+        return span;
+      }
+      const input2 = document.createElement("input");
+      input2.type = "text";
+      input2.classList.add("wc-form-array-control");
+      input2.setAttribute("data-col", col.field);
+      input2.name = `${this._prefix}.${index}.${col.field}`;
+      input2.id = input2.name;
+      input2.value = value != null && typeof value !== "object" ? value : "";
+      return input2;
+    }
   }
   _createControl(col, index, value) {
     const name = `${this._prefix}.${index}.${col.field}`;
@@ -44610,15 +44636,22 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
   _escAttr(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
-  // Apply a WcMaskHub mask now if the hub is ready, else once IMask finishes loading (wcready).
+  // Apply a WcMaskHub mask, deferring until the hub is FULLY ready. On a full page load the
+  // MaskHub sets `window.wc.MaskHub = this` BEFORE it finishes loading IMask + building its
+  // `maskConfigs`, so a naive "hub exists?" check applies too early → applyMask reads
+  // `this.maskConfigs[type]` on `undefined` and throws (which used to abort _renderRows and
+  // blank the whole array). So require `maskConfigs`, else defer to the same `wcready`-from-
+  // document signal wc-input type="tel" uses. Never throws.
   _applyMask(input2, maskType) {
     const apply = () => {
       const hub = window.wc && window.wc.MaskHub;
-      if (hub && typeof hub.applyMaskToElement === "function") {
+      if (!hub || !hub.maskConfigs || typeof hub.applyMaskToElement !== "function") return false;
+      try {
         hub.applyMaskToElement(input2, maskType);
-        return true;
+      } catch (e) {
+        console.warn("[wc-form-array] mask apply failed", e);
       }
-      return false;
+      return true;
     };
     if (!apply()) document.addEventListener("wcready", () => apply(), { once: true });
   }
