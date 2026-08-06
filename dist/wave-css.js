@@ -25301,7 +25301,11 @@ if (!customElements.get("wc-table")) {
         "searchable",
         "search-placeholder",
         "row-numbers",
-        "enhance"
+        "enhance",
+        "search-input",
+        "filter-attr",
+        "filter-input",
+        "filter-value"
       ];
     }
     static get is() {
@@ -25321,6 +25325,11 @@ if (!customElements.get("wc-table")) {
       this._searchTimer = null;
       this._initialized = false;
       this._searchRaw = "";
+      this._filterValue = "";
+      this._extSearchEl = null;
+      this._extSearchHandler = null;
+      this._extFilterEl = null;
+      this._extFilterHandler = null;
       this._runStreams = /* @__PURE__ */ new Map();
       this._runStatusRows = {};
       this._completedRuns = /* @__PURE__ */ new Set();
@@ -25347,6 +25356,9 @@ if (!customElements.get("wc-table")) {
         return;
       }
       this._parseColumns();
+      this._seedFilters();
+      this._bindExternalSearch();
+      this._bindExternalFilter();
       const url = this.getAttribute("url");
       const items = this.getAttribute("items");
       if (url) {
@@ -25368,6 +25380,8 @@ if (!customElements.get("wc-table")) {
     disconnectedCallback() {
       super.disconnectedCallback();
       this._closeAllRunStreams();
+      this._unbindExternalSearch();
+      this._unbindExternalFilter();
     }
     _render() {
       super._render();
@@ -25468,6 +25482,15 @@ if (!customElements.get("wc-table")) {
     get rowNumbers() {
       return this.hasAttribute("row-numbers");
     }
+    get searchInputSel() {
+      return this.getAttribute("search-input") || "";
+    }
+    get filterAttr() {
+      return this.getAttribute("filter-attr") || "";
+    }
+    get filterInputSel() {
+      return this.getAttribute("filter-input") || "";
+    }
     _pageSizeVal() {
       if (!this.paginate) return Infinity;
       const n = parseInt(this.getAttribute("page-size"), 10);
@@ -25495,7 +25518,7 @@ if (!customElements.get("wc-table")) {
       this._renderBody();
     }
     _buildSearchToolbarHtml() {
-      if (!this.searchable) return "";
+      if (!this.searchable || this.searchInputSel) return "";
       const ph = this._escapeAttr(this.getAttribute("search-placeholder") || "Search\u2026");
       const val = this._escapeAttr(this._searchRaw || "");
       return `<div class="wc-table-toolbar"><input type="search" class="wc-table-search" placeholder="${ph}" aria-label="Search table" value="${val}"></div>`;
@@ -25516,6 +25539,89 @@ if (!customElements.get("wc-table")) {
           });
         }, 200);
       });
+    }
+    // ---- External search / filter binding (both modes) ----------------------
+    _seedFilters() {
+      const fv = this.getAttribute("filter-value");
+      if (fv != null && fv !== "") this._filterValue = String(fv).trim();
+    }
+    // Public: drive the search from anywhere (equivalent to typing in the box).
+    setSearch(query) {
+      this._searchRaw = query == null ? "" : String(query);
+      this._query = this._searchRaw.trim().toLowerCase();
+      this._currentPage = 0;
+      if (this._initialized) this._rerenderView();
+      this._emitEvent("wctablefilter", "wc-table:filter", {
+        bubbles: true,
+        detail: { query: this._query }
+      });
+    }
+    // Public: set the attr-filter value (filter-attr predicate). '' clears it.
+    setFilter(value) {
+      this._filterValue = value == null ? "" : String(value).trim();
+      this._currentPage = 0;
+      if (this._initialized) this._rerenderView();
+    }
+    _rerenderView() {
+      if (this._enhanceMode) this._applyEnhanceView();
+      else this._renderBody();
+    }
+    // Resolve + bind the external search input named by `search-input`. Re-resolvable on
+    // (re)connect so it survives an htmx swap that replaces this <wc-table> (the external
+    // input lives OUTSIDE the swapped region). Seeds the current value; no internal box.
+    _bindExternalSearch() {
+      const sel = this.searchInputSel;
+      if (!sel) return;
+      const input2 = document.querySelector(sel);
+      if (!input2) return;
+      if (input2 === this._extSearchEl) return;
+      this._unbindExternalSearch();
+      this._extSearchEl = input2;
+      this._extSearchHandler = () => {
+        clearTimeout(this._searchTimer);
+        this._searchTimer = setTimeout(() => this.setSearch(input2.value), 200);
+      };
+      input2.addEventListener("input", this._extSearchHandler);
+      input2.addEventListener("search", this._extSearchHandler);
+      this._searchRaw = input2.value || "";
+      this._query = this._searchRaw.trim().toLowerCase();
+    }
+    _unbindExternalSearch() {
+      if (this._extSearchEl && this._extSearchHandler) {
+        this._extSearchEl.removeEventListener("input", this._extSearchHandler);
+        this._extSearchEl.removeEventListener("search", this._extSearchHandler);
+      }
+      this._extSearchEl = null;
+      this._extSearchHandler = null;
+    }
+    // Bind an external control (e.g. a <select>) named by `filter-input` to the attr-filter.
+    _bindExternalFilter() {
+      const sel = this.filterInputSel;
+      if (!sel) return;
+      const el = document.querySelector(sel);
+      if (!el) return;
+      if (el === this._extFilterEl) return;
+      this._unbindExternalFilter();
+      this._extFilterEl = el;
+      this._extFilterHandler = () => this.setFilter(el.value);
+      el.addEventListener("change", this._extFilterHandler);
+      el.addEventListener("input", this._extFilterHandler);
+      if (el.value != null && el.value !== "") this._filterValue = String(el.value).trim();
+    }
+    _unbindExternalFilter() {
+      if (this._extFilterEl && this._extFilterHandler) {
+        this._extFilterEl.removeEventListener("change", this._extFilterHandler);
+        this._extFilterEl.removeEventListener("input", this._extFilterHandler);
+      }
+      this._extFilterEl = null;
+      this._extFilterHandler = null;
+    }
+    // Does a row pass the attr-filter? Row attr value is a whitespace token list
+    // (e.g. data-event="<id> <id>"); empty filter value = pass.
+    _attrFilterPass(tokenStr) {
+      if (!this._filterValue || !this.filterAttr) return true;
+      const tokens = String(tokenStr || "").split(/\s+/).filter(Boolean);
+      return tokens.includes(this._filterValue) || String(tokenStr || "").trim() === this._filterValue;
     }
     // Renders only the table + pager/footer region (keeps the toolbar/search input intact).
     _renderBody() {
@@ -25602,10 +25708,14 @@ if (!customElements.get("wc-table")) {
     }
     _getFilteredData() {
       const q = this._query;
-      if (!q) return [...this._data];
+      const attrOn = !!(this._filterValue && this.filterAttr);
+      if (!q && !attrOn) return [...this._data];
+      const field = attrOn ? this.filterAttr.replace(/^data-/, "") : "";
       const filterable = this._columns.filter((c) => c.filterable);
       const cols = filterable.length ? filterable : this._columns;
       return this._data.filter((row) => {
+        if (attrOn && !this._attrFilterPass(this._stringifyVal(this._getNestedValue(row, field)))) return false;
+        if (!q) return true;
         let hay;
         if (cols.length) hay = cols.map((c) => this._stringifyVal(this._getNestedValue(row, c.field))).join(" ");
         else hay = Object.keys(row).filter((k) => !k.startsWith("_")).map((k) => this._stringifyVal(row[k])).join(" ");
@@ -26071,6 +26181,9 @@ if (!customElements.get("wc-table")) {
       this._ensureRowNumberColumn();
       this._buildEnhanceChrome();
       this._wireEnhanceSort();
+      this._seedFilters();
+      this._bindExternalSearch();
+      this._bindExternalFilter();
       this._applyEnhanceView();
     }
     _enhanceApplyClasses() {
@@ -26112,7 +26225,7 @@ if (!customElements.get("wc-table")) {
       });
     }
     _buildEnhanceChrome() {
-      if (this.searchable && !this._searchEl) {
+      if (this.searchable && !this.searchInputSel && !this._searchEl) {
         const wrap = document.createElement("div");
         wrap.className = "wc-table-toolbar";
         const input2 = document.createElement("input");
@@ -26193,6 +26306,9 @@ if (!customElements.get("wc-table")) {
       this._applyEnhanceView();
     }
     _enhanceRowMatches(tr) {
+      if (this._filterValue && this.filterAttr && !this._attrFilterPass(tr.getAttribute(this.filterAttr))) {
+        return false;
+      }
       if (!this._query) return true;
       const hay = tr.dataset && tr.dataset.search != null ? tr.dataset.search : tr.textContent;
       return hay.toLowerCase().includes(this._query);
@@ -26249,8 +26365,23 @@ if (!customElements.get("wc-table")) {
       if (this._enhanceMode) {
         if (["striped", "hoverable", "bordered", "borderless", "size", "clickable"].includes(attrName)) {
           this._enhanceApplyClasses();
-        } else if (["paginate", "page-size", "row-numbers", "searchable", "search-placeholder"].includes(attrName)) {
+        } else if ([
+          "paginate",
+          "page-size",
+          "row-numbers",
+          "searchable",
+          "search-placeholder",
+          "search-input",
+          "filter-attr",
+          "filter-input",
+          "filter-value"
+        ].includes(attrName)) {
           this._currentPage = 0;
+          this._unbindExternalSearch();
+          this._unbindExternalFilter();
+          this._seedFilters();
+          this._bindExternalSearch();
+          this._bindExternalFilter();
           this._reinitEnhance();
         } else {
           super._handleAttributeChange(attrName, newValue);
@@ -26267,9 +26398,17 @@ if (!customElements.get("wc-table")) {
         }
         this._currentPage = 0;
         this._renderTable();
-      } else if (["paginate", "searchable", "search-placeholder"].includes(attrName)) {
+      } else if (["paginate", "searchable", "search-placeholder", "search-input"].includes(attrName)) {
         this._currentPage = 0;
+        this._unbindExternalSearch();
         this._renderTable();
+        this._bindExternalSearch();
+      } else if (["filter-attr", "filter-input", "filter-value"].includes(attrName)) {
+        this._currentPage = 0;
+        this._unbindExternalFilter();
+        this._seedFilters();
+        this._bindExternalFilter();
+        this._renderBody();
       } else if (["striped", "hoverable", "bordered", "borderless", "size", "clickable", "page-size", "row-numbers"].includes(attrName)) {
         this._renderBody();
       } else {

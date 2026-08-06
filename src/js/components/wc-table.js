@@ -37,7 +37,8 @@ if (!customElements.get('wc-table')) {
       return ['id', 'class', 'url', 'items', 'striped', 'hoverable', 'bordered', 'borderless',
               'size', 'fixed-header', 'clickable', 'auto-columns', 'empty-message',
               'page-size', 'display-member',
-              'paginate', 'searchable', 'search-placeholder', 'row-numbers', 'enhance'];
+              'paginate', 'searchable', 'search-placeholder', 'row-numbers', 'enhance',
+              'search-input', 'filter-attr', 'filter-input', 'filter-value'];
     }
 
     static get is() {
@@ -58,6 +59,11 @@ if (!customElements.get('wc-table')) {
       this._searchTimer = null;
       this._initialized = false;   // gate: ignore attr callbacks until connectedCallback finishes
       this._searchRaw = '';        // untrimmed search box text (preserved across full re-render)
+      this._filterValue = '';      // active attr-filter value (filter-attr predicate; '' = off)
+      this._extSearchEl = null;    // bound external search input (search-input selector)
+      this._extSearchHandler = null;
+      this._extFilterEl = null;    // bound external filter control (filter-input selector)
+      this._extFilterHandler = null;
       // run-status formatter: live SSE streams keyed by run id
       this._runStreams = new Map();   // runId -> { es, cellEl, gotData, done, retries, liveField, doneField }
       this._runStatusRows = {};       // runId -> row object (for the complete event detail)
@@ -93,6 +99,11 @@ if (!customElements.get('wc-table')) {
       // Parse column definitions from child wc-table-col elements
       this._parseColumns();
 
+      // Bind external search/filter inputs (they live outside this element and survive swaps).
+      this._seedFilters();
+      this._bindExternalSearch();
+      this._bindExternalFilter();
+
       // Load data
       const url = this.getAttribute('url');
       const items = this.getAttribute('items');
@@ -116,6 +127,8 @@ if (!customElements.get('wc-table')) {
     disconnectedCallback() {
       super.disconnectedCallback();
       this._closeAllRunStreams();
+      this._unbindExternalSearch();
+      this._unbindExternalFilter();
     }
 
     _render() {
@@ -215,6 +228,9 @@ if (!customElements.get('wc-table')) {
     get paginate() { return this.hasAttribute('paginate'); }
     get searchable() { return this.hasAttribute('searchable'); }
     get rowNumbers() { return this.hasAttribute('row-numbers'); }
+    get searchInputSel() { return this.getAttribute('search-input') || ''; }
+    get filterAttr() { return this.getAttribute('filter-attr') || ''; }
+    get filterInputSel() { return this.getAttribute('filter-input') || ''; }
 
     _pageSizeVal() {
       if (!this.paginate) return Infinity;
@@ -246,7 +262,8 @@ if (!customElements.get('wc-table')) {
     }
 
     _buildSearchToolbarHtml() {
-      if (!this.searchable) return '';
+      // No internal box when searching is driven by an external input.
+      if (!this.searchable || this.searchInputSel) return '';
       const ph = this._escapeAttr(this.getAttribute('search-placeholder') || 'Search…');
       const val = this._escapeAttr(this._searchRaw || '');
       return `<div class="wc-table-toolbar">`
@@ -269,6 +286,99 @@ if (!customElements.get('wc-table')) {
           });
         }, 200);
       });
+    }
+
+    // ---- External search / filter binding (both modes) ----------------------
+
+    _seedFilters() {
+      const fv = this.getAttribute('filter-value');
+      if (fv != null && fv !== '') this._filterValue = String(fv).trim();
+    }
+
+    // Public: drive the search from anywhere (equivalent to typing in the box).
+    setSearch(query) {
+      this._searchRaw = query == null ? '' : String(query);
+      this._query = this._searchRaw.trim().toLowerCase();
+      this._currentPage = 0;
+      if (this._initialized) this._rerenderView();
+      this._emitEvent('wctablefilter', 'wc-table:filter', {
+        bubbles: true, detail: { query: this._query }
+      });
+    }
+
+    // Public: set the attr-filter value (filter-attr predicate). '' clears it.
+    setFilter(value) {
+      this._filterValue = value == null ? '' : String(value).trim();
+      this._currentPage = 0;
+      if (this._initialized) this._rerenderView();
+    }
+
+    _rerenderView() {
+      if (this._enhanceMode) this._applyEnhanceView();
+      else this._renderBody();
+    }
+
+    // Resolve + bind the external search input named by `search-input`. Re-resolvable on
+    // (re)connect so it survives an htmx swap that replaces this <wc-table> (the external
+    // input lives OUTSIDE the swapped region). Seeds the current value; no internal box.
+    _bindExternalSearch() {
+      const sel = this.searchInputSel;
+      if (!sel) return;
+      const input = document.querySelector(sel);
+      if (!input) return;
+      if (input === this._extSearchEl) return; // already bound to this node
+      this._unbindExternalSearch();
+      this._extSearchEl = input;
+      this._extSearchHandler = () => {
+        clearTimeout(this._searchTimer);
+        this._searchTimer = setTimeout(() => this.setSearch(input.value), 200);
+      };
+      input.addEventListener('input', this._extSearchHandler);
+      input.addEventListener('search', this._extSearchHandler); // native clear (×) on type=search
+      // Seed from the input's current value (no render here — the caller renders next).
+      this._searchRaw = input.value || '';
+      this._query = this._searchRaw.trim().toLowerCase();
+    }
+
+    _unbindExternalSearch() {
+      if (this._extSearchEl && this._extSearchHandler) {
+        this._extSearchEl.removeEventListener('input', this._extSearchHandler);
+        this._extSearchEl.removeEventListener('search', this._extSearchHandler);
+      }
+      this._extSearchEl = null;
+      this._extSearchHandler = null;
+    }
+
+    // Bind an external control (e.g. a <select>) named by `filter-input` to the attr-filter.
+    _bindExternalFilter() {
+      const sel = this.filterInputSel;
+      if (!sel) return;
+      const el = document.querySelector(sel);
+      if (!el) return;
+      if (el === this._extFilterEl) return;
+      this._unbindExternalFilter();
+      this._extFilterEl = el;
+      this._extFilterHandler = () => this.setFilter(el.value);
+      el.addEventListener('change', this._extFilterHandler);
+      el.addEventListener('input', this._extFilterHandler);
+      if (el.value != null && el.value !== '') this._filterValue = String(el.value).trim();
+    }
+
+    _unbindExternalFilter() {
+      if (this._extFilterEl && this._extFilterHandler) {
+        this._extFilterEl.removeEventListener('change', this._extFilterHandler);
+        this._extFilterEl.removeEventListener('input', this._extFilterHandler);
+      }
+      this._extFilterEl = null;
+      this._extFilterHandler = null;
+    }
+
+    // Does a row pass the attr-filter? Row attr value is a whitespace token list
+    // (e.g. data-event="<id> <id>"); empty filter value = pass.
+    _attrFilterPass(tokenStr) {
+      if (!this._filterValue || !this.filterAttr) return true;
+      const tokens = String(tokenStr || '').split(/\s+/).filter(Boolean);
+      return tokens.includes(this._filterValue) || String(tokenStr || '').trim() === this._filterValue;
     }
 
     // Renders only the table + pager/footer region (keeps the toolbar/search input intact).
@@ -370,10 +480,15 @@ if (!customElements.get('wc-table')) {
 
     _getFilteredData() {
       const q = this._query;
-      if (!q) return [...this._data];
+      const attrOn = !!(this._filterValue && this.filterAttr);
+      if (!q && !attrOn) return [...this._data];
+      // In data mode the filter-attr maps to a row field (leading "data-" stripped).
+      const field = attrOn ? this.filterAttr.replace(/^data-/, '') : '';
       const filterable = this._columns.filter(c => c.filterable);
       const cols = filterable.length ? filterable : this._columns;
       return this._data.filter(row => {
+        if (attrOn && !this._attrFilterPass(this._stringifyVal(this._getNestedValue(row, field)))) return false;
+        if (!q) return true;
         let hay;
         if (cols.length) hay = cols.map(c => this._stringifyVal(this._getNestedValue(row, c.field))).join(' ');
         else hay = Object.keys(row).filter(k => !k.startsWith('_')).map(k => this._stringifyVal(row[k])).join(' ');
@@ -874,6 +989,9 @@ if (!customElements.get('wc-table')) {
       this._ensureRowNumberColumn();
       this._buildEnhanceChrome();
       this._wireEnhanceSort();
+      this._seedFilters();
+      this._bindExternalSearch();
+      this._bindExternalFilter();
       this._applyEnhanceView();
     }
 
@@ -909,7 +1027,7 @@ if (!customElements.get('wc-table')) {
     }
 
     _buildEnhanceChrome() {
-      if (this.searchable && !this._searchEl) {
+      if (this.searchable && !this.searchInputSel && !this._searchEl) {
         const wrap = document.createElement('div');
         wrap.className = 'wc-table-toolbar';
         const input = document.createElement('input');
@@ -982,6 +1100,10 @@ if (!customElements.get('wc-table')) {
     }
 
     _enhanceRowMatches(tr) {
+      // Attr-filter (e.g. filter-attr="data-event") — a second axis beyond search.
+      if (this._filterValue && this.filterAttr && !this._attrFilterPass(tr.getAttribute(this.filterAttr))) {
+        return false;
+      }
       if (!this._query) return true;
       const hay = (tr.dataset && tr.dataset.search != null) ? tr.dataset.search : tr.textContent;
       return hay.toLowerCase().includes(this._query);
@@ -1050,8 +1172,14 @@ if (!customElements.get('wc-table')) {
       if (this._enhanceMode) {
         if (['striped', 'hoverable', 'bordered', 'borderless', 'size', 'clickable'].includes(attrName)) {
           this._enhanceApplyClasses();
-        } else if (['paginate', 'page-size', 'row-numbers', 'searchable', 'search-placeholder'].includes(attrName)) {
+        } else if (['paginate', 'page-size', 'row-numbers', 'searchable', 'search-placeholder',
+                    'search-input', 'filter-attr', 'filter-input', 'filter-value'].includes(attrName)) {
           this._currentPage = 0;
+          this._unbindExternalSearch();
+          this._unbindExternalFilter();
+          this._seedFilters();
+          this._bindExternalSearch();
+          this._bindExternalFilter();
           this._reinitEnhance();
         } else {
           super._handleAttributeChange(attrName, newValue);
@@ -1065,9 +1193,17 @@ if (!customElements.get('wc-table')) {
         try { this._data = JSON.parse(newValue); } catch (e) { this._data = []; }
         this._currentPage = 0;
         this._renderTable();
-      } else if (['paginate', 'searchable', 'search-placeholder'].includes(attrName)) {
+      } else if (['paginate', 'searchable', 'search-placeholder', 'search-input'].includes(attrName)) {
         this._currentPage = 0;
-        this._renderTable(); // rebuild toolbar + body
+        this._unbindExternalSearch();
+        this._renderTable(); // rebuild toolbar (internal or none)
+        this._bindExternalSearch();
+      } else if (['filter-attr', 'filter-input', 'filter-value'].includes(attrName)) {
+        this._currentPage = 0;
+        this._unbindExternalFilter();
+        this._seedFilters();
+        this._bindExternalFilter();
+        this._renderBody();
       } else if (['striped', 'hoverable', 'bordered', 'borderless', 'size', 'clickable', 'page-size', 'row-numbers'].includes(attrName)) {
         this._renderBody();
       } else {

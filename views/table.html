@@ -256,6 +256,52 @@
       </wc-table>
     </div>
 
+    <!-- ============================================ -->
+    <!-- EXAMPLE: External filter bar (search-input + filter-attr) -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>External filter bar — <code>search-input</code> + <code>filter-attr</code></h3>
+      <p>
+        The search box lives in an app-owned filter row (next to a "Master Event"
+        <code>&lt;select&gt;</code>), bound via <code>search-input="#p-search"</code>. The select
+        filters client-side by <code>tr[data-event]</code> via <code>filter-attr</code> +
+        <code>filter-input</code> — zero round-trips, and the <code>&lt;wc-table&gt;</code> renders
+        no internal search box.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div class="col gap-1">
+          <label for="p-event" class="text-sm">Master Event</label>
+          <select id="p-event" class="w-full">
+            <option value="">All events</option>
+            <option value="spring">Spring Meet</option>
+            <option value="fall">Fall Meet</option>
+          </select>
+        </div>
+        <div class="col gap-1">
+          <label for="p-search" class="text-sm">Search</label>
+          <input id="p-search" type="search" placeholder="Name or barcode…" class="w-full">
+        </div>
+      </div>
+      <wc-table paginate page-size="5" row-numbers
+                search-input="#p-search" filter-attr="data-event" filter-input="#p-event">
+        <table class="wc-table w-full" striped hoverable>
+          <thead><tr>
+            <th>#</th><th class="wc-sortable">Name</th>
+            <th class="wc-sortable" data-type="num">Check-ins</th><th>Barcode</th>
+          </tr></thead>
+          <tbody>
+            <tr data-search="abigail adamo 50072" data-event="spring"><td><a href="#">Abigail Adamo</a></td><td data-sort="5"><span class="badge badge-success">5</span></td><td><code>50072</code></td></tr>
+            <tr data-search="marcus bell 50120" data-event="fall"><td><a href="#">Marcus Bell</a></td><td data-sort="12"><span class="badge badge-success">12</span></td><td><code>50120</code></td></tr>
+            <tr data-search="priya chandra 50088" data-event="spring fall"><td><a href="#">Priya Chandra</a></td><td data-sort="0"><span class="badge badge-muted">0</span></td><td><code>50088</code></td></tr>
+            <tr data-search="diego ramirez 50201" data-event="fall"><td><a href="#">Diego Ramirez</a></td><td data-sort="8"><span class="badge badge-success">8</span></td><td><code>50201</code></td></tr>
+            <tr data-search="hana suzuki 50133" data-event="spring"><td><a href="#">Hana Suzuki</a></td><td data-sort="21"><span class="badge badge-success">21</span></td><td><code>50133</code></td></tr>
+            <tr data-search="omar farouk 50177" data-event="fall"><td><a href="#">Omar Farouk</a></td><td data-sort="3"><span class="badge badge-warning">3</span></td><td><code>50177</code></td></tr>
+            <tr data-search="lena novak 50210" data-event="spring"><td><a href="#">Lena Novak</a></td><td data-sort="9"><span class="badge badge-success">9</span></td><td><code>50210</code></td></tr>
+          </tbody>
+        </table>
+      </wc-table>
+    </div>
+
     <wc-javascript>
     // Row click events
     const clickTable = document.getElementById('click-table');
