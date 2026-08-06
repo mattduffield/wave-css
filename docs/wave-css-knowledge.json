@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.34.0",
+    "version": "1.35.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-07-15"
   },
@@ -666,11 +666,15 @@
           "min",
           "max",
           "step",
+          "rows",
+          "full-width",
+          "mask",
+          "geocode-url",
           "required",
           "col-class"
         ],
-        "notes": "`field` (required) is the object key this column maps to — the `sub` in `${name}.${index}.${sub}`. `label` defaults to field. `type`: text | number | date | select (also accepts email/tel/time/datetime-local; anything else falls back to text). For `type=select`: `options` is a JSON array — either inline {key,value} option objects OR a collection of records (reference column); `option-value`/`option-label` pick which members are the stored value and visible label (defaults value/key). `min`/`max`/`step`/`placeholder` pass through to number/date/text inputs; `required` marks the per-row control required; `col-class` adds width/align class(es) to that column's header + cells. The parent reads these attributes directly (not via a method) so it works regardless of custom-element upgrade order.",
-        "usage": "<!-- child of <wc-form-array> — see wc-form-array usage -->\n<wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\" col-class=\"w-100\" required></wc-form-array-column>"
+        "notes": "`field` (required) is the object key this column maps to — the `sub` in `${name}.${index}.${sub}`. `label` defaults to field. `type`: text | number | date | select | textarea | tel | address (also accepts email/time/datetime-local; anything else falls back to text). For `type=select`: `options` is a JSON array — either inline {key,value} option objects OR a collection of records (reference column); `option-value`/`option-label` pick which members are the stored value and visible label (defaults value/key). `min`/`max`/`step`/`placeholder` pass through to number/date/text inputs; `required` marks the per-row control required; `col-class` adds width/align class(es) to that column's header + cells. NEW COLUMN TYPES/OPTIONS: `type=\"textarea\"` renders a multi-line <textarea> (rows via `rows`, default 3) — same dotted-index naming/collect/blank-row handling as any control. `full-width` makes the column span the whole card on its own row (card layout: the .wc-fa-field gets grid-column:1/-1) — ideal for a long textarea / medical field. `mask` applies a WcMaskHub mask (phone | ssn | zip | zipPlus4 | date | currency) to the input via wc.MaskHub.applyMaskToElement (applied when the hub is ready, else on `wcready`); `type=\"tel\"` implies mask=\"phone\" so a phone column formats EXACTLY like wc-input type=tel (the masked string is what's stored/submitted). `type=\"address\"` renders a per-row <wc-address> with geocode autocomplete (proxy URL via `geocode-url`, default /api/geocode) — built via the parser (wc-address appends its wrapper in the constructor) and REINDEX-SAFE: on add/remove the custom element's name attribute + its inner named input are renumbered so the submitted dotted name stays contiguous (single value, no double-submit). Works in BOTH card and table layouts (full-width row-spanning is a card-layout feature). The parent reads these attributes directly (not via a method) so it works regardless of custom-element upgrade order.",
+        "usage": "<!-- child of <wc-form-array> — see wc-form-array usage -->\n<wc-form-array-column field=\"quantity\" label=\"Qty\" type=\"number\" min=\"1\" step=\"1\" col-class=\"w-100\" required></wc-form-array-column>\n<wc-form-array-column field=\"phone\" label=\"Phone\" type=\"tel\"></wc-form-array-column>\n<wc-form-array-column field=\"medical_notes\" label=\"Medical notes\" type=\"textarea\" rows=\"3\" full-width></wc-form-array-column>\n<wc-form-array-column field=\"home\" label=\"Home address\" type=\"address\" geocode-url=\"/api/geocode\" full-width></wc-form-array-column>"
       },
       {
         "name": "wc-rich-text",

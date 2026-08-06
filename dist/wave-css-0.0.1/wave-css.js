@@ -44076,7 +44076,11 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       "max",
       "step",
       "required",
-      "col-class"
+      "col-class",
+      "rows",
+      "full-width",
+      "mask",
+      "geocode-url"
     ];
   }
   constructor() {
@@ -44122,6 +44126,10 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       min: this.getAttribute("min"),
       max: this.getAttribute("max"),
       step: this.getAttribute("step"),
+      rows: this.getAttribute("rows"),
+      fullWidth: this.hasAttribute("full-width"),
+      mask: this.getAttribute("mask") || "",
+      geocodeUrl: this.getAttribute("geocode-url") || "",
       required: this.hasAttribute("required"),
       colClass: this.getAttribute("col-class") || ""
     };
@@ -44346,6 +44354,7 @@ var WcFormArray = class extends WcBaseComponent {
     this._columns.forEach((col) => {
       const cell = document.createElement("div");
       cell.classList.add("wc-form-array-cell");
+      if (col.fullWidth) cell.classList.add("is-full");
       if (col.colClass) cell.classList.add(...col.colClass.split(" ").filter(Boolean));
       const rawVal = data && data[col.field] != null ? data[col.field] : "";
       cell.appendChild(this._createControl(col, index, rawVal));
@@ -44369,6 +44378,7 @@ var WcFormArray = class extends WcBaseComponent {
     this._columns.forEach((col) => {
       const field = document.createElement("div");
       field.classList.add("wc-fa-field");
+      if (col.fullWidth) field.classList.add("is-full");
       if (col.colClass) field.classList.add(...col.colClass.split(" ").filter(Boolean));
       if (col.required) field.classList.add("is-required");
       const ctrlId = `${this._prefix}.${index}.${col.field}`;
@@ -44416,10 +44426,38 @@ var WcFormArray = class extends WcBaseComponent {
     if (this._isReadonly()) {
       const span = document.createElement("span");
       span.classList.add("wc-form-array-readonly");
+      if (col.type === "textarea") span.classList.add("wc-form-array-readonly-multiline");
       span.setAttribute("data-col", col.field);
       span.dataset.value = value;
       span.textContent = col.type === "select" ? this._labelForValue(col, value) : value === "" ? "\u2014" : String(value);
       return span;
+    }
+    if (col.type === "textarea") {
+      const ta = document.createElement("textarea");
+      ta.classList.add("wc-form-array-control", "wc-form-array-textarea");
+      ta.name = name;
+      ta.id = name;
+      ta.setAttribute("data-col", col.field);
+      const rows = parseInt(col.rows, 10);
+      ta.rows = Number.isFinite(rows) && rows > 0 ? rows : 3;
+      if (col.placeholder) ta.placeholder = col.placeholder;
+      if (col.required) ta.required = true;
+      ta.value = value;
+      return ta;
+    }
+    if (col.type === "address") {
+      const attrs = [
+        `data-col="${this._escAttr(col.field)}"`,
+        `name="${this._escAttr(name)}"`,
+        `id="${this._escAttr(name)}"`
+      ];
+      if (col.geocodeUrl) attrs.push(`geocode-url="${this._escAttr(col.geocodeUrl)}"`);
+      if (col.placeholder) attrs.push(`placeholder="${this._escAttr(col.placeholder)}"`);
+      if (col.required) attrs.push("required");
+      if (value !== "" && value != null) attrs.push(`value="${this._escAttr(String(value))}"`);
+      const tmp = document.createElement("div");
+      tmp.innerHTML = `<wc-address ${attrs.join(" ")}></wc-address>`;
+      return tmp.firstElementChild;
     }
     if (col.type === "select") {
       const select = document.createElement("select");
@@ -44466,7 +44504,24 @@ var WcFormArray = class extends WcBaseComponent {
     if (col.max != null) input2.max = col.max;
     if (col.step != null) input2.step = col.step;
     if (col.required) input2.required = true;
+    const maskType = col.mask || (col.type === "tel" ? "phone" : "");
+    if (maskType) this._applyMask(input2, maskType);
     return input2;
+  }
+  _escAttr(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  // Apply a WcMaskHub mask now if the hub is ready, else once IMask finishes loading (wcready).
+  _applyMask(input2, maskType) {
+    const apply = () => {
+      const hub = window.wc && window.wc.MaskHub;
+      if (hub && typeof hub.applyMaskToElement === "function") {
+        hub.applyMaskToElement(input2, maskType);
+        return true;
+      }
+      return false;
+    };
+    if (!apply()) document.addEventListener("wcready", () => apply(), { once: true });
   }
   /**
    * THE critical correctness routine. Renumbers every control so indices are
@@ -44479,8 +44534,14 @@ var WcFormArray = class extends WcBaseComponent {
       row.querySelectorAll("[data-col]").forEach((ctrl) => {
         const field = ctrl.getAttribute("data-col");
         const name = `${this._prefix}.${i}.${field}`;
-        if ("name" in ctrl) ctrl.name = name;
-        ctrl.id = name;
+        if (ctrl.tagName && ctrl.tagName.indexOf("-") !== -1) {
+          ctrl.setAttribute("name", name);
+          ctrl.setAttribute("id", name);
+          ctrl.querySelectorAll("[name]").forEach((inner) => inner.setAttribute("name", name));
+        } else {
+          if ("name" in ctrl) ctrl.name = name;
+          ctrl.id = name;
+        }
       });
       if (this._layout === "card") {
         row.querySelectorAll(":scope > .wc-fa-card-grid > .wc-fa-field > label[for]").forEach((lbl, ci) => {
@@ -44516,6 +44577,10 @@ var WcFormArray = class extends WcBaseComponent {
         min: el.getAttribute("min"),
         max: el.getAttribute("max"),
         step: el.getAttribute("step"),
+        rows: el.getAttribute("rows"),
+        fullWidth: el.hasAttribute("full-width"),
+        mask: el.getAttribute("mask") || "",
+        geocodeUrl: el.getAttribute("geocode-url") || "",
         required: el.hasAttribute("required"),
         colClass: el.getAttribute("col-class") || ""
       };
@@ -44875,6 +44940,26 @@ var WcFormArray = class extends WcBaseComponent {
         .wc-fa-field.is-required > label::after {
           content: ' *';
           color: var(--danger-color, #ef4444);
+        }
+        /* full-width column \u2192 spans the whole card on its own row */
+        .wc-fa-field.is-full {
+          grid-column: 1 / -1;
+        }
+
+        /* Multi-line + address controls (both layouts) */
+        .wc-form-array-textarea {
+          min-height: 4.5rem;
+          resize: vertical;
+          font: inherit;
+          line-height: 1.4;
+        }
+        .wc-form-array-readonly-multiline {
+          white-space: pre-wrap;
+        }
+        .wc-form-array-cell wc-address,
+        .wc-fa-field wc-address {
+          display: block;
+          width: 100%;
         }
       }
     `.trim();

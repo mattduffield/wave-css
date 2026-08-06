@@ -17,13 +17,19 @@
  *  Attributes:
  *    field         (required) — the object key this column maps to (the `sub` in `${name}.${index}.${sub}`)
  *    label                    — column header text (defaults to field)
- *    type                     — text | number | date | select  (default: text)
+ *    type                     — text | number | date | select | textarea | tel | address  (default: text)
  *    options                  — JSON array for `select` columns. Inline option list OR a
  *                               collection of records (reference column).
  *    option-value             — for `select`: which member of each option object is the stored value (e.g. "_id")
  *    option-label             — for `select`: which member is the visible label (e.g. "name")
  *    placeholder              — placeholder text for text/number/date inputs
  *    min / max / step         — passed through to number/date inputs
+ *    rows                     — for `type="textarea"`: visible row count (default 3)
+ *    full-width               — the column spans the whole card on its own row (card layout;
+ *                               ideal for a long textarea / medical field)
+ *    mask                     — apply a WcMaskHub mask (phone | ssn | zip | zipPlus4 | date | currency).
+ *                               `type="tel"` implies `mask="phone"` — formats exactly like wc-input type=tel
+ *    geocode-url              — for `type="address"`: the geocode proxy URL passed to the per-row wc-address
  *    required                 — mark the per-row control required
  *    col-class                — extra class(es) applied to this column's cells (width/align)
  *
@@ -41,7 +47,8 @@ class WcFormArrayColumn extends WcBaseComponent {
   static get observedAttributes() {
     return [
       'field', 'label', 'type', 'options', 'option-value', 'option-label',
-      'placeholder', 'min', 'max', 'step', 'required', 'col-class'
+      'placeholder', 'min', 'max', 'step', 'required', 'col-class',
+      'rows', 'full-width', 'mask', 'geocode-url'
     ];
   }
 
@@ -97,6 +104,10 @@ class WcFormArrayColumn extends WcBaseComponent {
       min: this.getAttribute('min'),
       max: this.getAttribute('max'),
       step: this.getAttribute('step'),
+      rows: this.getAttribute('rows'),
+      fullWidth: this.hasAttribute('full-width'),
+      mask: this.getAttribute('mask') || '',
+      geocodeUrl: this.getAttribute('geocode-url') || '',
       required: this.hasAttribute('required'),
       colClass: this.getAttribute('col-class') || ''
     };

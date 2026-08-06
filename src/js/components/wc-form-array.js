@@ -294,6 +294,7 @@ class WcFormArray extends WcBaseComponent {
     this._columns.forEach(col => {
       const cell = document.createElement('div');
       cell.classList.add('wc-form-array-cell');
+      if (col.fullWidth) cell.classList.add('is-full');
       if (col.colClass) cell.classList.add(...col.colClass.split(' ').filter(Boolean));
       const rawVal = data && data[col.field] != null ? data[col.field] : '';
       cell.appendChild(this._createControl(col, index, rawVal));
@@ -323,6 +324,7 @@ class WcFormArray extends WcBaseComponent {
     this._columns.forEach(col => {
       const field = document.createElement('div');
       field.classList.add('wc-fa-field');
+      if (col.fullWidth) field.classList.add('is-full');
       if (col.colClass) field.classList.add(...col.colClass.split(' ').filter(Boolean));
       if (col.required) field.classList.add('is-required');
       const ctrlId = `${this._prefix}.${index}.${col.field}`;
@@ -378,10 +380,41 @@ class WcFormArray extends WcBaseComponent {
     if (this._isReadonly()) {
       const span = document.createElement('span');
       span.classList.add('wc-form-array-readonly');
+      if (col.type === 'textarea') span.classList.add('wc-form-array-readonly-multiline');
       span.setAttribute('data-col', col.field);
       span.dataset.value = value;
       span.textContent = col.type === 'select' ? this._labelForValue(col, value) : (value === '' ? '—' : String(value));
       return span;
+    }
+
+    // Multi-line text
+    if (col.type === 'textarea') {
+      const ta = document.createElement('textarea');
+      ta.classList.add('wc-form-array-control', 'wc-form-array-textarea');
+      ta.name = name;
+      ta.id = name;
+      ta.setAttribute('data-col', col.field);
+      const rows = parseInt(col.rows, 10);
+      ta.rows = Number.isFinite(rows) && rows > 0 ? rows : 3;
+      if (col.placeholder) ta.placeholder = col.placeholder;
+      if (col.required) ta.required = true;
+      ta.value = value;
+      return ta;
+    }
+
+    // Address: a per-row <wc-address> with geocode autocomplete (reindex-safe custom element).
+    // Build via the parser — wc-address appends its wrapper in the constructor, which
+    // document.createElement disallows ("must not have children").
+    if (col.type === 'address') {
+      const attrs = [`data-col="${this._escAttr(col.field)}"`,
+        `name="${this._escAttr(name)}"`, `id="${this._escAttr(name)}"`];
+      if (col.geocodeUrl) attrs.push(`geocode-url="${this._escAttr(col.geocodeUrl)}"`);
+      if (col.placeholder) attrs.push(`placeholder="${this._escAttr(col.placeholder)}"`);
+      if (col.required) attrs.push('required');
+      if (value !== '' && value != null) attrs.push(`value="${this._escAttr(String(value))}"`);
+      const tmp = document.createElement('div');
+      tmp.innerHTML = `<wc-address ${attrs.join(' ')}></wc-address>`;
+      return tmp.firstElementChild;
     }
 
     if (col.type === 'select') {
@@ -435,7 +468,29 @@ class WcFormArray extends WcBaseComponent {
     if (col.max != null) input.max = col.max;
     if (col.step != null) input.step = col.step;
     if (col.required) input.required = true;
+
+    // Mask via WcMaskHub — `type="tel"` implies the phone mask (matches wc-input type=tel);
+    // `mask="ssn|zip|zipPlus4|date|currency|phone"` selects a named mask. Value is set above so
+    // the mask picks up the pre-filled value.
+    const maskType = col.mask || (col.type === 'tel' ? 'phone' : '');
+    if (maskType) this._applyMask(input, maskType);
+
     return input;
+  }
+
+  _escAttr(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Apply a WcMaskHub mask now if the hub is ready, else once IMask finishes loading (wcready).
+  _applyMask(input, maskType) {
+    const apply = () => {
+      const hub = window.wc && window.wc.MaskHub;
+      if (hub && typeof hub.applyMaskToElement === 'function') { hub.applyMaskToElement(input, maskType); return true; }
+      return false;
+    };
+    if (!apply()) document.addEventListener('wcready', () => apply(), { once: true });
   }
 
   /**
@@ -449,8 +504,16 @@ class WcFormArray extends WcBaseComponent {
       row.querySelectorAll('[data-col]').forEach(ctrl => {
         const field = ctrl.getAttribute('data-col');
         const name = `${this._prefix}.${i}.${field}`;
-        if ('name' in ctrl) ctrl.name = name;
-        ctrl.id = name;
+        if (ctrl.tagName && ctrl.tagName.indexOf('-') !== -1) {
+          // Custom-element control (e.g. wc-address): set the attribute and rename any inner
+          // named input so the dotted-index name that actually submits stays contiguous.
+          ctrl.setAttribute('name', name);
+          ctrl.setAttribute('id', name);
+          ctrl.querySelectorAll('[name]').forEach(inner => inner.setAttribute('name', name));
+        } else {
+          if ('name' in ctrl) ctrl.name = name;
+          ctrl.id = name;
+        }
       });
       if (this._layout === 'card') {
         // Keep <label for> in sync with the renumbered control ids, and refresh the title.
@@ -492,6 +555,10 @@ class WcFormArray extends WcBaseComponent {
         min: el.getAttribute('min'),
         max: el.getAttribute('max'),
         step: el.getAttribute('step'),
+        rows: el.getAttribute('rows'),
+        fullWidth: el.hasAttribute('full-width'),
+        mask: el.getAttribute('mask') || '',
+        geocodeUrl: el.getAttribute('geocode-url') || '',
         required: el.hasAttribute('required'),
         colClass: el.getAttribute('col-class') || ''
       };
@@ -882,6 +949,26 @@ class WcFormArray extends WcBaseComponent {
         .wc-fa-field.is-required > label::after {
           content: ' *';
           color: var(--danger-color, #ef4444);
+        }
+        /* full-width column → spans the whole card on its own row */
+        .wc-fa-field.is-full {
+          grid-column: 1 / -1;
+        }
+
+        /* Multi-line + address controls (both layouts) */
+        .wc-form-array-textarea {
+          min-height: 4.5rem;
+          resize: vertical;
+          font: inherit;
+          line-height: 1.4;
+        }
+        .wc-form-array-readonly-multiline {
+          white-space: pre-wrap;
+        }
+        .wc-form-array-cell wc-address,
+        .wc-fa-field wc-address {
+          display: block;
+          width: 100%;
         }
       }
     `.trim();
