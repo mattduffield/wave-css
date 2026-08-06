@@ -695,7 +695,9 @@ class WcFormArray extends WcBaseComponent {
       } else { v = opt; label = opt; }
       v = v == null ? '' : String(v);
       seen.add(v.toLowerCase());
-      const sel = pre.some(p => p === v) ? ' selected' : '';
+      // Match pre-fill values case-insensitively on the option VALUE (so "Epipen" selects the
+      // "EpiPen" option and submits its canonical value/label as a normal chip).
+      const sel = pre.some(p => p.toLowerCase() === v.toLowerCase()) ? ' selected' : '';
       html += `<option value="${this._escAttr(v)}"${sel}>${this._escHtml(label)}</option>`;
     });
     // Pre-filled custom values not in the option list (allow-custom / allow-dynamic).

@@ -319,17 +319,23 @@ class WcSelect extends WcBaseFormComponent {
       const ipt = document.createElement('input');
       ipt.classList.add('dropdown-input');
       ipt.id = 'dropdownInput';
+      ipt.type = 'text';
       ipt.setAttribute('placeholder', 'Add or select...');
 
-      // Apply autocomplete attribute if specified
-      const autocomplete = this.getAttribute('autocomplete');
-      if (autocomplete) {
-        ipt.setAttribute('autocomplete', autocomplete);
-      }
+      // Suppress the browser's native autofill/history popup — only the component's own option
+      // dropdown should show (unrelated saved values like "AAA"/"prospect" leaking in, and the
+      // popup covering the options, were the symptoms). Default autocomplete to "off" unless the
+      // author explicitly set one; add the belt-and-suspenders guards password managers honor.
+      ipt.setAttribute('autocomplete', this.getAttribute('autocomplete') || 'off');
+      ipt.setAttribute('autocorrect', 'off');
+      ipt.setAttribute('autocapitalize', 'off');
+      ipt.setAttribute('spellcheck', 'false');
+      ipt.setAttribute('data-lpignore', 'true');
+      ipt.setAttribute('data-1p-ignore', '');
+      ipt.setAttribute('data-form-type', 'other');
 
-      // When no-filter is set, disable autocomplete and make input readonly
+      // When no-filter is set, make input readonly (pick-only)
       if (this.hasAttribute('no-filter')) {
-        ipt.setAttribute('autocomplete', 'off');
         ipt.setAttribute('readonly', '');
       }
 
@@ -768,19 +774,22 @@ class WcSelect extends WcBaseFormComponent {
       wc-select[mode="chip"] .dropdown-input { 
         display: block; 
       }
-      wc-select .options-container { 
+      wc-select .options-container {
         display: none;
-        position: absolute; 
-        top: 29.5px; 
-        left: 0; 
-        right: 0; 
-        background: var(--secondary-bg-color); 
-        color: var(--primary-color);
-        border: 1px solid var(--accent-bg-color); 
-        max-height: 150px;
-        margin-left 0.5rem;
-        overflow-y: auto; 
-        z-index: 10; 
+        position: absolute;
+        top: 29.5px;
+        left: 0;
+        right: 0;
+        /* Solid, theme-legible surface so it's readable in light + dark and never see-through. */
+        background: var(--component-bg-color, var(--surface-1, #fff));
+        color: var(--text-1, var(--component-color, #1f2937));
+        border: 1px solid var(--component-border-color, var(--surface-4, #d1d5db));
+        border-radius: 0.375rem;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.1);
+        max-height: 220px;
+        overflow-y: auto;
+        /* Above sibling UI (and the browser autofill popup is suppressed in #2). */
+        z-index: 1000;
       }
 
       wc-select[mode="chip"] .options-container { 
