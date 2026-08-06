@@ -663,8 +663,17 @@ if (!customElements.get('wc-table')) {
         + `<button type="button" class="btn btn-sm" data-page="next"${page >= totalPages ? ' disabled' : ''}>Next »</button>`
         + `<span class="wc-table-jump text-2">Go to page `
         + `<input type="number" class="wc-table-jump-input" min="1" max="${totalPages}" value="${page}" aria-label="Go to page"></span>`
-        + `<span class="wc-table-summary text-2">${from}–${to} of ${total}</span>`
+        + `<span class="wc-table-summary text-2">${this._padNum(from, total)}–${this._padNum(to, total)} of ${total}</span>`
         + `</div>`;
+    }
+
+    // Pad a number to the digit-width of `total` with FIGURE SPACE (U+2007 = digit width under
+    // tabular-nums), so the summary text is a CONSTANT width across pages — otherwise its grid
+    // track (auto) would resize and shift Next/jump. e.g. "1–1 of 13" → " 1– 1 of 13".
+    _padNum(n, total) {
+      const w = String(Math.max(0, total)).length;
+      const s = String(n);
+      return String.fromCharCode(0x2007).repeat(Math.max(0, w - s.length)) + s;
     }
 
     // Windowed page list with ellipses: 1 … (cur-1) cur (cur+1) … total
@@ -1343,10 +1352,16 @@ if (!customElements.get('wc-table')) {
         const widths = headers.map(th => Math.round(th.getBoundingClientRect().width)); // forces layout
         this._tbody.replaceChildren(...backup);            // restore page slice (no paint between)
         // Pin via <colgroup>, honoring author overrides, then switch to fixed layout.
+        // IMPORTANT: a display:none column (responsive breakpoint hiding) is removed from the
+        // rendered rows, so we must NOT emit a <col> slot for it — otherwise every column after
+        // the hidden one shifts by one and content overlaps. Emit cols only for visible headers,
+        // in order, so the colgroup matches the actual visible cell set 1:1.
         const overrides = this._columnWidthOverrides(headers);
         const cg = document.createElement('colgroup');
         cg.className = 'wc-colgroup';
         headers.forEach((th, i) => {
+          const cs = window.getComputedStyle(th);
+          if (cs.display === 'none') return; // hidden column: no slot in the colgroup
           const col = document.createElement('col');
           col.style.width = overrides[i] || (widths[i] ? widths[i] + 'px' : '');
           cg.appendChild(col);
@@ -1485,27 +1500,58 @@ if (!customElements.get('wc-table')) {
           font-variant-numeric: tabular-nums;
         }
 
-        /* Pager */
+        /* Pager — CSS grid gives each region a fixed x-position independent of content width,
+           so paging (digit count / ellipses changing) never slides Prev/Next/jump/summary. */
         .wc-table-pager {
-          display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+          display: grid;
+          grid-template-columns: auto 1fr auto auto auto; /* prev | pages | next | jump | summary */
+          align-items: center;
+          gap: 0.4rem 0.6rem;
           padding: 0.5rem 0.25rem;
           font-size: 0.85rem;
         }
+        .wc-table-pager [data-page="prev"] { justify-self: start; }
+        .wc-table-pager .wc-table-pages    { justify-self: center; } /* re-centers in the 1fr track */
+        .wc-table-pager [data-page="next"] { justify-self: start; }
+        .wc-table-pager .wc-table-jump     { justify-self: start; }
+        .wc-table-pager .wc-table-summary  { justify-self: end; }    /* replaces margin-left:auto */
         .wc-table-pager .wc-table-pages { display: inline-flex; align-items: center; gap: 0.25rem; }
+        /* Uniform page-button width + tabular digits so 1- vs 2-digit buttons don't jitter. */
+        .wc-table-pager .wc-table-pages .btn {
+          min-width: 2rem; text-align: center;
+          font-variant-numeric: tabular-nums;
+        }
         .wc-table-pager .btn.wc-page-active {
           background: var(--primary-bg-color); color: var(--primary-color);
           font-weight: 600; pointer-events: none;
         }
-        .wc-table-pager .wc-table-ellipsis { padding: 0 0.15rem; opacity: 0.7; }
-        .wc-table-pager .wc-table-jump { display: inline-flex; align-items: center; gap: 0.35rem; }
+        .wc-table-pager .wc-table-ellipsis {
+          display: inline-flex; align-items: center; justify-content: center;
+          min-width: 1rem; padding: 0 0.15rem; opacity: 0.7;
+        }
+        .wc-table-pager .wc-table-jump { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
         .wc-table-pager .wc-table-jump-input {
           width: 3.5rem; padding: 0.25rem 0.4rem;
           border: 1px solid var(--component-border-color, var(--surface-4));
           border-radius: 0.375rem;
           background: var(--component-bg-color, var(--surface-1));
           color: var(--text-1);
+          font-variant-numeric: tabular-nums;
         }
-        .wc-table-pager .wc-table-summary { margin-left: auto; }
+        .wc-table-pager .wc-table-summary { white-space: nowrap; font-variant-numeric: tabular-nums; }
+        /* Narrow screens: collapse to two rows (prev pages next / jump . summary). */
+        @media (max-width: 640px) {
+          .wc-table-pager {
+            grid-template-columns: auto 1fr auto;
+            grid-template-areas: "prev pages next" "jump . summary";
+            row-gap: 0.5rem;
+          }
+          .wc-table-pager [data-page="prev"] { grid-area: prev; }
+          .wc-table-pager .wc-table-pages    { grid-area: pages; }
+          .wc-table-pager [data-page="next"] { grid-area: next; }
+          .wc-table-pager .wc-table-jump     { grid-area: jump; }
+          .wc-table-pager .wc-table-summary  { grid-area: summary; }
+        }
       `;
       this.loadStyle('wc-table-component-style', style);
     }
