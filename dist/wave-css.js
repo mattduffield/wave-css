@@ -25217,6 +25217,7 @@ if (!customElements.get("wc-table-col")) {
         "field",
         "label",
         "sortable",
+        "filterable",
         "align",
         "width",
         "format",
@@ -25249,6 +25250,7 @@ if (!customElements.get("wc-table-col")) {
         field: this.getAttribute("field") || "",
         label: this.getAttribute("label") || this.getAttribute("field") || "",
         sortable: this.hasAttribute("sortable"),
+        filterable: this.hasAttribute("filterable"),
         align: this.getAttribute("align") || "left",
         width: this.getAttribute("width") || "",
         format: this.getAttribute("format") || "",
@@ -25294,7 +25296,12 @@ if (!customElements.get("wc-table")) {
         "auto-columns",
         "empty-message",
         "page-size",
-        "display-member"
+        "display-member",
+        "paginate",
+        "searchable",
+        "search-placeholder",
+        "row-numbers",
+        "enhance"
       ];
     }
     static get is() {
@@ -25307,6 +25314,13 @@ if (!customElements.get("wc-table")) {
       this._sortField = "";
       this._sortDir = "";
       this._currentPage = 0;
+      this._query = "";
+      this._pageRows = [];
+      this._lastTotalPages = 1;
+      this._enhanceMode = false;
+      this._searchTimer = null;
+      this._initialized = false;
+      this._searchRaw = "";
       this._runStreams = /* @__PURE__ */ new Map();
       this._runStatusRows = {};
       this._completedRuns = /* @__PURE__ */ new Set();
@@ -25325,6 +25339,13 @@ if (!customElements.get("wc-table")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
+      if (this._detectEnhanceMode()) {
+        this._enhanceMode = true;
+        this._initEnhance();
+        this._initialized = true;
+        this._setReady();
+        return;
+      }
       this._parseColumns();
       const url = this.getAttribute("url");
       const items = this.getAttribute("items");
@@ -25341,6 +25362,7 @@ if (!customElements.get("wc-table")) {
       } else {
         this._renderTable();
       }
+      this._initialized = true;
       this._setReady();
     }
     disconnectedCallback() {
@@ -25367,6 +25389,7 @@ if (!customElements.get("wc-table")) {
           field: col.getAttribute("field") || "",
           label: col.getAttribute("label") || col.getAttribute("field") || "",
           sortable: col.hasAttribute("sortable"),
+          filterable: col.hasAttribute("filterable"),
           align: col.getAttribute("align") || "left",
           width: col.getAttribute("width") || "",
           format: col.getAttribute("format") || "",
@@ -25435,10 +25458,22 @@ if (!customElements.get("wc-table")) {
       }
       this._renderTable();
     }
-    _renderTable() {
-      const data = this._getSortedData();
-      const emptyMessage = this.getAttribute("empty-message") || "No data available";
-      this._runStatusRows = {};
+    // Feature getters
+    get paginate() {
+      return this.hasAttribute("paginate");
+    }
+    get searchable() {
+      return this.hasAttribute("searchable");
+    }
+    get rowNumbers() {
+      return this.hasAttribute("row-numbers");
+    }
+    _pageSizeVal() {
+      if (!this.paginate) return Infinity;
+      const n = parseInt(this.getAttribute("page-size"), 10);
+      return Number.isFinite(n) && n > 0 ? n : 10;
+    }
+    _buildTableClasses() {
       const classes = ["wc-table"];
       if (this.hasAttribute("striped")) classes.push("wc-table-striped");
       if (this.hasAttribute("hoverable")) classes.push("wc-table-hover");
@@ -25448,15 +25483,64 @@ if (!customElements.get("wc-table")) {
       const size = this.getAttribute("size");
       if (size) classes.push(`wc-table-${size}`);
       if (this.hasAttribute("fixed-header")) classes.push("wc-table-fixed-header");
+      return classes.join(" ");
+    }
+    // Full (re)build: a persistent search toolbar + a body region that re-renders on
+    // filter/sort/page (so the search input keeps focus + caret while typing).
+    _renderTable() {
+      const toolbar = this._buildSearchToolbarHtml();
+      this.componentElement.innerHTML = toolbar + '<div class="wc-table-render"></div>';
+      this._renderRegion = this.componentElement.querySelector(".wc-table-render");
+      this._wireSearch();
+      this._renderBody();
+    }
+    _buildSearchToolbarHtml() {
+      if (!this.searchable) return "";
+      const ph = this._escapeAttr(this.getAttribute("search-placeholder") || "Search\u2026");
+      const val = this._escapeAttr(this._searchRaw || "");
+      return `<div class="wc-table-toolbar"><input type="search" class="wc-table-search" placeholder="${ph}" aria-label="Search table" value="${val}"></div>`;
+    }
+    _wireSearch() {
+      const input2 = this.componentElement.querySelector(".wc-table-search");
+      if (!input2) return;
+      input2.addEventListener("input", () => {
+        this._searchRaw = input2.value;
+        clearTimeout(this._searchTimer);
+        this._searchTimer = setTimeout(() => {
+          this._query = input2.value.trim().toLowerCase();
+          this._currentPage = 0;
+          this._renderBody();
+          this._emitEvent("wctablefilter", "wc-table:filter", {
+            bubbles: true,
+            detail: { query: this._query }
+          });
+        }, 200);
+      });
+    }
+    // Renders only the table + pager/footer region (keeps the toolbar/search input intact).
+    _renderBody() {
+      if (!this._renderRegion) {
+        this._renderTable();
+        return;
+      }
+      this._runStatusRows = {};
+      const emptyMessage = this.getAttribute("empty-message") || "No data available";
+      const classes = this._buildTableClasses();
+      const rowNum = this.rowNumbers;
+      const { pageRows, total, totalPages, start } = this._getViewData();
+      this._pageRows = pageRows;
+      this._lastTotalPages = totalPages;
+      const colCount = (this._columns.length || 1) + (rowNum ? 1 : 0);
       const needsResponsive = this.hasAttribute("fixed-header");
       let html = "";
       if (needsResponsive) {
         const maxH = this.getAttribute("max-height") || "500px";
         html += `<div class="wc-table-responsive" style="max-height: ${maxH}; overflow-y: auto;">`;
       }
-      html += `<table class="${classes.join(" ")}">`;
+      html += `<table class="${classes}">`;
       if (this._columns.length > 0) {
         html += "<thead><tr>";
+        if (rowNum) html += '<th class="wc-rownum">#</th>';
         this._columns.forEach((col) => {
           const alignClass = col.align !== "left" ? ` wc-text-${col.align}` : "";
           const sortClass = col.sortable ? " wc-sortable" : "";
@@ -25467,12 +25551,12 @@ if (!customElements.get("wc-table")) {
         html += "</tr></thead>";
       }
       html += "<tbody>";
-      if (data.length === 0) {
-        const colspan = this._columns.length || 1;
-        html += `<tr class="wc-table-empty"><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: var(--text-6);">${emptyMessage}</td></tr>`;
+      if (pageRows.length === 0) {
+        html += `<tr class="wc-table-empty"><td colspan="${colCount}" style="text-align: center; padding: 2rem; color: var(--text-6);">${emptyMessage}</td></tr>`;
       } else {
-        data.forEach((row, idx) => {
+        pageRows.forEach((row, idx) => {
           html += `<tr data-row-index="${idx}">`;
+          if (rowNum) html += `<td class="wc-rownum">${start + idx + 1}</td>`;
           if (this._columns.length > 0) {
             this._columns.forEach((col) => {
               const value = this._getNestedValue(row, col.field);
@@ -25494,18 +25578,61 @@ if (!customElements.get("wc-table")) {
       }
       html += "</tbody></table>";
       if (needsResponsive) html += "</div>";
-      if (data.length > 0) {
-        html += `<div class="wc-table-footer">${data.length} record${data.length !== 1 ? "s" : ""}</div>`;
+      if (this.paginate && total > 0) {
+        html += this._buildPagerHtml(total, totalPages, start, pageRows.length);
+      } else if (total > 0) {
+        html += `<div class="wc-table-footer">${total} record${total !== 1 ? "s" : ""}</div>`;
       }
-      this.componentElement.innerHTML = html;
+      this._renderRegion.innerHTML = html;
       this._wireTableEvents();
+      this._wirePager(this._renderRegion);
       this._reconcileRunStreams();
     }
-    _getSortedData() {
-      if (!this._sortField) return [...this._data];
+    // filter → sort → paginate. Returns the current page's rows + paging metadata.
+    _getViewData() {
+      const filtered = this._sortRows(this._getFilteredData());
+      const total = filtered.length;
+      const size = this._pageSizeVal();
+      const totalPages = Math.max(1, size === Infinity ? 1 : Math.ceil(total / size));
+      if (this._currentPage >= totalPages) this._currentPage = totalPages - 1;
+      if (this._currentPage < 0) this._currentPage = 0;
+      const start = this.paginate ? this._currentPage * size : 0;
+      const pageRows = this.paginate ? filtered.slice(start, start + size) : filtered;
+      return { pageRows, total, totalPages, start };
+    }
+    _getFilteredData() {
+      const q = this._query;
+      if (!q) return [...this._data];
+      const filterable = this._columns.filter((c) => c.filterable);
+      const cols = filterable.length ? filterable : this._columns;
+      return this._data.filter((row) => {
+        let hay;
+        if (cols.length) hay = cols.map((c) => this._stringifyVal(this._getNestedValue(row, c.field))).join(" ");
+        else hay = Object.keys(row).filter((k) => !k.startsWith("_")).map((k) => this._stringifyVal(row[k])).join(" ");
+        return hay.toLowerCase().includes(q);
+      });
+    }
+    _stringifyVal(v) {
+      if (v == null) return "";
+      if (typeof v === "object") {
+        if (v.$oid) return v.$oid;
+        if (v.$date) {
+          const d = new Date(v.$date);
+          return isNaN(d.getTime()) ? "" : d.toISOString();
+        }
+        try {
+          return JSON.stringify(v);
+        } catch (e) {
+          return "";
+        }
+      }
+      return String(v);
+    }
+    _sortRows(rows) {
+      if (!this._sortField) return rows;
       const field = this._sortField;
       const dir = this._sortDir === "desc" ? -1 : 1;
-      return [...this._data].sort((a, b) => {
+      return [...rows].sort((a, b) => {
         const va = this._getNestedValue(a, field);
         const vb = this._getNestedValue(b, field);
         if (va == null && vb == null) return 0;
@@ -25513,6 +25640,79 @@ if (!customElements.get("wc-table")) {
         if (vb == null) return -1;
         if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
         return String(va).localeCompare(String(vb)) * dir;
+      });
+    }
+    // Backward-compat: the full sorted dataset (unfiltered/unpaged).
+    _getSortedData() {
+      return this._sortRows([...this._data]);
+    }
+    // ---- Pager (shared by both modes) ---------------------------------------
+    _buildPagerHtml(total, totalPages, start, shown) {
+      const page = this._currentPage + 1;
+      const from = total === 0 ? 0 : start + 1;
+      const to = start + shown;
+      let btns = "";
+      this._pageNumbers(page, totalPages).forEach((n) => {
+        if (n === "\u2026") {
+          btns += `<span class="wc-table-ellipsis text-2">\u2026</span>`;
+          return;
+        }
+        const active = n === page ? " wc-page-active" : "";
+        const cur = n === page ? ' aria-current="page"' : "";
+        btns += `<button type="button" class="btn btn-sm${active}" data-page="${n}"${cur}>${n}</button>`;
+      });
+      return `<div class="wc-table-pager"><button type="button" class="btn btn-sm" data-page="prev"${page <= 1 ? " disabled" : ""}>\xAB Prev</button><span class="wc-table-pages">${btns}</span><button type="button" class="btn btn-sm" data-page="next"${page >= totalPages ? " disabled" : ""}>Next \xBB</button><span class="wc-table-jump text-2">Go to page <input type="number" class="wc-table-jump-input" min="1" max="${totalPages}" value="${page}" aria-label="Go to page"></span><span class="wc-table-summary text-2">${from}\u2013${to} of ${total}</span></div>`;
+    }
+    // Windowed page list with ellipses: 1 … (cur-1) cur (cur+1) … total
+    _pageNumbers(current, total) {
+      const wanted = /* @__PURE__ */ new Set([1, total, current - 1, current, current + 1]);
+      const valid = [...wanted].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+      const out = [];
+      let prev = 0;
+      valid.forEach((n) => {
+        if (n - prev > 1) out.push("\u2026");
+        out.push(n);
+        prev = n;
+      });
+      return out;
+    }
+    _wirePager(scope) {
+      const pager = scope.querySelector(".wc-table-pager");
+      if (!pager) return;
+      pager.querySelectorAll("button[data-page]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const v = btn.dataset.page;
+          let target;
+          if (v === "prev") target = this._currentPage;
+          else if (v === "next") target = this._currentPage + 2;
+          else target = parseInt(v, 10);
+          this._goToPage(target);
+        });
+      });
+      const jump = pager.querySelector(".wc-table-jump-input");
+      if (jump) {
+        const go = () => {
+          const n = parseInt(jump.value, 10);
+          if (Number.isFinite(n)) this._goToPage(n);
+        };
+        jump.addEventListener("change", go);
+        jump.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            go();
+          }
+        });
+      }
+    }
+    _goToPage(n) {
+      const totalPages = this._lastTotalPages || 1;
+      const clamped = Math.min(Math.max(1, n | 0), totalPages);
+      this._currentPage = clamped - 1;
+      if (this._enhanceMode) this._applyEnhanceView();
+      else this._renderBody();
+      this._emitEvent("wctablepage", "wc-table:page", {
+        bubbles: true,
+        detail: { page: clamped, totalPages: this._lastTotalPages }
       });
     }
     _getNestedValue(obj, path) {
@@ -25812,28 +26012,31 @@ if (!customElements.get("wc-table")) {
       if (this._completedRuns) this._completedRuns.clear();
     }
     _wireTableEvents() {
-      const table = this.componentElement.querySelector("table");
+      const region = this._renderRegion || this.componentElement;
+      const table = region.querySelector("table");
       if (!table) return;
       table.querySelectorAll("th.wc-sortable").forEach((th) => {
         th.addEventListener("click", () => {
           const field = th.dataset.field;
+          if (!field) return;
           if (this._sortField === field) {
             this._sortDir = this._sortDir === "asc" ? "desc" : "asc";
           } else {
             this._sortField = field;
             this._sortDir = "asc";
           }
+          this._currentPage = 0;
           this._emitEvent("wctablesort", "table:sort", {
             bubbles: true,
             detail: { field: this._sortField, direction: this._sortDir }
           });
-          this._renderTable();
+          this._renderBody();
         });
       });
       table.querySelectorAll("tbody tr[data-row-index]").forEach((tr) => {
         tr.addEventListener("click", () => {
           const idx = parseInt(tr.dataset.rowIndex);
-          const data = this._getSortedData()[idx];
+          const data = this._pageRows[idx];
           this._emitEvent("wctablerowclick", "table:row-click", {
             bubbles: true,
             detail: { row: tr, index: idx, data }
@@ -25841,7 +26044,7 @@ if (!customElements.get("wc-table")) {
         });
         tr.addEventListener("dblclick", () => {
           const idx = parseInt(tr.dataset.rowIndex);
-          const data = this._getSortedData()[idx];
+          const data = this._pageRows[idx];
           this._emitEvent("wctablerowdblclick", "table:row-dblclick", {
             bubbles: true,
             detail: { row: tr, index: idx, data }
@@ -25849,7 +26052,211 @@ if (!customElements.get("wc-table")) {
         });
       });
     }
+    // ---- Enhance mode (light-DOM authored <table>) --------------------------
+    _detectEnhanceMode() {
+      if (this.hasAttribute("url") || this.hasAttribute("items")) return false;
+      return !!this.querySelector("table");
+    }
+    _initEnhance() {
+      if (this.componentElement && this.componentElement.classList.contains("wc-table-container") && !this.componentElement.hasChildNodes()) {
+        this.componentElement.remove();
+      }
+      this._table = this.querySelector("table");
+      if (!this._table) return;
+      if (!this._table.classList.contains("wc-table")) this._table.classList.add("wc-table");
+      this._enhanceApplyClasses();
+      this._tbody = this._table.querySelector("tbody") || this._table;
+      this._theadRow = this._table.querySelector("thead tr");
+      this._allRows = Array.from(this._tbody.querySelectorAll(":scope > tr"));
+      this._ensureRowNumberColumn();
+      this._buildEnhanceChrome();
+      this._wireEnhanceSort();
+      this._applyEnhanceView();
+    }
+    _enhanceApplyClasses() {
+      if (!this._table) return;
+      const map = {
+        striped: "wc-table-striped",
+        hoverable: "wc-table-hover",
+        bordered: "wc-table-bordered",
+        borderless: "wc-table-borderless",
+        clickable: "wc-table-clickable"
+      };
+      Object.entries(map).forEach(([attr, cls]) => {
+        if (this.hasAttribute(attr)) this._table.classList.add(cls);
+      });
+      const size = this.getAttribute("size");
+      if (size) this._table.classList.add(`wc-table-${size}`);
+    }
+    _ensureRowNumberColumn() {
+      if (!this.rowNumbers || !this._theadRow) return;
+      let th = this._theadRow.querySelector(":scope > th.wc-rownum");
+      if (!th) {
+        const first = this._theadRow.querySelector(":scope > th");
+        if (first && first.textContent.trim() === "#") {
+          first.classList.add("wc-rownum");
+          th = first;
+        } else {
+          th = document.createElement("th");
+          th.className = "wc-rownum";
+          th.textContent = "#";
+          this._theadRow.insertBefore(th, this._theadRow.firstChild);
+        }
+      }
+      this._allRows.forEach((tr) => {
+        if (!tr.querySelector(":scope > td.wc-rownum")) {
+          const td = document.createElement("td");
+          td.className = "wc-rownum";
+          tr.insertBefore(td, tr.firstChild);
+        }
+      });
+    }
+    _buildEnhanceChrome() {
+      if (this.searchable && !this._searchEl) {
+        const wrap = document.createElement("div");
+        wrap.className = "wc-table-toolbar";
+        const input2 = document.createElement("input");
+        input2.type = "search";
+        input2.className = "wc-table-search";
+        input2.placeholder = this.getAttribute("search-placeholder") || "Search\u2026";
+        input2.setAttribute("aria-label", "Search table");
+        wrap.appendChild(input2);
+        this._table.parentNode.insertBefore(wrap, this._table);
+        this._searchEl = input2;
+        input2.addEventListener("input", () => {
+          clearTimeout(this._searchTimer);
+          this._searchTimer = setTimeout(() => {
+            this._query = input2.value.trim().toLowerCase();
+            this._currentPage = 0;
+            this._applyEnhanceView();
+            this._emitEvent("wctablefilter", "wc-table:filter", {
+              bubbles: true,
+              detail: { query: this._query }
+            });
+          }, 200);
+        });
+      }
+      if (!this._chromeEl) {
+        const chrome = document.createElement("div");
+        chrome.className = "wc-table-chrome";
+        if (this._table.nextSibling) this._table.parentNode.insertBefore(chrome, this._table.nextSibling);
+        else this._table.parentNode.appendChild(chrome);
+        this._chromeEl = chrome;
+      }
+    }
+    _wireEnhanceSort() {
+      if (!this._theadRow) return;
+      this._theadRow.querySelectorAll("th").forEach((th) => {
+        const sortable = th.classList.contains("wc-sortable") || th.hasAttribute("data-sortable");
+        if (!sortable || th.classList.contains("wc-rownum")) return;
+        th.classList.add("wc-sortable");
+        if (th._wcSortWired) return;
+        th._wcSortWired = true;
+        th.addEventListener("click", () => this._enhanceSort(th));
+      });
+    }
+    _enhanceSort(th) {
+      const cells = Array.from(this._theadRow.children);
+      const colIndex = cells.indexOf(th);
+      if (colIndex < 0) return;
+      const type = (th.dataset.type || "").toLowerCase();
+      if (this._sortTh === th) this._sortDir = this._sortDir === "asc" ? "desc" : "asc";
+      else {
+        this._sortTh = th;
+        this._sortDir = "asc";
+      }
+      const dir = this._sortDir === "desc" ? -1 : 1;
+      const cellVal = (tr) => {
+        const td = tr.children[colIndex];
+        if (!td) return "";
+        return td.dataset && td.dataset.sort != null ? td.dataset.sort : td.textContent.trim();
+      };
+      this._allRows = this._allRows.slice().sort((a, b) => {
+        const va = cellVal(a), vb = cellVal(b);
+        if (type === "num") {
+          const na = parseFloat(va), nb = parseFloat(vb);
+          return ((isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb)) * dir;
+        }
+        if (type === "date") {
+          const da = Date.parse(va), db = Date.parse(vb);
+          return ((isNaN(da) ? 0 : da) - (isNaN(db) ? 0 : db)) * dir;
+        }
+        return String(va).localeCompare(String(vb)) * dir;
+      });
+      cells.forEach((c) => c.classList.remove("wc-sort-asc", "wc-sort-desc"));
+      th.classList.add(this._sortDir === "asc" ? "wc-sort-asc" : "wc-sort-desc");
+      this._currentPage = 0;
+      this._emitEvent("wctablesort", "table:sort", {
+        bubbles: true,
+        detail: { field: th.textContent.trim(), direction: this._sortDir }
+      });
+      this._applyEnhanceView();
+    }
+    _enhanceRowMatches(tr) {
+      if (!this._query) return true;
+      const hay = tr.dataset && tr.dataset.search != null ? tr.dataset.search : tr.textContent;
+      return hay.toLowerCase().includes(this._query);
+    }
+    _applyEnhanceView() {
+      const filtered = this._allRows.filter((tr) => this._enhanceRowMatches(tr));
+      const total = filtered.length;
+      const size = this._pageSizeVal();
+      const totalPages = Math.max(1, this.paginate ? Math.ceil(total / size) : 1);
+      if (this._currentPage >= totalPages) this._currentPage = totalPages - 1;
+      if (this._currentPage < 0) this._currentPage = 0;
+      const start = this.paginate ? this._currentPage * size : 0;
+      const pageRows = this.paginate ? filtered.slice(start, start + size) : filtered;
+      this._lastTotalPages = totalPages;
+      this._pageRows = pageRows;
+      const colCount = this._theadRow ? this._theadRow.children.length : 1;
+      if (pageRows.length === 0) {
+        const emptyMessage = this.getAttribute("empty-message") || "No data available";
+        const tr = document.createElement("tr");
+        tr.className = "wc-table-empty";
+        const td = document.createElement("td");
+        td.colSpan = colCount;
+        td.style.cssText = "text-align:center; padding:2rem; color: var(--text-6);";
+        td.textContent = emptyMessage;
+        tr.appendChild(td);
+        this._tbody.replaceChildren(tr);
+      } else {
+        this._tbody.replaceChildren(...pageRows);
+        if (this.rowNumbers) {
+          pageRows.forEach((tr, i) => {
+            const td = tr.querySelector(":scope > td.wc-rownum");
+            if (td) td.textContent = String(start + i + 1);
+          });
+        }
+      }
+      if (this._chromeEl) {
+        if (this.paginate && total > 0) this._chromeEl.innerHTML = this._buildPagerHtml(total, totalPages, start, pageRows.length);
+        else if (total > 0) this._chromeEl.innerHTML = `<div class="wc-table-footer">${total} record${total !== 1 ? "s" : ""}</div>`;
+        else this._chromeEl.innerHTML = "";
+        this._wirePager(this._chromeEl);
+      }
+    }
+    _reinitEnhance() {
+      this._ensureRowNumberColumn();
+      this._wireEnhanceSort();
+      this._buildEnhanceChrome();
+      this._applyEnhanceView();
+    }
     async _handleAttributeChange(attrName, newValue) {
+      if (!this._initialized) {
+        if (attrName === "class" || attrName === "id") super._handleAttributeChange(attrName, newValue);
+        return;
+      }
+      if (this._enhanceMode) {
+        if (["striped", "hoverable", "bordered", "borderless", "size", "clickable"].includes(attrName)) {
+          this._enhanceApplyClasses();
+        } else if (["paginate", "page-size", "row-numbers", "searchable", "search-placeholder"].includes(attrName)) {
+          this._currentPage = 0;
+          this._reinitEnhance();
+        } else {
+          super._handleAttributeChange(attrName, newValue);
+        }
+        return;
+      }
       if (attrName === "url" && newValue) {
         await this._fetchData(newValue);
       } else if (attrName === "items" && newValue) {
@@ -25858,9 +26265,13 @@ if (!customElements.get("wc-table")) {
         } catch (e) {
           this._data = [];
         }
+        this._currentPage = 0;
         this._renderTable();
-      } else if (["striped", "hoverable", "bordered", "borderless", "size", "clickable"].includes(attrName)) {
+      } else if (["paginate", "searchable", "search-placeholder"].includes(attrName)) {
+        this._currentPage = 0;
         this._renderTable();
+      } else if (["striped", "hoverable", "bordered", "borderless", "size", "clickable", "page-size", "row-numbers"].includes(attrName)) {
+        this._renderBody();
       } else {
         super._handleAttributeChange(attrName, newValue);
       }
@@ -25871,6 +26282,7 @@ if (!customElements.get("wc-table")) {
     }
     set data(val) {
       this._data = Array.isArray(val) ? val : [];
+      this._currentPage = 0;
       this._renderTable();
     }
     refresh() {
@@ -25895,6 +26307,52 @@ if (!customElements.get("wc-table")) {
           z-index: 1;
           background: var(--primary-bg-color);
         }
+
+        /* Search toolbar */
+        .wc-table-toolbar { display: flex; margin-bottom: 0.5rem; }
+        .wc-table-search {
+          width: 100%; max-width: 22rem;
+          padding: 0.4rem 0.65rem;
+          border: 1px solid var(--component-border-color, var(--surface-4));
+          border-radius: 0.375rem;
+          background: var(--component-bg-color, var(--surface-1));
+          color: var(--text-1);
+          font-size: 0.9rem;
+        }
+        .wc-table-search:focus {
+          outline: none;
+          border-color: var(--primary-bg-color, #3b82f6);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-bg-color, #3b82f6) 18%, transparent);
+        }
+
+        /* Row-number column */
+        .wc-table th.wc-rownum, .wc-table td.wc-rownum {
+          width: 1%; white-space: nowrap; text-align: right;
+          color: var(--text-2, var(--text-1)); opacity: 0.75;
+          font-variant-numeric: tabular-nums;
+        }
+
+        /* Pager */
+        .wc-table-pager {
+          display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+          padding: 0.5rem 0.25rem;
+          font-size: 0.85rem;
+        }
+        .wc-table-pager .wc-table-pages { display: inline-flex; align-items: center; gap: 0.25rem; }
+        .wc-table-pager .btn.wc-page-active {
+          background: var(--primary-bg-color); color: var(--primary-color);
+          font-weight: 600; pointer-events: none;
+        }
+        .wc-table-pager .wc-table-ellipsis { padding: 0 0.15rem; opacity: 0.7; }
+        .wc-table-pager .wc-table-jump { display: inline-flex; align-items: center; gap: 0.35rem; }
+        .wc-table-pager .wc-table-jump-input {
+          width: 3.5rem; padding: 0.25rem 0.4rem;
+          border: 1px solid var(--component-border-color, var(--surface-4));
+          border-radius: 0.375rem;
+          background: var(--component-bg-color, var(--surface-1));
+          color: var(--text-1);
+        }
+        .wc-table-pager .wc-table-summary { margin-left: auto; }
       `;
       this.loadStyle("wc-table-component-style", style);
     }

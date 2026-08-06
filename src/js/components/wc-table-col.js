@@ -17,7 +17,7 @@ if (!customElements.get('wc-table-col')) {
     }
 
     static get observedAttributes() {
-      return ['field', 'label', 'sortable', 'align', 'width', 'format', 'class',
+      return ['field', 'label', 'sortable', 'filterable', 'align', 'width', 'format', 'class',
         'type', 'formatter', 'formatter-map', 'formatter-href', 'formatter-format',
         'formatter-active-field', 'formatter-events-url', 'formatter-live-field', 'formatter-done-when',
         'formatter-event-name', 'formatter-live-path'];
@@ -34,6 +34,7 @@ if (!customElements.get('wc-table-col')) {
         field: this.getAttribute('field') || '',
         label: this.getAttribute('label') || this.getAttribute('field') || '',
         sortable: this.hasAttribute('sortable'),
+        filterable: this.hasAttribute('filterable'),
         align: this.getAttribute('align') || 'left',
         width: this.getAttribute('width') || '',
         format: this.getAttribute('format') || '',

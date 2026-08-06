@@ -412,6 +412,7 @@ const ICONS_TO_COPY = [
   "key",
   "keyboard",
   "key-skeleton",
+  "kit-medical",
   "knife",
   "knife-kitchen",
   "layer-group",

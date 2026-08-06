@@ -178,6 +178,84 @@
       </wc-table>
     </div>
 
+    <!-- ============================================ -->
+    <!-- EXAMPLE: Pagination + Search + Row numbers (data mode) -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Pagination + Search + Row numbers (data mode)</h3>
+      <p>
+        <code>paginate page-size="8" searchable row-numbers</code> — client-side pager
+        (« Prev · numbered · Next » · go-to-page · <em>X–Y of N</em>), a debounced search box,
+        and a global <code>#</code> column. The Email column is <code>filterable</code> (search
+        scopes to it). Fires <code>wc-table:page</code> / <code>wc-table:filter</code>.
+      </p>
+      <wc-table id="paged-table" striped hoverable
+                paginate page-size="8" searchable row-numbers
+                search-placeholder="Search email…">
+        <wc-table-col field="first_name" label="First" sortable></wc-table-col>
+        <wc-table-col field="last_name" label="Last" sortable></wc-table-col>
+        <wc-table-col field="email" label="Email" filterable></wc-table-col>
+        <wc-table-col field="status" label="Status" formatter="badge"
+                      formatter-map='{"active":"success","pending":"warning","inactive":"muted"}'></wc-table-col>
+      </wc-table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- EXAMPLE: Enhance mode (authored composite rows) -->
+    <!-- ============================================ -->
+    <div class="demo-section">
+      <h3>Enhance mode — authored composite rows (zero data binding)</h3>
+      <p>
+        A <code>&lt;wc-table&gt;</code> wrapping an authored <code>&lt;table&gt;</code> (no
+        <code>url</code>/<code>items</code>) is auto-enhanced <strong>in place</strong>: composite
+        cells (avatar + name + DOB, badges) are preserved exactly, while paging / search / sort /
+        row-numbers are added. Search matches <code>data-search</code>; sort uses
+        <code>data-sort</code> / <code>data-type</code>.
+      </p>
+      <wc-table paginate page-size="4" searchable row-numbers search-placeholder="Name or barcode…">
+        <table class="wc-table w-full" striped>
+          <thead><tr>
+            <th>#</th>
+            <th class="wc-sortable">Name</th>
+            <th class="wc-sortable" data-type="num">Check-ins</th>
+            <th>Barcode</th>
+          </tr></thead>
+          <tbody>
+            <tr data-search="abigail adamo 50072">
+              <td><a href="#">Abigail Adamo</a><br><small style="color:var(--text-5)">Mar 30, 2019</small></td>
+              <td data-sort="5"><span class="badge badge-success">5</span></td>
+              <td><code>50072</code></td>
+            </tr>
+            <tr data-search="marcus bell 50120">
+              <td><a href="#">Marcus Bell</a><br><small style="color:var(--text-5)">Jan 12, 2018</small></td>
+              <td data-sort="12"><span class="badge badge-success">12</span></td>
+              <td><code>50120</code></td>
+            </tr>
+            <tr data-search="priya chandra 50088">
+              <td><a href="#">Priya Chandra</a><br><small style="color:var(--text-5)">Aug 5, 2020</small></td>
+              <td data-sort="0"><span class="badge badge-muted">0</span></td>
+              <td><code>50088</code></td>
+            </tr>
+            <tr data-search="diego ramirez 50201">
+              <td><a href="#">Diego Ramirez</a><br><small style="color:var(--text-5)">Nov 22, 2019</small></td>
+              <td data-sort="8"><span class="badge badge-success">8</span></td>
+              <td><code>50201</code></td>
+            </tr>
+            <tr data-search="hana suzuki 50133">
+              <td><a href="#">Hana Suzuki</a><br><small style="color:var(--text-5)">Feb 18, 2017</small></td>
+              <td data-sort="21"><span class="badge badge-success">21</span></td>
+              <td><code>50133</code></td>
+            </tr>
+            <tr data-search="omar farouk 50177">
+              <td><a href="#">Omar Farouk</a><br><small style="color:var(--text-5)">Jul 9, 2021</small></td>
+              <td data-sort="3"><span class="badge badge-warning">3</span></td>
+              <td><code>50177</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </wc-table>
+    </div>
+
     <wc-javascript>
     // Row click events
     const clickTable = document.getElementById('click-table');
@@ -207,6 +285,21 @@
       const table = document.getElementById('programmatic-table');
       table.data = [];
     };
+
+    // Populate the pagination demo with 20 rows.
+    (function () {
+      const paged = document.getElementById('paged-table');
+      if (!paged) return;
+      const firsts = ['Jane','John','Alice','Bob','Carol','Dave','Eve','Frank','Grace','Hana',
+                      'Ivan','Judy','Ken','Lena','Marco','Nina','Omar','Pia','Quinn','Rosa'];
+      const statuses = ['active','pending','inactive'];
+      paged.data = firsts.map((f, i) => ({
+        first_name: f,
+        last_name: 'Lastname' + String(i + 1).padStart(2, '0'),
+        email: f.toLowerCase() + i + '@example.com',
+        status: statuses[i % 3]
+      }));
+    })();
     </wc-javascript>
 
   </div>
