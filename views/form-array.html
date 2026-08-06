@@ -125,6 +125,10 @@
             <wc-form-array-column field="medical_notes" label="Medical notes / allergies"
                                   type="textarea" rows="3" full-width
                                   placeholder="Allergies, medications, emergency instructions…"></wc-form-array-column>
+            <wc-form-array-column field="dietary" label="Dietary restrictions (list + custom)"
+                                  control="wc-select" multiple mode="chip" allow-custom normalize="title"
+                                  option-value="value" option-label="key"
+                                  options='[{"key":"Eggs","value":"Eggs"},{"key":"Peanuts","value":"Peanuts"},{"key":"Dairy","value":"Dairy"},{"key":"Gluten","value":"Gluten"},{"key":"Shellfish","value":"Shellfish"}]'></wc-form-array-column>
             <wc-form-array-column field="home" label="Home address" type="address" full-width
                                   geocode-url="/api/geocode" countries="us" show-fields icon="location-dot"
                                   placeholder="Start typing an address…"></wc-form-array-column>

@@ -43003,6 +43003,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       (option) => option.style.display !== "none" && !option.classList.contains("optgroup-label")
     );
     const allowDynamic = this.hasAttribute("allow-dynamic");
+    const allowCustom = this.hasAttribute("allow-custom");
     if (e.key === "ArrowDown") {
       e.preventDefault();
       this.highlightedIndex = (this.highlightedIndex + 1) % options.length;
@@ -43016,11 +43017,9 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       const highlightedOption = options[this.highlightedIndex];
       this.addChip(highlightedOption.getAttribute("data-value"), highlightedOption.textContent);
       this.resetDropdown();
-    } else if (e.key === "Enter" && allowDynamic) {
+    } else if (e.key === "Enter" && (allowDynamic || allowCustom)) {
       e.preventDefault();
-      const value = e.target.value;
-      this.addChip(value, value);
-      this.resetDropdown();
+      this._addCustomTag(e.target.value);
     } else if (e.key === "Escape") {
       this.resetDropdown();
     }
@@ -43066,9 +43065,43 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
     this.highlightedIndex = -1;
     this.updateHighlight([]);
   }
+  // Normalize a free-typed tag: trim, collapse inner whitespace, then case per `normalize`
+  // (title default | lower | upper | none). Keeps spelling uniform for `allow-custom`.
+  _normalizeTag(v) {
+    let s = String(v == null ? "" : v).trim().replace(/\s+/g, " ");
+    if (!s) return "";
+    const mode = (this.getAttribute("normalize") || "title").toLowerCase();
+    if (mode === "none") return s;
+    if (mode === "lower") return s.toLowerCase();
+    if (mode === "upper") return s.toUpperCase();
+    return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  // Add a free-typed value as a chip (allow-custom / allow-dynamic). For allow-custom, normalize
+  // first and prefer an existing option that matches case-insensitively (canonical spelling).
+  _addCustomTag(raw) {
+    const allowCustom = this.hasAttribute("allow-custom");
+    let value = allowCustom ? this._normalizeTag(raw) : String(raw == null ? "" : raw).trim();
+    if (!value) {
+      this.resetDropdown();
+      return;
+    }
+    if (allowCustom) {
+      const match = Array.from(this.querySelectorAll("option")).find((o) => String(o.value).toLowerCase() === value.toLowerCase() || o.textContent.trim().toLowerCase() === value.toLowerCase());
+      if (match) {
+        this.addChip(match.value, match.textContent.trim());
+        this.resetDropdown();
+        return;
+      }
+    }
+    this.addChip(value, value);
+    this.resetDropdown();
+  }
   addChip(value, label) {
-    const allowDynamic = this.hasAttribute("allow-dynamic");
-    if (this.selectedOptions.includes(value)) return;
+    const allowCustom = this.hasAttribute("allow-custom");
+    const allowDynamic = this.hasAttribute("allow-dynamic") || allowCustom;
+    if (allowCustom) {
+      if (this.selectedOptions.some((v) => String(v).toLowerCase() === String(value).toLowerCase())) return;
+    } else if (this.selectedOptions.includes(value)) return;
     this.selectedOptions.push(value);
     setTimeout(() => {
       if (allowDynamic) {
@@ -43108,7 +43141,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
   }
   updateSelect() {
     const selectElement = this.querySelector("select");
-    const allowDynamic = this.hasAttribute("allow-dynamic");
+    const allowDynamic = this.hasAttribute("allow-dynamic") || this.hasAttribute("allow-custom");
     const existingDynamicOptions = [];
     if (allowDynamic) {
       Array.from(selectElement.options).forEach((opt) => {
@@ -44160,6 +44193,23 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
   static get is() {
     return "wc-form-array";
   }
+  // Reserved column attributes — everything else is passed through to a `control="<tag>"`.
+  // (options/option-value/option-label are translated into <option> children, so also excluded.)
+  static get RESERVED_COL_ATTRS() {
+    return /* @__PURE__ */ new Set([
+      "field",
+      "label",
+      "type",
+      "control",
+      "full-width",
+      "col-class",
+      "required",
+      "icon",
+      "options",
+      "option-value",
+      "option-label"
+    ]);
+  }
   // Address sub-fields carried alongside the visible street (wc-address).
   static get ADDRESS_SUBFIELDS() {
     return ["formatted_address", "city", "state", "postal_code", "county", "country", "lat", "lng"];
@@ -44518,6 +44568,9 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
       span.textContent = text;
       return span;
     }
+    if (col.control) {
+      return this._createGenericControl(col, index, value);
+    }
     if (col.type === "textarea") {
       const ta = document.createElement("textarea");
       ta.classList.add("wc-form-array-control", "wc-form-array-textarea");
@@ -44657,6 +44710,80 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
     wrap.appendChild(icon);
     return wrap;
   }
+  // Instantiate an arbitrary Wave form control, passing through its non-reserved attributes and
+  // owning name/id/data-col. Built via the parser (many controls append their wrapper in the
+  // constructor, which document.createElement disallows). `options` JSON becomes <option selected>
+  // children so select-like controls (wc-select chip/multiple) pre-fill + submit correctly.
+  _createGenericControl(col, index, value) {
+    const tag = col.control;
+    const name = `${this._prefix}.${index}.${col.field}`;
+    const attrs = [];
+    (col.passthru || []).forEach(([k, v]) => attrs.push(v === "" ? k : `${k}="${this._escAttr(v)}"`));
+    attrs.push(
+      `name="${this._escAttr(name)}"`,
+      `id="${this._escAttr(name)}"`,
+      `data-col="${this._escAttr(col.field)}"`,
+      "form-element"
+    );
+    if (col.required && !(col.passthru || []).some(([k]) => k === "required")) attrs.push("required");
+    const optionMarkup = this._buildOptionMarkup(col, value);
+    const tmp = document.createElement("div");
+    tmp.innerHTML = `<${tag} ${attrs.join(" ")}>${optionMarkup}</${tag}>`;
+    const el = tmp.firstElementChild;
+    if (!optionMarkup && value != null && !Array.isArray(value) && value !== "") {
+      el.setAttribute("value", String(value));
+    }
+    return el;
+  }
+  _prefillArray(value) {
+    if (Array.isArray(value)) return value.map((v) => v == null ? "" : String(v)).filter((s) => s !== "");
+    if (value == null || value === "") return [];
+    return [String(value)];
+  }
+  _colAllowsCustom(col) {
+    return (col.passthru || []).some(([k]) => k === "allow-custom" || k === "allow-dynamic");
+  }
+  _buildOptionMarkup(col, value) {
+    if (!Array.isArray(col.options) || !col.options.length) return "";
+    const pre = this._prefillArray(value);
+    const seen = /* @__PURE__ */ new Set();
+    let html = "";
+    col.options.forEach((opt) => {
+      let v, label;
+      if (opt && typeof opt === "object") {
+        v = opt[col.optionValue];
+        label = opt[col.optionLabel] != null ? opt[col.optionLabel] : v;
+      } else {
+        v = opt;
+        label = opt;
+      }
+      v = v == null ? "" : String(v);
+      seen.add(v.toLowerCase());
+      const sel = pre.some((p) => p === v) ? " selected" : "";
+      html += `<option value="${this._escAttr(v)}"${sel}>${this._escHtml(label)}</option>`;
+    });
+    if (this._colAllowsCustom(col)) {
+      pre.forEach((pv) => {
+        if (!seen.has(pv.toLowerCase())) {
+          html += `<option value="${this._escAttr(pv)}" selected>${this._escHtml(pv)}</option>`;
+          seen.add(pv.toLowerCase());
+        }
+      });
+    }
+    return html;
+  }
+  // Read a control's current value — an inner <select multiple> yields an ARRAY of values.
+  _readControlValue(ctrl) {
+    const sel = ctrl.matches && ctrl.matches("select[multiple]") ? ctrl : ctrl.querySelector ? ctrl.querySelector("select[multiple]") : null;
+    if (sel) return Array.from(sel.selectedOptions).map((o) => o.value);
+    if ("value" in ctrl) return ctrl.value;
+    return ctrl.dataset ? ctrl.dataset.value || "" : "";
+  }
+  _escHtml(s) {
+    const d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
   _escAttr(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
@@ -44746,7 +44873,11 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
         showFields: el.getAttribute("show-fields"),
         icon: el.getAttribute("icon") || "",
         required: el.hasAttribute("required"),
-        colClass: el.getAttribute("col-class") || ""
+        colClass: el.getAttribute("col-class") || "",
+        // Generic control passthrough: `control="<tag>"` renders any Wave form component; every
+        // attribute that isn't reserved (or translated into <option>s) is passed through to it.
+        control: el.getAttribute("control") || "",
+        passthru: Array.from(el.attributes).filter((a) => !_WcFormArray.RESERVED_COL_ATTRS.has(a.name)).map((a) => [a.name, a.value])
       };
     }).filter((c) => c.field);
   }
@@ -44782,7 +44913,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
     const obj = {};
     row.querySelectorAll("[data-col]").forEach((ctrl) => {
       const key = ctrl.getAttribute("data-col");
-      const val = "value" in ctrl ? ctrl.value : ctrl.dataset.value || "";
+      const val = this._readControlValue(ctrl);
       if (key.indexOf(".") !== -1) {
         const parts = key.split(".");
         let o = obj;
@@ -44800,7 +44931,8 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
   _isRowEmpty(row) {
     const ctrls = row.querySelectorAll("[data-col]");
     return Array.from(ctrls).every((ctrl) => {
-      const v = "value" in ctrl ? ctrl.value : ctrl.dataset.value || "";
+      const v = this._readControlValue(ctrl);
+      if (Array.isArray(v)) return v.length === 0;
       return v == null || String(v).trim() === "";
     });
   }
@@ -44872,6 +45004,14 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
           if (!ctrl.disabled) {
             ctrl.disabled = true;
             disabled.push(ctrl);
+          }
+          if (ctrl.tagName && ctrl.tagName.indexOf("-") !== -1) {
+            ctrl.querySelectorAll("input, select, textarea").forEach((inner) => {
+              if (!inner.disabled) {
+                inner.disabled = true;
+                disabled.push(inner);
+              }
+            });
           }
         });
       }

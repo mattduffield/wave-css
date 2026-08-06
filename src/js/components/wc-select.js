@@ -1096,6 +1096,7 @@ class WcSelect extends WcBaseFormComponent {
       option.style.display !== 'none' && !option.classList.contains('optgroup-label')
     );
     const allowDynamic = this.hasAttribute('allow-dynamic');
+    const allowCustom = this.hasAttribute('allow-custom');
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -1110,11 +1111,9 @@ class WcSelect extends WcBaseFormComponent {
       const highlightedOption = options[this.highlightedIndex];
       this.addChip(highlightedOption.getAttribute('data-value'), highlightedOption.textContent);
       this.resetDropdown();
-    } else if (e.key === 'Enter' && allowDynamic) {
+    } else if (e.key === 'Enter' && (allowDynamic || allowCustom)) {
       e.preventDefault();
-      const value = e.target.value;
-      this.addChip(value, value);
-      this.resetDropdown();
+      this._addCustomTag(e.target.value);
     } else if (e.key === 'Escape') {
       this.resetDropdown();
     }
@@ -1168,9 +1167,41 @@ class WcSelect extends WcBaseFormComponent {
     this.updateHighlight([]);
   }
 
+  // Normalize a free-typed tag: trim, collapse inner whitespace, then case per `normalize`
+  // (title default | lower | upper | none). Keeps spelling uniform for `allow-custom`.
+  _normalizeTag(v) {
+    let s = String(v == null ? '' : v).trim().replace(/\s+/g, ' ');
+    if (!s) return '';
+    const mode = (this.getAttribute('normalize') || 'title').toLowerCase();
+    if (mode === 'none') return s;
+    if (mode === 'lower') return s.toLowerCase();
+    if (mode === 'upper') return s.toUpperCase();
+    return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()); // title
+  }
+
+  // Add a free-typed value as a chip (allow-custom / allow-dynamic). For allow-custom, normalize
+  // first and prefer an existing option that matches case-insensitively (canonical spelling).
+  _addCustomTag(raw) {
+    const allowCustom = this.hasAttribute('allow-custom');
+    let value = allowCustom ? this._normalizeTag(raw) : String(raw == null ? '' : raw).trim();
+    if (!value) { this.resetDropdown(); return; }
+    if (allowCustom) {
+      const match = Array.from(this.querySelectorAll('option')).find(o =>
+        String(o.value).toLowerCase() === value.toLowerCase() ||
+        o.textContent.trim().toLowerCase() === value.toLowerCase());
+      if (match) { this.addChip(match.value, match.textContent.trim()); this.resetDropdown(); return; }
+    }
+    this.addChip(value, value);
+    this.resetDropdown();
+  }
+
   addChip(value, label) {
-    const allowDynamic = this.hasAttribute('allow-dynamic');
-    if (this.selectedOptions.includes(value)) return;
+    const allowCustom = this.hasAttribute('allow-custom');
+    const allowDynamic = this.hasAttribute('allow-dynamic') || allowCustom;
+    // Dedupe: exact for allow-dynamic, case-insensitive for allow-custom (so "eggs"/"Eggs" collapse).
+    if (allowCustom) {
+      if (this.selectedOptions.some(v => String(v).toLowerCase() === String(value).toLowerCase())) return;
+    } else if (this.selectedOptions.includes(value)) return;
 
     // Add to selectedOptions immediately to prevent duplicates
     this.selectedOptions.push(value);
@@ -1218,8 +1249,8 @@ class WcSelect extends WcBaseFormComponent {
 
   updateSelect() {
     const selectElement = this.querySelector('select');
-    const allowDynamic = this.hasAttribute('allow-dynamic');
-    
+    const allowDynamic = this.hasAttribute('allow-dynamic') || this.hasAttribute('allow-custom');
+
     // Store existing dynamic options before clearing
     const existingDynamicOptions = [];
     if (allowDynamic) {
