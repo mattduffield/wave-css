@@ -44080,7 +44080,8 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       "rows",
       "full-width",
       "mask",
-      "geocode-url"
+      "geocode-url",
+      "countries"
     ];
   }
   constructor() {
@@ -44130,6 +44131,7 @@ var WcFormArrayColumn = class extends WcBaseComponent {
       fullWidth: this.hasAttribute("full-width"),
       mask: this.getAttribute("mask") || "",
       geocodeUrl: this.getAttribute("geocode-url") || "",
+      countries: this.getAttribute("countries") || "",
       required: this.hasAttribute("required"),
       colClass: this.getAttribute("col-class") || ""
     };
@@ -44146,9 +44148,13 @@ var WcFormArrayColumn = class extends WcBaseComponent {
 customElements.define(WcFormArrayColumn.is, WcFormArrayColumn);
 
 // src/js/components/wc-form-array.js
-var WcFormArray = class extends WcBaseComponent {
+var WcFormArray = class _WcFormArray extends WcBaseComponent {
   static get is() {
     return "wc-form-array";
+  }
+  // Address sub-fields carried as hidden inputs (the visible wc-address is `street`).
+  static get ADDRESS_SUBFIELDS() {
+    return ["formatted_address", "city", "state", "postal_code", "county", "country", "lat", "lng"];
   }
   static get observedAttributes() {
     return [
@@ -44173,6 +44179,7 @@ var WcFormArray = class extends WcBaseComponent {
     this._onSubmitCapture = this._handleFormSubmitCapture.bind(this);
     this._onHtmxConfig = this._handleHtmxConfigRequest.bind(this);
     this._onPopulate = this._handlePopulate.bind(this);
+    this._onAddressChange = this._handleAddressChange.bind(this);
     this._guardForm = null;
     const compEl = this.querySelector(":scope > .wc-form-array");
     if (compEl) {
@@ -44260,6 +44267,20 @@ var WcFormArray = class extends WcBaseComponent {
     if (this._isReadonly()) return;
     const rows = e && e.detail && Array.isArray(e.detail.rows) ? e.detail.rows : [];
     rows.forEach((r) => this.addRow(r || {}));
+  }
+  // A per-row wc-address emitted a geocoded selection — fill the row's hidden address
+  // sub-fields (city/state/postal_code/… ; street is the visible wc-address itself).
+  _handleAddressChange(e) {
+    const addrEl = e.target && e.target.closest ? e.target.closest("wc-address") : null;
+    if (!addrEl) return;
+    const wrap = addrEl.closest(".wc-fa-address");
+    if (!wrap || !this.componentElement.contains(wrap)) return;
+    const d = e.detail || {};
+    wrap.querySelectorAll('input[type="hidden"][data-col]').forEach((h) => {
+      const sub = h.getAttribute("data-col").split(".").pop();
+      if (d[sub] != null) h.value = d[sub];
+    });
+    this._emitChange();
   }
   // ---- Rendering ------------------------------------------------------------
   _render() {
@@ -44381,7 +44402,7 @@ var WcFormArray = class extends WcBaseComponent {
       if (col.fullWidth) field.classList.add("is-full");
       if (col.colClass) field.classList.add(...col.colClass.split(" ").filter(Boolean));
       if (col.required) field.classList.add("is-required");
-      const ctrlId = `${this._prefix}.${index}.${col.field}`;
+      const ctrlId = col.type === "address" ? `${this._prefix}.${index}.${col.field}.street` : `${this._prefix}.${index}.${col.field}`;
       const label = document.createElement("label");
       label.setAttribute("for", ctrlId);
       label.textContent = col.label;
@@ -44428,8 +44449,19 @@ var WcFormArray = class extends WcBaseComponent {
       span.classList.add("wc-form-array-readonly");
       if (col.type === "textarea") span.classList.add("wc-form-array-readonly-multiline");
       span.setAttribute("data-col", col.field);
-      span.dataset.value = value;
-      span.textContent = col.type === "select" ? this._labelForValue(col, value) : value === "" ? "\u2014" : String(value);
+      let text;
+      if (col.type === "address") {
+        const a = value && typeof value === "object" ? value : {};
+        text = a.formatted_address || [a.street, a.city, a.state, a.postal_code].filter(Boolean).join(", ") || "\u2014";
+        span.dataset.value = "";
+      } else if (col.type === "select") {
+        text = this._labelForValue(col, value);
+        span.dataset.value = value;
+      } else {
+        text = value === "" ? "\u2014" : String(value);
+        span.dataset.value = value;
+      }
+      span.textContent = text;
       return span;
     }
     if (col.type === "textarea") {
@@ -44439,25 +44471,39 @@ var WcFormArray = class extends WcBaseComponent {
       ta.id = name;
       ta.setAttribute("data-col", col.field);
       const rows = parseInt(col.rows, 10);
-      ta.rows = Number.isFinite(rows) && rows > 0 ? rows : 3;
+      ta.rows = Number.isFinite(rows) && rows > 0 ? rows : 2;
       if (col.placeholder) ta.placeholder = col.placeholder;
       if (col.required) ta.required = true;
       ta.value = value;
       return ta;
     }
     if (col.type === "address") {
+      const a = value && typeof value === "object" ? value : {};
+      const wrap = document.createElement("div");
+      wrap.classList.add("wc-fa-address");
+      const streetName = `${this._prefix}.${index}.${col.field}.street`;
       const attrs = [
-        `data-col="${this._escAttr(col.field)}"`,
-        `name="${this._escAttr(name)}"`,
-        `id="${this._escAttr(name)}"`
+        `data-col="${this._escAttr(col.field + ".street")}"`,
+        `name="${this._escAttr(streetName)}"`,
+        `id="${this._escAttr(streetName)}"`
       ];
       if (col.geocodeUrl) attrs.push(`geocode-url="${this._escAttr(col.geocodeUrl)}"`);
+      if (col.countries) attrs.push(`countries="${this._escAttr(col.countries)}"`);
       if (col.placeholder) attrs.push(`placeholder="${this._escAttr(col.placeholder)}"`);
       if (col.required) attrs.push("required");
-      if (value !== "" && value != null) attrs.push(`value="${this._escAttr(String(value))}"`);
+      if (a.street != null && a.street !== "") attrs.push(`value="${this._escAttr(String(a.street))}"`);
       const tmp = document.createElement("div");
       tmp.innerHTML = `<wc-address ${attrs.join(" ")}></wc-address>`;
-      return tmp.firstElementChild;
+      wrap.appendChild(tmp.firstElementChild);
+      _WcFormArray.ADDRESS_SUBFIELDS.forEach((sub) => {
+        const h = document.createElement("input");
+        h.type = "hidden";
+        h.setAttribute("data-col", `${col.field}.${sub}`);
+        h.name = `${this._prefix}.${index}.${col.field}.${sub}`;
+        h.value = a[sub] != null ? a[sub] : "";
+        wrap.appendChild(h);
+      });
+      return wrap;
     }
     if (col.type === "select") {
       const select = document.createElement("select");
@@ -44546,7 +44592,7 @@ var WcFormArray = class extends WcBaseComponent {
       if (this._layout === "card") {
         row.querySelectorAll(":scope > .wc-fa-card-grid > .wc-fa-field > label[for]").forEach((lbl, ci) => {
           const col = this._columns[ci];
-          if (col) lbl.setAttribute("for", `${this._prefix}.${i}.${col.field}`);
+          if (col) lbl.setAttribute("for", col.type === "address" ? `${this._prefix}.${i}.${col.field}.street` : `${this._prefix}.${i}.${col.field}`);
         });
         this._updateCardTitle(row, i);
       }
@@ -44581,6 +44627,7 @@ var WcFormArray = class extends WcBaseComponent {
         fullWidth: el.hasAttribute("full-width"),
         mask: el.getAttribute("mask") || "",
         geocodeUrl: el.getAttribute("geocode-url") || "",
+        countries: el.getAttribute("countries") || "",
         required: el.hasAttribute("required"),
         colClass: el.getAttribute("col-class") || ""
       };
@@ -44617,8 +44664,19 @@ var WcFormArray = class extends WcBaseComponent {
   _rowToObject(row) {
     const obj = {};
     row.querySelectorAll("[data-col]").forEach((ctrl) => {
-      const field = ctrl.getAttribute("data-col");
-      obj[field] = "value" in ctrl ? ctrl.value : ctrl.dataset.value || "";
+      const key = ctrl.getAttribute("data-col");
+      const val = "value" in ctrl ? ctrl.value : ctrl.dataset.value || "";
+      if (key.indexOf(".") !== -1) {
+        const parts = key.split(".");
+        let o = obj;
+        for (let k = 0; k < parts.length - 1; k++) {
+          if (o[parts[k]] == null || typeof o[parts[k]] !== "object") o[parts[k]] = {};
+          o = o[parts[k]];
+        }
+        o[parts[parts.length - 1]] = val;
+      } else {
+        obj[key] = val;
+      }
     });
     return obj;
   }
@@ -44737,6 +44795,8 @@ var WcFormArray = class extends WcBaseComponent {
     this.addEventListener("wcformarraypopulate", this._onPopulate);
     this.removeEventListener("wc-form-array:populate", this._onPopulate);
     this.addEventListener("wc-form-array:populate", this._onPopulate);
+    this.componentElement.removeEventListener("wcaddresschange", this._onAddressChange);
+    this.componentElement.addEventListener("wcaddresschange", this._onAddressChange);
     this._unwireFormGuard();
     const form = this.closest("form");
     if (form) {
@@ -44761,6 +44821,7 @@ var WcFormArray = class extends WcBaseComponent {
     }
     this.removeEventListener("wcformarraypopulate", this._onPopulate);
     this.removeEventListener("wc-form-array:populate", this._onPopulate);
+    if (this.componentElement) this.componentElement.removeEventListener("wcaddresschange", this._onAddressChange);
     this._unwireFormGuard();
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
@@ -44956,6 +45017,7 @@ var WcFormArray = class extends WcBaseComponent {
         .wc-form-array-readonly-multiline {
           white-space: pre-wrap;
         }
+        .wc-fa-address { display: block; width: 100%; }
         .wc-form-array-cell wc-address,
         .wc-fa-field wc-address {
           display: block;
