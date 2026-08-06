@@ -129,7 +129,7 @@ Four semantic color families with CSS variables and utility classes:
 
 ### CSS Grid Utilities
 
-Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl).
+Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl). **Column span** is responsive: `col-span-1`…`col-span-12` + `col-span-full` (base) and breakpoint-prefixed `{sm,md,lg,xl,2xl}:col-span-{1..12|full}` — so an item can change its span per breakpoint, e.g. a field full-width on mobile but 2 cols in a `md:grid-2` form grid: `class="col-1 md:col-span-2"`. (`col-span-full` = `grid-column: 1 / -1`.)
 
 ### Modal Flex Fill
 
