@@ -25835,7 +25835,17 @@ if (!customElements.get("wc-table")) {
       this._renderRegion.innerHTML = html;
       this._wireTableEvents();
       this._wirePager(this._renderRegion);
+      this._htmxProcess(this._renderRegion);
       this._reconcileRunStreams();
+    }
+    // Re-process a freshly-rendered subtree with HTMX (no-op when HTMX isn't loaded).
+    _htmxProcess(el) {
+      if (el && typeof htmx !== "undefined" && typeof htmx.process === "function") {
+        try {
+          htmx.process(el);
+        } catch (e) {
+        }
+      }
     }
     // filter → sort → paginate. Returns the current page's rows + paging metadata.
     _getViewData() {
@@ -26503,6 +26513,8 @@ if (!customElements.get("wc-table")) {
         else this._chromeEl.innerHTML = "";
         this._wirePager(this._chromeEl);
       }
+      this._htmxProcess(this._table);
+      this._htmxProcess(this._chromeEl);
     }
     _reinitEnhance() {
       this._ensureRowNumberColumn();

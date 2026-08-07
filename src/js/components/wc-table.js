@@ -581,9 +581,19 @@ if (!customElements.get('wc-table')) {
       this._renderRegion.innerHTML = html;
       this._wireTableEvents();
       this._wirePager(this._renderRegion);
+      // Hand the freshly-created DOM back to HTMX so `hx-*` on cell content (row action links,
+      // drill-in <a hx-get>) is activated — innerHTML bypasses HTMX's normal processing.
+      this._htmxProcess(this._renderRegion);
       // Reconcile live run-status streams against the freshly-rendered cells (innerHTML replaced
       // the old nodes): rebind ongoing runs to their new cell, open new ones, close vanished ones.
       this._reconcileRunStreams();
+    }
+
+    // Re-process a freshly-rendered subtree with HTMX (no-op when HTMX isn't loaded).
+    _htmxProcess(el) {
+      if (el && typeof htmx !== 'undefined' && typeof htmx.process === 'function') {
+        try { htmx.process(el); } catch (e) { /* defensive: never let HTMX processing break render */ }
+      }
     }
 
     // filter → sort → paginate. Returns the current page's rows + paging metadata.
@@ -1287,6 +1297,11 @@ if (!customElements.get('wc-table')) {
         else this._chromeEl.innerHTML = '';
         this._wirePager(this._chromeEl);
       }
+
+      // Re-activate HTMX on the authored cells (moved/re-attached during paging) + the pager chrome,
+      // so `hx-*` drill-in links keep working on the initial render and every re-render.
+      this._htmxProcess(this._table);
+      this._htmxProcess(this._chromeEl);
     }
 
     _reinitEnhance() {
