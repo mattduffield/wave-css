@@ -1527,6 +1527,16 @@ if (!customElements.get('wc-table')) {
         .wc-table-pager .wc-table-jump     { justify-self: start; }
         .wc-table-pager .wc-table-summary  { justify-self: end; }    /* replaces margin-left:auto */
         .wc-table-pager .wc-table-pages { display: inline-flex; align-items: center; gap: 0.25rem; }
+        /* Every pager button is accent-filled; route its text through the auto-contrast
+           --wc-on-primary token (black/white by the accent's luminance) so it stays WCAG AA
+           in every theme, light + dark. The generic --button-color flips per-theme and fails
+           on the bright accent (dark themes) and on dark earth-tone accents (light themes). */
+        .wc-table-pager .btn {
+          --button-bg-color: var(--primary-bg-color);
+          --button-color: var(--wc-on-primary, var(--primary-color));
+          --button-hover-bg-color: color-mix(in oklab, var(--primary-bg-color) 88%, #000);
+          --button-hover-color: var(--wc-on-primary, var(--primary-color));
+        }
         /* Uniform page-button width + tabular digits so 1- vs 2-digit buttons don't jitter. */
         .wc-table-pager .wc-table-pages .btn {
           min-width: 2rem; text-align: center;

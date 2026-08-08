@@ -13065,9 +13065,9 @@
         wc-table,
         .wc-table {
             --wc-on-primary: rgb(from var(--primary-bg-color)
-                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
         }
     }
 
@@ -13865,6 +13865,33 @@
         border: 1px solid var(--button-disabled-border-color);
         color: var(--button-disabled-color);
         cursor: not-allowed;
+    }
+
+    /* Global bare-.btn auto-contrast. The theme default --button-color (a light swatch) fails
+       WCAG AA on the bright accent fill in dark themes (~1.9–2.6:1) and on dark earth-tone fills
+       in light themes (~2.9–3.4:1). Pick BLACK or WHITE by the fill's WCAG relative luminance
+       (crossover Y≈0.179, where both give ~4.6:1) so every plain filled button is AA in every
+       theme, light + dark. Same mechanism as the wc-table --wc-on-primary token, but computed
+       from each button's own --button-bg-color / --button-hover-bg-color.
+       :where() keeps ZERO specificity so the semantic variants (.btn-primary/-secondary/-cancel/
+       -success/-danger/-warning/-info) that set their own --button-color still win. .btn-outline
+       is excluded — its text sits on the container background, not the fill. @supports-guarded so
+       the theme's swatch color remains the fallback where relative color / pow() aren't supported. */
+    @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+        :where(a.btn:not(.btn-outline), button.btn:not(.btn-outline), input[type="button"].btn:not(.btn-outline)) {
+            /* Channels are clamp()'d to [0,255] BEFORE the luminance math: highly-saturated accents
+               are out of the sRGB gamut, so the relative-color r/g/b keywords can go negative, and
+               pow(negative, 2.4) => NaN would collapse the pick to black on a dark fill. Clamping
+               gamut-limits each channel so the black/white choice matches the rendered color. */
+            --button-color: rgb(from var(--button-bg-color)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+            --button-hover-color: rgb(from var(--button-hover-bg-color)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+        }
     }
 
     a.btn-outline,
