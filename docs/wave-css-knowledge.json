@@ -1,14 +1,18 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.43.0",
+    "version": "1.44.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-07-15"
+    "lastUpdated": "2026-08-07"
   },
   "selfHostedAssets": {
     "note": "Wave lazy-loads third-party libs from public CDNs. Set the single global window.WaveAssetBase (before the bundle runs) to load them from a local mirror first, with automatic CDN fallback. UNSET (default) = load from CDN exactly as before (no behavior change). SET (e.g. '/static/js') = try local first, fall back to CDN on any failure with one console.warn naming the missing file. Covers all three mechanisms: injected <script> onerror, injected <link> error, and dynamic import() rejection. Implemented centrally in helper-function.js (waveLocalAssetUrl + loadScript/loadCSS/loadLibrary/waveImport) AND in the WcDependencyManager loader (src/js/utils/dependency-manager.js) — the latter is how IMask (phone/date masking in wc-input via wc-mask-hub), CodeMirror core, and Tabulator core load. Progressively-loaded files (CodeMirror modes/themes/addons, Prism components/themes) resolve locally too; the loader dedups on BOTH local and CDN src so a component's own CDN-url dedup check (wc-code-mirror) can't double-load.",
     "pathRule": "Normalize <pkg>@<ver> (jsdelivr/unpkg) and <pkg>/<ver> (cdnjs) both to <pkg>-<ver>/, then keep the path after the version (no vendor/ subfolder). cdn.sheetjs.com is also recognized (path already starts with the versioned folder /xlsx-<ver>/… so it's mirrored verbatim). e.g. cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js -> ${base}/chart.js-4.4.1/dist/chart.umd.min.js ; cdnjs.../codemirror/5.65.13/addon/dialog/dialog.min.js -> ${base}/codemirror-5.65.13/addon/dialog/dialog.min.js ; unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js -> ${base}/maplibre-gl-4.7.1/dist/maplibre-gl.js",
-    "notRewritten": ["unversioned URLs (unpkg.com/notie)", "same-origin/already-local paths", "unknown hosts (esm.run web-llm)"],
+    "notRewritten": [
+      "unversioned URLs (unpkg.com/notie)",
+      "same-origin/already-local paths",
+      "unknown hosts (esm.run web-llm)"
+    ],
     "pinnedVersions": {
       "imask-7.6.1": "imask.min.js (wc-input phone/date/currency masking via wc-mask-hub; loads through WcDependencyManager)",
       "chart.js-4.4.1": "dist/chart.umd.min.js",
@@ -31,7 +35,10 @@
       "@huggingface/transformers-3.5.0": "ESM entry (wc-hf-bot)",
       "@xenova/transformers-2.17.2": "ESM entry (wc-hf-bot)"
     },
-    "hostApi": ["window.wc.waveLocalAssetUrl(url)", "window.wc.waveImport(url)"],
+    "hostApi": [
+      "window.wc.waveLocalAssetUrl(url)",
+      "window.wc.waveImport(url)"
+    ],
     "usage": "<script>window.WaveAssetBase='/static/js';</script> then load wave-css.min.js",
     "vendorScript": "npm run vendor-assets -- <outDir>  (scripts/vendor-assets.mjs) downloads the pinned set into <outDir>/<lib>-<version>/…; copy into static/js/. CodeMirror and Prism modes/themes/components load ON DEMAND by name, so it pulls the WHOLE minified tree via the cdnjs file-list API (CodeMirror ~262 files: 122 modes + 65 themes + addons; Prism ~298 components) — cherry-picking only literal-URL files leaves gaps and a data editor 404s on mode/sql, mode/javascript, or a selected theme (then falls back to CDN). Flags: --only=codemirror,prism,files, --force, --concurrency=N; skips files already present.",
     "mimeNote": "The static server must serve .js as text/javascript and .css as text/css. A text/plain MIME (including the text/plain 404 page for a missing file) is refused under strict MIME checking."
@@ -645,7 +652,13 @@
           "layout",
           "item-title"
         ],
-        "methods": ["addRow(data?)", "setRow(index, data)", "removeRow(rowOrIndex)", "rows (get/set)", "value (get/set)"],
+        "methods": [
+          "addRow(data?)",
+          "setRow(index, data)",
+          "removeRow(rowOrIndex)",
+          "rows (get/set)",
+          "value (get/set)"
+        ],
         "events": [
           "wcformarraychange"
         ],
@@ -956,18 +969,48 @@
         "name": "wc-map",
         "description": "Keyless, $0/mo drop-in for wc-google-map — MapLibre GL JS + free OpenFreeMap vector tiles. Same attributes/pins/methods/events; no API key, no billing.",
         "attributes": [
-          "lat", "lng", "address", "title", "zoom", "map-type", "center-lat", "center-lng",
-          "draggable", "scrollwheel", "disable-default-ui", "markers", "fit-bounds",
-          "tiles", "map-style", "attribution-compact", "api-key (accepted but ignored)", "class", "elt-class"
+          "lat",
+          "lng",
+          "address",
+          "title",
+          "zoom",
+          "map-type",
+          "center-lat",
+          "center-lng",
+          "draggable",
+          "scrollwheel",
+          "disable-default-ui",
+          "markers",
+          "fit-bounds",
+          "tiles",
+          "map-style",
+          "attribution-compact",
+          "api-key (accepted but ignored)",
+          "class",
+          "elt-class"
         ],
         "events": {
           "emits": [
-            "wcmaploaded", "wcpinclicked", "wcmapmarkerclick", "wcgooglemapmarkerclick",
-            "wcmapclicked", "wcmapcenterchanged", "wcmapzoomchanged", "wcmapboundschanged",
-            "wcmapdragstart", "wcmapdragging", "wcmapdragend"
+            "wcmaploaded",
+            "wcpinclicked",
+            "wcmapmarkerclick",
+            "wcgooglemapmarkerclick",
+            "wcmapclicked",
+            "wcmapcenterchanged",
+            "wcmapzoomchanged",
+            "wcmapboundschanged",
+            "wcmapdragstart",
+            "wcmapdragging",
+            "wcmapdragend"
           ]
         },
-        "methods": ["addPin(lat, lng, address, title)", "clearPins()", "updatePins(pins)", "getMap()", "getMarkers()"],
+        "methods": [
+          "addPin(lat, lng, address, title)",
+          "clearPins()",
+          "updatePins(pins)",
+          "getMap()",
+          "getMarkers()"
+        ],
         "notes": "Provider-agnostic map on MapLibre GL JS + OpenFreeMap (https://tiles.openfreemap.org/styles/liberty — no key, commercial OK, MIT). Preserves wc-google-map's whole contract so migration is find-replace of the tag name (attributes/pins/methods/events identical, incl. legacy wc-google-map:marker-click alias). Pins from single lat/lng attrs, <option data-lat data-lng data-title data-address data-link> children, and/or a markers JSON array ([{lat,lng,label?,title?,address?,link?}]) — additive. fit-bounds frames all pins (auto for >1). Override tiles with `tiles` (or `map-style`) — e.g. a self-hosted PMTiles style — for zero third-party dependency. attribution-compact (default true) collapses the mandatory OpenFreeMap/OpenMapTiles/OSM credit to a small ⓘ that expands on click (so it doesn't cover small maps); attribution-compact=\"false\" forces the always-expanded box. NB: MapLibre uses [lng,lat] internally (component converts); the reserved `style` HTML attribute is deliberately NOT used for the tiles URL. clearPins()/updatePins() also clear the markers attr (true full replace). Loads MapLibre from CDN once; disconnect defers cleanup 1s (HTMX-swap safe). Scaffold: geo/address entity → prefer wc-map over wc-google-map.",
         "usage": {
           "single": "<wc-map lat=\"40.7128\" lng=\"-74.0060\" zoom=\"12\"></wc-map>",
@@ -978,16 +1021,42 @@
         "name": "wc-address",
         "description": "Keyless, $0/mo drop-in for wc-google-address — address type-ahead via the app's own /api/geocode proxy (LocationIQ/Nominatim server-side). No provider key in the browser.",
         "attributes": [
-          "name", "value", "placeholder", "lbl-label", "lbl-class", "elt-class",
-          "disabled", "readonly", "required", "autocomplete",
-          "geocode-url (default /api/geocode)", "address-group", "target-map",
-          "countries", "types", "icon-name", "api-key (ignored)", "fields (ignored)",
-          "data-lat", "data-lng", "data-address", "tooltip", "tooltip-position"
+          "name",
+          "value",
+          "placeholder",
+          "lbl-label",
+          "lbl-class",
+          "elt-class",
+          "disabled",
+          "readonly",
+          "required",
+          "autocomplete",
+          "geocode-url (default /api/geocode)",
+          "address-group",
+          "target-map",
+          "countries",
+          "types",
+          "icon-name",
+          "api-key (ignored)",
+          "fields (ignored)",
+          "data-lat",
+          "data-lng",
+          "data-address",
+          "tooltip",
+          "tooltip-position"
         ],
         "events": {
-          "emits": ["wcaddresschange", "wc-address:change", "google-address:change", "wcgoogleaddresschange"]
+          "emits": [
+            "wcaddresschange",
+            "wc-address:change",
+            "google-address:change",
+            "wcgoogleaddresschange"
+          ]
         },
-        "methods": ["getPlaceData()", "value (get/set)"],
+        "methods": [
+          "getPlaceData()",
+          "value (get/set)"
+        ],
         "notes": "Provider-agnostic address autocomplete. Talks ONLY to the app's geocode proxy (default geocode-url=/api/geocode): GET {base}/autocomplete?q=<partial> -> [{id,label,lat,lng}]; on select GET {base}/details?id=<id> -> {street,city,state,postal_code,county,country,lat,lng,formatted_address,source,approximate}. Same UX as wc-google-address (debounced >=3 chars, dropdown, ArrowUp/Down/Enter/Esc, click-outside/blur close). Fires wcaddresschange (canonical) + aliases wc-address:change / google-address:change / wcgoogleaddresschange on the element AND document (so wc-address-listener, which listens for wcgoogleaddresschange, and existing screens keep working after a find-replace). Change detail: {addressGroup, street, city, state, postal_code, county, country, lat, lng, formatted_address, formatted_address_encoded, formatted_address_slug (Zillow-style), place_id, source, approximate}. target-map pushes lat/lng/address to a wc-map OR wc-google-map by id. api-key/fields accepted but ignored. Details-404 falls back to the suggestion's own label + lat/lng. Requires a visible 'Search by LocationIQ' attribution per provider ToS.",
         "usage": {
           "basic": "<wc-address name=\"address.street\" lbl-label=\"Street Address\" address-group=\"address\" target-map=\"map1\" countries=\"us\" geocode-url=\"/api/geocode\"></wc-address>"
@@ -1007,18 +1076,44 @@
       {
         "name": "wc-barcode",
         "description": "Scannable code (QR default, Code128 optional) + human-readable value as crisp print-quality SVG, with bundled offline generators (no CDN).",
-        "attributes": ["value", "symbology", "label", "size", "ec-level", "caption", "class"],
-        "methods": ["value (get/set property — re-renders)"],
+        "attributes": [
+          "value",
+          "symbology",
+          "label",
+          "size",
+          "ec-level",
+          "caption",
+          "class"
+        ],
+        "methods": [
+          "value (get/set property — re-renders)"
+        ],
         "notes": "Display-only (no form participation, no events). value required (empty ⇒ renders nothing). symbology: qr (default) | code128. label: right (default) | bottom | none — where the human-readable value shows. size: QR square px (default 96) / Code128 bar-height px (default 64). ec-level: QR error correction L|M(default)|Q|H. caption: optional small text above (e.g. attendee name). The QR + Code128 generators are BUNDLED in the component (compact QR encoder ported from Project Nayuki, byte mode versions 1-40; Code128 Code Set B) — no external CDN, works offline. The code itself is ALWAYS pure black on white (white bg rect + black modules/bars, never theme-tinted) so scanners read it reliably; caption/label use --text-1. role=img + aria-label='barcode <value>'. @media print forces black-on-white and removes shadows/margins for a clean printed label. QR output verified scannable by decoding it back with jsQR in tests/barcode-test.py. Layout: label=right → code left + monospace value right (small wide wristband label); label=bottom → value centered beneath.",
         "usage": "<wc-barcode value=\"IE-4F9K2\" caption=\"Ava Noble\"></wc-barcode>\n<wc-barcode value=\"IE-4F9K2\" symbology=\"code128\" label=\"bottom\" size=\"64\"></wc-barcode>"
       },
       {
         "name": "wc-checkin",
         "description": "Touch-friendly scan-to-check-in / check-out station: captures a scanned code (USB keyboard-wedge and/or camera), POSTs to a server endpoint, and renders the server's allow/deny verdict. THE SERVER IS AUTHORITATIVE — the component never decides allow/deny, never caches or infers authorization, and never receives the authorized barcodes (only display names + a yes/no).",
-        "attributes": ["mode", "scan-source", "endpoint", "event-id", "session-id", "csrf", "allow-override", "beep", "class"],
-        "methods": ["requestHandler (optional property: async (payload) => response — routes the POST through your own client instead of fetch; used by the demo + tests; still server-authoritative)"],
+        "attributes": [
+          "mode",
+          "scan-source",
+          "endpoint",
+          "event-id",
+          "session-id",
+          "csrf",
+          "allow-override",
+          "beep",
+          "class"
+        ],
+        "methods": [
+          "requestHandler (optional property: async (payload) => response — routes the POST through your own client instead of fetch; used by the demo + tests; still server-authoritative)"
+        ],
         "events": {
-          "emits": ["wccheckinscanned (legacy checkin:scanned) — {code, source, step}", "wccheckinresult (legacy checkin:result) — the full server response", "wccheckinerror (legacy checkin:error) — {message}"],
+          "emits": [
+            "wccheckinscanned (legacy checkin:scanned) — {code, source, step}",
+            "wccheckinresult (legacy checkin:result) — the full server response",
+            "wccheckinerror (legacy checkin:error) — {message}"
+          ],
           "note": "All events are CustomEvents dispatched on the element AND on document (bubbles + composed)."
         },
         "notes": "mode: in (default) | out. scan-source: usb (default) | camera | both. endpoint: URL to POST to. event-id / session-id: passed through on every request. csrf: sent as X-CSRF-Token header AND csrf_token in the body. allow-override: boolean; shows an admin Override action on a DENIED check-out only when the server response also carries override_allowed:true (Override re-posts the authorize payload with override:true). beep: boolean (default true; beep=\"false\" disables) — short WebAudio success/fail tone (no asset). REQUEST body: { mode, scanned_barcode, event_id, session_id, step, attendee_id?, csrf_token?, override? } where step is 'identify' on the first scan and 'authorize' on the check-out pickup scan. RESPONSE (rendered as-is): { allowed, reason, attendee:{id,name,photo?}, authorized_names?, requires_pickup_scan?, recorded_id?, override_allowed? }. Check-IN = one scan → ALLOWED/DENIED + reason + attendee card. Check-OUT = two-step: first scan identifies the child (server returns requires_pickup_scan:true) → shows child card + authorized_names (NAMES ONLY) + 'Scan an authorized pickup'; the pickup scan posts step:'authorize' + attendee_id → final allow/deny (+ 'Released' on allow). USB keyboard-wedge: buffers rapid keystrokes ending in Enter; inter-keystroke timing (>60ms gap resets the buffer) distinguishes a scanner burst from human typing; min length 3. Camera: prefers the browser-native BarcodeDetector API (QR + 1-D, zero load) where available; browsers without it (Safari/Firefox) fall back to a lazily-loaded ZXing decoder (@zxing/library UMD, loaded via Wave's shared loader so WaveAssetBase self-hosting + CDN fallback apply; fetched only the first time a fallback browser opens the camera) so the camera works everywhere — only if neither loads does it show a 'use a USB scanner' message. FAIL-SAFE: any network/parse error → ERROR state, never ALLOWED. Big glanceable states (idle/scanning/result/pickup/camera/error), large tap targets, theme via CSS vars (success=green, deny=red, accent=--primary-bg-color). display:contents; styles in @layer wc.usage. role='group' + aria-label; aria-live status regions. Verified in tests/checkin-test.py (server-authoritative render, USB wedge vs typing, two-step + override, fail-safe).",
@@ -1027,10 +1122,30 @@
       {
         "name": "wc-record-lookup",
         "description": "Typeahead that searches an EXISTING collection via a server endpoint and, on select, either emits the chosen record or fills sibling form fields. Powers match-at-entry hints, 'use this family', and generic attach-existing flows. The server is the source of truth for results (tenant-scoped, display-safe fields); the component only displays what the endpoint returns and never blocks typing.",
-        "attributes": ["endpoint", "min-chars", "debounce", "label-field", "value-field", "mode", "fill-map", "keep-text", "param-* (dynamic)", "placeholder", "lbl-label", "disabled", "name", "class"],
-        "methods": ["searchHandler (optional property: async (q, params) => results[] — routes the search through your own client instead of fetch; used by the demo + tests; still server-authoritative)"],
+        "attributes": [
+          "endpoint",
+          "min-chars",
+          "debounce",
+          "label-field",
+          "value-field",
+          "mode",
+          "fill-map",
+          "keep-text",
+          "param-* (dynamic)",
+          "placeholder",
+          "lbl-label",
+          "disabled",
+          "name",
+          "class"
+        ],
+        "methods": [
+          "searchHandler (optional property: async (q, params) => results[] — routes the search through your own client instead of fetch; used by the demo + tests; still server-authoritative)"
+        ],
         "events": {
-          "emits": ["wcrecordselected (legacy record:selected) — {record}", "wcrecordsearch (legacy record:search) — {q}"],
+          "emits": [
+            "wcrecordselected (legacy record:selected) — {record}",
+            "wcrecordsearch (legacy record:search) — {q}"
+          ],
           "note": "CustomEvents dispatched on the element AND on document (bubbles + composed)."
         },
         "notes": "endpoint: GET URL returning a JSON array (or {results:[]}); the component appends ?q=<query> plus every param-* attribute as a query param (param-master_event=\"…\" → &master_event=…). min-chars default 2 (below it → no search, dropdown cleared). debounce default 300ms. label-field default 'label' (displayed; supports dotted paths + literal-key-first). value-field default 'id'. mode: 'select' (emit record:selected with the full record; clears the input unless keep-text is present) | 'fill' (populate sibling fields via fill-map, THEN also emit record:selected — e.g. 'use this family' to fill parents then trigger a children load) | 'hint' (non-blocking inline banner 'Looks like <label> — use existing?' with a primary action button that emits record:selected, plus a × dismiss — does NOT show the dropdown). fill-map: JSON { target_field_name: 'result.path' } — for each entry it resolves the dotted path from the record and sets the sibling field found by name (scoped to the closest <form>, else document): sets property + value attribute + inner control and dispatches input & change, so wc-input, plain input, select, and textarea all update. Dropdown reuses the wc-address look + keyboard nav (ArrowUp/Down highlight, Enter select, Escape close, click, mousedown-before-blur so a pick isn't lost). Suggestion text is colored EXPLICITLY with --text-1 (don't rely on inherited color — learned lesson). Empty results clear the dropdown/hint. Theme tokens: --component-bg-color/--surface-1/2/3/4, --text-1, --primary-bg-color/--primary-color. display:contents; styles in @layer wc.usage. Extends WcBaseComponent (NOT form-associated — it emits/fills, it does not submit its own value). Verified in tests/record-lookup-test.py (min-chars gate, debounce, keyboard nav, all three modes, param-* passthrough, dotted-path fill, events on element+document).",
@@ -1119,7 +1234,11 @@
           "header-menu-columns",
           "auto-header-filter"
         ],
-        "methods": ["setRemoteData(url)", "setLocalData(data)", "data (get/set inline)"],
+        "methods": [
+          "setRemoteData(url)",
+          "setLocalData(data)",
+          "data (get/set inline)"
+        ],
         "events": {
           "emits": [
             "wctabulatorready"
@@ -1163,7 +1282,13 @@
           "url-key",
           "url-history"
         ],
-        "methods": ["setSearch(query)", "setFilter(value)", "goToPage(n)", "data (get/set)", "refresh()"],
+        "methods": [
+          "setSearch(query)",
+          "setFilter(value)",
+          "goToPage(n)",
+          "data (get/set)",
+          "refresh()"
+        ],
         "events": {
           "emits": [
             "wctablerowclick",
@@ -1526,6 +1651,68 @@
         ],
         "notes": "Same UI and API as wc-ai-bot but uses Hugging Face Transformers.js with ONNX/GGUF models.",
         "usage": "<wc-hf-bot model=\"Xenova/distilgpt2\" system-prompt=\"You are helpful.\" title=\"HF Assistant\" theme=\"bubble\"></wc-hf-bot>"
+      },
+      {
+        "name": "wc-fx-board",
+        "description": "Per-station player for a multi-zone FX board. Renders category-grouped pads from a typed resource list and plays audio/video LOCALLY on the station device. Audio effects overlap/retrigger; a background resource is EXCLUSIVE (a new background stops the prior) and honors loop; video plays into a single inline <video> surface. When `controllable`, also executes remote COMMANDs addressed to its `zone` (over a host-provided WebSocket via `ws-url`, or fed in with `.receive()`) and emits STATE after any change so a master console reflects what is playing.",
+        "attributes": [
+          "id",
+          "class",
+          "resources",
+          "categories",
+          "master-volume",
+          "show-shortcuts",
+          "zone",
+          "controllable",
+          "columns",
+          "ws-url"
+        ],
+        "events": [
+          "wcfxboardplay",
+          "wcfxboardstop",
+          "message"
+        ],
+        "methods": [
+          "send(obj)",
+          "receive(json)",
+          "play(id)",
+          "stop(id)",
+          "stopAll()",
+          "setMasterVolume(0..100)"
+        ],
+        "resourceShape": "{ id, type:'audio'|'video'|'light', name, category, file_url, shortcut_key, volume(0..1), loop, is_background, order }",
+        "protocol": {
+          "command": "{ type:'cmd', zone, action, resource_id?, value? } — action in play|stop|stopAll|volume|background|requestState (master→zone)",
+          "state": "{ type:'state', zone, playing:[{id,type,is_background}], master_volume } — master_volume is a 0..1 fraction (zone→masters)"
+        },
+        "notes": "Extends WcBaseComponent (not form-associated). type:'light' is RESERVED — rendered as a labeled, disabled 'coming soon' pad (no playback). Effective volume = master(0..1) × resource.volume; the master slider live-adjusts playing media. Local controls always work; `controllable` gates executing remote COMMANDs for this zone + emitting STATE. `show-shortcuts` assigns number keys 1..9 to the first pads (a resource `shortcut_key` wins). Lazy media (preload on demand), fail-soft on a bad file_url (pad → is-error), reflects `resources` changes (HTMX swap), clean disconnect (stops media, closes socket, removes listeners). Active/playing pads use --primary-bg-color + the --wc-on-primary auto-contrast token; pulse gated by prefers-reduced-motion; real <button> pads with aria-pressed/aria-label/focus-visible. .send(obj) also dispatches a `message` CustomEvent so a host can forward it; .receive(json) accepts an object or JSON string. Construct declaratively (HTML/parser or insertAdjacentHTML), NOT via document.createElement (the wrapper is appended in the constructor). CSS scoped in main.css @layer wc.usage.",
+        "usage": "<wc-fx-board zone=\"main-hall\" controllable show-shortcuts master-volume=\"80\" columns=\"4\"\n    resources='[{\"id\":\"a1\",\"type\":\"audio\",\"name\":\"Applause\",\"category\":\"Crowd\",\"file_url\":\"/fx/applause.mp3\",\"volume\":0.9,\"is_background\":false,\"order\":0}]'\n    categories='[{\"name\":\"Crowd\",\"icon\":\"users\",\"color\":\"#3b82f6\"}]'\n    ws-url=\"/ws/fx_ws?role=station&zone=main-hall\"></wc-fx-board>"
+      },
+      {
+        "name": "wc-fx-console",
+        "description": "Master console for a multi-zone FX board. NO local playback — it remote-controls zones. Pick a zone, then its category-grouped pads (+ master volume + Stop All) SEND COMMANDs to that zone over a host-provided WebSocket. Incoming STATE messages drive a live per-zone 'playing' indicator (whole floor at a glance) and a 'now playing' list + pad highlights for the selected zone.",
+        "attributes": [
+          "id",
+          "class",
+          "zones",
+          "master-volume",
+          "ws-url"
+        ],
+        "events": [
+          "wcfxconsolecommand",
+          "message"
+        ],
+        "methods": [
+          "send(obj)",
+          "receive(json)",
+          "selectZone(idOrKey)"
+        ],
+        "protocol": {
+          "command": "{ type:'cmd', zone, action, resource_id?, value? } — action in play|stop|stopAll|volume|background|requestState (master→zone)",
+          "state": "{ type:'state', zone, playing:[{id,type,is_background}], master_volume } — reflected in the UI (zone→masters)"
+        },
+        "notes": "Extends WcBaseComponent (not form-associated). A zone's routing key is its `event_name` (falling back to `id`); COMMAND.zone uses that key and incoming STATE.zone is matched to it. On zone select it sends action:'requestState'; on socket open it requests state for every zone. type:'light' pads are disabled no-ops and never send. Active zone/pad states use --primary-bg-color + the --wc-on-primary auto-contrast token. .send(obj) sends over the socket if open AND dispatches a `message` CustomEvent so a host can forward it; .receive(json) accepts an object or JSON string (STATE updates the UI). Construct declaratively, not via document.createElement. Pairs with wc-fx-board (the station player).",
+        "usage": "<wc-fx-console master-volume=\"80\"\n    zones='[{\"id\":\"z1\",\"name\":\"Main Hall\",\"event_name\":\"main-hall\",\"categories\":[{\"name\":\"Crowd\",\"icon\":\"users\"}],\"resources\":[{\"id\":\"a1\",\"type\":\"audio\",\"name\":\"Applause\",\"category\":\"Crowd\",\"file_url\":\"/fx/applause.mp3\"}]}]'\n    ws-url=\"/ws/fx_ws?role=master\"></wc-fx-console>"
       }
     ],
     "buttons": [
@@ -1979,12 +2166,29 @@
       ],
       "onSurfaceForeground": {
         "note": "A saturated accent legible as a FILL is usually illegible as TEXT on a light surface (e.g. --success-color #22c55e on white ~1.9:1, fails WCAG AA). For any accent rendered as text/icon on a surface, mix it 55% toward --text-1 (near-black in light themes, near-white in dark) so the same declaration stays >=4.5:1 in both. Badge foregrounds now use this inline mix (color-mix(in srgb, var(--<state>-color) 55%, var(--text-1))). Inlined per rule, NOT an inherited :root token — a :root token bakes in the page-root --text-1 and goes stale inside a nested theme.",
-        "utilities": [".on-surface-accent (set --accent inline/parent)", ".on-surface-success", ".on-surface-danger", ".on-surface-warning", ".on-surface-info"],
+        "utilities": [
+          ".on-surface-accent (set --accent inline/parent)",
+          ".on-surface-success",
+          ".on-surface-danger",
+          ".on-surface-warning",
+          ".on-surface-info"
+        ],
         "guidance": "Use --*-color / .success-color for fills (backgrounds, borders, filled icons); use the on-surface utilities for accent-colored text/icons on a surface."
       },
       "buttonVariants": {
         "note": "Semantic + neutral button color variants. Compose with .btn (e.g. class='btn btn-primary'; also .btn-sm). Each variant just reassigns the shared --button-* tokens so the base .btn structure/hover/active/focus/disabled is reused. Previously these (except .btn/.btn-outline/.btn-sm) were PHANTOM classes — referenced in templates but defined in no CSS, so they rendered as a plain neutral .btn. Now real and verified WCAG AA (>=4.5:1 label vs fill) across all themes in light & dark (tests/button-variants-test.py).",
-        "classes": [".btn (base)", ".btn-outline", ".btn-sm (size)", ".btn-primary", ".btn-secondary", ".btn-cancel", ".btn-success", ".btn-danger", ".btn-warning", ".btn-info"],
+        "classes": [
+          ".btn (base)",
+          ".btn-outline",
+          ".btn-sm (size)",
+          ".btn-primary",
+          ".btn-secondary",
+          ".btn-cancel",
+          ".btn-success",
+          ".btn-danger",
+          ".btn-warning",
+          ".btn-info"
+        ],
         "primary": ".btn-primary deepens --primary-bg-color 60% toward black + white label so it's AA in every theme (the theme's --primary-color isn't reliably AA; --primary-bg-color ranges bright-yellow to dark-coffee). In .crisp it uses the lighter per-hue --accent-fill-bg/--on-accent via fallback.",
         "semantic": "success/danger/warning/info are FIXED deepened fills (#15803d / #b91c1c / #b45309 / #1d4ed8) with white text — AA in every theme + light/dark (raw --*-color accents are too light for white).",
         "cancel": ".btn-cancel is the dark 'opposite-of-primary' dismiss button (like the swal cancel): --text-1 fill (black-ish in light themes, a light chip in dark) with a --surface-1 label. The swal dialog's own cancel button styles via --secondary-bg-color in wc-prompt.js; .btn-secondary matches that neutral look."
@@ -1999,7 +2203,11 @@
           "--accent-border": "accent-derived border/ring that reads on the card",
           "--accent-hover": "(pre-existing) hover state of --accent"
         },
-        "utilities": [".accent-fill (loud full accent)", ".accent-soft-fill (subtle bubble/callout — prefer for chat bubbles)", ".accent-border-color"],
+        "utilities": [
+          ".accent-fill (loud full accent)",
+          ".accent-soft-fill (subtle bubble/callout — prefer for chat bubbles)",
+          ".accent-border-color"
+        ],
         "guidance": "For a legible accent bubble/pill just add class=accent-fill or class=accent-soft-fill — no color: needed. Prefer .accent-soft-fill for chat bubbles/callouts (full --accent is loud)."
       },
       "defaults": {
@@ -2541,7 +2749,8 @@
       "views/rating.html — wc-rating demos (editable half-value stars + a whole-value hearts variant, and a readonly display with show-value + count)",
       "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')",
       "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)"
-    ]
+    ],
+    "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },
   "routing": {
     "description": "Template-based routing used with Go Kart framework",

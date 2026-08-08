@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-fx-board / wc-fx-console</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-fx-board &amp; wc-fx-console</h1>
+    <p class="mb-6 text-muted">
+      A multi-zone FX board. The <strong>station</strong> (<code>wc-fx-board</code>) plays audio/video
+      locally; the <strong>master</strong> (<code>wc-fx-console</code>) remote-controls zones by sending
+      COMMANDs. Here there is no server — the two components are bridged in-page: the console's
+      outgoing <code>message</code> events are fed to the board's <code>.receive()</code>, and the
+      board's STATE <code>message</code> events are fed back to the console's <code>.receive()</code>.
+      Try the console pads, then watch the station light up and the console's live indicator update.
+    </p>
+
+    <div class="col-1 gap-8">
+
+      <!-- Master console -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Master console (sends COMMANDs — no local playback)</h2>
+        <wc-fx-console id="console"
+            master-volume="80"
+            zones='[
+              {"id":"z1","name":"Main Hall","event_name":"main-hall",
+               "columns":4,
+               "categories":[{"name":"Crowd","icon":"users","color":"#3b82f6"},
+                             {"name":"Ambience","icon":"cloud","color":"#22c55e"},
+                             {"name":"Vision","icon":"film","color":"#a855f7"},
+                             {"name":"Lights","icon":"lightbulb","color":"#f59e0b"}],
+               "resources":[
+                 {"id":"applause","type":"audio","name":"Applause","category":"Crowd","file_url":"","volume":0.9,"is_background":false,"order":0},
+                 {"id":"boo","type":"audio","name":"Boo","category":"Crowd","file_url":"","volume":1,"is_background":false,"order":1},
+                 {"id":"rain","type":"audio","name":"Rain Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":0},
+                 {"id":"wind","type":"audio","name":"Wind Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":1},
+                 {"id":"sting","type":"video","name":"Intro Sting","category":"Vision","file_url":"","volume":1,"is_background":false,"order":0},
+                 {"id":"strobe","type":"light","name":"Strobe","category":"Lights","file_url":"","order":0}
+               ]},
+              {"id":"z2","name":"Lobby","event_name":"lobby",
+               "resources":[
+                 {"id":"chime","type":"audio","name":"Chime","category":"Crowd","file_url":"","volume":0.8,"order":0}
+               ]}
+            ]'>
+        </wc-fx-console>
+      </div>
+
+      <!-- Station player -->
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Station: Main Hall (plays locally; executes COMMANDs)</h2>
+        <p class="text-muted">
+          <code>show-shortcuts</code> assigns number keys 1–9 to the first pads. (file_url is blank in this
+          demo, so real audio won't load — the pads still light up and emit events/STATE.)
+        </p>
+        <wc-fx-board id="station"
+            zone="main-hall" controllable show-shortcuts columns="4" master-volume="80"
+            categories='[{"name":"Crowd","icon":"users","color":"#3b82f6"},
+                         {"name":"Ambience","icon":"cloud","color":"#22c55e"},
+                         {"name":"Vision","icon":"film","color":"#a855f7"},
+                         {"name":"Lights","icon":"lightbulb","color":"#f59e0b"}]'
+            resources='[
+              {"id":"applause","type":"audio","name":"Applause","category":"Crowd","file_url":"","volume":0.9,"is_background":false,"shortcut_key":"1","order":0},
+              {"id":"boo","type":"audio","name":"Boo","category":"Crowd","file_url":"","volume":1,"is_background":false,"shortcut_key":"2","order":1},
+              {"id":"rain","type":"audio","name":"Rain Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":0},
+              {"id":"wind","type":"audio","name":"Wind Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":1},
+              {"id":"sting","type":"video","name":"Intro Sting","category":"Vision","file_url":"","volume":1,"is_background":false,"order":0},
+              {"id":"strobe","type":"light","name":"Strobe","category":"Lights","file_url":"","order":0}
+            ]'>
+        </wc-fx-board>
+      </div>
+
+      <!-- Event log -->
+      <div class="card p-4 col-1 gap-2">
+        <h2 class="text-base font-semibold">Event log</h2>
+        <pre id="log" class="text-xs" style="max-height: 220px; overflow:auto; margin:0;"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const consoleEl = document.getElementById('console');
+    const station = document.getElementById('station');
+    const log = document.getElementById('log');
+    const write = (t) => { log.textContent = t + '\n' + log.textContent; };
+
+    await Promise.all([consoleEl.ready, station.ready]);
+
+    // Bridge the two components in-page (stands in for the WebSocket relay).
+    consoleEl.addEventListener('message', (e) => { station.receive(e.detail); });   // COMMAND → station
+    station.addEventListener('message', (e) => { consoleEl.receive(e.detail); });    // STATE → console
+
+    consoleEl.addEventListener('wcfxconsolecommand', (e) =>
+      write('console → cmd  ' + JSON.stringify(e.detail)));
+    station.addEventListener('wcfxboardplay', (e) => write('station play  ' + JSON.stringify(e.detail)));
+    station.addEventListener('wcfxboardstop', (e) => write('station stop  ' + JSON.stringify(e.detail)));
+
+    // Prime the console's live indicators.
+    consoleEl.selectZone('main-hall');
+  </script>
+</body>
+</html>

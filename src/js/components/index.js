@@ -102,6 +102,8 @@ import './wc-kanban.js';
 import './wc-calendar.js';
 import './wc-gantt.js';
 import './wc-data-cards.js';
+import './wc-fx-board.js';
+import './wc-fx-console.js';
 // Form Controls
 import './wc-form.js';
 import './wc-input.js';

@@ -13041,6 +13041,280 @@
     }
 }
 
+/* ── Multi-zone FX board: <wc-fx-board> (station player) + <wc-fx-console> (master) ──
+   Wave semantic tokens only (no hardcoded hex); active/playing states use
+   --primary-bg-color + the --wc-on-primary auto-contrast token so labels stay AA in
+   every theme, light + dark. Pulse is gated behind prefers-reduced-motion. */
+@layer wc.usage {
+    wc-fx-board,
+    wc-fx-console {
+        display: contents;
+    }
+
+    .wc-fx-board,
+    .wc-fx-console {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        width: 100%;
+        color: var(--text-1);
+    }
+
+    /* Header: master volume + Stop All (shared by board + console panel) */
+    .wc-fx-board-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.5rem 0.75rem;
+        background-color: var(--surface-2);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.5rem;
+    }
+    .wc-fx-master {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1 1 220px;
+        min-width: 0;
+    }
+    .wc-fx-master-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+    .wc-fx-master-input {
+        flex: 1 1 auto;
+        min-width: 80px;
+        accent-color: var(--primary-bg-color);
+    }
+    .wc-fx-master-value {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.85rem;
+        color: var(--text-2, var(--component-alt-color));
+        min-width: 3ch;
+        text-align: right;
+    }
+
+    /* Inline video surface */
+    .wc-fx-video-surface {
+        position: relative;
+        background: var(--surface-1);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .wc-fx-video {
+        display: block;
+        width: 100%;
+        max-height: 60vh;
+        background: #000;
+    }
+    .wc-fx-video-close {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.4rem;
+        z-index: 1;
+        width: 2rem;
+        height: 2rem;
+        line-height: 1;
+        font-size: 1.25rem;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        background-color: var(--primary-bg-color);
+        color: var(--wc-on-primary);
+    }
+
+    /* Category groups */
+    .wc-fx-group {
+        border: 1px solid var(--surface-4);
+        border-left: 3px solid var(--fx-cat-color, var(--primary-bg-color));
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background-color: var(--surface-2);
+    }
+    .wc-fx-group-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-weight: 600;
+        border-bottom: 1px solid var(--surface-4);
+    }
+    .wc-fx-group-icon {
+        color: var(--fx-cat-color, var(--text-2, var(--component-alt-color)));
+    }
+    .wc-fx-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+        gap: 0.5rem;
+        padding: 0.625rem;
+    }
+
+    /* Pads (real buttons) */
+    .wc-fx-pad {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.4rem;
+        min-height: 4.25rem;
+        padding: 0.6rem 0.7rem;
+        text-align: left;
+        cursor: pointer;
+        border: 1px solid var(--surface-4);
+        border-radius: 0.5rem;
+        background-color: var(--surface-3);
+        color: var(--text-1);
+        transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+    .wc-fx-pad:hover:not(:disabled) {
+        border-color: var(--fx-cat-color, var(--primary-bg-color));
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.18);
+    }
+    .wc-fx-pad:focus-visible {
+        outline: 2px solid var(--primary-bg-color);
+        outline-offset: 2px;
+    }
+    .wc-fx-pad-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+    .wc-fx-pad-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .wc-fx-pad-key {
+        font-size: 0.7rem;
+        font-family: inherit;
+        padding: 0.05rem 0.35rem;
+        border-radius: 0.25rem;
+        border: 1px solid var(--surface-4);
+        background-color: var(--surface-1);
+        color: var(--text-2, var(--component-alt-color));
+    }
+
+    /* Active / playing — accent fill + auto-contrast label */
+    .wc-fx-pad.is-playing {
+        background-color: var(--primary-bg-color);
+        color: var(--wc-on-primary);
+        border-color: var(--primary-bg-color);
+    }
+    .wc-fx-pad.is-playing .wc-fx-pad-name,
+    .wc-fx-zone.is-playing .wc-fx-zone-name {
+        color: var(--wc-on-primary);
+    }
+    .wc-fx-pad.is-playing .wc-fx-pad-key {
+        background-color: color-mix(in oklab, var(--primary-bg-color) 70%, #000);
+        color: var(--wc-on-primary);
+        border-color: transparent;
+    }
+
+    /* light-type (reserved): disabled coming-soon pad */
+    .wc-fx-pad.is-light,
+    .wc-fx-pad:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+        background-color: var(--surface-2);
+    }
+
+    /* fail-soft error state on a bad file_url */
+    .wc-fx-pad.is-error {
+        border-color: var(--danger-color);
+        box-shadow: inset 0 0 0 1px var(--danger-color);
+    }
+
+    /* Console: zone selector + panel */
+    .wc-fx-console-zones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+    .wc-fx-zone {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.75rem;
+        cursor: pointer;
+        border: 1px solid var(--surface-4);
+        border-radius: 0.5rem;
+        background-color: var(--surface-2);
+        color: var(--text-1);
+        font-weight: 600;
+    }
+    .wc-fx-zone:hover {
+        border-color: var(--primary-bg-color);
+    }
+    .wc-fx-zone:focus-visible {
+        outline: 2px solid var(--primary-bg-color);
+        outline-offset: 2px;
+    }
+    .wc-fx-zone.is-selected {
+        background-color: var(--primary-bg-color);
+        color: var(--wc-on-primary);
+        border-color: var(--primary-bg-color);
+    }
+    .wc-fx-zone-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.25rem;
+        height: 1.25rem;
+        padding: 0 0.35rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-variant-numeric: tabular-nums;
+    }
+    .wc-fx-zone-indicator.is-active {
+        background-color: var(--success-color);
+        color: var(--surface-1);
+    }
+    .wc-fx-console-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .wc-fx-console-empty {
+        padding: 1rem;
+        text-align: center;
+        color: var(--text-3, var(--component-alt-color));
+        border: 1px dashed var(--surface-4);
+        border-radius: 0.5rem;
+    }
+    .wc-fx-nowplaying {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        min-height: 1.75rem;
+        font-size: 0.85rem;
+    }
+    .wc-fx-nowplaying-label {
+        font-weight: 600;
+        color: var(--text-2, var(--component-alt-color));
+    }
+    .wc-fx-nowplaying-idle {
+        color: var(--text-3, var(--component-alt-color));
+        font-style: italic;
+    }
+
+    /* Playing pulse — motion-safe only */
+    @media (prefers-reduced-motion: no-preference) {
+        .wc-fx-pad.is-playing {
+            animation: wc-fx-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes wc-fx-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary-bg-color) 55%, transparent); }
+            50%      { box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary-bg-color) 12%, transparent); }
+        }
+    }
+}
+
 @layer wc.tables {
     /* Base table styles - requires .wc-table class */
     .wc-table {
@@ -13058,12 +13332,16 @@
        Y≈0.179, where black & white both give ~4.6:1) → AA in every theme, light + dark.
        Falls back to --primary-color where relative color / pow() aren't supported. */
     wc-table,
-    .wc-table {
+    .wc-table,
+    wc-fx-board, .wc-fx-board,
+    wc-fx-console, .wc-fx-console {
         --wc-on-primary: var(--primary-color);
     }
     @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
         wc-table,
-        .wc-table {
+        .wc-table,
+        wc-fx-board, .wc-fx-board,
+        wc-fx-console, .wc-fx-console {
             --wc-on-primary: rgb(from var(--primary-bg-color)
                 clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
                 clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)

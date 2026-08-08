@@ -40664,6 +40664,1108 @@ var WcDataCards = class extends WcBaseComponent {
 };
 customElements.define(WcDataCards.is, WcDataCards);
 
+// src/js/components/wc-fx-board.js
+var WcFxBoard = class extends WcBaseComponent {
+  static get is() {
+    return "wc-fx-board";
+  }
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "resources",
+      "categories",
+      "master-volume",
+      "show-shortcuts",
+      "zone",
+      "controllable",
+      "columns",
+      "ws-url"
+    ];
+  }
+  constructor() {
+    super();
+    this._resources = [];
+    this._categories = [];
+    this._resById = /* @__PURE__ */ new Map();
+    this._active = /* @__PURE__ */ new Map();
+    this._bgId = null;
+    this._videoActiveId = null;
+    this._keymap = /* @__PURE__ */ new Map();
+    this._masterVolume = 80;
+    this._zone = "";
+    this._columns = 0;
+    this._showShortcuts = false;
+    this._wsUrl = "";
+    this._ws = null;
+    this._onClick = this._handleClick.bind(this);
+    this._onInput = this._handleInput.bind(this);
+    this._onKeydown = this._handleKeydown.bind(this);
+    const compEl = this.querySelector(":scope > .wc-fx-board");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-fx-board");
+      this.appendChild(this.componentElement);
+    }
+  }
+  connectedCallback() {
+    super.connectedCallback();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stopAll();
+    this._closeWs();
+    this._unWireEvents();
+  }
+  // ---- Public API -----------------------------------------------------------
+  get resources() {
+    return this._resources.slice();
+  }
+  set resources(arr) {
+    this.stopAll();
+    this._resources = Array.isArray(arr) ? arr : [];
+    this._indexResources();
+    this._renderBoard();
+  }
+  get zone() {
+    return this._zone;
+  }
+  play(id) {
+    this._playResource(id);
+  }
+  stop(id) {
+    this._stopResource(id);
+  }
+  setMasterVolume(v) {
+    this._masterVolume = this._clamp(this._num(v, this._masterVolume), 0, 100);
+    const slider = this.componentElement.querySelector(".wc-fx-master-input");
+    if (slider) slider.value = String(this._masterVolume);
+    const readout = this.componentElement.querySelector(".wc-fx-master-value");
+    if (readout) readout.textContent = `${Math.round(this._masterVolume)}%`;
+    this._active.forEach((entry) => {
+      const vol = this._effectiveVolume(entry.resource);
+      entry.instances.forEach((el) => {
+        try {
+          el.volume = vol;
+        } catch (ex) {
+        }
+      });
+    });
+    this._afterChange();
+  }
+  stopAll() {
+    if (!this._active || this._active.size === 0) {
+      this._hideVideo();
+      this._bgId = null;
+      this._videoActiveId = null;
+      return;
+    }
+    const entries = Array.from(this._active.values());
+    this._active.forEach((entry, id) => {
+      entry.instances.forEach((el) => this._haltMedia(el));
+      this._reflectPad(id, false);
+    });
+    this._active.clear();
+    this._bgId = null;
+    this._videoActiveId = null;
+    this._hideVideo();
+    entries.forEach((entry) => this._emitStop(entry.resource));
+    this._afterChange();
+  }
+  /** Send an outgoing protocol message: over the socket if open, and as a `message` event. */
+  send(obj) {
+    if (obj == null) return;
+    if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+      try {
+        this._ws.send(JSON.stringify(obj));
+      } catch (ex) {
+      }
+    }
+    this.dispatchEvent(new CustomEvent("message", { detail: obj }));
+  }
+  /** Deliver an incoming protocol message (object or JSON string). */
+  receive(json) {
+    let msg = json;
+    if (typeof json === "string") {
+      try {
+        msg = JSON.parse(json);
+      } catch (ex) {
+        return;
+      }
+    }
+    if (!msg || typeof msg !== "object") return;
+    if (msg.type !== "cmd") return;
+    if (!this.hasAttribute("controllable")) return;
+    if (msg.zone != null && String(msg.zone) !== String(this._zone)) return;
+    this._executeCommand(msg);
+  }
+  // ---- Config / rendering ---------------------------------------------------
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderBoard();
+    this._wireEvents();
+    this._connectWs();
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _readConfig() {
+    this._resources = this._parseJSON("resources", []);
+    this._categories = this._parseJSON("categories", []);
+    this._zone = this.getAttribute("zone") || "";
+    this._columns = parseInt(this.getAttribute("columns"), 10) || 0;
+    this._showShortcuts = this.hasAttribute("show-shortcuts");
+    this._masterVolume = this._clamp(this._num(this.getAttribute("master-volume"), 80), 0, 100);
+    this._wsUrl = this.getAttribute("ws-url") || "";
+    this._indexResources();
+  }
+  _indexResources() {
+    this._resById = /* @__PURE__ */ new Map();
+    this._resources.forEach((r) => {
+      if (r && r.id != null) this._resById.set(String(r.id), r);
+    });
+  }
+  _renderBoard() {
+    const el = this.componentElement;
+    if (!el) return;
+    const wasActive = new Map(this._active);
+    el.innerHTML = "";
+    this._keymap = /* @__PURE__ */ new Map();
+    const header = document.createElement("div");
+    header.className = "wc-fx-board-header";
+    const master = document.createElement("label");
+    master.className = "wc-fx-master";
+    const mlabel = document.createElement("span");
+    mlabel.className = "wc-fx-master-label";
+    mlabel.textContent = "Master";
+    const minput = document.createElement("input");
+    minput.type = "range";
+    minput.className = "wc-fx-master-input";
+    minput.min = "0";
+    minput.max = "100";
+    minput.step = "1";
+    minput.value = String(this._masterVolume);
+    minput.setAttribute("aria-label", "Master volume");
+    const mvalue = document.createElement("span");
+    mvalue.className = "wc-fx-master-value";
+    mvalue.textContent = `${Math.round(this._masterVolume)}%`;
+    master.appendChild(mlabel);
+    master.appendChild(minput);
+    master.appendChild(mvalue);
+    const stopAll = document.createElement("button");
+    stopAll.type = "button";
+    stopAll.className = "btn btn-sm wc-fx-stop-all";
+    stopAll.textContent = "Stop All";
+    stopAll.setAttribute("aria-label", "Stop all playing media");
+    header.appendChild(master);
+    header.appendChild(stopAll);
+    el.appendChild(header);
+    const surface = document.createElement("div");
+    surface.className = "wc-fx-video-surface";
+    surface.hidden = true;
+    const video = document.createElement("video");
+    video.className = "wc-fx-video";
+    video.setAttribute("playsinline", "");
+    video.setAttribute("controls", "");
+    const vclose = document.createElement("button");
+    vclose.type = "button";
+    vclose.className = "wc-fx-video-close";
+    vclose.textContent = "\xD7";
+    vclose.setAttribute("aria-label", "Stop video");
+    surface.appendChild(vclose);
+    surface.appendChild(video);
+    el.appendChild(surface);
+    this._videoSurface = surface;
+    this._videoEl = video;
+    video.addEventListener("ended", () => {
+      if (this._videoActiveId != null && !video.loop) this._removeInstance(this._videoActiveId, video);
+    });
+    video.addEventListener("error", () => {
+      if (this._videoActiveId != null) {
+        this._markError(this._videoActiveId);
+        this._removeInstance(this._videoActiveId, video);
+      }
+    });
+    let padIndex = 0;
+    const groups = this._groupResources();
+    const gridCols = this._columns > 0 ? `repeat(${this._columns}, minmax(0, 1fr))` : "";
+    groups.forEach((group) => {
+      const groupEl = document.createElement("div");
+      groupEl.className = "wc-fx-group";
+      if (group.cat && group.cat.color) groupEl.style.setProperty("--fx-cat-color", group.cat.color);
+      const gh = document.createElement("div");
+      gh.className = "wc-fx-group-header";
+      if (group.cat && group.cat.icon) {
+        const ic = document.createElement("wc-fa-icon");
+        ic.setAttribute("name", group.cat.icon);
+        ic.className = "wc-fx-group-icon";
+        gh.appendChild(ic);
+      }
+      const gt = document.createElement("span");
+      gt.className = "wc-fx-group-title";
+      gt.textContent = group.cat ? group.cat.name : "Uncategorized";
+      gh.appendChild(gt);
+      groupEl.appendChild(gh);
+      const grid = document.createElement("div");
+      grid.className = "wc-fx-grid";
+      if (gridCols) grid.style.gridTemplateColumns = gridCols;
+      group.items.forEach((res) => {
+        const pad = this._createPad(res, padIndex);
+        grid.appendChild(pad);
+        const key = pad.dataset.key;
+        if (key) this._keymap.set(key, String(res.id));
+        padIndex++;
+      });
+      groupEl.appendChild(grid);
+      el.appendChild(groupEl);
+    });
+    wasActive.forEach((entry, id) => {
+      if (this._active.has(id)) this._reflectPad(id, true);
+    });
+  }
+  _createPad(res, index) {
+    const type = res.type || "audio";
+    const isLight = type === "light";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "wc-fx-pad";
+    btn.dataset.id = String(res.id);
+    btn.dataset.type = type;
+    btn.setAttribute("aria-pressed", "false");
+    if (res.is_background) btn.classList.add("is-background");
+    let key = res.shortcut_key ? String(res.shortcut_key) : "";
+    if (!key && this._showShortcuts && index < 9) key = String(index + 1);
+    if (key) btn.dataset.key = key;
+    if (isLight) {
+      btn.classList.add("is-light");
+      btn.disabled = true;
+    }
+    const nameEl = document.createElement("span");
+    nameEl.className = "wc-fx-pad-name";
+    nameEl.textContent = res.name != null ? res.name : String(res.id);
+    btn.appendChild(nameEl);
+    const meta = document.createElement("span");
+    meta.className = "wc-fx-pad-meta";
+    if (key) {
+      const kb = document.createElement("kbd");
+      kb.className = "wc-fx-pad-key";
+      kb.textContent = key;
+      meta.appendChild(kb);
+    }
+    const typeBadge = document.createElement("span");
+    typeBadge.className = "badge badge-muted wc-fx-pad-type";
+    typeBadge.textContent = type;
+    meta.appendChild(typeBadge);
+    if (res.is_background) {
+      const bg = document.createElement("span");
+      bg.className = "badge badge-info wc-fx-pad-bg";
+      bg.textContent = "bg";
+      meta.appendChild(bg);
+    }
+    if (isLight) {
+      const soon = document.createElement("span");
+      soon.className = "badge badge-warning wc-fx-pad-soon";
+      soon.textContent = "coming soon";
+      meta.appendChild(soon);
+    }
+    btn.appendChild(meta);
+    let aria = res.name != null ? String(res.name) : String(res.id);
+    if (key) aria += `, shortcut ${key}`;
+    aria += `, ${type}`;
+    if (res.is_background) aria += ", background";
+    if (isLight) aria += ", coming soon";
+    btn.setAttribute("aria-label", aria);
+    return btn;
+  }
+  _groupResources() {
+    const catByName = /* @__PURE__ */ new Map();
+    this._categories.forEach((c, i) => {
+      if (c && c.name != null) catByName.set(String(c.name), { ...c, _i: i });
+    });
+    const groups = /* @__PURE__ */ new Map();
+    this._resources.forEach((r) => {
+      const name = r.category != null ? String(r.category) : "Uncategorized";
+      if (!groups.has(name)) groups.set(name, { cat: catByName.get(name) || { name }, items: [], _seen: groups.size });
+      groups.get(name).items.push(r);
+    });
+    const arr = Array.from(groups.values());
+    arr.sort((a, b) => {
+      const ai = catByName.has(a.cat.name) ? catByName.get(a.cat.name)._i : 1e3 + a._seen;
+      const bi = catByName.has(b.cat.name) ? catByName.get(b.cat.name)._i : 1e3 + b._seen;
+      return ai - bi;
+    });
+    arr.forEach((g) => g.items.sort((a, b) => this._num(a.order, 0) - this._num(b.order, 0) || String(a.name || "").localeCompare(String(b.name || ""))));
+    return arr;
+  }
+  // ---- Playback -------------------------------------------------------------
+  _playResource(id, forceBackground) {
+    const res = this._resById.get(String(id));
+    if (!res) return;
+    if ((res.type || "audio") === "light") return;
+    if (!res.file_url) {
+      this._markError(id);
+      return;
+    }
+    const isBg = forceBackground || !!res.is_background;
+    if (isBg) this._stopBackground();
+    let mediaEl;
+    if (res.type === "video") {
+      if (this._videoActiveId != null && this._videoActiveId !== String(id)) {
+        this._removeInstance(this._videoActiveId, this._videoEl);
+      }
+      mediaEl = this._videoEl;
+      mediaEl.loop = !!res.loop;
+      mediaEl.volume = this._effectiveVolume(res);
+      mediaEl.src = res.file_url;
+      this._videoActiveId = String(id);
+      this._showVideo();
+      const p = mediaEl.play();
+      if (p && p.catch) p.catch(() => {
+      });
+    } else {
+      mediaEl = new Audio();
+      mediaEl.preload = "auto";
+      mediaEl.loop = !!res.loop;
+      mediaEl.volume = this._effectiveVolume(res);
+      mediaEl.src = res.file_url;
+      mediaEl.addEventListener("ended", () => {
+        if (!mediaEl.loop) this._removeInstance(id, mediaEl);
+      });
+      mediaEl.addEventListener("error", () => {
+        this._markError(id);
+        this._removeInstance(id, mediaEl);
+      }, { once: true });
+      const p = mediaEl.play();
+      if (p && p.catch) p.catch(() => {
+      });
+    }
+    let entry = this._active.get(String(id));
+    if (!entry) {
+      entry = { instances: /* @__PURE__ */ new Set(), resource: res, isBackground: isBg };
+      this._active.set(String(id), entry);
+    }
+    entry.isBackground = isBg;
+    entry.instances.add(mediaEl);
+    if (isBg) this._bgId = String(id);
+    this._clearError(id);
+    this._reflectPad(id, true);
+    this._emitPlay(res);
+    this._afterChange();
+  }
+  _stopResource(id) {
+    const entry = this._active.get(String(id));
+    if (!entry) return;
+    entry.instances.forEach((el) => this._haltMedia(el));
+    this._active.delete(String(id));
+    if (this._bgId === String(id)) this._bgId = null;
+    if (this._videoActiveId === String(id)) {
+      this._videoActiveId = null;
+      this._hideVideo();
+    }
+    this._reflectPad(id, false);
+    this._emitStop(entry.resource);
+    this._afterChange();
+  }
+  _stopBackground() {
+    if (this._bgId != null) this._stopResource(this._bgId);
+  }
+  /** Remove ONE finished instance without a full stop (ended/error path). */
+  _removeInstance(id, el) {
+    const entry = this._active.get(String(id));
+    if (!entry) return;
+    entry.instances.delete(el);
+    if (el === this._videoEl && this._videoActiveId === String(id)) {
+      this._videoActiveId = null;
+      this._hideVideo();
+    }
+    if (entry.instances.size === 0) {
+      this._active.delete(String(id));
+      if (this._bgId === String(id)) this._bgId = null;
+      this._reflectPad(id, false);
+      this._emitStop(entry.resource);
+      this._afterChange();
+    }
+  }
+  _haltMedia(el) {
+    try {
+      el.pause();
+    } catch (ex) {
+    }
+    try {
+      el.currentTime = 0;
+    } catch (ex) {
+    }
+    if (el === this._videoEl) {
+      try {
+        el.removeAttribute("src");
+        el.load();
+      } catch (ex) {
+      }
+    }
+  }
+  _effectiveVolume(res) {
+    const rv = res && res.volume != null ? this._num(res.volume, 1) : 1;
+    return this._clamp(this._masterVolume / 100 * rv, 0, 1);
+  }
+  _showVideo() {
+    if (this._videoSurface) this._videoSurface.hidden = false;
+  }
+  _hideVideo() {
+    if (this._videoSurface) this._videoSurface.hidden = true;
+  }
+  _reflectPad(id, on) {
+    const pad = this.componentElement.querySelector(`.wc-fx-pad[data-id="${CSS.escape(String(id))}"]`);
+    if (!pad) return;
+    pad.classList.toggle("is-playing", !!on);
+    pad.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  _markError(id) {
+    const pad = this.componentElement.querySelector(`.wc-fx-pad[data-id="${CSS.escape(String(id))}"]`);
+    if (pad) {
+      pad.classList.add("is-error");
+      pad.classList.remove("is-playing");
+      pad.setAttribute("aria-pressed", "false");
+    }
+  }
+  _clearError(id) {
+    const pad = this.componentElement.querySelector(`.wc-fx-pad[data-id="${CSS.escape(String(id))}"]`);
+    if (pad) pad.classList.remove("is-error");
+  }
+  // ---- Remote command / state ----------------------------------------------
+  _executeCommand(msg) {
+    switch (msg.action) {
+      case "play":
+        this._playResource(msg.resource_id);
+        break;
+      case "stop":
+        this._stopResource(msg.resource_id);
+        break;
+      case "stopAll":
+        this.stopAll();
+        break;
+      case "volume":
+        this.setMasterVolume(this._num(msg.value, 0) * 100);
+        break;
+      case "background":
+        if (msg.resource_id != null) this._playResource(msg.resource_id, true);
+        else this._stopBackground();
+        break;
+      case "requestState":
+        this._emitState();
+        break;
+      default:
+        break;
+    }
+  }
+  _afterChange() {
+    if (this.hasAttribute("controllable")) this._emitState();
+  }
+  _emitState() {
+    const playing = [];
+    this._active.forEach((entry, id) => {
+      playing.push({ id, type: entry.resource.type || "audio", is_background: !!entry.isBackground });
+    });
+    this.send({ type: "state", zone: this._zone, playing, master_volume: this._masterVolume / 100 });
+  }
+  // ---- WebSocket ------------------------------------------------------------
+  _connectWs() {
+    this._closeWs();
+    if (!this._wsUrl) return;
+    try {
+      const ws = new WebSocket(this._wsUrl);
+      this._ws = ws;
+      ws.addEventListener("message", (e) => this.receive(e.data));
+      ws.addEventListener("open", () => {
+        if (this.hasAttribute("controllable")) this._emitState();
+      });
+      ws.addEventListener("error", () => {
+      });
+      ws.addEventListener("close", () => {
+        if (this._ws === ws) this._ws = null;
+      });
+    } catch (ex) {
+      this._ws = null;
+    }
+  }
+  _closeWs() {
+    if (this._ws) {
+      try {
+        this._ws.close();
+      } catch (ex) {
+      }
+      this._ws = null;
+    }
+  }
+  // ---- Events / wiring ------------------------------------------------------
+  _handleClick(e) {
+    if (e.target.closest(".wc-fx-video-close")) {
+      this._stopVideoSurface();
+      return;
+    }
+    if (e.target.closest(".wc-fx-stop-all")) {
+      this.stopAll();
+      return;
+    }
+    const pad = e.target.closest(".wc-fx-pad");
+    if (!pad || !this.componentElement.contains(pad) || pad.disabled) return;
+    const id = pad.dataset.id;
+    const res = this._resById.get(String(id));
+    if (!res) return;
+    if (res.is_background && this._bgId === String(id)) this._stopResource(id);
+    else this._playResource(id);
+  }
+  _stopVideoSurface() {
+    if (this._videoActiveId != null) this._stopResource(this._videoActiveId);
+    else this._hideVideo();
+  }
+  _handleInput(e) {
+    if (e.target.closest(".wc-fx-master-input")) {
+      this.setMasterVolume(e.target.value);
+    }
+  }
+  _handleKeydown(e) {
+    if (!this._keymap || this._keymap.size === 0) return;
+    const t = e.target;
+    if (t && t.matches('input, textarea, select, [contenteditable="true"]')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const id = this._keymap.get(e.key);
+    if (id == null) return;
+    e.preventDefault();
+    const res = this._resById.get(String(id));
+    if (!res || (res.type || "audio") === "light") return;
+    if (res.is_background && this._bgId === String(id)) this._stopResource(id);
+    else this._playResource(id);
+  }
+  _emitPlay(res) {
+    this._emitEvent("wcfxboardplay", "wc-fx-board:play", {
+      bubbles: true,
+      composed: true,
+      detail: { id: res.id, type: res.type || "audio", zone: this._zone }
+    });
+  }
+  _emitStop(res) {
+    this._emitEvent("wcfxboardstop", "wc-fx-board:stop", {
+      bubbles: true,
+      composed: true,
+      detail: { id: res.id, type: res.type || "audio", zone: this._zone }
+    });
+  }
+  _wireEvents() {
+    super._wireEvents();
+    const el = this.componentElement;
+    el.removeEventListener("click", this._onClick);
+    el.addEventListener("click", this._onClick);
+    el.removeEventListener("input", this._onInput);
+    el.addEventListener("input", this._onInput);
+    document.removeEventListener("keydown", this._onKeydown);
+    document.addEventListener("keydown", this._onKeydown);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    const el = this.componentElement;
+    if (el) {
+      el.removeEventListener("click", this._onClick);
+      el.removeEventListener("input", this._onInput);
+    }
+    document.removeEventListener("keydown", this._onKeydown);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "master-volume") {
+      this.setMasterVolume(newValue);
+    } else if (attrName === "ws-url") {
+      this._wsUrl = newValue || "";
+      this._connectWs();
+    } else if (attrName === "resources") {
+      this.stopAll();
+      this._readConfig();
+      this._renderBoard();
+    } else if (["categories", "columns", "show-shortcuts", "zone", "controllable"].includes(attrName)) {
+      this._readConfig();
+      this._renderBoard();
+    } else if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  // ---- Helpers --------------------------------------------------------------
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed != null ? parsed : fallback;
+    } catch (ex) {
+      console.warn(`[wc-fx-board] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _num(v, dflt) {
+    const n = parseFloat(v);
+    return Number.isNaN(n) ? dflt : n;
+  }
+  _clamp(n, lo, hi) {
+    return Math.min(hi, Math.max(lo, n));
+  }
+};
+customElements.define(WcFxBoard.is, WcFxBoard);
+
+// src/js/components/wc-fx-console.js
+var WcFxConsole = class extends WcBaseComponent {
+  static get is() {
+    return "wc-fx-console";
+  }
+  static get observedAttributes() {
+    return ["id", "class", "zones", "master-volume", "ws-url"];
+  }
+  constructor() {
+    super();
+    this._zones = [];
+    this._zoneByKey = /* @__PURE__ */ new Map();
+    this._selectedKey = null;
+    this._masterVolume = 80;
+    this._liveState = /* @__PURE__ */ new Map();
+    this._wsUrl = "";
+    this._ws = null;
+    this._onClick = this._handleClick.bind(this);
+    this._onInput = this._handleInput.bind(this);
+    const compEl = this.querySelector(":scope > .wc-fx-console");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-fx-console");
+      this.appendChild(this.componentElement);
+    }
+  }
+  connectedCallback() {
+    super.connectedCallback();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._closeWs();
+    this._unWireEvents();
+  }
+  // ---- Public API -----------------------------------------------------------
+  get zones() {
+    return this._zones.slice();
+  }
+  set zones(arr) {
+    this._zones = Array.isArray(arr) ? arr : [];
+    this._indexZones();
+    this._renderConsole();
+  }
+  selectZone(idOrKey) {
+    const zone = this._resolveZone(idOrKey);
+    if (!zone) return;
+    this._selectedKey = this._zoneKey(zone);
+    this._renderConsole();
+    this._sendCommand("requestState");
+  }
+  send(obj) {
+    if (obj == null) return;
+    if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+      try {
+        this._ws.send(JSON.stringify(obj));
+      } catch (ex) {
+      }
+    }
+    this.dispatchEvent(new CustomEvent("message", { detail: obj }));
+  }
+  receive(json) {
+    let msg = json;
+    if (typeof json === "string") {
+      try {
+        msg = JSON.parse(json);
+      } catch (ex) {
+        return;
+      }
+    }
+    if (!msg || typeof msg !== "object") return;
+    if (msg.type !== "state") return;
+    const key = String(msg.zone);
+    this._liveState.set(key, {
+      playing: Array.isArray(msg.playing) ? msg.playing : [],
+      master_volume: msg.master_volume
+    });
+    this._refreshLive(key);
+  }
+  // ---- Config / rendering ---------------------------------------------------
+  _render() {
+    super._render();
+    this._readConfig();
+    this._renderConsole();
+    this._wireEvents();
+    this._connectWs();
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _readConfig() {
+    this._zones = this._parseJSON("zones", []);
+    this._masterVolume = this._clamp(this._num(this.getAttribute("master-volume"), 80), 0, 100);
+    this._wsUrl = this.getAttribute("ws-url") || "";
+    this._indexZones();
+  }
+  _indexZones() {
+    this._zoneByKey = /* @__PURE__ */ new Map();
+    this._zones.forEach((z) => {
+      if (z) this._zoneByKey.set(this._zoneKey(z), z);
+    });
+    if (!this._selectedKey || !this._zoneByKey.has(this._selectedKey)) {
+      this._selectedKey = this._zones.length ? this._zoneKey(this._zones[0]) : null;
+    }
+  }
+  _zoneKey(zone) {
+    return String(zone.event_name != null ? zone.event_name : zone.id);
+  }
+  _resolveZone(idOrKey) {
+    const s = String(idOrKey);
+    if (this._zoneByKey.has(s)) return this._zoneByKey.get(s);
+    return this._zones.find((z) => String(z.id) === s) || null;
+  }
+  _renderConsole() {
+    const el = this.componentElement;
+    if (!el) return;
+    el.innerHTML = "";
+    const zonesEl = document.createElement("div");
+    zonesEl.className = "wc-fx-console-zones";
+    zonesEl.setAttribute("role", "tablist");
+    zonesEl.setAttribute("aria-label", "Zones");
+    this._zones.forEach((z) => {
+      const key = this._zoneKey(z);
+      const zb = document.createElement("button");
+      zb.type = "button";
+      zb.className = "wc-fx-zone";
+      zb.dataset.zoneKey = key;
+      zb.setAttribute("role", "tab");
+      const selected = key === this._selectedKey;
+      zb.classList.toggle("is-selected", selected);
+      zb.setAttribute("aria-selected", selected ? "true" : "false");
+      const nm = document.createElement("span");
+      nm.className = "wc-fx-zone-name";
+      nm.textContent = z.name != null ? z.name : key;
+      zb.appendChild(nm);
+      const ind = document.createElement("span");
+      ind.className = "wc-fx-zone-indicator";
+      zb.appendChild(ind);
+      zonesEl.appendChild(zb);
+    });
+    el.appendChild(zonesEl);
+    const panel = document.createElement("div");
+    panel.className = "wc-fx-console-panel";
+    const zone = this._selectedKey != null ? this._zoneByKey.get(this._selectedKey) : null;
+    if (!zone) {
+      const empty = document.createElement("div");
+      empty.className = "wc-fx-console-empty";
+      empty.textContent = "No zone selected";
+      panel.appendChild(empty);
+      el.appendChild(panel);
+      this._zones.forEach((z) => this._refreshLive(this._zoneKey(z)));
+      return;
+    }
+    const header = document.createElement("div");
+    header.className = "wc-fx-board-header";
+    const master = document.createElement("label");
+    master.className = "wc-fx-master";
+    const mlabel = document.createElement("span");
+    mlabel.className = "wc-fx-master-label";
+    mlabel.textContent = "Master";
+    const minput = document.createElement("input");
+    minput.type = "range";
+    minput.className = "wc-fx-master-input";
+    minput.min = "0";
+    minput.max = "100";
+    minput.step = "1";
+    minput.value = String(this._masterVolume);
+    minput.setAttribute("aria-label", `Master volume for ${zone.name || this._selectedKey}`);
+    const mvalue = document.createElement("span");
+    mvalue.className = "wc-fx-master-value";
+    mvalue.textContent = `${Math.round(this._masterVolume)}%`;
+    master.appendChild(mlabel);
+    master.appendChild(minput);
+    master.appendChild(mvalue);
+    const stopAll = document.createElement("button");
+    stopAll.type = "button";
+    stopAll.className = "btn btn-sm wc-fx-stop-all";
+    stopAll.textContent = "Stop All";
+    stopAll.setAttribute("aria-label", `Stop all in ${zone.name || this._selectedKey}`);
+    header.appendChild(master);
+    header.appendChild(stopAll);
+    panel.appendChild(header);
+    const now = document.createElement("div");
+    now.className = "wc-fx-nowplaying";
+    now.setAttribute("aria-live", "polite");
+    panel.appendChild(now);
+    const resources = Array.isArray(zone.resources) ? zone.resources : [];
+    const categories = Array.isArray(zone.categories) ? zone.categories : [];
+    const groups = this._groupResources(resources, categories);
+    const cols = parseInt(zone.columns, 10) || 0;
+    const gridCols = cols > 0 ? `repeat(${cols}, minmax(0, 1fr))` : "";
+    groups.forEach((group) => {
+      const groupEl = document.createElement("div");
+      groupEl.className = "wc-fx-group";
+      if (group.cat && group.cat.color) groupEl.style.setProperty("--fx-cat-color", group.cat.color);
+      const gh = document.createElement("div");
+      gh.className = "wc-fx-group-header";
+      if (group.cat && group.cat.icon) {
+        const ic = document.createElement("wc-fa-icon");
+        ic.setAttribute("name", group.cat.icon);
+        ic.className = "wc-fx-group-icon";
+        gh.appendChild(ic);
+      }
+      const gt = document.createElement("span");
+      gt.className = "wc-fx-group-title";
+      gt.textContent = group.cat ? group.cat.name : "Uncategorized";
+      gh.appendChild(gt);
+      groupEl.appendChild(gh);
+      const grid = document.createElement("div");
+      grid.className = "wc-fx-grid";
+      if (gridCols) grid.style.gridTemplateColumns = gridCols;
+      group.items.forEach((res) => grid.appendChild(this._createPad(res)));
+      groupEl.appendChild(grid);
+      panel.appendChild(groupEl);
+    });
+    el.appendChild(panel);
+    this._zones.forEach((z) => this._refreshLive(this._zoneKey(z)));
+  }
+  _createPad(res) {
+    const type = res.type || "audio";
+    const isLight = type === "light";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "wc-fx-pad";
+    btn.dataset.id = String(res.id);
+    btn.dataset.type = type;
+    btn.setAttribute("aria-pressed", "false");
+    if (res.is_background) btn.classList.add("is-background");
+    if (isLight) {
+      btn.classList.add("is-light");
+      btn.disabled = true;
+    }
+    const nameEl = document.createElement("span");
+    nameEl.className = "wc-fx-pad-name";
+    nameEl.textContent = res.name != null ? res.name : String(res.id);
+    btn.appendChild(nameEl);
+    const meta = document.createElement("span");
+    meta.className = "wc-fx-pad-meta";
+    const typeBadge = document.createElement("span");
+    typeBadge.className = "badge badge-muted wc-fx-pad-type";
+    typeBadge.textContent = type;
+    meta.appendChild(typeBadge);
+    if (res.is_background) {
+      const bg = document.createElement("span");
+      bg.className = "badge badge-info wc-fx-pad-bg";
+      bg.textContent = "bg";
+      meta.appendChild(bg);
+    }
+    if (isLight) {
+      const soon = document.createElement("span");
+      soon.className = "badge badge-warning wc-fx-pad-soon";
+      soon.textContent = "coming soon";
+      meta.appendChild(soon);
+    }
+    btn.appendChild(meta);
+    let aria = res.name != null ? String(res.name) : String(res.id);
+    aria += `, ${type}`;
+    if (res.is_background) aria += ", background";
+    if (isLight) aria += ", coming soon";
+    btn.setAttribute("aria-label", aria);
+    return btn;
+  }
+  _groupResources(resources, categories) {
+    const catByName = /* @__PURE__ */ new Map();
+    (categories || []).forEach((c, i) => {
+      if (c && c.name != null) catByName.set(String(c.name), { ...c, _i: i });
+    });
+    const groups = /* @__PURE__ */ new Map();
+    (resources || []).forEach((r) => {
+      const name = r.category != null ? String(r.category) : "Uncategorized";
+      if (!groups.has(name)) groups.set(name, { cat: catByName.get(name) || { name }, items: [], _seen: groups.size });
+      groups.get(name).items.push(r);
+    });
+    const arr = Array.from(groups.values());
+    arr.sort((a, b) => {
+      const ai = catByName.has(a.cat.name) ? catByName.get(a.cat.name)._i : 1e3 + a._seen;
+      const bi = catByName.has(b.cat.name) ? catByName.get(b.cat.name)._i : 1e3 + b._seen;
+      return ai - bi;
+    });
+    arr.forEach((g) => g.items.sort((a, b) => this._num(a.order, 0) - this._num(b.order, 0) || String(a.name || "").localeCompare(String(b.name || ""))));
+    return arr;
+  }
+  // ---- Live state reflection ------------------------------------------------
+  _refreshLive(key) {
+    const state = this._liveState.get(key);
+    const count = state && Array.isArray(state.playing) ? state.playing.length : 0;
+    const zb = this.componentElement.querySelector(`.wc-fx-zone[data-zone-key="${CSS.escape(key)}"]`);
+    if (zb) {
+      const ind = zb.querySelector(".wc-fx-zone-indicator");
+      if (ind) {
+        ind.textContent = count > 0 ? String(count) : "";
+        ind.classList.toggle("is-active", count > 0);
+      }
+      zb.classList.toggle("is-playing", count > 0);
+    }
+    if (key !== this._selectedKey) return;
+    const zone = this._zoneByKey.get(key);
+    const now = this.componentElement.querySelector(".wc-fx-nowplaying");
+    if (now) {
+      now.innerHTML = "";
+      const items = state && state.playing ? state.playing : [];
+      if (!items.length) {
+        const idle = document.createElement("span");
+        idle.className = "wc-fx-nowplaying-idle";
+        idle.textContent = "Nothing playing";
+        now.appendChild(idle);
+      } else {
+        const label = document.createElement("span");
+        label.className = "wc-fx-nowplaying-label";
+        label.textContent = "Playing:";
+        now.appendChild(label);
+        items.forEach((p) => {
+          const res = zone && Array.isArray(zone.resources) ? zone.resources.find((r) => String(r.id) === String(p.id)) : null;
+          const chip = document.createElement("span");
+          chip.className = "badge wc-fx-nowplaying-chip";
+          if (p.is_background) chip.classList.add("badge-info");
+          chip.textContent = res && res.name != null ? res.name : String(p.id);
+          now.appendChild(chip);
+        });
+      }
+    }
+    const playingIds = new Set((state && state.playing || []).map((p) => String(p.id)));
+    this.componentElement.querySelectorAll(".wc-fx-pad").forEach((pad) => {
+      const on = playingIds.has(pad.dataset.id);
+      pad.classList.toggle("is-playing", on);
+      pad.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  // ---- Commands -------------------------------------------------------------
+  _sendCommand(action, resource_id, value) {
+    if (this._selectedKey == null) return;
+    const cmd = { type: "cmd", zone: this._selectedKey, action };
+    if (resource_id != null) cmd.resource_id = resource_id;
+    if (value != null) cmd.value = value;
+    this.send(cmd);
+    this._emitEvent("wcfxconsolecommand", "wc-fx-console:command", {
+      bubbles: true,
+      composed: true,
+      detail: { zone: this._selectedKey, action, resource_id: resource_id != null ? resource_id : null, value: value != null ? value : null }
+    });
+  }
+  // ---- WebSocket ------------------------------------------------------------
+  _connectWs() {
+    this._closeWs();
+    if (!this._wsUrl) return;
+    try {
+      const ws = new WebSocket(this._wsUrl);
+      this._ws = ws;
+      ws.addEventListener("message", (e) => this.receive(e.data));
+      ws.addEventListener("open", () => {
+        this._zones.forEach((z) => {
+          this.send({ type: "cmd", zone: this._zoneKey(z), action: "requestState" });
+        });
+      });
+      ws.addEventListener("error", () => {
+      });
+      ws.addEventListener("close", () => {
+        if (this._ws === ws) this._ws = null;
+      });
+    } catch (ex) {
+      this._ws = null;
+    }
+  }
+  _closeWs() {
+    if (this._ws) {
+      try {
+        this._ws.close();
+      } catch (ex) {
+      }
+      this._ws = null;
+    }
+  }
+  // ---- Events / wiring ------------------------------------------------------
+  _handleClick(e) {
+    const zoneBtn = e.target.closest(".wc-fx-zone");
+    if (zoneBtn && this.componentElement.contains(zoneBtn)) {
+      this.selectZone(zoneBtn.dataset.zoneKey);
+      return;
+    }
+    if (e.target.closest(".wc-fx-stop-all")) {
+      this._sendCommand("stopAll");
+      return;
+    }
+    const pad = e.target.closest(".wc-fx-pad");
+    if (!pad || !this.componentElement.contains(pad) || pad.disabled) return;
+    const zone = this._selectedKey != null ? this._zoneByKey.get(this._selectedKey) : null;
+    const res = zone && Array.isArray(zone.resources) ? zone.resources.find((r) => String(r.id) === String(pad.dataset.id)) : null;
+    const state = this._liveState.get(this._selectedKey);
+    const bgActive = state && (state.playing || []).some((p) => String(p.id) === String(pad.dataset.id) && p.is_background);
+    if (res && res.is_background && bgActive) this._sendCommand("stop", pad.dataset.id);
+    else this._sendCommand("play", pad.dataset.id);
+  }
+  _handleInput(e) {
+    if (e.target.closest(".wc-fx-master-input")) {
+      this._masterVolume = this._clamp(this._num(e.target.value, this._masterVolume), 0, 100);
+      const readout = this.componentElement.querySelector(".wc-fx-master-value");
+      if (readout) readout.textContent = `${Math.round(this._masterVolume)}%`;
+      this._sendCommand("volume", null, this._masterVolume / 100);
+    }
+  }
+  _wireEvents() {
+    super._wireEvents();
+    const el = this.componentElement;
+    el.removeEventListener("click", this._onClick);
+    el.addEventListener("click", this._onClick);
+    el.removeEventListener("input", this._onInput);
+    el.addEventListener("input", this._onInput);
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    const el = this.componentElement;
+    if (!el) return;
+    el.removeEventListener("click", this._onClick);
+    el.removeEventListener("input", this._onInput);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "zones") {
+      this._readConfig();
+      this._renderConsole();
+    } else if (attrName === "master-volume") {
+      this._masterVolume = this._clamp(this._num(newValue, 80), 0, 100);
+      const slider = this.componentElement.querySelector(".wc-fx-master-input");
+      if (slider) slider.value = String(this._masterVolume);
+      const readout = this.componentElement.querySelector(".wc-fx-master-value");
+      if (readout) readout.textContent = `${Math.round(this._masterVolume)}%`;
+    } else if (attrName === "ws-url") {
+      this._wsUrl = newValue || "";
+      this._connectWs();
+    } else if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue);
+    } else {
+      super._handleAttributeChange(attrName, newValue);
+    }
+  }
+  // ---- Helpers --------------------------------------------------------------
+  _parseJSON(attr, fallback) {
+    const raw = this.getAttribute(attr);
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed != null ? parsed : fallback;
+    } catch (ex) {
+      console.warn(`[wc-fx-console] invalid JSON for ${attr}`, ex);
+      return fallback;
+    }
+  }
+  _num(v, dflt) {
+    const n = parseFloat(v);
+    return Number.isNaN(n) ? dflt : n;
+  }
+  _clamp(n, lo, hi) {
+    return Math.min(hi, Math.max(lo, n));
+  }
+};
+customElements.define(WcFxConsole.is, WcFxConsole);
+
 // src/js/components/wc-form.js
 var WcForm = class extends WcBaseComponent {
   static get observedAttributes() {
