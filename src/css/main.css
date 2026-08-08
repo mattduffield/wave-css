@@ -13051,10 +13051,30 @@
         border: 1px solid var(--component-border-color);
     }
 
+    /* Auto-contrast on-color for text sitting on --primary-bg-color (themed header + primary
+       cells + active pager button). --primary-color flips light in dark themes while
+       --primary-bg-color stays a bright accent, so a static token can't stay legible in every
+       theme. Here we pick BLACK or WHITE by the accent's WCAG relative luminance (crossover
+       Y≈0.179, where black & white both give ~4.6:1) → AA in every theme, light + dark.
+       Falls back to --primary-color where relative color / pow() aren't supported. */
+    wc-table,
+    .wc-table {
+        --wc-on-primary: var(--primary-color);
+    }
+    @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+        wc-table,
+        .wc-table {
+            --wc-on-primary: rgb(from var(--primary-bg-color)
+                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255)
+                clamp(0, (0.179 - (0.2126*pow((r/255 + 0.055)/1.055, 2.4) + 0.7152*pow((g/255 + 0.055)/1.055, 2.4) + 0.0722*pow((b/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+        }
+    }
+
     /* Table headers */
     .wc-table thead {
         background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        color: var(--wc-on-primary);
     }
 
     .wc-table thead th {
@@ -13072,6 +13092,27 @@
 
     .wc-table tbody td {
         padding: 0.75rem 1rem;
+    }
+
+    /* Row-number ("#") column (row-numbers attr). An intentional, theme-consistent column:
+       the header matches the themed header exactly; the body cells are transparent so the
+       row stripe/hover paints through, with muted tabular numbers. Works light + dark. */
+    .wc-table thead th.wc-rownum {
+        background-color: var(--primary-bg-color);
+        color: var(--wc-on-primary);
+        width: 1%;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .wc-table td.wc-rownum {
+        padding: 0.75rem 1rem;
+        background: transparent;   /* let the row stripe/hover show through */
+        color: var(--text-2);
+        width: 1%;
+        white-space: nowrap;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
     }
 
     .wc-table tbody tr:last-child {
@@ -13251,7 +13292,7 @@
 
     .wc-table tr.wc-table-primary {
         background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        color: var(--wc-on-primary);
     }
 
     .wc-table tr.wc-table-success {
@@ -13300,7 +13341,7 @@
     .wc-table td.wc-table-primary,
     .wc-table th.wc-table-primary {
         background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        color: var(--wc-on-primary);
     }
 
     .wc-table td.wc-table-success,

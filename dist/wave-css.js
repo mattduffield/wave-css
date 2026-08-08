@@ -26718,12 +26718,8 @@ if (!customElements.get("wc-table")) {
           box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-bg-color, #3b82f6) 18%, transparent);
         }
 
-        /* Row-number column */
-        .wc-table th.wc-rownum, .wc-table td.wc-rownum {
-          width: 1%; white-space: nowrap; text-align: right;
-          color: var(--text-2, var(--text-1)); opacity: 0.75;
-          font-variant-numeric: tabular-nums;
-        }
+        /* Row-number (.wc-rownum) column styling lives in src/css/main.css (themed header +
+           transparent striped/hover body, centered tabular numbers) \u2014 single source of truth. */
 
         /* Pager \u2014 CSS grid gives each region a fixed x-position independent of content width,
            so paging (digit count / ellipses changing) never slides Prev/Next/jump/summary. */
@@ -26747,7 +26743,7 @@ if (!customElements.get("wc-table")) {
           font-variant-numeric: tabular-nums;
         }
         .wc-table-pager .btn.wc-page-active {
-          background: var(--primary-bg-color); color: var(--primary-color);
+          background: var(--primary-bg-color); color: var(--wc-on-primary, var(--primary-color));
           font-weight: 600; pointer-events: none;
         }
         .wc-table-pager .wc-table-ellipsis {
