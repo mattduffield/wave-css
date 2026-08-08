@@ -13054,7 +13054,7 @@
     /* Table headers */
     .wc-table thead {
         background-color: var(--primary-bg-color);
-        color: var(--primary-text-color);
+        color: var(--primary-color);
     }
 
     .wc-table thead th {
@@ -13251,7 +13251,7 @@
 
     .wc-table tr.wc-table-primary {
         background-color: var(--primary-bg-color);
-        color: var(--primary-text-color);
+        color: var(--primary-color);
     }
 
     .wc-table tr.wc-table-success {
@@ -13300,7 +13300,7 @@
     .wc-table td.wc-table-primary,
     .wc-table th.wc-table-primary {
         background-color: var(--primary-bg-color);
-        color: var(--primary-text-color);
+        color: var(--primary-color);
     }
 
     .wc-table td.wc-table-success,
