@@ -10614,7 +10614,7 @@
     left: 28px;
     border-radius: 50%;
     border: 16px solid #000;
-    border-color: var(--primary-bg-color) transparent var(--primary-bg-color) transparent;
+    border-color: var(--wc-spin-1) transparent var(--wc-spin-1) transparent;
     animation: ldio-qjspg5uvdp 1s linear infinite;
   }
   .ldio-qjspg5uvdp > div:nth-child(2),
@@ -10626,7 +10626,7 @@
     animation: ldio-qjspg5uvdp 1s linear infinite reverse;
   }
   .ldio-qjspg5uvdp > div:nth-child(2) {
-    border-color: transparent var(--secondary-bg-color) transparent var(--secondary-bg-color);
+    border-color: transparent var(--wc-spin-2) transparent var(--wc-spin-2);
   }
   .ldio-qjspg5uvdp > div:nth-child(3) {
     border-color: transparent;
@@ -10646,14 +10646,14 @@
     height: 16px;
     top: -16px;
     left: 48px;
-    background: var(--primary-bg-color);
+    background: var(--wc-spin-1);
     border-radius: 50%;
-    box-shadow: 0 128px 0 0 var(--primary-bg-color);
+    box-shadow: 0 128px 0 0 var(--wc-spin-1);
   }
   .ldio-qjspg5uvdp > div:nth-child(3) div:after {
     left: -16px;
     top: 48px;
-    box-shadow: 128px 0 0 0 var(--primary-bg-color);
+    box-shadow: 128px 0 0 0 var(--wc-spin-1);
   }
   .ldio-qjspg5uvdp > div:nth-child(4) {
     border-color: transparent;
@@ -10673,14 +10673,14 @@
     height: 16px;
     top: -16px;
     left: 30px;
-    background: var(--secondary-bg-color);
+    background: var(--wc-spin-2);
     border-radius: 50%;
-    box-shadow: 0 92px 0 0 var(--secondary-bg-color);
+    box-shadow: 0 92px 0 0 var(--wc-spin-2);
   }
   .ldio-qjspg5uvdp > div:nth-child(4) div:after {
     left: -16px;
     top: 30px;
-    box-shadow: 92px 0 0 0 var(--secondary-bg-color);
+    box-shadow: 92px 0 0 0 var(--wc-spin-2);
   }
   .loadingio-spinner-double-ring-v30pdg208rd {
     width: 200px;
@@ -10696,6 +10696,8 @@
     transform: translateZ(0) scale(1);
     backface-visibility: hidden;
     transform-origin: 0 0;
+    --wc-spin-1: color-mix(in oklab, var(--primary-bg-color) 55%, var(--text-1));
+    --wc-spin-2: color-mix(in oklab, var(--primary-bg-color) 45%, var(--text-2));
   }
   .ldio-qjspg5uvdp div {
     box-sizing: content-box;
