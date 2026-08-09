@@ -47134,48 +47134,30 @@ var WcFileUpload = class extends WcBaseFormComponent {
   }
   _buildSkeleton() {
     const labelText = this.getAttribute("lbl-label") || "";
-    if (labelText) {
-      const lbl = document.createElement("label");
-      lbl.textContent = labelText;
-      this.componentElement.appendChild(lbl);
-    }
-    const dz = document.createElement("div");
-    dz.classList.add("wc-file-upload-dropzone");
-    dz.setAttribute("role", "button");
-    dz.tabIndex = 0;
     const accept = this.getAttribute("accept") || "";
     const maxSize = this.getAttribute("max-size") || "";
-    dz.innerHTML = `
-      <wc-fa-icon name="cloud-arrow-up" size="1.25rem"></wc-fa-icon>
-      <div class="wc-file-upload-prompt">Drop a file or <span class="wc-file-upload-browse">browse</span></div>
-      <div class="wc-file-upload-hint">${accept ? accept : "Any file"}${maxSize ? ` \xB7 up to ${maxSize}MB` : ""}</div>
+    const disabled = this.hasAttribute("disabled");
+    this.componentElement.innerHTML = `
+      ${labelText ? `<label>${this._esc(labelText)}</label>` : ""}
+      <div class="wc-file-upload-dropzone${disabled ? " is-disabled" : ""}" role="button" tabindex="0">
+        <wc-fa-icon name="cloud-arrow-up" size="1.25rem"></wc-fa-icon>
+        <div class="wc-file-upload-prompt">Drop a file or <span class="wc-file-upload-browse">browse</span></div>
+        <div class="wc-file-upload-hint">${accept ? this._esc(accept) : "Any file"}${maxSize ? ` \xB7 up to ${this._esc(maxSize)}MB` : ""}</div>
+        <input type="file" class="wc-file-upload-input"${accept ? ` accept="${this._esc(accept)}"` : ""}${this.multiple ? " multiple" : ""}>
+      </div>
+      <wc-progress class="wc-file-upload-progress" percent="0" size="sm" hidden></wc-progress>
+      <div class="wc-file-upload-message" hidden></div>
+      <div class="wc-file-upload-previews"></div>
     `.trim();
-    const input2 = document.createElement("input");
-    input2.type = "file";
-    input2.classList.add("wc-file-upload-input");
-    if (accept) input2.accept = accept;
-    if (this.multiple) input2.multiple = true;
-    dz.appendChild(input2);
-    this.componentElement.appendChild(dz);
-    this.dropzoneEl = dz;
-    this.inputEl = input2;
-    const progress = document.createElement("wc-progress");
-    progress.classList.add("wc-file-upload-progress");
-    progress.setAttribute("percent", "0");
-    progress.setAttribute("size", "sm");
-    progress.hidden = true;
-    this.componentElement.appendChild(progress);
-    this.progressEl = progress;
-    const msg = document.createElement("div");
-    msg.classList.add("wc-file-upload-message");
-    msg.hidden = true;
-    this.componentElement.appendChild(msg);
-    this.messageEl = msg;
-    const previews = document.createElement("div");
-    previews.classList.add("wc-file-upload-previews");
-    this.componentElement.appendChild(previews);
-    this.previewsEl = previews;
-    if (this.hasAttribute("disabled")) dz.classList.add("is-disabled");
+    this.dropzoneEl = this.componentElement.querySelector(".wc-file-upload-dropzone");
+    this.inputEl = this.componentElement.querySelector(".wc-file-upload-input");
+    this.progressEl = this.componentElement.querySelector(".wc-file-upload-progress");
+    this.messageEl = this.componentElement.querySelector(".wc-file-upload-message");
+    this.previewsEl = this.componentElement.querySelector(".wc-file-upload-previews");
+  }
+  /** Minimal HTML escaper for attribute/text interpolation into innerHTML templates. */
+  _esc(s) {
+    return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   }
   // ---- Value seeding --------------------------------------------------------
   _seedValue() {
@@ -47332,49 +47314,23 @@ var WcFileUpload = class extends WcBaseFormComponent {
   _renderPreviews() {
     if (!this.previewsEl) return;
     this.previewsEl.innerHTML = "";
+    const disabled = this.hasAttribute("disabled");
     this._files.forEach((f, idx) => {
       const item = document.createElement("div");
       item.classList.add("wc-file-upload-item");
       item.dataset.index = idx;
       const isImage = f.type && f.type.startsWith("image/") || IMAGE_EXT.test(f.url);
-      if (isImage) {
-        const img = document.createElement("img");
-        img.classList.add("wc-file-upload-thumb");
-        img.src = f.url;
-        img.alt = f.name;
-        img.loading = "lazy";
-        item.appendChild(img);
-      } else {
-        const icon = document.createElement("wc-fa-icon");
-        icon.setAttribute("name", "file");
-        icon.setAttribute("size", "1rem");
-        icon.classList.add("wc-file-upload-fileicon");
-        item.appendChild(icon);
-      }
-      const meta = document.createElement("div");
-      meta.classList.add("wc-file-upload-itemmeta");
-      const link = document.createElement("a");
-      link.classList.add("wc-file-upload-itemname");
-      link.href = f.url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = f.name;
-      meta.appendChild(link);
-      if (f.size != null) {
-        const size = document.createElement("span");
-        size.classList.add("wc-file-upload-itemsize", "badge", "badge-muted");
-        size.textContent = this._formatSize(f.size);
-        meta.appendChild(size);
-      }
-      item.appendChild(meta);
-      if (!this.hasAttribute("disabled")) {
-        const rm = document.createElement("button");
-        rm.type = "button";
-        rm.classList.add("wc-file-upload-remove", "btn", "btn-sm");
-        rm.setAttribute("aria-label", "Remove file");
-        rm.innerHTML = "&times;";
-        item.appendChild(rm);
-      }
+      const media = isImage ? `<img class="wc-file-upload-thumb" src="${this._esc(f.url)}" alt="${this._esc(f.name)}" loading="lazy">` : `<wc-fa-icon name="file" size="1rem" class="wc-file-upload-fileicon"></wc-fa-icon>`;
+      const sizeHtml = f.size != null ? `<span class="wc-file-upload-itemsize badge badge-muted">${this._esc(this._formatSize(f.size))}</span>` : "";
+      const rmHtml = !disabled ? `<button type="button" class="wc-file-upload-remove btn btn-sm" aria-label="Remove file">&times;</button>` : "";
+      item.innerHTML = `
+        ${media}
+        <div class="wc-file-upload-itemmeta">
+          <a class="wc-file-upload-itemname" href="${this._esc(f.url)}" target="_blank" rel="noopener">${this._esc(f.name)}</a>
+          ${sizeHtml}
+        </div>
+        ${rmHtml}
+      `.trim();
       this.previewsEl.appendChild(item);
     });
   }
