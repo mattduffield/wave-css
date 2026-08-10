@@ -434,7 +434,7 @@ class WcInput extends WcBaseFormComponent {
     // Suppress browser + password-manager autofill on text-like inputs only (autocomplete="off"
     // alone is ignored for address-shaped inputs). Skip types that never autofill. Respects an
     // author-set autocomplete; the passthrough below still forwards an explicit autocomplete attr.
-    if (!['hidden', 'checkbox', 'radio', 'color', 'file'].includes(type)) {
+    if (!['hidden', 'checkbox', 'radio', 'color', 'file', 'range', 'button', 'submit'].includes(type)) {
       suppressAutofill(this.formElement, this.getAttribute('autocomplete'));
     }
     // FACE: the inner control gets an id (for <label for>) but NO name — the host carries the
