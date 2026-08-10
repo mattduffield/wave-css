@@ -45743,6 +45743,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
           lbl.textContent = _WcFormArray.ADDRESS_LABELS[sub] || sub;
           const inp = document.createElement("input");
           inp.type = "text";
+          inp.setAttribute("autocomplete", "off");
           inp.classList.add("wc-form-array-control");
           inp.setAttribute("data-col", `${col.field}.${sub}`);
           inp.name = subName;
@@ -45759,6 +45760,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
         if (visible.indexOf(sub) !== -1) return;
         const h = document.createElement("input");
         h.type = "hidden";
+        h.setAttribute("autocomplete", "off");
         h.setAttribute("data-col", `${col.field}.${sub}`);
         h.name = `${this._prefix}.${index}.${col.field}.${sub}`;
         h.value = a[sub] != null ? a[sub] : "";
