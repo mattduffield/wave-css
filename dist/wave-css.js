@@ -42288,7 +42288,9 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     this.formElement = document.createElement("input");
     this.formElement.setAttribute("form-element", "");
     this.formElement.setAttribute("type", type);
-    suppressAutofill(this.formElement, this.getAttribute("autocomplete"));
+    if (!["hidden", "checkbox", "radio", "color", "file"].includes(type)) {
+      suppressAutofill(this.formElement, this.getAttribute("autocomplete"));
+    }
     if (name && type !== "radio") this.formElement.id = name;
     if (type === "radio") {
       let options = [];
