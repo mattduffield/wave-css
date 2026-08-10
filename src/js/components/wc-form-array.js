@@ -63,6 +63,7 @@
  */
 
 import { WcBaseComponent } from './wc-base-component.js';
+import { suppressAutofill } from './helper-function.js';
 
 class WcFormArray extends WcBaseComponent {
   static get is() {
@@ -534,7 +535,7 @@ class WcFormArray extends WcBaseComponent {
           lbl.textContent = WcFormArray.ADDRESS_LABELS[sub] || sub;
           const inp = document.createElement('input');
           inp.type = 'text';
-          inp.setAttribute('autocomplete', 'off');
+          suppressAutofill(inp);   // full guard: autocomplete="off" alone is ignored for address inputs
           inp.classList.add('wc-form-array-control');
           inp.setAttribute('data-col', `${col.field}.${sub}`);
           inp.name = subName;
@@ -553,7 +554,7 @@ class WcFormArray extends WcBaseComponent {
         if (visible.indexOf(sub) !== -1) return;
         const h = document.createElement('input');
         h.type = 'hidden';
-        h.setAttribute('autocomplete', 'off');
+        suppressAutofill(h);
         h.setAttribute('data-col', `${col.field}.${sub}`);
         h.name = `${this._prefix}.${index}.${col.field}.${sub}`;
         h.value = a[sub] != null ? a[sub] : '';

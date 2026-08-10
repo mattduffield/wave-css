@@ -26,6 +26,7 @@
 
 
 import { WcBaseFormComponent } from './wc-base-form-component.js';
+import { suppressAutofill } from './helper-function.js';
 
 class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
@@ -326,13 +327,7 @@ class WcSelect extends WcBaseFormComponent {
       // dropdown should show (unrelated saved values like "AAA"/"prospect" leaking in, and the
       // popup covering the options, were the symptoms). Default autocomplete to "off" unless the
       // author explicitly set one; add the belt-and-suspenders guards password managers honor.
-      ipt.setAttribute('autocomplete', this.getAttribute('autocomplete') || 'off');
-      ipt.setAttribute('autocorrect', 'off');
-      ipt.setAttribute('autocapitalize', 'off');
-      ipt.setAttribute('spellcheck', 'false');
-      ipt.setAttribute('data-lpignore', 'true');
-      ipt.setAttribute('data-1p-ignore', '');
-      ipt.setAttribute('data-form-type', 'other');
+      suppressAutofill(ipt, this.getAttribute('autocomplete'));
 
       // When no-filter is set, make input readonly (pick-only)
       if (this.hasAttribute('no-filter')) {

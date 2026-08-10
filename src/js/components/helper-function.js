@@ -8,6 +8,25 @@ export function generateUniqueId() {
   });
 }
 
+/**
+ * Belt-and-suspenders suppression of browser + password-manager autofill on an input.
+ * `autocomplete="off"` alone is ignored by Chrome/Safari for address-shaped inputs, so we
+ * also set the guards LastPass / 1Password / Dashlane / Bitwarden honor. Single source of
+ * truth — call from any component that generates its own <input>.
+ * @param {HTMLElement} el - the input/textarea to harden
+ * @param {string} [preferredAutocomplete] - author-set autocomplete value; defaults to 'off'
+ */
+export function suppressAutofill(el, preferredAutocomplete) {
+  if (!el) return;
+  el.setAttribute('autocomplete', preferredAutocomplete || 'off');
+  el.setAttribute('autocorrect', 'off');
+  el.setAttribute('autocapitalize', 'off');
+  el.setAttribute('spellcheck', 'false');
+  el.setAttribute('data-lpignore', 'true');
+  el.setAttribute('data-1p-ignore', '');
+  el.setAttribute('data-form-type', 'other');
+}
+
 // ─── Self-hostable third-party asset loading ─────────────────────────────────
 // Opt-in: set `window.WaveAssetBase` (e.g. '/static/js') to load third-party libs
 // from a local mirror FIRST, with automatic CDN fallback on any load failure.

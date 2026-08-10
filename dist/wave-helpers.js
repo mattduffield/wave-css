@@ -44,6 +44,7 @@ var WaveHelpers = (() => {
     processJSONField: () => processJSONField,
     show: () => show,
     sleep: () => sleep,
+    suppressAutofill: () => suppressAutofill,
     testSchema: () => testSchema,
     toggleIndicator: () => toggleIndicator,
     updateJetTemplate: () => updateJetTemplate,
@@ -62,6 +63,16 @@ var WaveHelpers = (() => {
     return "xxxx-xxxx-xxxx-xxxx".replace(/[x]/g, () => {
       return (Math.random() * 16 | 0).toString(16);
     });
+  }
+  function suppressAutofill(el, preferredAutocomplete) {
+    if (!el) return;
+    el.setAttribute("autocomplete", preferredAutocomplete || "off");
+    el.setAttribute("autocorrect", "off");
+    el.setAttribute("autocapitalize", "off");
+    el.setAttribute("spellcheck", "false");
+    el.setAttribute("data-lpignore", "true");
+    el.setAttribute("data-1p-ignore", "");
+    el.setAttribute("data-form-type", "other");
   }
   function waveLocalAssetUrl(cdnUrl) {
     const raw = typeof window !== "undefined" && window.WaveAssetBase ? String(window.WaveAssetBase) : "";

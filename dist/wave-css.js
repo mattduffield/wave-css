@@ -7,6 +7,16 @@ function generateUniqueId() {
     return (Math.random() * 16 | 0).toString(16);
   });
 }
+function suppressAutofill(el, preferredAutocomplete) {
+  if (!el) return;
+  el.setAttribute("autocomplete", preferredAutocomplete || "off");
+  el.setAttribute("autocorrect", "off");
+  el.setAttribute("autocapitalize", "off");
+  el.setAttribute("spellcheck", "false");
+  el.setAttribute("data-lpignore", "true");
+  el.setAttribute("data-1p-ignore", "");
+  el.setAttribute("data-form-type", "other");
+}
 function waveLocalAssetUrl(cdnUrl) {
   const raw = typeof window !== "undefined" && window.WaveAssetBase ? String(window.WaveAssetBase) : "";
   if (!raw) return null;
@@ -13549,7 +13559,7 @@ var WcAddress = class extends WcBaseFormComponent {
     this.formElement.setAttribute("form-element", "");
     this.formElement.setAttribute("class", "form-control");
     this.formElement.setAttribute("placeholder", placeholder);
-    this.formElement.setAttribute("autocomplete", "off");
+    suppressAutofill(this.formElement, this.getAttribute("autocomplete"));
     if (value) this.formElement.value = value;
     const eltClass = this.getAttribute("elt-class");
     if (eltClass) this.formElement.setAttribute("class", eltClass);
@@ -42278,6 +42288,7 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
     this.formElement = document.createElement("input");
     this.formElement.setAttribute("form-element", "");
     this.formElement.setAttribute("type", type);
+    suppressAutofill(this.formElement, this.getAttribute("autocomplete"));
     if (name && type !== "radio") this.formElement.id = name;
     if (type === "radio") {
       let options = [];
@@ -43449,13 +43460,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       ipt.id = "dropdownInput";
       ipt.type = "text";
       ipt.setAttribute("placeholder", "Add or select...");
-      ipt.setAttribute("autocomplete", this.getAttribute("autocomplete") || "off");
-      ipt.setAttribute("autocorrect", "off");
-      ipt.setAttribute("autocapitalize", "off");
-      ipt.setAttribute("spellcheck", "false");
-      ipt.setAttribute("data-lpignore", "true");
-      ipt.setAttribute("data-1p-ignore", "");
-      ipt.setAttribute("data-form-type", "other");
+      suppressAutofill(ipt, this.getAttribute("autocomplete"));
       if (this.hasAttribute("no-filter")) {
         ipt.setAttribute("readonly", "");
       }
@@ -45743,7 +45748,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
           lbl.textContent = _WcFormArray.ADDRESS_LABELS[sub] || sub;
           const inp = document.createElement("input");
           inp.type = "text";
-          inp.setAttribute("autocomplete", "off");
+          suppressAutofill(inp);
           inp.classList.add("wc-form-array-control");
           inp.setAttribute("data-col", `${col.field}.${sub}`);
           inp.name = subName;
@@ -45760,7 +45765,7 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
         if (visible.indexOf(sub) !== -1) return;
         const h = document.createElement("input");
         h.type = "hidden";
-        h.setAttribute("autocomplete", "off");
+        suppressAutofill(h);
         h.setAttribute("data-col", `${col.field}.${sub}`);
         h.name = `${this._prefix}.${index}.${col.field}.${sub}`;
         h.value = a[sub] != null ? a[sub] : "";
@@ -49386,6 +49391,7 @@ export {
   processJSONField,
   show,
   sleep,
+  suppressAutofill,
   testSchema,
   toggleIndicator,
   updateJetTemplate,

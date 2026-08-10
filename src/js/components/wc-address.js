@@ -36,6 +36,7 @@
  */
 
 import { WcBaseFormComponent } from './wc-base-form-component.js';
+import { suppressAutofill } from './helper-function.js';
 
 class WcAddress extends WcBaseFormComponent {
   static get is() {
@@ -467,7 +468,7 @@ class WcAddress extends WcBaseFormComponent {
     this.formElement.setAttribute('form-element', '');
     this.formElement.setAttribute('class', 'form-control');
     this.formElement.setAttribute('placeholder', placeholder);
-    this.formElement.setAttribute('autocomplete', 'off');
+    suppressAutofill(this.formElement, this.getAttribute('autocomplete'));
     if (value) this.formElement.value = value;
 
     const eltClass = this.getAttribute('elt-class');

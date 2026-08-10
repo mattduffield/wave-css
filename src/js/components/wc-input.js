@@ -34,6 +34,7 @@
  */
 
 import { WcBaseFormComponent } from './wc-base-form-component.js';
+import { suppressAutofill } from './helper-function.js';
 
 class WcInput extends WcBaseFormComponent {
   static get observedAttributes() {
@@ -430,6 +431,10 @@ class WcInput extends WcBaseFormComponent {
     this.formElement = document.createElement('input');
     this.formElement.setAttribute('form-element', '');
     this.formElement.setAttribute('type', type);
+    // Suppress browser + password-manager autofill (autocomplete="off" alone is ignored for
+    // address-shaped inputs). Respects an author-set autocomplete; the passthrough below still
+    // forwards an explicit autocomplete attribute if present.
+    suppressAutofill(this.formElement, this.getAttribute('autocomplete'));
     // FACE: the inner control gets an id (for <label for>) but NO name — the host carries the
     // name and submits the value via setFormValue (consistent with the modern components).
     if (name && type !== 'radio') this.formElement.id = name;
