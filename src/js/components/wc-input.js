@@ -295,7 +295,13 @@ class WcInput extends WcBaseFormComponent {
       return;
     }    
     if (this.passThruAttributes.includes(attrName)) {
-      this.formElement?.setAttribute(attrName, newValue);
+      if (attrName === 'autocomplete' && this.formElement) {
+        // Route through the guard so a later author autocomplete="off" can't re-enable autofill.
+        // 'off'/null → the token; real values (e.g. 'email') are forwarded unchanged.
+        suppressAutofill(this.formElement, newValue);
+      } else {
+        this.formElement?.setAttribute(attrName, newValue);
+      }
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {
       const type = this.getAttribute('type') || 'text';

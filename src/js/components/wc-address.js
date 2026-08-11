@@ -422,7 +422,13 @@ class WcAddress extends WcBaseFormComponent {
     }
 
     if (this.passThruAttributes.includes(attrName)) {
-      this.formElement?.setAttribute(attrName, newValue);
+      if (attrName === 'autocomplete' && this.formElement) {
+        // Route through the guard so a later author autocomplete="off" can't re-enable autofill.
+        // 'off'/null → the token; real values are forwarded unchanged.
+        suppressAutofill(this.formElement, newValue);
+      } else {
+        this.formElement?.setAttribute(attrName, newValue);
+      }
       return;
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {

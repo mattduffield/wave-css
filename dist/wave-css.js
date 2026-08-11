@@ -13526,7 +13526,11 @@ var WcAddress = class extends WcBaseFormComponent {
       return;
     }
     if (this.passThruAttributes.includes(attrName)) {
-      this.formElement?.setAttribute(attrName, newValue);
+      if (attrName === "autocomplete" && this.formElement) {
+        suppressAutofill(this.formElement, newValue);
+      } else {
+        this.formElement?.setAttribute(attrName, newValue);
+      }
       return;
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {
@@ -42189,7 +42193,11 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       return;
     }
     if (this.passThruAttributes.includes(attrName)) {
-      this.formElement?.setAttribute(attrName, newValue);
+      if (attrName === "autocomplete" && this.formElement) {
+        suppressAutofill(this.formElement, newValue);
+      } else {
+        this.formElement?.setAttribute(attrName, newValue);
+      }
     }
     if (this.passThruEmptyAttributes.includes(attrName)) {
       const type = this.getAttribute("type") || "text";
