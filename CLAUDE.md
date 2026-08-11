@@ -81,6 +81,19 @@ The build process (esbuild.config.js) generates:
 - `wave-helpers.js` - IIFE bundle with helper functions
 - `wave-css.min.css` / `wave-css.css` - CSS bundles with all themes
 
+### Autofill-suppression token (`window.WcConfig.autofillToken`)
+
+Wave's shared `suppressAutofill(el, preferredAutocomplete)` helper (in `helper-function.js`, used by `wc-input`, `wc-address`, `wc-form-array`, `wc-select`) hardens generated inputs against Chrome/Safari + password-manager autofill. `autocomplete="off"` is ignored for address-shaped fields, so it sets `autocomplete` to a **non-standard token** the browser won't recognize (nothing to autofill) plus the guards password managers honor (`autocorrect`/`autocapitalize=off`, `spellcheck=false`, `data-lpignore`, `data-1p-ignore`, `data-form-type=other`).
+
+The token is **runtime-configurable — no Wave rebuild needed** — and is resolved **at call time** (set the global before components upgrade). Precedence: `window.WcConfig.autofillToken` → `window.WcAutofillToken` → default **`'password-contact'`**.
+
+```html
+<script>window.WcConfig = { autofillToken: 'my-app-nofill' };</script>
+<script type="module" src="/static/js/wave-css-0.0.1/wave-css.min.js"></script>
+```
+
+A **legitimate author value is preserved per-field** — an explicit `<wc-input autocomplete="email">` (or `one-time-code`, etc.) is kept as-is; only an empty value or `autocomplete="off"` is treated as "no preference" and falls back to the configurable token. So set the global for the app-wide default and override per field with a real `autocomplete`.
+
 ### Self-hosting third-party assets (`window.WaveAssetBase`)
 
 Wave lazy-loads third-party libs (chart.js, CodeMirror, maplibre, dompurify, marked, prism, jspdf, luxon, transformers, …) from public CDNs. To self-host them (CDN-outage resilience) set a **single global before the bundle runs**:

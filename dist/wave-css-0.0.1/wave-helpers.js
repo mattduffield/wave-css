@@ -21,6 +21,7 @@ var WaveHelpers = (() => {
   var helper_function_exports = {};
   __export(helper_function_exports, {
     applyRule: () => applyRule,
+    autofillToken: () => autofillToken,
     checkResources: () => checkResources,
     countElements: () => countElements,
     disableSortable: () => disableSortable,
@@ -64,9 +65,17 @@ var WaveHelpers = (() => {
       return (Math.random() * 16 | 0).toString(16);
     });
   }
+  function autofillToken() {
+    if (typeof window !== "undefined") {
+      if (window.WcConfig && window.WcConfig.autofillToken) return window.WcConfig.autofillToken;
+      if (window.WcAutofillToken) return window.WcAutofillToken;
+    }
+    return "password-contact";
+  }
   function suppressAutofill(el, preferredAutocomplete) {
     if (!el) return;
-    el.setAttribute("autocomplete", preferredAutocomplete || "off");
+    const pref = preferredAutocomplete && String(preferredAutocomplete).toLowerCase() !== "off" ? preferredAutocomplete : autofillToken();
+    el.setAttribute("autocomplete", pref);
     el.setAttribute("autocorrect", "off");
     el.setAttribute("autocapitalize", "off");
     el.setAttribute("spellcheck", "false");

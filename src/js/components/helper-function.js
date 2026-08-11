@@ -9,16 +9,40 @@ export function generateUniqueId() {
 }
 
 /**
+ * Runtime-configurable token used to suppress Chrome/Safari autofill. `autocomplete="off"` is
+ * ignored for address-shaped inputs, but a NON-STANDARD token the browser doesn't recognize is
+ * honored (nothing to autofill). Configurable WITHOUT a Wave rebuild — resolved at CALL time so
+ * setting the global before components upgrade takes effect:
+ *   window.WcConfig = { autofillToken: 'my-token' };   // preferred (WcIconConfig-style knob)
+ *   window.WcAutofillToken = 'my-token';               // alternate single global
+ * Default: 'password-contact'.
+ */
+export function autofillToken() {
+  if (typeof window !== 'undefined') {
+    if (window.WcConfig && window.WcConfig.autofillToken) return window.WcConfig.autofillToken;
+    if (window.WcAutofillToken) return window.WcAutofillToken;
+  }
+  return 'password-contact';
+}
+
+/**
  * Belt-and-suspenders suppression of browser + password-manager autofill on an input.
- * `autocomplete="off"` alone is ignored by Chrome/Safari for address-shaped inputs, so we
- * also set the guards LastPass / 1Password / Dashlane / Bitwarden honor. Single source of
- * truth — call from any component that generates its own <input>.
+ * `autocomplete="off"` alone is ignored by Chrome/Safari for address-shaped inputs, so we set
+ * `autocomplete` to the configurable non-standard `autofillToken()` (see above) plus the guards
+ * LastPass / 1Password / Dashlane / Bitwarden honor. Single source of truth — call from any
+ * component that generates its own <input>.
+ *
+ * A legitimate author value (e.g. 'email', 'one-time-code') is preserved as-is; an empty value
+ * or 'off' is treated as "no preference" and falls back to the configurable token.
  * @param {HTMLElement} el - the input/textarea to harden
- * @param {string} [preferredAutocomplete] - author-set autocomplete value; defaults to 'off'
+ * @param {string} [preferredAutocomplete] - author-set autocomplete value; '' / 'off' → token
  */
 export function suppressAutofill(el, preferredAutocomplete) {
   if (!el) return;
-  el.setAttribute('autocomplete', preferredAutocomplete || 'off');
+  const pref = preferredAutocomplete && String(preferredAutocomplete).toLowerCase() !== 'off'
+    ? preferredAutocomplete
+    : autofillToken();
+  el.setAttribute('autocomplete', pref);
   el.setAttribute('autocorrect', 'off');
   el.setAttribute('autocapitalize', 'off');
   el.setAttribute('spellcheck', 'false');

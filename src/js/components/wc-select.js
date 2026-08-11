@@ -26,7 +26,7 @@
 
 
 import { WcBaseFormComponent } from './wc-base-form-component.js';
-import { suppressAutofill } from './helper-function.js';
+import { suppressAutofill, autofillToken } from './helper-function.js';
 
 class WcSelect extends WcBaseFormComponent {
   static get observedAttributes() {
@@ -274,10 +274,11 @@ class WcSelect extends WcBaseFormComponent {
     if (size) {
       select.setAttribute('size', size);
     }
+    // Single source of truth for the token: a real author value is kept; '' / 'off' → the
+    // runtime-configurable autofillToken() (same default the chip input uses below).
     const autocomplete = this.getAttribute('autocomplete');
-    if (autocomplete) {
-      select.setAttribute('autocomplete', autocomplete);
-    }
+    select.setAttribute('autocomplete',
+      autocomplete && autocomplete.toLowerCase() !== 'off' ? autocomplete : autofillToken());
     
     // Process children maintaining optgroup structure
     const children = Array.from(this.children);
