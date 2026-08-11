@@ -78,12 +78,14 @@ class WcFormArray extends WcBaseComponent {
   }
 
   // Address sub-fields carried alongside the visible street (wc-address).
+  // `street2` (apt/suite) is manually entered — geocode never returns it, and _handleAddressChange
+  // only overwrites subs the result contains (`if (d[sub] != null)`), so the user's value survives.
   static get ADDRESS_SUBFIELDS() {
-    return ['formatted_address', 'city', 'state', 'postal_code', 'county', 'country', 'lat', 'lng'];
+    return ['street2', 'formatted_address', 'city', 'state', 'postal_code', 'county', 'country', 'lat', 'lng'];
   }
   static get ADDRESS_LABELS() {
-    return { street: 'Street', city: 'City', state: 'State', postal_code: 'Zip', county: 'County',
-             country: 'Country', formatted_address: 'Address', lat: 'Lat', lng: 'Lng' };
+    return { street: 'Street', street2: 'Apt / Suite', city: 'City', state: 'State', postal_code: 'Zip',
+             county: 'County', country: 'Country', formatted_address: 'Address', lat: 'Lat', lng: 'Lng' };
   }
 
   // Resolve `show-fields`: null/absent → none visible; boolean ('') → City/State/Zip; else the list.
