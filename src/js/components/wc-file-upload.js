@@ -21,7 +21,8 @@
  *    </wc-file-upload>
  *
  *  Endpoint contract (POST multipart/form-data to `upload-url`):
- *    fields: file (required), category (default "attachments"), record_id (default "general")
+ *    fields: file (required; field name overridable via `file-field`), category (default "attachments"),
+ *            record_id (default "general"), plus any `extra-fields` key/value pairs (passthrough).
  *    success → JSON { url, filename, originalName, contentType, size }; the component reads `url`.
  *    error   → non-200 JSON { error }; the message is surfaced and the field is left unset.
  *
@@ -29,7 +30,10 @@
  *
  *  Attributes:
  *    name (required), value, lbl-label, accept, max-size (MB), upload-url (default /upload),
- *    category (default attachments), record-id (default general), multiple, required, disabled
+ *    category (default attachments), record-id (default general), multiple, required, disabled,
+ *    extra-fields (JSON object of string field→value appended to each upload; reserved keys
+ *      — the file field, category, record_id — are NOT overridden; malformed JSON is ignored),
+ *    file-field (multipart field name for the file itself; default "file")
  *
  *  Events (bubbling, composed):
  *    wcfileuploadchange — on add/remove; detail { value }  (legacy alias wc-file-upload:change)
@@ -49,7 +53,8 @@ class WcFileUpload extends WcBaseFormComponent {
 
   static get observedAttributes() {
     return ['name', 'id', 'class', 'value', 'lbl-label', 'accept', 'max-size',
-      'upload-url', 'category', 'record-id', 'multiple', 'required', 'disabled'];
+      'upload-url', 'category', 'record-id', 'extra-fields', 'file-field',
+      'multiple', 'required', 'disabled'];
   }
 
   constructor() {
@@ -241,10 +246,27 @@ class WcFileUpload extends WcBaseFormComponent {
 
   _uploadFile(file) {
     const url = this.getAttribute('upload-url') || '/upload';
+    const fileField = this.getAttribute('file-field') || 'file';
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append(fileField, file);
     fd.append('category', this.getAttribute('category') || 'attachments');
     fd.append('record_id', this.getAttribute('record-id') || 'general');
+
+    // Arbitrary extra fields — a JSON object of string field→value pairs. The reserved slots
+    // (the file field, category, record_id) are NOT overridden; malformed JSON is a no-op.
+    const rawExtra = this.getAttribute('extra-fields');
+    if (rawExtra) {
+      try {
+        const parsed = JSON.parse(rawExtra);
+        if (parsed && typeof parsed === 'object') {
+          const reserved = new Set([fileField, 'category', 'record_id']);
+          for (const [k, v] of Object.entries(parsed)) {
+            if (reserved.has(k)) continue;
+            fd.append(k, v == null ? '' : v);
+          }
+        }
+      } catch (ex) { /* malformed extra-fields JSON → ignore, upload the base fields */ }
+    }
 
     const xhr = new XMLHttpRequest();
     this._activeUploads++;

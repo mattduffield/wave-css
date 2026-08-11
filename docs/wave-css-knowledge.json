@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.45.0",
+    "version": "1.46.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-08-11"
   },
@@ -735,12 +735,14 @@
           "record-id",
           "multiple",
           "required",
-          "disabled"
+          "disabled",
+          "extra-fields",
+          "file-field"
         ],
         "events": [
           "wcfileuploadchange"
         ],
-        "notes": "Extends WcBaseFormComponent (form-associated). On pick/drop it validates `accept` (mime patterns: image/*, application/pdf, .ext) and `max-size` (MB) CLIENT-SIDE (clear message on reject, no upload), then POSTs multipart/form-data to `upload-url` (default /upload) via XHR with progress: fields file (the binary), category (default 'attachments'), record_id (default 'general'). Success → JSON { url, filename, originalName, contentType, size }; the component stores `url` via _internals.setFormValue under the host `name` and shows a preview. Error → non-200 { error } surfaced as a message, field left unset. VALUE: single → the URL string; `multiple` → a JSON array of URL strings (host preference over CSV). `value` seeds an existing file on edit (shows its preview, basename-derived name) and round-trips. PREVIEW: image (contentType image/*, image extension, or data:image URI) → thumbnail <img>; otherwise a file chip (wc-fa-icon + name + size badge + link). A remove control clears the value (one entry in multiple mode). `required` participates in form validity via setValidity (no file → valueMissing → element & form invalid). The internal file <input> carries NO name (raw file never submitted — only the FACE url value); the base formElement is nulled so it isn't mistaken for the value source. Uses wc-progress for the upload bar. htmx-safe: re-seeds on value change and initializes on dynamic insert. Styles in @layer wc.usage. Event wcfileuploadchange detail { value } on add/remove (legacy alias wc-file-upload:change). Generation: schema fields typed file/image/attachment → category = entity name, record-id = the record id. Direct-to-R2 presigned upload (for >10MB) is out of scope; the /upload proxy handles it.",
+        "notes": "Extends WcBaseFormComponent (form-associated). On pick/drop it validates `accept` (mime patterns: image/*, application/pdf, .ext) and `max-size` (MB) CLIENT-SIDE (clear message on reject, no upload), then POSTs multipart/form-data to `upload-url` (default /upload) via XHR with progress: fields file (the binary), category (default 'attachments'), record_id (default 'general'). Success → JSON { url, filename, originalName, contentType, size }; the component stores `url` via _internals.setFormValue under the host `name` and shows a preview. Error → non-200 { error } surfaced as a message, field left unset. VALUE: single → the URL string; `multiple` → a JSON array of URL strings (host preference over CSV). `value` seeds an existing file on edit (shows its preview, basename-derived name) and round-trips. PREVIEW: image (contentType image/*, image extension, or data:image URI) → thumbnail <img>; otherwise a file chip (wc-fa-icon + name + size badge + link). A remove control clears the value (one entry in multiple mode). `required` participates in form validity via setValidity (no file → valueMissing → element & form invalid). The internal file <input> carries NO name (raw file never submitted — only the FACE url value); the base formElement is nulled so it isn't mistaken for the value source. Uses wc-progress for the upload bar. htmx-safe: re-seeds on value change and initializes on dynamic insert. Styles in @layer wc.usage. Event wcfileuploadchange detail { value } on add/remove (legacy alias wc-file-upload:change). Generation: schema fields typed file/image/attachment → category = entity name, record-id = the record id. Direct-to-R2 presigned upload (for >10MB) is out of scope; the /upload proxy handles it. `extra-fields` (JSON object of string field→value) appends arbitrary multipart fields to each upload beyond the fixed category/record_id — reserved keys (the file field, category, record_id) are NOT overridden; malformed JSON is ignored. `file-field` overrides the multipart field name for the file itself (default 'file').",
         "usage": "<wc-file-upload name=\"document_url\" value=\"{{ Record.document_url }}\" lbl-label=\"Document\"\n    accept=\"image/*,application/pdf\" max-size=\"10\" upload-url=\"/upload\"\n    category=\"attachments\" record-id=\"{{ RecordID }}\" required>\n</wc-file-upload>\n<!-- Submits document_url=<public R2 url>. multiple → JSON array of urls. -->"
       },
       {

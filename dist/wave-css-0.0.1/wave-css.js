@@ -47093,6 +47093,8 @@ var WcFileUpload = class extends WcBaseFormComponent {
       "upload-url",
       "category",
       "record-id",
+      "extra-fields",
+      "file-field",
       "multiple",
       "required",
       "disabled"
@@ -47268,10 +47270,25 @@ var WcFileUpload = class extends WcBaseFormComponent {
   }
   _uploadFile(file) {
     const url = this.getAttribute("upload-url") || "/upload";
+    const fileField = this.getAttribute("file-field") || "file";
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append(fileField, file);
     fd.append("category", this.getAttribute("category") || "attachments");
     fd.append("record_id", this.getAttribute("record-id") || "general");
+    const rawExtra = this.getAttribute("extra-fields");
+    if (rawExtra) {
+      try {
+        const parsed = JSON.parse(rawExtra);
+        if (parsed && typeof parsed === "object") {
+          const reserved = /* @__PURE__ */ new Set([fileField, "category", "record_id"]);
+          for (const [k, v] of Object.entries(parsed)) {
+            if (reserved.has(k)) continue;
+            fd.append(k, v == null ? "" : v);
+          }
+        }
+      } catch (ex) {
+      }
+    }
     const xhr = new XMLHttpRequest();
     this._activeUploads++;
     this._showProgress(0);
