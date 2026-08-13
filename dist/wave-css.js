@@ -31336,7 +31336,7 @@ var WcLoader = class extends WcBaseComponent {
     return "wc-loader";
   }
   static get observedAttributes() {
-    return ["id", "class", "type", "variant", "size", "speed", "thickness", "overlay", "label"];
+    return ["id", "class", "type", "variant", "size", "speed", "thickness", "overlay", "fixed", "label"];
   }
   constructor() {
     super();
@@ -31391,7 +31391,8 @@ var WcLoader = class extends WcBaseComponent {
       this._setVar("--wc-loader-thickness", newValue);
     } else if (attrName === "label") {
       this.componentElement?.setAttribute("aria-label", newValue || "Loading");
-    } else if (attrName === "variant" || attrName === "overlay") {
+    } else if (attrName === "class") {
+    } else if (attrName === "variant" || attrName === "overlay" || attrName === "fixed") {
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
@@ -31409,8 +31410,9 @@ var WcLoader = class extends WcBaseComponent {
     const style = `
       wc-loader { display: contents; }
 
-      /* Full-area dimmed backdrop (covers the nearest positioned ancestor; give that a
-         position:relative). Overrides display:contents so the host becomes the backdrop box. */
+      /* Full-area dimmed backdrop. Overrides display:contents so the host becomes the backdrop
+         box. Non-fixed: covers the nearest POSITIONED ancestor (give that position:relative).
+         A visible overlay intentionally blocks interaction (pointer-events default: auto). */
       wc-loader[overlay] {
         display: flex;
         align-items: center;
@@ -31419,6 +31421,45 @@ var WcLoader = class extends WcBaseComponent {
         inset: 0;
         background: color-mix(in srgb, var(--surface-1) 50%, transparent);
         z-index: 50;
+        transition: opacity 0.2s ease, visibility 0s;
+      }
+
+      /* fixed \u2192 viewport-fixed backdrop so it can be dropped at <body> level with no positioned
+         parent (the go-kart #content-loader case). Supports the fixed boolean or overlay=fixed. */
+      wc-loader[overlay][fixed],
+      wc-loader[overlay="fixed"] {
+        position: fixed;
+        z-index: 1000;
+      }
+
+      /* \u2500\u2500 overlay AS AN HTMX BUSY INDICATOR \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+         Self-contained gating (htmx's own .htmx-indicator sets opacity ONLY \u2014 an idle absolute
+         backdrop at opacity:0 still EATS clicks). Idle: invisible + click-through + inert.
+         Shown only while .htmx-request is on the host (htmx adds it to hx-indicator targets). */
+      wc-loader[overlay].htmx-indicator {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+      }
+      wc-loader[overlay].htmx-indicator.htmx-request {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity 0.2s ease, visibility 0s;
+      }
+
+      /* \u2500\u2500 Programmatic (EventHub) control \u2014 independent of HTMX \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+         .hidden fully removes the loader (backdrop + spinner) \u2192 invisible + inert. .wc-loader-show
+         force-reveals an overlay even when it's an idle htmx-indicator. */
+      wc-loader.hidden { display: none !important; }
+      wc-loader[overlay].wc-loader-show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        /* Override the htmx-indicator's delayed visibility transition so a programmatic show
+           reveals immediately (not after the 0.2s opacity fade). */
+        transition: opacity 0.2s ease, visibility 0s !important;
       }
 
       /* \u2500\u2500 Ring COLORS: --wc-spin-1/2 derived in OKLCH from the theme's --hue/--chroma-mult.
@@ -31527,19 +31568,21 @@ var WcLoader = class extends WcBaseComponent {
         box-shadow: ${dr(92)} 0 0 0 var(--wc-spin-2);
       }
 
-      /* EventHub hide/toggle */
+      /* Legacy: hiding the inner spinner element (kept for back-compat; EventHub now hides the host). */
       wc-loader .wc-loader.hidden { display: none !important; }
 
       @keyframes wc-loader-spin { to { transform: rotate(360deg); } }
       @keyframes wc-loader-dr-spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
 
-      /* Respect reduced-motion: slow the animation right down rather than freezing it. */
+      /* Respect reduced-motion: slow the animation right down rather than freezing it, and drop
+         the overlay's opacity transition (show/hide snaps). */
       @media (prefers-reduced-motion: reduce) {
         wc-loader:not([type]) .wc-loader,
         wc-loader[type="ring"] .wc-loader,
         wc-loader[type="double-ring"] .wc-loader-dr > div {
           animation-duration: 6s !important;
         }
+        wc-loader[overlay] { transition: none; }
       }
     `.trim();
     this.loadStyle("wc-loader-style", style);
@@ -31549,9 +31592,21 @@ var WcLoader = class extends WcBaseComponent {
     const { selector } = detail;
     const apply = (tgt) => {
       if (tgt !== this) return;
-      if (mode === "show") this.componentElement.classList.remove("hidden");
-      else if (mode === "hide") this.componentElement.classList.add("hidden");
-      else if (mode === "toggle") this.componentElement.classList.toggle("hidden");
+      if (mode === "show") {
+        this.classList.remove("hidden");
+        this.classList.add("wc-loader-show");
+      } else if (mode === "hide") {
+        this.classList.remove("wc-loader-show");
+        this.classList.add("hidden");
+      } else if (mode === "toggle") {
+        if (this.classList.contains("hidden")) {
+          this.classList.remove("hidden");
+          this.classList.add("wc-loader-show");
+        } else {
+          this.classList.remove("wc-loader-show");
+          this.classList.add("hidden");
+        }
+      }
     };
     if (typeof selector === "string" || Array.isArray(selector)) {
       document.querySelectorAll(selector).forEach(apply);

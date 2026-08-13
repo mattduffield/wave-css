@@ -48,8 +48,9 @@ an optional dimmed **overlay**, and accessibility built in. It is **fully self-s
 | `speed`     | Animation duration                                                       | 2s / 1s        | `"0.5s"`, `"1s"` |
 | `thickness` | Ring border width (**ring** only)                                        | 16px           | `"4px"`, `"8px"` |
 | `overlay`   | Center the spinner over a dimmed full-area backdrop (boolean)            | off            | — |
+| `fixed`     | Make the overlay `position:fixed` over the viewport (boolean, or `overlay="fixed"`) | off | — |
 | `label`     | Accessible label (`aria-label`)                                          | `"Loading"`    | any string |
-| `class`     | Extra CSS classes                                                        | —              | — |
+| `class`     | Extra CSS classes (`htmx-indicator` turns the overlay into a busy indicator — see below) | —  | — |
 
 ## Spinner styles (`type`)
 
@@ -92,8 +93,38 @@ variant (it beats the variant's attribute-selector rule):
 ## Overlay
 
 `overlay` turns the host into a flex-centered, dimmed backdrop
-(`background: color-mix(in srgb, var(--surface-1) 50%, transparent)`, `position: absolute; inset: 0`)
-that covers the **nearest positioned ancestor** — give that ancestor `position: relative`.
+(`background: color-mix(in srgb, var(--surface-1) 50%, transparent)`) that covers an area and
+centers the spinner. Two positioning modes:
+
+- **default** — `position: absolute; inset: 0`, covering the **nearest positioned ancestor**. Give
+  that ancestor `position: relative` (otherwise it escapes up to the nearest positioned block or the
+  viewport).
+- **`fixed`** (or `overlay="fixed"`) — `position: fixed; inset: 0` (high `z-index`), covering the
+  **viewport**. Use this when dropping the loader at `<body>` level with no positioned parent — the
+  go-kart `#content-loader` case.
+
+A **standalone** `overlay` (no `htmx-indicator`, not hidden) is a visible, interaction-blocking
+loading screen.
+
+### Overlay as a busy indicator (no wrapper markup)
+
+Add `class="htmx-indicator"` to use the overlay directly as an HTMX/EventHub-driven busy indicator —
+**no wrapper `<div>` needed**:
+
+```html
+<wc-loader id="content-loader" class="htmx-indicator" type="double-ring" variant="mono" overlay fixed></wc-loader>
+```
+
+- **Idle** (no `.htmx-request`): the overlay is `opacity:0; visibility:hidden; pointer-events:none`
+  — fully invisible **and click-through** (elements behind it stay interactive).
+- **Loading** (`.htmx-request` on the host — HTMX adds it to `hx-indicator` targets during a
+  request): the dimmed backdrop + spinner appear and **block interaction**.
+
+This is self-contained: the component sets `pointer-events`/`visibility` itself, because the stock
+`.htmx-indicator { opacity: 0 }` rule leaves an absolutely-positioned backdrop still capturing
+clicks while idle (that was the bug this fixes). The host class is kept **on the host** (not
+relocated to the inner element) so the gating works, and it survives re-renders. Show/hide uses a
+smooth `opacity` transition (disabled under `prefers-reduced-motion`).
 
 ## Accessibility
 
@@ -103,12 +134,17 @@ that covers the **nearest positioned ancestor** — give that ancestor `position
 ## Event API (EventHub)
 
 ```javascript
-wc.EventHub.broadcast('wcloadershow',   ['[data-wc-id="your-loader-id"]']);
-wc.EventHub.broadcast('wcloaderhide',   ['[data-wc-id="your-loader-id"]']);
-wc.EventHub.broadcast('wcloadertoggle', ['[data-wc-id="your-loader-id"]']);
+wc.EventHub.broadcast('wcloadershow',   ['#content-loader']);   // or ['[data-wc-id="…"]']
+wc.EventHub.broadcast('wcloaderhide',   ['#content-loader']);
+wc.EventHub.broadcast('wcloadertoggle', ['#content-loader']);
 ```
 
-Hiding adds the `hidden` class to the inner spinner (the animation continues while hidden).
+These drive the **host** (so an `overlay` backdrop shows/hides, not just the inner spinner) and work
+**independently of HTMX**:
+- **show** removes `.hidden` and adds `.wc-loader-show` — force-reveals the overlay (visible +
+  `pointer-events:auto`) even for an idle `htmx-indicator`.
+- **hide** adds `.hidden` → the host is `display:none` (fully removed + inert).
+- **toggle** flips between the two.
 
 ## Technical Details
 

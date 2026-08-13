@@ -56,6 +56,32 @@
       <wc-loader type="double-ring" variant="mono" overlay label="Loading content"></wc-loader>
     </div>
 
+    <h2 class="text-lg font-semibold mt-4">overlay AS AN HTMX INDICATOR (no wrapper) — idle is click-through</h2>
+    <p class="text-sm" style="color: var(--text-2);">
+      The button below sits BEHIND an idle <code>&lt;wc-loader class="htmx-indicator" overlay&gt;</code>.
+      While idle the overlay is invisible + click-through, so the button is clickable. Toggle
+      <code>.htmx-request</code> (or fire an EventHub show) to reveal the dimmed backdrop + spinner and
+      block clicks.
+    </p>
+    <div id="ind-demo" style="position: relative; height: 160px; border: 1px dashed var(--surface-4); border-radius: .5rem; background: var(--surface-3); overflow: hidden;">
+      <button id="behind-btn" class="btn btn-primary" style="position: absolute; top: 1rem; left: 1rem;">
+        Click me (behind the overlay)
+      </button>
+      <span id="click-count" class="text-sm" style="position: absolute; top: 1.25rem; left: 14rem; color: var(--text-1);">clicks: 0</span>
+      <wc-loader id="demo-indicator" class="htmx-indicator" type="double-ring" variant="mono" overlay label="Loading"></wc-loader>
+    </div>
+    <div class="row gap-3 mt-2" style="flex-wrap: wrap;">
+      <button class="btn btn-sm" onclick="document.getElementById('demo-indicator').classList.toggle('htmx-request')">Toggle .htmx-request</button>
+      <button class="btn btn-sm" onclick="document.body.dispatchEvent(new CustomEvent('wcloadershow',{detail:{selector:'#demo-indicator'}}))">EventHub show</button>
+      <button class="btn btn-sm" onclick="document.body.dispatchEvent(new CustomEvent('wcloaderhide',{detail:{selector:'#demo-indicator'}}))">EventHub hide</button>
+    </div>
+    <wc-javascript>
+      const btn = document.getElementById('behind-btn');
+      const out = document.getElementById('click-count');
+      let n = 0;
+      if (btn) btn.addEventListener('click', () => { n++; out.textContent = 'clicks: ' + n; });
+    </wc-javascript>
+
     <wc-article-skeleton></wc-article-skeleton>
   </div>
 </div>

@@ -14,8 +14,13 @@
  *    <wc-loader variant="contrast"></wc-loader>
  *    <wc-loader type="double-ring" variant="complement"></wc-loader>
  *
- *    <!-- Full-area dimmed overlay (covers the nearest positioned ancestor) -->
+ *    <!-- Full-area dimmed overlay (covers the nearest POSITIONED ancestor) -->
  *    <wc-loader type="double-ring" variant="mono" overlay></wc-loader>
+ *
+ *    <!-- Overlay AS AN HTMX BUSY INDICATOR — no wrapper needed. Idle = invisible + click-through;
+ *         shown (dimmed backdrop + spinner, blocking clicks) only while .htmx-request is present.
+ *         `fixed` makes it viewport-fixed so it can sit at <body> level with no positioned parent. -->
+ *    <wc-loader id="content-loader" class="htmx-indicator" type="double-ring" variant="mono" overlay fixed></wc-loader>
  *
  *    <!-- Consumer color override (wins over the variant) -->
  *    <wc-loader style="--wc-spin-1:#ff0080; --wc-spin-2:#00c2ff"></wc-loader>
@@ -27,7 +32,13 @@
  *    size       CSS length; ring footprint (default 120px) / double-ring footprint (default 200px)
  *    speed      animation duration (ring default 2s, double-ring default 1s)
  *    thickness  ring border width (default 16px; ring only)
- *    overlay    boolean; center the spinner over a dimmed full-area backdrop
+ *    overlay    boolean; center the spinner over a dimmed full-area backdrop.
+ *               • Standalone (no htmx-indicator) → a visible blocking loading screen.
+ *               • class="htmx-indicator" → idle is invisible + click-through + inert; the backdrop
+ *                 appears + blocks only while the host has .htmx-request (HTMX adds it). No wrapper.
+ *    fixed      boolean (or overlay="fixed"); make the overlay position:fixed over the viewport
+ *               (drop at <body> level, no positioned parent needed). Non-fixed covers the nearest
+ *               positioned ancestor — give that ancestor position:relative.
  *    label      aria-label text (default "Loading")
  *
  *  Color tokens (override inline to win over the variant):
@@ -52,7 +63,7 @@ class WcLoader extends WcBaseComponent {
   }
 
   static get observedAttributes() {
-    return ['id', 'class', 'type', 'variant', 'size', 'speed', 'thickness', 'overlay', 'label'];
+    return ['id', 'class', 'type', 'variant', 'size', 'speed', 'thickness', 'overlay', 'fixed', 'label'];
   }
 
   constructor() {
@@ -121,7 +132,11 @@ class WcLoader extends WcBaseComponent {
       this._setVar('--wc-loader-thickness', newValue);
     } else if (attrName === 'label') {
       this.componentElement?.setAttribute('aria-label', newValue || 'Loading');
-    } else if (attrName === 'variant' || attrName === 'overlay') {
+    } else if (attrName === 'class') {
+      // Keep author classes (htmx-indicator, hidden, …) ON THE HOST — the overlay/indicator CSS
+      // keys off the host (wc-loader[overlay].htmx-indicator{…}). The base would relocate them to
+      // the inner element and strip them off the host, silently breaking the indicator gating.
+    } else if (attrName === 'variant' || attrName === 'overlay' || attrName === 'fixed') {
       // Styling reacts to the host attribute via CSS — nothing to stamp on the inner element.
     } else {
       super._handleAttributeChange(attrName, newValue);
@@ -144,8 +159,9 @@ class WcLoader extends WcBaseComponent {
     const style = `
       wc-loader { display: contents; }
 
-      /* Full-area dimmed backdrop (covers the nearest positioned ancestor; give that a
-         position:relative). Overrides display:contents so the host becomes the backdrop box. */
+      /* Full-area dimmed backdrop. Overrides display:contents so the host becomes the backdrop
+         box. Non-fixed: covers the nearest POSITIONED ancestor (give that position:relative).
+         A visible overlay intentionally blocks interaction (pointer-events default: auto). */
       wc-loader[overlay] {
         display: flex;
         align-items: center;
@@ -154,6 +170,45 @@ class WcLoader extends WcBaseComponent {
         inset: 0;
         background: color-mix(in srgb, var(--surface-1) 50%, transparent);
         z-index: 50;
+        transition: opacity 0.2s ease, visibility 0s;
+      }
+
+      /* fixed → viewport-fixed backdrop so it can be dropped at <body> level with no positioned
+         parent (the go-kart #content-loader case). Supports the fixed boolean or overlay=fixed. */
+      wc-loader[overlay][fixed],
+      wc-loader[overlay="fixed"] {
+        position: fixed;
+        z-index: 1000;
+      }
+
+      /* ── overlay AS AN HTMX BUSY INDICATOR ──────────────────────────────────────────────────
+         Self-contained gating (htmx's own .htmx-indicator sets opacity ONLY — an idle absolute
+         backdrop at opacity:0 still EATS clicks). Idle: invisible + click-through + inert.
+         Shown only while .htmx-request is on the host (htmx adds it to hx-indicator targets). */
+      wc-loader[overlay].htmx-indicator {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+      }
+      wc-loader[overlay].htmx-indicator.htmx-request {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity 0.2s ease, visibility 0s;
+      }
+
+      /* ── Programmatic (EventHub) control — independent of HTMX ──────────────────────────────
+         .hidden fully removes the loader (backdrop + spinner) → invisible + inert. .wc-loader-show
+         force-reveals an overlay even when it's an idle htmx-indicator. */
+      wc-loader.hidden { display: none !important; }
+      wc-loader[overlay].wc-loader-show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        /* Override the htmx-indicator's delayed visibility transition so a programmatic show
+           reveals immediately (not after the 0.2s opacity fade). */
+        transition: opacity 0.2s ease, visibility 0s !important;
       }
 
       /* ── Ring COLORS: --wc-spin-1/2 derived in OKLCH from the theme's --hue/--chroma-mult.
@@ -262,19 +317,21 @@ class WcLoader extends WcBaseComponent {
         box-shadow: ${dr(92)} 0 0 0 var(--wc-spin-2);
       }
 
-      /* EventHub hide/toggle */
+      /* Legacy: hiding the inner spinner element (kept for back-compat; EventHub now hides the host). */
       wc-loader .wc-loader.hidden { display: none !important; }
 
       @keyframes wc-loader-spin { to { transform: rotate(360deg); } }
       @keyframes wc-loader-dr-spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
 
-      /* Respect reduced-motion: slow the animation right down rather than freezing it. */
+      /* Respect reduced-motion: slow the animation right down rather than freezing it, and drop
+         the overlay's opacity transition (show/hide snaps). */
       @media (prefers-reduced-motion: reduce) {
         wc-loader:not([type]) .wc-loader,
         wc-loader[type="ring"] .wc-loader,
         wc-loader[type="double-ring"] .wc-loader-dr > div {
           animation-duration: 6s !important;
         }
+        wc-loader[overlay] { transition: none; }
       }
     `.trim();
     this.loadStyle('wc-loader-style', style);
@@ -285,9 +342,23 @@ class WcLoader extends WcBaseComponent {
     const { selector } = detail;
     const apply = (tgt) => {
       if (tgt !== this) return;
-      if (mode === 'show') this.componentElement.classList.remove('hidden');
-      else if (mode === 'hide') this.componentElement.classList.add('hidden');
-      else if (mode === 'toggle') this.componentElement.classList.toggle('hidden');
+      // Drive the HOST so the overlay backdrop (not just the inner spinner) shows/hides, with
+      // matching pointer-events. `.wc-loader-show` force-reveals even an idle htmx-indicator.
+      if (mode === 'show') {
+        this.classList.remove('hidden');
+        this.classList.add('wc-loader-show');
+      } else if (mode === 'hide') {
+        this.classList.remove('wc-loader-show');
+        this.classList.add('hidden');
+      } else if (mode === 'toggle') {
+        if (this.classList.contains('hidden')) {
+          this.classList.remove('hidden');
+          this.classList.add('wc-loader-show');
+        } else {
+          this.classList.remove('wc-loader-show');
+          this.classList.add('hidden');
+        }
+      }
     };
     if (typeof selector === 'string' || Array.isArray(selector)) {
       document.querySelectorAll(selector).forEach(apply);
