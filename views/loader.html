@@ -1,18 +1,61 @@
 <div id="page-contents" class="p-4">
   <div class="col gap-4">
-    <div class="col gap-4 mt-4">
-      <wc-theme-selector theme="theme-slate-storm" mode="dark">
-      </wc-theme-selector>
+    <h1 class="text-2xl font-bold">wc-loader</h1>
+    <p class="text-sm" style="color: var(--text-2); max-width: 60ch;">
+      Two spinner <code>type</code>s (<code>ring</code>, <code>double-ring</code>) × five color
+      <code>variant</code>s. All CSS is injected by the component itself, so it renders with
+      <code>main.css</code> not loaded. Ring colors derive in OKLCH from the theme's
+      <code>--hue</code>/<code>--chroma-mult</code> — flip the theme + light/dark to watch them track.
+    </p>
+
+    <wc-theme-selector theme="theme-ocean" mode="light"></wc-theme-selector>
+
+    <h2 class="text-lg font-semibold mt-4">type="ring" — all variants</h2>
+    <div class="row gap-6" style="flex-wrap: wrap; align-items: flex-end;">
+      <div class="col items-center gap-2"><wc-loader variant="mono" size="72px"></wc-loader><span class="text-xs">mono</span></div>
+      <div class="col items-center gap-2"><wc-loader variant="contrast" size="72px"></wc-loader><span class="text-xs">contrast</span></div>
+      <div class="col items-center gap-2"><wc-loader variant="analogous" size="72px"></wc-loader><span class="text-xs">analogous</span></div>
+      <div class="col items-center gap-2"><wc-loader variant="complement" size="72px"></wc-loader><span class="text-xs">complement</span></div>
+      <div class="col items-center gap-2"><wc-loader variant="neutral" size="72px"></wc-loader><span class="text-xs">neutral</span></div>
     </div>
-    <div class="row gap-4">
+
+    <h2 class="text-lg font-semibold mt-4">type="double-ring" — all variants</h2>
+    <div class="row gap-6" style="flex-wrap: wrap; align-items: flex-end;">
+      <div class="col items-center gap-2"><wc-loader type="double-ring" variant="mono" size="96px"></wc-loader><span class="text-xs">mono</span></div>
+      <div class="col items-center gap-2"><wc-loader type="double-ring" variant="contrast" size="96px"></wc-loader><span class="text-xs">contrast</span></div>
+      <div class="col items-center gap-2"><wc-loader type="double-ring" variant="analogous" size="96px"></wc-loader><span class="text-xs">analogous</span></div>
+      <div class="col items-center gap-2"><wc-loader type="double-ring" variant="complement" size="96px"></wc-loader><span class="text-xs">complement</span></div>
+      <div class="col items-center gap-2"><wc-loader type="double-ring" variant="neutral" size="96px"></wc-loader><span class="text-xs">neutral</span></div>
+    </div>
+
+    <h2 class="text-lg font-semibold mt-4">size scaling (double-ring, mono)</h2>
+    <div class="row gap-6" style="flex-wrap: wrap; align-items: flex-end;">
+      <wc-loader type="double-ring" size="48px"></wc-loader>
+      <wc-loader type="double-ring" size="96px"></wc-loader>
+      <wc-loader type="double-ring" size="160px"></wc-loader>
+      <wc-loader type="double-ring"></wc-loader>
+    </div>
+
+    <h2 class="text-lg font-semibold mt-4">ring size / speed / thickness (backward-compatible API)</h2>
+    <div class="row gap-4" style="flex-wrap: wrap; align-items: center;">
       <wc-loader size="20px" speed="0.5s" thickness="4px"></wc-loader>
       <wc-loader size="45px" speed="0.75s" thickness="8px"></wc-loader>
       <wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>
       <wc-loader></wc-loader>
-      <wc-loader size="90px" speed="1s" thickness="12px"></wc-loader>
-      <wc-loader size="45px" speed="0.75s" thickness="8px"></wc-loader>
-      <wc-loader size="20px" speed="0.5s" thickness="4px"></wc-loader>
     </div>
+
+    <h2 class="text-lg font-semibold mt-4">consumer override (inline --wc-spin-1/2 wins over the variant)</h2>
+    <div class="row gap-6" style="align-items: center;">
+      <wc-loader type="double-ring" variant="mono" style="--wc-spin-1:#ff0080; --wc-spin-2:#00c2ff"></wc-loader>
+      <wc-loader style="--wc-spin-1:#ff0080; --wc-spin-2:#00c2ff"></wc-loader>
+    </div>
+
+    <h2 class="text-lg font-semibold mt-4">overlay (dimmed backdrop over a positioned ancestor)</h2>
+    <div style="position: relative; height: 180px; border: 1px dashed var(--surface-4); border-radius: .5rem; background: var(--surface-3);">
+      <p class="p-4">Content behind the loader…</p>
+      <wc-loader type="double-ring" variant="mono" overlay label="Loading content"></wc-loader>
+    </div>
+
     <wc-article-skeleton></wc-article-skeleton>
   </div>
 </div>
