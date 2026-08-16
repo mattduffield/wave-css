@@ -13225,12 +13225,31 @@
        --primary-bg-color stays a bright accent, so a static token can't stay legible in every
        theme. Here we pick BLACK or WHITE by the accent's WCAG relative luminance (crossover
        Y≈0.179, where black & white both give ~4.6:1) → AA in every theme, light + dark.
-       Falls back to --primary-color where relative color / pow() aren't supported. */
+
+       The @supports block below is the real guarantee. Without relative color + pow() we fall back
+       per mode (verified by sweeping --hue 0..360 on crisp + named themes, tests/on-primary-
+       contrast-test.py):
+         • DARK themes use BRIGHT accent fills, so BLACK is reliably legible on --primary-bg-color
+           (0/18 hues fail on crisp AND named dark; the raw --primary-color flips light in dark
+           themes → 1.9–2.7:1, the reported 3.53:1 header). The :where(.dark) prefix adds NO
+           specificity, so the @supports computation still wins wherever supported (it also resolves
+           to black in dark themes — this only rescues browsers lacking relative color + pow()).
+         • LIGHT themes are left on --primary-color: their fills vary (bright named accents vs.
+           darker crisp accents), so NO single static value is legible on all — best-effort only;
+           the @supports path is the guarantee. */
     wc-table,
     .wc-table,
     wc-fx-board, .wc-fx-board,
     wc-fx-console, .wc-fx-console {
         --wc-on-primary: var(--primary-color);
+    }
+    :where(.dark) wc-table,
+    :where(.dark) .wc-table,
+    :where(.dark) wc-fx-board,
+    :where(.dark) .wc-fx-board,
+    :where(.dark) wc-fx-console,
+    :where(.dark) .wc-fx-console {
+        --wc-on-primary: #000;
     }
     @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
         wc-table,
@@ -13238,9 +13257,9 @@
         wc-fx-board, .wc-fx-board,
         wc-fx-console, .wc-fx-console {
             --wc-on-primary: rgb(from var(--primary-bg-color)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
         }
     }
 
@@ -14057,13 +14076,13 @@
                pow(negative, 2.4) => NaN would collapse the pick to black on a dark fill. Clamping
                gamut-limits each channel so the black/white choice matches the rendered color. */
             --button-color: rgb(from var(--button-bg-color)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
             --button-hover-color: rgb(from var(--button-hover-bg-color)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255)
-                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 100000, 255));
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
         }
     }
 
