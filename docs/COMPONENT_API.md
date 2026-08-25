@@ -213,36 +213,64 @@ wc.EventHub.broadcast('event:name', ['.my-class', 'wc-input[name="email"]'], { d
 
 ## Theming
 
-### CSS Variables
+Themes are **generated in OKLCH** from two knobs plus a light/dark mode. Full guide:
+[`THEMES.md`](./THEMES.md); token catalog: [`COLORS.md`](./COLORS.md).
 
-All components use CSS variables for theming:
+### The knobs + role tokens
 
 ```css
-:root {
-  --hue: 210;                    /* Primary color hue */
-  --saturation: 100%;            /* Color saturation */
-  --lightness: 50%;              /* Color lightness */
-  
-  --color-primary: hsl(var(--hue), var(--saturation), var(--lightness));
-  --color-background: #ffffff;
-  --color-text: #333333;
-  
-  --border-radius: 0.25rem;
-  --transition-speed: 200ms;
-}
+/* A theme just sets these; the whole palette derives from them. */
+--hue: 230;          /* 0–360 color-wheel angle */
+--chroma-mult: 1;    /* saturation: 1 full · 0 grayscale · 0.15 muted */
+
+/* Components style with ROLE tokens (never hardcoded hex) — they resolve
+   correctly in every theme AND in light/dark automatically: */
+background: var(--surface-2);
+color:      var(--text-1);
+/* accent fill + auto-contrast on-color */
+background: var(--primary-bg-color);
+color:      var(--wc-on-primary);
+/* semantic */
+color: var(--danger-color);
 ```
 
-### Applying Themes
+Key families: `--surface-1..13`, `--text-1..13`, `--component-/card-/container-*`,
+`--primary-bg-color` / `--wc-on-primary`, `--success/danger/warning/info-color`, and (in `crisp`
+mode) the `--accent` family. See [`COLORS.md`](./COLORS.md) for the complete list.
+
+### Applying / switching themes
+
+Themes are **classes on `<html>`**: `theme-<name>` + `light`|`dark` (+ optional `crisp`).
 
 ```html
-<!-- Using theme selector -->
-<wc-theme-selector></wc-theme-selector>
+<!-- Declarative + persistent (saves to localStorage) -->
+<wc-theme theme="theme-ocean" mode="dark"></wc-theme>
 
-<!-- Programmatically -->
-<script>
-  document.documentElement.setAttribute('data-theme', 'ocean');
-</script>
+<!-- Swatch-grid picker with a light/dark toggle -->
+<wc-theme-selector theme="theme-ocean" mode="light"></wc-theme-selector>
+
+<!-- Or set the classes directly -->
+<html class="theme-ocean dark">
 ```
+
+> Wave uses an explicit `.light`/`.dark` **class**, not the CSS `light-dark()` function — so mode is
+> user-controllable, mixable with 50+ hue themes, and nestable. (See [`THEMES.md` §10](./THEMES.md).)
+
+## AI Bots — which one?
+
+Two chat components share the same UI/API; they differ by inference engine. Full docs:
+[`wc-ai-bot.md`](./wc-ai-bot.md), [`wc-hf-bot.md`](./wc-hf-bot.md).
+
+| Want… | Use | Notes |
+|---|---|---|
+| Zero-setup, "just works" in Chrome, private/offline | **`wc-ai-bot`** `provider="gemini-nano"` | Chrome's built-in on-device model; one-time download. |
+| In-browser LLM on any WebGPU browser, pick the model | **`wc-ai-bot`** `provider="webllm"` (or `auto`) | Llama 3.2 etc. via WebGPU; auto-sized to GPU. |
+| A hosted/streaming backend you control | **`wc-ai-bot`** `provider="server"` | SSE endpoint (+ optional Cloudflare Turnstile). |
+| A **specific Hugging Face / ONNX model**, no WebGPU required | **`wc-hf-bot`** | Transformers.js (WASM/CPU or WebGPU). |
+| Slash-command generators + knowledge bases | **`wc-ai-bot`** `mode="assistant"` | `/create-schema`, `/create-screen`, … + `context-urls`. |
+
+`provider="auto"` (default) uses Gemini Nano if it's already available, otherwise WebLLM.
+Demos: `views/ai-bot.html`, `views/ai-bot-assistant.html`, `views/hf-bot.html`, `views/company-bot-example.html`.
 
 ## Advanced Usage
 

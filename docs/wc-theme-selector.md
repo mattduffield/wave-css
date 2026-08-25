@@ -1,5 +1,7 @@
 # WC-Theme-Selector Web Component
 
+> New here? Read **[THEMES.md](./THEMES.md)** for how Wave theming works (hue/chroma, light/dark, crisp), and **[COLORS.md](./COLORS.md)** for the token reference.
+
 A custom web component that provides a theme selection interface with support for light/dark mode switching. The component includes a collection of predefined color themes and respects system color scheme preferences.
 
 ## Features

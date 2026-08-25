@@ -1,15 +1,14 @@
 /**
- * 
+ *
  *  Name: wc-div
  *  Usage:
- *    <wc-div caption="SCROLL DOWN"
- *      img-url="https://www.w3schools.com/howto/img_parallax.jpg">
- *    </wc-div>
- *    <wc-div caption="LESS HEIGHT"
- *      img-url="https://www.w3schools.com/howto/img_parallax2.jpg"
- *      min-height="400px">
- *    </wc-div>
- * 
+ *    <wc-div class="p-4 gap-2">…content…</wc-div>
+ *
+ *  An enhanced <div> wrapper: it relocates author classes onto an inner `.wc-div` element and
+ *  exposes that inner element as the designer container. Only `id` and `class` are honored.
+ *  (NOTE: earlier `caption` / `img-url` / `min-height` parallax attributes were never implemented
+ *  — their attribute handlers are no-ops — so they are intentionally omitted here.)
+ *
  */
 
 

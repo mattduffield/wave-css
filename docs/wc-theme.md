@@ -1,5 +1,7 @@
 # WC-Theme Web Component
 
+> New here? Read **[THEMES.md](./THEMES.md)** for how Wave theming works (hue/chroma, light/dark, crisp), and **[COLORS.md](./COLORS.md)** for the token reference.
+
 A lightweight web component that automatically applies saved theme preferences to your application, ensuring theme consistency across page loads and HTMX-based navigation.
 
 ## Features

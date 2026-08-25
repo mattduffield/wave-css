@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.47.0",
+    "version": "1.50.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-08-11"
+    "lastUpdated": "2026-08-25"
   },
   "selfHostedAssets": {
     "note": "Wave lazy-loads third-party libs from public CDNs. Set the single global window.WaveAssetBase (before the bundle runs) to load them from a local mirror first, with automatic CDN fallback. UNSET (default) = load from CDN exactly as before (no behavior change). SET (e.g. '/static/js') = try local first, fall back to CDN on any failure with one console.warn naming the missing file. Covers all three mechanisms: injected <script> onerror, injected <link> error, and dynamic import() rejection. Implemented centrally in helper-function.js (waveLocalAssetUrl + loadScript/loadCSS/loadLibrary/waveImport) AND in the WcDependencyManager loader (src/js/utils/dependency-manager.js) — the latter is how IMask (phone/date masking in wc-input via wc-mask-hub), CodeMirror core, and Tabulator core load. Progressively-loaded files (CodeMirror modes/themes/addons, Prism components/themes) resolve locally too; the loader dedups on BOTH local and CDN src so a component's own CDN-url dedup check (wc-code-mirror) can't double-load.",
@@ -392,6 +392,36 @@
         },
         "notes": "Click behavior: only the arrow toggle expands/collapses; clicking the label selects. data-tree-action child elements render as hover-reveal action buttons. contextmenu event is prevented. htmx.process is called with guard check after render. indicator-color renders a vertical bar on the left of the item and all its children (applied to .wc-tree-item container).",
         "usage": "<wc-tree-item label=\"Node\" icon=\"fa-folder\" badge=\"3\" expanded>\n  <wc-tree-item label=\"Child\" icon=\"fa-file\" icon-style=\"color:red;\"></wc-tree-item>\n</wc-tree-item>\n\n<!-- With hover action buttons -->\n<wc-tree-item label=\"Document\" icon=\"fa-file\">\n  <button data-tree-action onclick=\"editDoc()\">Edit</button>\n  <button data-tree-action onclick=\"deleteDoc()\">Delete</button>\n</wc-tree-item>"
+      },
+      {
+        "name": "wc-top-nav",
+        "description": "A responsive top navigation bar that builds HTMX-powered links from declarative <option> children or an items JSON array, with a mobile hamburger toggle.",
+        "attributes": [
+          "id",
+          "class",
+          "items"
+        ],
+        "docs": "docs/wc-top-nav.md",
+        "usage": "<wc-top-nav id=\"top-nav\">\n  <option value=\"home\" selected>Home</option>\n  <option value=\"news\">News</option>\n  <option value=\"contact\">Contact</option>\n  <option value=\"about\">About</option>\n</wc-top-nav>",
+        "notes": "DEPRECATED — retained for back-compat; prefer wc-menu / wc-sidenav."
+      },
+      {
+        "name": "wc-tree-filter",
+        "description": "Configuration-only child element for wc-tree. It renders nothing itself — it declares a filterable attribute and its possible values, which the parent tree reads to build the gear-icon filter popover.",
+        "docs": "docs/wc-tree-filter.md",
+        "usage": "<wc-tree filterable>\n  <wc-tree-filter field=\"data-kind\" label=\"Type\"\n                  values=\"app,template,schema,lookup\" checked></wc-tree-filter>\n  <wc-tree-filter field=\"badge\" label=\"Badge\" values=\"system,user\"></wc-tree-filter>\n\n  <wc-tree-item label=\"Prospect\" icon=\"folder\" data-kind=\"template\"></wc-tree-item>\n</wc-tree>"
+      },
+      {
+        "name": "wc-document-tree-context-menu",
+        "description": "Configuration-only child element for wc-document-tree. It renders nothing itself — it declares one right-click context-menu item (or a separator) that the parent reads to build its context menu.",
+        "docs": "docs/wc-document-tree-context-menu.md",
+        "usage": "<wc-document-tree data='[{\"_id\":\"abc\",\"name\":\"Matt\"}]'>\n  <wc-document-tree-context-menu label=\"Edit Document\" icon=\"pen-to-square\">\n    (e, node) => { window.dsOpenEditDocument(node.documentId); }\n  </wc-document-tree-context-menu>\n  <wc-document-tree-context-menu separator></wc-document-tree-context-menu>\n</wc-document-tree>"
+      },
+      {
+        "name": "wc-code-mirror-context-menu",
+        "description": "A configuration-only child element for wc-code-mirror. Each one declares a single entry (or divider) in the editor's right-click context menu. It renders nothing itself (display: contents) — the parent reads these children to build the menu.",
+        "docs": "docs/wc-code-mirror-context-menu.md",
+        "usage": "<wc-code-mirror-context-menu></wc-code-mirror-context-menu>"
       }
     ],
     "form": [
@@ -844,6 +874,88 @@
         ],
         "notes": "Extends WcBaseFormComponent. The icon list is sourced INTERNALLY from Wave's own bundle manifest (fetched from WcIconConfig.bundleBaseUrl/<variant>-icons.json — the keys are icon names; cached per variant across instances) — the host never supplies the ~579 names. `variant` (default solid) selects which bundle (solid|regular|light|thin|duotone…) and previews render in that style (icon-style). Search filters by NAME SUBSTRING (the manifest carries no synonyms/aliases, so name-only). Select via click or Enter sets `value` to the name string, updates the trigger, closes, and fires wciconpickerchange { value }. Keyboard: ArrowDown from search enters the grid; arrows navigate (by `columns`, default 8); Enter selects; Escape closes and returns focus to the trigger. `value` seeds + round-trips; `required` → form validity (valueMissing when empty); `clearable` shows a clear control that empties the value — automatically HIDDEN when `required` (clearing a required field is contradictory). PERFORMANCE: the popover is appended to <body> (never clipped by overflow ancestors; position:fixed, z-index 10000, flips above when low on space, mirrors the html theme/.dark/.crisp classes) and preview SVGs are LAZY-rendered via IntersectionObserver, so opening/filtering stays smooth across the full set (verified: ~128 of 579 rendered on open). Submits via FACE setFormValue under the host `name` (the search <input> is nulled out of the base formElement so it isn't treated as the value). htmx-safe: re-renders on attribute change; tears down the body panel on disconnect; inits on dynamic insert. Styles in @layer wc.usage. Legacy alias wc-icon-picker:change. Generation: emit for any icon field (app icon, nav item, or a schema field typed as icon); default value = the Builder's validated auto-pick.",
         "usage": "<wc-icon-picker name=\"icon\" value=\"cart-shopping\" lbl-label=\"App Icon\"\n    variant=\"solid\" placeholder=\"Search icons…\" columns=\"8\" clearable required>\n</wc-icon-picker>"
+      },
+      {
+        "name": "wc-vin-decoder",
+        "description": "wc-vin-decoder is a form-associated text input for a vehicle VIN that automatically",
+        "attributes": [
+          "name",
+          "value",
+          "api-url",
+          "database-endpoint",
+          "vin-group",
+          "lbl-label",
+          "lbl-class",
+          "placeholder",
+          "required",
+          "disabled",
+          "readonly",
+          "tooltip",
+          "tooltip-position",
+          "class",
+          "elt-class",
+          "vehicle-type",
+          "autocomplete",
+          "autocapitalize",
+          "spellcheck",
+          "inputmode",
+          "pattern",
+          "minlength",
+          "maxlength",
+          "onchange",
+          "oninput",
+          "onblur",
+          "onfocus"
+        ],
+        "events": {
+          "emits": [
+            "wcvindecoderchange",
+            "wcvindecodererror"
+          ]
+        },
+        "docs": "docs/wc-vin-decoder.md",
+        "usage": "<wc-vin-decoder\n  name=\"vin\"\n  lbl-label=\"VIN Number\"\n  vin-group=\"vehicle-0\"\n  api-url=\"https://vin.pegramins.com\"\n  database-endpoint=\"/api/vehicles/vin\"\n  required>\n</wc-vin-decoder>"
+      },
+      {
+        "name": "wc-google-address",
+        "description": "The wc-google-address is a web component that provides Google Places Autocomplete functionality for address input, with automatic address parsing and form field population.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "placeholder",
+          "lbl-label",
+          "lbl-class",
+          "elt-class",
+          "disabled",
+          "readonly",
+          "required",
+          "autocomplete",
+          "api-key",
+          "address-group",
+          "target-map",
+          "countries",
+          "types",
+          "fields",
+          "icon-name",
+          "data-lat",
+          "data-lng",
+          "data-address",
+          "onchange",
+          "oninput",
+          "onblur",
+          "onfocus",
+          "tooltip",
+          "tooltip-position"
+        ],
+        "events": {
+          "emits": [
+            "wcgoogleaddresschange"
+          ]
+        },
+        "docs": "docs/wc-google-address.md",
+        "usage": "<wc-google-address\n  name=\"address.street\"\n  lbl-label=\"Street Address\"\n  api-key=\"YOUR_GOOGLE_API_KEY\"\n  address-group=\"address\"\n  placeholder=\"Start typing address...\"\n  required>\n</wc-google-address>"
       }
     ],
     "display": [
@@ -1216,6 +1328,54 @@
           ]
         },
         "usage": "<wc-slideshow autoplay autoplay-interval=\"3000\">\n  <wc-slideshow-image url=\"image1.jpg\" caption=\"Slide 1\"></wc-slideshow-image>\n  <wc-slideshow-image url=\"image2.jpg\" caption=\"Slide 2\"></wc-slideshow-image>\n</wc-slideshow>"
+      },
+      {
+        "name": "wc-busy-indicator",
+        "description": "A themeable loading/busy indicator with many animation styles — chart-flavored SVG animations plus classic spinner, pulse, dots, and skeleton.",
+        "attributes": [
+          "type",
+          "text",
+          "size",
+          "color",
+          "color-variation",
+          "color-levels"
+        ],
+        "docs": "docs/wc-busy-indicator.md",
+        "usage": "<wc-busy-indicator></wc-busy-indicator>\n<wc-busy-indicator type=\"chart-bar\" text=\"Loading chart data...\"></wc-busy-indicator>"
+      },
+      {
+        "name": "wc-slideshow-image",
+        "description": "A single image slide used inside a wc-slideshow. It renders an image with an optional caption and a slide-number label.",
+        "attributes": [
+          "id",
+          "class",
+          "url",
+          "caption",
+          "numbertext"
+        ],
+        "docs": "docs/wc-slideshow-image.md",
+        "usage": "<wc-slideshow class=\"mb-4\" autoplay autoplay-interval=\"3000\">\n  <wc-slideshow-image\n    url=\"https://www.w3schools.com/howto/img_nature_wide.jpg\"\n    caption=\"Caption 1\"></wc-slideshow-image>\n  <wc-slideshow-image\n    url=\"https://www.w3schools.com/howto/img_snow_wide.jpg\"\n    caption=\"Caption 2\"></wc-slideshow-image>\n</wc-slideshow>"
+      },
+      {
+        "name": "wc-emoji",
+        "description": "An emoji reaction bar with an expandable, categorized emoji picker. It can render a quick-access reaction row plus a \"more\" trigger, or a picker-only trigger button. Every emoji carries a shortcode (e.g. :thumbsup: for 👍) shown as a tooltip.",
+        "attributes": [
+          "id",
+          "class",
+          "quick-emojis",
+          "picker-only",
+          "trigger-emoji",
+          "onpick",
+          "categories",
+          "hover-target"
+        ],
+        "events": {
+          "emits": [
+            "wcemojipick"
+          ]
+        },
+        "docs": "docs/wc-emoji.md",
+        "usage": "<!-- Quick reaction bar with expandable picker -->\n<wc-emoji\n  quick-emojis='[\"👍\",\"❤️\",\"🎉\",\"😂\"]'\n  onpick=\"handleEmoji(event.detail.emoji)\">\n</wc-emoji>\n\n<!-- Picker only (just a trigger button) -->\n<wc-emoji picker-only trigger-emoji=\"😀\"\n  onpick=\"handleEmoji(event.detail.emoji)\">\n</wc-emoji>"
       }
     ],
     "data": [
@@ -1521,6 +1681,101 @@
         ],
         "notes": "Extends WcBaseComponent. `items` (required) JSON array of records. `image-field` (optional) names the cover-image URL member — if the attribute is absent OR a record lacks a value, the card renders WITHOUT an <img> (no broken image), degrading to a tidy text card. `title-field` (default 'title'), optional `subtitle-field`, and `fields` (JSON array) rendered as .badge .badge-muted chips (empty values skipped). `columns` (default 3) is the MAX columns on wide screens; the grid is responsive 1 → 2 (>=640px) → columns (>=1024px) via a --wc-dc-cols custom property. `link-template` (URL with {field} tokens) renders each card as a real <a href>; otherwise click/Enter fires `wcdatacardsopen` detail { id } from `id-field` (default '_id'). htmx-safe; styles in @layer wc.usage. Legacy alias wc-data-cards:open. Public API: get/set items, refresh(). Generation: entity with an image field → gallery (image-field=that field); else tidy text cards.",
         "usage": "<wc-data-cards items='{{ Data.items|toJSON|safe }}' image-field=\"photo\" title-field=\"name\" subtitle-field=\"sku\" fields='[\"price\",\"status\"]' columns=\"3\" link-template=\"/x/product/{_id}\"></wc-data-cards>"
+      },
+      {
+        "name": "wc-tabulator-column",
+        "description": "A configuration-only child element of wc-tabulator. It defines a table column. The element renders nothing on its own (it adds the contents class) and is read/managed by the parent wc-tabulator during setup.",
+        "docs": "docs/wc-tabulator-column.md",
+        "usage": "<wc-tabulator url=\"/api/orders\">\n  <wc-tabulator-column field=\"name\" title=\"Name\"></wc-tabulator-column>\n  <wc-tabulator-column field=\"amount\" title=\"Amount\"></wc-tabulator-column>\n</wc-tabulator>"
+      },
+      {
+        "name": "wc-tabulator-func",
+        "description": "A configuration-only child element of wc-tabulator. It declares a helper/function (e.g. a formatter, sorter, or transform) that the parent wc-tabulator resolves by name. The element renders nothing on its own (it adds the contents class) and is managed by wc-tabulator.",
+        "docs": "docs/wc-tabulator-func.md",
+        "usage": "<wc-tabulator url=\"/api/orders\">\n  <wc-tabulator-func>\n    <!-- function definition consumed by wc-tabulator -->\n  </wc-tabulator-func>\n  <wc-tabulator-column field=\"name\" title=\"Name\"></wc-tabulator-column>\n</wc-tabulator>"
+      },
+      {
+        "name": "wc-tabulator-row-menu",
+        "description": "A configuration-only child element of wc-tabulator. It declares a row context menu that the parent wc-tabulator wires up. The element renders nothing on its own (it adds the contents class) and is managed by wc-tabulator.",
+        "docs": "docs/wc-tabulator-row-menu.md",
+        "usage": "<wc-tabulator url=\"/api/orders\">\n  <wc-tabulator-row-menu>\n    <!-- row menu definition consumed by wc-tabulator -->\n  </wc-tabulator-row-menu>\n  <wc-tabulator-column field=\"name\" title=\"Name\"></wc-tabulator-column>\n</wc-tabulator>"
+      },
+      {
+        "name": "wc-chart",
+        "description": "A declarative Chart.js wrapper that renders bar, line, and other chart types from JSON attributes. Chart.js is lazy-loaded on demand.",
+        "attributes": [
+          "type",
+          "labels",
+          "data",
+          "label",
+          "datasets",
+          "title",
+          "height",
+          "width",
+          "colors",
+          "show-legend",
+          "legend-position",
+          "show-data-labels",
+          "padding-top",
+          "responsive",
+          "maintain-aspect-ratio",
+          "x-axis-title",
+          "y-axis-title",
+          "stacked",
+          "tension",
+          "fill",
+          "point-radius",
+          "border-width",
+          "text-color",
+          "grid-color",
+          "class"
+        ],
+        "events": {
+          "emits": [
+            "wcchartclick",
+            "wcchartcreated"
+          ]
+        },
+        "docs": "docs/wc-chart.md",
+        "usage": "<wc-chart\n  type=\"bar\"\n  labels='[\"Q1\", \"Q2\", \"Q3\", \"Q4\"]'\n  data='[65, 59, 80, 81]'\n  label=\"Sales\"\n  title=\"Quarterly Sales\">\n</wc-chart>"
+      },
+      {
+        "name": "wc-chartjs",
+        "description": "An extension of wc-chart that loads its data from a URL via AJAX, with loading/error states, auto-refresh, and an expand/collapse button. Supports all wc-chart attributes.",
+        "attributes": [
+          "url",
+          "ajax-method",
+          "url-params",
+          "ajax-headers",
+          "auto-refresh",
+          "loading-text",
+          "busy-indicator",
+          "busy-indicator-type",
+          "busy-color-variation",
+          "busy-color-levels",
+          "expand-selector"
+        ],
+        "events": {
+          "emits": [
+            "wcchartjserror",
+            "wcchartjsloaded",
+            "wcchartjsloading"
+          ]
+        },
+        "docs": "docs/wc-chartjs.md",
+        "usage": "<wc-chartjs\n  url=\"/api/prospect-quotes/chart-data?num_days=14\"\n  type=\"bar\"\n  height=\"400\"\n  show-legend=\"true\"\n  legend-position=\"top\">\n</wc-chartjs>"
+      },
+      {
+        "name": "wc-ref-key",
+        "description": "Displays a reference key as a small, semi-transparent pill badge fixed to a corner of the viewport (out of flow, so it never affects page layout). Used by wc-help-drawer to scan for contextual help keys on the current page.",
+        "attributes": [
+          "value",
+          "label",
+          "position",
+          "orientation"
+        ],
+        "docs": "docs/wc-ref-key.md",
+        "usage": "<wc-ref-key value=\"DST-4002\" label=\"Data Compare\"></wc-ref-key>"
       }
     ],
     "interactive": [
@@ -1582,10 +1837,14 @@
       },
       {
         "name": "wc-ai-bot",
-        "description": "AI chatbot interface using WebLLM (MLC AI) for in-browser LLM inference",
+        "description": "In-browser or hosted LLM chat assistant. Providers: auto (Gemini Nano if available, else WebLLM), webllm (WebGPU/MLC), gemini-nano (Chrome built-in), server (SSE).",
         "attributes": [
-          "bot-id",
+          "provider",
           "model",
+          "endpoint",
+          "turnstile-site-key",
+          "bot-id",
+          "mode",
           "system-prompt",
           "title",
           "placeholder",
@@ -1599,7 +1858,11 @@
           "max-tokens",
           "debug",
           "check-gpu-compatibility",
-          "force-enable"
+          "force-enable",
+          "hide-if-unavailable",
+          "context-urls",
+          "context-window-size",
+          "query-context"
         ],
         "events": {
           "emits": [
@@ -1609,13 +1872,15 @@
             "wcboterror",
             "wcbotunsupported",
             "wcbotconversationcleared",
-            "wcbotclosed"
-          ]
+            "wcbotclosed",
+            "wcbotdownloadrequired",
+            "wcbotdownloadprogress"
+          ],
+          "note": "each also fires a legacy bot:* alias (e.g. bot:ready)"
         },
         "themes": [
-          "bubble (default, floating FAB)",
-          "minimal (inline embedded)",
-          "sidebar (full container)"
+          "bubble (default; floating FAB + panel)",
+          "any other value (e.g. inline) = embedded in its container"
         ],
         "methods": [
           "sendMessage(text)",
@@ -1630,14 +1895,22 @@
           "clearStoredPreferences()"
         ],
         "notes": "Runs LLMs in browser via WebGPU (or provider=\"server\" for a hosted SSE backend). Auto-detects GPU capability. Supports streaming responses. Markdown rendering via marked library (compact, table-friendly: GFM tables render bordered/padded with a shaded header and scroll horizontally on overflow; lists are tightly spaced; long tokens wrap; fenced code scrolls). Bubble-theme panel size is configurable via panel-width/panel-height attributes (or the --wc-ai-bot-panel-width/--wc-ai-bot-panel-height CSS custom properties), clamped to 92vw/85vh (calc(100v*-2rem) on <=640px viewports). Defaults remain 350x500. panel-height is the preferred alias for the bubble panel height (falls back to max-height). Server-mode reliability: the turn's busy state clears whenever the stream terminates — on the SSE `done` event (the reader is cancelled so a socket held open by heartbeats can't hang the turn), on EOF, and on `error` — so the next message always sends and echoes. Each turn uses an AbortController; a new send while busy supersedes the in-flight/wedged turn (aborts it, preserves its partial answer, proceeds) rather than no-op'ing. Markdown rendering is throw-safe (a rich table/link answer that fails to render falls back to plain text and still finishes the turn). Message bubbles use theme surface tokens with on-surface text (bot = --surface-2, user = accent-tinted --surface-3, text = --text-1, links = --accent) so contrast follows the active light/dark theme; message ids are unique (no Date.now() collision that could stream an answer into the user's bubble).",
-        "usage": "<wc-ai-bot model=\"Llama-3.2-3B-Instruct-q4f16_1-MLC\" system-prompt=\"You are a helpful assistant.\" title=\"AI Assistant\" theme=\"sidebar\"></wc-ai-bot>"
+        "usage": "<wc-ai-bot provider=\"auto\" system-prompt=\"You are a helpful assistant.\" title=\"AI Assistant\"></wc-ai-bot>",
+        "providers": [
+          "auto",
+          "webllm",
+          "gemini-nano",
+          "server"
+        ],
+        "assistantMode": "mode='assistant' adds slash-commands (/create-schema, /create-template, /create-list, /create-edit, /create-screen, /create-component, /create-web-pilot, /query, /help) and JSON knowledge bases via context-urls.",
+        "docs": "docs/wc-ai-bot.md"
       },
       {
         "name": "wc-hf-bot",
-        "description": "AI chatbot using Transformers.js (Hugging Face) for browser-based inference",
+        "description": "In-browser LLM chat assistant using Hugging Face Transformers.js (ONNX models), runs on WebGPU or WASM/CPU. Same UI/API as wc-ai-bot minus server/Gemini-Nano/assistant-mode.",
         "attributes": [
-          "bot-id",
           "model",
+          "bot-id",
           "system-prompt",
           "title",
           "placeholder",
@@ -1651,8 +1924,43 @@
           "check-gpu-compatibility",
           "force-enable"
         ],
-        "notes": "Same UI and API as wc-ai-bot but uses Hugging Face Transformers.js with ONNX/GGUF models.",
-        "usage": "<wc-hf-bot model=\"Xenova/distilgpt2\" system-prompt=\"You are helpful.\" title=\"HF Assistant\" theme=\"bubble\"></wc-hf-bot>"
+        "notes": "Transformers.js (Hugging Face) ONNX inference in the browser. Deps lazy-loaded via waveImport: @huggingface/transformers@3.5.0 (fallback @xenova/transformers@2.17.2) + marked. Not supported (use wc-ai-bot): provider/endpoint/server, gemini-nano, mode=assistant + knowledge bases, panel-width/panel-height.",
+        "usage": "<wc-hf-bot model=\"Xenova/distilgpt2\" system-prompt=\"You are helpful.\" title=\"HF Assistant\"></wc-hf-bot>",
+        "events": {
+          "emits": [
+            "wcbotready",
+            "wcbotmessagesent",
+            "wcbotresponsereceived",
+            "wcboterror",
+            "wcbotunsupported",
+            "wcbotconversationcleared",
+            "wcbotclosed"
+          ],
+          "note": "each also fires a legacy bot:* alias"
+        },
+        "themes": [
+          "bubble (default; floating FAB + panel)",
+          "any other value (e.g. inline) = embedded in its container"
+        ],
+        "methods": [
+          "sendMessage(text)",
+          "clearConversation()",
+          "exportConversation()",
+          "setContext(systemPrompt)",
+          "toggleMinimize()"
+        ],
+        "staticMethods": [
+          "checkSystemSupport()",
+          "getAvailableModels()",
+          "clearStoredPreferences()"
+        ],
+        "models": [
+          "Xenova/distilgpt2 (~250MB, default weak HW)",
+          "Xenova/gpt2 (~500MB, default strong HW)",
+          "Xenova/gpt2-medium (~1.5GB)",
+          "any Transformers.js text-generation model"
+        ],
+        "docs": "docs/wc-hf-bot.md"
       },
       {
         "name": "wc-fx-board",
@@ -1715,6 +2023,16 @@
         },
         "notes": "Extends WcBaseComponent (not form-associated). A zone's routing key is its `event_name` (falling back to `id`); COMMAND.zone uses that key and incoming STATE.zone is matched to it. On zone select it sends action:'requestState'; on socket open it requests state for every zone. type:'light' pads are disabled no-ops and never send. Active zone/pad states use --primary-bg-color + the --wc-on-primary auto-contrast token. .send(obj) sends over the socket if open AND dispatches a `message` CustomEvent so a host can forward it; .receive(json) accepts an object or JSON string (STATE updates the UI). Construct declaratively, not via document.createElement. Pairs with wc-fx-board (the station player).",
         "usage": "<wc-fx-console master-volume=\"80\"\n    zones='[{\"id\":\"z1\",\"name\":\"Main Hall\",\"event_name\":\"main-hall\",\"categories\":[{\"name\":\"Crowd\",\"icon\":\"users\"}],\"resources\":[{\"id\":\"a1\",\"type\":\"audio\",\"name\":\"Applause\",\"category\":\"Crowd\",\"file_url\":\"/fx/applause.mp3\"}]}]'\n    ws-url=\"/ws/fx_ws?role=master\"></wc-fx-console>"
+      },
+      {
+        "name": "wc-canvas-dot-highlight",
+        "description": "A custom web component that creates an interactive dot matrix animation with mouse-following highlight effects",
+        "attributes": [
+          "id",
+          "class"
+        ],
+        "docs": "docs/wc-canvas-dot-highlight.md",
+        "usage": "<script type=\"module\" src=\"path/to/wc-canvas-dot-highlight.js\"></script>"
       }
     ],
     "buttons": [
@@ -1762,6 +2080,13 @@
         "name": "wc-icon",
         "description": "Basic SVG icon component",
         "usage": "<wc-icon name=\"home\"></wc-icon>"
+      },
+      {
+        "name": "wc-icon-config",
+        "description": "Global configuration object for the Wave CSS icon components. It defines where icon assets and icon bundles are loaded from, and which bundles to preload. It is exported as WcIconConfig and also exposed on window.WcIconConfig.",
+        "docs": "docs/wc-icon-config.md",
+        "usage": "<script>\n  window.WcIconConfig = {\n    iconBaseUrl: 'https://cdn.example.com/wave-css/icons',\n    bundleBaseUrl: 'https://cdn.example.com/wave-css/icon-bundles',\n    preloadBundles: ['solid', 'regular']\n  };\n</script>\n<script type=\"module\" src=\"/dist/wave-css.min.js\"></script>",
+        "notes": "Config module (window.WcIconConfig), not a custom element — sets icon bundle base URLs/variants for wc-fa-icon / wc-icon-picker."
       }
     ],
     "skeleton": [
@@ -2059,6 +2384,50 @@
           "hx-select"
         ],
         "usage": "<wc-visibility-change hx-verb=\"GET\" hx-url=\"/api/refresh\" hx-target=\"#content\" hx-swap=\"innerHTML\"></wc-visibility-change>"
+      },
+      {
+        "name": "wc-event-stream",
+        "description": "A thin declarative wrapper around the browser EventSource (Server-Sent Events) API. It opens a stream from src, re-dispatches each named event as a CustomEvent on the element, and optionally applies live \"run-state\" DOM bindings to slotted children.",
+        "attributes": [
+          "id",
+          "src",
+          "events",
+          "mode",
+          "scope",
+          "reload-on-error",
+          "reload-target",
+          "reload-trigger-event"
+        ],
+        "docs": "docs/wc-event-stream.md",
+        "usage": "<wc-event-stream id=\"run-events\"\n  src=\"/automate/events?run_id=abc123\"\n  events=\"step_change,run_complete\"></wc-event-stream>\n\n<script>\n  document.getElementById('run-events')\n    .addEventListener('wc-event-stream:step_change', e => {\n      console.log(e.detail); // parsed JSON payload\n    });\n</script>"
+      },
+      {
+        "name": "wc-address-listener",
+        "description": "A helper that listens for address-change events and updates child form fields based on their name attribute. Pair it with wc-address (or wc-google-address) so selecting an address auto-fills City / State / ZIP / County / etc.",
+        "attributes": [
+          "address-group"
+        ],
+        "docs": "docs/wc-address-listener.md",
+        "usage": "<wc-address-listener></wc-address-listener>"
+      },
+      {
+        "name": "wc-vin-listener",
+        "description": "wc-vin-listener wraps a group of form fields (and/or links) that should auto-populate when a",
+        "attributes": [
+          "vin-group",
+          "array-fields"
+        ],
+        "docs": "docs/wc-vin-listener.md",
+        "usage": "<wc-vin-listener></wc-vin-listener>"
+      },
+      {
+        "name": "wc-theme",
+        "description": "A lightweight web component that automatically applies saved theme preferences to your application, ensuring theme consistency across page loads and HTMX-based navigation.",
+        "attributes": [
+          "theme"
+        ],
+        "docs": "docs/wc-theme.md",
+        "usage": "<script type=\"module\" src=\"path/to/wc-theme.js\"></script>"
       }
     ],
     "designer": [
@@ -2120,6 +2489,56 @@
           "tests/designer-server-render-test.py — 21 Playwright integration tests"
         ],
         "usage": "<wc-live-designer canvas-url=\"/x/article/create?designer=true\" schema=\"article\" theme=\"theme-ocean dark\"></wc-live-designer>"
+      },
+      {
+        "name": "wc-step-outline",
+        "description": "A companion to wc-code-mirror (with step-gutter) that renders a hierarchical list of {% call step %} blocks parsed from a target editor's content. Each row shows a colored dot matching the gutter palette, the step name, and indentation by nesting depth. Clicking a row jumps the editor cursor to that",
+        "attributes": [
+          "id",
+          "class",
+          "for",
+          "events-from",
+          "storage-key"
+        ],
+        "events": {
+          "emits": [
+            "wc-step-outline:open-include"
+          ]
+        },
+        "docs": "docs/wc-step-outline.md",
+        "usage": "<wc-step-outline for=\"script\"></wc-step-outline>"
+      },
+      {
+        "name": "wc-step-palette",
+        "description": "A vertical column of tiles, one per documented step type, that insert a {% call step(name=\"\", type=\"X\") %} skeleton at the cursor of a target wc-code-mirror. After insertion the cursor lands inside the empty name=\"\" so the author can start typing the step name immediately.",
+        "attributes": [
+          "id",
+          "class",
+          "for"
+        ],
+        "events": {
+          "emits": [
+            "wc-step-palette:toggle-collapsed"
+          ]
+        },
+        "docs": "docs/wc-step-palette.md",
+        "usage": "<wc-step-palette for=\"script\"></wc-step-palette>"
+      },
+      {
+        "name": "wc-template-preview",
+        "description": "An in-page preview harness that renders a screen template inside an <iframe> with toggles to show/hide the preview and to enable/disable drag-and-drop editing in the previewed frame. Used by the template/screen editing workflow.",
+        "docs": "docs/wc-template-preview.md",
+        "usage": "<wc-template-preview\n  url=\"/screen/contact/123\"\n  new-url=\"/screen/contact/create\"\n  return-url=\"/screen/contact_list/list\">\n</wc-template-preview>"
+      },
+      {
+        "name": "wc-base-template",
+        "description": "A minimal structural wrapper used as a container/host for template infrastructure (e.g. a top-nav shell). It relocates its declarative children into an inner .wc-base-template container and integrates with the Wave CSS base component lifecycle. The host element is display: contents.",
+        "attributes": [
+          "id",
+          "class"
+        ],
+        "docs": "docs/wc-base-template.md",
+        "usage": "<wc-base-template id=\"top-nav\"></wc-base-template>"
       }
     ]
   },

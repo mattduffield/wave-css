@@ -8,7 +8,7 @@ if (!customElements.get('wc-dropdown-item')) {
     }
 
     connectedCallback() {
-      // Columns are managed by wc-tabulator; no additional work needed
+      // Declarative menu item — rendering/behavior is handled by the parent wc-dropdown.
     }
   }
 

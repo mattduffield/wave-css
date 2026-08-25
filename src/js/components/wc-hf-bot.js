@@ -1,3 +1,27 @@
+/**
+ *  wc-hf-bot — in-browser LLM chat assistant powered by Hugging Face Transformers.js (ONNX).
+ *
+ *  Full documentation: docs/wc-hf-bot.md
+ *
+ *  Same UI/API as wc-ai-bot, but the inference engine is Transformers.js running ONNX models
+ *  client-side (works on WebGPU or WASM/CPU). No server, no API key. NOT included here (use
+ *  wc-ai-bot instead): provider/endpoint/server mode, Gemini Nano, assistant mode + knowledge
+ *  bases, and panel-width/panel-height.
+ *
+ *  Attributes: model (e.g. Xenova/distilgpt2, Xenova/gpt2, Xenova/gpt2-medium), bot-id,
+ *    system-prompt, title, placeholder, theme (bubble|inline), position, auto-open, max-height,
+ *    temperature, max-tokens, check-gpu-compatibility, force-enable, debug.
+ *
+ *  Events (canonical + legacy `bot:*` alias): wcbotready, wcbotmessagesent,
+ *    wcbotresponsereceived, wcboterror, wcbotunsupported, wcbotconversationcleared, wcbotclosed.
+ *
+ *  Instance API: sendMessage(text), clearConversation(), exportConversation(),
+ *    setContext(systemPrompt), toggleMinimize().
+ *  Static API: WcHfBot.checkSystemSupport(), getAvailableModels(), clearStoredPreferences().
+ *
+ *  Reference: https://huggingface.co/docs/transformers.js
+ */
+
 import { WcBaseComponent } from './wc-base-component.js';
 import { waveImport } from './helper-function.js';
 

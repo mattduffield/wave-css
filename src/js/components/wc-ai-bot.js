@@ -1,9 +1,32 @@
 /**
+ *  wc-ai-bot — in-browser (or hosted) LLM chat assistant.
  *
- * References:
- * https://webllm.mlc.ai/
- * https://chat.webllm.ai/
+ *  Full documentation: docs/wc-ai-bot.md
  *
+ *  Providers (via `provider`):
+ *    auto (default)  Gemini Nano if already available, else WebLLM
+ *    webllm          in-browser via WebGPU (MLC/WebLLM), model auto-sized to GPU
+ *    gemini-nano     Chrome's built-in on-device AI (LanguageModel API)
+ *    server          hosted SSE endpoint (`endpoint`, optional Cloudflare Turnstile)
+ *
+ *  Key attributes: provider, model, endpoint, turnstile-site-key, bot-id, mode, system-prompt,
+ *    title, placeholder, theme (bubble|inline), position, auto-open, panel-width/panel-height,
+ *    max-height, temperature, max-tokens, check-gpu-compatibility, force-enable,
+ *    hide-if-unavailable, debug, context-urls, context-window-size, query-context.
+ *
+ *  Events (canonical + legacy `bot:*` alias): wcbotready, wcbotmessagesent,
+ *    wcbotresponsereceived, wcboterror, wcbotunsupported, wcbotconversationcleared, wcbotclosed,
+ *    wcbotdownloadrequired, wcbotdownloadprogress.
+ *
+ *  Instance API: sendMessage(text), clearConversation(), exportConversation(),
+ *    setContext(systemPrompt), toggleMinimize().
+ *  Static API: WcAiBot.checkSystemSupport(), getAvailableModels(), clearStoredPreferences().
+ *
+ *  mode="assistant" adds slash-commands (/create-schema, /create-template, /create-list,
+ *    /create-edit, /create-screen, /create-component, /create-web-pilot, /query, /help) and JSON
+ *    knowledge bases loaded from `context-urls`.
+ *
+ *  References: https://webllm.mlc.ai/ · https://developer.chrome.com/docs/ai/prompt-api
  */
 
 import { WcBaseComponent } from './wc-base-component.js';

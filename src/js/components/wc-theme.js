@@ -13,7 +13,7 @@
  *  Description:
  *    Manages the application theme by applying theme classes to the document element.
  *    - If 'theme' attribute is provided, uses that value (and saves to localStorage)
- *    - Otherwise, loads theme from localStorage (defaults to 'rose')
+ *    - Otherwise, loads theme from localStorage (defaults to 'royal')
  *    - Supports both theme name and dark/light mode in the same attribute
  */
 import { loadStyle } from './helper-function.js';
