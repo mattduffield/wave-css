@@ -108,6 +108,46 @@ if (!customElements.get('wc-mask-hub')) {
           min: 0
         }
       };
+
+      // ── Self-healing application ─────────────────────────────────────────
+      // The `on wcready from document` hyperscript in wc-input only works for
+      // elements present when wcready fires. Inputs that arrive LATER (HTMX
+      // fragment/tab swaps — most app screens) subscribe to an event that has
+      // already happened, never get masked, and the eventual save fails schema
+      // validation. So: (1) drain anything queued before IMask loaded,
+      // (2) sweep the whole document now, (3) sweep every HTMX-settled region
+      // from ONE document-level listener. applyMask is idempotent
+      // (_imaskInstance guard) and formats any already-typed value, so a late
+      // application preserves the user's typing instead of losing it.
+      const pending = this._pending || [];
+      this._pending = [];
+      pending.forEach(p => this.applyMask({ target: p.target }, p.maskType));
+      this.applyAll(document);
+      if (!WcMaskHub._sweepWired) {
+        WcMaskHub._sweepWired = true;
+        const sweep = (evt) => {
+          const root = evt && evt.target && evt.target.querySelectorAll ? evt.target : document;
+          this.applyAll(root);
+        };
+        document.body.addEventListener('htmx:afterSettle', sweep);
+        document.body.addEventListener('htmx:load', sweep);
+      }
+    }
+
+    /**
+     * Apply the right mask to every not-yet-masked candidate in root.
+     * Candidates: input[type=tel] (phone) and anything carrying data-mask="<type>".
+     */
+    applyAll(root) {
+      if (!root || !root.querySelectorAll || typeof IMask === 'undefined') return;
+      root.querySelectorAll('input[type="tel"], input[data-mask], [data-mask] input').forEach((el) => {
+        if (el._imaskInstance) return;
+        const holder = el.closest('[data-mask]');
+        const maskType = el.getAttribute('data-mask') || (holder && holder.getAttribute('data-mask')) ||
+          (el.type === 'tel' ? 'phone' : null);
+        if (!maskType || !this.maskConfigs[maskType]) return;
+        this.applyMask({ target: el }, maskType);
+      });
     }
 
     /**
@@ -124,6 +164,16 @@ if (!customElements.get('wc-mask-hub')) {
           console.log('[WcMaskHub] Mask already applied to element, skipping:', target.getAttribute('name') || target.id || 'unnamed');
         }
         return; // Already initialized
+      }
+
+      // Not loaded yet? QUEUE instead of throwing. A focus/wcready that arrives
+      // before IMask finishes loading used to hit `IMask is not defined` and the
+      // field silently stayed unmasked forever — the user then saved a raw value
+      // that failed schema validation and lost their typing to a refresh.
+      if (typeof IMask === 'undefined' || !this.maskConfigs) {
+        this._pending = this._pending || [];
+        this._pending.push({ target, maskType });
+        return;
       }
 
       // Get the mask configuration
