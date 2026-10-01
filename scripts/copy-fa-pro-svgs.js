@@ -361,6 +361,7 @@ const ICONS_TO_COPY = [
   "filter",
   "fingerprint",
   "fire",
+  "fire-flamed-curve",
   "flask",
   "floppy-disk",
   "folder",
