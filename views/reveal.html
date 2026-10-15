@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-reveal</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 680px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-4">wc-reveal</h1>
+    <p class="mb-6 text-muted">
+      A single animated collapsible that hosts live light-DOM content — named form controls,
+      htmx and hyperscript bindings survive because children are moved, never re-created.
+    </p>
+
+    <div class="card p-4 col-1 gap-5">
+      <wc-form>
+        <wc-input name="title" lbl-label="Title" value="Summit Memories"></wc-input>
+
+        <!-- Usage target: real controls inside the panel -->
+        <wc-reveal id="adjust" label="Adjust size, alignment & lines" class="mt-3">
+          <div class="line-row row gap-3">
+            <wc-input name="size" type="number" lbl-label="Size" value="18"></wc-input>
+            <div class="col-1 gap-1">
+              <label for="align">Align</label>
+              <select id="align" name="align"
+                      hx-on:change="document.getElementById('htmx-out').textContent = 'htmx saw align=' + this.value">
+                <option value="left">Left</option>
+                <option value="center" selected>Center</option>
+                <option value="right">Right</option>
+              </select>
+              <span id="htmx-out" class="text-xs text-muted"></span>
+            </div>
+          </div>
+          <div class="field col-1 gap-1 mt-3">
+            <label for="lines">Decorative lines</label>
+            <!-- Picking "custom" reveals sub-controls: the panel grows with no remeasuring -->
+            <select id="lines" name="lines"
+                    _="on change if my.value is 'custom' remove .hidden from #line-custom else add .hidden to #line-custom end">
+              <option value="none">None</option>
+              <option value="single" selected>Single</option>
+              <option value="custom">Custom…</option>
+            </select>
+            <div id="line-custom" class="hidden col-1 gap-2 mt-2">
+              <wc-input name="line_weight" type="number" lbl-label="Line weight" value="2"></wc-input>
+              <wc-select name="line_style" lbl-label="Line style">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+              </wc-select>
+            </div>
+          </div>
+        </wc-reveal>
+
+        <!-- Rich summary + starts open + nested reveal -->
+        <wc-reveal open class="mt-3">
+          <span slot="summary"><wc-fa-icon name="gear" class="mr-2"></wc-fa-icon>Advanced (starts open)</span>
+          <wc-input name="notes" lbl-label="Notes" value="Nested panels below"></wc-input>
+          <wc-reveal label="Nested: expert settings" class="mt-3">
+            <wc-input name="kerning" type="number" lbl-label="Kerning" value="0"></wc-input>
+          </wc-reveal>
+        </wc-reveal>
+
+        <!-- A required field in a closed panel: submitting opens it -->
+        <wc-reveal label="Contact (required field inside)" class="mt-3">
+          <input name="email" type="email" required placeholder="you@example.com" aria-label="Email">
+        </wc-reveal>
+
+        <div class="row gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+        </div>
+      </wc-form>
+      <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+    </div>
+
+    <h2 class="text-lg font-bold mt-6 mb-3">Group (accordion-style), disabled, no-animate</h2>
+    <div class="card p-4 col-1 gap-3">
+      <wc-reveal label="Shipping" data-group="checkout" open>
+        <p>Opening another reveal in this group closes this one.</p>
+      </wc-reveal>
+      <wc-reveal label="Billing" data-group="checkout">
+        <p>Billing details.</p>
+      </wc-reveal>
+      <wc-reveal label="Review" data-group="checkout">
+        <p>Review your order.</p>
+      </wc-reveal>
+      <wc-reveal label="Disabled" disabled>
+        <p>Can't be toggled.</p>
+      </wc-reveal>
+      <wc-reveal label="No animation" no-animate>
+        <p>Snaps open and closed.</p>
+      </wc-reveal>
+      <div class="row gap-2">
+        <button class="btn" onclick="wc.EventHub.broadcast('wcrevealopen', '#adjust')">EventHub: open #adjust</button>
+        <button class="btn" onclick="wc.EventHub.broadcast('wcrevealclose', '#adjust')">EventHub: close #adjust</button>
+        <button class="btn" onclick="wc.EventHub.broadcast('wcrevealtoggle', '#adjust')">EventHub: toggle #adjust</button>
+      </div>
+      <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const out = document.getElementById('out');
+    document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      out.textContent = JSON.stringify(obj, null, 2);
+    });
+
+    const log = document.getElementById('log');
+    ['wcrevealopened', 'wcrevealclosed', 'wcrevealtoggled'].forEach(name => {
+      document.addEventListener(name, (e) => {
+        const r = e.target;
+        const label = r.getAttribute('label') || r.querySelector('[slot="summary"]')?.textContent.trim();
+        log.textContent = `${name} ${JSON.stringify(e.detail)} — ${label}\n` + log.textContent;
+      });
+    });
+  </script>
+</body>
+</html>

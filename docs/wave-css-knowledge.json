@@ -979,6 +979,38 @@
         "usage": "<wc-accordion allow-many>\n  <option value=\"Section 1\" selected>Content for section 1...</option>\n  <option value=\"Section 2\">Content for section 2...</option>\n</wc-accordion>"
       },
       {
+        "name": "wc-reveal",
+        "description": "Single animated collapsible that hosts arbitrary live light-DOM content (form controls, nested panels) — fills the gap wc-accordion leaves",
+        "attributes": [
+          "id",
+          "class",
+          "label",
+          "open",
+          "disabled",
+          "no-animate",
+          "data-group"
+        ],
+        "events": {
+          "emits": [
+            "wcrevealopened",
+            "wcrevealclosed",
+            "wcrevealtoggled"
+          ],
+          "legacyAliases": [
+            "wc:reveal:open",
+            "wc:reveal:close",
+            "wc:reveal:toggle"
+          ],
+          "listens": [
+            "wcrevealopen",
+            "wcrevealclose",
+            "wcrevealtoggle"
+          ]
+        },
+        "notes": "Extends WcBaseComponent. Host child nodes are MOVED (appendChild, never innerHTML/clone) into the panel, so named form fields, values, htmx and hyperscript bindings survive; children appended later are adopted too (MutationObserver). Summary from `label` or a [slot=\"summary\"] / [data-summary] child. Renders <button class=\"wc-reveal-header\" aria-expanded aria-controls> + <div class=\"wc-reveal-body\" role=\"region\" aria-labelledby>. Height animates via grid-template-rows 0fr→1fr (tracks true auto height when inner controls reveal sub-controls, no JS remeasuring); once open the panel stops clipping so inner dropdowns can overflow. Collapsed body is [inert] (out of tab order/a11y tree) but its fields still SUBMIT. A required control failing validation inside a closed panel opens it. `open` reflected (+ host class wc-reveal-open/wc-reveal-closed); `.open` property + `toggle()`. prefers-reduced-motion and `no-animate` disable transitions. `data-group` = accordion-style (opening one closes siblings via EventHub wcrevealclose). DOM events are past-tense notifications (wcrevealopened/closed/toggled, detail {open}, bubbling; legacy aliases wc:reveal:open/close/toggle); present-tense wcrevealopen/close/toggle are inbound EventHub commands taking a selector like wc-accordion — kept distinct so a notification never re-triggers a command. Tokens: --wc-reveal-hover-bg, --wc-reveal-caret-color, --wc-reveal-radius. Styles in @layer wc.usage.",
+        "usage": "<wc-reveal label=\"Adjust size, alignment & lines\">\n  <div class=\"line-row\">\n    <wc-input name=\"size\" type=\"number\" lbl-label=\"Size\"></wc-input>\n    <select name=\"align\"><option>left</option><option>center</option></select>\n  </div>\n</wc-reveal>"
+      },
+      {
         "name": "wc-article-card",
         "description": "Article card that fetches metadata from a URL endpoint",
         "attributes": [
@@ -3169,6 +3201,7 @@
       "views/color.html — wc-color demos (hex with presets + seeded value, rgb-format conversion, and a presets-only field)",
       "views/rating.html — wc-rating demos (editable half-value stars + a whole-value hearts variant, and a readonly display with show-value + count)",
       "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')",
+      "views/reveal.html — wc-reveal demos (live form controls in the panel incl. a select that reveals sub-controls, [slot=summary] + nested reveals, required-field auto-open, data-group accordion, disabled, no-animate, EventHub commands + event log)",
       "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"

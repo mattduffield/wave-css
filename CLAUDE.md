@@ -202,6 +202,7 @@ The AI Builder picks components by field type/shape. Full detail (with notes, de
 
 ### Display Components
 - `wc-accordion`: Collapsible content sections
+- `wc-reveal`: Single animated collapsible hosting **live light-DOM content** (named form controls, nested panels) — the gap `wc-accordion` (text/HTML-string sections only) leaves. Host child nodes are **moved** (appendChild, never innerHTML/clone) into the panel so values, `name`s, htmx and hyperscript bindings survive; children appended later are adopted too. Summary from `label` or a `[slot="summary"]`/`[data-summary]` child. Renders a real `<button class="wc-reveal-header" aria-expanded aria-controls>` + `<div class="wc-reveal-body" role="region" aria-labelledby>`. Height animates with **grid-template-rows 0fr→1fr** (tracks true auto height when inner selects reveal sub-controls — no remeasuring); once open the panel stops clipping so inner dropdowns overflow. Collapsed body is `inert` (no tab/a11y) but its fields **still submit**; a required control failing validation in a closed panel opens it. Attributes `label`, `open` (reflected; host class `wc-reveal-open`/`wc-reveal-closed`), `disabled`, `no-animate`, `data-group` (accordion-style: opening one closes siblings via EventHub). `.open` property + `toggle()`. Honors `prefers-reduced-motion`. Events (bubbling, detail `{open}`) are **past-tense notifications** `wcrevealopened`/`wcrevealclosed`/`wcrevealtoggled` (legacy aliases `wc:reveal:open`/`:close`/`:toggle`); the present-tense `wcrevealopen`/`wcrevealclose`/`wcrevealtoggle` are inbound **EventHub commands** (selector, like wc-accordion) — distinct names so a notification can never bubble into a command listener. Tokens `--wc-reveal-hover-bg`, `--wc-reveal-caret-color`, `--wc-reveal-radius`. `@layer wc.usage`. Verified in `tests/reveal-test.py`
 - `wc-article-card`: Article card display
 - `wc-contact-card`: Contact information card
 - `wc-contact-chip`: Compact contact display
@@ -423,6 +424,7 @@ http://localhost:3015/views/index.html
 - `views/map.html` - wc-map (keyless OpenFreeMap) single pin, markers-array + fit-bounds, and wc-address type-ahead wired to a target map (address part needs the `/api/geocode` proxy)
 - `views/checkin.html` - wc-checkin demos: check-IN (usb + camera) with ALLOWED/DENIED, and two-step check-OUT with authorized-pickups prompt + Override; in-page `requestHandler` mock (server-authoritative) + event log; Simulate-scan boxes stand in for a physical scanner
 - `views/record-lookup.html` - wc-record-lookup demos: `mode="select"` (emit record), `mode="hint"` (use-existing banner), and `mode="fill"` ("use this family" filling dotted-name sibling fields); in-page `searchHandler` mock + event log
+- `views/reveal.html` - wc-reveal demos: live form controls in the panel (incl. a select that reveals sub-controls), `[slot="summary"]` + nested reveals, required-field auto-open, `data-group` accordion, disabled, no-animate, EventHub commands + event log
 
 ### Quick Start Example
 
