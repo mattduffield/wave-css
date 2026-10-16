@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-ruler</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .ruler-shell {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      grid-template-rows: 22px 1fr auto;
+      height: 72vh;
+      min-height: 420px;
+      border: 1px solid var(--surface-4);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background: var(--surface-3);
+    }
+    .ruler-corner {
+      margin: 0; padding: 0;
+      border: 0; border-right: 1px solid var(--surface-4); border-bottom: 1px solid var(--surface-4);
+      background: var(--surface-2); color: var(--text-2);
+      font: 600 9px/1 system-ui, sans-serif; text-transform: uppercase; cursor: pointer;
+    }
+    .ruler-corner:hover { background: var(--surface-3); color: var(--text-1); }
+    #scroller { position: relative; overflow: auto; }
+    #stage { position: relative; }
+    #page {
+      position: absolute;
+      background: var(--surface-1);
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--text-1) 25%, transparent);
+    }
+    .obj {
+      position: absolute;
+      border: 1px dashed var(--surface-5, var(--surface-4));
+      background: color-mix(in srgb, var(--primary-bg-color) 12%, transparent);
+      cursor: pointer;
+      font: 12px system-ui, sans-serif; color: var(--text-2);
+      display: grid; place-items: center;
+    }
+    .obj.is-selected { border: 1.5px solid var(--primary-bg-color); }
+    .guide { position: absolute; background: var(--info-color); pointer-events: none; }
+    .guide.h { left: 0; right: 0; height: 1px; }
+    .guide.v { top: 0; bottom: 0; width: 1px; }
+    .guide.live { opacity: 0.55; }
+    .statusbar {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; gap: 1rem;
+      height: 30px; padding: 0 0.75rem;
+      border-top: 1px solid var(--surface-4);
+      background: var(--surface-2); color: var(--text-2); font-size: 12px;
+    }
+    .statusbar .grow { flex: 1; }
+  </style>
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1100px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-2">wc-ruler</h1>
+    <p class="mb-4 text-muted">
+      Canvas-drawn rulers that track a scrolled, zoomed page. Click an object to highlight its
+      extent, drag from a ruler to create a guide (double-click a ruler to drop one), and click the
+      corner to change units. Ctrl/⌘ + wheel or pinch over the page zooms (via <code>wc-zoom</code>).
+    </p>
+
+    <div class="ruler-shell">
+      <button class="ruler-corner" id="corner" title="Change units">in</button>
+      <wc-ruler id="hr" orientation="horizontal" unit="in" length="612" partner="#vr" cursor-tracking></wc-ruler>
+      <wc-ruler id="vr" orientation="vertical" unit="in" length="792" partner="#hr" cursor-tracking></wc-ruler>
+      <div id="scroller">
+        <div id="stage">
+          <div id="page">
+            <div class="obj" data-x="36" data-y="36" data-w="540" data-h="90">Masthead</div>
+            <div class="obj" data-x="36" data-y="150" data-w="260" data-h="380">Story</div>
+            <div class="obj" data-x="316" data-y="150" data-w="260" data-h="200">Photo</div>
+            <div class="obj" data-x="316" data-y="372" data-w="260" data-h="158">Pull quote</div>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <span id="pos">—</span>
+        <span id="guides-out">Guides: none</span>
+        <span class="grow"></span>
+        <wc-zoom id="zoom" value="100" target="#scroller" fit-buttons></wc-zoom>
+      </div>
+    </div>
+
+    <pre id="log" class="card p-3 text-xs mt-4" style="white-space:pre-wrap; max-height: 10rem; overflow:auto;"></pre>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const PT = 96 / 72;
+    const PAGE = { w: 612, h: 792 };
+    const MARGIN = 48;
+    const hr = document.getElementById('hr');
+    const vr = document.getElementById('vr');
+    const scroller = document.getElementById('scroller');
+    const stage = document.getElementById('stage');
+    const page = document.getElementById('page');
+    const zoomEl = document.getElementById('zoom');
+    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+    let zoom = 1;
+    let selected = null;
+    let live = null;
+
+    await Promise.all([customElements.whenDefined('wc-ruler'), customElements.whenDefined('wc-zoom')]);
+    await Promise.all([hr.ready, vr.ready, zoomEl.ready]);
+
+    function layout() {
+      const s = PT * zoom;
+      const pw = PAGE.w * s, ph = PAGE.h * s;
+      const sw = Math.max(scroller.clientWidth, pw + MARGIN * 2);
+      const sh = Math.max(scroller.clientHeight, ph + MARGIN * 2);
+      stage.style.width = sw + 'px';
+      stage.style.height = sh + 'px';
+      page.style.width = pw + 'px';
+      page.style.height = ph + 'px';
+      page.style.left = (sw - pw) / 2 + 'px';
+      page.style.top = MARGIN + 'px';
+      page.querySelectorAll('.obj').forEach(o => {
+        o.style.left = o.dataset.x * s + 'px';
+        o.style.top = o.dataset.y * s + 'px';
+        o.style.width = o.dataset.w * s + 'px';
+        o.style.height = o.dataset.h * s + 'px';
+      });
+      drawGuides();
+      sync();
+    }
+
+    // Rulers only need the page's screen offset + zoom — called on every scroll frame.
+    function sync() {
+      const pr = page.getBoundingClientRect();
+      hr.setOrigin(pr.left - hr.querySelector('canvas').getBoundingClientRect().left);
+      vr.setOrigin(pr.top - vr.querySelector('canvas').getBoundingClientRect().top);
+      hr.setZoom(zoom);
+      vr.setZoom(zoom);
+    }
+
+    function drawGuides() {
+      page.querySelectorAll('.guide').forEach(g => g.remove());
+      const s = PT * zoom;
+      const add = (cls, pos) => {
+        const g = document.createElement('div');
+        g.className = 'guide ' + cls;
+        if (cls.startsWith('v')) g.style.left = pos * s + 'px'; else g.style.top = pos * s + 'px';
+        page.appendChild(g);
+      };
+      hr.guides.forEach(x => add('v', x));   // x positions → vertical lines
+      vr.guides.forEach(y => add('h', y));   // y positions → horizontal lines
+      if (live) add((live.axis === 'x' ? 'v' : 'h') + ' live', live.position);
+      const fmt = (a) => a.map(v => (v / 72).toFixed(2) + 'in').join(', ') || '—';
+      document.getElementById('guides-out').textContent = `Guides x: ${fmt(hr.guides)} · y: ${fmt(vr.guides)}`;
+    }
+
+    scroller.addEventListener('scroll', sync, { passive: true });
+    new ResizeObserver(layout).observe(scroller);
+
+    page.addEventListener('click', (e) => {
+      const o = e.target.closest('.obj');
+      page.querySelectorAll('.obj').forEach(x => x.classList.toggle('is-selected', x === o));
+      selected = o;
+      if (!o) { hr.setSelection(); vr.setSelection(); return; }
+      hr.setSelection(+o.dataset.x, +o.dataset.x + +o.dataset.w);
+      vr.setSelection(+o.dataset.y, +o.dataset.y + +o.dataset.h);
+      log(`selected ${o.textContent}: x ${o.dataset.x}–${+o.dataset.x + +o.dataset.w}pt`);
+    });
+
+    scroller.addEventListener('pointermove', (e) => {
+      const x = hr.clientToPoints(e.clientX), y = vr.clientToPoints(e.clientY);
+      document.getElementById('pos').textContent = `${(x / 72).toFixed(2)}in, ${(y / 72).toFixed(2)}in`;
+    });
+
+    document.addEventListener('wcrulerguidedrag', (e) => { live = e.detail; drawGuides(); });
+    document.addEventListener('wcrulerguidecancel', () => { live = null; drawGuides(); });
+    document.addEventListener('wcrulerguidecreate', (e) => {
+      live = null;
+      log(`wcrulerguidecreate ${JSON.stringify(e.detail)}`);
+      requestAnimationFrame(drawGuides); // the ruler adds it to its guides by default
+    });
+
+    // Corner box cycles units on both rulers.
+    const units = ['in', 'cm', 'mm', 'pt', 'pc', 'px'];
+    document.getElementById('corner').addEventListener('click', (e) => {
+      const next = units[(units.indexOf(hr.getAttribute('unit')) + 1) % units.length];
+      hr.setAttribute('unit', next);
+      vr.setAttribute('unit', next);
+      e.currentTarget.textContent = next;
+    });
+
+    // Zoom toward the cursor for wheel/pinch; fit buttons compute the value and set it back.
+    zoomEl.addEventListener('wczoomchange', (e) => {
+      const old = zoom;
+      zoom = e.detail.value / 100;
+      const ax = e.detail.anchorX ?? scroller.clientWidth / 2;
+      const ay = e.detail.anchorY ?? scroller.clientHeight / 2;
+      const cx = scroller.scrollLeft + ax, cy = scroller.scrollTop + ay;
+      layout();
+      scroller.scrollLeft = cx * (zoom / old) - ax;
+      scroller.scrollTop = cy * (zoom / old) - ay;
+      sync();
+    });
+    zoomEl.addEventListener('wczoomfit', (e) => {
+      const availW = scroller.clientWidth - MARGIN * 2;
+      const availH = scroller.clientHeight - MARGIN * 2;
+      const fitW = availW / (PAGE.w * PT);
+      const fitP = Math.min(fitW, availH / (PAGE.h * PT));
+      zoom = (e.detail.mode === 'width' ? fitW : fitP);
+      zoomEl.value = Math.round(zoom * 100);
+      zoom = zoomEl.value / 100;
+      layout();
+      log(`fit ${e.detail.mode} → ${zoomEl.value}%`);
+    });
+
+    layout();
+    scroller.scrollLeft = (stage.offsetWidth - scroller.clientWidth) / 2;
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-font-picker</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    #preview {
+      min-height: 5rem;
+      padding: 1rem;
+      border: 1px dashed var(--surface-4);
+      border-radius: 0.5rem;
+      font-size: 2rem;
+      line-height: 1.2;
+      transition: font-family 0s;
+    }
+    #preview.is-previewing { border-color: var(--primary-bg-color); }
+  </style>
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 720px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-2">wc-font-picker</h1>
+    <p class="mb-6 text-muted">
+      Searchable font chooser with every font previewed in its own face. 1,500 fonts (about 40 real
+      Google Fonts that register lazily via the FontFace API as they scroll into view, the rest in
+      system faces); Document fonts and Recent sections; category chips; live hover preview.
+    </p>
+
+    <div class="card p-4 col-1 gap-4">
+      <wc-form>
+        <label for="sample" class="mb-1">Preview text</label>
+        <input id="sample" value="Follow the Star" class="mb-3">
+
+        <wc-font-picker id="fp" name="font" lbl-label="Font" value="playfair-display"
+                        document-fonts='["playfair-display","lora","great-vibes"]'
+                        recent-key="wave-demo-recent-fonts"
+                        preview-text="Follow the Star" required></wc-font-picker>
+
+        <div id="preview" class="mt-4">Follow the Star</div>
+
+        <div class="row gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+        </div>
+      </wc-form>
+      <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+    </div>
+
+    <h2 class="text-base font-semibold mt-6 mb-2">Loaded from <code>url</code>, no sample line, custom categories</h2>
+    <div class="card p-4 col-1 gap-3">
+      <wc-font-picker id="fp-url" name="heading_font" lbl-label="Heading font" preview-text=""
+                      results-member="fonts"
+                      categories='["script","serif",{"id":"slab","label":"Slab serif"},"sans","display"]'></wc-font-picker>
+    </div>
+
+    <pre id="log" class="card p-3 text-xs mt-4" style="white-space:pre-wrap; max-height: 12rem; overflow:auto;"></pre>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <script>
+    // Real web fonts (Google Fonts via jsDelivr @fontsource) — registered lazily by the picker.
+    const WEB = [
+      ['playfair-display', 'Playfair Display', 'serif'], ['lora', 'Lora', 'serif'], ['merriweather', 'Merriweather', 'serif'],
+      ['eb-garamond', 'EB Garamond', 'serif'], ['libre-baskerville', 'Libre Baskerville', 'serif'], ['cinzel', 'Cinzel', 'serif'],
+      ['crimson-text', 'Crimson Text', 'serif'], ['roboto-slab', 'Roboto Slab', 'slab'], ['bitter', 'Bitter', 'slab'],
+      ['arvo', 'Arvo', 'slab'], ['zilla-slab', 'Zilla Slab', 'slab'], ['alfa-slab-one', 'Alfa Slab One', 'slab'],
+      ['montserrat', 'Montserrat', 'sans'], ['open-sans', 'Open Sans', 'sans'], ['raleway', 'Raleway', 'sans'],
+      ['lato', 'Lato', 'sans'], ['poppins', 'Poppins', 'sans'], ['nunito', 'Nunito', 'sans'], ['work-sans', 'Work Sans', 'sans'],
+      ['oswald', 'Oswald', 'sans'], ['lobster', 'Lobster', 'display'], ['bebas-neue', 'Bebas Neue', 'display'],
+      ['abril-fatface', 'Abril Fatface', 'display'], ['anton', 'Anton', 'display'], ['righteous', 'Righteous', 'display'],
+      ['permanent-marker', 'Permanent Marker', 'display'], ['pacifico', 'Pacifico', 'script'], ['great-vibes', 'Great Vibes', 'script'],
+      ['dancing-script', 'Dancing Script', 'script'], ['caveat', 'Caveat', 'script'], ['satisfy', 'Satisfy', 'script'],
+      ['amatic-sc', 'Amatic SC', 'script'], ['kalam', 'Kalam', 'script'], ['shadows-into-light', 'Shadows Into Light', 'script'],
+      ['fira-code', 'Fira Code', 'monospace'], ['jetbrains-mono', 'JetBrains Mono', 'monospace'],
+      ['source-code-pro', 'Source Code Pro', 'monospace'], ['space-mono', 'Space Mono', 'monospace'],
+      ['ibm-plex-mono', 'IBM Plex Mono', 'monospace'], ['courier-prime', 'Courier Prime', 'monospace'],
+    ].map(([id, family, category]) => ({
+      id, family, display_name: family, category,
+      url: `https://cdn.jsdelivr.net/npm/@fontsource/${id}@5/files/${id}-latin-400-normal.woff2`,
+    }));
+    WEB.find(f => f.id === 'alfa-slab-one').badge = { text: 'Heavy', variant: 'warning' };
+    WEB.find(f => f.id === 'great-vibes').note = 'Best at 14pt and larger';
+
+    // Bulk entries in local system faces (no url) to exercise virtualisation at 1,500 fonts.
+    const SYSTEM = [
+      ['Georgia', 'serif'], ['Times New Roman', 'serif'], ['Palatino', 'serif'], ['Didot', 'serif'], ['Baskerville', 'serif'],
+      ['Arial', 'sans'], ['Helvetica', 'sans'], ['Verdana', 'sans'], ['Trebuchet MS', 'sans'], ['Gill Sans', 'sans'], ['Futura', 'sans'], ['Optima', 'sans'],
+      ['Impact', 'display'], ['Copperplate', 'display'], ['Brush Script MT', 'script'], ['Snell Roundhand', 'script'],
+      ['Courier New', 'monospace'], ['Menlo', 'monospace'], ['Monaco', 'monospace'], ['Rockwell', 'slab'],
+    ];
+    const BULK = [];
+    for (let i = 0; BULK.length + WEB.length < 1500; i++) {
+      const [family, category] = SYSTEM[i % SYSTEM.length];
+      const n = Math.floor(i / SYSTEM.length) + 1;
+      BULK.push({ id: `${family.toLowerCase().replace(/\s+/g, '-')}-${n}`, family, display_name: `${family} ${String(n).padStart(2, '0')}`, category });
+    }
+    window.DEMO_FONTS = [...WEB, ...BULK];
+  </script>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const fp = document.getElementById('fp');
+    fp.fonts = window.DEMO_FONTS;
+
+    // url mode: serve the same JSON from a Blob URL (stands in for a server endpoint).
+    const blob = new Blob([JSON.stringify({ fonts: window.DEMO_FONTS.slice(0, 40) })], { type: 'application/json' });
+    document.getElementById('fp-url').setAttribute('url', URL.createObjectURL(blob));
+
+    const preview = document.getElementById('preview');
+    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+    const famOf = (v) => (window.DEMO_FONTS.find(f => f.id === v) || {}).family || v;
+    const setFace = (family) => { preview.style.fontFamily = `"${family}", system-ui`; };
+    setFace(famOf(fp.value));
+
+    // Live preview while hovering / arrowing; revert when the panel closes without a pick.
+    fp.addEventListener('wcfontpreview', (e) => { preview.classList.add('is-previewing'); setFace(e.detail.family); });
+    fp.addEventListener('wcfontpreviewend', (e) => { preview.classList.remove('is-previewing'); setFace(e.detail.family); log(`wcfontpreviewend ${JSON.stringify(e.detail)}`); });
+    fp.addEventListener('wcfontchange', (e) => { preview.classList.remove('is-previewing'); setFace(e.detail.family); log(`wcfontchange ${JSON.stringify(e.detail)}`); });
+    document.getElementById('fp-url').addEventListener('wcfontchange', (e) => log(`#fp-url wcfontchange ${JSON.stringify(e.detail)}`));
+
+    document.getElementById('sample').addEventListener('input', (e) => {
+      fp.setAttribute('preview-text', e.target.value);
+      preview.textContent = e.target.value || ' ';
+    });
+
+    document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('out').textContent = JSON.stringify(Object.fromEntries(new FormData(e.target)), null, 2);
+    });
+  </script>
+</body>
+</html>

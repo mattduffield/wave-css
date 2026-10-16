@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-zoom</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .zoom-shell {
+      display: flex; flex-direction: column;
+      height: 60vh; min-height: 360px;
+      border: 1px solid var(--surface-4); border-radius: 0.5rem; overflow: hidden;
+    }
+    #surface { position: relative; flex: 1; overflow: auto; background: var(--surface-3); }
+    #board {
+      position: absolute; left: 0; top: 0;
+      width: 600px; height: 400px;
+      transform-origin: 0 0;
+      background: var(--surface-1);
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--text-1) 25%, transparent);
+      display: grid; place-items: center;
+      font: 600 28px Georgia, serif; color: var(--text-1);
+    }
+    .statusbar {
+      display: flex; align-items: center; gap: 1rem;
+      height: 30px; padding: 0 0.75rem;
+      border-top: 1px solid var(--surface-4);
+      background: var(--surface-2); color: var(--text-2); font-size: 12px;
+    }
+    .statusbar .grow { flex: 1; }
+  </style>
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1000px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-2">wc-zoom</h1>
+    <p class="mb-4 text-muted">
+      A status-bar zoom control: − / slider / + / percentage. The slider is logarithmic with 100% in
+      the middle. Click the percentage for presets and Fit page / Fit width, or type a value.
+      Over the board: Ctrl/⌘ + wheel or pinch zooms toward the cursor; Ctrl/⌘ + = / − / 0 / 1.
+    </p>
+
+    <div class="zoom-shell">
+      <div id="surface"><div id="sizer"></div><div id="board">Follow the Star</div></div>
+      <div class="statusbar">
+        <span>Page 1 of 4</span>
+        <span>Story: 612 words</span>
+        <span class="grow"></span>
+        <wc-zoom id="zoom" value="92" target="#surface" fit-buttons></wc-zoom>
+      </div>
+    </div>
+
+    <h2 class="text-base font-semibold mt-6 mb-2">Without fit buttons, custom range and steps</h2>
+    <div class="statusbar" style="border: 1px solid var(--surface-4); border-radius: 0.5rem;">
+      <span class="grow"></span>
+      <wc-zoom id="zoom2" value="100" min="50" max="200" steps="[50,75,100,150,200]"></wc-zoom>
+    </div>
+
+    <pre id="log" class="card p-3 text-xs mt-4" style="white-space:pre-wrap; max-height: 12rem; overflow:auto;"></pre>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const zoom = document.getElementById('zoom');
+    const surface = document.getElementById('surface');
+    const board = document.getElementById('board');
+    const PAD = 40;
+    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+    let scale = 0.92;
+
+    const sizer = document.getElementById('sizer');
+    function apply() {
+      board.style.transform = `translate(${PAD}px, ${PAD}px) scale(${scale})`;
+      sizer.style.width = 600 * scale + PAD * 2 + 'px';
+      sizer.style.height = 400 * scale + PAD * 2 + 'px';
+    }
+
+    zoom.addEventListener('wczoomchange', (e) => {
+      const { value, source, anchorX, anchorY } = e.detail;
+      const old = scale;
+      scale = value / 100;
+      if (anchorX != null) {
+        // keep the point under the cursor fixed
+        const cx = surface.scrollLeft + anchorX - PAD, cy = surface.scrollTop + anchorY - PAD;
+        apply();
+        surface.scrollLeft = cx * (scale / old) + PAD - anchorX;
+        surface.scrollTop = cy * (scale / old) + PAD - anchorY;
+      } else {
+        apply();
+      }
+      log(`wczoomchange ${JSON.stringify(e.detail)}`);
+    });
+    zoom.addEventListener('wczoomfit', (e) => {
+      const w = (surface.clientWidth - PAD * 2) / 600;
+      const h = (surface.clientHeight - PAD * 2) / 400;
+      zoom.value = Math.round((e.detail.mode === 'width' ? w : Math.min(w, h)) * 100);
+      scale = zoom.value / 100;
+      apply();
+      log(`wczoomfit ${JSON.stringify(e.detail)} → host set ${zoom.value}%`);
+    });
+    document.getElementById('zoom2').addEventListener('wczoomchange', (e) => log(`#zoom2 ${JSON.stringify(e.detail)}`));
+    apply();
+  </script>
+</body>
+</html>

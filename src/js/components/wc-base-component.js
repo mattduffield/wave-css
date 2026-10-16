@@ -56,6 +56,20 @@ export class WcBaseComponent extends HTMLElement {
     }
   }
 
+  /**
+   * Emit a component notification: the bubbling DOM event (+ legacy alias) from this
+   * element, and the same payload through wc.EventHub for page-wide subscribers. The
+   * EventHub copy is dispatched on document.body with detail { selector, custom } —
+   * selector identifies this instance ([data-wc-id="…"]), custom is the event detail.
+   * @param {string} newName - lowercase event name (e.g. 'wczoomchange')
+   * @param {string} legacyName - colon alias (e.g. 'wc-zoom:change')
+   * @param {object} detail - event detail
+   */
+  _notify(newName, legacyName, detail) {
+    this._emitEvent(newName, legacyName, { bubbles: true, composed: true, detail });
+    window.wc?.EventHub?.broadcast(newName, `[data-wc-id="${this.wcId}"]`, '', detail);
+  }
+
   constructor() {
     super();
     this._wcId = generateUniqueId();

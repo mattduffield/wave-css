@@ -777,7 +777,7 @@
       },
       {
         "name": "wc-color",
-        "description": "Form-associated color picker field. Shows a swatch + the text value; clicking opens the native color picker; optional preset swatches allow one-click selection. Submits a normal named value in the chosen format (hex by default) — stored under `name` with no special handling. Useful for color-typed schema fields (theme/category/label colors, e.g. the per-lane colors wc-kanban consumes).",
+        "description": "Form-associated color picker field. Shows a swatch + the text value; clicking opens the native color picker — or, with `alpha` / picker=\"custom\", Wave's own popover (saturation/value square, hue + transparency sliders, hex + R/G/B or H/S/L fields, eyedropper, optional CMYK tab). Preset swatches (`swatches`) and labelled `swatch-groups` (Document colours, Brand kit, Recent) allow one-click selection; `allow-none` adds a 'no colour' swatch. Submits a normal named value in the chosen format — stored under `name` with no special handling.",
         "attributes": [
           "name",
           "id",
@@ -788,13 +788,26 @@
           "swatches",
           "allow-custom",
           "required",
-          "disabled"
+          "disabled",
+          "alpha",
+          "picker",
+          "swatch-groups",
+          "recent-key",
+          "allow-none",
+          "cmyk"
         ],
-        "events": [
-          "wccolorchange"
-        ],
-        "notes": "Extends WcBaseFormComponent. Foundation is the native <input type=color> (hex picking); the stored/submitted value is converted to `format` (hex default | rgb | hsl) from the picked hex, and any incoming color string (hex / rgb() / hsl()) is parsed back to hex to seed the swatch. `swatches` (JSON array of colors) renders one-click preset buttons; `allow-custom=\"false\"` locks the free picker (presets only). `value` seeds + round-trips (save→reopen→same, modulo canonical spacing); `required` participates in form validity via setValidity (empty → valueMissing → element & form invalid). The native <input type=color> is nulled out of the base formElement so it isn't auto-bound as the value source (the component converts hex→format itself and calls setFormValue under the host `name`). Alpha is NOT supported (native picker limitation; out of scope). htmx-safe: re-seeds on value change and initializes on dynamic insert. Styles in @layer wc.usage (empty state shows a checkerboard swatch). Event wccolorchange detail { value } (legacy alias wc-color:change). Generation: emit for color-typed fields or field names ending _color; pass swatches from a palette when available.",
-        "usage": "<wc-color name=\"label_color\" value=\"{{ Record.label_color }}\" lbl-label=\"Label Color\"\n    format=\"hex\" swatches='[\"#ef4444\",\"#f59e0b\",\"#22c55e\",\"#3b82f6\",\"#a855f7\"]' required>\n</wc-color>"
+        "events": {
+          "emits": [
+            "wccolorchange",
+            "wccolorinput"
+          ],
+          "legacyAliases": [
+            "wc-color:change",
+            "wc-color:input"
+          ]
+        },
+        "notes": "Extends WcBaseFormComponent. Defaults keep the original behaviour (native <input type=color>, hex/rgb/hsl `format`, `swatches` row, `allow-custom=\"false\"` presets-only). ALPHA: `alpha` adds a transparency slider; values become #rrggbbaa (hex), rgba() (rgb) or hsla() (hsl); the swatch draws over a checkerboard. Parses #rgb/#rgba/#rrggbb/#rrggbbaa, rgb()/rgba(), hsl()/hsla() (comma or space syntax incl. '/ 50%'); without `alpha` an 8-digit value drops alpha (original behaviour). CUSTOM PICKER (alpha or picker=\"custom\"): body-level popover (role=dialog, theme classes mirrored) with SV square, hue + alpha sliders (pointer + arrow keys, Shift ×10), hex field, R/G/B ⇄ H/S/L fields, EyeDropper button only where window.EyeDropper exists. EVENTS: wccolorchange {value, alpha, cmyk?} on commit (preset/None click, drag release, field Enter/blur, eyedropper, CMYK entry); wccolorinput {value, alpha, cmyk?} continuously while dragging/typing — preview with input, record undo on change. Native mode keeps its original timing (wccolorchange as the native picker moves) and now also fires wccolorinput. `swatch-groups` JSON [{label, colors}] → labelled rows after the unlabelled `swatches` row; `recent-key` keeps a Recent row (last 8 committed, localStorage). A preset without its own alpha keeps the current transparency; `#rrggbbaa` presets apply theirs. `allow-none` → 'no colour' swatch (surface square + --danger-color diagonal) setting value '' (alpha 0). `cmyk` → CMYK tab (0–100); wccolorchange detail.cmyk = [c,m,y,k] only when the user entered CMYK (store exact print values); naive RGB↔CMYK, NOT colour-managed. `required` → valueMissing. The native input is nulled out of the base formElement (the component converts + setFormValue under `name`). htmx-safe; popover torn down on disconnect. Docs: docs/wc-color.md.",
+        "usage": "<wc-color name=\"fill\" lbl-label=\"Fill\" alpha allow-none cmyk recent-key=\"ps-recent-colors\" value=\"#1a2a4acc\"\n    swatch-groups='[{\"label\":\"Document colours\",\"colors\":[\"#1a2a4a\",\"#c9a84c\"]},{\"label\":\"Brand kit\",\"colors\":[\"#2c4a7c\",\"#c9a84c80\"]}]'></wc-color>"
       },
       {
         "name": "wc-rating",
@@ -956,6 +969,53 @@
         },
         "docs": "docs/wc-google-address.md",
         "usage": "<wc-google-address\n  name=\"address.street\"\n  lbl-label=\"Street Address\"\n  api-key=\"YOUR_GOOGLE_API_KEY\"\n  address-group=\"address\"\n  placeholder=\"Start typing address...\"\n  required>\n</wc-google-address>"
+      },
+      {
+        "name": "wc-font-picker",
+        "description": "Form-associated searchable font chooser previewing every font in its own face (generalises the SummitMemories designer's font preview picker). Closed state like wc-select; popover with search, category chips, Document fonts / Recent / All fonts sections, virtualised for 1,500+ fonts.",
+        "attributes": [
+          "name",
+          "id",
+          "class",
+          "value",
+          "lbl-label",
+          "placeholder",
+          "required",
+          "disabled",
+          "fonts",
+          "url",
+          "results-member",
+          "document-fonts",
+          "recent-key",
+          "preview-text",
+          "categories"
+        ],
+        "methods": [
+          "open(seed?)",
+          "close()",
+          "refresh()"
+        ],
+        "properties": [
+          "value",
+          "fonts (array get/set)",
+          "renderPreview = (font, text) => Node|null"
+        ],
+        "events": {
+          "emits": [
+            "wcfontchange",
+            "wcfontpreview",
+            "wcfontpreviewend",
+            "wcoptionsloaded"
+          ],
+          "legacyAliases": [
+            "wc-font-picker:change",
+            "wc-font-picker:preview",
+            "wc-font-picker:preview-end",
+            "optionsloaded"
+          ]
+        },
+        "notes": "Extends WcBaseFormComponent; submits the font value (id, or family when no id) under `name` via FACE; `required` → valueMissing. Font entries {id, family, display_name, category, url?, weights?, styles?, note?, badge?:{text,variant}}. `url` fonts register lazily with the FontFace API when their row (or the closed control) scrolls into view (IntersectionObserver), with a neutral placeholder bar until loaded and an italic fallback on failure; registrations are shared page-wide (each file fetched once). Fonts load from `fonts` JSON (or the .fonts property) or `url` (+ results-member; array or {results}) with ready deferred until loaded and wcoptionsloaded fired. Sections: Document fonts (`document-fonts` JSON of values, in order), Recent (`recent-key` localStorage, last 8, newest first), then All fonts grouped by category (flat while searching / filtering). Chips: Serif, Sans Serif, Display, Script, Monospace + categories found (override with `categories` JSON of ids or {id,label}); category slugs normalise sans-serif→sans, handwriting→script, mono→monospace, slab-serif→slab. `preview-text` sample line per row (default 'The quick brown fox'; '' → compact rows). Keyboard: typing on the closed control opens with the search seeded; ↑/↓/PageUp/PageDown/Home/End, Enter picks, Esc closes; role=listbox/option + aria-activedescendant on the search (role=combobox). wcfontpreview {value, family} on hover/arrow (live preview); wcfontpreviewend {value, family} (unchanged current) when closed without a pick; wcfontchange {value, family} on pick. Values given as family/display names still resolve. renderPreview hook for custom previews (e.g. single-line SVG pen fonts). Virtualised list (fixed row heights, ~viewport of rows in the DOM). Panel is a body-level popover mirroring theme classes; pressed chip uses the --wc-on-primary auto-contrast token. Events also broadcast via wc.EventHub (detail.custom). Docs: docs/wc-font-picker.md (includes the SummitMemories designer migration map).",
+        "usage": "<wc-font-picker name=\"font\" lbl-label=\"Font\" value=\"georgia\"\n    fonts='[{\"id\":\"georgia\",\"family\":\"Georgia\",\"category\":\"serif\"},{\"id\":\"lobster\",\"family\":\"Lobster\",\"category\":\"display\",\"url\":\"/fonts/lobster.woff2\"}]'\n    document-fonts='[\"georgia\"]' recent-key=\"ps-recent-fonts\" preview-text=\"Follow the Star\" required></wc-font-picker>"
       }
     ],
     "display": [
@@ -2065,6 +2125,77 @@
         ],
         "docs": "docs/wc-canvas-dot-highlight.md",
         "usage": "<script type=\"module\" src=\"path/to/wc-canvas-dot-highlight.js\"></script>"
+      },
+      {
+        "name": "wc-ruler",
+        "description": "Horizontal/vertical ruler for a zoomable canvas (Publisher/InDesign/PowerPoint style), drawn on a <canvas> for crispness at any devicePixelRatio. Units in/cm/mm/pt/pc/px, zoom- and scroll-aware, off-page shading, selection band, guide markers with drag-out and double-click guides, optional cursor hairline.",
+        "attributes": [
+          "id",
+          "class",
+          "orientation",
+          "unit",
+          "zoom",
+          "origin",
+          "length",
+          "selection",
+          "guides",
+          "partner",
+          "cursor-tracking"
+        ],
+        "methods": [
+          "setOrigin(px)",
+          "setZoom(z)",
+          "setSelection(start, end)",
+          "trackCursor(clientX|clientY)",
+          "setGuides(array)",
+          "clientToPoints(clientCoord)",
+          "refreshTheme()"
+        ],
+        "events": {
+          "emits": [
+            "wcrulerguidedrag",
+            "wcrulerguidecreate",
+            "wcrulerguidecancel"
+          ],
+          "legacyAliases": [
+            "wc-ruler:guide-drag",
+            "wc-ruler:guide-create",
+            "wc-ruler:guide-cancel"
+          ]
+        },
+        "notes": "Extends WcBaseComponent. All positions in POINTS (1pt = 1/72in; at zoom 1 a point is 96/72 CSS px). `origin` = CSS px from the ruler's start edge where 0pt sits (track a scrolled, centred page); `length` = page extent in points ([0,length] drawn on-page, rest shaded); `selection` = JSON [start,end] band; `guides` = JSON array along this ruler's axis. Tick density is chosen per zoom so labels never overlap (inches/picas: whole-unit labels with ½ ¼ ⅛ ¹⁄₁₆ ticks; metric: ½ + tenths). Vertical labels read top to bottom. PERFORMANCE: setOrigin/setZoom/setSelection/trackCursor never touch the DOM — they update state and schedule one rAF paint (safe on every scroll/zoom frame); ResizeObserver + DPR media query re-render crisply. GUIDES: `partner` = selector of the perpendicular ruler; a guide dragged out of the top ruler is a horizontal guide measured on the partner's (y) axis, with a live marker on the partner. wcrulerguidedrag {position, axis, clientX, clientY} while dragging; wcrulerguidecreate {position, axis:'x'|'y', source:'drag'|'dblclick'} on release / double-click — CANCELABLE: by default the guide is added to the ruler owning that axis; preventDefault() to manage guides yourself. wcrulerguidecancel {axis} when dragged out and back. Events also broadcast via wc.EventHub (detail.custom). Theming via --wc-ruler-bg/-page-bg/-tick/-text/-accent/-guide/-size/-font-size (Wave tokens by default; re-resolved on theme class change). Styles in @layer wc.usage. Docs: docs/wc-ruler.md.",
+        "usage": "<wc-ruler id=\"hr\" orientation=\"horizontal\" unit=\"in\" length=\"612\" partner=\"#vr\" cursor-tracking></wc-ruler>\n<wc-ruler id=\"vr\" orientation=\"vertical\" unit=\"in\" length=\"792\" partner=\"#hr\" cursor-tracking></wc-ruler>\n<!-- per scroll/zoom frame: hr.setOrigin(px); hr.setZoom(z); hr.setSelection(x0, x1) -->"
+      },
+      {
+        "name": "wc-zoom",
+        "description": "Compact status-bar zoom control: optional Fit page / Fit width, − logarithmic slider +, editable percentage with a presets menu; Ctrl/⌘ + wheel, trackpad pinch and Ctrl/⌘ shortcuts over a target.",
+        "attributes": [
+          "id",
+          "class",
+          "value",
+          "min",
+          "max",
+          "steps",
+          "fit-buttons",
+          "target"
+        ],
+        "methods": [
+          "zoomIn(source?)",
+          "zoomOut(source?)",
+          "fit(mode)"
+        ],
+        "events": {
+          "emits": [
+            "wczoomchange",
+            "wczoomfit"
+          ],
+          "legacyAliases": [
+            "wc-zoom:change",
+            "wc-zoom:fit"
+          ]
+        },
+        "notes": "Extends WcBaseComponent. `value` is a percentage (default 100), clamped to `min` (10) / `max` (800); reflected when the user changes it; SETTING .value NEVER FIRES AN EVENT (so the host can set it from wczoomfit without a loop). `steps` JSON (default [25,50,75,100,125,150,200,300,400]) drives −/+ and the menu. Slider is piecewise-logarithmic: [min,100] fills the left half, [100,max] the right, so 100% is the midpoint; snaps to a preset within 1.5% of travel. wczoomchange {value, previous, source: slider|button|input|menu|wheel|key, anchorX?, anchorY?} — wheel/pinch add the pointer position in the TARGET's own coordinates (px from its top-left, excluding scroll) so the host can zoom toward the cursor. wczoomfit {mode:'page'|'width'} — the host computes and sets value. `target` selector: Ctrl/⌘ + wheel and pinch (Chromium/Firefox wheel+ctrlKey; Safari gesturestart/gesturechange) with the browser page zoom prevented there; shortcuts Ctrl/⌘ + = / − / 0 (fit page) / 1 (100%). Re-binds when htmx swaps the target (htmx:afterSwap). Menu is a body-level popover (role=menu, theme classes mirrored). 24px tall — fits a 30px status bar. Events also broadcast via wc.EventHub (detail.custom). Docs: docs/wc-zoom.md.",
+        "usage": "<wc-zoom id=\"zoom\" value=\"92\" target=\"#canvas\" fit-buttons></wc-zoom>\n<!-- zoom.addEventListener('wczoomchange', e => canvas.setZoom(e.detail.value / 100, e.detail.anchorX, e.detail.anchorY));\n     zoom.addEventListener('wczoomfit', e => { zoom.value = fit(e.detail.mode); }); -->"
       }
     ],
     "buttons": [
@@ -3146,7 +3277,8 @@
         "wcfileuploadchange"
       ],
       "color": [
-        "wccolorchange"
+        "wccolorchange",
+        "wccolorinput"
       ],
       "rating": [
         "wcratingchange"
@@ -3162,8 +3294,23 @@
         "wctablesort",
         "wctablerowclick",
         "wcrunstatuscomplete"
+      ],
+      "ruler": [
+        "wcrulerguidedrag",
+        "wcrulerguidecreate",
+        "wcrulerguidecancel"
+      ],
+      "zoom": [
+        "wczoomchange",
+        "wczoomfit"
+      ],
+      "fontPicker": [
+        "wcfontchange",
+        "wcfontpreview",
+        "wcfontpreviewend"
       ]
-    }
+    },
+    "notificationBroadcast": "Components that also publish notifications through EventHub (wc-ruler, wc-zoom, wc-font-picker via WcBaseComponent._notify) dispatch the bubbling DOM event on the element AND broadcast the same name on document.body with detail { selector: '[data-wc-id=\"…\"]', custom: <detail> }. Listen on the element/document for the DOM event (detail = payload); listen on document.body and read detail.custom for the EventHub copy. broadcast() dispatches once at top level and additionally on window.parent's body only inside an iframe (e.g. the designer canvas)."
   },
   "patterns": {
     "simplePageTemplate": "<!DOCTYPE html>\n<html lang=\"en\" class=\"theme-ocean\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>My Page</title>\n  <link rel=\"stylesheet\" href=\"/dist/wave-css.min.css\">\n</head>\n<body>\n  <div class=\"container mx-auto p-6\">\n    <h1>Hello Wave CSS!</h1>\n  </div>\n  <script type=\"module\" src=\"/dist/wave-css.min.js\"></script>\n</body>\n</html>",
@@ -3198,11 +3345,14 @@
       "views/gantt.html — wc-gantt demos (duration bars in swimlanes, day/week/month scale switch, milestone diamond, pointer drag-move + edge-resize firing wcganttchange, link-template <a> bars)",
       "views/data-cards.html — wc-data-cards demos (image gallery with link-template + responsive columns, and graceful no-image text cards with the open event)",
       "views/file-upload.html — wc-file-upload demos (single image seeded with an existing file + FACE submit payload, and a multiple-file field whose value is a JSON array of urls)",
-      "views/color.html — wc-color demos (hex with presets + seeded value, rgb-format conversion, and a presets-only field)",
+      "views/color.html — wc-color demos (hex with presets + seeded value, rgb-format conversion, a presets-only field; plus alpha + allow-none + swatch-groups + CMYK + Recent in the custom popover, rgba() border, and picker=custom without alpha)",
       "views/rating.html — wc-rating demos (editable half-value stars + a whole-value hearts variant, and a readonly display with show-value + count)",
       "views/slider.html — wc-slider demos (single with unit + marks + step snapping, and a dual-thumb range submitting 'min,max')",
       "views/reveal.html — wc-reveal demos (live form controls in the panel incl. a select that reveals sub-controls, [slot=summary] + nested reveals, required-field auto-open, data-group accordion, disabled, no-animate, EventHub commands + event log)",
-      "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)"
+      "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)",
+      "views/ruler.html — wc-ruler demos (scrollable, zoomable page with top + left rulers, corner box cycling units, click objects for the selection band, drag-out / double-click guides, wc-zoom status bar zooming toward the cursor)",
+      "views/zoom.html — wc-zoom demos (30px status bar with fit buttons over a zoomable board: log slider, presets menu, typed value, Ctrl/⌘ + wheel / pinch toward the cursor, shortcuts; plus a custom min/max/steps control)",
+      "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },
@@ -3268,7 +3418,7 @@
       {
         "when": "color / field name ends _color",
         "component": "wc-color",
-        "notes": "format hex|rgb|hsl; pass a palette via swatches"
+        "notes": "format hex|rgb|hsl; pass a palette via swatches Add `alpha` for fill/overlay colors that need transparency (#rrggbbaa), `allow-none` for optional fill/border colors, `swatch-groups` for brand/document palettes."
       },
       {
         "when": "file / image / attachment",
@@ -3304,6 +3454,11 @@
         "when": "icon field (app icon, nav item, or schema field typed icon)",
         "component": "wc-icon-picker",
         "notes": "submits the FA icon NAME string (e.g. cart-shopping) — what wc-fa-icon/_app.icon expect; default value = the validated auto-pick"
+      },
+      {
+        "when": "font field (font family / typeface, e.g. heading_font, body_font)",
+        "component": "wc-font-picker",
+        "notes": "value = the font id (or family); pass the tenant's font collection via `fonts` or `url`; set document-fonts to fonts already used in the document and recent-key per app"
       }
     ],
     "collectionViews": [

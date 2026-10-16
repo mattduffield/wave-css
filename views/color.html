@@ -50,11 +50,52 @@
         </wc-form>
         <pre id="out" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
       </div>
+
+      <div class="card p-4 col-1 gap-3">
+        <h2 class="text-base font-semibold">Transparency, swatch groups, None, CMYK (custom popover)</h2>
+        <p class="text-xs text-muted">
+          <code>alpha</code> opens Wave's own picker (saturation/value square, hue + transparency
+          sliders, hex and R/G/B or H/S/L fields, eyedropper where supported). Drag to see
+          <code>wccolorinput</code> stream; release to commit <code>wccolorchange</code>.
+        </p>
+        <wc-form id="form2">
+          <wc-color
+              name="fill"
+              lbl-label="Fill"
+              alpha
+              allow-none
+              cmyk
+              recent-key="wave-demo-recent-colors"
+              value="#1a2a4acc"
+              swatches='["#1a2a4a","#c9a84c","#e8d5a3","#2c4a7c","#f5f1e8"]'
+              swatch-groups='[{"label":"Document colours","colors":["#1a2a4a","#c9a84c","#e8d5a3"]},{"label":"Brand kit","colors":["#2c4a7c","#c9a84c80","#7c3aed"]}]'>
+          </wc-color>
+          <wc-color name="border" lbl-label="Border (rgba format, allow-none)" alpha allow-none format="rgb" value="rgba(201, 168, 76, 0.5)"></wc-color>
+          <wc-color name="ink" lbl-label="Ink (custom picker, no alpha, hsl)" picker="custom" format="hsl" value="#2c4a7c"></wc-color>
+          <div class="row gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Save (logs payload)</button>
+          </div>
+        </wc-form>
+        <pre id="out2" class="card p-3 text-xs" style="white-space:pre-wrap;"></pre>
+        <pre id="log" class="card p-3 text-xs" style="white-space:pre-wrap; max-height: 10rem; overflow:auto;"></pre>
+      </div>
     </div>
   </div>
 
   <script type="module" src="../dist/wave-css.min.js"></script>
   <script type="module">
+    // wc-form moves its id onto the inner <form>, so #form2 is the form itself.
+    document.getElementById('form2').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('out2').textContent = JSON.stringify(Object.fromEntries(new FormData(e.target)), null, 2);
+    });
+    let inputs = 0;
+    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+    document.getElementById('form2').addEventListener('wccolorinput', () => { inputs++; });
+    document.getElementById('form2').addEventListener('wccolorchange', (e) => {
+      log(`wccolorchange ${JSON.stringify(e.detail)} (after ${inputs} wccolorinput)`);
+      inputs = 0;
+    });
     document.querySelector('wc-form').querySelector('form, .wc-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);

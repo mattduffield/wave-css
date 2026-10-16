@@ -1264,6 +1264,19 @@ var WcBaseComponent = class _WcBaseComponent extends HTMLElement {
       if (altTarget) altTarget.dispatchEvent(new CustomEvent(legacyName, opts));
     }
   }
+  /**
+   * Emit a component notification: the bubbling DOM event (+ legacy alias) from this
+   * element, and the same payload through wc.EventHub for page-wide subscribers. The
+   * EventHub copy is dispatched on document.body with detail { selector, custom } —
+   * selector identifies this instance ([data-wc-id="…"]), custom is the event detail.
+   * @param {string} newName - lowercase event name (e.g. 'wczoomchange')
+   * @param {string} legacyName - colon alias (e.g. 'wc-zoom:change')
+   * @param {object} detail - event detail
+   */
+  _notify(newName, legacyName, detail) {
+    this._emitEvent(newName, legacyName, { bubbles: true, composed: true, detail });
+    window.wc?.EventHub?.broadcast(newName, `[data-wc-id="${this.wcId}"]`, "", detail);
+  }
   constructor() {
     super();
     this._wcId = generateUniqueId();
@@ -31851,8 +31864,11 @@ if (!customElements.get("wc-event-hub")) {
       const payload = { detail: { selector, subSelector, custom } };
       const customEvent = new CustomEvent(eventName, payload);
       document.body.dispatchEvent(customEvent);
-      if (window.parent.document) {
-        window.parent.document.body.dispatchEvent(customEvent);
+      if (window.parent !== window) {
+        try {
+          window.parent.document?.body?.dispatchEvent(customEvent);
+        } catch (err) {
+        }
       }
     }
     _applyStyle() {
@@ -47782,21 +47798,139 @@ var WcFileUpload = class extends WcBaseFormComponent {
 };
 customElements.define(WcFileUpload.is, WcFileUpload);
 
+// src/js/utils/wc-popover.js
+var THEME_CLASS = /^(theme-[\w-]+|dark|light|crisp)$/;
+function themeClassesFor(el) {
+  let theme = null;
+  let scheme = null;
+  let crisp = false;
+  for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
+    node.classList.forEach((c) => {
+      if (!THEME_CLASS.test(c)) return;
+      if (c.startsWith("theme-")) {
+        if (!theme) theme = c;
+      } else if (c === "dark" || c === "light") {
+        if (!scheme) scheme = c;
+      } else if (c === "crisp") crisp = true;
+    });
+  }
+  return [theme, scheme, crisp ? "crisp" : null].filter(Boolean);
+}
+var WcPopover = class {
+  constructor(host, opts = {}) {
+    this.host = host;
+    this.opts = opts;
+    this.anchor = null;
+    this.panel = null;
+    this._onReposition = () => this.reposition();
+    this._onDocPointer = (e) => {
+      if (!this.panel) return;
+      if (this.panel.contains(e.target) || this.host.contains(e.target)) return;
+      this.close("outside");
+    };
+    this._onKeydown = (e) => {
+      if (e.key === "Escape" && this.panel) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.close("escape");
+      }
+    };
+  }
+  get isOpen() {
+    return !!this.panel;
+  }
+  open(anchor, panel) {
+    if (this.panel) this.close("replace");
+    this.anchor = anchor;
+    this.panel = panel;
+    panel.classList.add("wc-popover", ...themeClassesFor(this.host));
+    document.body.appendChild(panel);
+    this.reposition();
+    window.addEventListener("resize", this._onReposition);
+    window.addEventListener("scroll", this._onReposition, true);
+    document.addEventListener("pointerdown", this._onDocPointer, true);
+    panel.addEventListener("keydown", this._onKeydown);
+  }
+  reposition() {
+    if (!this.panel || !this.anchor) return;
+    if (!this.anchor.isConnected) {
+      this.close("detached");
+      return;
+    }
+    const r = this.anchor.getBoundingClientRect();
+    const margin = 8;
+    const width = Math.max(r.width, this.opts.minWidth || 0);
+    this.panel.style.position = "fixed";
+    this.panel.style.width = this.opts.matchWidth === false ? "" : `${width}px`;
+    if (this.opts.maxHeight) this.panel.style.maxHeight = `${this.opts.maxHeight}px`;
+    const pw = this.panel.offsetWidth;
+    const ph = this.panel.offsetHeight;
+    let left = this.opts.align === "end" ? r.right - pw : r.left;
+    left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
+    let top = r.bottom + 4;
+    if (top + ph > window.innerHeight - margin && r.top - ph - 4 >= margin) {
+      top = r.top - ph - 4;
+    }
+    this.panel.style.left = `${left}px`;
+    this.panel.style.top = `${Math.max(margin, top)}px`;
+  }
+  close(reason = "api") {
+    if (!this.panel) return;
+    window.removeEventListener("resize", this._onReposition);
+    window.removeEventListener("scroll", this._onReposition, true);
+    document.removeEventListener("pointerdown", this._onDocPointer, true);
+    this.panel.removeEventListener("keydown", this._onKeydown);
+    const panel = this.panel;
+    this.panel = null;
+    panel.remove();
+    if (this.opts.onClose) this.opts.onClose(reason, panel);
+  }
+};
+
 // src/js/components/wc-color.js
+var RECENT_MAX = 8;
 var WcColor = class extends WcBaseFormComponent {
   static get is() {
     return "wc-color";
   }
   static get observedAttributes() {
-    return ["name", "id", "class", "value", "lbl-label", "format", "swatches", "allow-custom", "required", "disabled"];
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "lbl-label",
+      "format",
+      "swatches",
+      "allow-custom",
+      "required",
+      "disabled",
+      "alpha",
+      "picker",
+      "swatch-groups",
+      "recent-key",
+      "allow-none",
+      "cmyk"
+    ];
   }
   constructor() {
     super();
     this._hex = "";
+    this._alpha = 1;
     this._value = "";
+    this._cmyk = null;
+    this._hsv = { h: 0, s: 0, v: 0 };
     this._onSwatchClick = this._handleSwatchClick.bind(this);
     this._onNativeInput = this._handleNativeInput.bind(this);
     this._onPresetClick = this._handlePresetClick.bind(this);
+    this._popover = new WcPopover(this, {
+      matchWidth: false,
+      onClose: (reason) => {
+        this.swatchEl?.setAttribute("aria-expanded", "false");
+        if (reason === "escape") this.swatchEl?.focus();
+        this._pop = null;
+      }
+    });
     const compEl = this.querySelector(":scope > .wc-color");
     if (compEl) {
       this.componentElement = compEl;
@@ -47814,6 +47948,7 @@ var WcColor = class extends WcBaseFormComponent {
   }
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._popover.close("disconnect");
     this._unWireEvents();
   }
   // ---- Value contract (FACE) ------------------------------------------------
@@ -47822,7 +47957,11 @@ var WcColor = class extends WcBaseFormComponent {
   }
   set value(v) {
     this._setFromString(v);
+    this._cmyk = null;
     this._reflect(false);
+  }
+  get alpha() {
+    return this._alpha;
   }
   get format() {
     const f = (this.getAttribute("format") || "hex").toLowerCase();
@@ -47830,6 +47969,12 @@ var WcColor = class extends WcBaseFormComponent {
   }
   get allowCustom() {
     return this.getAttribute("allow-custom") !== "false";
+  }
+  get hasAlpha() {
+    return this.hasAttribute("alpha") && this.getAttribute("alpha") !== "false";
+  }
+  get usesCustomPicker() {
+    return this.hasAlpha || this.getAttribute("picker") === "custom";
   }
   // ---- Lifecycle ------------------------------------------------------------
   _render() {
@@ -47854,7 +47999,13 @@ var WcColor = class extends WcBaseFormComponent {
     swatch.type = "button";
     swatch.classList.add("wc-color-swatch");
     swatch.setAttribute("aria-label", "Choose color");
+    if (this.usesCustomPicker) {
+      swatch.setAttribute("aria-haspopup", "dialog");
+      swatch.setAttribute("aria-expanded", "false");
+    }
+    if (this.hasAlpha) swatch.classList.add("has-alpha");
     if (!this.allowCustom) swatch.classList.add("is-locked");
+    if (this.hasAttribute("disabled")) swatch.disabled = true;
     control.appendChild(swatch);
     this.swatchEl = swatch;
     const valueText = document.createElement("span");
@@ -47870,25 +48021,72 @@ var WcColor = class extends WcBaseFormComponent {
     control.appendChild(native);
     this.nativeEl = native;
     this.componentElement.appendChild(control);
-    const swatches = this._parseJSON("swatches", []);
-    if (swatches.length) {
+    const rows = this._swatchRows();
+    if (rows.length) {
       const presets = document.createElement("div");
       presets.classList.add("wc-color-presets");
-      swatches.forEach((c) => {
-        const hex = this._toHex(String(c));
-        if (!hex) return;
-        const b = document.createElement("button");
-        b.type = "button";
-        b.classList.add("wc-color-preset");
-        b.dataset.hex = hex;
-        b.style.backgroundColor = hex;
-        b.title = String(c);
-        b.setAttribute("aria-label", String(c));
-        presets.appendChild(b);
-      });
+      rows.forEach((row) => presets.appendChild(this._swatchRowEl(row)));
       this.componentElement.appendChild(presets);
       this.presetsEl = presets;
+    } else {
+      this.presetsEl = null;
     }
+  }
+  // [{ label|null, colors: [{hex, alpha, raw}], none: bool }]
+  _swatchRows() {
+    const rows = [];
+    const toEntries = (list) => list.map((c) => {
+      const p = this._parse(String(c));
+      return p ? { hex: p.hex, alpha: p.alpha, raw: String(c) } : null;
+    }).filter(Boolean);
+    const flat = toEntries(this._parseJSON("swatches", []));
+    const allowNone = this.hasAttribute("allow-none");
+    if (flat.length || allowNone) rows.push({ label: null, colors: flat, none: allowNone });
+    this._parseJSON("swatch-groups", []).forEach((g) => {
+      if (!g || !Array.isArray(g.colors)) return;
+      const colors = toEntries(g.colors);
+      if (colors.length) rows.push({ label: String(g.label || ""), colors, none: false });
+    });
+    const recent = toEntries(this._recent());
+    if (recent.length) rows.push({ label: "Recent", colors: recent, none: false, recent: true });
+    return rows;
+  }
+  _swatchRowEl(row) {
+    const wrap = document.createElement("div");
+    wrap.className = "wc-color-swatch-row";
+    if (row.recent) wrap.classList.add("is-recent");
+    if (row.label) {
+      const lbl = document.createElement("span");
+      lbl.className = "wc-color-swatch-label";
+      lbl.textContent = row.label;
+      wrap.appendChild(lbl);
+    }
+    const list = document.createElement("div");
+    list.className = "wc-color-swatch-list";
+    if (row.none) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "wc-color-preset wc-color-none";
+      b.dataset.none = "1";
+      b.title = "No colour";
+      b.setAttribute("aria-label", "No colour");
+      list.appendChild(b);
+    }
+    row.colors.forEach((c) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.classList.add("wc-color-preset");
+      if (c.alpha < 1) b.classList.add("has-alpha");
+      b.dataset.hex = c.hex;
+      b.dataset.alpha = String(c.alpha);
+      b.style.setProperty("--wc-color-chip", this._css(c.hex, c.alpha));
+      b.style.backgroundColor = c.alpha < 1 ? "" : c.hex;
+      b.title = c.raw;
+      b.setAttribute("aria-label", c.raw);
+      list.appendChild(b);
+    });
+    wrap.appendChild(list);
+    return wrap;
   }
   // ---- Value seeding / reflection ------------------------------------------
   _seedValue() {
@@ -47896,43 +48094,60 @@ var WcColor = class extends WcBaseFormComponent {
     this._reflect(false);
   }
   _setFromString(str) {
-    const hex = this._toHex(str);
-    this._hex = hex || "";
-    this._value = hex ? this._toFormat(hex) : "";
+    const p = this._parse(str);
+    this._hex = p ? p.hex : "";
+    if (p) this._alpha = this.hasAlpha ? p.alpha : 1;
+    this._value = this._hex ? this._toFormat(this._hex, this._alpha) : "";
   }
-  // Push current state into the DOM + form value.
-  _reflect(emit) {
+  _reflect(emit, eventName = "wccolorchange") {
     if (this.swatchEl) {
-      if (this._hex) {
-        this.swatchEl.style.backgroundColor = this._hex;
-        this.swatchEl.classList.remove("is-empty");
-      } else {
+      const none = !this._hex;
+      this.swatchEl.classList.toggle("is-empty", none);
+      this.swatchEl.classList.toggle("is-none", none && this.hasAttribute("allow-none"));
+      if (none) {
         this.swatchEl.style.backgroundColor = "";
-        this.swatchEl.classList.add("is-empty");
+        this.swatchEl.style.removeProperty("--wc-color-chip");
+      } else if (this.hasAlpha) {
+        this.swatchEl.style.backgroundColor = "";
+        this.swatchEl.style.setProperty("--wc-color-chip", this._css(this._hex, this._alpha));
+      } else {
+        this.swatchEl.style.backgroundColor = this._hex;
       }
     }
-    if (this.valueEl) this.valueEl.textContent = this._value || "No color";
-    if (this.nativeEl && this._hex) this.nativeEl.value = this._hex;
-    if (this.presetsEl) {
-      this.presetsEl.querySelectorAll(".wc-color-preset").forEach((b) => {
-        b.classList.toggle("is-active", b.dataset.hex.toLowerCase() === this._hex.toLowerCase());
-      });
+    if (this.valueEl) {
+      this.valueEl.textContent = this._value || (this.hasAttribute("allow-none") ? "None" : "No color");
     }
+    if (this.nativeEl && this._hex) this.nativeEl.value = this._hex;
+    this.componentElement.querySelectorAll(".wc-color-preset").forEach((b) => this._markPreset(b));
+    if (this._pop) this._pop.querySelectorAll(".wc-color-preset").forEach((b) => this._markPreset(b));
     this._internals.setFormValue(this._value);
     this._updateValidity();
     if (emit) {
-      this._emitEvent("wccolorchange", "wc-color:change", {
-        bubbles: true,
-        composed: true,
-        detail: { value: this._value }
-      });
+      const detail = { value: this._value, alpha: this._hex ? this._alpha : 0 };
+      if (emit === "cmyk" && this._cmyk) detail.cmyk = this._cmyk.slice();
+      if (eventName === "wccolorinput") {
+        this._emitEvent("wccolorinput", "wc-color:input", { bubbles: true, composed: true, detail });
+      } else {
+        this._emitEvent("wccolorchange", "wc-color:change", { bubbles: true, composed: true, detail });
+        if (emit !== "live") this._pushRecent();
+      }
     }
   }
-  _setHex(hex, emit) {
-    const norm = this._toHex(hex);
-    if (!norm) return;
-    this._hex = norm;
-    this._value = this._toFormat(norm);
+  _markPreset(b) {
+    let active;
+    if (b.dataset.none) active = !this._hex;
+    else {
+      active = !!this._hex && b.dataset.hex.toLowerCase() === this._hex.toLowerCase() && (!this.hasAlpha || Math.abs(Number(b.dataset.alpha) - this._alpha) < 5e-3);
+    }
+    b.classList.toggle("is-active", active);
+    b.setAttribute("aria-pressed", String(active));
+  }
+  _setHex(hex, emit, alpha) {
+    const p = this._parse(hex);
+    if (!p) return;
+    this._hex = p.hex;
+    if (this.hasAlpha && alpha != null) this._alpha = alpha;
+    this._value = this._toFormat(this._hex, this._alpha);
     this._reflect(emit);
   }
   _updateValidity() {
@@ -47942,49 +48157,398 @@ var WcColor = class extends WcBaseFormComponent {
       this._internals.setValidity({});
     }
   }
+  // ---- Recent ---------------------------------------------------------------
+  _recent() {
+    const key = this.getAttribute("recent-key");
+    if (!key) return [];
+    try {
+      const v = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(v) ? v : [];
+    } catch (err) {
+      return [];
+    }
+  }
+  _pushRecent() {
+    const key = this.getAttribute("recent-key");
+    if (!key || !this._hex) return;
+    const entry = this.hasAlpha && this._alpha < 1 ? this._hex8(this._hex, this._alpha) : this._hex;
+    const list = [entry, ...this._recent().filter((c) => String(c).toLowerCase() !== entry)].slice(0, RECENT_MAX);
+    try {
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (err) {
+    }
+    this._refreshRecentRows();
+  }
+  _refreshRecentRows() {
+    const rebuild = (container2) => {
+      if (!container2) return;
+      container2.querySelector(":scope > .wc-color-swatch-row.is-recent")?.remove();
+      const recent = this._swatchRows().find((r) => r.recent);
+      if (recent) container2.appendChild(this._swatchRowEl(recent));
+    };
+    if (this.presetsEl) rebuild(this.presetsEl);
+    else if (this._recent().length) {
+      const presets = document.createElement("div");
+      presets.classList.add("wc-color-presets");
+      this.componentElement.appendChild(presets);
+      this.presetsEl = presets;
+      this.presetsEl.addEventListener("click", this._onPresetClick);
+      rebuild(presets);
+    }
+    rebuild(this._pop?.querySelector(".wc-color-pop-swatches"));
+    this.componentElement.querySelectorAll(".wc-color-preset").forEach((b) => this._markPreset(b));
+  }
   // ---- Interaction ----------------------------------------------------------
-  _handleSwatchClick(e) {
+  _handleSwatchClick() {
     if (this.hasAttribute("disabled") || !this.allowCustom) return;
+    if (this.usesCustomPicker) {
+      if (this._popover.isOpen) this._popover.close("toggle");
+      else this._openPopover();
+      return;
+    }
     this.nativeEl.click();
   }
-  _handleNativeInput() {
-    this._setHex(this.nativeEl.value, true);
+  _handleNativeInput(e) {
+    this._cmyk = null;
+    this._setHex(this.nativeEl.value, false);
+    this._reflect(true, "wccolorinput");
+    this._reflect(e && e.type === "change" ? true : "live");
   }
   _handlePresetClick(e) {
     const b = e.target.closest(".wc-color-preset");
     if (!b || this.hasAttribute("disabled")) return;
-    this._setHex(b.dataset.hex, true);
+    this._cmyk = null;
+    if (b.dataset.none) {
+      this._hex = "";
+      this._value = "";
+      this._reflect("preset");
+    } else {
+      const a = Number(b.dataset.alpha);
+      this._setHex(b.dataset.hex, "preset", a < 1 ? a : this._hex ? this._alpha : 1);
+    }
+    if (this._pop) this._syncPopover();
+  }
+  // ---- Custom popover --------------------------------------------------------
+  _openPopover() {
+    const pop = document.createElement("div");
+    pop.className = "wc-color-pop";
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", this.getAttribute("lbl-label") || "Choose color");
+    const cmyk = this.hasAttribute("cmyk");
+    const eyedropper = typeof window.EyeDropper === "function";
+    pop.innerHTML = `
+      ${cmyk ? `<div class="wc-color-pop-tabs" role="tablist">
+        <button type="button" role="tab" class="wc-color-pop-tab" data-tab="picker" aria-selected="true">Picker</button>
+        <button type="button" role="tab" class="wc-color-pop-tab" data-tab="cmyk" aria-selected="false">CMYK</button>
+      </div>` : ""}
+      <div class="wc-color-pop-pane" data-pane="picker">
+        <div class="wc-color-sv" role="slider" tabindex="0" aria-label="Saturation and brightness">
+          <div class="wc-color-sv-thumb"></div>
+        </div>
+        <div class="wc-color-pop-row">
+          <div class="wc-color-pop-sliders">
+            <div class="wc-color-track wc-color-hue" role="slider" tabindex="0" aria-label="Hue" aria-valuemin="0" aria-valuemax="360"><div class="wc-color-track-thumb"></div></div>
+            ${this.hasAlpha ? `<div class="wc-color-track wc-color-alpha" role="slider" tabindex="0" aria-label="Transparency" aria-valuemin="0" aria-valuemax="100"><div class="wc-color-track-thumb"></div></div>` : ""}
+          </div>
+          <div class="wc-color-pop-preview" aria-hidden="true"></div>
+          ${eyedropper ? `<button type="button" class="wc-color-eyedropper" title="Pick a colour from the screen" aria-label="Pick a colour from the screen">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5l3 3-1.6 1.6-.7-.7-5.6 5.6H3.5v-2.1L9.1 4.3l-.7-.7 2.1-2.1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          </button>` : ""}
+        </div>
+        <div class="wc-color-pop-fields${this.hasAlpha ? " has-alpha" : ""}">
+          <label class="wc-color-field wc-color-field-hex"><span>Hex</span><input type="text" data-field="hex" spellcheck="false" autocomplete="off"></label>
+          <button type="button" class="wc-color-mode" title="Switch RGB / HSL">RGB</button>
+          <label class="wc-color-field"><span data-label="0">R</span><input type="number" data-field="0" min="0" max="255"></label>
+          <label class="wc-color-field"><span data-label="1">G</span><input type="number" data-field="1" min="0" max="255"></label>
+          <label class="wc-color-field"><span data-label="2">B</span><input type="number" data-field="2" min="0" max="255"></label>
+          ${this.hasAlpha ? `<label class="wc-color-field"><span>A%</span><input type="number" data-field="a" min="0" max="100"></label>` : ""}
+        </div>
+      </div>
+      ${cmyk ? `<div class="wc-color-pop-pane" data-pane="cmyk" hidden>
+        <div class="wc-color-cmyk">
+          ${["C", "M", "Y", "K"].map((l, i) => `<label class="wc-color-field"><span>${l}</span><input type="number" data-cmyk="${i}" min="0" max="100"></label>`).join("")}
+        </div>
+        <p class="wc-color-cmyk-note">Approximate on screen \u2014 CMYK isn't colour-managed here.</p>
+      </div>` : ""}
+      <div class="wc-color-pop-swatches"></div>
+    `;
+    const swatches = pop.querySelector(".wc-color-pop-swatches");
+    this._swatchRows().forEach((row) => swatches.appendChild(this._swatchRowEl(row)));
+    if (!swatches.children.length) swatches.remove();
+    this._pop = pop;
+    this._mode = "rgb";
+    this._wirePopover(pop);
+    this._popover.open(this.swatchEl, pop);
+    this.swatchEl.setAttribute("aria-expanded", "true");
+    const p = this._hex ? this._hexToRgb(this._hex) : { r: 255, g: 255, b: 255 };
+    this._hsv = this._rgbToHsv(p.r, p.g, p.b);
+    this._syncPopover();
+    pop.querySelector(".wc-color-sv").focus();
+  }
+  _wirePopover(pop) {
+    const sv = pop.querySelector(".wc-color-sv");
+    const hue = pop.querySelector(".wc-color-hue");
+    const alpha = pop.querySelector(".wc-color-alpha");
+    this._drag(sv, (x, y) => {
+      this._hsv.s = x;
+      this._hsv.v = 1 - y;
+      this._applyHsv("input");
+    });
+    this._drag(hue, (x) => {
+      this._hsv.h = x * 360;
+      this._applyHsv("input");
+    });
+    if (alpha) this._drag(alpha, (x) => {
+      this._alpha = Math.round(x * 100) / 100;
+      this._applyHsv("input");
+    });
+    const keyNudge = (el, fn) => el.addEventListener("keydown", (e) => {
+      const big = e.shiftKey ? 10 : 1;
+      const map = { ArrowLeft: [-big, 0], ArrowRight: [big, 0], ArrowUp: [0, big], ArrowDown: [0, -big] };
+      if (!map[e.key]) return;
+      e.preventDefault();
+      fn(...map[e.key]);
+      this._applyHsv("commit");
+    });
+    keyNudge(sv, (dx, dy) => {
+      this._hsv.s = Math.min(1, Math.max(0, this._hsv.s + dx / 100));
+      this._hsv.v = Math.min(1, Math.max(0, this._hsv.v + dy / 100));
+    });
+    keyNudge(hue, (dx, dy) => {
+      this._hsv.h = (this._hsv.h + (dx || dy) + 360) % 360;
+    });
+    if (alpha) keyNudge(alpha, (dx, dy) => {
+      this._alpha = Math.min(1, Math.max(0, this._alpha + (dx || dy) / 100));
+    });
+    pop.addEventListener("input", (e) => this._handleFieldInput(e, false));
+    pop.addEventListener("change", (e) => this._handleFieldInput(e, true));
+    pop.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.matches("input")) {
+        e.preventDefault();
+        this._handleFieldInput(e, true);
+      }
+    });
+    pop.addEventListener("click", (e) => {
+      if (e.target.closest(".wc-color-preset")) {
+        this._handlePresetClick(e);
+        return;
+      }
+      const tab = e.target.closest(".wc-color-pop-tab");
+      if (tab) {
+        this._showTab(tab.dataset.tab);
+        return;
+      }
+      if (e.target.closest(".wc-color-mode")) {
+        this._mode = this._mode === "rgb" ? "hsl" : "rgb";
+        this._syncPopover();
+        return;
+      }
+      if (e.target.closest(".wc-color-eyedropper")) this._eyedrop();
+    });
+  }
+  // Pointer drag on a track/area → callback with x,y in 0..1; commits on release.
+  _drag(el, onMove) {
+    const at = (e) => {
+      const r = el.getBoundingClientRect();
+      onMove(
+        Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+        Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))
+      );
+    };
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      el.focus();
+      el.setPointerCapture(e.pointerId);
+      at(e);
+      const move = (ev) => at(ev);
+      const up = () => {
+        el.removeEventListener("pointermove", move);
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("pointercancel", up);
+        this._applyHsv("commit");
+      };
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerup", up);
+      el.addEventListener("pointercancel", up);
+    });
+  }
+  // Push the popover's HSV(+alpha) into the value. phase: 'input' (live) | 'commit'.
+  _applyHsv(phase) {
+    const { r, g, b } = this._hsvToRgb(this._hsv.h, this._hsv.s, this._hsv.v);
+    this._cmyk = null;
+    this._hex = this._rgbToHex(r, g, b);
+    this._value = this._toFormat(this._hex, this._alpha);
+    if (phase === "commit") this._reflect(true);
+    else this._reflect(true, "wccolorinput");
+    this._syncPopover(true);
+  }
+  _handleFieldInput(e, commit) {
+    const t = e.target;
+    if (!t.matches("input")) return;
+    const phase = commit ? "commit" : "input";
+    if (t.dataset.field === "hex") {
+      const p = this._parse(t.value.startsWith("#") ? t.value : `#${t.value}`);
+      if (!p) return;
+      this._hex = p.hex;
+      if (this.hasAlpha && /^#?([0-9a-f]{4}|[0-9a-f]{8})$/i.test(t.value.trim())) this._alpha = p.alpha;
+      this._hsv = this._rgbToHsv(...Object.values(this._hexToRgb(p.hex)));
+    } else if (t.dataset.field === "a") {
+      const a = Number(t.value);
+      if (!Number.isFinite(a)) return;
+      this._alpha = Math.min(1, Math.max(0, a / 100));
+    } else if (t.dataset.field != null) {
+      const vals = [0, 1, 2].map((i) => Number(this._pop.querySelector(`[data-field="${i}"]`).value));
+      if (vals.some((v) => !Number.isFinite(v))) return;
+      let rgb;
+      if (this._mode === "rgb") rgb = { r: vals[0], g: vals[1], b: vals[2] };
+      else rgb = this._hslToRgb(vals[0], vals[1], vals[2]);
+      this._hex = this._rgbToHex(rgb.r, rgb.g, rgb.b);
+      this._hsv = this._rgbToHsv(...Object.values(this._hexToRgb(this._hex)));
+    } else if (t.dataset.cmyk != null) {
+      const cmyk = [0, 1, 2, 3].map((i) => Number(this._pop.querySelector(`[data-cmyk="${i}"]`).value));
+      if (cmyk.some((v) => !Number.isFinite(v))) return;
+      const clamped = cmyk.map((v) => Math.min(100, Math.max(0, v)));
+      const { r, g, b } = this._cmykToRgb(...clamped);
+      this._hex = this._rgbToHex(r, g, b);
+      this._hsv = this._rgbToHsv(r, g, b);
+      this._value = this._toFormat(this._hex, this._alpha);
+      this._cmyk = clamped;
+      if (commit) this._reflect("cmyk");
+      else this._reflect("cmyk", "wccolorinput");
+      this._syncPopover(true, t);
+      return;
+    } else {
+      return;
+    }
+    this._cmyk = null;
+    this._value = this._toFormat(this._hex, this._alpha);
+    if (commit) this._reflect(true);
+    else this._reflect(true, "wccolorinput");
+    this._syncPopover(true, t);
+  }
+  _showTab(name) {
+    if (!this._pop) return;
+    this._pop.querySelectorAll(".wc-color-pop-tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.tab === name)));
+    this._pop.querySelectorAll(".wc-color-pop-pane").forEach((p) => {
+      p.hidden = p.dataset.pane !== name;
+    });
+    this._syncPopover();
+    this._popover.reposition();
+  }
+  async _eyedrop() {
+    try {
+      const result = await new window.EyeDropper().open();
+      const p = this._parse(result.sRGBHex);
+      if (!p) return;
+      this._hex = p.hex;
+      this._hsv = this._rgbToHsv(...Object.values(this._hexToRgb(p.hex)));
+      this._applyHsv("commit");
+    } catch (err) {
+    }
+  }
+  // Reflect state into the popover. `skipEl` keeps the field being typed in untouched.
+  _syncPopover(fromDrag = false, skipEl = null) {
+    const pop = this._pop;
+    if (!pop) return;
+    if (!fromDrag && this._hex) {
+      const cur = this._hsvToRgb(this._hsv.h, this._hsv.s, this._hsv.v);
+      if (this._rgbToHex(cur.r, cur.g, cur.b) !== this._hex) {
+        this._hsv = this._rgbToHsv(...Object.values(this._hexToRgb(this._hex)));
+      }
+    }
+    const { h, s, v } = this._hsv;
+    const hueCss = `hsl(${Math.round(h)} 100% 50%)`;
+    const sv = pop.querySelector(".wc-color-sv");
+    sv.style.setProperty("--wc-color-hue", hueCss);
+    sv.setAttribute("aria-valuetext", `saturation ${Math.round(s * 100)}%, brightness ${Math.round(v * 100)}%`);
+    const thumb = pop.querySelector(".wc-color-sv-thumb");
+    thumb.style.left = `${s * 100}%`;
+    thumb.style.top = `${(1 - v) * 100}%`;
+    const hue = pop.querySelector(".wc-color-hue");
+    hue.querySelector(".wc-color-track-thumb").style.left = `${h / 360 * 100}%`;
+    hue.setAttribute("aria-valuenow", String(Math.round(h)));
+    const rgb = this._hsvToRgb(h, s, v);
+    const opaque = this._rgbToHex(rgb.r, rgb.g, rgb.b);
+    const alpha = pop.querySelector(".wc-color-alpha");
+    if (alpha) {
+      alpha.style.setProperty("--wc-color-opaque", opaque);
+      alpha.querySelector(".wc-color-track-thumb").style.left = `${this._alpha * 100}%`;
+      alpha.setAttribute("aria-valuenow", String(Math.round(this._alpha * 100)));
+    }
+    pop.querySelector(".wc-color-pop-preview").style.setProperty(
+      "--wc-color-chip",
+      this._hex ? this._css(this._hex, this._alpha) : "transparent"
+    );
+    const set = (sel, val) => {
+      const el = pop.querySelector(sel);
+      if (el && el !== skipEl) el.value = val;
+    };
+    const hexOut = this._hex ? this.hasAlpha && this._alpha < 1 ? this._hex8(this._hex, this._alpha) : this._hex : "";
+    set('[data-field="hex"]', hexOut);
+    pop.querySelector(".wc-color-mode").textContent = this._mode.toUpperCase();
+    const labels = this._mode === "rgb" ? ["R", "G", "B"] : ["H", "S%", "L%"];
+    const maxes = this._mode === "rgb" ? [255, 255, 255] : [360, 100, 100];
+    const vals = this._mode === "rgb" ? [rgb.r, rgb.g, rgb.b] : Object.values(this._rgbToHsl(rgb.r, rgb.g, rgb.b));
+    [0, 1, 2].forEach((i) => {
+      pop.querySelector(`[data-label="${i}"]`).textContent = labels[i];
+      const input2 = pop.querySelector(`[data-field="${i}"]`);
+      input2.max = String(maxes[i]);
+      if (input2 !== skipEl) input2.value = this._hex ? String(vals[i]) : "";
+    });
+    set('[data-field="a"]', String(Math.round(this._alpha * 100)));
+    const cmyk = this._cmyk || (this._hex ? this._rgbToCmyk(rgb.r, rgb.g, rgb.b) : null);
+    [0, 1, 2, 3].forEach((i) => set(`[data-cmyk="${i}"]`, cmyk ? String(cmyk[i]) : ""));
   }
   // ---- Color conversion -----------------------------------------------------
-  _toHex(str) {
+  // → { hex: '#rrggbb', alpha: 0..1 } | null
+  _parse(str) {
     if (str == null) return null;
-    let s = String(str).trim().toLowerCase();
+    const s = String(str).trim().toLowerCase();
     if (!s) return null;
     let m;
-    if (m = s.match(/^#([0-9a-f]{3})$/)) {
+    if (m = s.match(/^#([0-9a-f]{3,4})$/)) {
       const c = m[1];
-      return `#${c[0]}${c[0]}${c[1]}${c[1]}${c[2]}${c[2]}`;
+      const hex = `#${c[0]}${c[0]}${c[1]}${c[1]}${c[2]}${c[2]}`;
+      return { hex, alpha: c.length === 4 ? parseInt(c[3] + c[3], 16) / 255 : 1 };
     }
-    if (m = s.match(/^#([0-9a-f]{6})$/)) return s;
-    if (m = s.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/)) {
-      return this._rgbToHex(+m[1], +m[2], +m[3]);
+    if (m = s.match(/^#([0-9a-f]{6})([0-9a-f]{2})?$/)) {
+      return { hex: `#${m[1]}`, alpha: m[2] ? Math.round(parseInt(m[2], 16) / 255 * 1e3) / 1e3 : 1 };
     }
-    if (m = s.match(/^hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%/)) {
+    const num = (v, scale) => v.endsWith("%") ? parseFloat(v) / 100 * scale : parseFloat(v);
+    const alphaOf = (v) => v == null ? 1 : Math.min(1, Math.max(0, v.endsWith("%") ? parseFloat(v) / 100 : parseFloat(v)));
+    if (m = s.match(/^rgba?\(\s*([\d.]+%?)\s*[,\s]\s*([\d.]+%?)\s*[,\s]\s*([\d.]+%?)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/)) {
+      return { hex: this._rgbToHex(num(m[1], 255), num(m[2], 255), num(m[3], 255)), alpha: alphaOf(m[4]) };
+    }
+    if (m = s.match(/^hsla?\(\s*([\d.]+)(?:deg)?\s*[,\s]\s*([\d.]+)%\s*[,\s]\s*([\d.]+)%\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/)) {
       const { r, g, b } = this._hslToRgb(+m[1], +m[2], +m[3]);
-      return this._rgbToHex(r, g, b);
+      return { hex: this._rgbToHex(r, g, b), alpha: alphaOf(m[4]) };
     }
     return null;
   }
-  _toFormat(hex) {
+  // Kept for backward compatibility (returns '#rrggbb' or null).
+  _toHex(str) {
+    const p = this._parse(str);
+    return p ? p.hex : null;
+  }
+  _toFormat(hex, alpha = 1) {
     const fmt = this.format;
-    if (fmt === "hex") return hex;
+    const a = Math.round(alpha * 100) / 100;
+    if (fmt === "hex") return this.hasAlpha ? this._hex8(hex, alpha) : hex;
     const { r, g, b } = this._hexToRgb(hex);
-    if (fmt === "rgb") return `rgb(${r}, ${g}, ${b})`;
+    if (fmt === "rgb") return this.hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a})` : `rgb(${r}, ${g}, ${b})`;
     const { h, s, l } = this._rgbToHsl(r, g, b);
-    return `hsl(${h}, ${s}%, ${l}%)`;
+    return this.hasAlpha ? `hsla(${h}, ${s}%, ${l}%, ${a})` : `hsl(${h}, ${s}%, ${l}%)`;
+  }
+  _hex8(hex, alpha) {
+    return `${hex}${Math.round(Math.min(1, Math.max(0, alpha)) * 255).toString(16).padStart(2, "0")}`;
+  }
+  _css(hex, alpha) {
+    const { r, g, b } = this._hexToRgb(hex);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
   _hexToRgb(hex) {
-    const n = parseInt(hex.slice(1), 16);
+    const n = parseInt(hex.slice(1, 7), 16);
     return { r: n >> 16 & 255, g: n >> 8 & 255, b: n & 255 };
   }
   _rgbToHex(r, g, b) {
@@ -48032,6 +48596,40 @@ var WcColor = class extends WcBaseFormComponent {
       b: Math.round(hue2rgb(p, q, h - 1 / 3) * 255)
     };
   }
+  _rgbToHsv(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    let h = 0;
+    if (d) {
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+      else if (max === g) h = ((b - r) / d + 2) * 60;
+      else h = ((r - g) / d + 4) * 60;
+    } else {
+      h = this._hsv ? this._hsv.h : 0;
+    }
+    return { h, s: max ? d / max : 0, v: max };
+  }
+  _hsvToRgb(h, s, v) {
+    const f = (n) => {
+      const k = (n + h / 60) % 6;
+      return v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+    };
+    return { r: Math.round(f(5) * 255), g: Math.round(f(3) * 255), b: Math.round(f(1) * 255) };
+  }
+  // Naive device conversion (not colour-managed).
+  _rgbToCmyk(r, g, b) {
+    const R = r / 255, G = g / 255, B = b / 255;
+    const k = 1 - Math.max(R, G, B);
+    if (k >= 1) return [0, 0, 0, 100];
+    const c = (1 - R - k) / (1 - k), m = (1 - G - k) / (1 - k), y = (1 - B - k) / (1 - k);
+    return [c, m, y, k].map((v) => Math.round(v * 100));
+  }
+  _cmykToRgb(c, m, y, k) {
+    const K = 1 - k / 100;
+    return { r: 255 * (1 - c / 100) * K, g: 255 * (1 - m / 100) * K, b: 255 * (1 - y / 100) * K };
+  }
   _parseJSON(attr, fallback) {
     const raw = this.getAttribute(attr);
     if (!raw) return fallback;
@@ -48074,20 +48672,37 @@ var WcColor = class extends WcBaseFormComponent {
   _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === "value") {
       this._setFromString(newValue);
+      this._cmyk = null;
       this._reflect(false);
+      if (this._pop) this._syncPopover();
       return;
     }
     if (attrName === "required") {
       this._updateValidity();
       return;
     }
-    if (["format", "swatches", "allow-custom", "lbl-label", "disabled"].includes(attrName)) {
+    if ([
+      "format",
+      "swatches",
+      "allow-custom",
+      "lbl-label",
+      "disabled",
+      "alpha",
+      "picker",
+      "swatch-groups",
+      "recent-key",
+      "allow-none",
+      "cmyk"
+    ].includes(attrName)) {
       const hex = this._hex;
+      this._popover.close("rebuild");
+      this._unWireEvents();
       this.componentElement.innerHTML = "";
       this._buildSkeleton();
       this._wireEvents();
       this._hex = hex;
-      this._value = hex ? this._toFormat(hex) : "";
+      if (!this.hasAlpha) this._alpha = 1;
+      this._value = hex ? this._toFormat(hex, this._alpha) : "";
       this._reflect(false);
       return;
     }
@@ -48098,6 +48713,28 @@ var WcColor = class extends WcBaseFormComponent {
     super._handleAttributeChange(attrName, newValue);
   }
   _applyStyle() {
+    const checker = `
+          background-image:
+            linear-gradient(45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--surface-4) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--surface-4) 75%);
+          background-size: 10px 10px;
+          background-position: 0 0, 0 5px, 5px -5px, -5px 0;`;
+    const chipOverChecker = `
+          background-image:
+            linear-gradient(var(--wc-color-chip, transparent), var(--wc-color-chip, transparent)),
+            linear-gradient(45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--surface-4) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--surface-4) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--surface-4) 75%);
+          background-size: 100% 100%, 10px 10px, 10px 10px, 10px 10px, 10px 10px;
+          background-position: 0 0, 0 0, 0 5px, 5px -5px, -5px 0;
+          background-color: var(--surface-1);`;
+    const noneStyle = `
+          background-color: var(--surface-1);
+          background-image: linear-gradient(to top right, transparent calc(50% - 1px), var(--danger-color) calc(50% - 1px), var(--danger-color) calc(50% + 1px), transparent calc(50% + 1px));
+          background-size: 100% 100%;`;
     const style = `
       wc-color { display: contents; }
 
@@ -48113,17 +48750,14 @@ var WcColor = class extends WcBaseFormComponent {
           border-radius: 0.375rem;
           cursor: pointer;
           /* checkerboard shows through when empty */
-          background-image:
-            linear-gradient(45deg, var(--surface-4) 25%, transparent 25%),
-            linear-gradient(-45deg, var(--surface-4) 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, var(--surface-4) 75%),
-            linear-gradient(-45deg, transparent 75%, var(--surface-4) 75%);
-          background-size: 10px 10px;
-          background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+          ${checker}
         }
         .wc-color-swatch:not(.is-empty) { background-image: none; }
+        .wc-color-swatch.has-alpha:not(.is-empty) { ${chipOverChecker} }
+        .wc-color-swatch.is-none { ${noneStyle} }
         .wc-color-swatch:focus-visible { outline: var(--primary-bg-color) solid 2px; outline-offset: 1px; }
         .wc-color-swatch.is-locked { cursor: default; }
+        .wc-color-swatch:disabled { cursor: not-allowed; opacity: 0.6; }
         .wc-color-value {
           font-family: 'SF Mono', 'Fira Code', monospace;
           font-size: 0.85rem;
@@ -48135,7 +48769,10 @@ var WcColor = class extends WcBaseFormComponent {
           opacity: 0;
           pointer-events: none;
         }
-        .wc-color-presets { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+        .wc-color-presets { display: flex; flex-direction: column; gap: 0.375rem; }
+        .wc-color-swatch-row { display: flex; flex-direction: column; gap: 0.2rem; }
+        .wc-color-swatch-label { font-size: 0.7rem; color: var(--text-2, var(--text-1)); }
+        .wc-color-swatch-list { display: flex; flex-wrap: wrap; gap: 0.25rem; }
         .wc-color-preset {
           width: 1.5rem; height: 1.5rem;
           padding: 0;
@@ -48143,18 +48780,154 @@ var WcColor = class extends WcBaseFormComponent {
           border-radius: 0.25rem;
           cursor: pointer;
         }
+        .wc-color-preset.has-alpha { ${chipOverChecker} }
+        .wc-color-preset.wc-color-none { ${noneStyle} }
         .wc-color-preset:hover { transform: scale(1.1); }
+        .wc-color-preset:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 1px; }
         .wc-color-preset.is-active {
           outline: 2px solid var(--text-1);
           outline-offset: 1px;
         }
         wc-color[required] .wc-color > label::after { content: ' *'; font-weight: bold; }
+
+        /* Custom popover (lives on <body>) */
+        .wc-color-pop {
+          z-index: 10000;
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+          width: 248px;
+          padding: 0.6rem;
+          background-color: var(--surface-2);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.6rem;
+          box-shadow: 0 8px 28px color-mix(in srgb, var(--text-1) 22%, transparent);
+          color: var(--text-1);
+          font-size: 0.75rem;
+        }
+        .wc-color-pop-pane { display: flex; flex-direction: column; gap: 0.6rem; }
+        .wc-color-pop-pane[hidden] { display: none; }
+        .wc-color-pop-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--surface-4); }
+        .wc-color-pop-tab {
+          margin: 0 0 -1px; padding: 0.3rem 0.6rem;
+          border: 0; border-bottom: 2px solid transparent;
+          background: transparent; color: var(--text-2, var(--text-1)); font: inherit; cursor: pointer;
+        }
+        .wc-color-pop-tab[aria-selected="true"] { color: var(--text-1); border-bottom-color: var(--primary-bg-color); font-weight: 600; }
+        /* The saturation/value square is colour-space data, so it uses literal black/white. */
+        .wc-color-sv {
+          position: relative;
+          height: 150px;
+          border-radius: 0.375rem;
+          background:
+            linear-gradient(to top, #000, transparent),
+            linear-gradient(to right, #fff, var(--wc-color-hue, red));
+          cursor: crosshair;
+          touch-action: none;
+        }
+        .wc-color-sv-thumb {
+          position: absolute;
+          width: 12px; height: 12px;
+          margin: -6px 0 0 -6px;
+          border: 2px solid #fff;
+          border-radius: 50%;
+          box-shadow: 0 0 0 1px #000;
+          pointer-events: none;
+        }
+        .wc-color-pop-row { display: flex; align-items: center; gap: 0.5rem; }
+        .wc-color-pop-sliders { flex: 1 1 auto; display: flex; flex-direction: column; gap: 0.5rem; }
+        .wc-color-track {
+          position: relative;
+          height: 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          touch-action: none;
+        }
+        .wc-color-hue {
+          background: linear-gradient(to right, #f00, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00);
+        }
+        .wc-color-alpha {
+          ${checker}
+          background-size: 8px 8px;
+          background-color: var(--surface-1);
+        }
+        .wc-color-alpha::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background: linear-gradient(to right, transparent, var(--wc-color-opaque, var(--text-1)));
+        }
+        .wc-color-track-thumb {
+          position: absolute;
+          top: 50%;
+          z-index: 1;
+          width: 14px; height: 14px;
+          margin: -7px 0 0 -7px;
+          border: 2px solid #fff;
+          border-radius: 50%;
+          box-shadow: 0 0 0 1px #000;
+          pointer-events: none;
+        }
+        .wc-color-sv:focus-visible,
+        .wc-color-track:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 2px; }
+        .wc-color-pop-preview {
+          flex: none;
+          width: 30px; height: 30px;
+          border: 1px solid var(--surface-4);
+          border-radius: 0.375rem;
+          ${chipOverChecker}
+        }
+        .wc-color-eyedropper,
+        .wc-color-mode {
+          flex: none;
+          display: inline-flex; align-items: center; justify-content: center;
+          margin: 0;
+          border: 1px solid var(--surface-4);
+          border-radius: 0.25rem;
+          background: transparent; color: inherit; font: inherit;
+          cursor: pointer;
+        }
+        .wc-color-eyedropper { width: 30px; height: 30px; padding: 0; }
+        .wc-color-eyedropper svg { width: 16px; height: 16px; }
+        .wc-color-mode { align-self: end; height: 26px; padding: 0 0.375rem; font-size: 0.65rem; font-weight: 600; }
+        .wc-color-eyedropper:hover, .wc-color-mode:hover { background-color: var(--surface-3); }
+        /* [Hex \xB7\xB7\xB7 ][mode] over [R][G][B] \u2014 or [Hex \xB7\xB7\xB7 \xB7\xB7\xB7 ][mode] over [R][G][B][A%] */
+        .wc-color-pop-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.375rem; }
+        .wc-color-pop-fields.has-alpha { grid-template-columns: repeat(4, 1fr); }
+        .wc-color-field { display: flex; flex-direction: column; gap: 0.125rem; margin: 0; min-width: 0; font-weight: 400; }
+        .wc-color-field > span { font-size: 0.65rem; color: var(--text-2, var(--text-1)); }
+        .wc-color-field-hex { grid-column: span 2; }
+        .wc-color-pop-fields.has-alpha .wc-color-field-hex { grid-column: span 3; }
+        .wc-color-cmyk { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.375rem; }
+        .wc-color-cmyk-note { margin: 0; font-size: 0.65rem; color: var(--text-2, var(--text-1)); }
+        .wc-color-pop-swatches { display: flex; flex-direction: column; gap: 0.375rem; border-top: 1px solid var(--surface-4); padding-top: 0.5rem; }
       }
+
+      /* Unlayered: the wc.ui layer styles bare input and outranks wc.usage. */
+      .wc-color-pop .wc-color-field input {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        margin: 0;
+        padding: 0 0.3rem;
+        background-color: var(--surface-1);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.25rem;
+        color: var(--text-1);
+        font: inherit;
+        font-size: 0.75rem;
+        font-variant-numeric: tabular-nums;
+        box-sizing: border-box;
+        -moz-appearance: textfield;
+      }
+      .wc-color-pop .wc-color-field input::-webkit-inner-spin-button,
+      .wc-color-pop .wc-color-field input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     `.trim();
     this.loadStyle("wc-color-style", style);
   }
 };
-customElements.define(WcColor.is, WcColor);
+if (!customElements.get(WcColor.is)) customElements.define(WcColor.is, WcColor);
 
 // src/js/components/wc-rating.js
 var WcRating = class extends WcBaseFormComponent {
@@ -48884,6 +49657,2188 @@ if (!customElements.get("wc-reveal")) {
   }
   customElements.define("wc-reveal", WcReveal);
 }
+
+// src/js/components/wc-ruler.js
+var UNIT_PTS = { in: 72, cm: 72 / 2.54, mm: 72 / 25.4, pt: 1, pc: 12, px: 0.75 };
+var PT_TO_PX = 96 / 72;
+var COLOR_VARS = {
+  bg: "--wc-ruler-bg",
+  page: "--wc-ruler-page-bg",
+  tick: "--wc-ruler-tick",
+  text: "--wc-ruler-text",
+  accent: "--wc-ruler-accent",
+  guide: "--wc-ruler-guide"
+};
+if (!customElements.get("wc-ruler")) {
+  class WcRuler extends WcBaseComponent {
+    static get is() {
+      return "wc-ruler";
+    }
+    static get observedAttributes() {
+      return [
+        "id",
+        "class",
+        "orientation",
+        "unit",
+        "zoom",
+        "origin",
+        "length",
+        "selection",
+        "guides",
+        "partner",
+        "cursor-tracking"
+      ];
+    }
+    constructor() {
+      super();
+      this._zoom = 1;
+      this._origin = 0;
+      this._length = 0;
+      this._selection = null;
+      this._guides = [];
+      this._cursor = null;
+      this._dragGuide = null;
+      this._size = { w: 0, h: 0 };
+      this._colors = null;
+      this._frame = 0;
+      this._drag = null;
+      this._onResize = () => this._measure();
+      this._onPointerDown = this._handlePointerDown.bind(this);
+      this._onPointerMove = this._handlePointerMove.bind(this);
+      this._onPointerUp = this._handlePointerUp.bind(this);
+      this._onDblClick = this._handleDblClick.bind(this);
+      this._onPagePointer = (e) => this.trackCursor(this.vertical ? e.clientY : e.clientX);
+      this._onPageLeave = () => this.trackCursor(null);
+      this._onThemeChange = () => this.refreshTheme();
+      const compEl = this.querySelector(":scope > .wc-ruler");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-ruler");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+      this._measure();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._unWireEvents();
+    }
+    // ---- Public API ---------------------------------------------------------
+    get vertical() {
+      return this.getAttribute("orientation") === "vertical";
+    }
+    get unit() {
+      const u = (this.getAttribute("unit") || "in").toLowerCase();
+      return UNIT_PTS[u] ? u : "in";
+    }
+    get zoom() {
+      return this._zoom;
+    }
+    get origin() {
+      return this._origin;
+    }
+    get guides() {
+      return this._guides.slice();
+    }
+    get selection() {
+      return this._selection ? this._selection.slice() : null;
+    }
+    setOrigin(px) {
+      const v = Number(px);
+      if (!Number.isFinite(v) || v === this._origin) return;
+      this._origin = v;
+      this._schedule();
+    }
+    setZoom(z) {
+      const v = Number(z);
+      if (!Number.isFinite(v) || v <= 0 || v === this._zoom) return;
+      this._zoom = v;
+      this._schedule();
+    }
+    setSelection(start, end) {
+      const s = Number(start);
+      const e = Number(end);
+      this._selection = Number.isFinite(s) && Number.isFinite(e) ? [Math.min(s, e), Math.max(s, e)] : null;
+      this._schedule();
+    }
+    setGuides(list) {
+      this._guides = Array.isArray(list) ? list.map(Number).filter(Number.isFinite) : [];
+      this._schedule();
+    }
+    trackCursor(clientCoord) {
+      if (clientCoord == null || !this._canvas) {
+        if (this._cursor === null) return;
+        this._cursor = null;
+      } else {
+        const r = this._canvas.getBoundingClientRect();
+        this._cursor = clientCoord - (this.vertical ? r.top : r.left);
+      }
+      this._schedule();
+    }
+    clientToPoints(clientCoord) {
+      const r = this._canvas.getBoundingClientRect();
+      const local = clientCoord - (this.vertical ? r.top : r.left);
+      return this._pxToPts(local);
+    }
+    refreshTheme() {
+      this._colors = null;
+      this._schedule();
+    }
+    getDesignerHTML() {
+      return "";
+    }
+    // ---- Lifecycle ----------------------------------------------------------
+    _render() {
+      super._render();
+      this._applyStyle();
+      this._canvas = this.componentElement.querySelector(":scope > canvas");
+      if (!this._canvas) {
+        this._canvas = document.createElement("canvas");
+        this._canvas.setAttribute("aria-hidden", "true");
+        this.componentElement.appendChild(this._canvas);
+      }
+      this._probe = this.componentElement.querySelector(":scope > .wc-ruler-probe");
+      if (!this._probe) {
+        this._probe = document.createElement("span");
+        this._probe.className = "wc-ruler-probe";
+        this.componentElement.appendChild(this._probe);
+      }
+      this._ctx = this._canvas.getContext("2d");
+      this.componentElement.setAttribute("role", "presentation");
+      this._syncOrientation();
+      this._zoom = this._num("zoom", 1, (v) => v > 0);
+      this._origin = this._num("origin", 0);
+      this._length = this._num("length", 0, (v) => v >= 0);
+      this._selection = this._parseSelection(this.getAttribute("selection"));
+      this._guides = this._parseList(this.getAttribute("guides"));
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      switch (attrName) {
+        case "orientation":
+          this._syncOrientation();
+          this._measure();
+          break;
+        case "unit":
+          this._schedule();
+          break;
+        case "zoom":
+          this.setZoom(newValue == null ? 1 : newValue);
+          break;
+        case "origin":
+          this.setOrigin(newValue == null ? 0 : newValue);
+          break;
+        case "length":
+          this._length = Math.max(0, Number(newValue) || 0);
+          this._schedule();
+          break;
+        case "selection":
+          this._selection = this._parseSelection(newValue);
+          this._schedule();
+          break;
+        case "guides":
+          this._guides = this._parseList(newValue);
+          this._schedule();
+          break;
+        case "cursor-tracking":
+          this._wireCursorTracking();
+          if (newValue === null) this.trackCursor(null);
+          break;
+        case "partner":
+        case "id":
+          break;
+        default:
+          super._handleAttributeChange(attrName, newValue, oldValue);
+      }
+    }
+    _syncOrientation() {
+      this.componentElement.classList.toggle("wc-ruler-vertical", this.vertical);
+      this.componentElement.classList.toggle("wc-ruler-horizontal", !this.vertical);
+    }
+    // ---- Geometry -----------------------------------------------------------
+    get _scale() {
+      return PT_TO_PX * this._zoom;
+    }
+    _ptsToPx(pts) {
+      return this._origin + pts * this._scale;
+    }
+    _pxToPts(px) {
+      return (px - this._origin) / this._scale;
+    }
+    _measure() {
+      if (!this._canvas) return;
+      const r = this._canvas.getBoundingClientRect();
+      this._size = { w: r.width, h: r.height };
+      this._resizeCanvas();
+    }
+    _resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(1, Math.round(this._size.w * dpr));
+      const h = Math.max(1, Math.round(this._size.h * dpr));
+      if (this._canvas.width !== w) this._canvas.width = w;
+      if (this._canvas.height !== h) this._canvas.height = h;
+      this._dpr = dpr;
+      this._paint();
+    }
+    _schedule() {
+      if (this._frame || !this._ctx) return;
+      this._frame = requestAnimationFrame(() => {
+        this._frame = 0;
+        this._paint();
+      });
+    }
+    // Choose the labelled (major) step in units so labels never overlap, then how many
+    // subdivisions fit (binary for inches/picas, decimal for metric/pt/px).
+    _tickPlan(labelPx) {
+      const unit = this.unit;
+      const pxPerUnit = UNIT_PTS[unit] * this._scale;
+      const binary = unit === "in" || unit === "pc";
+      const minMajorPx = Math.max(labelPx + 14, binary ? 56 : 32);
+      const candidates = [];
+      if (binary) {
+        [0.125, 0.25, 0.5].forEach((s) => candidates.push(s));
+      }
+      for (let exp = -2; exp <= 6; exp++) {
+        const p = Math.pow(10, exp);
+        [1, 2, 5].forEach((m) => candidates.push(m * p));
+      }
+      candidates.sort((a, b) => a - b);
+      const major = candidates.find((s) => s * pxPerUnit >= minMajorPx) || candidates[candidates.length - 1];
+      const majorPx = major * pxPerUnit;
+      const levels = [];
+      const minSubPx = binary ? 5 : 3.5;
+      if (binary && major <= 1) {
+        let div = 2;
+        while (majorPx / div >= minSubPx && div <= 16) {
+          levels.push(div);
+          div *= 2;
+        }
+      } else {
+        const lead = Math.round(major / Math.pow(10, Math.floor(Math.log10(major))));
+        const splits = lead === 5 ? [5, 10] : lead === 2 ? binary ? [2, 4, 8] : [2, 4] : [2, 10];
+        splits.forEach((div) => {
+          if (majorPx / div >= minSubPx) levels.push(div);
+        });
+      }
+      return { major, majorPx, levels };
+    }
+    _formatLabel(units) {
+      const v = Math.abs(units);
+      if (Math.abs(v - Math.round(v)) < 1e-6) return String(Math.round(v));
+      return String(parseFloat(v.toFixed(3)));
+    }
+    _resolveColors() {
+      const out = {};
+      Object.entries(COLOR_VARS).forEach(([key, prop]) => {
+        this._probe.style.color = `var(${prop})`;
+        out[key] = getComputedStyle(this._probe).color;
+      });
+      this._probe.style.color = "";
+      const cs = getComputedStyle(this.componentElement);
+      out.font = `${cs.getPropertyValue("--wc-ruler-font-size").trim() || "10px"} ${cs.fontFamily || "system-ui, sans-serif"}`;
+      return out;
+    }
+    _paint() {
+      const ctx = this._ctx;
+      if (!ctx) return;
+      if (!this._colors) this._colors = this._resolveColors();
+      const c = this._colors;
+      const dpr = this._dpr || 1;
+      const vertical = this.vertical;
+      const len = vertical ? this._size.h : this._size.w;
+      const thick = vertical ? this._size.w : this._size.h;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, this._size.w, this._size.h);
+      if (len <= 0 || thick <= 0) return;
+      if (vertical) ctx.setTransform(0, dpr, dpr, 0, 0, 0);
+      const snap = (v) => Math.round(v * dpr) / dpr;
+      const band = (from, to, color, alpha = 1) => {
+        const a = Math.max(0, from);
+        const b = Math.min(len, to);
+        if (b <= a) return;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.fillRect(snap(a), 0, snap(b) - snap(a), thick);
+        ctx.globalAlpha = 1;
+      };
+      band(0, len, c.bg);
+      if (this._length > 0) band(this._ptsToPx(0), this._ptsToPx(this._length), c.page);
+      if (this._selection) band(this._ptsToPx(this._selection[0]), this._ptsToPx(this._selection[1]), c.accent, 0.28);
+      ctx.font = c.font;
+      const unitPts = UNIT_PTS[this.unit];
+      const sample = this._formatLabel(Math.max(Math.abs(this._pxToPts(0)), Math.abs(this._pxToPts(len))) / unitPts);
+      const labelPx = Math.max(ctx.measureText(sample).width, ctx.measureText("00").width);
+      const plan = this._tickPlan(labelPx);
+      const stepPts = plan.major * unitPts;
+      const firstPts = this._pxToPts(0);
+      const lastPts = this._pxToPts(len);
+      const startIdx = Math.floor(firstPts / stepPts) - 1;
+      const endIdx = Math.ceil(lastPts / stepPts) + 1;
+      const heights = [0.5, 0.35, 0.25, 0.18];
+      const edge = thick;
+      ctx.fillStyle = c.tick;
+      for (let i = startIdx; i <= endIdx; i++) {
+        const base = this._ptsToPx(i * stepPts);
+        if (base >= -plan.majorPx && base <= len + plan.majorPx) {
+          const x = snap(base);
+          if (x >= 0 && x <= len) ctx.fillRect(x, 0, 1 / dpr * Math.max(1, Math.round(dpr)), thick);
+          for (let l = plan.levels.length - 1; l >= 0; l--) {
+            const div = plan.levels[l];
+            const h = thick * heights[Math.min(l, heights.length - 1)];
+            for (let k = 1; k < div; k++) {
+              const sx = snap(base + plan.majorPx * k / div);
+              if (sx < 0 || sx > len) continue;
+              ctx.fillRect(sx, edge - h, 1 / dpr * Math.max(1, Math.round(dpr)), h);
+            }
+          }
+        }
+      }
+      ctx.fillStyle = c.text;
+      if (vertical) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.textBaseline = vertical ? "bottom" : "top";
+      for (let i = startIdx; i <= endIdx; i++) {
+        const x = this._ptsToPx(i * stepPts);
+        if (x < -labelPx || x > len) continue;
+        const text = this._formatLabel(i * stepPts / unitPts);
+        if (vertical) {
+          ctx.save();
+          ctx.translate(2, Math.round(x) + 3);
+          ctx.rotate(Math.PI / 2);
+          ctx.fillText(text, 0, 0);
+          ctx.restore();
+        } else {
+          ctx.fillText(text, Math.round(x) + 3, 2);
+        }
+      }
+      if (vertical) ctx.setTransform(0, dpr, dpr, 0, 0, 0);
+      const marker = (px, color, alpha = 1) => {
+        if (px < 0 || px > len) return;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        const x = snap(px);
+        ctx.fillRect(x - 1 / dpr, 0, 2 / dpr * Math.max(1, Math.round(dpr)), thick);
+        ctx.beginPath();
+        ctx.moveTo(x - 4, thick);
+        ctx.lineTo(x + 4, thick);
+        ctx.lineTo(x, thick - 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      };
+      this._guides.forEach((g) => marker(this._ptsToPx(g), c.guide));
+      if (this._dragGuide != null) marker(this._ptsToPx(this._dragGuide), c.guide, 0.6);
+      if (this._cursor != null && this._cursor >= 0 && this._cursor <= len) {
+        ctx.fillStyle = c.text;
+        ctx.fillRect(snap(this._cursor), 0, 1 / dpr * Math.max(1, Math.round(dpr)), thick);
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    // ---- Guides -------------------------------------------------------------
+    get _partner() {
+      const sel = this.getAttribute("partner");
+      if (!sel) return null;
+      try {
+        const el = document.querySelector(sel);
+        return el && el !== this && typeof el.clientToPoints === "function" ? el : null;
+      } catch (err) {
+        return null;
+      }
+    }
+    _crossAxis() {
+      return this.vertical ? "x" : "y";
+    }
+    _dragPosition(e) {
+      const partner = this._partner;
+      if (partner) return partner.clientToPoints(this.vertical ? e.clientX : e.clientY);
+      const r = this._canvas.getBoundingClientRect();
+      const offset = this.vertical ? e.clientX - r.right : e.clientY - r.bottom;
+      return offset / this._scale;
+    }
+    _handlePointerDown(e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      this._canvas.setPointerCapture(e.pointerId);
+      this._drag = { id: e.pointerId, out: false, everOut: false };
+    }
+    _handlePointerMove(e) {
+      if (!this._drag || e.pointerId !== this._drag.id) return;
+      const r = this._canvas.getBoundingClientRect();
+      const outside = this.vertical ? e.clientX > r.right : e.clientY > r.bottom;
+      if (!outside && !this._drag.out) return;
+      this._drag.out = outside;
+      if (outside) this._drag.everOut = true;
+      const position = this._dragPosition(e);
+      const partner = this._partner;
+      if (partner) partner._setDragGuide(outside ? position : null);
+      if (!outside) return;
+      this._notify("wcrulerguidedrag", "wc-ruler:guide-drag", {
+        position,
+        axis: this._crossAxis(),
+        clientX: e.clientX,
+        clientY: e.clientY
+      });
+    }
+    _handlePointerUp(e) {
+      if (!this._drag || e.pointerId !== this._drag.id) return;
+      const { out: wasOut, everOut } = this._drag;
+      this._drag = null;
+      const partner = this._partner;
+      if (partner) partner._setDragGuide(null);
+      if (!wasOut) {
+        if (everOut) this._notify("wcrulerguidecancel", "wc-ruler:guide-cancel", { axis: this._crossAxis() });
+        return;
+      }
+      const position = this._dragPosition(e);
+      this._createGuide(position, this._crossAxis(), "drag", partner);
+    }
+    _handleDblClick(e) {
+      const position = this.clientToPoints(this.vertical ? e.clientY : e.clientX);
+      this._createGuide(position, this.vertical ? "y" : "x", "dblclick", this);
+    }
+    _createGuide(position, axis, source, owner) {
+      const detail = { position: Math.round(position * 100) / 100, axis, source };
+      const evt = new CustomEvent("wcrulerguidecreate", { bubbles: true, composed: true, cancelable: true, detail });
+      this.dispatchEvent(evt);
+      this.dispatchEvent(new CustomEvent("wc-ruler:guide-create", { bubbles: true, composed: true, detail }));
+      window.wc?.EventHub?.broadcast("wcrulerguidecreate", `[data-wc-id="${this.wcId}"]`, "", detail);
+      if (!evt.defaultPrevented && owner) owner.setGuides([...owner.guides, detail.position]);
+    }
+    _setDragGuide(pts) {
+      this._dragGuide = pts;
+      this._schedule();
+    }
+    // ---- Helpers --------------------------------------------------------------
+    _num(attr, fallback, valid = () => true) {
+      const v = parseFloat(this.getAttribute(attr));
+      return Number.isFinite(v) && valid(v) ? v : fallback;
+    }
+    _parseList(raw) {
+      if (!raw) return [];
+      try {
+        const v = JSON.parse(raw);
+        return Array.isArray(v) ? v.map(Number).filter(Number.isFinite) : [];
+      } catch (err) {
+        console.warn("[wc-ruler] invalid guides JSON", err);
+        return [];
+      }
+    }
+    _parseSelection(raw) {
+      const list = this._parseList(raw);
+      return list.length >= 2 ? [Math.min(list[0], list[1]), Math.max(list[0], list[1])] : null;
+    }
+    // ---- Wiring ---------------------------------------------------------------
+    _wireCursorTracking() {
+      window.removeEventListener("pointermove", this._onPagePointer);
+      document.documentElement.removeEventListener("pointerleave", this._onPageLeave);
+      if (this.hasAttribute("cursor-tracking") && this.isConnected) {
+        window.addEventListener("pointermove", this._onPagePointer, { passive: true });
+        document.documentElement.addEventListener("pointerleave", this._onPageLeave);
+      }
+    }
+    _wireEvents() {
+      super._wireEvents();
+      this._unWireEvents();
+      this._resizeObserver = new ResizeObserver(this._onResize);
+      this._resizeObserver.observe(this.componentElement);
+      this._dprQuery = matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      this._onDprChange = () => {
+        this._measure();
+        this._dprQuery.removeEventListener("change", this._onDprChange);
+        this._wireDpr();
+      };
+      this._dprQuery.addEventListener("change", this._onDprChange);
+      this._themeObserver = new MutationObserver(this._onThemeChange);
+      this._themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme"] });
+      if (document.body) this._themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+      this._schemeQuery = matchMedia("(prefers-color-scheme: dark)");
+      this._schemeQuery.addEventListener("change", this._onThemeChange);
+      this._canvas.addEventListener("pointerdown", this._onPointerDown);
+      this._canvas.addEventListener("pointermove", this._onPointerMove);
+      this._canvas.addEventListener("pointerup", this._onPointerUp);
+      this._canvas.addEventListener("pointercancel", this._onPointerUp);
+      this._canvas.addEventListener("dblclick", this._onDblClick);
+      this._wireCursorTracking();
+    }
+    _wireDpr() {
+      this._dprQuery = matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      this._dprQuery.addEventListener("change", this._onDprChange);
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+      this._resizeObserver?.disconnect();
+      this._themeObserver?.disconnect();
+      this._dprQuery?.removeEventListener("change", this._onDprChange);
+      this._schemeQuery?.removeEventListener("change", this._onThemeChange);
+      if (this._canvas) {
+        this._canvas.removeEventListener("pointerdown", this._onPointerDown);
+        this._canvas.removeEventListener("pointermove", this._onPointerMove);
+        this._canvas.removeEventListener("pointerup", this._onPointerUp);
+        this._canvas.removeEventListener("pointercancel", this._onPointerUp);
+        this._canvas.removeEventListener("dblclick", this._onDblClick);
+      }
+      window.removeEventListener("pointermove", this._onPagePointer);
+      document.documentElement.removeEventListener("pointerleave", this._onPageLeave);
+      if (this._frame) {
+        cancelAnimationFrame(this._frame);
+        this._frame = 0;
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-ruler { display: contents; }
+
+        @layer wc.usage {
+          .wc-ruler {
+            --wc-ruler-bg: var(--surface-2);
+            --wc-ruler-page-bg: var(--surface-1);
+            --wc-ruler-tick: var(--text-3, var(--text-2));
+            --wc-ruler-text: var(--text-2, var(--text-1));
+            --wc-ruler-accent: var(--primary-bg-color);
+            --wc-ruler-guide: var(--info-color, var(--primary-bg-color));
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            color: var(--wc-ruler-text);
+          }
+          .wc-ruler-horizontal {
+            width: 100%;
+            height: var(--wc-ruler-size, 22px);
+            border-bottom: 1px solid var(--surface-4);
+            cursor: s-resize;
+          }
+          .wc-ruler-vertical {
+            width: var(--wc-ruler-size, 22px);
+            height: 100%;
+            border-right: 1px solid var(--surface-4);
+            cursor: e-resize;
+          }
+          .wc-ruler > canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+          }
+          .wc-ruler-probe {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+            pointer-events: none;
+          }
+          .theme-high-contrast .wc-ruler {
+            --wc-ruler-tick: var(--text-1);
+            --wc-ruler-text: var(--text-1);
+          }
+        }
+      `.trim();
+      this.loadStyle("wc-ruler-style", style);
+    }
+  }
+  customElements.define("wc-ruler", WcRuler);
+}
+
+// src/js/components/wc-zoom.js
+var DEFAULT_STEPS = [25, 50, 75, 100, 125, 150, 200, 300, 400];
+var SLIDER_MAX = 1e3;
+if (!customElements.get("wc-zoom")) {
+  class WcZoom extends WcBaseComponent {
+    static get is() {
+      return "wc-zoom";
+    }
+    static get observedAttributes() {
+      return ["id", "class", "value", "min", "max", "steps", "fit-buttons", "target"];
+    }
+    constructor() {
+      super();
+      this._value = 100;
+      this._target = null;
+      this._gestureStart = 100;
+      this._menuIndex = -1;
+      this._onClick = this._handleClick.bind(this);
+      this._onSliderInput = this._handleSliderInput.bind(this);
+      this._onFieldKeydown = this._handleFieldKeydown.bind(this);
+      this._onFieldFocus = () => this._field.select();
+      this._onFieldBlur = this._handleFieldBlur.bind(this);
+      this._onWheel = this._handleWheel.bind(this);
+      this._onGestureStart = this._handleGestureStart.bind(this);
+      this._onGestureChange = this._handleGestureChange.bind(this);
+      this._onKeydown = this._handleShortcut.bind(this);
+      this._onMenuClick = this._handleMenuClick.bind(this);
+      this._onSwap = () => {
+        if (!this._target || !this._target.isConnected) this._wireTarget();
+      };
+      this._onMenuKeydown = this._handleMenuKeydown.bind(this);
+      this._popover = new WcPopover(this, {
+        matchWidth: false,
+        align: "end",
+        onClose: (reason) => {
+          this._field?.setAttribute("aria-expanded", "false");
+          if (reason === "escape") this._field?.focus();
+        }
+      });
+      const compEl = this.querySelector(":scope > .wc-zoom");
+      if (compEl) {
+        this.componentElement = compEl;
+      } else {
+        this.componentElement = document.createElement("div");
+        this.componentElement.classList.add("wc-zoom");
+        this.appendChild(this.componentElement);
+      }
+    }
+    async connectedCallback() {
+      super.connectedCallback();
+      this._applyStyle();
+      this._wireEvents();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._popover.close("disconnect");
+      this._unWireEvents();
+    }
+    // ---- Public API ---------------------------------------------------------
+    get value() {
+      return this._value;
+    }
+    set value(v) {
+      this._set(v, null);
+    }
+    get min() {
+      return this._attrNum("min", 10);
+    }
+    get max() {
+      return Math.max(this.min, this._attrNum("max", 800));
+    }
+    get steps() {
+      let list = DEFAULT_STEPS;
+      const raw = this.getAttribute("steps");
+      if (raw) {
+        try {
+          const v = JSON.parse(raw);
+          if (Array.isArray(v)) list = v.map(Number).filter(Number.isFinite);
+        } catch (err) {
+          console.warn("[wc-zoom] invalid steps JSON", err);
+        }
+      }
+      return [...new Set(list)].filter((s) => s >= this.min && s <= this.max).sort((a, b) => a - b);
+    }
+    zoomIn(source = "button") {
+      const next = this.steps.find((s) => s > this._value + 0.5);
+      this._set(next ?? this.max, source);
+    }
+    zoomOut(source = "button") {
+      const prev = [...this.steps].reverse().find((s) => s < this._value - 0.5);
+      this._set(prev ?? this.min, source);
+    }
+    fit(mode) {
+      const m = mode === "width" ? "width" : "page";
+      this._popover.close("fit");
+      this._notify("wczoomfit", "wc-zoom:fit", { mode: m });
+    }
+    getDesignerHTML() {
+      return "";
+    }
+    // ---- Lifecycle ----------------------------------------------------------
+    _render() {
+      super._render();
+      if (!this.componentElement.querySelector(":scope > .wc-zoom-slider")) {
+        this._build();
+      } else {
+        this._bindParts();
+      }
+      this._value = this._clamp(this._attrNum("value", 100));
+      this._sync();
+    }
+    _build() {
+      const el = this.componentElement;
+      el.innerHTML = "";
+      el.setAttribute("role", "group");
+      el.setAttribute("aria-label", "Zoom");
+      const btn = (cls, label, text) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = cls;
+        b.setAttribute("aria-label", label);
+        b.textContent = text;
+        return b;
+      };
+      const fits = document.createElement("span");
+      fits.className = "wc-zoom-fits";
+      fits.append(btn("wc-zoom-fit", "Fit page", "Fit page"), btn("wc-zoom-fit", "Fit width", "Fit width"));
+      fits.children[0].dataset.mode = "page";
+      fits.children[1].dataset.mode = "width";
+      const out = btn("wc-zoom-step", "Zoom out", "\u2212");
+      out.dataset.dir = "out";
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.className = "wc-zoom-slider";
+      slider.min = "0";
+      slider.max = String(SLIDER_MAX);
+      slider.step = "10";
+      slider.setAttribute("aria-label", "Zoom level");
+      const inn = btn("wc-zoom-step", "Zoom in", "+");
+      inn.dataset.dir = "in";
+      const field = document.createElement("input");
+      field.type = "text";
+      field.className = "wc-zoom-field";
+      field.inputMode = "numeric";
+      field.autocomplete = "off";
+      field.spellcheck = false;
+      field.setAttribute("aria-label", "Zoom percentage");
+      field.setAttribute("aria-haspopup", "menu");
+      field.setAttribute("aria-expanded", "false");
+      el.append(fits, out, slider, inn, field);
+      this._bindParts();
+    }
+    _bindParts() {
+      const el = this.componentElement;
+      this._fits = el.querySelector(".wc-zoom-fits");
+      this._slider = el.querySelector(".wc-zoom-slider");
+      this._field = el.querySelector(".wc-zoom-field");
+      this._fits.hidden = !this.hasAttribute("fit-buttons");
+    }
+    _handleAttributeChange(attrName, newValue, oldValue) {
+      switch (attrName) {
+        case "value":
+          if (newValue !== null && Number(newValue) !== this._value) this._set(newValue, null, false);
+          break;
+        case "min":
+        case "max":
+        case "steps":
+          this._value = this._clamp(this._value);
+          this._sync();
+          break;
+        case "fit-buttons":
+          if (this._fits) this._fits.hidden = newValue === null;
+          break;
+        case "target":
+          this._wireTarget();
+          break;
+        case "id":
+          break;
+        default:
+          super._handleAttributeChange(attrName, newValue, oldValue);
+      }
+    }
+    // ---- Value --------------------------------------------------------------
+    _set(v, source, reflect = true, extra = {}) {
+      const n = parseFloat(v);
+      if (!Number.isFinite(n)) {
+        this._sync();
+        return;
+      }
+      const next = this._clamp(Math.round(n * 10) / 10);
+      const previous = this._value;
+      this._value = next;
+      this._sync();
+      if (reflect && this.getAttribute("value") !== String(next)) this.setAttribute("value", String(next));
+      if (source && next !== previous) {
+        this._notify("wczoomchange", "wc-zoom:change", { value: next, previous, source, ...extra });
+      }
+    }
+    _clamp(v) {
+      return Math.min(this.max, Math.max(this.min, v));
+    }
+    _sync() {
+      if (!this._slider) return;
+      this._slider.value = String(Math.round(this._toSlider(this._value)));
+      this._slider.setAttribute("aria-valuetext", `${Math.round(this._value)}%`);
+      if (document.activeElement !== this._field) this._field.value = `${Math.round(this._value)}%`;
+      const [out, inn] = this.componentElement.querySelectorAll(".wc-zoom-step");
+      out.disabled = this._value <= this.min;
+      inn.disabled = this._value >= this.max;
+    }
+    // Piecewise-logarithmic: [min, 100] fills the left half, [100, max] the right, so 100% is
+    // the midpoint. If 100 is outside the range, a single log scale is used.
+    _toSlider(v) {
+      const { min, max } = this;
+      const L = Math.log;
+      if (min < 100 && max > 100) {
+        return v <= 100 ? L(v / min) / L(100 / min) * (SLIDER_MAX / 2) : SLIDER_MAX / 2 + L(v / 100) / L(max / 100) * (SLIDER_MAX / 2);
+      }
+      return max === min ? 0 : L(v / min) / L(max / min) * SLIDER_MAX;
+    }
+    _fromSlider(t) {
+      const { min, max } = this;
+      if (min < 100 && max > 100) {
+        return t <= SLIDER_MAX / 2 ? min * Math.pow(100 / min, t / (SLIDER_MAX / 2)) : 100 * Math.pow(max / 100, (t - SLIDER_MAX / 2) / (SLIDER_MAX / 2));
+      }
+      return min * Math.pow(max / min, t / SLIDER_MAX);
+    }
+    _attrNum(attr, fallback) {
+      const v = parseFloat(this.getAttribute(attr));
+      return Number.isFinite(v) && v > 0 ? v : fallback;
+    }
+    // ---- Controls -----------------------------------------------------------
+    _handleClick(e) {
+      const step = e.target.closest(".wc-zoom-step");
+      if (step) {
+        if (step.dataset.dir === "in") this.zoomIn("button");
+        else this.zoomOut("button");
+        return;
+      }
+      const fitBtn = e.target.closest(".wc-zoom-fit");
+      if (fitBtn) {
+        this.fit(fitBtn.dataset.mode);
+        return;
+      }
+      if (e.target === this._field && !this._popover.isOpen) this._openMenu();
+    }
+    _handleSliderInput() {
+      let v = this._fromSlider(Number(this._slider.value));
+      const t = Number(this._slider.value);
+      const near = this.steps.find((s) => Math.abs(this._toSlider(s) - t) <= SLIDER_MAX * 0.015);
+      if (near != null) v = near;
+      this._set(Math.round(v), "slider");
+    }
+    _handleFieldKeydown(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (this._popover.isOpen && this._menuIndex >= 0) {
+          this._activateMenuItem(this._menuIndex);
+          return;
+        }
+        this._set(this._field.value.replace("%", ""), "input");
+        this._popover.close("commit");
+        this._field.value = `${Math.round(this._value)}%`;
+        this._field.select();
+      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!this._popover.isOpen) this._openMenu();
+        this._moveMenu(e.key === "ArrowDown" ? 1 : -1);
+      } else if (e.key === "Escape" && this._popover.isOpen) {
+        e.preventDefault();
+        this._popover.close("escape");
+      } else if (e.key.length === 1 && this._popover.isOpen) {
+        this._highlight(-1);
+      }
+    }
+    _handleFieldBlur() {
+      setTimeout(() => {
+        if (this._popover.panel?.contains(document.activeElement)) return;
+        const typed = parseFloat(this._field.value);
+        if (Number.isFinite(typed) && typed !== Math.round(this._value)) this._set(typed, "input");
+        this._field.value = `${Math.round(this._value)}%`;
+      }, 0);
+    }
+    // ---- Menu ---------------------------------------------------------------
+    _openMenu() {
+      const panel = document.createElement("div");
+      panel.className = "wc-zoom-menu";
+      panel.setAttribute("role", "menu");
+      panel.setAttribute("aria-label", "Zoom presets");
+      const item = (label, data) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "wc-zoom-menu-item";
+        b.tabIndex = -1;
+        b.textContent = label;
+        Object.assign(b.dataset, data);
+        return b;
+      };
+      [...this.steps].reverse().forEach((s) => {
+        const b = item(`${s}%`, { value: String(s) });
+        b.setAttribute("role", "menuitemradio");
+        b.setAttribute("aria-checked", String(Math.round(this._value) === s));
+        panel.appendChild(b);
+      });
+      const sep = document.createElement("div");
+      sep.className = "wc-zoom-menu-sep";
+      sep.setAttribute("role", "separator");
+      panel.appendChild(sep);
+      const fp = item("Fit page", { mode: "page" });
+      const fw = item("Fit width", { mode: "width" });
+      fp.setAttribute("role", "menuitem");
+      fw.setAttribute("role", "menuitem");
+      panel.append(fp, fw);
+      panel.addEventListener("click", this._onMenuClick);
+      panel.addEventListener("keydown", this._onMenuKeydown);
+      this._popover.open(this._field, panel);
+      this._field.setAttribute("aria-expanded", "true");
+      this._menuIndex = -1;
+    }
+    _menuItems() {
+      return this._popover.panel ? Array.from(this._popover.panel.querySelectorAll(".wc-zoom-menu-item")) : [];
+    }
+    _moveMenu(dir) {
+      const items = this._menuItems();
+      if (!items.length) return;
+      let i = this._menuIndex;
+      if (i < 0) {
+        const current = items.findIndex((b) => b.getAttribute("aria-checked") === "true");
+        i = current >= 0 ? current : dir > 0 ? -1 : items.length;
+        if (current >= 0) {
+          this._highlight(current);
+          return;
+        }
+      }
+      this._highlight((i + dir + items.length) % items.length);
+    }
+    _highlight(i) {
+      this._menuIndex = i;
+      this._menuItems().forEach((b, idx) => b.classList.toggle("is-active", idx === i));
+      if (i >= 0) this._menuItems()[i]?.scrollIntoView({ block: "nearest" });
+    }
+    _activateMenuItem(i) {
+      const b = this._menuItems()[i];
+      if (!b) return;
+      if (b.dataset.mode) {
+        this.fit(b.dataset.mode);
+        return;
+      }
+      this._popover.close("pick");
+      this._set(b.dataset.value, "menu");
+      this._field.value = `${Math.round(this._value)}%`;
+    }
+    _handleMenuClick(e) {
+      const b = e.target.closest(".wc-zoom-menu-item");
+      if (!b) return;
+      this._activateMenuItem(this._menuItems().indexOf(b));
+      this._field.blur();
+    }
+    _handleMenuKeydown(e) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        this._moveMenu(e.key === "ArrowDown" ? 1 : -1);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        this._activateMenuItem(this._menuIndex);
+      }
+    }
+    // ---- Target: wheel, pinch, shortcuts -------------------------------------
+    _resolveTarget() {
+      const sel = this.getAttribute("target");
+      if (!sel) return null;
+      try {
+        return document.querySelector(sel);
+      } catch (err) {
+        return null;
+      }
+    }
+    _wireTarget() {
+      if (this._target) {
+        this._target.removeEventListener("wheel", this._onWheel);
+        this._target.removeEventListener("gesturestart", this._onGestureStart);
+        this._target.removeEventListener("gesturechange", this._onGestureChange);
+        this._target = null;
+      }
+      document.removeEventListener("keydown", this._onKeydown);
+      if (!this.isConnected) return;
+      if (this.getAttribute("target")) document.addEventListener("keydown", this._onKeydown);
+      const target = this._resolveTarget();
+      if (!target) {
+        if (this.getAttribute("target") && !this._retry) {
+          this._retry = requestAnimationFrame(() => {
+            this._retry = 0;
+            if (!this._target) this._wireTarget();
+          });
+        }
+        return;
+      }
+      this._target = target;
+      target.addEventListener("wheel", this._onWheel, { passive: false });
+      target.addEventListener("gesturestart", this._onGestureStart, { passive: false });
+      target.addEventListener("gesturechange", this._onGestureChange, { passive: false });
+    }
+    _anchor(e) {
+      const r = this._target.getBoundingClientRect();
+      return { anchorX: Math.round(e.clientX - r.left), anchorY: Math.round(e.clientY - r.top) };
+    }
+    _handleWheel(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+      const delta = Math.max(-200, Math.min(200, e.deltaY * unit));
+      this._set(this._value * Math.exp(-delta * 25e-4), "wheel", true, this._anchor(e));
+    }
+    _handleGestureStart(e) {
+      e.preventDefault();
+      this._gestureStart = this._value;
+    }
+    _handleGestureChange(e) {
+      e.preventDefault();
+      this._set(this._gestureStart * e.scale, "wheel", true, this._anchor(e));
+    }
+    _handleShortcut(e) {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.defaultPrevented) return;
+      if (!this._target || !this._target.isConnected) this._wireTarget();
+      if (!this._target) return;
+      const k = e.key;
+      if (k === "=" || k === "+") {
+        e.preventDefault();
+        this.zoomIn("key");
+      } else if (k === "-" || k === "_") {
+        e.preventDefault();
+        this.zoomOut("key");
+      } else if (k === "0") {
+        e.preventDefault();
+        this.fit("page");
+      } else if (k === "1") {
+        e.preventDefault();
+        this._set(100, "key");
+      }
+    }
+    // ---- Wiring ---------------------------------------------------------------
+    _wireEvents() {
+      super._wireEvents();
+      this._unWireEvents();
+      this.componentElement.addEventListener("click", this._onClick);
+      this._slider.addEventListener("input", this._onSliderInput);
+      this._field.addEventListener("keydown", this._onFieldKeydown);
+      this._field.addEventListener("focus", this._onFieldFocus);
+      this._field.addEventListener("blur", this._onFieldBlur);
+      document.addEventListener("htmx:afterSwap", this._onSwap);
+      this._wireTarget();
+    }
+    _unWireEvents() {
+      super._unWireEvents();
+      this.componentElement.removeEventListener("click", this._onClick);
+      this._slider?.removeEventListener("input", this._onSliderInput);
+      this._field?.removeEventListener("keydown", this._onFieldKeydown);
+      this._field?.removeEventListener("focus", this._onFieldFocus);
+      this._field?.removeEventListener("blur", this._onFieldBlur);
+      if (this._target) {
+        this._target.removeEventListener("wheel", this._onWheel);
+        this._target.removeEventListener("gesturestart", this._onGestureStart);
+        this._target.removeEventListener("gesturechange", this._onGestureChange);
+        this._target = null;
+      }
+      document.removeEventListener("keydown", this._onKeydown);
+      document.removeEventListener("htmx:afterSwap", this._onSwap);
+      if (this._retry) {
+        cancelAnimationFrame(this._retry);
+        this._retry = 0;
+      }
+    }
+    _applyStyle() {
+      const style = `
+        wc-zoom { display: contents; }
+
+        @layer wc.usage {
+          .wc-zoom {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            height: 24px;
+            font-size: 12px;
+            color: var(--text-1);
+          }
+          .wc-zoom-fits { display: inline-flex; gap: 0.125rem; margin-right: 0.25rem; }
+          .wc-zoom-fits[hidden] { display: none; }
+          .wc-zoom button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+            margin: 0;
+            padding: 0 0.375rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            line-height: 1;
+            cursor: pointer;
+          }
+          .wc-zoom button:hover:not(:disabled) { background-color: var(--surface-3); border-color: var(--surface-4); }
+          .wc-zoom button:disabled { opacity: 0.45; cursor: default; }
+          .wc-zoom button:focus-visible,
+          .wc-zoom-field:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 1px; }
+          .wc-zoom .wc-zoom-step { width: 22px; padding: 0; font-size: 14px; }
+          /* Menu lives on <body> */
+          .wc-zoom-menu {
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            min-width: 8rem;
+            max-height: min(440px, 80vh);
+            overflow-y: auto;
+            padding: 0.25rem;
+            background-color: var(--surface-2);
+            border: 1px solid var(--surface-4);
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 24px color-mix(in srgb, var(--text-1) 22%, transparent);
+            color: var(--text-1);
+            font-size: 12px;
+          }
+          .wc-zoom-menu-item {
+            margin: 0;
+            padding: 0.3rem 0.625rem 0.3rem 1.5rem;
+            border: 0;
+            border-radius: 0.25rem;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+          }
+          .wc-zoom-menu-item:hover,
+          .wc-zoom-menu-item.is-active { background-color: var(--surface-4); }
+          .wc-zoom-menu-item[aria-checked="true"]::before {
+            content: '\u2713';
+            position: absolute;
+            left: 0.5rem;
+            color: var(--primary-bg-color);
+          }
+          .theme-high-contrast .wc-zoom-menu-item[aria-checked="true"]::before { color: currentColor; }
+          .wc-zoom-menu-sep { height: 1px; margin: 0.25rem 0.25rem; background-color: var(--surface-4); }
+        }
+
+        /* Unlayered: the wc.ui layer styles bare input (padding/border/background/font-size)
+           and outranks wc.usage, so the inputs' own rules must sit outside the layers. */
+        /* Track + thumb come from Wave's own input[type=range] styling (same as wc-slider). */
+        .wc-zoom-slider {
+          width: var(--wc-zoom-slider-width, 110px);
+          margin: 0 0.125rem;
+          padding: 0;
+          border: 0;
+          cursor: pointer;
+        }
+        .wc-zoom-field {
+          width: 4.5em;
+          height: 22px;
+          margin: 0;
+          padding: 0 0.375rem;
+          border: 1px solid transparent;
+          border-radius: 0.25rem;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
+          text-align: right;
+          cursor: pointer;
+        }
+        .wc-zoom-field:hover { border-color: var(--surface-4); }
+        .wc-zoom-field:focus { cursor: text; background-color: var(--surface-1); border-color: var(--surface-5, var(--surface-4)); }
+      `.trim();
+      this.loadStyle("wc-zoom-style", style);
+    }
+  }
+  customElements.define("wc-zoom", WcZoom);
+}
+
+// src/js/components/wc-font-picker.js
+var CATEGORY_LABELS = {
+  serif: "Serif",
+  sans: "Sans Serif",
+  "sans-serif": "Sans Serif",
+  sansserif: "Sans Serif",
+  display: "Display",
+  script: "Script",
+  handwriting: "Script",
+  monospace: "Monospace",
+  mono: "Monospace",
+  slab: "Slab Serif",
+  "slab-serif": "Slab Serif"
+};
+var DEFAULT_CATEGORIES = ["serif", "sans", "display", "script", "monospace"];
+var ROW_H = 54;
+var ROW_H_COMPACT = 34;
+var HEADER_H = 28;
+var OVERSCAN = 6;
+var RECENT_MAX2 = 8;
+var fontState = /* @__PURE__ */ new Map();
+var fontLoads = /* @__PURE__ */ new Map();
+function canonicalCategory(c) {
+  const k = String(c || "").trim().toLowerCase();
+  if (!k) return "other";
+  if (k === "sans-serif" || k === "sansserif") return "sans";
+  if (k === "handwriting") return "script";
+  if (k === "mono") return "monospace";
+  if (k === "slab-serif") return "slab";
+  return k;
+}
+function categoryLabel(id) {
+  if (CATEGORY_LABELS[id]) return CATEGORY_LABELS[id];
+  if (id === "other") return "Other";
+  return id.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+function cssFamily(family) {
+  return `"${String(family).replace(/"/g, '\\"')}"`;
+}
+var WcFontPicker = class extends WcBaseFormComponent {
+  static get is() {
+    return "wc-font-picker";
+  }
+  static get observedAttributes() {
+    return [
+      "name",
+      "id",
+      "class",
+      "value",
+      "lbl-label",
+      "placeholder",
+      "required",
+      "disabled",
+      "fonts",
+      "url",
+      "results-member",
+      "document-fonts",
+      "recent-key",
+      "preview-text",
+      "categories"
+    ];
+  }
+  constructor() {
+    super();
+    this._value = "";
+    this._fonts = [];
+    this._byValue = /* @__PURE__ */ new Map();
+    this._items = [];
+    this._offsets = [];
+    this._activeIndex = -1;
+    this._lastPreview = null;
+    this._picked = false;
+    this._query = "";
+    this._category = "";
+    this._uid = `wcfp-${Math.random().toString(36).slice(2, 8)}`;
+    this.renderPreview = null;
+    if (this.hasAttribute("url")) this._deferReady = true;
+    this._onTriggerClick = () => this._popover.isOpen ? this.close() : this.open();
+    this._onTriggerKeydown = this._handleTriggerKeydown.bind(this);
+    this._onSearchInput = this._handleSearchInput.bind(this);
+    this._onPanelKeydown = this._handlePanelKeydown.bind(this);
+    this._onPanelClick = this._handlePanelClick.bind(this);
+    this._onListOver = this._handleListOver.bind(this);
+    this._onListScroll = () => this._scheduleRows();
+    this._popover = new WcPopover(this, {
+      minWidth: 300,
+      maxHeight: 440,
+      onClose: (reason) => this._handleClosed(reason)
+    });
+    const compEl = this.querySelector(":scope > .wc-font-picker");
+    if (compEl) {
+      this.componentElement = compEl;
+    } else {
+      this.componentElement = document.createElement("div");
+      this.componentElement.classList.add("wc-font-picker");
+      this.appendChild(this.componentElement);
+    }
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._value = this.getAttribute("value") || "";
+    this._internals.setFormValue(this._value);
+    this._loadFonts();
+    this._renderTrigger();
+    this._updateValidity();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._popover.close("disconnect");
+    this._unWireEvents();
+    this._triggerObserver?.disconnect();
+  }
+  // ---- Value contract (FACE) ------------------------------------------------
+  get value() {
+    return this._value;
+  }
+  set value(v) {
+    this._value = v == null ? "" : String(v);
+    this._internals.setFormValue(this._value);
+    this._renderTrigger();
+    this._updateValidity();
+  }
+  get fonts() {
+    return this._fonts.slice();
+  }
+  set fonts(list) {
+    this._setFonts(Array.isArray(list) ? list : []);
+  }
+  get previewText() {
+    return this.hasAttribute("preview-text") ? this.getAttribute("preview-text") : "The quick brown fox";
+  }
+  open(seed = "") {
+    if (this._popover.isOpen || this.hasAttribute("disabled")) return;
+    this._picked = false;
+    this._lastPreview = null;
+    this._query = seed;
+    this._category = "";
+    this._buildPanel();
+  }
+  close() {
+    this._popover.close("api");
+  }
+  refresh() {
+    this._loadFonts();
+  }
+  // ---- Lifecycle ------------------------------------------------------------
+  _render() {
+    super._render();
+    if (!this.componentElement.querySelector(":scope > .wc-font-picker-trigger")) {
+      this.componentElement.innerHTML = "";
+      this._buildSkeleton();
+    } else {
+      this._triggerEl = this.componentElement.querySelector(":scope > .wc-font-picker-trigger");
+    }
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _buildSkeleton() {
+    const labelText = this.getAttribute("lbl-label") || "";
+    if (labelText) {
+      const lbl = document.createElement("label");
+      lbl.textContent = labelText;
+      lbl.id = `${this._uid}-label`;
+      this.componentElement.appendChild(lbl);
+    }
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "wc-font-picker-trigger";
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+    if (labelText) trigger.setAttribute("aria-labelledby", `${this._uid}-label ${this._uid}-current`);
+    trigger.disabled = this.hasAttribute("disabled");
+    this.componentElement.appendChild(trigger);
+    this._triggerEl = trigger;
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    switch (attrName) {
+      case "value":
+        this.value = newValue || "";
+        return;
+      case "fonts":
+      case "url":
+      case "results-member":
+        this._loadFonts();
+        return;
+      case "document-fonts":
+      case "recent-key":
+      case "preview-text":
+      case "categories":
+        if (this._popover.isOpen) this._refreshPanel();
+        return;
+      case "required":
+        this._updateValidity();
+        return;
+      case "placeholder":
+        this._renderTrigger();
+        return;
+      case "lbl-label":
+      case "disabled":
+        this._popover.close("rebuild");
+        this.componentElement.innerHTML = "";
+        this._buildSkeleton();
+        this._wireEvents();
+        this._renderTrigger();
+        return;
+      default:
+        super._handleAttributeChange(attrName, newValue, oldValue);
+    }
+  }
+  // ---- Fonts ------------------------------------------------------------------
+  _loadFonts() {
+    const url = this.getAttribute("url");
+    if (url) {
+      const token = this._fetchToken = {};
+      fetch(url, { credentials: "same-origin" }).then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))).then((data) => {
+        if (token !== this._fetchToken) return;
+        const member = this.getAttribute("results-member");
+        const list2 = member ? data?.[member] : Array.isArray(data) ? data : data?.results;
+        this._setFonts(Array.isArray(list2) ? list2 : []);
+        this._emitEvent("wcoptionsloaded", "optionsloaded", {
+          bubbles: true,
+          composed: true,
+          detail: { count: this._fonts.length }
+        });
+        this._setReady();
+      }).catch((err) => {
+        console.warn("[wc-font-picker] failed to load fonts", err);
+        this._setReady();
+      });
+      return;
+    }
+    let list = [];
+    const raw = this.getAttribute("fonts");
+    if (raw) {
+      try {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v)) list = v;
+      } catch (err) {
+        console.warn("[wc-font-picker] invalid fonts JSON", err);
+      }
+    }
+    this._setFonts(list);
+  }
+  _setFonts(list) {
+    this._fonts = list.filter((f) => f && (f.family || f.id)).map((f) => {
+      const family = String(f.family || f.display_name || f.id);
+      return {
+        ...f,
+        family,
+        value: String(f.id ?? family),
+        label: String(f.display_name || family),
+        cat: canonicalCategory(f.category)
+      };
+    });
+    this._byValue = new Map(this._fonts.map((f) => [f.value, f]));
+    this._renderTrigger();
+    if (this._popover.isOpen) this._refreshPanel();
+  }
+  // Exact value first, then a family / display-name match (so a stored family name still resolves).
+  _find(value) {
+    if (!value) return null;
+    if (this._byValue.has(value)) return this._byValue.get(value);
+    const v = String(value).toLowerCase();
+    return this._fonts.find((f) => f.family.toLowerCase() === v || f.label.toLowerCase() === v) || null;
+  }
+  _ensureFont(font) {
+    if (!font || !font.url) return Promise.resolve();
+    const key = `${font.family}|${font.url}`;
+    if (fontLoads.has(key)) return fontLoads.get(key);
+    fontState.set(font.family, "loading");
+    const desc = {};
+    if (Array.isArray(font.weights) && font.weights.length) {
+      const ws = font.weights.map(Number).filter(Number.isFinite);
+      if (ws.length) desc.weight = ws.length > 1 ? `${Math.min(...ws)} ${Math.max(...ws)}` : String(ws[0]);
+    }
+    if (Array.isArray(font.styles) && font.styles.length === 1) desc.style = font.styles[0];
+    const promise = (async () => {
+      try {
+        const face = new FontFace(font.family, `url(${JSON.stringify(font.url)})`, desc);
+        document.fonts.add(face);
+        await face.load();
+        fontState.set(font.family, "loaded");
+      } catch (err) {
+        fontState.set(font.family, "failed");
+        console.warn(`[wc-font-picker] could not load "${font.family}"`, err);
+      }
+      document.querySelectorAll(".wc-font-picker-face").forEach((el) => {
+        if (el.dataset.family === font.family) this._applyFaceState(el, font);
+      });
+    })();
+    fontLoads.set(key, promise);
+    return promise;
+  }
+  _applyFaceState(el, font) {
+    const state = font.url ? fontState.get(font.family) || "idle" : "loaded";
+    el.classList.toggle("is-loading", state === "loading" || state === "idle");
+    el.classList.toggle("is-failed", state === "failed");
+  }
+  _faceEl(font, text, cls) {
+    const custom = typeof this.renderPreview === "function" ? this.renderPreview(font, text) : null;
+    if (custom) {
+      const wrap = document.createElement("span");
+      wrap.className = `${cls} wc-font-picker-custom`;
+      wrap.appendChild(custom);
+      return wrap;
+    }
+    const el = document.createElement("span");
+    el.className = `${cls} wc-font-picker-face`;
+    el.textContent = text;
+    el.dataset.family = font.family;
+    el.style.fontFamily = `${cssFamily(font.family)}, system-ui, sans-serif`;
+    this._applyFaceState(el, font);
+    return el;
+  }
+  // ---- Trigger ----------------------------------------------------------------
+  _renderTrigger() {
+    const t = this._triggerEl;
+    if (!t) return;
+    t.innerHTML = "";
+    const font = this._find(this._value);
+    const current = document.createElement("span");
+    current.className = "wc-font-picker-current";
+    current.id = `${this._uid}-current`;
+    if (font) {
+      current.appendChild(this._faceEl(font, font.label, "wc-font-picker-current-name"));
+      if (font.note) {
+        const note = document.createElement("span");
+        note.className = "wc-font-picker-note";
+        note.textContent = font.note;
+        current.appendChild(note);
+      }
+      this._observeTrigger(font);
+    } else if (this._value) {
+      const el = document.createElement("span");
+      el.className = "wc-font-picker-current-name";
+      el.style.fontFamily = `${cssFamily(this._value)}, system-ui, sans-serif`;
+      el.textContent = this._value;
+      current.appendChild(el);
+    } else {
+      const ph = document.createElement("span");
+      ph.className = "wc-font-picker-current-name is-placeholder";
+      ph.textContent = this.getAttribute("placeholder") || "Choose a font";
+      current.appendChild(ph);
+    }
+    const chev = document.createElement("span");
+    chev.className = "wc-font-picker-chevron";
+    chev.setAttribute("aria-hidden", "true");
+    t.append(current, chev);
+  }
+  _observeTrigger(font) {
+    if (!font.url) return;
+    this._triggerObserver?.disconnect();
+    this._triggerObserver = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        this._triggerObserver.disconnect();
+        this._ensureFont(font);
+      }
+    });
+    this._triggerObserver.observe(this._triggerEl);
+  }
+  _updateValidity() {
+    if (this.hasAttribute("required") && !this._value) {
+      this._internals.setValidity({ valueMissing: true }, "Please choose a font.", this._triggerEl || this);
+    } else {
+      this._internals.setValidity({});
+    }
+  }
+  // ---- Panel --------------------------------------------------------------------
+  _categories() {
+    const raw = this.getAttribute("categories");
+    if (raw) {
+      try {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v) && v.length) {
+          return v.map((c) => typeof c === "string" ? { id: canonicalCategory(c), label: categoryLabel(canonicalCategory(c)) } : { id: canonicalCategory(c.id), label: c.label || categoryLabel(canonicalCategory(c.id)) });
+        }
+      } catch (err) {
+        console.warn("[wc-font-picker] invalid categories JSON", err);
+      }
+    }
+    const ids = [...DEFAULT_CATEGORIES];
+    this._fonts.forEach((f) => {
+      if (!ids.includes(f.cat)) ids.push(f.cat);
+    });
+    return ids.map((id) => ({ id, label: categoryLabel(id) }));
+  }
+  _buildChips(chips) {
+    chips.innerHTML = "";
+    const chip = (id, label) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "wc-font-picker-chip";
+      b.dataset.category = id;
+      b.textContent = label;
+      b.setAttribute("aria-pressed", String(this._category === id));
+      return b;
+    };
+    chips.appendChild(chip("", "All"));
+    this._categories().forEach((c) => chips.appendChild(chip(c.id, c.label)));
+  }
+  // Fonts or section attributes changed while open: rebuild chips + rows, keep scroll.
+  _refreshPanel() {
+    if (!this._listEl) return;
+    const scroll = this._listEl.scrollTop;
+    const activeValue = this._items[this._activeIndex]?.font?.value;
+    this._buildChips(this._chipsEl);
+    this._buildItems();
+    this._listEl.scrollTop = scroll;
+    this._activeIndex = activeValue ? this._items.findIndex((it) => it.font && it.font.value === activeValue) : -1;
+    this._renderRows();
+    this._syncActive();
+  }
+  _buildPanel() {
+    const panel = document.createElement("div");
+    panel.className = "wc-font-picker-panel";
+    const search = document.createElement("input");
+    search.type = "text";
+    search.className = "wc-font-picker-search";
+    search.placeholder = "Search fonts\u2026";
+    search.autocomplete = "off";
+    search.spellcheck = false;
+    search.setAttribute("role", "combobox");
+    search.setAttribute("aria-expanded", "true");
+    search.setAttribute("aria-controls", `${this._uid}-list`);
+    search.setAttribute("aria-autocomplete", "list");
+    search.setAttribute("aria-label", "Search fonts");
+    search.value = this._query;
+    const chips = document.createElement("div");
+    chips.className = "wc-font-picker-chips";
+    chips.setAttribute("role", "toolbar");
+    chips.setAttribute("aria-label", "Font categories");
+    this._buildChips(chips);
+    const viewport = document.createElement("div");
+    viewport.className = "wc-font-picker-viewport";
+    const list = document.createElement("div");
+    list.className = "wc-font-picker-list";
+    list.id = `${this._uid}-list`;
+    list.setAttribute("role", "listbox");
+    list.setAttribute("aria-label", "Fonts");
+    list.tabIndex = -1;
+    const spacer = document.createElement("div");
+    spacer.className = "wc-font-picker-spacer";
+    list.appendChild(spacer);
+    const sticky = document.createElement("div");
+    sticky.className = "wc-font-picker-sticky";
+    sticky.setAttribute("aria-hidden", "true");
+    const empty = document.createElement("div");
+    empty.className = "wc-font-picker-empty";
+    empty.textContent = "No fonts match";
+    empty.hidden = true;
+    viewport.append(list, sticky, empty);
+    panel.append(search, chips, viewport);
+    panel.addEventListener("keydown", this._onPanelKeydown);
+    panel.addEventListener("click", this._onPanelClick);
+    search.addEventListener("input", this._onSearchInput);
+    list.addEventListener("scroll", this._onListScroll, { passive: true });
+    list.addEventListener("pointerover", this._onListOver);
+    this._popover.open(this._triggerEl, panel);
+    this._panelEl = panel;
+    this._chipsEl = chips;
+    this._searchEl = search;
+    this._listEl = list;
+    this._spacerEl = spacer;
+    this._stickyEl = sticky;
+    this._emptyEl = empty;
+    this._triggerEl.setAttribute("aria-expanded", "true");
+    this._rowObserver?.disconnect();
+    this._rowObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        this._rowObserver.unobserve(entry.target);
+        const font = this._find(entry.target.dataset.value);
+        if (font) this._ensureFont(font);
+      });
+    }, { root: list, rootMargin: "120px 0px" });
+    this._buildItems();
+    const current = this._find(this._value)?.value;
+    this._activeIndex = this._query ? this._items.findIndex((it) => it.font) : this._items.findIndex((it) => it.font && it.font.value === current);
+    if (this._activeIndex >= 0) this._scrollToIndex(this._activeIndex, "center");
+    this._renderRows();
+    this._syncActive();
+    search.focus();
+    search.setSelectionRange(search.value.length, search.value.length);
+  }
+  _recentValues() {
+    const key = this.getAttribute("recent-key");
+    if (!key) return [];
+    try {
+      const v = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(v) ? v.map(String) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+  _pushRecent(value) {
+    const key = this.getAttribute("recent-key");
+    if (!key || !value) return;
+    const list = [value, ...this._recentValues().filter((v) => v !== value)].slice(0, RECENT_MAX2);
+    try {
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (err) {
+    }
+  }
+  _documentValues() {
+    const raw = this.getAttribute("document-fonts");
+    if (!raw) return [];
+    try {
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v.map(String) : [];
+    } catch (err) {
+      console.warn("[wc-font-picker] invalid document-fonts JSON", err);
+      return [];
+    }
+  }
+  _matches(font) {
+    if (this._category && font.cat !== this._category) return false;
+    if (!this._query) return true;
+    const q = this._query.toLowerCase();
+    return font.label.toLowerCase().includes(q) || font.family.toLowerCase().includes(q) || font.cat.includes(q);
+  }
+  // Flatten the sections into rows: Document fonts, Recent, then All fonts grouped by
+  // category (or one flat group while searching / filtering to a category).
+  _buildItems() {
+    const items = [];
+    const push = (label, fonts) => {
+      if (!fonts.length) return;
+      items.push({ header: label });
+      fonts.forEach((font) => items.push({ font }));
+    };
+    const pick = (values) => values.map((v) => this._find(v)).filter((f) => f && this._matches(f));
+    push("Document fonts", pick(this._documentValues()));
+    push("Recent", pick(this._recentValues()));
+    const all = this._fonts.filter((f) => this._matches(f));
+    if (this._query || this._category) {
+      push(this._category ? categoryLabel(this._category) : "All fonts", all);
+    } else {
+      const cats = this._categories().map((c) => c.id);
+      const groups = /* @__PURE__ */ new Map();
+      all.forEach((f) => {
+        if (!groups.has(f.cat)) groups.set(f.cat, []);
+        groups.get(f.cat).push(f);
+      });
+      [...groups.keys()].sort((a, b) => {
+        const ia = cats.indexOf(a);
+        const ib = cats.indexOf(b);
+        return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+      }).forEach((cat) => push(`All fonts \xB7 ${categoryLabel(cat)}`, groups.get(cat)));
+    }
+    const rowH = this.previewText ? ROW_H : ROW_H_COMPACT;
+    let y = 0;
+    this._offsets = items.map((it) => {
+      const top = y;
+      y += it.header ? HEADER_H : rowH;
+      return top;
+    });
+    this._items = items;
+    this._totalH = y;
+    this._rowH = rowH;
+    this._spacerEl.style.height = `${y}px`;
+    this._emptyEl.hidden = items.length > 0;
+    this._listEl.querySelectorAll(".wc-font-picker-row, .wc-font-picker-header").forEach((el) => el.remove());
+    this._rendered = /* @__PURE__ */ new Map();
+  }
+  _indexAt(y) {
+    let lo = 0;
+    let hi = this._offsets.length - 1;
+    while (lo < hi) {
+      const mid = lo + hi + 1 >> 1;
+      if (this._offsets[mid] <= y) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+  _scheduleRows() {
+    if (this._rowFrame) return;
+    this._rowFrame = requestAnimationFrame(() => {
+      this._rowFrame = 0;
+      this._renderRows();
+    });
+  }
+  _renderRows() {
+    const list = this._listEl;
+    if (!list || !this._items.length) {
+      if (this._stickyEl) this._stickyEl.hidden = true;
+      return;
+    }
+    const top = list.scrollTop;
+    const bottom = top + list.clientHeight;
+    const first = Math.max(0, this._indexAt(top) - OVERSCAN);
+    const last = Math.min(this._items.length - 1, this._indexAt(bottom) + OVERSCAN);
+    this._rendered.forEach((el, idx) => {
+      if (idx < first || idx > last) {
+        el.remove();
+        this._rendered.delete(idx);
+      }
+    });
+    const frag = document.createDocumentFragment();
+    for (let i = first; i <= last; i++) {
+      if (this._rendered.has(i)) continue;
+      const el = this._rowEl(i);
+      this._rendered.set(i, el);
+      frag.appendChild(el);
+    }
+    list.appendChild(frag);
+    let h = this._indexAt(top);
+    while (h > 0 && !this._items[h].header) h--;
+    const header = this._items[h]?.header;
+    this._stickyEl.hidden = !header || top <= 0;
+    if (header) this._stickyEl.textContent = header;
+  }
+  _rowEl(i) {
+    const item = this._items[i];
+    const el = document.createElement("div");
+    el.style.top = `${this._offsets[i]}px`;
+    if (item.header) {
+      el.className = "wc-font-picker-header";
+      el.setAttribute("role", "presentation");
+      el.textContent = item.header;
+      return el;
+    }
+    const font = item.font;
+    el.className = "wc-font-picker-row";
+    el.id = `${this._uid}-opt-${i}`;
+    el.dataset.index = String(i);
+    el.dataset.value = font.value;
+    el.setAttribute("role", "option");
+    el.setAttribute("aria-label", font.label);
+    el.setAttribute("aria-selected", String(this._find(this._value)?.value === font.value));
+    el.classList.toggle("is-active", i === this._activeIndex);
+    el.style.height = `${this._rowH}px`;
+    const line = document.createElement("span");
+    line.className = "wc-font-picker-line";
+    line.appendChild(this._faceEl(font, font.label, "wc-font-picker-name"));
+    if (font.badge && font.badge.text) {
+      const b = document.createElement("span");
+      b.className = `badge badge-${font.badge.variant || "muted"} wc-font-picker-badge`;
+      b.textContent = font.badge.text;
+      line.appendChild(b);
+    }
+    el.appendChild(line);
+    const sample = this.previewText;
+    if (sample) {
+      el.appendChild(this._faceEl(font, sample, "wc-font-picker-sample"));
+    } else if (font.note) {
+      el.title = font.note;
+    }
+    if (sample && font.note) el.title = font.note;
+    if (font.url && !fontState.has(font.family)) this._rowObserver.observe(el);
+    return el;
+  }
+  _scrollToIndex(i, block = "nearest") {
+    const list = this._listEl;
+    if (!list || i < 0) return;
+    const top = this._offsets[i];
+    const h = this._items[i].header ? HEADER_H : this._rowH;
+    const viewTop = list.scrollTop + HEADER_H;
+    const viewBottom = list.scrollTop + list.clientHeight;
+    if (block === "center") list.scrollTop = Math.max(0, top - (list.clientHeight - h) / 2);
+    else if (top < viewTop) list.scrollTop = Math.max(0, top - HEADER_H);
+    else if (top + h > viewBottom) list.scrollTop = top + h - list.clientHeight;
+  }
+  _moveActive(delta, absolute) {
+    const n = this._items.length;
+    if (!n) return;
+    let i = absolute != null ? absolute : this._activeIndex;
+    const dir = delta >= 0 ? 1 : -1;
+    if (absolute == null) {
+      if (i < 0) i = dir > 0 ? -1 : n;
+      let steps = Math.abs(delta);
+      while (steps > 0) {
+        let next = i + dir;
+        while (next >= 0 && next < n && this._items[next].header) next += dir;
+        if (next < 0 || next >= n) break;
+        i = next;
+        steps--;
+      }
+    } else {
+      while (i >= 0 && i < n && this._items[i].header) i += dir;
+    }
+    if (i < 0 || i >= n || this._items[i].header) return;
+    this._activeIndex = i;
+    this._scrollToIndex(i);
+    this._renderRows();
+    this._syncActive();
+    this._preview(this._items[i].font);
+  }
+  _syncActive() {
+    if (!this._listEl) return;
+    this._rendered?.forEach((el, idx) => el.classList.toggle("is-active", idx === this._activeIndex));
+    if (this._activeIndex >= 0 && this._rendered?.has(this._activeIndex)) {
+      this._searchEl.setAttribute("aria-activedescendant", `${this._uid}-opt-${this._activeIndex}`);
+    } else {
+      this._searchEl.removeAttribute("aria-activedescendant");
+    }
+  }
+  _preview(font) {
+    if (!font || this._lastPreview === font.value) return;
+    this._lastPreview = font.value;
+    this._ensureFont(font);
+    this._notify("wcfontpreview", "wc-font-picker:preview", { value: font.value, family: font.family });
+  }
+  _pick(font) {
+    if (!font) return;
+    this._picked = true;
+    this._value = font.value;
+    this._internals.setFormValue(this._value);
+    this._pushRecent(font.value);
+    this._renderTrigger();
+    this._updateValidity();
+    this._popover.close("pick");
+    this._triggerEl.focus();
+    this._notify("wcfontchange", "wc-font-picker:change", { value: font.value, family: font.family });
+  }
+  _handleClosed(reason) {
+    this._rowObserver?.disconnect();
+    if (this._rowFrame) {
+      cancelAnimationFrame(this._rowFrame);
+      this._rowFrame = 0;
+    }
+    this._panelEl = null;
+    this._listEl = null;
+    this._triggerEl?.setAttribute("aria-expanded", "false");
+    if (reason === "escape") this._triggerEl?.focus();
+    if (!this._picked && reason !== "rebuild") {
+      const current = this._find(this._value);
+      this._notify("wcfontpreviewend", "wc-font-picker:preview-end", {
+        value: this._value,
+        family: current ? current.family : this._value
+      });
+    }
+  }
+  // ---- Interaction --------------------------------------------------------------
+  _handleTriggerKeydown(e) {
+    if (this.hasAttribute("disabled")) return;
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.open();
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      this.open(e.key);
+    }
+  }
+  _handleSearchInput() {
+    this._query = this._searchEl.value.trim();
+    this._buildItems();
+    this._listEl.scrollTop = 0;
+    this._activeIndex = this._items.findIndex((it) => it.font);
+    this._renderRows();
+    this._syncActive();
+  }
+  _handlePanelKeydown(e) {
+    const page = Math.max(1, Math.floor((this._listEl?.clientHeight || 300) / this._rowH) - 1);
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        this._moveActive(1);
+        return;
+      case "ArrowUp":
+        e.preventDefault();
+        this._moveActive(-1);
+        return;
+      case "PageDown":
+        e.preventDefault();
+        this._moveActive(page);
+        return;
+      case "PageUp":
+        e.preventDefault();
+        this._moveActive(-page);
+        return;
+      case "Home":
+        if (e.target === this._searchEl) return;
+        e.preventDefault();
+        this._moveActive(1, 0);
+        return;
+      case "End":
+        if (e.target === this._searchEl) return;
+        e.preventDefault();
+        this._moveActive(-1, this._items.length - 1);
+        return;
+      case "Enter": {
+        if (e.target.classList?.contains("wc-font-picker-chip")) return;
+        e.preventDefault();
+        const it = this._items[this._activeIndex];
+        if (it && it.font) this._pick(it.font);
+        return;
+      }
+      case "Tab":
+        return;
+      default:
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== this._searchEl) {
+          this._searchEl.focus();
+        }
+    }
+  }
+  _handlePanelClick(e) {
+    const chip = e.target.closest(".wc-font-picker-chip");
+    if (chip) {
+      this._category = chip.dataset.category === this._category ? "" : chip.dataset.category;
+      this._panelEl.querySelectorAll(".wc-font-picker-chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.category === this._category)));
+      this._buildItems();
+      this._listEl.scrollTop = 0;
+      this._activeIndex = this._items.findIndex((it) => it.font);
+      this._renderRows();
+      this._syncActive();
+      this._searchEl.focus();
+      return;
+    }
+    const row = e.target.closest(".wc-font-picker-row");
+    if (row) this._pick(this._items[Number(row.dataset.index)]?.font);
+  }
+  _handleListOver(e) {
+    const row = e.target.closest(".wc-font-picker-row");
+    if (!row) return;
+    const i = Number(row.dataset.index);
+    if (i !== this._activeIndex) {
+      this._activeIndex = i;
+      this._syncActive();
+    }
+    this._preview(this._items[i]?.font);
+  }
+  // ---- Wiring ---------------------------------------------------------------------
+  _wireEvents() {
+    this.formElement = null;
+    super._wireEvents();
+    if (this._triggerEl) {
+      this._triggerEl.removeEventListener("click", this._onTriggerClick);
+      this._triggerEl.removeEventListener("keydown", this._onTriggerKeydown);
+      this._triggerEl.addEventListener("click", this._onTriggerClick);
+      this._triggerEl.addEventListener("keydown", this._onTriggerKeydown);
+    }
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    this._triggerEl?.removeEventListener("click", this._onTriggerClick);
+    this._triggerEl?.removeEventListener("keydown", this._onTriggerKeydown);
+  }
+  _applyStyle() {
+    const style = `
+      wc-font-picker { display: contents; }
+
+      @layer wc.usage {
+        .wc-font-picker { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+        .wc-font-picker > label { font-weight: 500; }
+        wc-font-picker[required] .wc-font-picker > label::after { content: ' *'; font-weight: bold; }
+        .wc-font-picker-trigger {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          min-height: 2.5rem;
+          margin: 0;
+          padding: 0.375rem 2rem 0.375rem 0.75rem;
+          background-color: var(--component-bg-color, var(--surface-1));
+          border: 1px solid var(--component-border-color, var(--surface-4));
+          border-radius: 4px;
+          color: var(--component-color, var(--text-1));
+          font: inherit;
+          line-height: 1.2;
+          text-align: left;
+          cursor: pointer;
+        }
+        .wc-font-picker-trigger:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 1px; }
+        .wc-font-picker-trigger[aria-expanded="true"] { border-color: var(--primary-bg-color); }
+        .wc-font-picker-trigger:disabled { opacity: 0.6; cursor: not-allowed; }
+        .wc-font-picker-current { display: flex; flex-direction: column; min-width: 0; }
+        .wc-font-picker-current-name {
+          display: block;
+          font-size: 1.1rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wc-font-picker-current-name.is-placeholder { font-size: 0.95rem; color: var(--text-3, var(--text-2)); }
+        .wc-font-picker-note { display: block; font-size: 0.7rem; font-style: italic; color: var(--text-3, var(--text-2)); }
+        .wc-font-picker-chevron {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          width: 0.45rem;
+          height: 0.45rem;
+          border-right: 2px solid currentColor;
+          border-bottom: 2px solid currentColor;
+          transform: translateY(-70%) rotate(45deg);
+          opacity: 0.55;
+        }
+
+        /* Placeholder until a web font has loaded: a neutral bar, no fallback-font flash. */
+        .wc-font-picker-face.is-loading {
+          color: transparent !important;
+          background-color: var(--surface-3);
+          border-radius: 0.25rem;
+        }
+        .wc-font-picker-face.is-failed { font-family: inherit !important; font-style: italic; }
+
+        /* Panel lives on <body> */
+        .wc-font-picker-panel {
+          z-index: 10000;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          height: min(440px, 70vh);
+          padding: 0.5rem;
+          background-color: var(--surface-1);
+          border: 1px solid var(--surface-4);
+          border-radius: 0.6rem;
+          box-shadow: 0 8px 28px color-mix(in srgb, var(--text-1) 22%, transparent);
+          color: var(--text-1);
+          font-size: 0.875rem;
+        }
+        .wc-font-picker-chips { display: flex; gap: 0.25rem; overflow-x: auto; padding-bottom: 0.125rem; flex: none; }
+        .wc-font-picker-chip {
+          flex: none;
+          margin: 0;
+          padding: 0.2rem 0.6rem;
+          border: 1px solid var(--surface-4);
+          border-radius: 999px;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          font-size: 0.75rem;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .wc-font-picker-chip:hover { background-color: var(--surface-3); }
+        .wc-font-picker-chip[aria-pressed="true"] {
+          background-color: var(--primary-bg-color);
+          border-color: var(--primary-bg-color);
+          color: var(--wc-on-primary, var(--primary-color));
+        }
+        .wc-font-picker-chip:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 1px; }
+        .wc-font-picker-viewport { position: relative; flex: 1 1 auto; min-height: 0; }
+        .wc-font-picker-list { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; outline: none; }
+        .wc-font-picker-spacer { width: 1px; }
+        .wc-font-picker-header,
+        .wc-font-picker-sticky {
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: ${HEADER_H}px;
+          padding: 0.6rem 0.55rem 0;
+          font-size: 0.7rem;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: var(--text-3, var(--text-2));
+          background-color: var(--surface-1);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          box-sizing: border-box;
+        }
+        .wc-font-picker-sticky { top: 0; right: 0.75rem; z-index: 2; pointer-events: none; }
+        .wc-font-picker-sticky[hidden] { display: none; }
+        .wc-font-picker-row {
+          position: absolute;
+          left: 0;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 0.15rem;
+          padding: 0 0.55rem;
+          border: 1px solid transparent;
+          border-radius: 0.4rem;
+          cursor: pointer;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+        .wc-font-picker-row[aria-selected="true"] { background-color: var(--surface-3); }
+        .wc-font-picker-row.is-active { border-color: var(--primary-bg-color); background-color: var(--surface-2); }
+        .wc-font-picker-line { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+        .wc-font-picker-name {
+          font-size: 1.15rem;
+          line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+        }
+        .wc-font-picker-badge { flex: none; font-size: 0.6rem; }
+        .wc-font-picker-sample {
+          align-self: flex-start;
+          max-width: 100%;
+          font-size: 0.85rem;
+          line-height: 1.2;
+          color: var(--text-2, var(--text-1));
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wc-font-picker-custom { display: block; max-width: 100%; overflow: hidden; }
+        .wc-font-picker-empty { padding: 1.5rem 0.5rem; text-align: center; color: var(--text-3, var(--text-2)); }
+        .wc-font-picker-empty[hidden] { display: none; }
+        .theme-high-contrast .wc-font-picker-row.is-active { outline: 2px solid var(--text-1); outline-offset: -2px; }
+      }
+
+      /* Unlayered: wc.ui styles bare input and outranks wc.usage. */
+      .wc-font-picker-search {
+        flex: none;
+        width: 100%;
+        margin: 0;
+        padding: 0.4rem 0.6rem;
+        background-color: var(--surface-2);
+        border: 1px solid var(--surface-4);
+        border-radius: 0.4rem;
+        color: var(--text-1);
+        font: inherit;
+        box-sizing: border-box;
+      }
+    `.trim();
+    this.loadStyle("wc-font-picker-style", style);
+  }
+};
+if (!customElements.get(WcFontPicker.is)) customElements.define(WcFontPicker.is, WcFontPicker);
 
 // src/js/components/wc-slider.js
 var WcSlider = class extends WcBaseFormComponent {

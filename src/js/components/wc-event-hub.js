@@ -44,8 +44,14 @@ if (!customElements.get('wc-event-hub')) {
       const payload = { detail: { selector, subSelector, custom }};
       const customEvent = new CustomEvent(eventName, payload);
       document.body.dispatchEvent(customEvent);
-      if (window.parent.document) {
-        window.parent.document.body.dispatchEvent(customEvent);
+      // Also reach a hosting page (e.g. the designer canvas iframe). At top level
+      // window.parent === window, so re-dispatching would deliver every broadcast twice.
+      if (window.parent !== window) {
+        try {
+          window.parent.document?.body?.dispatchEvent(customEvent);
+        } catch (err) {
+          // cross-origin parent — nothing to reach
+        }
       }
     }
     
