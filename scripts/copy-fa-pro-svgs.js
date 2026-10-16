@@ -559,6 +559,7 @@ const ICONS_TO_COPY = [
   "search", // Alias for magnifying-glass
   "section",
   "server",
+  "shapes",
   "share",
   "share-nodes",
   "shield-check",
