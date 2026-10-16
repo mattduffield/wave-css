@@ -613,6 +613,7 @@ const ICONS_TO_COPY = [
   "telescope",
   "terminal",
   "text",
+  "text-height",
   "thumbtack",
   "ticket",
   "ticket-perforated",
