@@ -496,6 +496,7 @@ const ICONS_TO_COPY = [
   "paper-plane",
   "paper-plane-top",
   "paperclip",
+  "paragraph",
   "paste",
   "pause",
   "paw",
