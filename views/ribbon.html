@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-ribbon</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style>
+    .demo-frame { border: 1px solid var(--surface-4); border-radius: 0.5rem; overflow: hidden; }
+    .demo-canvas { height: 140px; display: grid; place-items: center; background: var(--surface-1); color: var(--text-2); }
+    #narrow-wrap { width: 800px; max-width: 100%; resize: horizontal; overflow: hidden; }
+    #page-contents { box-sizing: border-box; width: 100%; }
+    .grow { flex: 1 1 auto; }
+  </style>
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 1200px; margin: 0 auto;">
+    <h1 class="text-xl font-bold mb-2">wc-ribbon</h1>
+    <p class="mb-3 text-muted">
+      A Fusion 360 / Office-style ribbon: a few large buttons per group, and the group title
+      (<b>CREATE ▾</b>) lists every command with a description. Press <kbd>Alt</kbd> for key tips.
+    </p>
+
+    <div class="row gap-2 mb-3" style="flex-wrap: wrap;">
+      <button class="btn" id="start-sketch">Start sketch (show green Sketch tab)</button>
+      <button class="btn" id="finish-sketch">Finish sketch (hide it)</button>
+      <button class="btn" id="toggle-disable">Disable / enable Extrude</button>
+      <button class="btn" id="toggle-compact">Compact on / off</button>
+      <span class="grow"></span>
+      <button class="btn" data-theme="h-full theme-ocean">Light</button>
+      <button class="btn" data-theme="h-full theme-ocean dark">Dark</button>
+      <button class="btn" data-theme="h-full theme-ocean crisp">Crisp</button>
+      <button class="btn" data-theme="h-full theme-high-contrast">High contrast</button>
+    </div>
+
+    <div class="demo-frame">
+      <wc-ribbon id="rb" active="solid" keytips>
+        <wc-ribbon-tab key="solid" label="Solid" keytip="S">
+          <wc-ribbon-group label="Create" menu>
+            <wc-ribbon-button command="sketch" icon="pen-ruler" label="Sketch" tip="Start a sketch on a plane or a face"></wc-ribbon-button>
+            <wc-ribbon-button command="extrude" icon="arrow-up-from-line" label="Extrude" tip="Pull the selected sketch into a solid"></wc-ribbon-button>
+            <wc-ribbon-button command="revolve" icon="rotate" label="Revolve" tip="Spin the selected sketch around an axis (a bowl, a knob)"></wc-ribbon-button>
+            <wc-ribbon-button command="hole" icon="circle-dot" label="Hole" tip="A drilled hole, counterbore or countersink in a face"></wc-ribbon-button>
+            <wc-ribbon-item command="loft" icon="layer-group" label="Loft" tip="A solid through two or more sketches at different heights"></wc-ribbon-item>
+            <wc-ribbon-item command="sweep" icon="timeline" label="Sweep" tip="Carry a profile along a path"></wc-ribbon-item>
+            <wc-ribbon-item command="box" icon="cube" label="Box" tip="A box — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="cylinder" icon="database" label="Cylinder" tip="A cylinder — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="sphere" icon="circle" label="Sphere" tip="A sphere — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="pattern" icon="arrows-spin" label="Circular pattern" tip="Repeat the selected feature around a centre"></wc-ribbon-item>
+            <wc-ribbon-item command="row" icon="grip" label="Rectangular pattern" tip="Repeat the selected feature in a row"></wc-ribbon-item>
+            <wc-ribbon-item command="mirror" icon="arrows-left-right" label="Mirror" tip="Mirror the selected feature across a plane"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Modify" menu>
+            <wc-ribbon-button command="fillet" icon="circle-notch" label="Fillet" tip="Round edges"></wc-ribbon-button>
+            <wc-ribbon-button command="chamfer" icon="hexagon" label="Chamfer" tip="Bevel edges"></wc-ribbon-button>
+            <wc-ribbon-button command="shell" icon="box-open" label="Shell" tip="Hollow a body, leaving faces open"></wc-ribbon-button>
+            <wc-ribbon-button command="cut" icon="knife" label="Cut" tip="Cut the selected sketch into a body"></wc-ribbon-button>
+            <wc-ribbon-item command="union" icon="object-group" label="Join" tip="Join two bodies into one"></wc-ribbon-item>
+            <wc-ribbon-item command="subtract" icon="object-ungroup" label="Subtract" tip="Cut one body out of another"></wc-ribbon-item>
+            <wc-ribbon-item command="move" icon="arrows-up-down" label="Move" tip="Move or rotate a body"></wc-ribbon-item>
+            <wc-ribbon-item command="delete" icon="trash" label="Delete" tip="Delete the selected item (Delete)"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Inspect" menu>
+            <wc-ribbon-button command="measure" icon="ruler" label="Measure" tip="Click two points on the model (Esc to stop)" toggle></wc-ribbon-button>
+            <select id="section" caption="Section" title="Cut the model open to see inside">
+              <option value="">No section</option><option value="x">Across X</option><option value="y">Across Y</option><option value="z">Across Z</option>
+            </select>
+            <input type="range" id="section-at" caption="Cut at" min="0" max="100" value="50" title="Where the section cuts">
+            <wc-ribbon-item command="sectionoff" icon="cube" label="No section" tip="Show the whole model"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Insert">
+            <wc-ribbon-button command="model" icon="cube" label="Model" tip="A STEP, STL, 3MF or OBJ model"></wc-ribbon-button>
+            <wc-ribbon-button command="import" icon="file-import" label="Import" tip="A logo or drawing from an SVG or DXF file"></wc-ribbon-button>
+            <wc-ribbon-button command="param" icon="sliders" label="Parameter" tip="A named size you can change in one place"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+
+        <wc-ribbon-tab key="sketch" label="Sketch" contextual accent="success" keytip="K" hidden>
+          <wc-ribbon-group label="Create" menu>
+            <wc-ribbon-button command="sk-select" icon="bullseye-pointer" label="Select" tip="Select and drag shapes (Esc)" toggle toggle-group="tool" active></wc-ribbon-button>
+            <wc-ribbon-button command="sk-line" icon="minus" label="Line" tip="Click each point; Esc to stop" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-button command="sk-rect" icon="square" label="Rectangle" tip="Drag from corner to corner" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-button command="sk-circle" icon="circle" label="Circle" tip="Click the centre, drag out the size" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-item command="sk-polygon" icon="hexagon" label="Polygon" tip="Click the centre, drag out the size" toggle toggle-group="tool"></wc-ribbon-item>
+            <wc-ribbon-item command="sk-slot" icon="capsules" label="Slot" tip="Click one end, then the other" toggle toggle-group="tool"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Constraints" menu>
+            <wc-ribbon-button command="c-coincident" glyph="●" label="Coincident" tip="Two points meet, or a point on a line or circle"></wc-ribbon-button>
+            <wc-ribbon-button command="c-horizontal" glyph="H" label="Horizontal" tip="A line level, or two points in line"></wc-ribbon-button>
+            <wc-ribbon-button command="c-vertical" glyph="V" label="Vertical" tip="A line upright, or two points one above the other"></wc-ribbon-button>
+            <wc-ribbon-button command="c-perpendicular" glyph="⊥" label="Perpendicular" tip="Two lines at right angles"></wc-ribbon-button>
+            <wc-ribbon-button command="c-parallel" glyph="∥" label="Parallel" tip="Two lines parallel"></wc-ribbon-button>
+            <wc-ribbon-button command="c-tangent" glyph="T" label="Tangent" tip="A line or circle touching a circle or arc"></wc-ribbon-button>
+            <wc-ribbon-item command="c-equal" glyph="=" label="Equal" tip="Same length, or same radius"></wc-ribbon-item>
+            <wc-ribbon-item command="c-concentric" glyph="◎" label="Concentric" tip="Circles or arcs with one centre"></wc-ribbon-item>
+            <wc-ribbon-item command="c-symmetric" glyph="⇋" label="Symmetric" tip="Two points mirrored across a line"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Finish">
+            <wc-ribbon-button command="sk-finish" icon="check" label="Finish sketch" tip="Back to the model (Esc)" variant="success"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+
+        <wc-ribbon-tab key="make" label="Make" keytip="M">
+          <wc-ribbon-group label="Setup" menu>
+            <wc-ribbon-button command="stock" icon="square" label="Stock" tip="The board to cut from"></wc-ribbon-button>
+            <wc-ribbon-split command="tool-endmill" icon="screwdriver-wrench" label="Tool" tip="Add a cutter (an end mill)">
+              <wc-ribbon-item command="tool-endmill" icon="screwdriver-wrench" label="End mill" tip="A ¼″ flat end mill"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-vbit" icon="screwdriver-wrench" label="V-bit" tip="A 60° V-bit for lettering"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-ballmill" icon="screwdriver-wrench" label="Ball mill" tip="A ⅛″ ball-nose mill"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-drill" icon="screwdriver-wrench" label="Drill" tip="A ⅛″ drill"></wc-ribbon-item>
+            </wc-ribbon-split>
+            <wc-ribbon-button command="machines" icon="gear" label="Machines" tip="Your shop's CNC machines and printers"></wc-ribbon-button>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="CNC" menu>
+            <wc-ribbon-button command="profile" icon="rectangle" label="Profile" tip="Cut around the selected sketch, with tabs"></wc-ribbon-button>
+            <wc-ribbon-button command="pocket" icon="circle-minus" label="Pocket" tip="Clear the inside of the selected sketch"></wc-ribbon-button>
+            <wc-ribbon-button command="drill" icon="circle-dot" label="Drill" tip="Drill the circles of the selected sketch"></wc-ribbon-button>
+            <wc-ribbon-item command="engrave" icon="pen-ruler" label="Engrave" tip="Follow the sketch's lines"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Output">
+            <wc-ribbon-button command="gcode" icon="download" label="G-code" tip="Download one program per tool" variant="primary"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+      </wc-ribbon>
+      <div class="demo-canvas">canvas</div>
+    </div>
+
+    <h2 class="text-base font-semibold mt-6 mb-2">Defined as data (<code>setModel</code>) — drag the corner to narrow it</h2>
+    <p class="text-xs text-muted mb-2">
+      Groups collapse right-to-left into one "GROUP ▾" button that opens the same menu (widgets
+      included), then into a ⋯ overflow — never a horizontal scrollbar.
+      Width: <input type="range" id="narrow-width" min="280" max="1150" value="800" style="width: 14rem; vertical-align: middle;"> <span id="narrow-px">800px</span>
+    </p>
+    <div id="narrow-wrap" class="demo-frame">
+      <wc-ribbon id="rb-model"></wc-ribbon>
+      <div class="demo-canvas">canvas</div>
+    </div>
+
+    <pre id="log" class="card p-3 text-xs mt-4" style="white-space:pre-wrap; max-height: 12rem; overflow:auto;"></pre>
+  </div>
+
+  <wc-event-hub></wc-event-hub>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+  <script type="module">
+    const rb = document.getElementById('rb');
+    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+    await customElements.whenDefined('wc-ribbon');
+    await rb.ready;
+
+    document.addEventListener('wcribboncommand', (e) => {
+      log(`wcribboncommand ${JSON.stringify(e.detail)}`);
+      if (e.detail.command === 'sketch') rb.showTab('sketch', true);
+      if (e.detail.command === 'sk-finish') rb.hideTab('sketch');
+    });
+    document.addEventListener('wcribbontabchange', (e) => log(`wcribbontabchange ${JSON.stringify(e.detail)}`));
+
+    document.getElementById('start-sketch').onclick = () => rb.showTab('sketch', true);
+    document.getElementById('finish-sketch').onclick = () => rb.hideTab('sketch');
+    let extrudeOff = false;
+    document.getElementById('toggle-disable').onclick = () => { extrudeOff = !extrudeOff; rb.setDisabled('extrude', extrudeOff); };
+    document.getElementById('toggle-compact').onclick = () => rb.toggleAttribute('compact');
+    document.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { document.documentElement.className = b.dataset.theme; });
+
+    // ---- the same ribbon defined as data (CadStudio's CMD + RIBBON shape) ----
+    const commands = {
+      sketch: { icon: 'pen-ruler', label: 'Sketch', tip: 'Start a sketch on a plane or a face' },
+      extrude: { icon: 'arrow-up-from-line', label: 'Extrude', tip: 'Pull the selected sketch into a solid' },
+      revolve: { icon: 'rotate', label: 'Revolve', tip: 'Spin the selected sketch around an axis' },
+      hole: { icon: 'circle-dot', label: 'Hole', tip: 'A drilled hole in a face' },
+      loft: { icon: 'layer-group', label: 'Loft', tip: 'A solid through two or more sketches' },
+      sweep: { icon: 'timeline', label: 'Sweep', tip: 'Carry a profile along a path' },
+      box: { icon: 'cube', label: 'Box', tip: 'A box — no sketch needed' },
+      fillet: { icon: 'circle-notch', label: 'Fillet', tip: 'Round edges' },
+      chamfer: { icon: 'hexagon', label: 'Chamfer', tip: 'Bevel edges' },
+      shell: { icon: 'box-open', label: 'Shell', tip: 'Hollow a body' },
+      cut: { icon: 'knife', label: 'Cut', tip: 'Cut the selected sketch into a body' },
+      union: { icon: 'object-group', label: 'Join', tip: 'Join two bodies into one' },
+      measure: { icon: 'ruler', label: 'Measure', tip: 'Click two points on the model', toggle: true },
+      model: { icon: 'cube', label: 'Model', tip: 'A STEP, STL, 3MF or OBJ model' },
+      import: { icon: 'file-import', label: 'Import', tip: 'An SVG or DXF drawing' },
+      param: { icon: 'sliders', label: 'Parameter', tip: 'A named size', run: (d) => log(`run() param from ${d.source}`) },
+      'tool-endmill': { icon: 'screwdriver-wrench', label: 'Tool', tip: 'Add an end mill' },
+      'tool-vbit': { icon: 'screwdriver-wrench', label: 'V-bit', tip: 'A 60° V-bit for lettering' },
+      'tool-drill': { icon: 'screwdriver-wrench', label: 'Drill', tip: 'A ⅛″ drill' },
+      gcode: { icon: 'download', label: 'G-code', tip: 'Download one program per tool', primary: true },
+    };
+    const model = document.getElementById('rb-model');
+    await model.ready;
+    model.setModel({
+      commands,
+      widgets: {
+        section: { html: '<select title="Section"><option>No section</option><option>Across X</option><option>Across Y</option></select>', caption: 'Section' },
+      },
+      tabs: [
+        { key: 'solid', label: 'Solid', groups: [
+          { label: 'Create', main: ['sketch', 'extrude', 'revolve', 'hole'], more: ['loft', 'sweep', 'box'] },
+          { label: 'Modify', main: ['fillet', 'chamfer', 'shell', 'cut'], more: ['union'] },
+          { label: 'Inspect', main: ['measure', '@section'] },
+          { label: 'Insert', main: ['model', 'import', 'param'] },
+          { label: 'Make', main: [{ split: 'tool-endmill', items: ['tool-endmill', 'tool-vbit', 'tool-drill'] }, 'gcode'] },
+        ] },
+        { key: 'sketch', label: 'Sketch', contextual: true, accent: 'success', groups: [{ label: 'Finish', main: ['sketch'] }] },
+      ],
+    });
+
+    const wrap = document.getElementById('narrow-wrap');
+    document.getElementById('narrow-width').addEventListener('input', (e) => {
+      wrap.style.width = e.target.value + 'px';
+      document.getElementById('narrow-px').textContent = e.target.value + 'px';
+    });
+  </script>
+</body>
+</html>

@@ -719,7 +719,7 @@ class WcFontPicker extends WcBaseFormComponent {
     el.setAttribute('role', 'option');
     el.setAttribute('aria-label', font.label);
     el.setAttribute('aria-selected', String(this._find(this._value)?.value === font.value));
-    el.classList.toggle('is-active', i === this._activeIndex);
+    el.classList.toggle('is-kbd', i === this._activeIndex);
     el.style.height = `${this._rowH}px`;
 
     const line = document.createElement('span');
@@ -783,7 +783,7 @@ class WcFontPicker extends WcBaseFormComponent {
 
   _syncActive() {
     if (!this._listEl) return;
-    this._rendered?.forEach((el, idx) => el.classList.toggle('is-active', idx === this._activeIndex));
+    this._rendered?.forEach((el, idx) => el.classList.toggle('is-kbd', idx === this._activeIndex));
     if (this._activeIndex >= 0 && this._rendered?.has(this._activeIndex)) {
       this._searchEl.setAttribute('aria-activedescendant', `${this._uid}-opt-${this._activeIndex}`);
     } else {
@@ -932,6 +932,8 @@ class WcFontPicker extends WcBaseFormComponent {
       wc-font-picker { display: contents; }
 
       @layer wc.usage {
+        /* State classes avoid .is-active: Wave's global .is-active utility (@layer wc.selected)
+           would add its left accent bar and ring. This component uses .is-kbd. */
         .wc-font-picker { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
         .wc-font-picker > label { font-weight: 500; }
         wc-font-picker[required] .wc-font-picker > label::after { content: ' *'; font-weight: bold; }
@@ -1059,7 +1061,7 @@ class WcFontPicker extends WcBaseFormComponent {
           overflow: hidden;
         }
         .wc-font-picker-row[aria-selected="true"] { background-color: var(--surface-3); }
-        .wc-font-picker-row.is-active { border-color: var(--primary-bg-color); background-color: var(--surface-2); }
+        .wc-font-picker-row.is-kbd { border-color: var(--primary-bg-color); background-color: var(--surface-2); }
         .wc-font-picker-line { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
         .wc-font-picker-name {
           font-size: 1.15rem;
@@ -1083,7 +1085,7 @@ class WcFontPicker extends WcBaseFormComponent {
         .wc-font-picker-custom { display: block; max-width: 100%; overflow: hidden; }
         .wc-font-picker-empty { padding: 1.5rem 0.5rem; text-align: center; color: var(--text-3, var(--text-2)); }
         .wc-font-picker-empty[hidden] { display: none; }
-        .theme-high-contrast .wc-font-picker-row.is-active { outline: 2px solid var(--text-1); outline-offset: -2px; }
+        .theme-high-contrast .wc-font-picker-row.is-kbd { outline: 2px solid var(--text-1); outline-offset: -2px; }
       }
 
       /* Unlayered: wc.ui styles bare input and outranks wc.usage. */

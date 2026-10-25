@@ -394,7 +394,7 @@ if (!customElements.get('wc-zoom')) {
 
     _highlight(i) {
       this._menuIndex = i;
-      this._menuItems().forEach((b, idx) => b.classList.toggle('is-active', idx === i));
+      this._menuItems().forEach((b, idx) => b.classList.toggle('is-kbd', idx === i));
       if (i >= 0) this._menuItems()[i]?.scrollIntoView({ block: 'nearest' });
     }
 
@@ -530,6 +530,8 @@ if (!customElements.get('wc-zoom')) {
         wc-zoom { display: contents; }
 
         @layer wc.usage {
+        /* State classes avoid .is-active: Wave's global .is-active utility (@layer wc.selected)
+           would add its left accent bar and ring. This component uses .is-kbd. */
           .wc-zoom {
             display: inline-flex;
             align-items: center;
@@ -589,7 +591,7 @@ if (!customElements.get('wc-zoom')) {
             position: relative;
           }
           .wc-zoom-menu-item:hover,
-          .wc-zoom-menu-item.is-active { background-color: var(--surface-4); }
+          .wc-zoom-menu-item.is-kbd { background-color: var(--surface-4); }
           .wc-zoom-menu-item[aria-checked="true"]::before {
             content: '✓';
             position: absolute;

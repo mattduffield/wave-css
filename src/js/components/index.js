@@ -120,6 +120,7 @@ import './wc-reveal.js';
 import './wc-ruler.js';
 import './wc-zoom.js';
 import './wc-font-picker.js';
+import './wc-ribbon.js';
 import './wc-slider.js';
 import './wc-icon-picker.js';
 import './wc-wizard-step.js';

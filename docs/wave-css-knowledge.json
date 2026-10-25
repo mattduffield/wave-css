@@ -317,7 +317,11 @@
           "mode",
           "format",
           "dropdown-class",
-          "btn-class"
+          "btn-class",
+          "menu-style",
+          "position-area",
+          "position-try-fallbacks",
+          "dropdown-height"
         ],
         "events": {
           "listens": [
@@ -326,8 +330,8 @@
             "wcdropdowntoggle"
           ]
         },
-        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button.",
-        "usage": "<wc-dropdown label=\"Options\" mode=\"search\">\n  <a href=\"#about\">About</a>\n  <a href=\"#settings\">Settings</a>\n  <a href=\"#logout\">Logout</a>\n</wc-dropdown>"
+        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button. ANCHORING: each dropdown anchors to its own button — anchor name from `id`, else the instance's unique data-wc-id (no-id dropdowns used to share '---anchor' and all open at the last button). CSS anchor positioning is used only when BOTH anchor-name and position-area are supported (Chromium 125–128 lacked position-area); otherwise the JS fixed-position fallback places it. Esc closes and returns focus to the button. Listeners are bound once and removed on disconnect (no leaked window listeners). CSS hooks (defaults unchanged): --wc-dropdown-bg (button-hover-bg), --wc-dropdown-color, --wc-dropdown-border, --wc-dropdown-radius, --wc-dropdown-min-width (at least the button width), --wc-dropdown-max-width (250px), --wc-dropdown-max-height, --wc-dropdown-item-hover. menu-style=\"surface\" = the wc-ribbon menu look (surface-2, surface-4 border, 8px radius, min-width 300px, max-height 70vh). Rich items (opt-in): <a class=\"wc-menu-item\"> with .wc-menu-item-icon + .wc-menu-item-text > .wc-menu-item-label + .wc-menu-item-desc; .is-checked for toggles. Docs: docs/wc-dropdown.md.",
+        "usage": "<wc-dropdown label=\"Options\" mode=\"search\">\n  <a href=\"#about\">About</a>\n  <a href=\"#settings\">Settings</a>\n  <a href=\"#logout\">Logout</a>\n</wc-dropdown>\n<!-- surface look + rich items -->\n<wc-dropdown label=\"CREATE ▾\" menu-style=\"surface\">\n  <a href=\"#\" class=\"wc-menu-item\"><wc-fa-icon class=\"wc-menu-item-icon\" name=\"cube\"></wc-fa-icon>\n    <span class=\"wc-menu-item-text\"><span class=\"wc-menu-item-label\">Box</span><span class=\"wc-menu-item-desc\">A box — no sketch needed</span></span></a>\n</wc-dropdown>"
       },
       {
         "name": "wc-dropdown-item",
@@ -422,6 +426,147 @@
         "description": "A configuration-only child element for wc-code-mirror. Each one declares a single entry (or divider) in the editor's right-click context menu. It renders nothing itself (display: contents) — the parent reads these children to build the menu.",
         "docs": "docs/wc-code-mirror-context-menu.md",
         "usage": "<wc-code-mirror-context-menu></wc-code-mirror-context-menu>"
+      },
+      {
+        "name": "wc-ribbon",
+        "description": "Fusion 360 / Microsoft Office–style ribbon container: a tab strip + the active tab's body. Groups show a few large icon-over-label buttons; a group's title (CREATE ▾) opens a menu listing every command in the group with icon, name and one-line description. Contextual tabs (accent-coloured) appear only when relevant.",
+        "attributes": [
+          "id",
+          "class",
+          "active",
+          "compact",
+          "keytips"
+        ],
+        "methods": [
+          "setTab(key)",
+          "showTab(key, activate?)",
+          "hideTab(key)",
+          "setActive(command, bool)",
+          "setDisabled(command, bool)",
+          "setModel(model)",
+          "closeMenus()",
+          "relayout()",
+          "tab(key)"
+        ],
+        "events": {
+          "emits": [
+            "wcribboncommand",
+            "wcribbontabchange"
+          ],
+          "aliases": [
+            "ribbon-command",
+            "ribbon-tab-change"
+          ],
+          "listens": [
+            "wcribbonactivate",
+            "wcribbontabshow",
+            "wcribbontabhide"
+          ]
+        },
+        "notes": "Extends WcBaseComponent; light DOM (children moved with appendChild, so ids/values/htmx/hyperscript survive). wcribboncommand {command, tab, group, source:'button'|'menu', active?} bubbles from the button/menu item (alias ribbon-command) and is broadcast through wc.EventHub (detail.custom); wcribbontabchange {tab, previous, source}. EventHub inbound commands: broadcast('wcribbonactivate'|'wcribbontabshow'|'wcribbontabhide', '#ribbon', '<tab key>'). Cheap state: setActive/setDisabled/showTab/hideTab update in place and keep open menus stable (items update in place). hideTab of the active tab returns to the previous tab. MENUS: role=menu in the top layer (popover) anchored by JS to their OWN button; flip up/left near the viewport edge; max-height 70vh scrolling; min-width var(--wc-ribbon-menu-width, 300px); items = icon/glyph + label + one-line muted description, menuitemcheckbox + checked state for toggles; ↑/↓/Home/End/Enter/Space/Esc + type-ahead; close on item click / outside click / Esc (item click + Esc return focus to the opener). Menus stay in the ribbon's DOM, so they inherit CSS variables + theme changes live. NARROW WIDTHS: groups collapse right-to-left into one 'GROUP ▾' button that opens the same menu (its widgets move into the menu while open, then back), then into a ⋯ overflow menu with group sections — never a horizontal scrollbar (ResizeObserver). compact = single row, small icons beside labels. keytips: Alt shows tab letters, a letter picks the tab then shows command letters. setModel({tabs:[{key,label,contextual,accent,hidden,groups:[{label,menu,icon,main:[id|'@widget'|{split:id,items:[…]}|{html|element,caption}],more:[id…]}]}], commands:{id:{icon|glyph,label,tip,variant,primary,finish,toggle,tool,toggleGroup,active,disabled,keytip,run(detail)}}, widgets:{name: html|Node|()=>…|{html,caption}}}) — CadStudio's CMD + RIBBON shape (primary→variant primary, finish→success, tool→toggle + toggle-group 'tool'); contextual tabs start hidden. CSS vars: --wc-ribbon-bg, --wc-ribbon-group-border, --wc-ribbon-button-hover, --wc-ribbon-label-color, --wc-ribbon-menu-bg, --wc-ribbon-menu-width, --wc-ribbon-accent. Theme tokens only; AA in light/dark/crisp/high-contrast. State classes are .is-on (Wave's global .is-active utility would add its accent bar). htmx-safe: no window/document/body listeners left after removal (tested 50×). Docs: docs/wc-ribbon.md; demo views/ribbon.html; tests tests/ribbon-test.py.",
+        "usage": "<wc-ribbon id=\"rb\" active=\"solid\" keytips>\n  <wc-ribbon-tab key=\"solid\" label=\"Solid\">\n    <wc-ribbon-group label=\"Create\" menu>\n      <wc-ribbon-button command=\"extrude\" icon=\"arrow-up-from-line\" label=\"Extrude\" tip=\"Pull the selected sketch into a solid\"></wc-ribbon-button>\n      <wc-ribbon-item command=\"loft\" icon=\"layer-group\" label=\"Loft\" tip=\"A solid through two or more sketches\"></wc-ribbon-item>\n    </wc-ribbon-group>\n    <wc-ribbon-group label=\"Inspect\">\n      <wc-ribbon-button command=\"measure\" icon=\"ruler\" label=\"Measure\" tip=\"Click two points\" toggle></wc-ribbon-button>\n      <select caption=\"Section\"><option>No section</option></select>\n    </wc-ribbon-group>\n  </wc-ribbon-tab>\n  <wc-ribbon-tab key=\"sketch\" label=\"Sketch\" contextual accent=\"success\" hidden>\n    <wc-ribbon-group label=\"Constraints\" menu>\n      <wc-ribbon-button command=\"c-perpendicular\" glyph=\"⊥\" label=\"Perpendicular\" tip=\"Two lines at right angles\"></wc-ribbon-button>\n    </wc-ribbon-group>\n  </wc-ribbon-tab>\n</wc-ribbon>\n<script>rb.addEventListener('wcribboncommand', e => { if (e.detail.command === 'sketch') rb.showTab('sketch', true); });</script>",
+        "examples": [
+          {
+            "title": "Contextual tab while sketching",
+            "code": "rb.showTab('sketch', true);   // green Sketch tab appears and activates\nrb.setActive('sk-line', true); // the current sketch tool (toggle-group)\nrb.hideTab('sketch');          // back to the previous tab"
+          },
+          {
+            "title": "Defined as data",
+            "code": "rb.setModel({\n  commands: { sketch: { icon: 'pen-ruler', label: 'Sketch', tip: 'Start a sketch' },\n              loft: { icon: 'layer-group', label: 'Loft', tip: 'A solid through two sketches' },\n              gcode: { icon: 'download', label: 'G-code', tip: 'Download', primary: true, run: () => download() } },\n  widgets: { section: { html: '<select>…</select>', caption: 'Section' } },\n  tabs: [{ key: 'solid', label: 'Solid', groups: [\n    { label: 'Create', main: ['sketch'], more: ['loft'] },\n    { label: 'Inspect', main: ['@section'] },\n    { label: 'Output', main: ['gcode'] } ] }]\n});"
+          },
+          {
+            "title": "Split button",
+            "code": "<wc-ribbon-split command=\"tool-endmill\" icon=\"screwdriver-wrench\" label=\"Tool\" tip=\"Add a cutter\">\n  <wc-ribbon-item command=\"tool-vbit\" icon=\"screwdriver-wrench\" label=\"V-bit\" tip=\"A 60° V-bit\"></wc-ribbon-item>\n  <wc-ribbon-item command=\"tool-drill\" icon=\"screwdriver-wrench\" label=\"Drill\" tip=\"A ⅛″ drill\"></wc-ribbon-item>\n</wc-ribbon-split>"
+          },
+          {
+            "title": "EventHub",
+            "code": "wc.EventHub.broadcast('wcribbontabshow', '#rb', 'sketch');\nwc.EventHub.broadcast('wcribbonactivate', '#rb', 'make');\nwc.EventHub.broadcast('wcribbontabhide', '#rb', 'sketch');"
+          }
+        ]
+      },
+      {
+        "name": "wc-ribbon-tab",
+        "description": "One ribbon tab (role=tabpanel). Contextual tabs are styled with an accent colour (label mixed toward --text-1 for AA + accent underline + a thin accent line on the panel) and can be shown/hidden at runtime without re-rendering the others.",
+        "attributes": [
+          "key",
+          "label",
+          "contextual",
+          "accent",
+          "hidden",
+          "keytip"
+        ],
+        "notes": "accent = primary|success|warning|danger|info (contextual defaults to success). hidden hides its strip button; showTab/hideTab toggle it. Child: wc-ribbon-group.",
+        "usage": "<wc-ribbon-tab key=\"sketch\" label=\"Sketch\" contextual accent=\"success\" hidden>…</wc-ribbon-tab>"
+      },
+      {
+        "name": "wc-ribbon-group",
+        "description": "A ribbon group: its buttons on top, its label at the bottom. With `menu` the label becomes a 'LABEL ▾' button opening a menu of every wc-ribbon-button / wc-ribbon-split (with variants) / wc-ribbon-item in the group. Any other child element is a widget (compact control, optional `caption`).",
+        "attributes": [
+          "label",
+          "menu",
+          "icon",
+          "hidden"
+        ],
+        "notes": "When the ribbon is narrow the group collapses into one 'GROUP ▾' button (icon = `icon` attr or the first command's) that opens the same menu, widgets included; then into the ⋯ overflow. Widgets: <select caption=\"Section\">, <input type=\"range\" caption=\"Cut at\">.",
+        "usage": "<wc-ribbon-group label=\"Create\" menu>\n  <wc-ribbon-button command=\"extrude\" icon=\"arrow-up-from-line\" label=\"Extrude\" tip=\"…\"></wc-ribbon-button>\n  <wc-ribbon-item command=\"loft\" icon=\"layer-group\" label=\"Loft\" tip=\"…\"></wc-ribbon-item>\n</wc-ribbon-group>"
+      },
+      {
+        "name": "wc-ribbon-button",
+        "description": "Large ribbon button: a wc-fa-icon (~1.15rem) or a text glyph (⊥ ∥ ◎) over a small label; tooltip 'Label — tip'.",
+        "attributes": [
+          "command",
+          "icon",
+          "glyph",
+          "label",
+          "tip",
+          "variant",
+          "toggle",
+          "toggle-group",
+          "active",
+          "disabled",
+          "menu-only",
+          "keytip"
+        ],
+        "notes": "variant = primary|success|warning|danger|info (accent icon + tint). toggle = a tool that stays on (aria-pressed, flips on click); toggle-group = one-at-a-time (sketch tools). menu-only = listed only in the group menu. setActive/setDisabled on the ribbon update it in place.",
+        "usage": "<wc-ribbon-button command=\"sk-line\" icon=\"minus\" label=\"Line\" tip=\"Click each point; Esc to stop\" toggle toggle-group=\"tool\"></wc-ribbon-button>\n<wc-ribbon-button command=\"c-parallel\" glyph=\"∥\" label=\"Parallel\" tip=\"Two lines parallel\"></wc-ribbon-button>"
+      },
+      {
+        "name": "wc-ribbon-item",
+        "description": "A ribbon command listed only in its group's menu (less-used commands), or a variant inside a wc-ribbon-split.",
+        "attributes": [
+          "command",
+          "icon",
+          "glyph",
+          "label",
+          "tip",
+          "variant",
+          "toggle",
+          "toggle-group",
+          "active",
+          "disabled",
+          "menu-only",
+          "keytip"
+        ],
+        "usage": "<wc-ribbon-item command=\"loft\" icon=\"layer-group\" label=\"Loft\" tip=\"A solid through two or more sketches\"></wc-ribbon-item>"
+      },
+      {
+        "name": "wc-ribbon-split",
+        "description": "Ribbon split button: the icon runs the main command; 'Label ▾' below opens its variants (child wc-ribbon-items). In the group menu it is listed with its variants indented.",
+        "attributes": [
+          "command",
+          "icon",
+          "glyph",
+          "label",
+          "tip",
+          "variant",
+          "toggle",
+          "toggle-group",
+          "active",
+          "disabled",
+          "menu-only",
+          "keytip"
+        ],
+        "usage": "<wc-ribbon-split command=\"tool-endmill\" icon=\"screwdriver-wrench\" label=\"Tool\" tip=\"Add a cutter\">\n  <wc-ribbon-item command=\"tool-vbit\" icon=\"screwdriver-wrench\" label=\"V-bit\" tip=\"A 60° V-bit\"></wc-ribbon-item>\n</wc-ribbon-split>"
       }
     ],
     "form": [
@@ -3308,6 +3453,13 @@
         "wcfontchange",
         "wcfontpreview",
         "wcfontpreviewend"
+      ],
+      "ribbon": [
+        "wcribboncommand",
+        "wcribbontabchange",
+        "wcribbonactivate",
+        "wcribbontabshow",
+        "wcribbontabhide"
       ]
     },
     "notificationBroadcast": "Components that also publish notifications through EventHub (wc-ruler, wc-zoom, wc-font-picker via WcBaseComponent._notify) dispatch the bubbling DOM event on the element AND broadcast the same name on document.body with detail { selector: '[data-wc-id=\"…\"]', custom: <detail> }. Listen on the element/document for the DOM event (detail = payload); listen on document.body and read detail.custom for the EventHub copy. broadcast() dispatches once at top level and additionally on window.parent's body only inside an iframe (e.g. the designer canvas)."
@@ -3352,7 +3504,8 @@
       "views/icon-picker.html — wc-icon-picker demo (searchable grid of the full solid bundle, lazy previews, clearable, submits the icon name string)",
       "views/ruler.html — wc-ruler demos (scrollable, zoomable page with top + left rulers, corner box cycling units, click objects for the selection band, drag-out / double-click guides, wc-zoom status bar zooming toward the cursor)",
       "views/zoom.html — wc-zoom demos (30px status bar with fit buttons over a zoomable board: log slider, presets menu, typed value, Ctrl/⌘ + wheel / pinch toward the cursor, shortcuts; plus a custom min/max/steps control)",
-      "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)"
+      "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)",
+      "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },

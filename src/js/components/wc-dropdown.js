@@ -14,6 +14,24 @@
  *      <a href="#">Link 3</a>
  *    </wc-dropdown>
  * 
+ *    <!-- Surface menu look + rich items (icon, label, one-line description) -->
+ *    <wc-dropdown label="CREATE ▾" menu-style="surface">
+ *      <a href="#" class="wc-menu-item">
+ *        <wc-fa-icon class="wc-menu-item-icon" name="cube"></wc-fa-icon>
+ *        <span class="wc-menu-item-text"><span class="wc-menu-item-label">Box</span>
+ *          <span class="wc-menu-item-desc">A box — no sketch needed</span></span>
+ *      </a>
+ *    </wc-dropdown>
+ *
+ *  Each dropdown anchors its menu to its own button: the CSS anchor name comes from `id`, or
+ *  from the instance's unique data-wc-id when there is no id (they no longer share "---anchor").
+ *  Esc closes and returns focus to the button.
+ *
+ *  CSS hooks (defaults keep the original look): --wc-dropdown-bg, --wc-dropdown-color,
+ *  --wc-dropdown-border, --wc-dropdown-radius, --wc-dropdown-min-width, --wc-dropdown-max-width,
+ *  --wc-dropdown-max-height, --wc-dropdown-item-hover; menu-style="surface" applies the surface
+ *  look (surface-2 / surface-4 border / 8px radius / min-width 300px / max-height 70vh).
+ *
  *  API:
  *    wc.EventHub.broadcast('wcdropdownopen', ['[data-wc-id="0982-a544-98da-b3da"]'])
  *    wc.EventHub.broadcast('wcdropdownclose', ['[data-wc-id="0982-a544-98da-b3da"]'])
@@ -25,7 +43,7 @@ import { WcBaseComponent } from './wc-base-component.js';
 
 class WcDropdown extends WcBaseComponent {
   static get observedAttributes() {
-    return ['id', 'class', 'label', 'mode', 'format', 'dropdown-class', 'btn-class'];
+    return ['id', 'class', 'label', 'mode', 'format', 'dropdown-class', 'btn-class', 'menu-style'];
   }
 
   constructor() {
@@ -36,6 +54,15 @@ class WcDropdown extends WcBaseComponent {
     this._boundReposition = null;
     this._isOpen = false;
     this._isMobile = false;
+    // Bound once, so every removeEventListener really removes what was added
+    // (a fresh .bind() per call never matched, and a window listener leaked per render).
+    this._onClick = this._handleClick.bind(this);
+    this._onWindowClick = this._handleWindowClick.bind(this);
+    this._onInput = this._handleInput.bind(this);
+    this._onOpen = this._handleOpen.bind(this);
+    this._onClose = this._handleClose.bind(this);
+    this._onToggle = this._handleToggle.bind(this);
+    this._onKeydown = this._handleKeydown.bind(this);
     const compEl = this.querySelector('.wc-dropdown');
     if (compEl) {
       this.componentElement = compEl;
@@ -91,6 +118,17 @@ class WcDropdown extends WcBaseComponent {
   _handleAttributeChange(attrName, newValue) {
     if (attrName === 'label') {
       // Do nothing...
+    } else if (attrName === 'menu-style') {
+      this._applyMenuStyle();
+    } else if (attrName === 'id') {
+      // keep the anchor in step with a late id (the base would copy id onto the inner element)
+      const wcDropdown = this.querySelector('.wc-dropdown');
+      const content = this.querySelector('.wc-dropdown .dropdown-content');
+      if (wcDropdown && content) {
+        wcDropdown.style.anchorName = this._anchorName();
+        content.style.positionAnchor = this._anchorName();
+      }
+      super._handleAttributeChange(attrName, newValue);
     } else if (attrName === 'dropdown-class') {
       this._updateDropdownClass(newValue);
     } else {
@@ -101,20 +139,14 @@ class WcDropdown extends WcBaseComponent {
   _render() {
     super._render();
     const innerEl = this.querySelector('.wc-dropdown > *');
-    if (innerEl) {
-      const btn = this.querySelector('.dropbtn');
-      if (this.clickModes.includes(this.mode)) {
-        btn.addEventListener('click', this._handleClick.bind(this));
-        window.addEventListener('click', this._handleWindowClick.bind(this));  
-        const ipt = this.querySelector('.search');
-        if (ipt) {
-          ipt.addEventListener('input', this._handleInput.bind(this));
-        }
-      }
-    } else {
+    if (!innerEl) {
       this.componentElement.innerHTML = '';
       this._createInnerElement();
     }
+    // listeners are added in _wireEvents and removed in _unWireEvents. Render can run after
+    // connectedCallback (it waits for child components), so wire again here — idempotent.
+    this._applyMenuStyle();
+    if (this.isConnected) this._wireEvents();
 
     if (typeof htmx !== 'undefined') {
       htmx.process(this);
@@ -125,7 +157,9 @@ class WcDropdown extends WcBaseComponent {
   _createInnerElement() {
     const parts = Array.from(this.children).filter(p => !p.matches('wc-dropdown') && !p.matches('.wc-dropdown')); // Exclude nested wc-tab elements
 
-    const id = this.getAttribute('id') || '';
+    // Unique per instance: the id, else this instance's data-wc-id. (With no id every dropdown
+    // used to share "---anchor", so all menus opened at the last button.)
+    const anchor = this._anchorName();
     const positionArea = this.getAttribute('position-area') || 'bottom span-left';
     const positionTryFallbacks = this.getAttribute('position-try-fallbacks') || '--bottom-right, --bottom-left, --top-right, --top-left, --right, --left';    
     const lbl = this.getAttribute('label') || '';
@@ -188,7 +222,6 @@ class WcDropdown extends WcBaseComponent {
       path.setAttribute('d', 'm21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z');
       svg.appendChild(path);      
       dropdownContent.appendChild(svg);
-      ipt.addEventListener('input', this._handleInput.bind(this));
     }
     parts.forEach(p => dropdownContent.appendChild(p));
     dropdown.appendChild(dropdownContent);
@@ -198,18 +231,33 @@ class WcDropdown extends WcBaseComponent {
       dropdownContent.style.height = dropdownHeight;
       dropdownContent.style.overflow = 'auto';
     }
-    if (this.clickModes.includes(this.mode)) {
-      btn.addEventListener('click', this._handleClick.bind(this));
-      window.addEventListener('click', this._handleWindowClick.bind(this));
-    }
-
     const wcDropdown = this.querySelector('.wc-dropdown');
-    wcDropdown.style.anchorName = `--${id}-anchor`;
+    wcDropdown.style.anchorName = anchor;
     const drpContent = this.querySelector('.wc-dropdown .dropdown-content');
-    drpContent.style.positionAnchor = `--${id}-anchor`;
+    drpContent.style.positionAnchor = anchor;
     drpContent.style.positionArea = positionArea;
     drpContent.style.positionTryFallbacks = positionTryFallbacks;
-    drpContent.style.minWidth = `${wcDropdown.offsetWidth}px`;    
+    // at least the button's width (as before); --wc-dropdown-min-width can raise it
+    drpContent.style.minWidth = `max(${wcDropdown.offsetWidth}px, var(--wc-dropdown-min-width, 0px))`;    
+  }
+
+  _anchorName() {
+    const base = (this.getAttribute('id') || `wcdd-${this.wcId}`).replace(/[^a-zA-Z0-9_-]/g, '-');
+    return `--${base}-anchor`;
+  }
+
+  _applyMenuStyle() {
+    this.componentElement.classList.toggle('menu-surface', this.getAttribute('menu-style') === 'surface');
+  }
+
+  _handleKeydown(event) {
+    if (event.key !== 'Escape') return;
+    const shown = this.querySelector('.wc-dropdown.show');
+    if (!shown) return;
+    event.preventDefault();
+    shown.classList.remove('show');
+    this._isOpen = false;
+    this.querySelector('.dropbtn')?.focus();
   }
 
   _handleHelper(event, mode='open') {
@@ -346,8 +394,10 @@ class WcDropdown extends WcBaseComponent {
   }
 
   _checkAnchorPositioningSupport() {
-    // Check if CSS Anchor Positioning is supported
-    return CSS.supports('anchor-name', '--test');
+    // CSS anchor positioning needs BOTH anchor-name and position-area. Chromium 125–128 shipped
+    // anchor-name with the older inset-area name, so checking anchor-name alone skipped the JS
+    // fallback there and the menu was never placed (it sat on top of its button).
+    return CSS.supports('anchor-name', '--test') && CSS.supports('position-area', 'bottom');
   }
 
   _positionDropdown(dropdownContent, button) {
@@ -488,11 +538,52 @@ class WcDropdown extends WcBaseComponent {
       .wc-dropdown .dropdown-content {
         display: none;
         position: absolute;
-        background-color: var(--button-hover-bg-color);
-        min-width: 160px;
-        max-width: 250px;
+        background-color: var(--wc-dropdown-bg, var(--button-hover-bg-color));
+        color: var(--wc-dropdown-color, inherit);
+        border: var(--wc-dropdown-border, none);
+        border-radius: var(--wc-dropdown-radius, 0);
+        min-width: var(--wc-dropdown-min-width, 160px);
+        max-width: var(--wc-dropdown-max-width, 250px);
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
+      }
+      .wc-dropdown .dropdown-content:where([style*="max-height"]) { overflow-y: auto; }
+
+      /* menu-style="surface": the ribbon/menu look (opt-in; the default look is unchanged) */
+      .wc-dropdown.menu-surface .dropdown-content {
+        --wc-dropdown-bg: var(--surface-2);
+        --wc-dropdown-color: var(--text-1);
+        --wc-dropdown-border: 1px solid var(--surface-4);
+        --wc-dropdown-radius: 8px;
+        --wc-dropdown-min-width: 300px;
+        --wc-dropdown-max-width: min(480px, calc(100vw - 16px));
+        --wc-dropdown-item-hover: var(--surface-3);
+        max-height: var(--wc-dropdown-max-height, 70vh);
+        overflow-y: auto;
+        padding: 4px;
+        box-shadow: 0 10px 30px color-mix(in srgb, var(--text-1) 22%, transparent);
+      }
+      .wc-dropdown.menu-surface .dropdown-content a { color: var(--text-1); border-radius: 6px; }
+
+      /* Rich menu items (opt-in classes): icon, then label + one-line muted description */
+      .wc-dropdown .dropdown-content .wc-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+      }
+      .wc-menu-item-icon { flex: none; width: 1.25rem; display: inline-flex; justify-content: center; }
+      .wc-menu-item-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+      .wc-menu-item-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .wc-menu-item-desc {
+        font-size: 0.85em;
+        color: var(--text-2, inherit);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .wc-dropdown .dropdown-content .wc-menu-item.is-checked {
+        background-color: color-mix(in srgb, var(--primary-bg-color) 14%, transparent);
       }
 
       .wc-dropdown .search {
@@ -525,7 +616,7 @@ class WcDropdown extends WcBaseComponent {
       /* Change color of dropdown links on hover */
       /* .wc-dropdown .dropdown-content .wc-input:hover, */
       .wc-dropdown .dropdown-content a:hover {
-        background-color: var(--component-border-color);
+        background-color: var(--wc-dropdown-item-hover, var(--component-border-color));
       }
 
       /* Show the dropdown menu on hover */
@@ -570,8 +661,8 @@ class WcDropdown extends WcBaseComponent {
         }
       }
       
-      /* Fallback for browsers without anchor positioning */
-      @supports not (anchor-name: --test) {
+      /* Fallback for browsers without (complete) anchor positioning */
+      @supports not ((anchor-name: --test) and (position-area: bottom)) {
         .wc-dropdown .dropdown-content {
           position: fixed !important;
         }
@@ -582,12 +673,16 @@ class WcDropdown extends WcBaseComponent {
 
   _wireEvents() {
     super._wireEvents();
-
+    this._unWireEvents();
     if (this.clickModes.includes(this.mode)) {
-      document.body.addEventListener('wcdropdownopen', this._handleOpen.bind(this));
-      document.body.addEventListener('wcdropdownclose', this._handleClose.bind(this));
-      document.body.addEventListener('wcdropdowntoggle', this._handleToggle.bind(this));
+      document.body.addEventListener('wcdropdownopen', this._onOpen);
+      document.body.addEventListener('wcdropdownclose', this._onClose);
+      document.body.addEventListener('wcdropdowntoggle', this._onToggle);
+      this.querySelector('.dropbtn')?.addEventListener('click', this._onClick);
+      window.addEventListener('click', this._onWindowClick);
+      this.querySelector('.search')?.addEventListener('input', this._onInput);
     }
+    this.componentElement.addEventListener('keydown', this._onKeydown);
     
     // Add scroll and resize listeners for mobile positioning
     this._boundReposition = this._repositionOnScroll.bind(this);
@@ -597,20 +692,13 @@ class WcDropdown extends WcBaseComponent {
 
   _unWireEvents() {
     super._unWireEvents();
-
-    if (this.clickModes.includes(this.mode)) {
-      document.body.removeEventListener('wcdropdownopen', this._handleOpen.bind(this));
-      document.body.removeEventListener('wcdropdownclose', this._handleClose.bind(this));
-      document.body.removeEventListener('wcdropdowntoggle', this._handleToggle.bind(this));
-
-      const btn = this.querySelector('.dropbtn');
-      btn.removeEventListener('click', this._handleClick.bind(this));
-      window.removeEventListener('click', this._handleWindowClick.bind(this));
-      const ipt = this.querySelector('.search');
-      if (ipt) {
-        ipt.removeEventListener('input', this._handleInput.bind(this));
-      }
-    }
+    document.body.removeEventListener('wcdropdownopen', this._onOpen);
+    document.body.removeEventListener('wcdropdownclose', this._onClose);
+    document.body.removeEventListener('wcdropdowntoggle', this._onToggle);
+    this.querySelector('.dropbtn')?.removeEventListener('click', this._onClick);
+    window.removeEventListener('click', this._onWindowClick);
+    this.querySelector('.search')?.removeEventListener('input', this._onInput);
+    this.componentElement?.removeEventListener('keydown', this._onKeydown);
     
     // Remove scroll and resize listeners
     if (this._boundReposition) {

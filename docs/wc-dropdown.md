@@ -156,6 +156,44 @@ The dropdown content can include:
 </wc-dropdown>
 ```
 
+## Anchoring, menu look and rich items (Oct 2026)
+
+- **Each dropdown anchors to its own button.** The CSS anchor name comes from `id`, or from the instance's unique `data-wc-id` when there is no id. Before, dropdowns without an id all shared `---anchor`, so every menu opened at the last button.
+- **Positioning fallback:** CSS anchor positioning is used only when the browser supports both `anchor-name` and `position-area`. Chromium 125–128 had `anchor-name` without `position-area`, so menus were never placed there; those browsers now use the JS (fixed-position) fallback.
+- **Esc** closes an open menu and returns focus to the button.
+- **No leaked listeners:** handlers are bound once; removing a dropdown removes its window/body listeners (previously a window click listener was added on every render and never removed).
+
+### CSS hooks (defaults keep the original look)
+
+| Variable | Default |
+|----------|---------|
+| `--wc-dropdown-bg` | `var(--button-hover-bg-color)` |
+| `--wc-dropdown-color` | `inherit` |
+| `--wc-dropdown-border` | `none` |
+| `--wc-dropdown-radius` | `0` |
+| `--wc-dropdown-min-width` | at least the button width |
+| `--wc-dropdown-max-width` | `250px` |
+| `--wc-dropdown-max-height` | `70vh` (surface style) |
+| `--wc-dropdown-item-hover` | `var(--component-border-color)` |
+
+`menu-style="surface"` applies the menu look used by `wc-ribbon`: `--surface-2` background, `--surface-4` border, 8px radius, min-width 300px, max-height 70vh with scrolling.
+
+### Rich menu items (opt-in classes)
+
+```html
+<wc-dropdown label="CREATE ▾" menu-style="surface">
+  <a href="#" class="wc-menu-item">
+    <wc-fa-icon class="wc-menu-item-icon" name="cube" size="0.95rem"></wc-fa-icon>
+    <span class="wc-menu-item-text">
+      <span class="wc-menu-item-label">Box</span>
+      <span class="wc-menu-item-desc">A box — no sketch needed</span>
+    </span>
+  </a>
+</wc-dropdown>
+```
+
+`.wc-menu-item` lays out icon, then label + a one-line muted description; add `.is-checked` for a selected toggle.
+
 ## Best Practices
 
 1. Always provide meaningful labels for accessibility

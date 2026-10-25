@@ -14,6 +14,9 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - [wc-dropdown](docs/wc-dropdown.md)
 - [wc-flip-box](docs/wc-flip-box.md)
 - [wc-image](docs/wc-image.md)
+- [wc-reveal](CLAUDE.md) — animated collapsible for live form content
+- [wc-ribbon](docs/wc-ribbon.md) — Fusion 360 / Office-style ribbon: tabs, contextual tabs, groups whose title lists every command, split buttons, collapse at narrow widths
+- [wc-ruler](docs/wc-ruler.md) — canvas ruler for a zoomable page (units, guides, selection band)
 - [wc-save-button](docs/wc-save-button.md)
 - [wc-save-split-button](docs/wc-save-split-button.md)
 - [wc-sidebar](docs/wc-sidebar.md)
@@ -24,12 +27,15 @@ This library has been built with HTMX and Hyperscript in mind so that you still 
 - [wc-tabulator](docs/wc-tabulator.md)
 - [wc-theme-selector](docs/wc-theme-selector.md)
 - [wc-timeline](docs/wc-timeline.md)
+- [wc-zoom](docs/wc-zoom.md) — status-bar zoom control (log slider, presets, Ctrl/⌘ + wheel / pinch)
 
 
 ## Form Web Components
 - [wc-base-form-component](docs/wc-base-form-component.md)
 - [wc-form](docs/wc-form.md)
+- [wc-color](docs/wc-color.md) — colour field: transparency, swatch groups, CMYK
 - [wc-code-mirror](docs/wc-code-mirror.md)
+- [wc-font-picker](docs/wc-font-picker.md) — searchable font chooser, each font in its own face
 - [wc-input](docs/wc-input.md)
 - [wc-select](docs/wc-select.md)
 - [wc-textarea](docs/wc-textarea.md)

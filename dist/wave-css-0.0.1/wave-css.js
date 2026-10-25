@@ -14,16 +14,16 @@ function autofillToken() {
   }
   return "password-contact";
 }
-function suppressAutofill(el, preferredAutocomplete) {
-  if (!el) return;
+function suppressAutofill(el2, preferredAutocomplete) {
+  if (!el2) return;
   const pref = preferredAutocomplete && String(preferredAutocomplete).toLowerCase() !== "off" ? preferredAutocomplete : autofillToken();
-  el.setAttribute("autocomplete", pref);
-  el.setAttribute("autocorrect", "off");
-  el.setAttribute("autocapitalize", "off");
-  el.setAttribute("spellcheck", "false");
-  el.setAttribute("data-lpignore", "true");
-  el.setAttribute("data-1p-ignore", "");
-  el.setAttribute("data-form-type", "other");
+  el2.setAttribute("autocomplete", pref);
+  el2.setAttribute("autocorrect", "off");
+  el2.setAttribute("autocapitalize", "off");
+  el2.setAttribute("spellcheck", "false");
+  el2.setAttribute("data-lpignore", "true");
+  el2.setAttribute("data-1p-ignore", "");
+  el2.setAttribute("data-form-type", "other");
 }
 function waveLocalAssetUrl(cdnUrl) {
   const raw = typeof window !== "undefined" && window.WaveAssetBase ? String(window.WaveAssetBase) : "";
@@ -388,11 +388,11 @@ function waitForSelectorsPolling(selectors = [], timeout = 3e3) {
     checkAvailability();
   });
 }
-function waitForPropertyPolling(el, propertyName, timeout = 3e3) {
+function waitForPropertyPolling(el2, propertyName, timeout = 3e3) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const checkAvailability = () => {
-      const isAvailable = el[propertyName];
+      const isAvailable = el2[propertyName];
       if (isAvailable) {
         resolve();
       } else if (Date.now() - startTime > timeout) {
@@ -408,41 +408,41 @@ async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 function hide(selector) {
-  const el = document.querySelector(selector);
-  if (!el) return;
-  const responsiveDisplayClasses = Array.from(el.classList).filter(
+  const el2 = document.querySelector(selector);
+  if (!el2) return;
+  const responsiveDisplayClasses = Array.from(el2.classList).filter(
     (cls) => /^(sm|md|lg|xl|2xl):(flex|block|inline|inline-block|inline-flex|grid)$/.test(cls)
   );
   if (responsiveDisplayClasses.length > 0) {
-    el.dataset.originalResponsiveDisplay = responsiveDisplayClasses.join(" ");
+    el2.dataset.originalResponsiveDisplay = responsiveDisplayClasses.join(" ");
     responsiveDisplayClasses.forEach((cls) => {
       const prefix = cls.split(":")[0];
-      el.classList.remove(cls);
-      el.classList.add(`${prefix}:hidden`);
+      el2.classList.remove(cls);
+      el2.classList.add(`${prefix}:hidden`);
     });
   } else {
-    el.classList.add("hidden");
+    el2.classList.add("hidden");
   }
 }
 function show(selector) {
-  const el = document.querySelector(selector);
-  if (!el) return;
-  const responsiveHiddenClasses = Array.from(el.classList).filter(
+  const el2 = document.querySelector(selector);
+  if (!el2) return;
+  const responsiveHiddenClasses = Array.from(el2.classList).filter(
     (cls) => /^(sm|md|lg|xl|2xl):hidden$/.test(cls)
   );
   if (responsiveHiddenClasses.length > 0) {
     responsiveHiddenClasses.forEach((cls) => {
-      el.classList.remove(cls);
+      el2.classList.remove(cls);
     });
-    if (el.dataset.originalResponsiveDisplay) {
-      const originalClasses = el.dataset.originalResponsiveDisplay.split(" ");
+    if (el2.dataset.originalResponsiveDisplay) {
+      const originalClasses = el2.dataset.originalResponsiveDisplay.split(" ");
       originalClasses.forEach((cls) => {
-        el.classList.add(cls);
+        el2.classList.add(cls);
       });
-      delete el.dataset.originalResponsiveDisplay;
+      delete el2.dataset.originalResponsiveDisplay;
     }
   } else {
-    el.classList.remove("hidden");
+    el2.classList.remove("hidden");
   }
 }
 function hideAndShow(hideSelector, showSelector) {
@@ -642,15 +642,15 @@ function getSourcePropertyValue(srcDataId, srcSelector, srcProperty) {
     }
   }
   if (!selector) return void 0;
-  const el = document.querySelector(selector);
-  if (!el) return void 0;
-  if (srcProperty && srcProperty in el) {
-    return el[srcProperty];
+  const el2 = document.querySelector(selector);
+  if (!el2) return void 0;
+  if (srcProperty && srcProperty in el2) {
+    return el2[srcProperty];
   }
-  if (el.type === "checkbox") {
-    return el.checked;
+  if (el2.type === "checkbox") {
+    return el2.checked;
   }
-  return el.value;
+  return el2.value;
 }
 function applyRule(rule) {
   const { effect, condition, tgtDataId, tgtSelector, tgtProperty } = rule;
@@ -707,12 +707,12 @@ function applyRule(rule) {
 function initRules(rules) {
   const srcDataIds = Array.from(new Set(rules.map((r) => r.condition.srcDataId)));
   srcDataIds.forEach((id) => {
-    document.querySelectorAll(`[data-id="${id}"]`).forEach((el) => {
+    document.querySelectorAll(`[data-id="${id}"]`).forEach((el2) => {
       const elRules = Array.from(rules).filter((r) => r.condition.srcDataId == id);
-      el.addEventListener("change", () => {
+      el2.addEventListener("change", () => {
         elRules.forEach(applyRule);
       });
-      el.addEventListener("input", () => {
+      el2.addEventListener("input", () => {
         elRules.forEach(applyRule);
       });
     });
@@ -1001,21 +1001,21 @@ var WcDependencyManager = class {
         reject(new Error(`Timeout loading ${cdn} after ${timeout}ms`));
       }, timeout);
       const attempt = (href, isLocal) => {
-        let el;
+        let el2;
         if (isCSS) {
-          el = document.createElement("link");
-          el.rel = "stylesheet";
-          el.href = href;
+          el2 = document.createElement("link");
+          el2.rel = "stylesheet";
+          el2.href = href;
         } else {
-          el = document.createElement("script");
-          el.src = href;
+          el2 = document.createElement("script");
+          el2.src = href;
         }
-        el.onload = () => {
+        el2.onload = () => {
           clearTimeout(timeoutId);
           resolve();
         };
-        el.onerror = () => {
-          el.remove();
+        el2.onerror = () => {
+          el2.remove();
           if (isLocal) {
             console.warn(`[wave-css] Local asset not found (${href}); falling back to CDN: ${cdn}`);
             attempt(cdn, false);
@@ -1024,7 +1024,7 @@ var WcDependencyManager = class {
             reject(new Error(`Failed to load ${isCSS ? "CSS" : "script"}: ${cdn}`));
           }
         };
-        document.head.appendChild(el);
+        document.head.appendChild(el2);
       };
       attempt(local, true);
     });
@@ -1165,13 +1165,13 @@ if (typeof window !== "undefined") {
         }));
         const allElements = target.querySelectorAll("*");
         dependencyManager._log(`Dispatching wcready to ${allElements.length} child elements`);
-        allElements.forEach((el, index) => {
-          el.dispatchEvent(new CustomEvent("wcready", {
+        allElements.forEach((el2, index) => {
+          el2.dispatchEvent(new CustomEvent("wcready", {
             bubbles: false,
             detail: { dependencies: Array.from(dependencyManager._registeredDependencies) }
           }));
-          if (dependencyManager._debug && el.tagName === "WC-INPUT" && el.getAttribute("type") === "tel") {
-            dependencyManager._log(`Dispatched wcready to phone input [${index}]:`, el.getAttribute("name"));
+          if (dependencyManager._debug && el2.tagName === "WC-INPUT" && el2.getAttribute("type") === "tel") {
+            dependencyManager._log(`Dispatched wcready to phone input [${index}]:`, el2.getAttribute("name"));
           }
         });
       }, 100);
@@ -1523,9 +1523,9 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
     function isContainer(type) {
       return CONTAINER_TYPES.has(type);
     }
-    function getInnerElement(el, type) {
-      if (typeof el.getInnerContainer === "function") return el.getInnerContainer();
-      return el;
+    function getInnerElement(el2, type) {
+      if (typeof el2.getInnerContainer === "function") return el2.getInnerContainer();
+      return el2;
     }
     const toolbar = document.createElement("div");
     toolbar.id = "designer-toolbar";
@@ -1584,22 +1584,22 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
       registry.forEach((entry, id) => elements.push({ id, type: entry.type }));
       postToParent("registryBuilt", { count: registry.size, elements });
     }
-    function registerElement(el, type) {
-      if (registry.has(el.getAttribute("data-designer-id"))) return;
-      let id = el.getAttribute("data-designer-id");
+    function registerElement(el2, type) {
+      if (registry.has(el2.getAttribute("data-designer-id"))) return;
+      let id = el2.getAttribute("data-designer-id");
       if (!id) {
         id = generateId();
-        el.setAttribute("data-designer-id", id);
+        el2.setAttribute("data-designer-id", id);
       }
-      if (isContainer(type)) el.setAttribute("data-designer-container", "true");
-      if (UTILITY_TYPES.has(type)) el.setAttribute("data-designer-utility", "");
-      if (!el.querySelector(":scope > [data-designer-label-badge]")) {
+      if (isContainer(type)) el2.setAttribute("data-designer-container", "true");
+      if (UTILITY_TYPES.has(type)) el2.setAttribute("data-designer-utility", "");
+      if (!el2.querySelector(":scope > [data-designer-label-badge]")) {
         const badge = document.createElement("span");
         badge.setAttribute("data-designer-label-badge", "");
         badge.textContent = type;
-        el.appendChild(badge);
+        el2.appendChild(badge);
       }
-      registry.set(id, { element: el, type });
+      registry.set(id, { element: el2, type });
     }
     function selectComponent(designerId) {
       deselectAll();
@@ -1611,15 +1611,15 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
       entry.element.setAttribute("data-designer-selected", "");
       positionToolbar(entry.element);
       const ancestors = [];
-      let el = entry.element.parentElement;
-      while (el && el !== viewport && el !== document.body) {
-        const pid = el.getAttribute?.("data-designer-id");
+      let el2 = entry.element.parentElement;
+      while (el2 && el2 !== viewport && el2 !== document.body) {
+        const pid = el2.getAttribute?.("data-designer-id");
         if (pid && registry.has(pid)) ancestors.unshift({ designerId: pid, type: registry.get(pid).type });
-        el = el.parentElement;
+        el2 = el2.parentElement;
       }
       const props = {};
-      const el2 = entry.element;
-      for (const attr of el2.attributes) {
+      const el22 = entry.element;
+      for (const attr of el22.attributes) {
         const n = attr.name;
         if (n.startsWith("data-designer") || n === "data-wc-id" || n === "data-drop-target" || n === "style") continue;
         if (n === "class") {
@@ -1634,11 +1634,11 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
       }
       const formTags = /* @__PURE__ */ new Set(["wc-input", "wc-select", "wc-textarea", "wc-field", "wc-google-address"]);
       if (!props.name && formTags.has(entry.type)) {
-        const formEl = el2.querySelector(":scope > .wc-" + entry.type.replace("wc-", "") + " > [form-element]") || el2.querySelector(":scope > * > input, :scope > * > select, :scope > * > textarea");
+        const formEl = el22.querySelector(":scope > .wc-" + entry.type.replace("wc-", "") + " > [form-element]") || el22.querySelector(":scope > * > input, :scope > * > select, :scope > * > textarea");
         if (formEl?.name) props.name = formEl.name;
       }
       if (HTML_TAGS.has(entry.type)) {
-        const textNodes = Array.from(el2.childNodes).filter((n2) => n2.nodeType === 3);
+        const textNodes = Array.from(el22.childNodes).filter((n2) => n2.nodeType === 3);
         props.content = textNodes.map((n2) => n2.textContent).join("").trim();
       }
       postToParent("select", { designerId, type: entry.type, ancestors, properties: props });
@@ -1656,8 +1656,8 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
       toolbar.classList.remove("visible");
       postToParent("deselect", {});
     }
-    function positionToolbar(el) {
-      const rect = el.getBoundingClientRect();
+    function positionToolbar(el2) {
+      const rect = el2.getBoundingClientRect();
       toolbar.classList.add("visible");
       toolbar.style.left = `${rect.left + window.scrollX}px`;
       toolbar.style.top = `${rect.top + window.scrollY - 32}px`;
@@ -1680,12 +1680,12 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
     function moveComponent(designerId, direction) {
       const entry = registry.get(designerId);
       if (!entry) return;
-      const el = entry.element;
-      if (direction === "up" && el.previousElementSibling?.hasAttribute("data-designer-id"))
-        el.parentElement.insertBefore(el, el.previousElementSibling);
-      else if (direction === "down" && el.nextElementSibling?.hasAttribute("data-designer-id"))
-        el.parentElement.insertBefore(el.nextElementSibling, el);
-      if (selectedId === designerId) positionToolbar(el);
+      const el2 = entry.element;
+      if (direction === "up" && el2.previousElementSibling?.hasAttribute("data-designer-id"))
+        el2.parentElement.insertBefore(el2, el2.previousElementSibling);
+      else if (direction === "down" && el2.nextElementSibling?.hasAttribute("data-designer-id"))
+        el2.parentElement.insertBefore(el2.nextElementSibling, el2);
+      if (selectedId === designerId) positionToolbar(el2);
       postToParent("componentMoved", { designerId, direction });
     }
     function duplicateComponent(designerId) {
@@ -1694,20 +1694,20 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
     function updateProperty(designerId, propName, value) {
       const entry = registry.get(designerId);
       if (!entry) return;
-      const el = entry.element;
-      if (propName === "scope") el.setAttribute("data-scope", value);
+      const el2 = entry.element;
+      if (propName === "scope") el2.setAttribute("data-scope", value);
       else if (propName === "css") {
-        const keep = ["contents", "designer-selected"].filter((c) => el.classList.contains(c));
-        el.className = [value, ...keep].filter(Boolean).join(" ");
+        const keep = ["contents", "designer-selected"].filter((c) => el2.classList.contains(c));
+        el2.className = [value, ...keep].filter(Boolean).join(" ");
       } else if (propName === "content") {
-        const tn = Array.from(el.childNodes).find((n) => n.nodeType === 3);
+        const tn = Array.from(el2.childNodes).find((n) => n.nodeType === 3);
         if (tn) tn.textContent = value;
-        else el.prepend(document.createTextNode(value));
+        else el2.prepend(document.createTextNode(value));
       } else {
         const attr = propName.replace(/_/g, "-");
-        if (value === "" || value === true) el.setAttribute(attr, "");
-        else if (value === false || value == null) el.removeAttribute(attr);
-        else el.setAttribute(attr, value);
+        if (value === "" || value === true) el2.setAttribute(attr, "");
+        else if (value === false || value == null) el2.removeAttribute(attr);
+        else el2.setAttribute(attr, value);
       }
     }
     function insertHTMLAt(html, parentId, position, sourceHtml) {
@@ -1723,21 +1723,21 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = html;
       const newElements = Array.from(tempDiv.children);
-      for (const el of newElements) {
-        if (position != null && position < children.length) parentEl.insertBefore(el, children[position]);
-        else parentEl.appendChild(el);
+      for (const el2 of newElements) {
+        if (position != null && position < children.length) parentEl.insertBefore(el2, children[position]);
+        else parentEl.appendChild(el2);
       }
       setTimeout(() => {
-        for (const el of newElements) {
-          const tag = el.tagName.toLowerCase();
+        for (const el2 of newElements) {
+          const tag = el2.tagName.toLowerCase();
           if (isDesignerTag(tag)) {
-            registerElement(el, tag);
+            registerElement(el2, tag);
             if (isContainer(tag)) {
-              const inner = getInnerElement(el, tag);
+              const inner = getInnerElement(el2, tag);
               if (inner) inner.setAttribute("data-drop-target", tag);
             }
           }
-          scanNewChildren(el);
+          scanNewChildren(el2);
         }
         postToParent("componentInserted", { html: sourceHtml || html, parentId, position });
       }, 500);
@@ -1845,10 +1845,10 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
     function removeDropIndicator() {
       if (dropIndicator?.parentNode) dropIndicator.remove();
       dropIndicator = null;
-      document.querySelectorAll(".drop-indicator").forEach((el) => el.remove());
+      document.querySelectorAll(".drop-indicator").forEach((el2) => el2.remove());
     }
     function clearDropTargets() {
-      document.querySelectorAll(".drop-target").forEach((el) => el.classList.remove("drop-target"));
+      document.querySelectorAll(".drop-target").forEach((el2) => el2.classList.remove("drop-target"));
     }
     viewport.addEventListener("click", (e) => {
       const target = e.target.closest("[data-designer-id]");
@@ -1913,8 +1913,8 @@ if (document.documentElement?.hasAttribute?.("data-designer")) {
         e.preventDefault();
         e.detail.xhr?.abort();
       });
-      document.querySelectorAll("[hx-trigger]").forEach((el) => {
-        el.removeAttribute("hx-trigger");
+      document.querySelectorAll("[hx-trigger]").forEach((el2) => {
+        el2.removeAttribute("hx-trigger");
       });
     }
     setTimeout(() => scanAndRegister(), 500);
@@ -2168,14 +2168,14 @@ if (!customElements.get("wc-accordion")) {
     }
     _createHeader(label, selected) {
       const allowMany = this.hasAttribute("allow-many");
-      const el = document.createElement("button");
-      el.type = "button";
-      el.classList.add("accordion-header");
+      const el2 = document.createElement("button");
+      el2.type = "button";
+      el2.classList.add("accordion-header");
       if (selected) {
-        el.classList.add("accordion-active");
+        el2.classList.add("accordion-active");
       }
       if (allowMany) {
-        el.setAttribute("_", `on click
+        el2.setAttribute("_", `on click
           toggle .accordion-active on me
           set panel to me.nextElementSibling
           if panel.style.maxHeight then
@@ -2185,7 +2185,7 @@ if (!customElements.get("wc-accordion")) {
           end
         `);
       } else {
-        el.setAttribute("_", `on click
+        el2.setAttribute("_", `on click
           set hdrs to .accordion-header in my parentElement
           repeat for x in hdrs
             if x is not me then
@@ -2203,16 +2203,16 @@ if (!customElements.get("wc-accordion")) {
           end
         `);
       }
-      el.textContent = label;
-      return el;
+      el2.textContent = label;
+      return el2;
     }
     _createPanel(content) {
-      const el = document.createElement("div");
-      el.classList.add("accordion-panel");
+      const el2 = document.createElement("div");
+      el2.classList.add("accordion-panel");
       const p = document.createElement("p");
       p.innerHTML = content;
-      el.appendChild(p);
-      return el;
+      el2.appendChild(p);
+      return el2;
     }
     _moveDeclarativeOptions() {
       const options = this.querySelectorAll("option");
@@ -2553,8 +2553,8 @@ var WcBackgroundImage = class extends WcBaseComponent {
       const minHeight = this.getAttribute("min-height") || "100%";
       this.componentElement.style.backgroundImage = `url("${imgUrl}")`;
       this.componentElement.style.minHeight = minHeight;
-      const el = this._createElement();
-      this.componentElement.appendChild(el);
+      const el2 = this._createElement();
+      this.componentElement.appendChild(el2);
     }
     if (typeof htmx !== "undefined") {
       htmx.process(this);
@@ -3202,16 +3202,16 @@ if (!customElements.get("wc-code-mirror")) {
         return;
       }
       this._contextMenuItems = [];
-      menuElements.forEach((el) => {
-        const isSeparator = el.hasAttribute("separator");
+      menuElements.forEach((el2) => {
+        const isSeparator = el2.hasAttribute("separator");
         if (isSeparator) {
           this._contextMenuItems.push({ divider: true });
         } else {
-          const label = el.getAttribute("label") || "";
-          const icon = el.getAttribute("icon") || "";
-          const order = el.getAttribute("order");
-          const funcStr = el.textContent.trim();
-          el.textContent = "";
+          const label = el2.getAttribute("label") || "";
+          const icon = el2.getAttribute("icon") || "";
+          const order = el2.getAttribute("order");
+          const funcStr = el2.textContent.trim();
+          el2.textContent = "";
           if (!funcStr) return;
           let actionFn;
           try {
@@ -4757,21 +4757,21 @@ if (!customElements.get("wc-step-outline")) {
     _subscribeToEventStream() {
       const id = this.getAttribute("events-from");
       if (!id) return;
-      const el = document.getElementById(id);
-      if (!el) {
+      const el2 = document.getElementById(id);
+      if (!el2) {
         const self3 = this;
         setTimeout(function() {
           if (!self3._eventStreamEl && self3.isConnected) self3._subscribeToEventStream();
         }, 50);
         return;
       }
-      this._eventStreamEl = el;
+      this._eventStreamEl = el2;
       const self2 = this;
       this._stepChangeHandler = function(e) {
         const detail = e.detail || {};
         self2.setActiveStack(Array.isArray(detail.stack) ? detail.stack : []);
       };
-      el.addEventListener("wc-event-stream:step_change", this._stepChangeHandler);
+      el2.addEventListener("wc-event-stream:step_change", this._stepChangeHandler);
     }
     _unsubscribeFromEventStream() {
       if (this._eventStreamEl && this._stepChangeHandler) {
@@ -5572,66 +5572,66 @@ if (!customElements.get("wc-event-stream")) {
       }
       cur[parts[parts.length - 1]] = value;
     }
-    _applyBindField(el) {
-      const path = el.getAttribute("data-bind-field");
+    _applyBindField(el2) {
+      const path = el2.getAttribute("data-bind-field");
       if (!path) return;
       const value = this._readPath(this._runState, path);
-      const attr = el.getAttribute("data-bind-attr");
+      const attr = el2.getAttribute("data-bind-attr");
       if (attr) {
-        if (value == null || value === "") el.removeAttribute(attr);
-        else el.setAttribute(attr, String(value));
+        if (value == null || value === "") el2.removeAttribute(attr);
+        else el2.setAttribute(attr, String(value));
         return;
       }
-      if (el.tagName && el.tagName.toLowerCase().indexOf("wc-") === 0) {
-        if (value == null) el.setAttribute("value", "");
-        else el.setAttribute("value", String(value));
+      if (el2.tagName && el2.tagName.toLowerCase().indexOf("wc-") === 0) {
+        if (value == null) el2.setAttribute("value", "");
+        else el2.setAttribute("value", String(value));
         try {
-          el.value = value == null ? "" : value;
+          el2.value = value == null ? "" : value;
         } catch (_) {
         }
         return;
       }
-      el.textContent = value == null ? "" : String(value);
+      el2.textContent = value == null ? "" : String(value);
     }
-    _applyBindCount(el) {
-      const path = el.getAttribute("data-bind-count");
+    _applyBindCount(el2) {
+      const path = el2.getAttribute("data-bind-count");
       if (!path) return;
       const value = Number(this._readPath(this._runState, path) || 0);
-      el.textContent = String(value);
-      const pulseAttr = el.getAttribute("data-pulse-attr");
-      const pulseClass = el.getAttribute("data-pulse-class");
+      el2.textContent = String(value);
+      const pulseAttr = el2.getAttribute("data-pulse-attr");
+      const pulseClass = el2.getAttribute("data-pulse-class");
       const shouldPulse = value > 0;
       if (pulseAttr) {
-        if (shouldPulse) el.setAttribute(pulseAttr, "");
-        else el.removeAttribute(pulseAttr);
+        if (shouldPulse) el2.setAttribute(pulseAttr, "");
+        else el2.removeAttribute(pulseAttr);
       }
       if (pulseClass) {
-        if (shouldPulse) el.classList.add(pulseClass);
-        else el.classList.remove(pulseClass);
+        if (shouldPulse) el2.classList.add(pulseClass);
+        else el2.classList.remove(pulseClass);
       }
     }
-    _applyPulseWhen(el) {
-      const path = el.getAttribute("data-pulse-when-field");
+    _applyPulseWhen(el2) {
+      const path = el2.getAttribute("data-pulse-when-field");
       if (!path) return;
       const value = Number(this._readPath(this._runState, path) || 0);
-      const pulseAttr = el.getAttribute("data-pulse-attr");
-      const pulseClass = el.getAttribute("data-pulse-class");
+      const pulseAttr = el2.getAttribute("data-pulse-attr");
+      const pulseClass = el2.getAttribute("data-pulse-class");
       const shouldPulse = value > 0;
       if (pulseAttr) {
-        if (shouldPulse) el.setAttribute(pulseAttr, "");
-        else el.removeAttribute(pulseAttr);
+        if (shouldPulse) el2.setAttribute(pulseAttr, "");
+        else el2.removeAttribute(pulseAttr);
       }
       if (pulseClass) {
-        if (shouldPulse) el.classList.add(pulseClass);
-        else el.classList.remove(pulseClass);
+        if (shouldPulse) el2.classList.add(pulseClass);
+        else el2.classList.remove(pulseClass);
       }
     }
-    _applyShowWhen(el) {
-      const path = el.getAttribute("data-show-when-field");
+    _applyShowWhen(el2) {
+      const path = el2.getAttribute("data-show-when-field");
       if (!path) return;
-      const op = (el.getAttribute("data-show-when-op") || "set").toLowerCase();
+      const op = (el2.getAttribute("data-show-when-op") || "set").toLowerCase();
       const value = this._readPath(this._runState, path);
-      const cmp = el.getAttribute("data-show-when-value");
+      const cmp = el2.getAttribute("data-show-when-value");
       let show2;
       switch (op) {
         case "set":
@@ -5673,11 +5673,11 @@ if (!customElements.get("wc-event-stream")) {
           break;
       }
       if (show2) {
-        el.removeAttribute("hidden");
-        el.style.removeProperty("display");
+        el2.removeAttribute("hidden");
+        el2.style.removeProperty("display");
       } else {
-        el.setAttribute("hidden", "");
-        el.style.display = "none";
+        el2.setAttribute("hidden", "");
+        el2.style.display = "none";
       }
     }
     // ── Error-reload defense ──────────────────────────────────────────────
@@ -6595,9 +6595,9 @@ Examples:
         if (label) label.textContent = newValue || "";
       } else if (attrName === "disabled") {
         const elts = this.componentElement?.querySelectorAll("select, .cron-custom-input");
-        elts?.forEach((el) => {
-          if (newValue !== null) el.setAttribute("disabled", "");
-          else el.removeAttribute("disabled");
+        elts?.forEach((el2) => {
+          if (newValue !== null) el2.setAttribute("disabled", "");
+          else el2.removeAttribute("disabled");
         });
       } else {
         super._handleAttributeChange(attrName, newValue);
@@ -7047,43 +7047,43 @@ if (!customElements.get("wc-context-menu")) {
           this.componentElement.appendChild(div);
           return;
         }
-        const el = document.createElement("div");
-        el.classList.add("wc-context-menu-item");
+        const el2 = document.createElement("div");
+        el2.classList.add("wc-context-menu-item");
         if (item.disabled) {
-          el.classList.add("disabled");
+          el2.classList.add("disabled");
         }
         if (item.icon) {
           const iconEl = document.createElement("wc-fa-icon");
           iconEl.setAttribute("name", item.icon);
           iconEl.setAttribute("size", "0.8125rem");
-          el.appendChild(iconEl);
+          el2.appendChild(iconEl);
         }
         const labelEl = document.createElement("span");
         labelEl.textContent = item.label || "";
-        el.appendChild(labelEl);
+        el2.appendChild(labelEl);
         if (!item.disabled && item.action) {
-          el.addEventListener("click", (e) => {
+          el2.addEventListener("click", (e) => {
             e.stopPropagation();
             this.close();
             item.action();
           });
         }
-        this.componentElement.appendChild(el);
+        this.componentElement.appendChild(el2);
       });
     }
     _position(x, y) {
-      const el = this.componentElement;
-      el.style.position = "fixed";
-      el.style.left = `${x}px`;
-      el.style.top = `${y}px`;
+      const el2 = this.componentElement;
+      el2.style.position = "fixed";
+      el2.style.left = `${x}px`;
+      el2.style.top = `${y}px`;
       requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
+        const rect = el2.getBoundingClientRect();
         const margin = 4;
         if (rect.right > window.innerWidth - margin) {
-          el.style.left = `${window.innerWidth - rect.width - margin}px`;
+          el2.style.left = `${window.innerWidth - rect.width - margin}px`;
         }
         if (rect.bottom > window.innerHeight - margin) {
-          el.style.top = `${window.innerHeight - rect.height - margin}px`;
+          el2.style.top = `${window.innerHeight - rect.height - margin}px`;
         }
       });
     }
@@ -7253,7 +7253,7 @@ if (!customElements.get("wc-dropdown-item")) {
 // src/js/components/wc-dropdown.js
 var WcDropdown = class extends WcBaseComponent {
   static get observedAttributes() {
-    return ["id", "class", "label", "mode", "format", "dropdown-class", "btn-class"];
+    return ["id", "class", "label", "mode", "format", "dropdown-class", "btn-class", "menu-style"];
   }
   constructor() {
     super();
@@ -7263,6 +7263,13 @@ var WcDropdown = class extends WcBaseComponent {
     this._boundReposition = null;
     this._isOpen = false;
     this._isMobile = false;
+    this._onClick = this._handleClick.bind(this);
+    this._onWindowClick = this._handleWindowClick.bind(this);
+    this._onInput = this._handleInput.bind(this);
+    this._onOpen = this._handleOpen.bind(this);
+    this._onClose = this._handleClose.bind(this);
+    this._onToggle = this._handleToggle.bind(this);
+    this._onKeydown = this._handleKeydown.bind(this);
     const compEl = this.querySelector(".wc-dropdown");
     if (compEl) {
       this.componentElement = compEl;
@@ -7309,6 +7316,16 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "label") {
+    } else if (attrName === "menu-style") {
+      this._applyMenuStyle();
+    } else if (attrName === "id") {
+      const wcDropdown = this.querySelector(".wc-dropdown");
+      const content = this.querySelector(".wc-dropdown .dropdown-content");
+      if (wcDropdown && content) {
+        wcDropdown.style.anchorName = this._anchorName();
+        content.style.positionAnchor = this._anchorName();
+      }
+      super._handleAttributeChange(attrName, newValue);
     } else if (attrName === "dropdown-class") {
       this._updateDropdownClass(newValue);
     } else {
@@ -7318,27 +7335,19 @@ var WcDropdown = class extends WcBaseComponent {
   _render() {
     super._render();
     const innerEl = this.querySelector(".wc-dropdown > *");
-    if (innerEl) {
-      const btn = this.querySelector(".dropbtn");
-      if (this.clickModes.includes(this.mode)) {
-        btn.addEventListener("click", this._handleClick.bind(this));
-        window.addEventListener("click", this._handleWindowClick.bind(this));
-        const ipt = this.querySelector(".search");
-        if (ipt) {
-          ipt.addEventListener("input", this._handleInput.bind(this));
-        }
-      }
-    } else {
+    if (!innerEl) {
       this.componentElement.innerHTML = "";
       this._createInnerElement();
     }
+    this._applyMenuStyle();
+    if (this.isConnected) this._wireEvents();
     if (typeof htmx !== "undefined") {
       htmx.process(this);
     }
   }
   _createInnerElement() {
     const parts = Array.from(this.children).filter((p) => !p.matches("wc-dropdown") && !p.matches(".wc-dropdown"));
-    const id = this.getAttribute("id") || "";
+    const anchor = this._anchorName();
     const positionArea = this.getAttribute("position-area") || "bottom span-left";
     const positionTryFallbacks = this.getAttribute("position-try-fallbacks") || "--bottom-right, --bottom-left, --top-right, --top-left, --right, --left";
     const lbl = this.getAttribute("label") || "";
@@ -7401,7 +7410,6 @@ var WcDropdown = class extends WcBaseComponent {
       path.setAttribute("d", "m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z");
       svg.appendChild(path);
       dropdownContent.appendChild(svg);
-      ipt.addEventListener("input", this._handleInput.bind(this));
     }
     parts.forEach((p) => dropdownContent.appendChild(p));
     dropdown.appendChild(dropdownContent);
@@ -7411,17 +7419,29 @@ var WcDropdown = class extends WcBaseComponent {
       dropdownContent.style.height = dropdownHeight;
       dropdownContent.style.overflow = "auto";
     }
-    if (this.clickModes.includes(this.mode)) {
-      btn.addEventListener("click", this._handleClick.bind(this));
-      window.addEventListener("click", this._handleWindowClick.bind(this));
-    }
     const wcDropdown = this.querySelector(".wc-dropdown");
-    wcDropdown.style.anchorName = `--${id}-anchor`;
+    wcDropdown.style.anchorName = anchor;
     const drpContent = this.querySelector(".wc-dropdown .dropdown-content");
-    drpContent.style.positionAnchor = `--${id}-anchor`;
+    drpContent.style.positionAnchor = anchor;
     drpContent.style.positionArea = positionArea;
     drpContent.style.positionTryFallbacks = positionTryFallbacks;
-    drpContent.style.minWidth = `${wcDropdown.offsetWidth}px`;
+    drpContent.style.minWidth = `max(${wcDropdown.offsetWidth}px, var(--wc-dropdown-min-width, 0px))`;
+  }
+  _anchorName() {
+    const base = (this.getAttribute("id") || `wcdd-${this.wcId}`).replace(/[^a-zA-Z0-9_-]/g, "-");
+    return `--${base}-anchor`;
+  }
+  _applyMenuStyle() {
+    this.componentElement.classList.toggle("menu-surface", this.getAttribute("menu-style") === "surface");
+  }
+  _handleKeydown(event) {
+    if (event.key !== "Escape") return;
+    const shown = this.querySelector(".wc-dropdown.show");
+    if (!shown) return;
+    event.preventDefault();
+    shown.classList.remove("show");
+    this._isOpen = false;
+    this.querySelector(".dropbtn")?.focus();
   }
   _handleHelper(event, mode = "open") {
     const { detail } = event;
@@ -7539,7 +7559,7 @@ var WcDropdown = class extends WcBaseComponent {
     return window.innerWidth <= 768 || "ontouchstart" in window;
   }
   _checkAnchorPositioningSupport() {
-    return CSS.supports("anchor-name", "--test");
+    return CSS.supports("anchor-name", "--test") && CSS.supports("position-area", "bottom");
   }
   _positionDropdown(dropdownContent, button) {
     if (!this._detectMobile() && this._checkAnchorPositioningSupport()) {
@@ -7644,11 +7664,52 @@ var WcDropdown = class extends WcBaseComponent {
       .wc-dropdown .dropdown-content {
         display: none;
         position: absolute;
-        background-color: var(--button-hover-bg-color);
-        min-width: 160px;
-        max-width: 250px;
+        background-color: var(--wc-dropdown-bg, var(--button-hover-bg-color));
+        color: var(--wc-dropdown-color, inherit);
+        border: var(--wc-dropdown-border, none);
+        border-radius: var(--wc-dropdown-radius, 0);
+        min-width: var(--wc-dropdown-min-width, 160px);
+        max-width: var(--wc-dropdown-max-width, 250px);
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
+      }
+      .wc-dropdown .dropdown-content:where([style*="max-height"]) { overflow-y: auto; }
+
+      /* menu-style="surface": the ribbon/menu look (opt-in; the default look is unchanged) */
+      .wc-dropdown.menu-surface .dropdown-content {
+        --wc-dropdown-bg: var(--surface-2);
+        --wc-dropdown-color: var(--text-1);
+        --wc-dropdown-border: 1px solid var(--surface-4);
+        --wc-dropdown-radius: 8px;
+        --wc-dropdown-min-width: 300px;
+        --wc-dropdown-max-width: min(480px, calc(100vw - 16px));
+        --wc-dropdown-item-hover: var(--surface-3);
+        max-height: var(--wc-dropdown-max-height, 70vh);
+        overflow-y: auto;
+        padding: 4px;
+        box-shadow: 0 10px 30px color-mix(in srgb, var(--text-1) 22%, transparent);
+      }
+      .wc-dropdown.menu-surface .dropdown-content a { color: var(--text-1); border-radius: 6px; }
+
+      /* Rich menu items (opt-in classes): icon, then label + one-line muted description */
+      .wc-dropdown .dropdown-content .wc-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+      }
+      .wc-menu-item-icon { flex: none; width: 1.25rem; display: inline-flex; justify-content: center; }
+      .wc-menu-item-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+      .wc-menu-item-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .wc-menu-item-desc {
+        font-size: 0.85em;
+        color: var(--text-2, inherit);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .wc-dropdown .dropdown-content .wc-menu-item.is-checked {
+        background-color: color-mix(in srgb, var(--primary-bg-color) 14%, transparent);
       }
 
       .wc-dropdown .search {
@@ -7681,7 +7742,7 @@ var WcDropdown = class extends WcBaseComponent {
       /* Change color of dropdown links on hover */
       /* .wc-dropdown .dropdown-content .wc-input:hover, */
       .wc-dropdown .dropdown-content a:hover {
-        background-color: var(--component-border-color);
+        background-color: var(--wc-dropdown-item-hover, var(--component-border-color));
       }
 
       /* Show the dropdown menu on hover */
@@ -7726,8 +7787,8 @@ var WcDropdown = class extends WcBaseComponent {
         }
       }
       
-      /* Fallback for browsers without anchor positioning */
-      @supports not (anchor-name: --test) {
+      /* Fallback for browsers without (complete) anchor positioning */
+      @supports not ((anchor-name: --test) and (position-area: bottom)) {
         .wc-dropdown .dropdown-content {
           position: fixed !important;
         }
@@ -7737,29 +7798,29 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
+    this._unWireEvents();
     if (this.clickModes.includes(this.mode)) {
-      document.body.addEventListener("wcdropdownopen", this._handleOpen.bind(this));
-      document.body.addEventListener("wcdropdownclose", this._handleClose.bind(this));
-      document.body.addEventListener("wcdropdowntoggle", this._handleToggle.bind(this));
+      document.body.addEventListener("wcdropdownopen", this._onOpen);
+      document.body.addEventListener("wcdropdownclose", this._onClose);
+      document.body.addEventListener("wcdropdowntoggle", this._onToggle);
+      this.querySelector(".dropbtn")?.addEventListener("click", this._onClick);
+      window.addEventListener("click", this._onWindowClick);
+      this.querySelector(".search")?.addEventListener("input", this._onInput);
     }
+    this.componentElement.addEventListener("keydown", this._onKeydown);
     this._boundReposition = this._repositionOnScroll.bind(this);
     window.addEventListener("scroll", this._boundReposition, { passive: true });
     window.addEventListener("resize", this._boundReposition, { passive: true });
   }
   _unWireEvents() {
     super._unWireEvents();
-    if (this.clickModes.includes(this.mode)) {
-      document.body.removeEventListener("wcdropdownopen", this._handleOpen.bind(this));
-      document.body.removeEventListener("wcdropdownclose", this._handleClose.bind(this));
-      document.body.removeEventListener("wcdropdowntoggle", this._handleToggle.bind(this));
-      const btn = this.querySelector(".dropbtn");
-      btn.removeEventListener("click", this._handleClick.bind(this));
-      window.removeEventListener("click", this._handleWindowClick.bind(this));
-      const ipt = this.querySelector(".search");
-      if (ipt) {
-        ipt.removeEventListener("input", this._handleInput.bind(this));
-      }
-    }
+    document.body.removeEventListener("wcdropdownopen", this._onOpen);
+    document.body.removeEventListener("wcdropdownclose", this._onClose);
+    document.body.removeEventListener("wcdropdowntoggle", this._onToggle);
+    this.querySelector(".dropbtn")?.removeEventListener("click", this._onClick);
+    window.removeEventListener("click", this._onWindowClick);
+    this.querySelector(".search")?.removeEventListener("input", this._onInput);
+    this.componentElement?.removeEventListener("keydown", this._onKeydown);
     if (this._boundReposition) {
       window.removeEventListener("scroll", this._boundReposition);
       window.removeEventListener("resize", this._boundReposition);
@@ -8037,9 +8098,9 @@ if (!customElements.get("wc-emoji")) {
       }
     }
     _openPicker() {
-      document.querySelectorAll("wc-emoji").forEach((el) => {
-        if (el !== this && el._isOpen) {
-          el._closePicker();
+      document.querySelectorAll("wc-emoji").forEach((el2) => {
+        if (el2 !== this && el2._isOpen) {
+          el2._closePicker();
         }
       });
       const picker = this.querySelector(".wc-emoji-picker");
@@ -8989,8 +9050,8 @@ if (!customElements.get("wc-help-drawer")) {
     _collectRefKeys() {
       const refKeyElements = document.querySelectorAll("wc-ref-key");
       const refKeys = [];
-      refKeyElements.forEach((el) => {
-        const val = el.getAttribute("value");
+      refKeyElements.forEach((el2) => {
+        const val = el2.getAttribute("value");
         if (val && !refKeys.includes(val)) refKeys.push(val);
       });
       if (refKeys.length === 0) {
@@ -10307,11 +10368,11 @@ if (!customElements.get("wc-barcode")) {
       return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
     _draw() {
-      const el = this.componentElement;
-      if (!el) return;
+      const el2 = this.componentElement;
+      if (!el2) return;
       const value = this.getAttribute("value") || "";
       if (!value) {
-        el.innerHTML = "";
+        el2.innerHTML = "";
         this.removeAttribute("role");
         this.removeAttribute("aria-label");
         return;
@@ -10328,12 +10389,12 @@ if (!customElements.get("wc-barcode")) {
         codeSvg = symbology === "code128" ? this._renderCode128(value, Number.isFinite(sizeAttr) ? sizeAttr : 64) : this._renderQr(value, ecLevel, Number.isFinite(sizeAttr) ? sizeAttr : 96);
       } catch (e) {
         console.error("[wc-barcode]", e);
-        el.innerHTML = "";
+        el2.innerHTML = "";
         return;
       }
       const labelHtml = labelPos === "none" ? "" : `<span class="barcode-label">${this._escape(value)}</span>`;
       const captionHtml = caption ? `<span class="barcode-caption">${this._escape(caption)}</span>` : "";
-      el.innerHTML = `
+      el2.innerHTML = `
         ${captionHtml}
         <div class="barcode-main label-${labelPos}">
           <span class="barcode-code">${codeSvg}</span>
@@ -10748,9 +10809,9 @@ if (!customElements.get("wc-checkin")) {
     }
     _setStage(state, html) {
       this._state = state;
-      const el = this.componentElement;
-      el.className = `wc-checkin state-${state} mode-${this.mode}`;
-      el.innerHTML = html;
+      const el2 = this.componentElement;
+      el2.className = `wc-checkin state-${state} mode-${this.mode}`;
+      el2.innerHTML = html;
       this.setAttribute("role", "group");
       this.setAttribute("aria-label", this.mode === "out" ? "Check-out station" : "Check-in station");
     }
@@ -11150,15 +11211,15 @@ if (!customElements.get("wc-record-lookup")) {
     // ---- Rendering ------------------------------------------------------------
     _render() {
       super._render();
-      const el = this.componentElement;
-      el.innerHTML = "";
+      const el2 = this.componentElement;
+      el2.innerHTML = "";
       const name = this.getAttribute("name") || `rl-${this.wcId}`;
       const lbl = this.getAttribute("lbl-label");
       if (lbl) {
         const label = document.createElement("label");
         label.setAttribute("for", name);
         label.textContent = lbl;
-        el.appendChild(label);
+        el2.appendChild(label);
       }
       const input2 = document.createElement("input");
       input2.type = "text";
@@ -11167,21 +11228,21 @@ if (!customElements.get("wc-record-lookup")) {
       input2.classList.add("form-control", "rl-input");
       input2.placeholder = this.getAttribute("placeholder") || "Search\u2026";
       if (this.hasAttribute("disabled")) input2.disabled = true;
-      el.appendChild(input2);
+      el2.appendChild(input2);
       this._input = input2;
       const icon = document.createElement("wc-fa-icon");
       icon.setAttribute("name", "magnifying-glass");
       icon.setAttribute("icon-style", "solid");
       icon.setAttribute("size", "0.9rem");
       icon.classList.add("rl-icon");
-      el.appendChild(icon);
+      el2.appendChild(icon);
       const sugg = document.createElement("div");
       sugg.classList.add("rl-suggestions", "hidden");
-      el.appendChild(sugg);
+      el2.appendChild(sugg);
       this._suggestions = sugg;
       const hint = document.createElement("div");
       hint.classList.add("rl-hint", "hidden");
-      el.appendChild(hint);
+      el2.appendChild(hint);
       this._hint = hint;
       if (typeof htmx !== "undefined") htmx.process(this);
     }
@@ -11375,15 +11436,15 @@ if (!customElements.get("wc-record-lookup")) {
     // Set a sibling field's value by `name` — works for wc-input / plain input / select /
     // textarea: property + attribute + inner control, dispatching input & change.
     _setField(scope, name, val) {
-      const el = scope.querySelector(`[name="${name}"]`);
-      if (!el) return false;
+      const el2 = scope.querySelector(`[name="${name}"]`);
+      if (!el2) return false;
       try {
-        el.value = val;
+        el2.value = val;
       } catch (_) {
       }
-      if (el.setAttribute) el.setAttribute("value", String(val));
-      const isNative = el.matches("input, select, textarea");
-      const inner = isNative ? null : el.querySelector("input, select, textarea, [form-element]");
+      if (el2.setAttribute) el2.setAttribute("value", String(val));
+      const isNative = el2.matches("input, select, textarea");
+      const inner = isNative ? null : el2.querySelector("input, select, textarea, [form-element]");
       if (inner) {
         try {
           inner.value = val;
@@ -11392,8 +11453,8 @@ if (!customElements.get("wc-record-lookup")) {
         inner.dispatchEvent(new Event("input", { bubbles: true }));
         inner.dispatchEvent(new Event("change", { bubbles: true }));
       }
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+      el2.dispatchEvent(new Event("input", { bubbles: true }));
+      el2.dispatchEvent(new Event("change", { bubbles: true }));
       return true;
     }
     // ---- Helpers --------------------------------------------------------------
@@ -12958,10 +13019,10 @@ var WcMap = class _WcMap extends WcBaseComponent {
       const popup = new maplibregl.Popup({ offset: 24 }).setHTML(popupHtml);
       const marker = new maplibregl.Marker().setLngLat([pin.lng, pin.lat]).setPopup(popup).addTo(this.map);
       this.markers.push(marker);
-      const el = typeof marker.getElement === "function" ? marker.getElement() : null;
-      if (el) {
-        el.style.cursor = "pointer";
-        el.addEventListener("click", () => {
+      const el2 = typeof marker.getElement === "function" ? marker.getElement() : null;
+      if (el2) {
+        el2.style.cursor = "pointer";
+        el2.addEventListener("click", () => {
           this._emitEvent("wcpinclicked", "pin-clicked", {
             detail: { pin, marker, index },
             bubbles: true
@@ -13354,9 +13415,9 @@ var WcAddress = class extends WcBaseFormComponent {
     const group = this.getAttribute("address-group") || "address";
     const scope = this.closest("form") || document;
     const read = (field) => {
-      const el = scope.querySelector(`[name="${group}.${field}"]`);
-      if (!el) return "";
-      const v = el.value != null ? el.value : el.getAttribute("value");
+      const el2 = scope.querySelector(`[name="${group}.${field}"]`);
+      if (!el2) return "";
+      const v = el2.value != null ? el2.value : el2.getAttribute("value");
       return v == null ? "" : String(v).trim();
     };
     return { state: read("state"), postal_code: read("postal_code"), city: read("city") };
@@ -15647,22 +15708,22 @@ var WcMenu = class extends WcBaseComponent {
   }
   _createAnchor(viewName, viewLabel, selected) {
     const path = this.getAttribute("path") || "/static/views/";
-    const el = document.createElement("a");
-    el.classList.add("menu-link");
+    const el2 = document.createElement("a");
+    el2.classList.add("menu-link");
     if (selected) {
-      el.classList.add("active");
+      el2.classList.add("active");
     }
-    el.dataset.name = viewName;
-    el.textContent = viewLabel;
-    el.setAttribute("href", `${path}${viewName}.html`);
-    el.setAttribute("hx-get", `${path}${viewName}.html`);
-    el.setAttribute("hx-trigger", "click");
-    el.setAttribute("hx-target", "#viewport");
-    el.setAttribute("hx-swap", "innerHTML transition:true");
-    el.setAttribute("hx-push-url", `${path}${viewName}.html`);
-    el.setAttribute("hx-select", "#page-contents");
-    el.addEventListener("click", this._handleClick.bind(this));
-    return el;
+    el2.dataset.name = viewName;
+    el2.textContent = viewLabel;
+    el2.setAttribute("href", `${path}${viewName}.html`);
+    el2.setAttribute("hx-get", `${path}${viewName}.html`);
+    el2.setAttribute("hx-trigger", "click");
+    el2.setAttribute("hx-target", "#viewport");
+    el2.setAttribute("hx-swap", "innerHTML transition:true");
+    el2.setAttribute("hx-push-url", `${path}${viewName}.html`);
+    el2.setAttribute("hx-select", "#page-contents");
+    el2.addEventListener("click", this._handleClick.bind(this));
+    return el2;
   }
   _setActiveLink() {
     const selectedName = this._getCurrentRoute();
@@ -16356,11 +16417,11 @@ if (!customElements.get("wc-live-designer")) {
      * in the same format as the old registry properties.
      */
     _readPropertiesFromSourceNode(designerId) {
-      const el = this._getSourceNode(designerId);
-      if (!el) return {};
-      const tag = el.tagName.toLowerCase();
+      const el2 = this._getSourceNode(designerId);
+      if (!el2) return {};
+      const tag = el2.tagName.toLowerCase();
       const props = {};
-      for (const attr of el.attributes) {
+      for (const attr of el2.attributes) {
         const name = attr.name;
         if (name === "data-designer-id") continue;
         if (name === "class") {
@@ -16374,7 +16435,7 @@ if (!customElements.get("wc-live-designer")) {
         props[name] = attr.value;
       }
       if (WcLiveDesigner._HTML_TAGS.has(tag)) {
-        const textNodes = Array.from(el.childNodes).filter((n) => n.nodeType === 3);
+        const textNodes = Array.from(el2.childNodes).filter((n) => n.nodeType === 3);
         props.content = textNodes.map((n) => n.textContent).join("").trim();
       }
       return props;
@@ -16383,58 +16444,58 @@ if (!customElements.get("wc-live-designer")) {
      * Update a property on a sourceDoc node.
      */
     _updateSourceDocProperty(designerId, propName, value) {
-      const el = this._getSourceNode(designerId);
-      if (!el) return;
+      const el2 = this._getSourceNode(designerId);
+      if (!el2) return;
       if (propName === "css") {
-        if (value) el.setAttribute("class", value);
-        else el.removeAttribute("class");
+        if (value) el2.setAttribute("class", value);
+        else el2.removeAttribute("class");
       } else if (propName === "scope") {
-        if (value) el.setAttribute("data-scope", value);
-        else el.removeAttribute("data-scope");
+        if (value) el2.setAttribute("data-scope", value);
+        else el2.removeAttribute("data-scope");
       } else if (propName === "content") {
-        const textNode = Array.from(el.childNodes).find((n) => n.nodeType === 3);
+        const textNode = Array.from(el2.childNodes).find((n) => n.nodeType === 3);
         if (textNode) textNode.textContent = value;
-        else el.prepend(el.ownerDocument.createTextNode(value));
+        else el2.prepend(el2.ownerDocument.createTextNode(value));
       } else {
         const attrName = propName.replace(/_/g, "-");
-        if (value === "" || value === true) el.setAttribute(attrName, "");
-        else if (value === false || value == null) el.removeAttribute(attrName);
-        else el.setAttribute(attrName, String(value));
+        if (value === "" || value === true) el2.setAttribute(attrName, "");
+        else if (value === false || value == null) el2.removeAttribute(attrName);
+        else el2.setAttribute(attrName, String(value));
       }
     }
     /**
      * Remove a node from sourceDoc.
      */
     _removeSourceDocNode(designerId) {
-      const el = this._getSourceNode(designerId);
-      if (el) el.remove();
+      const el2 = this._getSourceNode(designerId);
+      if (el2) el2.remove();
     }
     /**
      * Move a node up/down in sourceDoc.
      */
     _moveSourceDocNode(designerId, direction) {
-      const el = this._getSourceNode(designerId);
-      if (!el) return;
-      if (direction === "up" && el.previousElementSibling) {
-        el.parentElement.insertBefore(el, el.previousElementSibling);
-      } else if (direction === "down" && el.nextElementSibling) {
-        el.parentElement.insertBefore(el.nextElementSibling, el);
+      const el2 = this._getSourceNode(designerId);
+      if (!el2) return;
+      if (direction === "up" && el2.previousElementSibling) {
+        el2.parentElement.insertBefore(el2, el2.previousElementSibling);
+      } else if (direction === "down" && el2.nextElementSibling) {
+        el2.parentElement.insertBefore(el2.nextElementSibling, el2);
       }
     }
     /**
      * Duplicate a node in sourceDoc. Returns the new stamped HTML for canvas insertion.
      */
     _duplicateSourceDocNode(designerId) {
-      const el = this._getSourceNode(designerId);
-      if (!el) return null;
-      const clone = el.cloneNode(true);
+      const el2 = this._getSourceNode(designerId);
+      if (!el2) return null;
+      const clone = el2.cloneNode(true);
       clone.removeAttribute("data-designer-id");
       clone.querySelectorAll("[data-designer-id]").forEach((c) => c.removeAttribute("data-designer-id"));
       this._stampDesignerIdsOnDoc(clone.parentElement || clone);
       if (!clone.hasAttribute("data-designer-id")) {
         clone.setAttribute("data-designer-id", this._generateDesignerId());
       }
-      el.after(clone);
+      el2.after(clone);
       return clone.outerHTML;
     }
     /**
@@ -16453,8 +16514,8 @@ if (!customElements.get("wc-live-designer")) {
       const designerChildren = Array.from(parent.children).filter(
         (c) => c.hasAttribute("data-designer-id")
       );
-      for (const el of newElements) {
-        const imported = this._sourceDoc.importNode(el, true);
+      for (const el2 of newElements) {
+        const imported = this._sourceDoc.importNode(el2, true);
         if (position != null && position < designerChildren.length) {
           parent.insertBefore(imported, designerChildren[position]);
         } else {
@@ -18100,94 +18161,94 @@ function runDelete() {
     transformToPongo2(rawHTML) {
       const doc = this._safeParse(rawHTML);
       const root = doc.body.firstElementChild;
-      root.querySelectorAll("[data-scope]").forEach((el) => {
-        const scope = el.getAttribute("data-scope");
+      root.querySelectorAll("[data-scope]").forEach((el2) => {
+        const scope = el2.getAttribute("data-scope");
         if (!scope) return;
-        const tag = el.tagName.toLowerCase();
+        const tag = el2.tagName.toLowerCase();
         const fieldName = scope.split(".").pop();
         if (tag === "wc-input") {
-          const inputType = el.getAttribute("type");
+          const inputType = el2.getAttribute("type");
           if (inputType === "checkbox") {
-            el.removeAttribute("checked");
-            el.setAttribute("data-pongo2-checked", `{% if Record.${scope} %} checked {% endif %}`);
+            el2.removeAttribute("checked");
+            el2.setAttribute("data-pongo2-checked", `{% if Record.${scope} %} checked {% endif %}`);
           } else if (inputType === "currency") {
-            el.setAttribute("value", `{{ Record.${scope}|floatformat:2 }}`);
+            el2.setAttribute("value", `{{ Record.${scope}|floatformat:2 }}`);
           } else if (inputType === "radio") {
-            const lookup = el.getAttribute("data-lookup");
+            const lookup = el2.getAttribute("data-lookup");
             if (lookup) {
-              el.setAttribute("value", `{{Record.${scope}}}`);
-              el.innerHTML = `
+              el2.setAttribute("value", `{{Record.${scope}}}`);
+              el2.innerHTML = `
 {% set ${fieldName} = coalesce(Record, "${scope}", "") %}
 {% for item in Lookups.${lookup}.item_list %}
 <option value="{{item.value}}"{% if ${fieldName} == item.value %} checked{% endif %}>{{item.key}}</option>
 {% endfor %}`;
             } else {
-              el.setAttribute("value", `{{ Record.${scope} }}`);
+              el2.setAttribute("value", `{{ Record.${scope} }}`);
             }
           } else {
-            el.setAttribute("value", `{{ Record.${scope} }}`);
+            el2.setAttribute("value", `{{ Record.${scope} }}`);
           }
         } else if (tag === "wc-select") {
-          const dataSource = el.getAttribute("data-source") || "";
-          const lookup = el.getAttribute("data-lookup");
-          const url = el.getAttribute("url");
-          const urlTemplate = el.getAttribute("data-url-template");
-          const items = el.getAttribute("items");
-          const mode = el.getAttribute("mode");
-          const allowDynamic = el.hasAttribute("allow-dynamic");
-          const placeholder = el.getAttribute("placeholder-option") || "Choose...";
+          const dataSource = el2.getAttribute("data-source") || "";
+          const lookup = el2.getAttribute("data-lookup");
+          const url = el2.getAttribute("url");
+          const urlTemplate = el2.getAttribute("data-url-template");
+          const items = el2.getAttribute("items");
+          const mode = el2.getAttribute("mode");
+          const allowDynamic = el2.hasAttribute("allow-dynamic");
+          const placeholder = el2.getAttribute("placeholder-option") || "Choose...";
           if (url || dataSource === "url") {
-            el.setAttribute("value", `{{ Record.${scope} }}`);
+            el2.setAttribute("value", `{{ Record.${scope} }}`);
           } else if (urlTemplate || dataSource === "url-template") {
           } else if (lookup || dataSource === "lookup") {
-            el.removeAttribute("value");
-            el.innerHTML = `
+            el2.removeAttribute("value");
+            el2.innerHTML = `
 <option value="">${placeholder}</option>
 {% set ${fieldName} = Record.${scope} %}
 {% for item in Lookups.${lookup}.item_list %}
 <option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.key}}</option>
 {% endfor %}`;
           } else if (dataSource === "collection") {
-            const collection = el.getAttribute("data-collection") || "";
-            const displayMember = el.getAttribute("display-member") || "name";
-            const valueMember = el.getAttribute("value-member") || "slug";
-            el.removeAttribute("value");
-            el.innerHTML = `
+            const collection = el2.getAttribute("data-collection") || "";
+            const displayMember = el2.getAttribute("display-member") || "name";
+            const valueMember = el2.getAttribute("value-member") || "slug";
+            el2.removeAttribute("value");
+            el2.innerHTML = `
 <option value="">${placeholder}</option>
 {% set ${fieldName} = Record.${scope} %}
 {% for item in TemplateCollections.${collection} %}
 <option value="{{item.${valueMember}}}"{% if ${fieldName} == item.${valueMember} %} selected{% endif %}>{{item.${displayMember}}}</option>
 {% endfor %}`;
           } else if (items || dataSource === "items") {
-            el.setAttribute("value", `{{ Record.${scope} }}`);
+            el2.setAttribute("value", `{{ Record.${scope} }}`);
           } else if (mode === "chip" && allowDynamic) {
-            el.removeAttribute("value");
-            el.innerHTML = `
+            el2.removeAttribute("value");
+            el2.innerHTML = `
 {% for tag in Record.${scope} %}
 <option value="{{tag}}" selected>{{tag}}</option>
 {% endfor %}`;
           } else if (mode === "chip") {
             if (lookup) {
-              el.removeAttribute("value");
-              el.innerHTML = `
+              el2.removeAttribute("value");
+              el2.innerHTML = `
 {% set ${fieldName} = Record.${scope} %}
 {% for item in Lookups.${lookup}.item_list %}
 <option value="{{item.value}}"{% if ${fieldName} == item.value %} selected{% endif %}>{{item.value}}</option>
 {% endfor %}`;
             } else {
-              el.setAttribute("value", `{{ Record.${scope} }}`);
+              el2.setAttribute("value", `{{ Record.${scope} }}`);
             }
           } else {
-            el.setAttribute("value", `{{ Record.${scope} }}`);
+            el2.setAttribute("value", `{{ Record.${scope} }}`);
           }
         } else if (tag === "wc-textarea") {
-          el.setAttribute("value", `{{ Record.${scope} }}`);
+          el2.setAttribute("value", `{{ Record.${scope} }}`);
         } else if (tag === "wc-field") {
-          el.setAttribute("value", `{{ Record.${scope} }}`);
+          el2.setAttribute("value", `{{ Record.${scope} }}`);
         } else {
-          el.setAttribute("value", `{{ Record.${scope} }}`);
+          el2.setAttribute("value", `{{ Record.${scope} }}`);
         }
-        el.removeAttribute("data-scope");
+        el2.removeAttribute("data-scope");
       });
       let html = this._safeSerialize(doc);
       html = html.replace(/data-pongo2-checked="([^"]+)"/g, (match, pongo2) => {
@@ -18510,8 +18571,8 @@ if (!customElements.get("wc-markdown-viewer")) {
     _detectLanguages() {
       const codeEls = this.componentElement.querySelectorAll('pre > code[class*="language-"]');
       const langs = /* @__PURE__ */ new Set();
-      codeEls.forEach((el) => {
-        const match = el.className.match(/language-(\S+)/);
+      codeEls.forEach((el2) => {
+        const match = el2.className.match(/language-(\S+)/);
         if (match) {
           const lang = match[1];
           const mapped = WcMarkdownViewer.LANG_MAP[lang] || lang;
@@ -20157,8 +20218,8 @@ if (!customElements.get("wc-slideshow")) {
     }
     _createInnerElement() {
       const els = this.querySelectorAll("wc-slideshow > *:not(.wc-slideshow)");
-      els.forEach((el) => {
-        this.componentElement.appendChild(el);
+      els.forEach((el2) => {
+        this.componentElement.appendChild(el2);
       });
       const prev = document.createElement("a");
       prev.classList.add("prev");
@@ -20900,7 +20961,7 @@ var WcTab = class extends WcBaseComponent {
   async _restoreTabsWhenReady() {
     try {
       const allElements = Array.from(this.querySelectorAll("*"));
-      const allComponents = allElements.filter((el) => el.tagName.toLowerCase().startsWith("wc-"));
+      const allComponents = allElements.filter((el2) => el2.tagName.toLowerCase().startsWith("wc-"));
       await Promise.all(
         allComponents.map((component) => {
           return new Promise((resolve) => {
@@ -21958,9 +22019,9 @@ if (!customElements.get("wc-tabulator")) {
     }
     getFuncs() {
       const funcElements = this.querySelectorAll("wc-tabulator-func");
-      funcElements.forEach((el) => {
-        const name = el.getAttribute("name");
-        const func = el.textContent.trim();
+      funcElements.forEach((el2) => {
+        const name = el2.getAttribute("name");
+        const func = el2.textContent.trim();
         if (!func) {
           return;
         }
@@ -21972,7 +22033,7 @@ if (!customElements.get("wc-tabulator")) {
           console.error("Function content:", func);
           console.error("Attempted to create:", `return (${func})`);
         }
-        el.innerHTML = "";
+        el2.innerHTML = "";
       });
     }
     // _handleCloneRow runs the unified Clone Row flow:
@@ -22114,9 +22175,9 @@ if (!customElements.get("wc-tabulator")) {
     }
     getRowMenu() {
       const rowMenuElements = this.querySelectorAll("wc-tabulator-row-menu");
-      rowMenuElements.forEach((el) => {
-        const order = el.getAttribute("order");
-        const isSeparator = el.hasAttribute("separator");
+      rowMenuElements.forEach((el2) => {
+        const order = el2.getAttribute("order");
+        const isSeparator = el2.hasAttribute("separator");
         let mnu = {};
         if (isSeparator) {
           mnu = {
@@ -22124,9 +22185,9 @@ if (!customElements.get("wc-tabulator")) {
             order
           };
         } else {
-          const label = el.getAttribute("label");
-          const icon = el.getAttribute("icon");
-          const func = el.textContent.trim();
+          const label = el2.getAttribute("label");
+          const icon = el2.getAttribute("icon");
+          const func = el2.textContent.trim();
           if (!func) {
             return;
           }
@@ -22138,7 +22199,7 @@ if (!customElements.get("wc-tabulator")) {
             order
           };
         }
-        el.innerHTML = "";
+        el2.innerHTML = "";
         this.rowMenus.push(mnu);
       });
       this.rowMenus.forEach((menu) => {
@@ -24038,8 +24099,8 @@ var WcTimeline = class extends WcBaseComponent {
       this._moveDeclarativeOptions();
       this.componentElement.innerHTML = "";
       this._items.forEach((item, idx) => {
-        const el = this._createElement(item.label, item.content, idx);
-        this.componentElement.appendChild(el);
+        const el2 = this._createElement(item.label, item.content, idx);
+        this.componentElement.appendChild(el2);
       });
     }
     if (typeof htmx !== "undefined") {
@@ -24704,11 +24765,11 @@ if (!customElements.get("wc-tree")) {
     _parseFilters() {
       const filterEls = this.querySelectorAll("wc-tree-filter");
       this._filters = [];
-      filterEls.forEach((el) => {
-        const field = el.getAttribute("field") || "";
-        const label = el.getAttribute("label") || field;
-        const valuesStr = el.getAttribute("values") || "";
-        const checked = el.hasAttribute("checked");
+      filterEls.forEach((el2) => {
+        const field = el2.getAttribute("field") || "";
+        const label = el2.getAttribute("label") || field;
+        const valuesStr = el2.getAttribute("values") || "";
+        const checked = el2.hasAttribute("checked");
         if (!field || !valuesStr) return;
         const values = valuesStr.split(",").map((v) => v.trim()).filter((v) => v);
         const valueStates = {};
@@ -24816,8 +24877,8 @@ if (!customElements.get("wc-tree")) {
     _getVisibleRows() {
       return Array.from(this.querySelectorAll(".tree-item-row")).filter(
         (row) => {
-          let el = row.closest("wc-tree-item");
-          let parent = el?.parentElement?.closest("wc-tree-item");
+          let el2 = row.closest("wc-tree-item");
+          let parent = el2?.parentElement?.closest("wc-tree-item");
           while (parent) {
             if (!parent.isExpanded) return false;
             parent = parent.parentElement?.closest("wc-tree-item");
@@ -25653,15 +25714,15 @@ if (!customElements.get("wc-table")) {
     _bindExternalFilter() {
       const sel = this.filterInputSel;
       if (!sel) return;
-      const el = document.querySelector(sel);
-      if (!el) return;
-      if (el === this._extFilterEl) return;
+      const el2 = document.querySelector(sel);
+      if (!el2) return;
+      if (el2 === this._extFilterEl) return;
       this._unbindExternalFilter();
-      this._extFilterEl = el;
-      this._extFilterHandler = () => this.setFilter(el.value);
-      el.addEventListener("change", this._extFilterHandler);
-      el.addEventListener("input", this._extFilterHandler);
-      if (el.value != null && el.value !== "") this._filterValue = String(el.value).trim();
+      this._extFilterEl = el2;
+      this._extFilterHandler = () => this.setFilter(el2.value);
+      el2.addEventListener("change", this._extFilterHandler);
+      el2.addEventListener("input", this._extFilterHandler);
+      if (el2.value != null && el2.value !== "") this._filterValue = String(el2.value).trim();
     }
     _unbindExternalFilter() {
       if (this._extFilterEl && this._extFilterHandler) {
@@ -25874,10 +25935,10 @@ if (!customElements.get("wc-table")) {
       this._reconcileRunStreams();
     }
     // Re-process a freshly-rendered subtree with HTMX (no-op when HTMX isn't loaded).
-    _htmxProcess(el) {
-      if (el && typeof htmx !== "undefined" && typeof htmx.process === "function") {
+    _htmxProcess(el2) {
+      if (el2 && typeof htmx !== "undefined" && typeof htmx.process === "function") {
         try {
-          htmx.process(el);
+          htmx.process(el2);
         } catch (e) {
         }
       }
@@ -31381,17 +31442,17 @@ var WcLoader = class extends WcBaseComponent {
   // Build the inner DOM for the current `type`. Colors/size are driven by CSS vars, so a
   // structure rebuild is only needed when `type` changes.
   _buildStructure() {
-    const el = this.componentElement;
-    if (!el) return;
+    const el2 = this.componentElement;
+    if (!el2) return;
     const type = (this.getAttribute("type") || "ring").toLowerCase();
     if (type === "double-ring") {
-      el.innerHTML = '<div class="wc-loader-dr"><div></div><div></div><div><div></div></div><div><div></div></div></div>';
+      el2.innerHTML = '<div class="wc-loader-dr"><div></div><div></div><div><div></div></div><div><div></div></div></div>';
     } else {
-      el.innerHTML = "";
+      el2.innerHTML = "";
     }
-    el.setAttribute("role", "status");
-    el.setAttribute("aria-busy", "true");
-    el.setAttribute("aria-label", this.getAttribute("label") || "Loading");
+    el2.setAttribute("role", "status");
+    el2.setAttribute("aria-busy", "true");
+    el2.setAttribute("aria-label", this.getAttribute("label") || "Loading");
   }
   _handleAttributeChange(attrName, newValue) {
     if (attrName === "type") {
@@ -31988,12 +32049,12 @@ if (!customElements.get("wc-mask-hub")) {
      */
     applyAll(root) {
       if (!root || !root.querySelectorAll || typeof IMask === "undefined") return;
-      root.querySelectorAll('input[type="tel"], input[data-mask], [data-mask] input').forEach((el) => {
-        if (el._imaskInstance) return;
-        const holder = el.closest("[data-mask]");
-        const maskType = el.getAttribute("data-mask") || holder && holder.getAttribute("data-mask") || (el.type === "tel" ? "phone" : null);
+      root.querySelectorAll('input[type="tel"], input[data-mask], [data-mask] input').forEach((el2) => {
+        if (el2._imaskInstance) return;
+        const holder = el2.closest("[data-mask]");
+        const maskType = el2.getAttribute("data-mask") || holder && holder.getAttribute("data-mask") || (el2.type === "tel" ? "phone" : null);
         if (!maskType || !this.maskConfigs[maskType]) return;
-        this.applyMask({ target: el }, maskType);
+        this.applyMask({ target: el2 }, maskType);
       });
     }
     /**
@@ -34026,9 +34087,9 @@ if (!customElements.get("wc-chart-builder")) {
           },
           onClick: (event, elements) => {
             if (elements.length > 0) {
-              const el = elements[0];
-              const idx = el.index;
-              const dsIdx = el.datasetIndex;
+              const el2 = elements[0];
+              const idx = el2.index;
+              const dsIdx = el2.datasetIndex;
               this._emitEvent("wcchartclick", "chart:click", {
                 bubbles: true,
                 composed: true,
@@ -35201,8 +35262,8 @@ if (!customElements.get("wc-pivot")) {
       searchInput.placeholder = "Search...";
       searchInput.addEventListener("input", () => {
         const q = searchInput.value.toLowerCase();
-        optionEls.forEach((el) => {
-          el.style.display = el.dataset.val.toLowerCase().includes(q) ? "" : "none";
+        optionEls.forEach((el2) => {
+          el2.style.display = el2.dataset.val.toLowerCase().includes(q) ? "" : "none";
         });
       });
       searchWrap.appendChild(searchInput);
@@ -35231,8 +35292,8 @@ if (!customElements.get("wc-pivot")) {
       selectAllBtn.type = "button";
       selectAllBtn.textContent = "All";
       selectAllBtn.addEventListener("click", () => {
-        optionEls.forEach((el) => {
-          el.querySelector("input").checked = true;
+        optionEls.forEach((el2) => {
+          el2.querySelector("input").checked = true;
         });
       });
       actions.appendChild(selectAllBtn);
@@ -35240,8 +35301,8 @@ if (!customElements.get("wc-pivot")) {
       clearBtn.type = "button";
       clearBtn.textContent = "None";
       clearBtn.addEventListener("click", () => {
-        optionEls.forEach((el) => {
-          el.querySelector("input").checked = false;
+        optionEls.forEach((el2) => {
+          el2.querySelector("input").checked = false;
         });
       });
       actions.appendChild(clearBtn);
@@ -35252,9 +35313,9 @@ if (!customElements.get("wc-pivot")) {
       applyBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const newExcluded = /* @__PURE__ */ new Set();
-        optionEls.forEach((el) => {
-          if (!el.querySelector("input").checked) {
-            newExcluded.add(el.dataset.val);
+        optionEls.forEach((el2) => {
+          if (!el2.querySelector("input").checked) {
+            newExcluded.add(el2.dataset.val);
           }
         });
         if (newExcluded.size > 0) {
@@ -35483,7 +35544,7 @@ if (!customElements.get("wc-pivot")) {
         detail: { row, column: col, value: matches.length, documents: matches }
       });
       const wasExpanded = this._drillDown && this._drillDown.row === row && this._drillDown.col === col;
-      tbody.querySelectorAll(".pivot-cell-expanded").forEach((el) => el.classList.remove("pivot-cell-expanded"));
+      tbody.querySelectorAll(".pivot-cell-expanded").forEach((el2) => el2.classList.remove("pivot-cell-expanded"));
       const existingDd = tbody.querySelector(".pivot-drilldown-row");
       if (existingDd) {
         const wrapper = existingDd.querySelector(".pivot-drilldown-wrapper");
@@ -35539,7 +35600,7 @@ if (!customElements.get("wc-pivot")) {
         e.stopPropagation();
         this._drillDown = null;
         const tbody2 = this.componentElement.querySelector(".pivot-table tbody");
-        if (tbody2) tbody2.querySelectorAll(".pivot-cell-expanded").forEach((el) => el.classList.remove("pivot-cell-expanded"));
+        if (tbody2) tbody2.querySelectorAll(".pivot-cell-expanded").forEach((el2) => el2.classList.remove("pivot-cell-expanded"));
         wrapper.classList.add("pivot-drilldown-closing");
         wrapper.addEventListener("animationend", () => tr.remove(), { once: true });
       });
@@ -37076,16 +37137,16 @@ if (!customElements.get("wc-document-tree")) {
         return;
       }
       this._contextMenuItems = [];
-      menuElements.forEach((el) => {
-        const isSeparator = el.hasAttribute("separator");
+      menuElements.forEach((el2) => {
+        const isSeparator = el2.hasAttribute("separator");
         if (isSeparator) {
           this._contextMenuItems.push({ divider: true });
         } else {
-          const label = el.getAttribute("label") || "";
-          const icon = el.getAttribute("icon") || "";
-          const order = el.getAttribute("order");
-          const funcStr = el.textContent.trim();
-          el.textContent = "";
+          const label = el2.getAttribute("label") || "";
+          const icon = el2.getAttribute("icon") || "";
+          const order = el2.getAttribute("order");
+          const funcStr = el2.textContent.trim();
+          el2.textContent = "";
           if (!funcStr) return;
           let actionFn;
           try {
@@ -37846,7 +37907,7 @@ var WcChartjs = class extends WcChart {
   // Public methods
   reload() {
     const errorElements = this.querySelectorAll(".wc-chartjs-error");
-    errorElements.forEach((el) => el.remove());
+    errorElements.forEach((el2) => el2.remove());
     return this._fetchChartData();
   }
   setUrl(url) {
@@ -39123,7 +39184,7 @@ var WcKanban = class extends WcBaseComponent {
   }
   _handleDragEnd() {
     const card = this._dragEl;
-    this.componentElement.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    this.componentElement.querySelectorAll(".drag-over").forEach((el2) => el2.classList.remove("drag-over"));
     this.componentElement.classList.remove("is-dragging");
     if (!card) return;
     card.classList.remove("dragging");
@@ -39195,33 +39256,33 @@ var WcKanban = class extends WcBaseComponent {
   // ---- Wiring ---------------------------------------------------------------
   _wireEvents() {
     super._wireEvents();
-    const el = this.componentElement;
-    el.removeEventListener("dragstart", this._onDragStart);
-    el.addEventListener("dragstart", this._onDragStart);
-    el.removeEventListener("dragover", this._onDragOver);
-    el.addEventListener("dragover", this._onDragOver);
-    el.removeEventListener("drop", this._onDrop);
-    el.addEventListener("drop", this._onDrop);
-    el.removeEventListener("dragend", this._onDragEnd);
-    el.addEventListener("dragend", this._onDragEnd);
-    el.removeEventListener("click", this._onClick);
-    el.addEventListener("click", this._onClick);
-    el.removeEventListener("keydown", this._onKeydown);
-    el.addEventListener("keydown", this._onKeydown);
-    el.removeEventListener("submit", this._onSubmit);
-    el.addEventListener("submit", this._onSubmit);
+    const el2 = this.componentElement;
+    el2.removeEventListener("dragstart", this._onDragStart);
+    el2.addEventListener("dragstart", this._onDragStart);
+    el2.removeEventListener("dragover", this._onDragOver);
+    el2.addEventListener("dragover", this._onDragOver);
+    el2.removeEventListener("drop", this._onDrop);
+    el2.addEventListener("drop", this._onDrop);
+    el2.removeEventListener("dragend", this._onDragEnd);
+    el2.addEventListener("dragend", this._onDragEnd);
+    el2.removeEventListener("click", this._onClick);
+    el2.addEventListener("click", this._onClick);
+    el2.removeEventListener("keydown", this._onKeydown);
+    el2.addEventListener("keydown", this._onKeydown);
+    el2.removeEventListener("submit", this._onSubmit);
+    el2.addEventListener("submit", this._onSubmit);
   }
   _unWireEvents() {
     super._unWireEvents();
-    const el = this.componentElement;
-    if (!el) return;
-    el.removeEventListener("dragstart", this._onDragStart);
-    el.removeEventListener("dragover", this._onDragOver);
-    el.removeEventListener("drop", this._onDrop);
-    el.removeEventListener("dragend", this._onDragEnd);
-    el.removeEventListener("click", this._onClick);
-    el.removeEventListener("keydown", this._onKeydown);
-    el.removeEventListener("submit", this._onSubmit);
+    const el2 = this.componentElement;
+    if (!el2) return;
+    el2.removeEventListener("dragstart", this._onDragStart);
+    el2.removeEventListener("dragover", this._onDragOver);
+    el2.removeEventListener("drop", this._onDrop);
+    el2.removeEventListener("dragend", this._onDragEnd);
+    el2.removeEventListener("click", this._onClick);
+    el2.removeEventListener("keydown", this._onKeydown);
+    el2.removeEventListener("submit", this._onSubmit);
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
     if ([
@@ -39948,7 +40009,7 @@ var WcCalendar = class extends WcBaseComponent {
   // ---- Wiring ---------------------------------------------------------------
   _wireEvents() {
     super._wireEvents();
-    const el = this.componentElement;
+    const el2 = this.componentElement;
     const pairs = [
       ["click", this._onClick],
       ["keydown", this._onKeydownBound || (this._onKeydownBound = this._handleKeydown.bind(this))],
@@ -39958,14 +40019,14 @@ var WcCalendar = class extends WcBaseComponent {
       ["dragend", this._onDragEnd]
     ];
     pairs.forEach(([type, fn]) => {
-      el.removeEventListener(type, fn);
-      el.addEventListener(type, fn);
+      el2.removeEventListener(type, fn);
+      el2.addEventListener(type, fn);
     });
   }
   _unWireEvents() {
     super._unWireEvents();
-    const el = this.componentElement;
-    if (!el) return;
+    const el2 = this.componentElement;
+    if (!el2) return;
     [
       ["click", this._onClick],
       ["keydown", this._onKeydownBound],
@@ -39973,7 +40034,7 @@ var WcCalendar = class extends WcBaseComponent {
       ["dragover", this._onDragOver],
       ["drop", this._onDrop],
       ["dragend", this._onDragEnd]
-    ].forEach(([type, fn]) => fn && el.removeEventListener(type, fn));
+    ].forEach(([type, fn]) => fn && el2.removeEventListener(type, fn));
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === "class") {
@@ -40519,11 +40580,11 @@ var WcGantt = class extends WcBaseComponent {
   // ---- Wiring ---------------------------------------------------------------
   _wireEvents() {
     super._wireEvents();
-    const el = this.componentElement;
-    el.removeEventListener("click", this._onClick);
-    el.addEventListener("click", this._onClick);
-    el.removeEventListener("pointerdown", this._onPointerDown);
-    el.addEventListener("pointerdown", this._onPointerDown);
+    const el2 = this.componentElement;
+    el2.removeEventListener("click", this._onClick);
+    el2.addEventListener("click", this._onClick);
+    el2.removeEventListener("pointerdown", this._onPointerDown);
+    el2.addEventListener("pointerdown", this._onPointerDown);
   }
   _unWireEvents() {
     super._unWireEvents();
@@ -41000,9 +41061,9 @@ var WcFxBoard = class extends WcBaseComponent {
     if (readout) readout.textContent = `${Math.round(this._masterVolume)}%`;
     this._active.forEach((entry) => {
       const vol = this._effectiveVolume(entry.resource);
-      entry.instances.forEach((el) => {
+      entry.instances.forEach((el2) => {
         try {
-          el.volume = vol;
+          el2.volume = vol;
         } catch (ex) {
         }
       });
@@ -41018,7 +41079,7 @@ var WcFxBoard = class extends WcBaseComponent {
     }
     const entries = Array.from(this._active.values());
     this._active.forEach((entry, id) => {
-      entry.instances.forEach((el) => this._haltMedia(el));
+      entry.instances.forEach((el2) => this._haltMedia(el2));
       this._reflectPad(id, false);
     });
     this._active.clear();
@@ -41081,10 +41142,10 @@ var WcFxBoard = class extends WcBaseComponent {
     });
   }
   _renderBoard() {
-    const el = this.componentElement;
-    if (!el) return;
+    const el2 = this.componentElement;
+    if (!el2) return;
     const wasActive = new Map(this._active);
-    el.innerHTML = "";
+    el2.innerHTML = "";
     this._keymap = /* @__PURE__ */ new Map();
     const header = document.createElement("div");
     header.className = "wc-fx-board-header";
@@ -41114,7 +41175,7 @@ var WcFxBoard = class extends WcBaseComponent {
     stopAll.setAttribute("aria-label", "Stop all playing media");
     header.appendChild(master);
     header.appendChild(stopAll);
-    el.appendChild(header);
+    el2.appendChild(header);
     const surface = document.createElement("div");
     surface.className = "wc-fx-video-surface";
     surface.hidden = true;
@@ -41129,7 +41190,7 @@ var WcFxBoard = class extends WcBaseComponent {
     vclose.setAttribute("aria-label", "Stop video");
     surface.appendChild(vclose);
     surface.appendChild(video);
-    el.appendChild(surface);
+    el2.appendChild(surface);
     this._videoSurface = surface;
     this._videoEl = video;
     video.addEventListener("ended", () => {
@@ -41172,7 +41233,7 @@ var WcFxBoard = class extends WcBaseComponent {
         padIndex++;
       });
       groupEl.appendChild(grid);
-      el.appendChild(groupEl);
+      el2.appendChild(groupEl);
     });
     wasActive.forEach((entry, id) => {
       if (this._active.has(id)) this._reflectPad(id, true);
@@ -41310,7 +41371,7 @@ var WcFxBoard = class extends WcBaseComponent {
   _stopResource(id) {
     const entry = this._active.get(String(id));
     if (!entry) return;
-    entry.instances.forEach((el) => this._haltMedia(el));
+    entry.instances.forEach((el2) => this._haltMedia(el2));
     this._active.delete(String(id));
     if (this._bgId === String(id)) this._bgId = null;
     if (this._videoActiveId === String(id)) {
@@ -41325,11 +41386,11 @@ var WcFxBoard = class extends WcBaseComponent {
     if (this._bgId != null) this._stopResource(this._bgId);
   }
   /** Remove ONE finished instance without a full stop (ended/error path). */
-  _removeInstance(id, el) {
+  _removeInstance(id, el2) {
     const entry = this._active.get(String(id));
     if (!entry) return;
-    entry.instances.delete(el);
-    if (el === this._videoEl && this._videoActiveId === String(id)) {
+    entry.instances.delete(el2);
+    if (el2 === this._videoEl && this._videoActiveId === String(id)) {
       this._videoActiveId = null;
       this._hideVideo();
     }
@@ -41341,19 +41402,19 @@ var WcFxBoard = class extends WcBaseComponent {
       this._afterChange();
     }
   }
-  _haltMedia(el) {
+  _haltMedia(el2) {
     try {
-      el.pause();
+      el2.pause();
     } catch (ex) {
     }
     try {
-      el.currentTime = 0;
+      el2.currentTime = 0;
     } catch (ex) {
     }
-    if (el === this._videoEl) {
+    if (el2 === this._videoEl) {
       try {
-        el.removeAttribute("src");
-        el.load();
+        el2.removeAttribute("src");
+        el2.load();
       } catch (ex) {
       }
     }
@@ -41507,20 +41568,20 @@ var WcFxBoard = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
-    const el = this.componentElement;
-    el.removeEventListener("click", this._onClick);
-    el.addEventListener("click", this._onClick);
-    el.removeEventListener("input", this._onInput);
-    el.addEventListener("input", this._onInput);
+    const el2 = this.componentElement;
+    el2.removeEventListener("click", this._onClick);
+    el2.addEventListener("click", this._onClick);
+    el2.removeEventListener("input", this._onInput);
+    el2.addEventListener("input", this._onInput);
     document.removeEventListener("keydown", this._onKeydown);
     document.addEventListener("keydown", this._onKeydown);
   }
   _unWireEvents() {
     super._unWireEvents();
-    const el = this.componentElement;
-    if (el) {
-      el.removeEventListener("click", this._onClick);
-      el.removeEventListener("input", this._onInput);
+    const el2 = this.componentElement;
+    if (el2) {
+      el2.removeEventListener("click", this._onClick);
+      el2.removeEventListener("input", this._onInput);
     }
     document.removeEventListener("keydown", this._onKeydown);
   }
@@ -41678,9 +41739,9 @@ var WcFxConsole = class extends WcBaseComponent {
     return this._zones.find((z) => String(z.id) === s) || null;
   }
   _renderConsole() {
-    const el = this.componentElement;
-    if (!el) return;
-    el.innerHTML = "";
+    const el2 = this.componentElement;
+    if (!el2) return;
+    el2.innerHTML = "";
     const zonesEl = document.createElement("div");
     zonesEl.className = "wc-fx-console-zones";
     zonesEl.setAttribute("role", "tablist");
@@ -41704,7 +41765,7 @@ var WcFxConsole = class extends WcBaseComponent {
       zb.appendChild(ind);
       zonesEl.appendChild(zb);
     });
-    el.appendChild(zonesEl);
+    el2.appendChild(zonesEl);
     const panel = document.createElement("div");
     panel.className = "wc-fx-console-panel";
     const zone = this._selectedKey != null ? this._zoneByKey.get(this._selectedKey) : null;
@@ -41713,7 +41774,7 @@ var WcFxConsole = class extends WcBaseComponent {
       empty.className = "wc-fx-console-empty";
       empty.textContent = "No zone selected";
       panel.appendChild(empty);
-      el.appendChild(panel);
+      el2.appendChild(panel);
       this._zones.forEach((z) => this._refreshLive(this._zoneKey(z)));
       return;
     }
@@ -41779,7 +41840,7 @@ var WcFxConsole = class extends WcBaseComponent {
       groupEl.appendChild(grid);
       panel.appendChild(groupEl);
     });
-    el.appendChild(panel);
+    el2.appendChild(panel);
     this._zones.forEach((z) => this._refreshLive(this._zoneKey(z)));
   }
   _createPad(res) {
@@ -41966,18 +42027,18 @@ var WcFxConsole = class extends WcBaseComponent {
   }
   _wireEvents() {
     super._wireEvents();
-    const el = this.componentElement;
-    el.removeEventListener("click", this._onClick);
-    el.addEventListener("click", this._onClick);
-    el.removeEventListener("input", this._onInput);
-    el.addEventListener("input", this._onInput);
+    const el2 = this.componentElement;
+    el2.removeEventListener("click", this._onClick);
+    el2.addEventListener("click", this._onClick);
+    el2.removeEventListener("input", this._onInput);
+    el2.addEventListener("input", this._onInput);
   }
   _unWireEvents() {
     super._unWireEvents();
-    const el = this.componentElement;
-    if (!el) return;
-    el.removeEventListener("click", this._onClick);
-    el.removeEventListener("input", this._onInput);
+    const el2 = this.componentElement;
+    if (!el2) return;
+    el2.removeEventListener("click", this._onClick);
+    el2.removeEventListener("input", this._onInput);
   }
   _handleAttributeChange(attrName, newValue, oldValue) {
     if (attrName === "zones") {
@@ -44717,8 +44778,8 @@ if (!customElements.get("wc-combobox")) {
       const tokens = (this.getAttribute("depends-on") || "").split(/\s+/).filter(Boolean);
       return tokens.map((tok) => {
         const sel = `wc-combobox[name="${CSS.escape(tok)}"], wc-combobox[data-name="${CSS.escape(tok)}"]`;
-        const el = this._resolveParentEl(sel);
-        return { token: tok, el, value: el ? el.value || "" : "" };
+        const el2 = this._resolveParentEl(sel);
+        return { token: tok, el: el2, value: el2 ? el2.value || "" : "" };
       });
     }
     _onAnyComboChange(e) {
@@ -46116,11 +46177,11 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
     const optionMarkup = this._buildOptionMarkup(col, value);
     const tmp = document.createElement("div");
     tmp.innerHTML = `<${tag} ${attrs.join(" ")}>${optionMarkup}</${tag}>`;
-    const el = tmp.firstElementChild;
+    const el2 = tmp.firstElementChild;
     if (!optionMarkup && value != null && !Array.isArray(value) && value !== "") {
-      el.setAttribute("value", String(value));
+      el2.setAttribute("value", String(value));
     }
-    return el;
+    return el2;
   }
   _prefillArray(value) {
     if (Array.isArray(value)) return value.map((v) => v == null ? "" : String(v)).filter((s) => s !== "");
@@ -46230,41 +46291,41 @@ var WcFormArray = class _WcFormArray extends WcBaseComponent {
   // ---- Helpers --------------------------------------------------------------
   _parseColumns() {
     const els = this.querySelectorAll(":scope > wc-form-array-column");
-    return Array.from(els).map((el) => {
+    return Array.from(els).map((el2) => {
       let options = [];
-      const optionsAttr = el.getAttribute("options");
+      const optionsAttr = el2.getAttribute("options");
       if (optionsAttr) {
         try {
           const parsed = JSON.parse(optionsAttr);
           if (Array.isArray(parsed)) options = parsed;
         } catch (ex) {
-          console.warn("[wc-form-array] invalid options JSON for column", el.getAttribute("field"), ex);
+          console.warn("[wc-form-array] invalid options JSON for column", el2.getAttribute("field"), ex);
         }
       }
       return {
-        field: el.getAttribute("field") || "",
-        label: el.getAttribute("label") || el.getAttribute("field") || "",
-        type: (el.getAttribute("type") || "text").toLowerCase(),
+        field: el2.getAttribute("field") || "",
+        label: el2.getAttribute("label") || el2.getAttribute("field") || "",
+        type: (el2.getAttribute("type") || "text").toLowerCase(),
         options,
-        optionValue: el.getAttribute("option-value") || "value",
-        optionLabel: el.getAttribute("option-label") || "key",
-        placeholder: el.getAttribute("placeholder") || "",
-        min: el.getAttribute("min"),
-        max: el.getAttribute("max"),
-        step: el.getAttribute("step"),
-        rows: el.getAttribute("rows"),
-        fullWidth: el.hasAttribute("full-width"),
-        mask: el.getAttribute("mask") || "",
-        geocodeUrl: el.getAttribute("geocode-url") || "",
-        countries: el.getAttribute("countries") || "",
-        showFields: el.getAttribute("show-fields"),
-        icon: el.getAttribute("icon") || "",
-        required: el.hasAttribute("required"),
-        colClass: el.getAttribute("col-class") || "",
+        optionValue: el2.getAttribute("option-value") || "value",
+        optionLabel: el2.getAttribute("option-label") || "key",
+        placeholder: el2.getAttribute("placeholder") || "",
+        min: el2.getAttribute("min"),
+        max: el2.getAttribute("max"),
+        step: el2.getAttribute("step"),
+        rows: el2.getAttribute("rows"),
+        fullWidth: el2.hasAttribute("full-width"),
+        mask: el2.getAttribute("mask") || "",
+        geocodeUrl: el2.getAttribute("geocode-url") || "",
+        countries: el2.getAttribute("countries") || "",
+        showFields: el2.getAttribute("show-fields"),
+        icon: el2.getAttribute("icon") || "",
+        required: el2.hasAttribute("required"),
+        colClass: el2.getAttribute("col-class") || "",
         // Generic control passthrough: `control="<tag>"` renders any Wave form component; every
         // attribute that isn't reserved (or translated into <option>s) is passed through to it.
-        control: el.getAttribute("control") || "",
-        passthru: Array.from(el.attributes).filter((a) => !_WcFormArray.RESERVED_COL_ATTRS.has(a.name)).map((a) => [a.name, a.value])
+        control: el2.getAttribute("control") || "",
+        passthru: Array.from(el2.attributes).filter((a) => !_WcFormArray.RESERVED_COL_ATTRS.has(a.name)).map((a) => [a.name, a.value])
       };
     }).filter((c) => c.field);
   }
@@ -47098,17 +47159,17 @@ var WcRichText = class extends WcBaseFormComponent {
   }
   _setUploading(on) {
     this._uploading = on;
-    let el = this.componentElement.querySelector(":scope > .wc-rich-text-uploading");
+    let el2 = this.componentElement.querySelector(":scope > .wc-rich-text-uploading");
     if (on) {
-      if (!el) {
-        el = document.createElement("div");
-        el.classList.add("wc-rich-text-uploading");
-        el.textContent = "Inserting image\u2026";
-        this.componentElement.appendChild(el);
+      if (!el2) {
+        el2 = document.createElement("div");
+        el2.classList.add("wc-rich-text-uploading");
+        el2.textContent = "Inserting image\u2026";
+        this.componentElement.appendChild(el2);
       }
       this.componentElement.setAttribute("aria-busy", "true");
     } else {
-      if (el) el.remove();
+      if (el2) el2.remove();
       this.componentElement.removeAttribute("aria-busy");
     }
   }
@@ -47800,11 +47861,11 @@ customElements.define(WcFileUpload.is, WcFileUpload);
 
 // src/js/utils/wc-popover.js
 var THEME_CLASS = /^(theme-[\w-]+|dark|light|crisp)$/;
-function themeClassesFor(el) {
+function themeClassesFor(el2) {
   let theme = null;
   let scheme = null;
   let crisp = false;
-  for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
+  for (let node = el2; node && node.nodeType === 1; node = node.parentElement) {
     node.classList.forEach((c) => {
       if (!THEME_CLASS.test(c)) return;
       if (c.startsWith("theme-")) {
@@ -48302,7 +48363,7 @@ var WcColor = class extends WcBaseFormComponent {
       this._alpha = Math.round(x * 100) / 100;
       this._applyHsv("input");
     });
-    const keyNudge = (el, fn) => el.addEventListener("keydown", (e) => {
+    const keyNudge = (el2, fn) => el2.addEventListener("keydown", (e) => {
       const big = e.shiftKey ? 10 : 1;
       const map = { ArrowLeft: [-big, 0], ArrowRight: [big, 0], ArrowUp: [0, big], ArrowDown: [0, -big] };
       if (!map[e.key]) return;
@@ -48347,30 +48408,30 @@ var WcColor = class extends WcBaseFormComponent {
     });
   }
   // Pointer drag on a track/area → callback with x,y in 0..1; commits on release.
-  _drag(el, onMove) {
+  _drag(el2, onMove) {
     const at = (e) => {
-      const r = el.getBoundingClientRect();
+      const r = el2.getBoundingClientRect();
       onMove(
         Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
         Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))
       );
     };
-    el.addEventListener("pointerdown", (e) => {
+    el2.addEventListener("pointerdown", (e) => {
       if (e.button !== 0) return;
       e.preventDefault();
-      el.focus();
-      el.setPointerCapture(e.pointerId);
+      el2.focus();
+      el2.setPointerCapture(e.pointerId);
       at(e);
       const move = (ev) => at(ev);
       const up = () => {
-        el.removeEventListener("pointermove", move);
-        el.removeEventListener("pointerup", up);
-        el.removeEventListener("pointercancel", up);
+        el2.removeEventListener("pointermove", move);
+        el2.removeEventListener("pointerup", up);
+        el2.removeEventListener("pointercancel", up);
         this._applyHsv("commit");
       };
-      el.addEventListener("pointermove", move);
-      el.addEventListener("pointerup", up);
-      el.addEventListener("pointercancel", up);
+      el2.addEventListener("pointermove", move);
+      el2.addEventListener("pointerup", up);
+      el2.addEventListener("pointercancel", up);
     });
   }
   // Push the popover's HSV(+alpha) into the value. phase: 'input' (live) | 'commit'.
@@ -48481,8 +48542,8 @@ var WcColor = class extends WcBaseFormComponent {
       this._hex ? this._css(this._hex, this._alpha) : "transparent"
     );
     const set = (sel, val) => {
-      const el = pop.querySelector(sel);
-      if (el && el !== skipEl) el.value = val;
+      const el2 = pop.querySelector(sel);
+      if (el2 && el2 !== skipEl) el2.value = val;
     };
     const hexOut = this._hex ? this.hasAlpha && this._alpha < 1 ? this._hex8(this._hex, this._alpha) : this._hex : "";
     set('[data-field="hex"]', hexOut);
@@ -50043,8 +50104,8 @@ if (!customElements.get("wc-ruler")) {
       const sel = this.getAttribute("partner");
       if (!sel) return null;
       try {
-        const el = document.querySelector(sel);
-        return el && el !== this && typeof el.clientToPoints === "function" ? el : null;
+        const el2 = document.querySelector(sel);
+        return el2 && el2 !== this && typeof el2.clientToPoints === "function" ? el2 : null;
       } catch (err) {
         return null;
       }
@@ -50357,10 +50418,10 @@ if (!customElements.get("wc-zoom")) {
       this._sync();
     }
     _build() {
-      const el = this.componentElement;
-      el.innerHTML = "";
-      el.setAttribute("role", "group");
-      el.setAttribute("aria-label", "Zoom");
+      const el2 = this.componentElement;
+      el2.innerHTML = "";
+      el2.setAttribute("role", "group");
+      el2.setAttribute("aria-label", "Zoom");
       const btn = (cls, label, text) => {
         const b = document.createElement("button");
         b.type = "button";
@@ -50394,14 +50455,14 @@ if (!customElements.get("wc-zoom")) {
       field.setAttribute("aria-label", "Zoom percentage");
       field.setAttribute("aria-haspopup", "menu");
       field.setAttribute("aria-expanded", "false");
-      el.append(fits, out, slider, inn, field);
+      el2.append(fits, out, slider, inn, field);
       this._bindParts();
     }
     _bindParts() {
-      const el = this.componentElement;
-      this._fits = el.querySelector(".wc-zoom-fits");
-      this._slider = el.querySelector(".wc-zoom-slider");
-      this._field = el.querySelector(".wc-zoom-field");
+      const el2 = this.componentElement;
+      this._fits = el2.querySelector(".wc-zoom-fits");
+      this._slider = el2.querySelector(".wc-zoom-slider");
+      this._field = el2.querySelector(".wc-zoom-field");
       this._fits.hidden = !this.hasAttribute("fit-buttons");
     }
     _handleAttributeChange(attrName, newValue, oldValue) {
@@ -50583,7 +50644,7 @@ if (!customElements.get("wc-zoom")) {
     }
     _highlight(i) {
       this._menuIndex = i;
-      this._menuItems().forEach((b, idx) => b.classList.toggle("is-active", idx === i));
+      this._menuItems().forEach((b, idx) => b.classList.toggle("is-kbd", idx === i));
       if (i >= 0) this._menuItems()[i]?.scrollIntoView({ block: "nearest" });
     }
     _activateMenuItem(i) {
@@ -50722,6 +50783,8 @@ if (!customElements.get("wc-zoom")) {
         wc-zoom { display: contents; }
 
         @layer wc.usage {
+        /* State classes avoid .is-active: Wave's global .is-active utility (@layer wc.selected)
+           would add its left accent bar and ring. This component uses .is-kbd. */
           .wc-zoom {
             display: inline-flex;
             align-items: center;
@@ -50781,7 +50844,7 @@ if (!customElements.get("wc-zoom")) {
             position: relative;
           }
           .wc-zoom-menu-item:hover,
-          .wc-zoom-menu-item.is-active { background-color: var(--surface-4); }
+          .wc-zoom-menu-item.is-kbd { background-color: var(--surface-4); }
           .wc-zoom-menu-item[aria-checked="true"]::before {
             content: '\u2713';
             position: absolute;
@@ -51112,17 +51175,17 @@ var WcFontPicker = class extends WcBaseFormComponent {
         fontState.set(font.family, "failed");
         console.warn(`[wc-font-picker] could not load "${font.family}"`, err);
       }
-      document.querySelectorAll(".wc-font-picker-face").forEach((el) => {
-        if (el.dataset.family === font.family) this._applyFaceState(el, font);
+      document.querySelectorAll(".wc-font-picker-face").forEach((el2) => {
+        if (el2.dataset.family === font.family) this._applyFaceState(el2, font);
       });
     })();
     fontLoads.set(key, promise);
     return promise;
   }
-  _applyFaceState(el, font) {
+  _applyFaceState(el2, font) {
     const state = font.url ? fontState.get(font.family) || "idle" : "loaded";
-    el.classList.toggle("is-loading", state === "loading" || state === "idle");
-    el.classList.toggle("is-failed", state === "failed");
+    el2.classList.toggle("is-loading", state === "loading" || state === "idle");
+    el2.classList.toggle("is-failed", state === "failed");
   }
   _faceEl(font, text, cls) {
     const custom = typeof this.renderPreview === "function" ? this.renderPreview(font, text) : null;
@@ -51132,13 +51195,13 @@ var WcFontPicker = class extends WcBaseFormComponent {
       wrap.appendChild(custom);
       return wrap;
     }
-    const el = document.createElement("span");
-    el.className = `${cls} wc-font-picker-face`;
-    el.textContent = text;
-    el.dataset.family = font.family;
-    el.style.fontFamily = `${cssFamily(font.family)}, system-ui, sans-serif`;
-    this._applyFaceState(el, font);
-    return el;
+    const el2 = document.createElement("span");
+    el2.className = `${cls} wc-font-picker-face`;
+    el2.textContent = text;
+    el2.dataset.family = font.family;
+    el2.style.fontFamily = `${cssFamily(font.family)}, system-ui, sans-serif`;
+    this._applyFaceState(el2, font);
+    return el2;
   }
   // ---- Trigger ----------------------------------------------------------------
   _renderTrigger() {
@@ -51159,11 +51222,11 @@ var WcFontPicker = class extends WcBaseFormComponent {
       }
       this._observeTrigger(font);
     } else if (this._value) {
-      const el = document.createElement("span");
-      el.className = "wc-font-picker-current-name";
-      el.style.fontFamily = `${cssFamily(this._value)}, system-ui, sans-serif`;
-      el.textContent = this._value;
-      current.appendChild(el);
+      const el2 = document.createElement("span");
+      el2.className = "wc-font-picker-current-name";
+      el2.style.fontFamily = `${cssFamily(this._value)}, system-ui, sans-serif`;
+      el2.textContent = this._value;
+      current.appendChild(el2);
     } else {
       const ph = document.createElement("span");
       ph.className = "wc-font-picker-current-name is-placeholder";
@@ -51386,7 +51449,7 @@ var WcFontPicker = class extends WcBaseFormComponent {
     this._rowH = rowH;
     this._spacerEl.style.height = `${y}px`;
     this._emptyEl.hidden = items.length > 0;
-    this._listEl.querySelectorAll(".wc-font-picker-row, .wc-font-picker-header").forEach((el) => el.remove());
+    this._listEl.querySelectorAll(".wc-font-picker-row, .wc-font-picker-header").forEach((el2) => el2.remove());
     this._rendered = /* @__PURE__ */ new Map();
   }
   _indexAt(y) {
@@ -51416,18 +51479,18 @@ var WcFontPicker = class extends WcBaseFormComponent {
     const bottom = top + list.clientHeight;
     const first = Math.max(0, this._indexAt(top) - OVERSCAN);
     const last = Math.min(this._items.length - 1, this._indexAt(bottom) + OVERSCAN);
-    this._rendered.forEach((el, idx) => {
+    this._rendered.forEach((el2, idx) => {
       if (idx < first || idx > last) {
-        el.remove();
+        el2.remove();
         this._rendered.delete(idx);
       }
     });
     const frag = document.createDocumentFragment();
     for (let i = first; i <= last; i++) {
       if (this._rendered.has(i)) continue;
-      const el = this._rowEl(i);
-      this._rendered.set(i, el);
-      frag.appendChild(el);
+      const el2 = this._rowEl(i);
+      this._rendered.set(i, el2);
+      frag.appendChild(el2);
     }
     list.appendChild(frag);
     let h = this._indexAt(top);
@@ -51438,24 +51501,24 @@ var WcFontPicker = class extends WcBaseFormComponent {
   }
   _rowEl(i) {
     const item = this._items[i];
-    const el = document.createElement("div");
-    el.style.top = `${this._offsets[i]}px`;
+    const el2 = document.createElement("div");
+    el2.style.top = `${this._offsets[i]}px`;
     if (item.header) {
-      el.className = "wc-font-picker-header";
-      el.setAttribute("role", "presentation");
-      el.textContent = item.header;
-      return el;
+      el2.className = "wc-font-picker-header";
+      el2.setAttribute("role", "presentation");
+      el2.textContent = item.header;
+      return el2;
     }
     const font = item.font;
-    el.className = "wc-font-picker-row";
-    el.id = `${this._uid}-opt-${i}`;
-    el.dataset.index = String(i);
-    el.dataset.value = font.value;
-    el.setAttribute("role", "option");
-    el.setAttribute("aria-label", font.label);
-    el.setAttribute("aria-selected", String(this._find(this._value)?.value === font.value));
-    el.classList.toggle("is-active", i === this._activeIndex);
-    el.style.height = `${this._rowH}px`;
+    el2.className = "wc-font-picker-row";
+    el2.id = `${this._uid}-opt-${i}`;
+    el2.dataset.index = String(i);
+    el2.dataset.value = font.value;
+    el2.setAttribute("role", "option");
+    el2.setAttribute("aria-label", font.label);
+    el2.setAttribute("aria-selected", String(this._find(this._value)?.value === font.value));
+    el2.classList.toggle("is-kbd", i === this._activeIndex);
+    el2.style.height = `${this._rowH}px`;
     const line = document.createElement("span");
     line.className = "wc-font-picker-line";
     line.appendChild(this._faceEl(font, font.label, "wc-font-picker-name"));
@@ -51465,16 +51528,16 @@ var WcFontPicker = class extends WcBaseFormComponent {
       b.textContent = font.badge.text;
       line.appendChild(b);
     }
-    el.appendChild(line);
+    el2.appendChild(line);
     const sample = this.previewText;
     if (sample) {
-      el.appendChild(this._faceEl(font, sample, "wc-font-picker-sample"));
+      el2.appendChild(this._faceEl(font, sample, "wc-font-picker-sample"));
     } else if (font.note) {
-      el.title = font.note;
+      el2.title = font.note;
     }
-    if (sample && font.note) el.title = font.note;
-    if (font.url && !fontState.has(font.family)) this._rowObserver.observe(el);
-    return el;
+    if (sample && font.note) el2.title = font.note;
+    if (font.url && !fontState.has(font.family)) this._rowObserver.observe(el2);
+    return el2;
   }
   _scrollToIndex(i, block = "nearest") {
     const list = this._listEl;
@@ -51514,7 +51577,7 @@ var WcFontPicker = class extends WcBaseFormComponent {
   }
   _syncActive() {
     if (!this._listEl) return;
-    this._rendered?.forEach((el, idx) => el.classList.toggle("is-active", idx === this._activeIndex));
+    this._rendered?.forEach((el2, idx) => el2.classList.toggle("is-kbd", idx === this._activeIndex));
     if (this._activeIndex >= 0 && this._rendered?.has(this._activeIndex)) {
       this._searchEl.setAttribute("aria-activedescendant", `${this._uid}-opt-${this._activeIndex}`);
     } else {
@@ -51667,6 +51730,8 @@ var WcFontPicker = class extends WcBaseFormComponent {
       wc-font-picker { display: contents; }
 
       @layer wc.usage {
+        /* State classes avoid .is-active: Wave's global .is-active utility (@layer wc.selected)
+           would add its left accent bar and ring. This component uses .is-kbd. */
         .wc-font-picker { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
         .wc-font-picker > label { font-weight: 500; }
         wc-font-picker[required] .wc-font-picker > label::after { content: ' *'; font-weight: bold; }
@@ -51794,7 +51859,7 @@ var WcFontPicker = class extends WcBaseFormComponent {
           overflow: hidden;
         }
         .wc-font-picker-row[aria-selected="true"] { background-color: var(--surface-3); }
-        .wc-font-picker-row.is-active { border-color: var(--primary-bg-color); background-color: var(--surface-2); }
+        .wc-font-picker-row.is-kbd { border-color: var(--primary-bg-color); background-color: var(--surface-2); }
         .wc-font-picker-line { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
         .wc-font-picker-name {
           font-size: 1.15rem;
@@ -51818,7 +51883,7 @@ var WcFontPicker = class extends WcBaseFormComponent {
         .wc-font-picker-custom { display: block; max-width: 100%; overflow: hidden; }
         .wc-font-picker-empty { padding: 1.5rem 0.5rem; text-align: center; color: var(--text-3, var(--text-2)); }
         .wc-font-picker-empty[hidden] { display: none; }
-        .theme-high-contrast .wc-font-picker-row.is-active { outline: 2px solid var(--text-1); outline-offset: -2px; }
+        .theme-high-contrast .wc-font-picker-row.is-kbd { outline: 2px solid var(--text-1); outline-offset: -2px; }
       }
 
       /* Unlayered: wc.ui styles bare input and outranks wc.usage. */
@@ -51839,6 +51904,1523 @@ var WcFontPicker = class extends WcBaseFormComponent {
   }
 };
 if (!customElements.get(WcFontPicker.is)) customElements.define(WcFontPicker.is, WcFontPicker);
+
+// src/js/components/wc-ribbon.js
+var ACCENTS = ["primary", "success", "warning", "danger", "info"];
+var ACCENT_VAR = {
+  primary: "var(--primary-bg-color)",
+  success: "var(--success-color)",
+  warning: "var(--warning-color)",
+  danger: "var(--danger-color)",
+  info: "var(--info-color)"
+};
+var COMMAND_TAGS = "wc-ribbon-button, wc-ribbon-item, wc-ribbon-split";
+var OWN_TAGS = /^WC-RIBBON-(BUTTON|ITEM|SPLIT)$/;
+var uidSeq = 0;
+var tabKey = (t) => t.getAttribute("key") || (t.getAttribute("label") || "").toLowerCase();
+var tabLabel = (t) => t.getAttribute("label") || t.getAttribute("key") || "";
+var el = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+};
+function pictureFor(host, size) {
+  const glyph = host.getAttribute("glyph");
+  if (glyph) {
+    const g = el("span", "wc-ribbon-glyph", glyph);
+    g.setAttribute("aria-hidden", "true");
+    return g;
+  }
+  const icon = host.getAttribute("icon");
+  if (icon) {
+    const i = document.createElement("wc-fa-icon");
+    i.setAttribute("name", icon);
+    i.setAttribute("size", size);
+    i.classList.add("wc-ribbon-icon");
+    i.setAttribute("aria-hidden", "true");
+    return i;
+  }
+  const blank = el("span", "wc-ribbon-glyph is-blank");
+  blank.setAttribute("aria-hidden", "true");
+  return blank;
+}
+function titleFor(host) {
+  const label = host.getAttribute("label") || host.getAttribute("command") || "";
+  const tip = host.getAttribute("tip");
+  return tip ? `${label} \u2014 ${tip}` : label;
+}
+function ensureInner(host, tag, cls) {
+  if (!host.componentElement) {
+    host.componentElement = host.querySelector(`:scope > .${cls.split(" ")[0]}`) || el(tag, cls);
+    if (!host.componentElement.parentNode) host.appendChild(host.componentElement);
+  }
+  return host.componentElement;
+}
+var WcRibbonCommandBase = class extends WcBaseComponent {
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "command",
+      "icon",
+      "glyph",
+      "label",
+      "tip",
+      "variant",
+      "toggle",
+      "toggle-group",
+      "active",
+      "disabled",
+      "menu-only",
+      "keytip",
+      "hidden"
+    ];
+  }
+  get command() {
+    return this.getAttribute("command") || "";
+  }
+  get label() {
+    return this.getAttribute("label") || this.command;
+  }
+  get active() {
+    return this.hasAttribute("active");
+  }
+  set active(v) {
+    this.toggleAttribute("active", !!v);
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(v) {
+    this.toggleAttribute("disabled", !!v);
+  }
+  getDesignerHTML() {
+    return null;
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      if (this.componentElement) super._handleAttributeChange(attrName, newValue, oldValue);
+      return;
+    }
+    if (attrName === "id") return;
+    this._sync(attrName);
+    this.closest("wc-ribbon")?._syncMenuItem?.(this);
+    if (attrName === "hidden" || attrName === "menu-only") this.closest("wc-ribbon")?.relayout?.();
+  }
+  _sync() {
+  }
+};
+var WcRibbonButton = class extends WcRibbonCommandBase {
+  static get is() {
+    return "wc-ribbon-button";
+  }
+  _render() {
+    super._render();
+    const b = ensureInner(this, "button", "wc-ribbon-btn");
+    b.type = "button";
+    b.dataset.role = "command";
+    if (!b.querySelector(":scope > .wc-ribbon-btn-label")) this._build();
+    else this._sync();
+  }
+  _build() {
+    const b = this.componentElement;
+    b.textContent = "";
+    b.append(pictureFor(this, "1.15rem"), el("span", "wc-ribbon-btn-label", this.label));
+    this._sync();
+  }
+  _sync(attr) {
+    const b = this.componentElement;
+    if (!b) return;
+    if (attr === "icon" || attr === "glyph" || attr === "label") {
+      this._build();
+      return;
+    }
+    b.title = titleFor(this);
+    b.disabled = this.disabled;
+    b.dataset.command = this.command;
+    const variant = this.getAttribute("variant");
+    if (ACCENTS.includes(variant)) b.dataset.variant = variant;
+    else delete b.dataset.variant;
+    if (this.hasAttribute("toggle")) b.setAttribute("aria-pressed", String(this.active));
+    else b.removeAttribute("aria-pressed");
+    b.classList.toggle("is-on", this.active);
+  }
+};
+var WcRibbonItem = class extends WcRibbonCommandBase {
+  static get is() {
+    return "wc-ribbon-item";
+  }
+  // Menu-only: renders nothing in the group; the menu reads its attributes.
+  _render() {
+  }
+};
+var WcRibbonSplit = class extends WcRibbonCommandBase {
+  static get is() {
+    return "wc-ribbon-split";
+  }
+  _render() {
+    super._render();
+    ensureInner(this, "div", "wc-ribbon-split");
+    if (!this._main) {
+      this._main = this.componentElement.querySelector(".wc-ribbon-btn") || el("button", "wc-ribbon-btn wc-ribbon-split-main");
+      this._arrow = this.componentElement.querySelector(".wc-ribbon-split-arrow") || el("button", "wc-ribbon-split-arrow");
+      this._main.type = "button";
+      this._main.dataset.role = "command";
+      this._arrow.type = "button";
+      this._arrow.dataset.role = "split-menu";
+      this._arrow.setAttribute("aria-haspopup", "menu");
+      this._arrow.setAttribute("aria-expanded", "false");
+      this.componentElement.append(this._main, this._arrow);
+      this._build();
+    } else {
+      this._sync();
+    }
+  }
+  get variants() {
+    return Array.from(this.querySelectorAll(":scope > wc-ribbon-item"));
+  }
+  _build() {
+    if (!this._main) return;
+    this._main.textContent = "";
+    this._main.append(pictureFor(this, "1.15rem"));
+    this._arrow.textContent = "";
+    this._arrow.append(el("span", "wc-ribbon-btn-label", this.label), el("span", "wc-ribbon-caret", "\u25BE"));
+    this._sync();
+  }
+  _sync(attr) {
+    if (!this._main) return;
+    if (attr === "icon" || attr === "glyph" || attr === "label") {
+      this._build();
+      return;
+    }
+    this._main.title = titleFor(this);
+    this._main.setAttribute("aria-label", this.label);
+    this._arrow.title = `${this.label} \u2014 more options`;
+    this._arrow.setAttribute("aria-label", `${this.label} options`);
+    this._main.disabled = this._arrow.disabled = this.disabled;
+    this._main.dataset.command = this.command;
+    const variant = this.getAttribute("variant");
+    if (ACCENTS.includes(variant)) this.componentElement.dataset.variant = variant;
+    else delete this.componentElement.dataset.variant;
+    if (this.hasAttribute("toggle")) this._main.setAttribute("aria-pressed", String(this.active));
+    this.componentElement.classList.toggle("is-on", this.active);
+  }
+};
+var WcRibbonGroup = class extends WcBaseComponent {
+  static get is() {
+    return "wc-ribbon-group";
+  }
+  static get observedAttributes() {
+    return ["id", "class", "label", "menu", "icon", "hidden"];
+  }
+  get label() {
+    return this.getAttribute("label") || "";
+  }
+  getDesignerHTML() {
+    return null;
+  }
+  _render() {
+    super._render();
+    const g = ensureInner(this, "div", "wc-ribbon-group");
+    g.setAttribute("role", "group");
+    this._items = g.querySelector(":scope > .wc-ribbon-group-items");
+    if (!this._items) {
+      this._items = el("div", "wc-ribbon-group-items");
+      this._collapse = el("button", "wc-ribbon-btn wc-ribbon-collapse");
+      this._collapse.type = "button";
+      this._collapse.dataset.role = "group-menu";
+      this._collapse.setAttribute("aria-haspopup", "menu");
+      this._collapse.setAttribute("aria-expanded", "false");
+      this._title = el("div", "wc-ribbon-group-label");
+      g.append(this._items, this._collapse, this._title);
+    } else {
+      this._collapse = g.querySelector(":scope > .wc-ribbon-collapse");
+      this._title = g.querySelector(":scope > .wc-ribbon-group-label");
+    }
+    this._adopt();
+    this._renderTitle();
+  }
+  // Move the host's own children into the items row (appendChild keeps their state/bindings).
+  _adopt() {
+    Array.from(this.childNodes).forEach((node) => {
+      if (node === this.componentElement) return;
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (!node.textContent.trim()) node.remove();
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      if (OWN_TAGS.test(node.tagName)) {
+        this._items.appendChild(node);
+      } else {
+        const wrap = el("div", "wc-ribbon-widget");
+        this._items.appendChild(wrap);
+        wrap.appendChild(node);
+        const caption = node.getAttribute("caption");
+        if (caption) wrap.appendChild(el("span", "wc-ribbon-caption", caption));
+      }
+    });
+    if (this._title) this._renderTitle();
+  }
+  _renderTitle() {
+    const label = this.label;
+    this.componentElement.setAttribute("aria-label", label);
+    const menu = this.hasAttribute("menu");
+    let title = this._title;
+    const wantTag = menu ? "BUTTON" : "DIV";
+    if (title.tagName !== wantTag) {
+      const next = el(menu ? "button" : "div", "wc-ribbon-group-label");
+      title.replaceWith(next);
+      this._title = title = next;
+    }
+    title.textContent = "";
+    if (menu) {
+      title.type = "button";
+      title.dataset.role = "group-menu";
+      title.setAttribute("aria-haspopup", "menu");
+      title.setAttribute("aria-expanded", "false");
+      title.title = `All ${label} commands`;
+      title.append(el("span", "wc-ribbon-group-name", label), el("span", "wc-ribbon-caret", "\u25BE"));
+    } else {
+      title.append(el("span", "wc-ribbon-group-name", label));
+    }
+    const c = this._collapse;
+    c.textContent = "";
+    const first = this.querySelector("wc-ribbon-button:not([menu-only]), wc-ribbon-split");
+    const pic = this.getAttribute("icon") ? pictureFor(this, "1.15rem") : first ? pictureFor(first, "1.15rem") : pictureFor(this, "1.15rem");
+    const lbl = el("span", "wc-ribbon-btn-label");
+    lbl.append(el("span", "wc-ribbon-group-name", label), el("span", "wc-ribbon-caret", "\u25BE"));
+    c.append(pic, lbl);
+    c.title = `${label} \u2014 all commands`;
+  }
+  get commandHosts() {
+    return Array.from(this.querySelectorAll(COMMAND_TAGS)).filter((h) => !h.hidden);
+  }
+  get widgets() {
+    return Array.from(this._items ? this._items.querySelectorAll(":scope > .wc-ribbon-widget") : []);
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue, oldValue);
+      return;
+    }
+    if (attrName === "id") return;
+    if (attrName === "hidden") {
+      this.closest("wc-ribbon")?.relayout?.();
+      return;
+    }
+    if (this._title) this._renderTitle();
+    this.closest("wc-ribbon")?.relayout?.();
+  }
+  _wireEvents() {
+    super._wireEvents();
+    if (!this._observer) this._observer = new MutationObserver(() => {
+      if (this._items) this._adopt();
+    });
+    this._observer.observe(this, { childList: true });
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    this._observer?.disconnect();
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._wireEvents();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._unWireEvents();
+  }
+};
+var WcRibbonTab = class extends WcBaseComponent {
+  static get is() {
+    return "wc-ribbon-tab";
+  }
+  static get observedAttributes() {
+    return ["id", "class", "key", "label", "contextual", "accent", "hidden", "keytip"];
+  }
+  get key() {
+    return tabKey(this);
+  }
+  get label() {
+    return tabLabel(this);
+  }
+  getDesignerHTML() {
+    return null;
+  }
+  _render() {
+    super._render();
+    const p = ensureInner(this, "div", "wc-ribbon-panel");
+    p.setAttribute("role", "tabpanel");
+    this._adopt();
+    this._syncAccent();
+    this.closest("wc-ribbon")?._syncTabButton?.(this);
+  }
+  _adopt() {
+    if (!this.componentElement) return;
+    Array.from(this.childNodes).forEach((node) => {
+      if (node === this.componentElement) return;
+      if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) {
+        node.remove();
+        return;
+      }
+      this.componentElement.appendChild(node);
+    });
+  }
+  _syncAccent() {
+    if (!this.componentElement) return;
+    const accent = this.getAttribute("accent");
+    const value = ACCENT_VAR[accent] || (this.hasAttribute("contextual") ? ACCENT_VAR.success : "");
+    if (value) this.componentElement.style.setProperty("--wc-ribbon-tab-accent", value);
+    else this.componentElement.style.removeProperty("--wc-ribbon-tab-accent");
+  }
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue, oldValue);
+      return;
+    }
+    if (attrName === "id") return;
+    if (attrName === "accent" || attrName === "contextual") this._syncAccent();
+    this.closest("wc-ribbon")?._syncTabButton?.(this);
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    if (!this._observer) this._observer = new MutationObserver(() => this._adopt());
+    this._observer.observe(this, { childList: true });
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._observer?.disconnect();
+  }
+};
+var WcRibbon = class extends WcBaseComponent {
+  static get is() {
+    return "wc-ribbon";
+  }
+  static get observedAttributes() {
+    return ["id", "class", "active", "compact", "keytips"];
+  }
+  constructor() {
+    super();
+    this._uid = `wcrb${++uidSeq}`;
+    this._active = "";
+    this._menu = null;
+    this._commands = {};
+    this._layoutFrame = 0;
+    this._keytipMode = null;
+    this._onClick = this._handleClick.bind(this);
+    this._onTabKeydown = this._handleTabKeydown.bind(this);
+    this._onMenuKeydown = this._handleMenuKeydown.bind(this);
+    this._onMenuClick = this._handleMenuClick.bind(this);
+    this._onDocPointer = this._handleDocPointer.bind(this);
+    this._onReposition = () => this._positionMenu();
+    this._onActivateCmd = (e) => this._hubCommand(e, "activate");
+    this._onShowCmd = (e) => this._hubCommand(e, "show");
+    this._onHideCmd = (e) => this._hubCommand(e, "hide");
+    this._onKeyDown = this._handleKeytipKeydown.bind(this);
+    this._onKeyUp = this._handleKeytipKeyup.bind(this);
+  }
+  async connectedCallback() {
+    super.connectedCallback();
+    this._applyStyle();
+    this._wireEvents();
+    this.relayout();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.closeMenus(true);
+    this._exitKeytips();
+    this._unWireEvents();
+  }
+  getDesignerHTML() {
+    return null;
+  }
+  // ---- Public API -----------------------------------------------------------------------------
+  get tabs() {
+    return this._body ? Array.from(this._body.querySelectorAll(":scope > wc-ribbon-tab")) : [];
+  }
+  get active() {
+    return this._active;
+  }
+  tab(key) {
+    return this.tabs.find((t) => tabKey(t) === key) || null;
+  }
+  setTab(key, source = "api") {
+    const tab = this.tab(key);
+    if (!tab || tab.hidden) return false;
+    const previous = this._active;
+    this._active = key;
+    if (this.getAttribute("active") !== key) {
+      this._settingActive = true;
+      this.setAttribute("active", key);
+      this._settingActive = false;
+    }
+    this.closeMenus(true);
+    this._syncPanels();
+    this.relayout();
+    if (previous !== key && source !== "init") this._emit("wcribbontabchange", "ribbon-tab-change", { tab: key, previous, source });
+    return true;
+  }
+  showTab(key, activate = false) {
+    const tab = this.tab(key);
+    if (!tab) return;
+    if (tab.hidden) tab.hidden = false;
+    if (activate) this.setTab(key);
+  }
+  hideTab(key) {
+    const tab = this.tab(key);
+    if (!tab) return;
+    if (!tab.hidden) tab.hidden = true;
+    this._ensureActiveVisible();
+  }
+  // The active tab was hidden: fall back to the previous tab, else the first visible one.
+  _ensureActiveVisible() {
+    const active = this.tab(this._active);
+    if (active && !active.hidden) return;
+    const prev = this._previousTab && this.tab(this._previousTab);
+    const fallback = prev && !prev.hidden ? this._previousTab : tabKey(this.tabs.find((t) => !t.hidden) || document.createElement("i"));
+    if (fallback) this.setTab(fallback, "hide");
+  }
+  setActive(command, on = true) {
+    this._commandHosts(command).forEach((h) => {
+      if (on && h.getAttribute("toggle-group")) {
+        const group = h.getAttribute("toggle-group");
+        this.querySelectorAll(`[toggle-group="${CSS.escape(group)}"][active]`).forEach((o) => {
+          if (o !== h) o.active = false;
+        });
+      }
+      h.active = on;
+    });
+  }
+  setDisabled(command, on = true) {
+    this._commandHosts(command).forEach((h) => {
+      h.disabled = on;
+    });
+  }
+  closeMenus(silent = false) {
+    this._closeMenu(silent ? "silent" : "api");
+  }
+  relayout() {
+    if (!this.isConnected || this._layoutFrame) return;
+    this._layoutFrame = requestAnimationFrame(() => {
+      this._layoutFrame = 0;
+      this._layout();
+    });
+  }
+  /**
+   * Define the ribbon as data:
+   *  { tabs: [{ key, label, contextual, accent, hidden, groups: [{ label, menu, icon,
+   *            main: [id | '@widget' | { split: id, items: [id…] } | { html|element, caption }],
+   *            more: [id…] }] }],
+   *    commands: { id: { icon | glyph, label, tip, variant, primary, finish, toggle, tool,
+   *                      toggleGroup, active, disabled, keytip, run(detail) } },
+   *    widgets: { name: html | Node | () => html|Node | { html|element, caption } } }
+   */
+  setModel(model = {}) {
+    this.closeMenus(true);
+    this._commands = model.commands || {};
+    const widgets = model.widgets || {};
+    this.tabs.forEach((t) => t.remove());
+    const cmdEl = (tag, id) => {
+      const c = this._commands[id] || {};
+      const e = document.createElement(tag);
+      e.setAttribute("command", id);
+      const attrs = {
+        icon: c.icon,
+        glyph: c.glyph,
+        label: c.label || id,
+        tip: c.tip,
+        keytip: c.keytip,
+        variant: c.variant || (c.primary ? "primary" : c.finish ? "success" : null),
+        "toggle-group": c.toggleGroup || (c.tool ? "tool" : null)
+      };
+      Object.entries(attrs).forEach(([k, v]) => {
+        if (v != null && v !== "") e.setAttribute(k, v);
+      });
+      if (c.toggle || c.tool || c.toggleGroup) e.setAttribute("toggle", "");
+      if (c.active) e.setAttribute("active", "");
+      if (c.disabled) e.setAttribute("disabled", "");
+      return e;
+    };
+    const widgetEl = (spec) => {
+      let w = spec;
+      if (typeof w === "function") w = w();
+      let caption = null;
+      if (w && !(w instanceof Node) && typeof w === "object") {
+        caption = w.caption;
+        w = w.element || w.html;
+      }
+      let node = w;
+      if (typeof w === "string") {
+        const t = document.createElement("template");
+        t.innerHTML = w.trim();
+        node = t.content.firstElementChild;
+      }
+      if (node && caption && !node.hasAttribute("caption")) node.setAttribute("caption", caption);
+      return node;
+    };
+    (model.tabs || []).forEach((t) => {
+      const tab = document.createElement("wc-ribbon-tab");
+      tab.setAttribute("key", t.key);
+      tab.setAttribute("label", t.label || t.key);
+      if (t.contextual) tab.setAttribute("contextual", "");
+      if (t.accent) tab.setAttribute("accent", t.accent);
+      if (t.keytip) tab.setAttribute("keytip", t.keytip);
+      if (t.hidden != null ? t.hidden : t.contextual) tab.hidden = true;
+      (t.groups || []).forEach((g) => {
+        const group = document.createElement("wc-ribbon-group");
+        group.setAttribute("label", g.label || g.name || "");
+        if (g.icon) group.setAttribute("icon", g.icon);
+        if (g.menu || g.menu !== false && g.more && g.more.length) group.setAttribute("menu", "");
+        (g.main || []).forEach((entry) => {
+          if (typeof entry === "string" && entry[0] === "@") {
+            const w = widgetEl(widgets[entry.slice(1)]);
+            if (w) group.appendChild(w);
+          } else if (typeof entry === "string") {
+            group.appendChild(cmdEl("wc-ribbon-button", entry));
+          } else if (entry && entry.split) {
+            const split = cmdEl("wc-ribbon-split", entry.split);
+            (entry.items || []).forEach((id) => split.appendChild(cmdEl("wc-ribbon-item", id)));
+            group.appendChild(split);
+          } else if (entry) {
+            const w = widgetEl(entry);
+            if (w) group.appendChild(w);
+          }
+        });
+        (g.more || []).forEach((id) => group.appendChild(cmdEl("wc-ribbon-item", id)));
+        tab.appendChild(group);
+      });
+      this._body.appendChild(tab);
+    });
+    this._syncStrip();
+    const wanted = model.active || this.getAttribute("active");
+    const first = this.tabs.find((t) => !t.hidden);
+    this._active = "";
+    if (!this.setTab(wanted) && first) this.setTab(tabKey(first));
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  // ---- Rendering ------------------------------------------------------------------------------
+  _render() {
+    super._render();
+    const root = ensureInner(this, "div", "wc-ribbon");
+    this._strip = root.querySelector(":scope > .wc-ribbon-tabs");
+    this._body = root.querySelector(":scope > .wc-ribbon-body");
+    this._layer = root.querySelector(":scope > .wc-ribbon-layer");
+    if (!this._strip) {
+      this._strip = el("div", "wc-ribbon-tabs");
+      this._strip.setAttribute("role", "tablist");
+      this._body = el("div", "wc-ribbon-body");
+      this._more = el("button", "wc-ribbon-btn wc-ribbon-more");
+      this._more.type = "button";
+      this._more.dataset.role = "overflow";
+      this._more.hidden = true;
+      this._more.setAttribute("aria-haspopup", "menu");
+      this._more.setAttribute("aria-expanded", "false");
+      this._more.setAttribute("aria-label", "More commands");
+      this._more.title = "More commands";
+      this._more.append(el("span", "wc-ribbon-glyph", "\u22EF"), el("span", "wc-ribbon-btn-label", "More"));
+      this._layer = el("div", "wc-ribbon-layer");
+      root.append(this._strip, this._body, this._more, this._layer);
+    } else {
+      this._more = root.querySelector(":scope > .wc-ribbon-more");
+    }
+    root.classList.toggle("is-compact", this.hasAttribute("compact"));
+    this._adoptTabs();
+    this._syncStrip();
+    const wanted = this.getAttribute("active");
+    const fallback = this.tabs.find((t) => !t.hidden);
+    if (!this.setTab(wanted, "init") && fallback) this.setTab(tabKey(fallback), "init");
+    if (typeof htmx !== "undefined") htmx.process(this);
+  }
+  _adoptTabs() {
+    Array.from(this.childNodes).forEach((node) => {
+      if (node === this.componentElement) return;
+      if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "WC-RIBBON-TAB") this._body.appendChild(node);
+      else if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) node.remove();
+    });
+  }
+  _syncStrip() {
+    const tabs = this.tabs;
+    const existing = new Map(Array.from(this._strip.children).map((b) => [b.dataset.key, b]));
+    tabs.forEach((t) => {
+      const key = tabKey(t);
+      let b = existing.get(key);
+      if (!b) {
+        b = el("button", "wc-ribbon-tab-btn");
+        b.type = "button";
+        b.setAttribute("role", "tab");
+        b.dataset.key = key;
+      }
+      existing.delete(key);
+      this._strip.appendChild(b);
+      this._syncTabButton(t, b);
+    });
+    existing.forEach((b) => b.remove());
+    this._syncPanels();
+  }
+  _syncTabButton(tab, button) {
+    if (!this._strip) return;
+    const key = tabKey(tab);
+    const b = button || this._strip.querySelector(`[data-key="${CSS.escape(key)}"]`);
+    if (!b) {
+      this._syncStrip();
+      return;
+    }
+    const panelId = `${this._uid}-panel-${key}`;
+    const tabId = `${this._uid}-tab-${key}`;
+    b.id = tabId;
+    b.textContent = tabLabel(tab);
+    b.hidden = tab.hidden;
+    b.setAttribute("aria-controls", panelId);
+    b.classList.toggle("is-contextual", tab.hasAttribute("contextual"));
+    const accent = tab.getAttribute("accent");
+    const value = ACCENT_VAR[accent] || (tab.hasAttribute("contextual") ? ACCENT_VAR.success : "");
+    if (value) b.style.setProperty("--wc-ribbon-tab-accent", value);
+    else b.style.removeProperty("--wc-ribbon-tab-accent");
+    if (tab.componentElement) {
+      tab.componentElement.id = panelId;
+      tab.componentElement.setAttribute("aria-labelledby", tabId);
+    }
+    if (!button) {
+      if (tab.hidden && this._active === key) this._ensureActiveVisible();
+      this._syncPanels();
+    }
+  }
+  _syncPanels() {
+    if (!this._strip) return;
+    this.tabs.forEach((t) => {
+      const key = tabKey(t);
+      const on = key === this._active && !t.hidden;
+      if (t.componentElement) t.componentElement.hidden = !on;
+      const b = this._strip.querySelector(`[data-key="${CSS.escape(key)}"]`);
+      if (b) {
+        b.setAttribute("aria-selected", String(on));
+        b.tabIndex = on ? 0 : -1;
+        b.classList.toggle("is-on", on);
+      }
+    });
+    if (this._active && this._active !== this._lastActive) {
+      if (this._lastActive) this._previousTab = this._lastActive;
+      this._lastActive = this._active;
+    }
+  }
+  _commandHosts(command) {
+    return Array.from(this.querySelectorAll(`[command="${CSS.escape(command)}"]`)).filter((h) => h.matches(COMMAND_TAGS));
+  }
+  // ---- Collapse at narrow widths ----------------------------------------------------------------
+  _activePanel() {
+    return this.tab(this._active)?.componentElement || null;
+  }
+  _layout() {
+    const panel = this._activePanel();
+    if (!panel || !this._body) return;
+    const groups = Array.from(panel.querySelectorAll(":scope > wc-ribbon-group")).filter((g) => !g.hidden && g.componentElement);
+    groups.forEach((g) => g.componentElement.classList.remove("is-collapsed", "is-overflowed"));
+    this._more.hidden = true;
+    this._overflowed = [];
+    const fits = () => this._body.scrollWidth <= this._body.clientWidth + 1;
+    if (fits()) return;
+    for (let i = groups.length - 1; i >= 0 && !fits(); i--) groups[i].componentElement.classList.add("is-collapsed");
+    if (fits()) return;
+    this._more.hidden = false;
+    for (let i = groups.length - 1; i >= 0 && !fits(); i--) {
+      groups[i].componentElement.classList.add("is-overflowed");
+      this._overflowed.unshift(groups[i]);
+    }
+  }
+  // ---- Menus ------------------------------------------------------------------------------------
+  _menuItem(host, { indent = false } = {}) {
+    const b = el("button", "wc-ribbon-menu-item");
+    b.type = "button";
+    b.tabIndex = -1;
+    b.dataset.command = host.command;
+    b._host = host;
+    const toggle = host.hasAttribute("toggle");
+    b.setAttribute("role", toggle ? "menuitemcheckbox" : "menuitem");
+    if (indent) b.classList.add("is-variant");
+    const pic = el("span", "wc-ribbon-menu-pic");
+    pic.appendChild(pictureFor(host, "0.95rem"));
+    const text = el("span", "wc-ribbon-menu-text");
+    text.append(el("span", "wc-ribbon-menu-label", host.label));
+    const tip = host.getAttribute("tip");
+    if (tip) text.append(el("span", "wc-ribbon-menu-desc", tip));
+    b.append(pic, text);
+    if (toggle) b.append(el("span", "wc-ribbon-menu-check", "\u2713"));
+    b.title = titleFor(host);
+    this._syncMenuItem(host, b);
+    return b;
+  }
+  // Update an open menu's item for a command host in place (setActive / setDisabled while open).
+  _syncMenuItem(host, item) {
+    const items = item ? [item] : this._menu ? Array.from(this._menu.panel.querySelectorAll(".wc-ribbon-menu-item")).filter((i) => i._host === host) : [];
+    items.forEach((i) => {
+      i.setAttribute("aria-disabled", String(host.disabled));
+      i.classList.toggle("is-disabled", host.disabled);
+      if (host.hasAttribute("toggle")) i.setAttribute("aria-checked", String(host.active));
+      const variant = host.getAttribute("variant");
+      if (ACCENTS.includes(variant)) i.dataset.variant = variant;
+      else delete i.dataset.variant;
+    });
+  }
+  _groupEntries(group, withWidgets) {
+    const entries = [];
+    group.commandHosts.forEach((h) => {
+      if (h.tagName === "WC-RIBBON-ITEM" && h.parentElement?.tagName === "WC-RIBBON-SPLIT") return;
+      entries.push({ host: h });
+      if (h.tagName === "WC-RIBBON-SPLIT") h.variants.forEach((v) => {
+        if (!v.hidden) entries.push({ host: v, indent: true });
+      });
+    });
+    if (withWidgets && group.widgets.length) entries.push({ widgets: group.widgets });
+    return entries;
+  }
+  _openMenu(opener, kind, source, viaKeyboard = false) {
+    if (this._menu && this._menu.opener === opener) {
+      this._closeMenu("toggle");
+      return;
+    }
+    this._closeMenu("replace");
+    const panel = el("div", "wc-ribbon-menu");
+    panel.setAttribute("role", "menu");
+    panel.tabIndex = -1;
+    panel.id = `${this._uid}-menu`;
+    const restore = [];
+    const addEntries = (entries) => entries.forEach((e) => {
+      if (e.header) {
+        const h = el("div", "wc-ribbon-menu-header", e.header);
+        h.setAttribute("role", "presentation");
+        panel.appendChild(h);
+      } else if (e.widgets) {
+        const box = el("div", "wc-ribbon-menu-widgets");
+        box.setAttribute("role", "presentation");
+        e.widgets.forEach((w) => {
+          restore.push([w, w.parentNode, w.nextSibling]);
+          box.appendChild(w);
+        });
+        panel.appendChild(box);
+      } else {
+        panel.appendChild(this._menuItem(e.host, { indent: e.indent }));
+      }
+    });
+    let label = "";
+    if (kind === "group") {
+      const group = source;
+      label = group.label;
+      addEntries(this._groupEntries(group, group.componentElement.classList.contains("is-collapsed")));
+    } else if (kind === "split") {
+      label = source.label;
+      addEntries([{ host: source }, ...source.variants.filter((v) => !v.hidden).map((v) => ({ host: v }))]);
+    } else if (kind === "overflow") {
+      label = "More commands";
+      this._overflowed.forEach((g) => addEntries([{ header: g.label }, ...this._groupEntries(g, true)]));
+    }
+    panel.setAttribute("aria-label", label);
+    if (!panel.children.length) {
+      const empty = el("div", "wc-ribbon-menu-empty", "No commands");
+      panel.appendChild(empty);
+    }
+    panel.addEventListener("keydown", this._onMenuKeydown);
+    panel.addEventListener("click", this._onMenuClick);
+    this._layer.appendChild(panel);
+    this._menu = { panel, opener, kind, restore };
+    opener.setAttribute("aria-expanded", "true");
+    opener.setAttribute("aria-controls", panel.id);
+    if (typeof panel.showPopover === "function") {
+      panel.setAttribute("popover", "manual");
+      try {
+        panel.showPopover();
+      } catch (err) {
+      }
+    }
+    this._positionMenu();
+    window.addEventListener("resize", this._onReposition);
+    window.addEventListener("scroll", this._onReposition, true);
+    document.addEventListener("pointerdown", this._onDocPointer, true);
+    const first = this._menuItems().find((i) => !i.classList.contains("is-disabled")) || this._menuItems()[0];
+    if (viaKeyboard && first) first.focus({ preventScroll: true });
+    else panel.focus({ preventScroll: true });
+  }
+  _menuItems() {
+    return this._menu ? Array.from(this._menu.panel.querySelectorAll(".wc-ribbon-menu-item")) : [];
+  }
+  // Under its own button, left-aligned; flips left/up near the right/bottom edge; capped height.
+  _positionMenu() {
+    if (!this._menu) return;
+    const { panel, opener } = this._menu;
+    if (!opener.isConnected || !opener.getClientRects().length) {
+      this._closeMenu("detached");
+      return;
+    }
+    const r = opener.getBoundingClientRect();
+    const m = 8;
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
+    panel.style.maxHeight = "";
+    const below = vh - r.bottom - 4 - m;
+    const above = r.top - 4 - m;
+    const natural = Math.min(panel.scrollHeight + 2, vh * 0.7);
+    const up = natural > below && above > below;
+    const h = Math.min(natural, up ? above : below);
+    panel.style.maxHeight = `${Math.max(120, h)}px`;
+    const pw = panel.offsetWidth;
+    const ph = panel.offsetHeight;
+    let left = r.left;
+    if (left + pw > vw - m) left = r.right - pw;
+    left = Math.max(m, Math.min(left, vw - pw - m));
+    let top = up ? r.top - 4 - ph : r.bottom + 4;
+    top = Math.max(m, Math.min(top, vh - ph - m));
+    panel.style.left = `${Math.round(left)}px`;
+    panel.style.top = `${Math.round(top)}px`;
+  }
+  _closeMenu(reason) {
+    if (!this._menu) return;
+    const { panel, opener, restore } = this._menu;
+    this._menu = null;
+    window.removeEventListener("resize", this._onReposition);
+    window.removeEventListener("scroll", this._onReposition, true);
+    document.removeEventListener("pointerdown", this._onDocPointer, true);
+    panel.removeEventListener("keydown", this._onMenuKeydown);
+    panel.removeEventListener("click", this._onMenuClick);
+    restore.forEach(([node, parent, next]) => {
+      if (parent) parent.insertBefore(node, next && next.parentNode === parent ? next : null);
+    });
+    if (panel.matches(":popover-open")) {
+      try {
+        panel.hidePopover();
+      } catch (err) {
+      }
+    }
+    panel.remove();
+    opener.setAttribute("aria-expanded", "false");
+    opener.removeAttribute("aria-controls");
+    if ((reason === "escape" || reason === "pick") && opener.isConnected) opener.focus({ preventScroll: true });
+  }
+  _handleMenuClick(e) {
+    const item = e.target.closest(".wc-ribbon-menu-item");
+    if (!item) return;
+    if (item.classList.contains("is-disabled")) return;
+    this._invoke(item._host, "menu");
+  }
+  _handleMenuKeydown(e) {
+    const items = this._menuItems();
+    const i = items.indexOf(document.activeElement);
+    const go = (n) => {
+      e.preventDefault();
+      items[(n + items.length) % items.length]?.focus();
+    };
+    switch (e.key) {
+      case "ArrowDown":
+        go(i + 1);
+        break;
+      case "ArrowUp":
+        go(i < 0 ? items.length - 1 : i - 1);
+        break;
+      case "Home":
+        go(0);
+        break;
+      case "End":
+        go(items.length - 1);
+        break;
+      case "Escape":
+        e.preventDefault();
+        e.stopPropagation();
+        this._closeMenu("escape");
+        break;
+      case "Tab":
+        this._closeMenu("tab");
+        break;
+      case "Enter":
+      case " ":
+        if (i >= 0) {
+          e.preventDefault();
+          if (!items[i].classList.contains("is-disabled")) this._invoke(items[i]._host, "menu");
+        }
+        break;
+      default:
+        if (e.key.length === 1 && /\S/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const k = e.key.toLowerCase();
+          const order = [...items.slice(i + 1), ...items.slice(0, i + 1)];
+          const hit = order.find((it) => (it._host.label || "").toLowerCase().startsWith(k));
+          if (hit) {
+            e.preventDefault();
+            hit.focus();
+          }
+        }
+    }
+  }
+  _handleDocPointer(e) {
+    if (!this._menu) return;
+    if (this._menu.panel.contains(e.target) || this._menu.opener.contains(e.target)) return;
+    this._closeMenu("outside");
+  }
+  // ---- Commands ---------------------------------------------------------------------------------
+  _invoke(host, source) {
+    if (!host || host.disabled) return;
+    const fromMenu = source === "menu";
+    if (fromMenu) this._closeMenu("pick");
+    if (host.hasAttribute("toggle")) {
+      const group2 = host.getAttribute("toggle-group");
+      if (group2) this.setActive(host.command, true);
+      else host.active = !host.active;
+    }
+    const tab = host.closest("wc-ribbon-tab");
+    const group = host.closest("wc-ribbon-group");
+    const detail = { command: host.command, tab: tab ? tab.key : "", group: group ? group.label : "", source };
+    if (host.hasAttribute("toggle")) detail.active = host.active;
+    const def = this._commands[host.command];
+    this._emit("wcribboncommand", "ribbon-command", detail, host);
+    if (def && typeof def.run === "function") {
+      try {
+        def.run(detail);
+      } catch (err) {
+        console.error("[wc-ribbon] command failed", host.command, err);
+      }
+    }
+  }
+  _emit(name, alias, detail, from = this) {
+    const opts = { bubbles: true, composed: true, detail };
+    from.dispatchEvent(new CustomEvent(name, opts));
+    from.dispatchEvent(new CustomEvent(alias, opts));
+    window.wc?.EventHub?.broadcast(name, `[data-wc-id="${this.wcId}"]`, "", detail);
+  }
+  _handleClick(e) {
+    const t = e.target.closest("button");
+    if (!t || !this.componentElement.contains(t) || this._menu?.panel.contains(t)) return;
+    if (t.classList.contains("wc-ribbon-tab-btn")) {
+      this.setTab(t.dataset.key, "click");
+      return;
+    }
+    switch (t.dataset.role) {
+      case "command":
+        this._invoke(t.closest("wc-ribbon-button, wc-ribbon-split"), "button");
+        break;
+      case "group-menu":
+        this._openMenu(t, "group", t.closest("wc-ribbon-group"), e.detail === 0);
+        break;
+      case "split-menu":
+        this._openMenu(t, "split", t.closest("wc-ribbon-split"), e.detail === 0);
+        break;
+      case "overflow":
+        this._openMenu(t, "overflow", null, e.detail === 0);
+        break;
+      default:
+    }
+  }
+  _handleTabKeydown(e) {
+    const t = e.target.closest(".wc-ribbon-tab-btn");
+    if (!t) return;
+    const visible = Array.from(this._strip.children).filter((b) => !b.hidden);
+    const i = visible.indexOf(t);
+    let next = null;
+    if (e.key === "ArrowRight") next = visible[(i + 1) % visible.length];
+    else if (e.key === "ArrowLeft") next = visible[(i - 1 + visible.length) % visible.length];
+    else if (e.key === "Home") next = visible[0];
+    else if (e.key === "End") next = visible[visible.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    this.setTab(next.dataset.key, "key");
+    next.focus();
+  }
+  _hubCommand(e, mode) {
+    const selector = e.detail?.selector;
+    if (!selector) return;
+    let targeted = false;
+    try {
+      targeted = selector === this || (typeof selector === "string" || Array.isArray(selector)) && this.matches(Array.isArray(selector) ? selector.join(",") : selector);
+    } catch (err) {
+      targeted = false;
+    }
+    if (!targeted) return;
+    const key = e.detail.subSelector || e.detail.custom?.key || e.detail.custom;
+    if (typeof key !== "string") return;
+    if (mode === "activate") this.setTab(key, "eventhub");
+    else if (mode === "show") this.showTab(key, !!e.detail.custom?.activate);
+    else this.hideTab(key);
+  }
+  // ---- Key tips (Alt) -----------------------------------------------------------------------------
+  _handleKeytipKeydown(e) {
+    if (this._keytipMode) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        this._exitKeytips();
+        return;
+      }
+      if (e.key === "Alt") {
+        e.preventDefault();
+        this._exitKeytips();
+        return;
+      }
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const k = e.key.toUpperCase();
+        const hit = this._keytipMode.map.get(k);
+        if (!hit) return;
+        if (this._keytipMode.level === "tabs") {
+          this.setTab(hit.dataset.key, "keytip");
+          this._showKeytips("commands");
+        } else {
+          this._exitKeytips();
+          hit.focus();
+          hit.click();
+        }
+      }
+      return;
+    }
+    this._altAlone = e.key === "Alt" && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+  }
+  _handleKeytipKeyup(e) {
+    if (e.key === "Alt" && this._altAlone && !this._keytipMode) {
+      e.preventDefault();
+      this._showKeytips("tabs");
+    }
+    this._altAlone = false;
+  }
+  _showKeytips(level) {
+    this._clearKeytipBadges();
+    const map = /* @__PURE__ */ new Map();
+    const used = /* @__PURE__ */ new Set();
+    const pick = (node, label, explicit) => {
+      let k = (explicit || "").toUpperCase();
+      if (!k || used.has(k)) k = Array.from((label || "").toUpperCase()).find((ch) => /[A-Z0-9]/.test(ch) && !used.has(ch)) || "";
+      if (!k) k = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").find((ch) => !used.has(ch)) || "";
+      if (!k) return;
+      used.add(k);
+      map.set(k, node);
+      const badge = el("span", "wc-ribbon-keytip", k);
+      badge.setAttribute("aria-hidden", "true");
+      node.appendChild(badge);
+    };
+    if (level === "tabs") {
+      Array.from(this._strip.children).filter((b) => !b.hidden).forEach((b) => pick(b, b.textContent, this.tab(b.dataset.key)?.getAttribute("keytip")));
+    } else {
+      const panel = this._activePanel();
+      const targets = Array.from(panel.querySelectorAll(".wc-ribbon-btn, .wc-ribbon-split-arrow, button.wc-ribbon-group-label")).filter((b) => b.getClientRects().length && !b.disabled);
+      targets.forEach((b) => {
+        const host = b.closest(COMMAND_TAGS);
+        const label = host ? host.label : b.textContent;
+        pick(b, label, host?.getAttribute("keytip"));
+      });
+    }
+    this._keytipMode = { level, map };
+    this.componentElement.classList.add("is-keytips");
+  }
+  _clearKeytipBadges() {
+    this.componentElement.querySelectorAll(".wc-ribbon-keytip").forEach((b) => b.remove());
+  }
+  _exitKeytips() {
+    if (!this._keytipMode || !this.componentElement) return;
+    this._keytipMode = null;
+    this._clearKeytipBadges();
+    this.componentElement.classList.remove("is-keytips");
+  }
+  // ---- Attributes / wiring ------------------------------------------------------------------------
+  _handleAttributeChange(attrName, newValue, oldValue) {
+    if (attrName === "class") {
+      super._handleAttributeChange(attrName, newValue, oldValue);
+      return;
+    }
+    if (attrName === "id") return;
+    if (attrName === "active") {
+      if (!this._settingActive && newValue) this.setTab(newValue, "attribute");
+    } else if (attrName === "compact") {
+      this.componentElement.classList.toggle("is-compact", newValue !== null);
+      this.relayout();
+    } else if (attrName === "keytips") {
+      this._wireKeytips();
+    }
+  }
+  _wireKeytips() {
+    document.removeEventListener("keydown", this._onKeyDown, true);
+    document.removeEventListener("keyup", this._onKeyUp, true);
+    if (this.hasAttribute("keytips") && this.isConnected) {
+      document.addEventListener("keydown", this._onKeyDown, true);
+      document.addEventListener("keyup", this._onKeyUp, true);
+    } else {
+      this._exitKeytips();
+    }
+  }
+  _wireEvents() {
+    super._wireEvents();
+    this._unWireEvents();
+    this.componentElement.addEventListener("click", this._onClick);
+    this._strip.addEventListener("keydown", this._onTabKeydown);
+    document.body.addEventListener("wcribbonactivate", this._onActivateCmd);
+    document.body.addEventListener("wcribbontabshow", this._onShowCmd);
+    document.body.addEventListener("wcribbontabhide", this._onHideCmd);
+    this._resizeObserver = new ResizeObserver(() => this.relayout());
+    this._resizeObserver.observe(this._body);
+    this._childObserver = new MutationObserver(() => {
+      this._adoptTabs();
+      this._syncStrip();
+      this.relayout();
+    });
+    this._childObserver.observe(this, { childList: true });
+    this._wireKeytips();
+  }
+  _unWireEvents() {
+    super._unWireEvents();
+    this.componentElement?.removeEventListener("click", this._onClick);
+    this._strip?.removeEventListener("keydown", this._onTabKeydown);
+    document.body.removeEventListener("wcribbonactivate", this._onActivateCmd);
+    document.body.removeEventListener("wcribbontabshow", this._onShowCmd);
+    document.body.removeEventListener("wcribbontabhide", this._onHideCmd);
+    document.removeEventListener("keydown", this._onKeyDown, true);
+    document.removeEventListener("keyup", this._onKeyUp, true);
+    this._resizeObserver?.disconnect();
+    this._childObserver?.disconnect();
+    if (this._layoutFrame) {
+      cancelAnimationFrame(this._layoutFrame);
+      this._layoutFrame = 0;
+    }
+  }
+  _applyStyle() {
+    const style = `
+      wc-ribbon, wc-ribbon-tab, wc-ribbon-group, wc-ribbon-button, wc-ribbon-split { display: contents; }
+
+      @layer wc.usage {
+        /* State classes avoid .is-active: Wave's global .is-active utility (@layer wc.selected)
+           would add its left accent bar and ring. This component uses .is-on. */
+        .wc-ribbon {
+          --wc-ribbon-accent: var(--primary-bg-color);
+          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-rows: auto auto;
+          background-color: var(--wc-ribbon-bg, var(--surface-2));
+          border-bottom: 1px solid var(--wc-ribbon-group-border, var(--surface-4));
+          color: var(--text-1);
+          font-size: 12px;
+          line-height: 1.2;
+          min-width: 0;
+        }
+        .wc-ribbon-tabs {
+          grid-column: 1 / -1;
+          display: flex;
+          gap: 2px;
+          padding: 0 0.5rem;
+          border-bottom: 1px solid var(--wc-ribbon-group-border, var(--surface-4));
+          overflow: hidden;
+        }
+        .wc-ribbon-tab-btn {
+          position: relative;
+          margin: 0 0 -1px;
+          padding: 0.4rem 0.8rem 0.35rem;
+          border: 0;
+          border-bottom: 2px solid transparent;
+          background: transparent;
+          color: var(--text-2, var(--text-1));
+          font: inherit;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.03em;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .wc-ribbon-tab-btn:hover { color: var(--text-1); background-color: var(--wc-ribbon-button-hover, var(--surface-3)); }
+        .wc-ribbon-tab-btn.is-on {
+          color: var(--text-1);
+          border-bottom-color: var(--wc-ribbon-tab-accent, var(--wc-ribbon-accent));
+        }
+        /* contextual tabs: accent label (mixed toward --text-1 so it stays AA) + accent underline */
+        .wc-ribbon-tab-btn.is-contextual {
+          color: color-mix(in srgb, var(--wc-ribbon-tab-accent) 55%, var(--text-1));
+          background-color: color-mix(in srgb, var(--wc-ribbon-tab-accent) 10%, transparent);
+          border-radius: 4px 4px 0 0;
+        }
+        .wc-ribbon-tab-btn.is-contextual.is-on { border-bottom-color: var(--wc-ribbon-tab-accent); }
+        .wc-ribbon-tab-btn:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: -2px; }
+
+        .wc-ribbon-body {
+          grid-column: 1;
+          display: flex;
+          min-width: 0;
+          min-height: 80px;
+          overflow: hidden;
+        }
+        .wc-ribbon-panel {
+          display: flex;
+          align-items: stretch;
+          flex: 0 0 auto;
+          padding: 4px 4px 0;
+        }
+        .wc-ribbon-panel[hidden] { display: none; }
+        .wc-ribbon-panel[style*="--wc-ribbon-tab-accent"] { box-shadow: inset 0 2px 0 var(--wc-ribbon-tab-accent); }
+
+        .wc-ribbon-group {
+          display: flex;
+          flex-direction: column;
+          flex: 0 0 auto;
+          padding: 0 4px;
+          border-right: 1px solid var(--wc-ribbon-group-border, var(--surface-4));
+        }
+        .wc-ribbon-group-items { display: flex; align-items: flex-start; gap: 2px; flex: 1 1 auto; }
+        .wc-ribbon-group-label {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          margin: 0;
+          padding: 2px 6px 3px;
+          border: 0;
+          border-radius: 4px;
+          background: transparent;
+          color: var(--wc-ribbon-label-color, var(--text-2, var(--text-1)));
+          font: inherit;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        button.wc-ribbon-group-label { cursor: pointer; }
+        button.wc-ribbon-group-label:hover,
+        button.wc-ribbon-group-label[aria-expanded="true"] { background-color: var(--wc-ribbon-button-hover, var(--surface-3)); color: var(--text-1); }
+        .wc-ribbon-caret { font-size: 0.8em; opacity: 0.8; }
+
+        .wc-ribbon-btn {
+          position: relative;
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          min-width: 46px;
+          max-width: 78px;
+          margin: 0;
+          padding: 6px 6px 4px;
+          border: 1px solid transparent;
+          border-radius: 6px;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          font-size: 11px;
+          line-height: 1.15;
+          text-align: center;
+          cursor: pointer;
+        }
+        .wc-ribbon-btn:hover:not(:disabled) { background-color: var(--wc-ribbon-button-hover, var(--surface-3)); }
+        .wc-ribbon-btn:focus-visible,
+        .wc-ribbon-split-arrow:focus-visible,
+        .wc-ribbon-group-label:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: -1px; }
+        .wc-ribbon-btn:disabled { opacity: 0.45; cursor: default; }
+        .wc-ribbon-btn.is-on,
+        .wc-ribbon-split.is-on .wc-ribbon-split-main {
+          background-color: color-mix(in srgb, var(--wc-ribbon-accent) 18%, transparent);
+          border-color: color-mix(in srgb, var(--wc-ribbon-accent) 60%, transparent);
+        }
+        .wc-ribbon-btn-label {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .wc-ribbon-icon, .wc-ribbon-glyph {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.25rem;
+          height: 1.25rem;
+          flex: none;
+        }
+        .wc-ribbon-glyph { font-size: 1.05rem; font-weight: 600; line-height: 1; font-family: ui-sans-serif, system-ui, sans-serif; }
+        [data-variant] .wc-ribbon-icon, [data-variant] .wc-ribbon-glyph,
+        [data-variant] > .wc-ribbon-split-main .wc-ribbon-icon {
+          color: color-mix(in srgb, var(--wc-ribbon-variant) 65%, var(--text-1));
+        }
+        .wc-ribbon-btn[data-variant], .wc-ribbon-split[data-variant] > .wc-ribbon-split-main {
+          background-color: color-mix(in srgb, var(--wc-ribbon-variant) 12%, transparent);
+        }
+        [data-variant="primary"] { --wc-ribbon-variant: var(--primary-bg-color); }
+        [data-variant="success"] { --wc-ribbon-variant: var(--success-color); }
+        [data-variant="warning"] { --wc-ribbon-variant: var(--warning-color); }
+        [data-variant="danger"] { --wc-ribbon-variant: var(--danger-color); }
+        [data-variant="info"] { --wc-ribbon-variant: var(--info-color); }
+
+        /* split button: icon on top runs the command, "Label \u25BE" below opens the variants */
+        .wc-ribbon-split { display: inline-flex; flex-direction: column; align-items: stretch; border-radius: 6px; }
+        .wc-ribbon-split .wc-ribbon-split-main { border-radius: 6px 6px 0 0; padding-bottom: 2px; width: 100%; max-width: none; }
+        .wc-ribbon-split-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+          margin: 0;
+          padding: 2px 6px 4px;
+          border: 1px solid transparent;
+          border-radius: 0 0 6px 6px;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          font-size: 11px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .wc-ribbon-split:hover .wc-ribbon-btn:not(:disabled),
+        .wc-ribbon-split:hover .wc-ribbon-split-arrow:not(:disabled) { border-color: var(--wc-ribbon-group-border, var(--surface-4)); }
+        .wc-ribbon-split-arrow:hover:not(:disabled),
+        .wc-ribbon-split-arrow[aria-expanded="true"] { background-color: var(--wc-ribbon-button-hover, var(--surface-3)); }
+        .wc-ribbon-split-arrow:disabled { opacity: 0.45; cursor: default; }
+
+        /* widgets: compact controls with an optional caption, aligned with the buttons */
+        .wc-ribbon-widget {
+          display: inline-flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4px;
+          align-self: stretch;
+          padding: 4px;
+        }
+        .wc-ribbon-caption { font-size: 10px; color: var(--wc-ribbon-label-color, var(--text-2, var(--text-1))); text-align: center; }
+
+        /* collapsed group: one "GROUP \u25BE" button opening the group's menu */
+        .wc-ribbon-collapse { display: none; }
+        .wc-ribbon-group.is-collapsed > .wc-ribbon-group-items,
+        .wc-ribbon-group.is-collapsed > .wc-ribbon-group-label { display: none; }
+        .wc-ribbon-group.is-collapsed > .wc-ribbon-collapse { display: inline-flex; align-self: flex-start; margin-top: 2px; }
+        .wc-ribbon-collapse .wc-ribbon-group-name { text-transform: uppercase; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+        .wc-ribbon-group.is-overflowed { display: none; }
+        .wc-ribbon-more {
+          grid-column: 2;
+          grid-row: 2;
+          align-self: start;
+          margin: 4px 4px 0;
+        }
+        .wc-ribbon-more[hidden] { display: none; }
+
+        /* compact: a single row, small icons beside labels */
+        .wc-ribbon.is-compact .wc-ribbon-body { min-height: 0; }
+        .wc-ribbon.is-compact .wc-ribbon-panel { padding: 2px 4px; }
+        .wc-ribbon.is-compact .wc-ribbon-group { flex-direction: row; align-items: center; gap: 2px; padding: 0 4px; }
+        .wc-ribbon.is-compact .wc-ribbon-group-items { align-items: center; }
+        .wc-ribbon.is-compact .wc-ribbon-btn,
+        .wc-ribbon.is-compact .wc-ribbon-split { flex-direction: row; max-width: none; padding: 3px 6px; gap: 5px; white-space: nowrap; }
+        .wc-ribbon.is-compact .wc-ribbon-split { padding: 0; }
+        .wc-ribbon.is-compact .wc-ribbon-split .wc-ribbon-split-main { border-radius: 6px 0 0 6px; padding: 3px 4px 3px 6px; width: auto; }
+        .wc-ribbon.is-compact .wc-ribbon-split-arrow { border-radius: 0 6px 6px 0; padding: 3px 6px 3px 2px; }
+        .wc-ribbon.is-compact .wc-ribbon-btn-label { display: block; }
+        .wc-ribbon.is-compact .wc-ribbon-icon, .wc-ribbon.is-compact .wc-ribbon-glyph { width: 1rem; height: 1rem; font-size: 0.9rem; }
+        .wc-ribbon.is-compact .wc-ribbon-widget { flex-direction: row; align-items: center; padding: 2px 4px; }
+        .wc-ribbon.is-compact .wc-ribbon-group-label { padding: 2px 4px; }
+        .wc-ribbon.is-compact .wc-ribbon-group.is-collapsed > .wc-ribbon-collapse { margin-top: 0; align-self: center; }
+        .wc-ribbon.is-compact .wc-ribbon-more { grid-row: 2; align-self: center; margin: 0 4px; flex-direction: row; }
+
+        /* menus: top layer (popover), anchored by JS to their own button */
+        .wc-ribbon-menu {
+          position: fixed;
+          inset: auto;
+          z-index: 10000;
+          margin: 0;
+          min-width: var(--wc-ribbon-menu-width, 300px);
+          max-width: min(480px, calc(100vw - 16px));
+          max-height: 70vh;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 4px;
+          background-color: var(--wc-ribbon-menu-bg, var(--surface-2));
+          border: 1px solid var(--surface-4);
+          border-radius: 8px;
+          box-shadow: 0 10px 30px color-mix(in srgb, var(--text-1) 22%, transparent);
+          color: var(--text-1);
+          font-size: 13px;
+          line-height: 1.25;
+        }
+        .wc-ribbon-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          margin: 0;
+          padding: 6px 10px;
+          border: 0;
+          border-radius: 6px;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+        .wc-ribbon-menu-item:hover,
+        .wc-ribbon-menu-item:focus { background-color: var(--surface-3); outline: none; }
+        .wc-ribbon-menu-item:focus-visible { box-shadow: inset 0 0 0 2px var(--primary-bg-color); }
+        .wc-ribbon-menu-item.is-variant { padding-left: 26px; }
+        .wc-ribbon-menu-item.is-disabled { opacity: 0.45; cursor: default; }
+        .wc-ribbon-menu-item[aria-checked="true"] { background-color: color-mix(in srgb, var(--wc-ribbon-accent) 14%, transparent); }
+        .wc-ribbon-menu-pic { display: inline-flex; justify-content: center; width: 1.25rem; flex: none; }
+        .wc-ribbon-menu-pic .wc-ribbon-icon, .wc-ribbon-menu-pic .wc-ribbon-glyph { width: 1.1rem; height: 1.1rem; font-size: 0.95rem; }
+        .wc-ribbon-menu-item[data-variant] .wc-ribbon-icon, .wc-ribbon-menu-item[data-variant] .wc-ribbon-glyph {
+          color: color-mix(in srgb, var(--wc-ribbon-variant) 65%, var(--text-1));
+        }
+        .wc-ribbon-menu-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+        .wc-ribbon-menu-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wc-ribbon-menu-desc {
+          font-size: 11px;
+          color: var(--text-2, var(--text-1));
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wc-ribbon-menu-check { flex: none; visibility: hidden; color: var(--text-1); }
+        .wc-ribbon-menu-item[aria-checked="true"] .wc-ribbon-menu-check { visibility: visible; }
+        .wc-ribbon-menu-header {
+          padding: 8px 10px 3px;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--text-2, var(--text-1));
+        }
+        .wc-ribbon-menu-widgets {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 6px 10px;
+          border-top: 1px solid var(--surface-4);
+          margin-top: 4px;
+        }
+        .wc-ribbon-menu-empty { padding: 10px; color: var(--text-2, var(--text-1)); }
+
+        /* key tips (Alt) */
+        .wc-ribbon-keytip {
+          position: absolute;
+          left: 50%;
+          bottom: -4px;
+          transform: translateX(-50%);
+          z-index: 2;
+          min-width: 1.1rem;
+          padding: 1px 4px;
+          border: 1px solid var(--surface-5, var(--surface-4));
+          border-radius: 3px;
+          background-color: var(--text-1);
+          color: var(--surface-1);
+          font: 600 10px/1.2 ui-sans-serif, system-ui, sans-serif;
+          text-align: center;
+          pointer-events: none;
+        }
+
+        .theme-high-contrast .wc-ribbon-btn.is-on,
+        .theme-high-contrast .wc-ribbon-menu-item[aria-checked="true"] { outline: 2px solid var(--text-1); outline-offset: -2px; }
+      }
+
+      /* Unlayered: [hidden] must beat .contents (wc.utility), and widget inputs must beat the
+         wc.ui bare input/select rules (padding, font-size 1rem). */
+      wc-ribbon-tab[hidden], wc-ribbon-group[hidden], wc-ribbon-button[hidden],
+      wc-ribbon-split[hidden], wc-ribbon-button[menu-only], wc-ribbon-item { display: none; }
+      .wc-ribbon-widget > select,
+      .wc-ribbon-widget > input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
+        height: 26px;
+        padding: 0 0.4rem;
+        font-size: 12px;
+        min-width: 7rem;
+      }
+      .wc-ribbon-widget > input[type="range"] { width: 7.5rem; margin: 6px 0; }
+      .wc-ribbon-menu-widgets > select,
+      .wc-ribbon-menu-widgets > input:not([type="range"]) { height: 26px; padding: 0 0.4rem; font-size: 12px; }
+    `.trim();
+    this.loadStyle("wc-ribbon-style", style);
+  }
+};
+[WcRibbon, WcRibbonTab, WcRibbonGroup, WcRibbonButton, WcRibbonItem, WcRibbonSplit].forEach((C) => {
+  if (!customElements.get(C.is)) customElements.define(C.is, C);
+});
 
 // src/js/components/wc-slider.js
 var WcSlider = class extends WcBaseFormComponent {
@@ -52795,11 +54377,11 @@ if (!customElements.get("wc-wizard")) {
       });
     }
     _readSteps() {
-      this._steps = Array.from(this.querySelectorAll(":scope > wc-wizard-step")).map((el) => ({
-        label: el.getAttribute("label") || "",
-        icon: el.getAttribute("icon") || "",
-        beforeNavigate: el.getAttribute("before-navigate") || "",
-        element: el
+      this._steps = Array.from(this.querySelectorAll(":scope > wc-wizard-step")).map((el2) => ({
+        label: el2.getAttribute("label") || "",
+        icon: el2.getAttribute("icon") || "",
+        beforeNavigate: el2.getAttribute("before-navigate") || "",
+        element: el2
       }));
     }
     _createInnerElement() {
@@ -52877,8 +54459,8 @@ if (!customElements.get("wc-wizard")) {
     _updateIndicators() {
       if (!this._indicatorsEl) return;
       const indicators = this._indicatorsEl.querySelectorAll(".wc-wizard-indicator");
-      indicators.forEach((el, i) => {
-        el.classList.toggle("active", i === this._activeStep);
+      indicators.forEach((el2, i) => {
+        el2.classList.toggle("active", i === this._activeStep);
       });
     }
     _handleAttributeChange(attrName, newValue) {
