@@ -10,17 +10,18 @@
   <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 
   <link rel="stylesheet" href="../dist/wave-css.min.css">
-  <style>
-    .demo-frame { border: 1px solid var(--surface-4); border-radius: 0.5rem; overflow: hidden; }
-    .demo-canvas { height: 140px; display: grid; place-items: center; background: var(--surface-1); color: var(--text-2); }
-    #narrow-wrap { width: 800px; max-width: 100%; resize: horizontal; overflow: hidden; }
-    #page-contents { box-sizing: border-box; width: 100%; }
-    .grow { flex: 1 1 auto; }
-  </style>
 </head>
 
 <body class="col-1 h-full text-sm">
   <div id="page-contents" class="p-6" style="max-width: 1200px; margin: 0 auto;">
+    <style>
+      /* inside #page-contents so the views/index.html menu (hx-select="#page-contents") keeps it */
+      .demo-frame { border: 1px solid var(--surface-4); border-radius: 0.5rem; overflow: hidden; }
+      .demo-canvas { height: 140px; display: grid; place-items: center; background: var(--surface-1); color: var(--text-2); }
+      #narrow-wrap { width: 800px; max-width: 100%; resize: horizontal; overflow: hidden; }
+      #page-contents { box-sizing: border-box; width: 100%; }
+      .grow { flex: 1 1 auto; }
+    </style>
     <h1 class="text-xl font-bold mb-2">wc-ribbon</h1>
     <p class="mb-3 text-muted">
       A Fusion 360 / Office-style ribbon: a few large buttons per group, and the group title
@@ -143,77 +144,87 @@
     </div>
 
     <pre id="log" class="card p-3 text-xs mt-4" style="white-space:pre-wrap; max-height: 12rem; overflow:auto;"></pre>
+
+    <!-- Demo wiring. wc-javascript runs it on a direct load AND when views/index.html swaps this page
+         in with htmx; type="text/plain" stops the parser/htmx from also running it. -->
+    <wc-javascript class="hidden">
+      <script type="text/plain">
+      (async () => {
+      const rb = document.getElementById('rb');
+      const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
+      await customElements.whenDefined('wc-ribbon');
+      await rb.ready;
+
+      // Listen on the page container (replaced on each visit from the index menu), not document,
+      // so revisiting the page doesn't stack duplicate listeners.
+      const root = document.getElementById('page-contents');
+      root.addEventListener('wcribboncommand', (e) => {
+        log(`wcribboncommand ${JSON.stringify(e.detail)}`);
+        if (e.detail.command === 'sketch') rb.showTab('sketch', true);
+        if (e.detail.command === 'sk-finish') rb.hideTab('sketch');
+      });
+      root.addEventListener('wcribbontabchange', (e) => log(`wcribbontabchange ${JSON.stringify(e.detail)}`));
+
+      document.getElementById('start-sketch').onclick = () => rb.showTab('sketch', true);
+      document.getElementById('finish-sketch').onclick = () => rb.hideTab('sketch');
+      let extrudeOff = false;
+      document.getElementById('toggle-disable').onclick = () => { extrudeOff = !extrudeOff; rb.setDisabled('extrude', extrudeOff); };
+      document.getElementById('toggle-compact').onclick = () => rb.toggleAttribute('compact');
+      document.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { document.documentElement.className = b.dataset.theme; });
+
+      // ---- the same ribbon defined as data (CadStudio's CMD + RIBBON shape) ----
+      const commands = {
+        sketch: { icon: 'pen-ruler', label: 'Sketch', tip: 'Start a sketch on a plane or a face' },
+        extrude: { icon: 'arrow-up-from-line', label: 'Extrude', tip: 'Pull the selected sketch into a solid' },
+        revolve: { icon: 'rotate', label: 'Revolve', tip: 'Spin the selected sketch around an axis' },
+        hole: { icon: 'circle-dot', label: 'Hole', tip: 'A drilled hole in a face' },
+        loft: { icon: 'layer-group', label: 'Loft', tip: 'A solid through two or more sketches' },
+        sweep: { icon: 'timeline', label: 'Sweep', tip: 'Carry a profile along a path' },
+        box: { icon: 'cube', label: 'Box', tip: 'A box — no sketch needed' },
+        fillet: { icon: 'circle-notch', label: 'Fillet', tip: 'Round edges' },
+        chamfer: { icon: 'hexagon', label: 'Chamfer', tip: 'Bevel edges' },
+        shell: { icon: 'box-open', label: 'Shell', tip: 'Hollow a body' },
+        cut: { icon: 'knife', label: 'Cut', tip: 'Cut the selected sketch into a body' },
+        union: { icon: 'object-group', label: 'Join', tip: 'Join two bodies into one' },
+        measure: { icon: 'ruler', label: 'Measure', tip: 'Click two points on the model', toggle: true },
+        model: { icon: 'cube', label: 'Model', tip: 'A STEP, STL, 3MF or OBJ model' },
+        import: { icon: 'file-import', label: 'Import', tip: 'An SVG or DXF drawing' },
+        param: { icon: 'sliders', label: 'Parameter', tip: 'A named size', run: (d) => log(`run() param from ${d.source}`) },
+        'tool-endmill': { icon: 'screwdriver-wrench', label: 'Tool', tip: 'Add an end mill' },
+        'tool-vbit': { icon: 'screwdriver-wrench', label: 'V-bit', tip: 'A 60° V-bit for lettering' },
+        'tool-drill': { icon: 'screwdriver-wrench', label: 'Drill', tip: 'A ⅛″ drill' },
+        gcode: { icon: 'download', label: 'G-code', tip: 'Download one program per tool', primary: true },
+      };
+      const model = document.getElementById('rb-model');
+      await model.ready;
+      model.setModel({
+        commands,
+        widgets: {
+          section: { html: '<select title="Section"><option>No section</option><option>Across X</option><option>Across Y</option></select>', caption: 'Section' },
+        },
+        tabs: [
+          { key: 'solid', label: 'Solid', groups: [
+            { label: 'Create', main: ['sketch', 'extrude', 'revolve', 'hole'], more: ['loft', 'sweep', 'box'] },
+            { label: 'Modify', main: ['fillet', 'chamfer', 'shell', 'cut'], more: ['union'] },
+            { label: 'Inspect', main: ['measure', '@section'] },
+            { label: 'Insert', main: ['model', 'import', 'param'] },
+            { label: 'Make', main: [{ split: 'tool-endmill', items: ['tool-endmill', 'tool-vbit', 'tool-drill'] }, 'gcode'] },
+          ] },
+          { key: 'sketch', label: 'Sketch', contextual: true, accent: 'success', groups: [{ label: 'Finish', main: ['sketch'] }] },
+        ],
+      });
+
+      const wrap = document.getElementById('narrow-wrap');
+      document.getElementById('narrow-width').addEventListener('input', (e) => {
+        wrap.style.width = e.target.value + 'px';
+        document.getElementById('narrow-px').textContent = e.target.value + 'px';
+      });
+      })();
+      </script>
+    </wc-javascript>
   </div>
 
   <wc-event-hub></wc-event-hub>
   <script type="module" src="../dist/wave-css.min.js"></script>
-  <script type="module">
-    const rb = document.getElementById('rb');
-    const log = (m) => { const l = document.getElementById('log'); l.textContent = m + '\n' + l.textContent; };
-    await customElements.whenDefined('wc-ribbon');
-    await rb.ready;
-
-    document.addEventListener('wcribboncommand', (e) => {
-      log(`wcribboncommand ${JSON.stringify(e.detail)}`);
-      if (e.detail.command === 'sketch') rb.showTab('sketch', true);
-      if (e.detail.command === 'sk-finish') rb.hideTab('sketch');
-    });
-    document.addEventListener('wcribbontabchange', (e) => log(`wcribbontabchange ${JSON.stringify(e.detail)}`));
-
-    document.getElementById('start-sketch').onclick = () => rb.showTab('sketch', true);
-    document.getElementById('finish-sketch').onclick = () => rb.hideTab('sketch');
-    let extrudeOff = false;
-    document.getElementById('toggle-disable').onclick = () => { extrudeOff = !extrudeOff; rb.setDisabled('extrude', extrudeOff); };
-    document.getElementById('toggle-compact').onclick = () => rb.toggleAttribute('compact');
-    document.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { document.documentElement.className = b.dataset.theme; });
-
-    // ---- the same ribbon defined as data (CadStudio's CMD + RIBBON shape) ----
-    const commands = {
-      sketch: { icon: 'pen-ruler', label: 'Sketch', tip: 'Start a sketch on a plane or a face' },
-      extrude: { icon: 'arrow-up-from-line', label: 'Extrude', tip: 'Pull the selected sketch into a solid' },
-      revolve: { icon: 'rotate', label: 'Revolve', tip: 'Spin the selected sketch around an axis' },
-      hole: { icon: 'circle-dot', label: 'Hole', tip: 'A drilled hole in a face' },
-      loft: { icon: 'layer-group', label: 'Loft', tip: 'A solid through two or more sketches' },
-      sweep: { icon: 'timeline', label: 'Sweep', tip: 'Carry a profile along a path' },
-      box: { icon: 'cube', label: 'Box', tip: 'A box — no sketch needed' },
-      fillet: { icon: 'circle-notch', label: 'Fillet', tip: 'Round edges' },
-      chamfer: { icon: 'hexagon', label: 'Chamfer', tip: 'Bevel edges' },
-      shell: { icon: 'box-open', label: 'Shell', tip: 'Hollow a body' },
-      cut: { icon: 'knife', label: 'Cut', tip: 'Cut the selected sketch into a body' },
-      union: { icon: 'object-group', label: 'Join', tip: 'Join two bodies into one' },
-      measure: { icon: 'ruler', label: 'Measure', tip: 'Click two points on the model', toggle: true },
-      model: { icon: 'cube', label: 'Model', tip: 'A STEP, STL, 3MF or OBJ model' },
-      import: { icon: 'file-import', label: 'Import', tip: 'An SVG or DXF drawing' },
-      param: { icon: 'sliders', label: 'Parameter', tip: 'A named size', run: (d) => log(`run() param from ${d.source}`) },
-      'tool-endmill': { icon: 'screwdriver-wrench', label: 'Tool', tip: 'Add an end mill' },
-      'tool-vbit': { icon: 'screwdriver-wrench', label: 'V-bit', tip: 'A 60° V-bit for lettering' },
-      'tool-drill': { icon: 'screwdriver-wrench', label: 'Drill', tip: 'A ⅛″ drill' },
-      gcode: { icon: 'download', label: 'G-code', tip: 'Download one program per tool', primary: true },
-    };
-    const model = document.getElementById('rb-model');
-    await model.ready;
-    model.setModel({
-      commands,
-      widgets: {
-        section: { html: '<select title="Section"><option>No section</option><option>Across X</option><option>Across Y</option></select>', caption: 'Section' },
-      },
-      tabs: [
-        { key: 'solid', label: 'Solid', groups: [
-          { label: 'Create', main: ['sketch', 'extrude', 'revolve', 'hole'], more: ['loft', 'sweep', 'box'] },
-          { label: 'Modify', main: ['fillet', 'chamfer', 'shell', 'cut'], more: ['union'] },
-          { label: 'Inspect', main: ['measure', '@section'] },
-          { label: 'Insert', main: ['model', 'import', 'param'] },
-          { label: 'Make', main: [{ split: 'tool-endmill', items: ['tool-endmill', 'tool-vbit', 'tool-drill'] }, 'gcode'] },
-        ] },
-        { key: 'sketch', label: 'Sketch', contextual: true, accent: 'success', groups: [{ label: 'Finish', main: ['sketch'] }] },
-      ],
-    });
-
-    const wrap = document.getElementById('narrow-wrap');
-    document.getElementById('narrow-width').addEventListener('input', (e) => {
-      wrap.style.width = e.target.value + 'px';
-      document.getElementById('narrow-px').textContent = e.target.value + 'px';
-    });
-  </script>
 </body>
 </html>
