@@ -45,6 +45,7 @@ const FILES = [
   'https://cdn.jsdelivr.net/npm/cm-show-invisibles@3.1.0/lib/show-invisibles.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  'https://cdn.jsdelivr.net/npm/html2canvas-pro@2.5.2/dist/html2canvas-pro.min.js', // wc-help-drawer screenshot fallback (oklch-aware)
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://unpkg.com/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.js',
   'https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js',

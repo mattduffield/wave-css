@@ -21,6 +21,7 @@
       "cm-show-invisibles-3.1.0": "lib/show-invisibles.min.js",
       "dompurify-3.0.9": "purify.min.js",
       "html2canvas-1.4.1": "html2canvas.min.js",
+      "html2canvas-pro-2.5.2": "dist/html2canvas-pro.min.js (wc-help-drawer screenshot fallback; understands oklch/oklab)",
       "jspdf-2.5.1": "jspdf.umd.min.js",
       "jspdf-autotable-3.8.4": "dist/jspdf.plugin.autotable.js",
       "luxon-2.3.1": "build/global/luxon.min.js",
@@ -2400,7 +2401,7 @@
     "skeleton": [
       {
         "name": "wc-help-drawer",
-        "description": "Slide-out help drawer with Help, Create Ticket (with screenshot capture), and My Tickets tabs",
+        "description": "Slide-out help drawer with Help, Create Ticket (screenshot + any-file attachments), and My Tickets tabs",
         "attributes": [
           "reference-key",
           "template-slug",
@@ -2422,7 +2423,7 @@
           "close()",
           "toggle()"
         ],
-        "notes": "Triggered by ? button or Ctrl+/ shortcut. Escape closes. Help tab loads content via HTMX with search (debounced 300ms). Create Ticket tab has screenshot capture via html2canvas (loaded on demand), uploads to /api/upload. My Tickets tab fetches from /api/_project_ticket filtered by username. Fixed 420px right panel with overlay. Mobile responsive (full width under 480px).",
+        "notes": "Triggered by ? button or Ctrl+/ shortcut. Escape closes. Help tab loads content via HTMX with search (debounced 300ms). CREATE TICKET attachments: 'Attach Screenshot' grabs the real tab with navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'browser'}, audio:false, preferCurrentTab:true, selfBrowserSurface:'include', surfaceSwitching:'exclude'}) — exact pixels, oklch/color-mix CSS and WebGL (CAD Studio's model) included; drawer + overlay hidden while grabbing one frame, tracks stopped after. Fallback when the API is missing or the user cancels: html2canvas-pro 2.5.2 (understands oklch/oklab/lab/lch/color(); html2canvas 1.4.1 threw 'unsupported color function oklch'), lazy-loaded via Wave's loader (WaveAssetBase local mirror html2canvas-pro-2.5.2/dist/html2canvas-pro.min.js, jsDelivr fallback). 'Attach files' (input multiple, no accept filter), drop on the ticket panel, or paste an image: each file uploads at once to POST /api/upload (FormData {file, category:'tickets'}, one XHR per file, progress on the chip, server JSON {error} shown, e.g. 'File too large (max 50MB)'); response {url, originalName, contentType}. Chips: thumbnail or file-type icon, name, size, ✕ remove; screenshots in the same list. Submit (held while uploads run) adds attachments_json = JSON [{url, name, content_type}] (failed uploads excluded) and screenshot_url (latest screenshot, older servers); list cleared after success. go-kart: /api/upload allows 50 MB for category 'tickets'; kanban_ticket_panel runPost turns attachments_json into one 'Attached files (n)' comment. My Tickets tab fetches from /api/_project_ticket filtered by username. Fixed 420px right panel with overlay. Mobile responsive (full width under 480px). Docs: docs/wc-help-drawer.md; tests tests/help-drawer-test.py.",
         "usage": "<wc-help-drawer reference-key=\"DS-001\" template-slug=\"data_studio\" username=\"mattd\" help-url=\"/x/help/create\" ticket-url=\"/x/ticket/create\" csrf-token=\"abc\"></wc-help-drawer>"
       },
       {

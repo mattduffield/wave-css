@@ -13,8 +13,17 @@
  *
  * Description:
  *   A slide-out help drawer with three tabs: Help (HTMX-loaded content with search),
- *   Create Ticket (form with screenshot capture), and My Tickets (client-rendered list).
+ *   Create Ticket (form with screenshot + file attachments), and My Tickets (client-rendered list).
  *   Triggered by a "?" button or Ctrl+/ keyboard shortcut.
+ *
+ *   Attachments (Create Ticket): "Attach Screenshot" grabs the real tab with the browser's
+ *   screen-capture API (getDisplayMedia — exact pixels, any CSS, WebGL included), falling back to
+ *   html2canvas-pro (understands oklch/oklab/lab/lch/color()) when the API is missing or the user
+ *   cancels. "Attach files" (any type), dropping files on the panel, or pasting an image also
+ *   attach. Each file uploads straight away to POST /api/upload (FormData { file,
+ *   category: "tickets" }, one request per file, progress shown, the server's {error} shown on
+ *   failure) and appears as a chip (thumbnail or icon, name, size, ✕). On submit the ticket gets
+ *   attachments_json = [{ url, name, content_type }, …] plus screenshot_url (older servers).
  *
  * Attributes:
  *   - reference-key: Context identifier for the current screen
@@ -60,7 +69,8 @@ if (!customElements.get("wc-help-drawer")) {
       super();
       this._isOpen = false;
       this._activeTab = "help";
-      this._screenshotUrl = "";
+      this._attachments = []; // { id, name, size, content_type, url, status, error, screenshot, thumb, xhr }
+      this._attachSeq = 0;
       this._searchTimeout = null;
       this._myTickets = [];
 
@@ -267,12 +277,18 @@ if (!customElements.get("wc-help-drawer")) {
           <input type="text" class="help-ticket-input" name="ticket_title" placeholder="Brief summary..." />
           <label class="text-xs font-medium">Description</label>
           <textarea class="help-ticket-input" name="ticket_description" rows="4" placeholder="Describe the issue or request..."></textarea>
-          <div class="flex flex-row gap-2">
-            <button type="button" class="help-ticket-screenshot-btn" title="Capture screenshot">
+          <div class="help-attach-row">
+            <button type="button" class="help-ticket-screenshot-btn" title="Capture a screenshot of this page">
               <wc-fa-icon name="camera" size="0.75rem"></wc-fa-icon> Attach Screenshot
             </button>
-            <span class="help-screenshot-status text-xs text-muted"></span>
+            <button type="button" class="help-ticket-screenshot-btn help-attach-files-btn" title="Attach images, videos or documents">
+              <wc-fa-icon name="paperclip" size="0.75rem"></wc-fa-icon> Attach files
+            </button>
+            <input type="file" class="help-attach-input" multiple hidden />
           </div>
+          <span class="help-screenshot-status text-xs text-muted" aria-live="polite"></span>
+          <div class="help-attach-hint text-xs">or drop files here, or paste an image</div>
+          <ul class="help-attach-list" aria-label="Attachments"></ul>
           <button type="button" class="help-ticket-submit-btn">
             <wc-fa-icon name="paper-plane" size="0.75rem"></wc-fa-icon> Submit Ticket
           </button>
@@ -284,6 +300,37 @@ if (!customElements.get("wc-help-drawer")) {
         ".help-ticket-screenshot-btn",
       );
       ssBtn.addEventListener("click", () => this._captureScreenshot());
+
+      // Wire file attachments: picker, drop, and the chip list's remove buttons
+      const fileInput = this._ticketPanel.querySelector(".help-attach-input");
+      this._ticketPanel
+        .querySelector(".help-attach-files-btn")
+        .addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        this._addFiles(Array.from(fileInput.files || []));
+        fileInput.value = ""; // the same file can be picked again
+      });
+      this._ticketPanel.addEventListener("dragover", (e) => {
+        if (!Array.from(e.dataTransfer?.types || []).includes("Files")) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        this._ticketPanel.classList.add("is-dragover");
+      });
+      this._ticketPanel.addEventListener("dragleave", (e) => {
+        if (!this._ticketPanel.contains(e.relatedTarget)) this._ticketPanel.classList.remove("is-dragover");
+      });
+      this._ticketPanel.addEventListener("drop", (e) => {
+        if (!e.dataTransfer?.files?.length) return;
+        e.preventDefault();
+        this._ticketPanel.classList.remove("is-dragover");
+        this._addFiles(Array.from(e.dataTransfer.files));
+      });
+      this._ticketPanel
+        .querySelector(".help-attach-list")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".help-attach-remove");
+          if (btn) this._removeAttachment(btn.dataset.id);
+        });
 
       // Wire submit button
       const submitBtn = this._ticketPanel.querySelector(
@@ -377,70 +424,281 @@ if (!customElements.get("wc-help-drawer")) {
 
     // ── Screenshot Capture ────────────────────────────────────────────────────
 
+    // html2canvas-pro: a drop-in html2canvas fork that understands oklch/oklab/lab/lch/color(),
+    // which Wave themes use (html2canvas 1.4.1 throws "unsupported color function oklch").
+    // Loaded through Wave's loader, so WaveAssetBase serves the local mirror
+    // (<base>/html2canvas-pro-2.5.2/dist/html2canvas-pro.min.js) with the CDN as fallback.
+    static get HTML2CANVAS_PRO_URL() {
+      return "https://cdn.jsdelivr.net/npm/html2canvas-pro@2.5.2/dist/html2canvas-pro.min.js";
+    }
+
+    _setStatus(text) {
+      const statusEl = this._ticketPanel?.querySelector(".help-screenshot-status");
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    _hideDrawerForCapture(hide) {
+      this._panel.style.display = hide ? "none" : "";
+      this._overlay.style.display = hide ? "none" : "";
+    }
+
     async _captureScreenshot() {
-      const statusEl = this._ticketPanel.querySelector(
-        ".help-screenshot-status",
-      );
-
-      // Load html2canvas if not available
-      if (!window.html2canvas) {
-        if (statusEl) statusEl.textContent = "Loading capture library...";
-        try {
-          await this.loadScript(
-            "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-          );
-        } catch (e) {
-          if (statusEl) statusEl.textContent = "Failed to load capture library";
-          return;
-        }
-      }
-
-      // Hide drawer, capture, show drawer
-      if (statusEl) statusEl.textContent = "Capturing...";
-      this._panel.style.display = "none";
-      this._overlay.style.display = "none";
-
-      await new Promise((r) => setTimeout(r, 300)); // Let UI settle
-
+      // Hide the drawer first, synchronously: getDisplayMedia must be called while the click's
+      // user activation is still valid, and the grab shouldn't include the drawer.
+      this._setStatus("Capturing...");
+      this._hideDrawerForCapture(true);
+      let blob = null;
+      let failure = "";
       try {
-        const canvas = await html2canvas(document.body, {
-          useCORS: true,
-          scale: 1,
-        });
-        const blob = await new Promise((resolve) =>
-          canvas.toBlob(resolve, "image/png"),
-        );
-
-        // Upload
-        if (statusEl) statusEl.textContent = "Uploading...";
-        this._panel.style.display = "";
-        this._overlay.style.display = "";
-
-        const formData = new FormData();
-        formData.append("file", blob, "screenshot.png");
-        formData.append("category", "tickets");
-
-        const csrfToken = this.getAttribute("csrf-token") || "";
-        const headers = {};
-        if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          headers,
-          body: formData,
-        });
-        if (response.ok) {
-          const data = await response.json();
-          this._screenshotUrl = data.url || data.file_url || "";
-          if (statusEl) statusEl.textContent = "Screenshot attached";
-        } else {
-          if (statusEl) statusEl.textContent = "Upload failed";
-        }
+        blob = await this._grabTab();
       } catch (e) {
-        this._panel.style.display = "";
-        this._overlay.style.display = "";
-        if (statusEl) statusEl.textContent = "Capture failed: " + e.message;
+        // API missing, the user cancelled, or capture isn't allowed here → html2canvas-pro
+        failure = e && e.name === "NotAllowedError" ? "" : (e && e.message) || "";
       }
+      if (!blob) {
+        try {
+          await new Promise((r) => setTimeout(r, 300)); // let the page repaint without the drawer
+          blob = await this._renderPage();
+        } catch (e) {
+          failure = (e && e.message) || failure || "unknown error";
+        }
+      }
+      this._hideDrawerForCapture(false);
+      if (!blob) {
+        this._setStatus("Capture failed: " + failure);
+        return;
+      }
+      this._setStatus("");
+      this._addFiles([new File([blob], "screenshot.png", { type: "image/png" })], { screenshot: true });
+    }
+
+    // A real screenshot of this tab: exact pixels, any CSS, WebGL canvases included.
+    async _grabTab() {
+      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== "function") {
+        throw new Error("screen capture is not available");
+      }
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: "browser" },
+        audio: false,
+        preferCurrentTab: true,
+        selfBrowserSurface: "include",
+        surfaceSwitching: "exclude",
+      });
+      try {
+        const video = document.createElement("video");
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        await video.play();
+        // let the page repaint without the drawer, then take a fresh frame
+        await new Promise((r) => setTimeout(r, 300));
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const c = document.createElement("canvas");
+        c.width = video.videoWidth;
+        c.height = video.videoHeight;
+        if (!c.width || !c.height) throw new Error("no video frame");
+        c.getContext("2d").drawImage(video, 0, 0);
+        return await new Promise((res) => c.toBlob(res, "image/png"));
+      } finally {
+        stream.getTracks().forEach((t) => t.stop());
+      }
+    }
+
+    // Fallback: render the visible page with html2canvas-pro.
+    async _renderPage() {
+      if (!window.html2canvasExports || typeof window.html2canvas !== "function") {
+        this._setStatus("Loading capture library...");
+        await this.loadScript(WcHelpDrawer.HTML2CANVAS_PRO_URL);
+      }
+      if (typeof window.html2canvas !== "function") throw new Error("capture library did not load");
+      this._setStatus("Capturing...");
+      const canvas = await window.html2canvas(document.body, {
+        useCORS: true,
+        scale: 1,
+        x: window.scrollX,
+        y: window.scrollY,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        windowWidth: document.documentElement.clientWidth,
+        windowHeight: window.innerHeight,
+      });
+      return await new Promise((res) => canvas.toBlob(res, "image/png"));
+    }
+
+    // ── Attachments ───────────────────────────────────────────────────────────
+
+    _addFiles(files, { screenshot = false } = {}) {
+      files.filter(Boolean).forEach((file) => {
+        const att = {
+          id: `att-${++this._attachSeq}`,
+          name: file.name || (screenshot ? "screenshot.png" : "file"),
+          size: file.size || 0,
+          content_type: file.type || "application/octet-stream",
+          url: "",
+          status: "uploading",
+          progress: 0,
+          error: "",
+          screenshot,
+          thumb: /^image\//.test(file.type || "") ? URL.createObjectURL(file) : "",
+        };
+        this._attachments.push(att);
+        this._uploadAttachment(att, file);
+      });
+      this._renderAttachments();
+    }
+
+    // One request per file, with progress; the server's JSON {error} is shown when it refuses.
+    _uploadAttachment(att, file) {
+      const formData = new FormData();
+      formData.append("file", file, att.name);
+      formData.append("category", "tickets");
+      const xhr = new XMLHttpRequest();
+      att.xhr = xhr;
+      xhr.open("POST", "/api/upload");
+      const csrfToken = this.getAttribute("csrf-token") || "";
+      if (csrfToken) xhr.setRequestHeader("X-CSRF-Token", csrfToken);
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable) return;
+        att.progress = Math.round((e.loaded / e.total) * 100);
+        this._renderAttachment(att);
+      };
+      xhr.onload = () => {
+        att.xhr = null;
+        let data = null;
+        try { data = JSON.parse(xhr.responseText); } catch (e) { data = null; }
+        if (xhr.status >= 200 && xhr.status < 300 && data && (data.url || data.file_url)) {
+          att.url = data.url || data.file_url;
+          att.name = data.originalName || att.name;
+          att.content_type = data.contentType || att.content_type;
+          att.status = "done";
+        } else {
+          att.status = "error";
+          att.error = (data && (data.error || data.message)) || `Upload failed (${xhr.status || "network"})`;
+        }
+        this._renderAttachment(att);
+        this._updateAttachStatus();
+      };
+      xhr.onerror = () => {
+        att.xhr = null;
+        att.status = "error";
+        att.error = "Upload failed (network error)";
+        this._renderAttachment(att);
+        this._updateAttachStatus();
+      };
+      xhr.send(formData);
+      this._updateAttachStatus();
+    }
+
+    _removeAttachment(id) {
+      const i = this._attachments.findIndex((a) => a.id === id);
+      if (i < 0) return;
+      const [att] = this._attachments.splice(i, 1);
+      if (att.xhr) att.xhr.abort();
+      if (att.thumb) URL.revokeObjectURL(att.thumb);
+      this._renderAttachments();
+    }
+
+    _clearAttachments() {
+      this._attachments.forEach((att) => {
+        if (att.xhr) att.xhr.abort();
+        if (att.thumb) URL.revokeObjectURL(att.thumb);
+      });
+      this._attachments = [];
+      this._renderAttachments();
+    }
+
+    _updateAttachStatus() {
+      const uploading = this._attachments.filter((a) => a.status === "uploading").length;
+      if (uploading) this._setStatus(`Uploading ${uploading} file${uploading === 1 ? "" : "s"}...`);
+      else {
+        const done = this._attachments.filter((a) => a.status === "done").length;
+        this._setStatus(done ? `${done} attached` : "");
+      }
+    }
+
+    _fileIcon(type, name) {
+      const ext = (name.split(".").pop() || "").toLowerCase();
+      if (/^image\//.test(type)) return "file-image";
+      if (/^video\//.test(type)) return "file-video";
+      if (type === "application/pdf" || ext === "pdf") return "file-pdf";
+      if (/zip|compressed|x-tar|gzip/.test(type) || ["zip", "gz", "tgz", "7z", "rar"].includes(ext)) return "file-zipper";
+      if (/spreadsheet|excel|csv/.test(type) || ["xls", "xlsx", "csv"].includes(ext)) return "file-excel";
+      if (/word|officedocument\.wordprocessing/.test(type) || ["doc", "docx"].includes(ext)) return "file-word";
+      if (/json|javascript|xml|html/.test(type) || ["json", "js", "log", "xml", "html"].includes(ext)) return "file-code";
+      if (/^text\//.test(type)) return "file-lines";
+      return "file";
+    }
+
+    _formatSize(bytes) {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    _renderAttachments() {
+      const list = this._ticketPanel?.querySelector(".help-attach-list");
+      if (!list) return;
+      list.innerHTML = "";
+      this._attachments.forEach((att) => list.appendChild(this._attachmentChip(att)));
+      list.hidden = this._attachments.length === 0;
+      this._updateAttachStatus();
+    }
+
+    _renderAttachment(att) {
+      const list = this._ticketPanel?.querySelector(".help-attach-list");
+      const old = list?.querySelector(`[data-id="${att.id}"]`);
+      if (old) old.replaceWith(this._attachmentChip(att));
+    }
+
+    _attachmentChip(att) {
+      const li = document.createElement("li");
+      li.className = `help-attach-chip is-${att.status}`;
+      li.dataset.id = att.id;
+      const pic = document.createElement("span");
+      pic.className = "help-attach-pic";
+      if (att.thumb) {
+        const img = document.createElement("img");
+        img.src = att.thumb;
+        img.alt = "";
+        pic.appendChild(img);
+      } else {
+        const icon = document.createElement("wc-fa-icon");
+        icon.setAttribute("name", this._fileIcon(att.content_type, att.name));
+        icon.setAttribute("size", "1rem");
+        pic.appendChild(icon);
+      }
+      const text = document.createElement("span");
+      text.className = "help-attach-text";
+      const name = document.createElement("span");
+      name.className = "help-attach-name";
+      name.textContent = att.screenshot ? `Screenshot · ${att.name}` : att.name;
+      name.title = att.name;
+      const meta = document.createElement("span");
+      meta.className = "help-attach-meta";
+      meta.textContent =
+        att.status === "uploading" ? `${this._formatSize(att.size)} · uploading ${att.progress}%`
+          : att.status === "error" ? att.error
+            : this._formatSize(att.size);
+      text.append(name, meta);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "help-attach-remove";
+      remove.dataset.id = att.id;
+      remove.title = `Remove ${att.name}`;
+      remove.setAttribute("aria-label", `Remove ${att.name}`);
+      remove.textContent = "×";
+      li.append(pic, text, remove);
+      return li;
+    }
+
+    // Paste an image (Ctrl/⌘-V) while the Create Ticket tab is open.
+    _handlePasteEvent(e) {
+      if (!this._isOpen || this._activeTab !== "create-ticket") return;
+      const files = Array.from(e.clipboardData?.files || []).filter((f) => /^image\//.test(f.type));
+      if (!files.length) return; // plain text pastes into the fields as usual
+      e.preventDefault();
+      this._addFiles(files.map((f, i) => (f.name && f.name !== "image.png" ? f
+        : new File([f], `pasted-image-${Date.now()}${i ? "-" + i : ""}.${(f.type.split("/")[1] || "png").replace("jpeg", "jpg")}`, { type: f.type }))));
     }
 
     // ── Ticket Submission ─────────────────────────────────────────────────────
@@ -466,6 +724,11 @@ if (!customElements.get("wc-help-drawer")) {
         }
         return;
       }
+      if (this._attachments.some((a) => a.status === "uploading")) {
+        if (window.wc?.Notify) wc.Notify.showWarning("Wait for the attachments to finish uploading");
+        this._setStatus("Wait for the attachments to finish uploading");
+        return;
+      }
 
       const csrfToken = this.getAttribute("csrf-token") || "";
       const body = new URLSearchParams();
@@ -479,8 +742,16 @@ if (!customElements.get("wc-help-drawer")) {
       body.append("page_url", window.location.pathname);
       body.append("created_by", this.getAttribute("username") || "");
       body.append("user_email", this.getAttribute("user-email") || "");
-      if (this._screenshotUrl)
-        body.append("screenshot_url", this._screenshotUrl);
+      // Every uploaded file (screenshot included) as attachments_json; failed uploads are left out.
+      const done = this._attachments.filter((a) => a.status === "done" && a.url);
+      if (done.length) {
+        body.append("attachments_json", JSON.stringify(
+          done.map((a) => ({ url: a.url, name: a.name, content_type: a.content_type })),
+        ));
+      }
+      // Older servers read screenshot_url (the latest screenshot)
+      const shot = done.filter((a) => a.screenshot).pop();
+      if (shot) body.append("screenshot_url", shot.url);
       if (csrfToken) body.append("csrf_token", csrfToken);
 
       const submitBtn = this._ticketPanel.querySelector(
@@ -512,8 +783,8 @@ if (!customElements.get("wc-help-drawer")) {
             composed: true,
             detail: { ticketId: data._id || data.id || "" },
           });
-          // Reset form fields
-          this._screenshotUrl = "";
+          // Reset form fields and the attachment list
+          this._clearAttachments();
           const titleInput = this._ticketPanel.querySelector('[name="ticket_title"]');
           const descInput = this._ticketPanel.querySelector('[name="ticket_description"]');
           const ssStatus = this._ticketPanel.querySelector('.help-screenshot-status');
@@ -726,6 +997,11 @@ if (!customElements.get("wc-help-drawer")) {
         }
       };
       document.addEventListener("keydown", this._handleKeydown);
+
+      // Paste an image into the Create Ticket tab
+      if (!this._handlePaste) this._handlePaste = (e) => this._handlePasteEvent(e);
+      document.removeEventListener("paste", this._handlePaste);
+      document.addEventListener("paste", this._handlePaste);
     }
 
     _unWireEvents() {
@@ -737,6 +1013,9 @@ if (!customElements.get("wc-help-drawer")) {
       }
       if (this._handleKeydown) {
         document.removeEventListener("keydown", this._handleKeydown);
+      }
+      if (this._handlePaste) {
+        document.removeEventListener("paste", this._handlePaste);
       }
     }
 
@@ -1022,6 +1301,99 @@ if (!customElements.get("wc-help-drawer")) {
         }
         .help-screenshot-status {
           color: var(--text-3);
+          min-height: 1em;
+        }
+
+        /* Attachments */
+        .help-attach-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+        .help-attach-hint {
+          color: var(--text-3);
+        }
+        .help-drawer-content.is-dragover {
+          outline: 2px dashed var(--primary-bg-color);
+          outline-offset: -4px;
+          background: color-mix(in srgb, var(--primary-bg-color) 8%, transparent);
+        }
+        .help-attach-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.375rem;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        .help-attach-list[hidden] {
+          display: none;
+        }
+        .help-attach-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.25rem 0.375rem;
+          background: var(--surface-3);
+          border: 1px solid var(--component-border-color);
+          border-radius: 0.375rem;
+          font-size: 0.75rem;
+          color: var(--text-1);
+        }
+        .help-attach-chip.is-error {
+          border-color: var(--danger-color);
+        }
+        .help-attach-pic {
+          flex: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.25rem;
+          height: 2.25rem;
+          border-radius: 0.25rem;
+          background: var(--surface-2);
+          color: var(--text-2);
+          overflow: hidden;
+        }
+        .help-attach-pic img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .help-attach-text {
+          display: flex;
+          flex-direction: column;
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .help-attach-name {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .help-attach-meta {
+          font-size: 0.6875rem;
+          color: var(--text-3);
+        }
+        .help-attach-chip.is-error .help-attach-meta {
+          color: color-mix(in srgb, var(--danger-color) 55%, var(--text-1));
+        }
+        .help-attach-remove {
+          flex: none;
+          width: 1.5rem;
+          height: 1.5rem;
+          padding: 0;
+          border: 0;
+          border-radius: 0.25rem;
+          background: transparent;
+          color: var(--text-2);
+          font-size: 1rem;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .help-attach-remove:hover {
+          background: var(--surface-4);
+          color: var(--text-1);
         }
         .help-ticket-submit-btn {
           display: flex;
