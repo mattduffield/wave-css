@@ -73,10 +73,26 @@ Emitted on the element; bubble and composed.
 **Attach files** — any type (the file input has no `accept` filter, `multiple`), **drop** files onto the ticket panel,
 or **paste** an image (Ctrl/⌘-V; pasted text still goes into the fields).
 
-Each file uploads straight away: `POST /api/upload`, `FormData { file, category: "tickets" }`, one request per file,
-with the `X-CSRF-Token` header when `csrf-token` is set. Progress shows on the chip ("uploading 42%"); when the
-server refuses, its JSON `{error}` text is shown (e.g. "File too large (max 50MB)"). Expected response:
-`{ url, originalName, contentType, … }`.
+Each file uploads straight away, **straight to Cloudflare R2** (the server never holds the file):
+
+1. `POST /api/upload/sign` — `application/x-www-form-urlencoded` `name`, `type` (`file.type` or
+   `application/octet-stream`), `size`, `category=tickets`, with the `X-CSRF-Token` header when `csrf-token` is set.
+   → `{ uploadUrl, method: "PUT", headers, url, originalName, contentType }` (the link works for 15 minutes, for
+   that file only: its size and Content-Type are part of the signature).
+2. `PUT` the `File` itself (not FormData) to `uploadUrl` with **exactly** the returned `headers` — nothing added.
+   Progress shows on the chip ("uploading 42%"). On 2xx the attachment takes `url`, `originalName` and `contentType`
+   from the sign response.
+3. If signing is refused, its JSON `{error}` is shown (e.g. 413 "File too large (max 100MB)", 401 …) — before
+   anything is sent.
+4. **Fallback** to the multipart `POST /api/upload` (`FormData { file, category: "tickets" }`, response
+   `{ url, originalName, contentType, … }`) when the sign endpoint isn't there (404/405, or an older server answering
+   with something that isn't a signed link) or the PUT fails with status 0 (the bucket's CORS rule isn't set yet, or
+   a network error).
+
+Tickets may be up to **100 MB** (go-kart). Removing a chip aborts whichever request is running — the sign call, the
+PUT or the fallback POST. One request per file at a time.
+
+R2 bucket CORS (once per bucket): `[{ "AllowedOrigins": ["*"], "AllowedMethods": ["PUT"], "AllowedHeaders": ["Content-Type"], "MaxAgeSeconds": 3600 }]`.
 
 Each attachment is a chip: an image thumbnail or a file-type icon, the name, the size, and ✕ to remove it before
 submitting. Screenshots join the same list.
@@ -113,5 +129,5 @@ The list is cleared after a successful submit.
 
 - The Help tab search is debounced (~300ms) and re-scans the reference key on each open.
 - Screenshot capture uses the screen-capture API first and lazy-loads html2canvas-pro as the fallback; on submit a success is surfaced via `wc.Notify` when available and the form fields + attachment list reset.
-- Tests: `tests/help-drawer-test.py` (real tab capture incl. a WebGL canvas, the oklch fallback, any-file uploads, the 50 MB refusal, drop, paste, submit payload).
+- Tests: `tests/help-drawer-test.py` (real tab capture incl. a WebGL canvas, the oklch fallback, signed direct-to-R2 uploads + both fallbacks, the 100 MB refusal, abort on remove, drop, paste, submit payload).
 - My Tickets loads on first open of that tab, filtered by `username`.

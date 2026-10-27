@@ -9231,22 +9231,87 @@ if (!customElements.get("wc-help-drawer")) {
       });
       this._renderAttachments();
     }
-    // One request per file, with progress; the server's JSON {error} is shown when it refuses.
+    // Each file goes straight to Cloudflare R2: ask the server for a signed link
+    // (POST /api/upload/sign), then PUT the file to it — the server never holds the file.
+    // Falls back to POST /api/upload when signing isn't there (404/405, older servers) or the
+    // PUT can't reach R2 (status 0: the bucket's CORS rule isn't set yet, or a network error).
     _uploadAttachment(att, file) {
+      const csrfToken = this.getAttribute("csrf-token") || "";
+      const params = new URLSearchParams();
+      params.append("name", att.name);
+      params.append("type", file.type || "application/octet-stream");
+      params.append("size", String(file.size));
+      params.append("category", "tickets");
+      this._send(att, "POST", "/api/upload/sign", params, {
+        "Content-Type": "application/x-www-form-urlencoded",
+        ...csrfToken ? { "X-CSRF-Token": csrfToken } : {}
+      }, (xhr, data) => {
+        if (xhr.status >= 200 && xhr.status < 300 && data && data.uploadUrl) {
+          this._putToR2(att, file, data);
+        } else if (data && (data.error || data.message)) {
+          this._failAttachment(att, xhr, data);
+        } else {
+          this._uploadViaServer(att, file);
+        }
+      });
+      this._updateAttachStatus();
+    }
+    // PUT the File itself (not FormData) with exactly the signed headers: Content-Type and the
+    // size are part of the signature, so nothing else may be added.
+    _putToR2(att, file, signed) {
+      const headers = signed.headers || {};
+      this._send(att, signed.method || "PUT", signed.uploadUrl, file, headers, (xhr) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          this._finishAttachment(att, {
+            url: signed.url,
+            originalName: signed.originalName,
+            contentType: signed.contentType
+          });
+        } else if (xhr.status === 0) {
+          this._uploadViaServer(att, file);
+        } else {
+          this._failAttachment(att, xhr, null);
+        }
+      }, true);
+    }
+    // The original path: multipart POST /api/upload (the server passes the file on to R2).
+    _uploadViaServer(att, file) {
       const formData = new FormData();
       formData.append("file", file, att.name);
       formData.append("category", "tickets");
+      const csrfToken = this.getAttribute("csrf-token") || "";
+      this._send(
+        att,
+        "POST",
+        "/api/upload",
+        formData,
+        csrfToken ? { "X-CSRF-Token": csrfToken } : {},
+        (xhr, data) => {
+          if (xhr.status >= 200 && xhr.status < 300 && data && (data.url || data.file_url)) {
+            this._finishAttachment(att, data);
+          } else {
+            this._failAttachment(att, xhr, data);
+          }
+        },
+        true
+      );
+    }
+    // One XHR at a time per attachment (att.xhr), so removing the chip aborts whichever request
+    // is running — the sign call, the PUT or the fallback POST.
+    _send(att, method, url, body, headers, done, trackProgress = false) {
       const xhr = new XMLHttpRequest();
       att.xhr = xhr;
-      xhr.open("POST", "/api/upload");
-      const csrfToken = this.getAttribute("csrf-token") || "";
-      if (csrfToken) xhr.setRequestHeader("X-CSRF-Token", csrfToken);
-      xhr.upload.onprogress = (e) => {
-        if (!e.lengthComputable) return;
-        att.progress = Math.round(e.loaded / e.total * 100);
-        this._renderAttachment(att);
-      };
-      xhr.onload = () => {
+      xhr.open(method, url);
+      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+      if (trackProgress) {
+        xhr.upload.onprogress = (e) => {
+          if (!e.lengthComputable || att.xhr !== xhr) return;
+          att.progress = Math.round(e.loaded / e.total * 100);
+          this._renderAttachment(att);
+        };
+      }
+      const finish = () => {
+        if (att.xhr !== xhr) return;
         att.xhr = null;
         let data = null;
         try {
@@ -9254,26 +9319,26 @@ if (!customElements.get("wc-help-drawer")) {
         } catch (e) {
           data = null;
         }
-        if (xhr.status >= 200 && xhr.status < 300 && data && (data.url || data.file_url)) {
-          att.url = data.url || data.file_url;
-          att.name = data.originalName || att.name;
-          att.content_type = data.contentType || att.content_type;
-          att.status = "done";
-        } else {
-          att.status = "error";
-          att.error = data && (data.error || data.message) || `Upload failed (${xhr.status || "network"})`;
-        }
-        this._renderAttachment(att);
-        this._updateAttachStatus();
+        done(xhr, data);
       };
-      xhr.onerror = () => {
-        att.xhr = null;
-        att.status = "error";
-        att.error = "Upload failed (network error)";
-        this._renderAttachment(att);
-        this._updateAttachStatus();
-      };
-      xhr.send(formData);
+      xhr.onload = finish;
+      xhr.onerror = finish;
+      xhr.send(body);
+    }
+    _finishAttachment(att, data) {
+      att.url = data.url || data.file_url;
+      att.name = data.originalName || att.name;
+      att.content_type = data.contentType || att.content_type;
+      att.status = "done";
+      att.progress = 100;
+      this._renderAttachment(att);
+      this._updateAttachStatus();
+    }
+    // The server's JSON {error} when it refuses (e.g. 413 "File too large (max 100MB)").
+    _failAttachment(att, xhr, data) {
+      att.status = "error";
+      att.error = data && (data.error || data.message) || (xhr.status ? `Upload failed (${xhr.status})` : "Upload failed (network error)");
+      this._renderAttachment(att);
       this._updateAttachStatus();
     }
     _removeAttachment(id) {
