@@ -32,6 +32,14 @@
  *                             (DOMPurify-sanitized). Absent → today's Image-URL prompt (no
  *                             regression). Email clients need hosted images, not data URIs.
  *    csrf                   — CSRF token sent as the `csrf_token` upload field (if present)
+ *    fields                 — JSON list of variables the text may use, each
+ *                             { token: "{first_name}", label: "First name", group?, sample? }
+ *                             (or set the `fields` property to the array). Each {name} in the content
+ *                             then shows as a box with its label (red, "Unknown: name", when it isn't in
+ *                             the list); the toolbar gets Insert field, and typing "{" opens the same
+ *                             searchable list (Esc types a plain "{"). The value keeps the plain
+ *                             {name} text in both modes, so a server fills it like any message.
+ *                             Absent → no change.
  *    required / readonly / disabled
  *
  *    Toolbar keys: bold, italic, underline, h2, h3, ul, ol, link, quote, code, image, table
@@ -87,7 +95,7 @@ class WcRichText extends WcBaseFormComponent {
   static get observedAttributes() {
     return ['name', 'id', 'class', 'value', 'mode', 'toolbar', 'lbl-label',
       'min-height', 'placeholder', 'required', 'readonly', 'disabled',
-      'image-upload-url', 'csrf'];
+      'image-upload-url', 'csrf', 'fields'];
   }
 
   constructor() {
@@ -106,6 +114,9 @@ class WcRichText extends WcBaseFormComponent {
     this._onPaste = this._handlePaste.bind(this);
     this._onFileChosen = this._handleFileChosen.bind(this);
     this._savedRange = null;
+    this._fields = null;
+    this._onEditorKeyDown = this._handleEditorKeyDown.bind(this);
+    this._onPickOutside = (e) => { if (this._pickEl && !this._pickEl.contains(e.target)) this._closePicker(false); };
 
     const compEl = this.querySelector(':scope > .wc-rich-text');
     if (compEl) {
@@ -144,6 +155,179 @@ class WcRichText extends WcBaseFormComponent {
 
   get mode() { return (this.getAttribute('mode') || 'markdown').toLowerCase() === 'html' ? 'html' : 'markdown'; }
 
+  // ---- Variables (fields) ----------------------------------------------------
+
+  get fields() { return this._fieldList(); }
+  set fields(list) {
+    this._fields = Array.isArray(list) ? list : null;
+    this._refreshFields();
+  }
+
+  _fieldList() {
+    if (this._fields) return this._fields;
+    const raw = this.getAttribute('fields');
+    if (!raw) return [];
+    try { const v = JSON.parse(raw); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+
+  _hasFields() { return !!this._fields || this.hasAttribute('fields'); }
+
+  _refreshFields() {
+    if (!this.toolbarEl) return;
+    const want = this._hasFields(), btn = this.toolbarEl.querySelector('.wc-rich-text-field-btn');
+    if (want && !btn) this.toolbarEl.appendChild(this._fieldButton());
+    if (!want && btn) btn.remove();
+    if (this.editorEl && this._libsReady) {
+      this.editorEl.querySelectorAll('.wc-rich-text-field').forEach(c => c.replaceWith(document.createTextNode(c.dataset.field)));
+      this.editorEl.normalize();
+      if (want) this._chipify(this.editorEl);
+    }
+  }
+
+  _fieldButton() {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.classList.add('wc-rich-text-btn', 'wc-rich-text-field-btn');
+    b.dataset.cmd = 'field';
+    b.title = 'Insert field (or type {)';
+    b.setAttribute('aria-label', 'Insert field');
+    b.innerHTML = `<wc-fa-icon name="plus" size="0.75rem"></wc-fa-icon><span>Insert field</span>`;
+    return b;
+  }
+
+  _fieldInfo(token) {
+    const key = token.slice(1, -1).trim();
+    const f = this._fieldList().find(x => String(x.token || '').slice(1, -1).trim() === key);
+    return f ? { label: f.label || key, sample: f.sample } : { label: 'Unknown: ' + key, unknown: true };
+  }
+
+  _chip(token) {
+    const c = document.createElement('span'), info = this._fieldInfo(token);
+    c.className = 'wc-rich-text-field' + (info.unknown ? ' unknown' : '');
+    c.contentEditable = 'false';
+    c.dataset.field = token;
+    c.textContent = info.label;
+    c.title = token + (info.unknown ? ' — not one of this text\'s fields' : (info.sample ? ' · e.g. ' + info.sample : ''));
+    return c;
+  }
+
+  // {name} in text (not in code) → boxes
+  _chipify(root) {
+    const re = /\{([A-Za-z_][\w.]*)\}/g;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.parentElement.closest('code, pre, .wc-rich-text-field')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    const hits = [];
+    while (walker.nextNode()) { if (re.test(walker.currentNode.nodeValue)) hits.push(walker.currentNode); re.lastIndex = 0; }
+    hits.forEach(node => {
+      const text = node.nodeValue, frag = document.createDocumentFragment();
+      let last = 0, m;
+      re.lastIndex = 0;
+      while ((m = re.exec(text))) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        frag.appendChild(this._chip(m[0]));
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.replaceWith(frag);
+    });
+    // a box that ends a line leaves the caret nowhere to go after it: give it an empty spot
+    root.querySelectorAll('.wc-rich-text-field').forEach(c => { if (!c.nextSibling) c.after(document.createTextNode('\u200B')); });
+  }
+
+  // the editor's HTML with each box back as its {name} (markers keep turndown from escaping the name)
+  _editorHtmlForValue(markers) {
+    if (!this.editorEl.querySelector('.wc-rich-text-field')) return this.editorEl.innerHTML.replace(/\u200B/g, '');
+    const clone = this.editorEl.cloneNode(true);
+    clone.querySelectorAll('.wc-rich-text-field').forEach(c => {
+      const tok = c.dataset.field;
+      if (markers) { markers.push(tok); c.replaceWith(document.createTextNode('\uE000' + (markers.length - 1) + '\uE001')); }
+      else c.replaceWith(document.createTextNode(tok));
+    });
+    return clone.innerHTML.replace(/\u200B/g, '');
+  }
+
+  _handleEditorKeyDown(e) {
+    if (e.key !== '{' || e.ctrlKey || e.metaKey || e.altKey || !this._hasFields()) return;
+    if (this.hasAttribute('readonly') || this.hasAttribute('disabled')) return;
+    e.preventDefault();
+    this._openPicker(true);
+  }
+
+  _openPicker(typedBrace) {
+    this._closePicker(true);
+    const range = this._saveSelection();
+    const el = document.createElement('div');
+    el.className = 'wc-rich-text-pick';
+    el.innerHTML = '<input type="text" class="wc-rich-text-pick-q" placeholder="Search fields" aria-label="Search fields"><div class="wc-rich-text-pick-list" role="listbox"></div>';
+    document.body.appendChild(el);
+    const rect = (range && range.getClientRects()[0]) || this.editorEl.getBoundingClientRect();
+    el.style.left = Math.max(8, Math.min(window.innerWidth - 300, rect.left)) + 'px';
+    el.style.top = (rect.bottom + 4 + 320 > window.innerHeight ? Math.max(8, rect.top - 324) : rect.bottom + 4) + 'px';
+    const q = el.querySelector('input'), list = el.querySelector('.wc-rich-text-pick-list');
+    let items = [], at = 0;
+    const draw = () => {
+      const s = q.value.trim().toLowerCase();
+      items = this._fieldList().filter(f => !s || String(f.label || '').toLowerCase().includes(s) || String(f.token || '').toLowerCase().includes(s));
+      at = Math.min(at, Math.max(0, items.length - 1));
+      list.textContent = '';
+      let group = null;
+      items.forEach((f, i) => {
+        if ((f.group || '') !== group) {
+          group = f.group || '';
+          if (group) { const g = document.createElement('div'); g.className = 'wc-rich-text-pick-group'; g.textContent = group; list.appendChild(g); }
+        }
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'wc-rich-text-pick-item' + (i === at ? ' on' : ''); b.dataset.i = String(i);
+        b.setAttribute('role', 'option'); b.title = f.token;
+        const lab = document.createElement('span'); lab.textContent = f.label || f.token; b.appendChild(lab);
+        if (f.sample != null && f.sample !== '') { const sm = document.createElement('small'); sm.textContent = String(f.sample).slice(0, 40); b.appendChild(sm); }
+        list.appendChild(b);
+      });
+      if (!items.length) { const n = document.createElement('div'); n.className = 'wc-rich-text-pick-none'; n.textContent = 'Nothing matches'; list.appendChild(n); }
+      const on = list.querySelector('.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest' });
+    };
+    const choose = (i) => { const f = items[i]; if (!f) return; this._closePicker(true); this._insertAt(range, this._chip(String(f.token))); };
+    q.addEventListener('input', () => { at = 0; draw(); });
+    q.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'ArrowDown') { e.preventDefault(); at = Math.min(items.length - 1, at + 1); draw(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); at = Math.max(0, at - 1); draw(); }
+      else if (e.key === 'Enter') { e.preventDefault(); choose(at); }
+      else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); this._closePicker(false); }
+    });
+    list.addEventListener('mousedown', (e) => e.preventDefault());
+    list.addEventListener('click', (e) => { const b = e.target.closest('.wc-rich-text-pick-item'); if (b) choose(+b.dataset.i); });
+    this._pickEl = el;
+    this._pickCancel = () => { if (typedBrace) this._insertAt(range, document.createTextNode('{')); else { this.editorEl.focus(); this._restoreSelection(range); } };
+    document.addEventListener('pointerdown', this._onPickOutside, true);
+    draw();
+    q.focus();
+  }
+
+  _closePicker(picked) {
+    if (!this._pickEl) return;
+    this._pickEl.remove();
+    this._pickEl = null;
+    document.removeEventListener('pointerdown', this._onPickOutside, true);
+    const cancel = this._pickCancel; this._pickCancel = null;
+    if (!picked && cancel) cancel();
+  }
+
+  _insertAt(range, node) {
+    this.editorEl.focus();
+    this._restoreSelection(range);
+    const sel = window.getSelection(), r = sel.getRangeAt(0);
+    r.deleteContents();
+    r.insertNode(node);
+    let after = node;
+    if (node.nodeType === 1 && !node.nextSibling) { after = document.createTextNode('\u200B'); node.after(after); }
+    const c = document.createRange();
+    c.setStartAfter(after); c.collapse(true);
+    sel.removeAllRanges(); sel.addRange(c);
+    this._handleEditorInput();
+  }
+
   // ---- Lifecycle ------------------------------------------------------------
 
   _render() {
@@ -181,6 +365,7 @@ class WcRichText extends WcBaseFormComponent {
       b.innerHTML = `<wc-fa-icon name="${def.icon}" size="0.875rem"></wc-fa-icon>`;
       toolbar.appendChild(b);
     });
+    if (this._hasFields()) toolbar.appendChild(this._fieldButton());
     if (this.mode === 'markdown') {
       const sep = document.createElement('span');
       sep.classList.add('wc-rich-text-sep');
@@ -281,15 +466,18 @@ class WcRichText extends WcBaseFormComponent {
       this.editorEl.innerHTML = safe;
       this._value = safe;
     }
+    if (this._hasFields()) this._chipify(this.editorEl);
     this._internals.setFormValue(this._value);
     this._pendingValue = null;
   }
 
   _readEditor() {
     if (this.mode === 'markdown') {
-      return this._htmlToMd(this.editorEl.innerHTML);
+      const markers = [];
+      const md = this._htmlToMd(this._editorHtmlForValue(markers));
+      return md.replace(/\uE000(\d+)\uE001/g, (m, i) => markers[+i] || '');
     }
-    return this._sanitize(this.editorEl.innerHTML);
+    return this._sanitize(this._editorHtmlForValue(null));
   }
 
   _plainText() {
@@ -328,11 +516,19 @@ class WcRichText extends WcBaseFormComponent {
     const html = cd && cd.getData('text/html');
     const text = cd && cd.getData('text/plain');
     if (html) {
-      const safe = this._sanitize(html);
+      let src = html;
+      if (this._hasFields()) { // a copied box arrives as a span: put its {name} back
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        tmp.querySelectorAll('[data-field]').forEach(c => c.replaceWith(document.createTextNode(c.getAttribute('data-field'))));
+        src = tmp.innerHTML;
+      }
+      const safe = this._sanitize(src);
       document.execCommand('insertHTML', false, safe);
     } else if (text != null) {
       document.execCommand('insertText', false, text);
     }
+    if (this._hasFields()) { this._chipify(this.editorEl); this._handleEditorInput(); }
   }
 
   _handleToolbarClick(e) {
@@ -342,6 +538,7 @@ class WcRichText extends WcBaseFormComponent {
     const key = btn.dataset.cmd;
     if (key === 'preview') { this._togglePreview(); return; }
     if (this.hasAttribute('readonly') || this.hasAttribute('disabled')) return;
+    if (key === 'field') { this._openPicker(false); return; }
     this._exec(key);
   }
 
@@ -534,6 +731,8 @@ class WcRichText extends WcBaseFormComponent {
       this.editorEl.addEventListener('input', this._onEditorInput);
       this.editorEl.removeEventListener('paste', this._onPaste);
       this.editorEl.addEventListener('paste', this._onPaste);
+      this.editorEl.removeEventListener('keydown', this._onEditorKeyDown);
+      this.editorEl.addEventListener('keydown', this._onEditorKeyDown);
     }
   }
 
@@ -546,7 +745,9 @@ class WcRichText extends WcBaseFormComponent {
     if (this.editorEl) {
       this.editorEl.removeEventListener('input', this._onEditorInput);
       this.editorEl.removeEventListener('paste', this._onPaste);
+      this.editorEl.removeEventListener('keydown', this._onEditorKeyDown);
     }
+    this._closePicker(true);
     if (this._fileInput) {
       this._fileInput.removeEventListener('change', this._onFileChosen);
       this._fileInput = null;
@@ -565,6 +766,7 @@ class WcRichText extends WcBaseFormComponent {
       this._updateValidity();
       return;
     }
+    if (attrName === 'fields') { this._refreshFields(); return; }
     if (attrName === 'image-upload-url' || attrName === 'csrf') {
       // Read live at click/upload time — no rebuild, no formElement passthrough.
       return;
@@ -695,6 +897,35 @@ class WcRichText extends WcBaseFormComponent {
         .wc-rich-text-editor th, .wc-rich-text-editor td {
           border: 1px solid var(--surface-5); padding: 0.25rem 0.5rem;
         }
+        /* variables (fields): a box per {name}; Insert field; the searchable list */
+        .wc-rich-text-btn.wc-rich-text-field-btn { width: auto; gap: 0.3rem; padding: 0 0.5rem; font-size: 0.8rem; }
+        .wc-rich-text-field {
+          display: inline-block; margin: 0 1px; padding: 0 0.4em; border-radius: 0.35em; line-height: 1.35;
+          font-size: 0.86em; font-weight: 600; white-space: nowrap; vertical-align: baseline; cursor: default; user-select: all;
+          background: color-mix(in srgb, var(--primary-bg-color) 16%, transparent);
+          border: 1px solid color-mix(in srgb, var(--primary-bg-color) 55%, transparent);
+        }
+        .wc-rich-text-field.unknown {
+          background: color-mix(in srgb, var(--danger-color) 14%, transparent); border: 1px dashed var(--danger-color);
+        }
+        .wc-rich-text-pick {
+          position: fixed; z-index: 1000; width: 290px; max-height: 320px; display: flex; flex-direction: column; gap: 0.25rem;
+          padding: 0.5rem; border-radius: 0.375rem; background: var(--surface-1); color: var(--text-1);
+          border: 1px solid var(--surface-4); box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+        }
+        .wc-rich-text-pick-q {
+          width: 100%; box-sizing: border-box; padding: 0.25rem 0.375rem; border-radius: 0.25rem; font: inherit; font-size: 0.85rem;
+          color: var(--component-color); background: var(--component-bg-color); border: 1px solid var(--component-border-color);
+        }
+        .wc-rich-text-pick-list { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; }
+        .wc-rich-text-pick-group { padding: 0.375rem 0.375rem 0.125rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-5, var(--text-3)); }
+        .wc-rich-text-pick-item {
+          display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; width: 100%; text-align: left;
+          padding: 0.25rem 0.375rem; border: 0; border-radius: 0.25rem; background: transparent; color: inherit; cursor: pointer; font-size: 0.85rem;
+        }
+        .wc-rich-text-pick-item small { color: var(--text-5, var(--text-3)); }
+        .wc-rich-text-pick-item:hover, .wc-rich-text-pick-item.on { background: color-mix(in srgb, var(--primary-bg-color) 18%, transparent); }
+        .wc-rich-text-pick-none { padding: 0.25rem 0.375rem; font-size: 0.85rem; color: var(--text-5, var(--text-3)); }
       }
     `.trim();
     this.loadStyle('wc-rich-text-style', style);

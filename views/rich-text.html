@@ -89,6 +89,26 @@ This is **bold**, *italic*, and `code`.
         </wc-form>
       </div>
 
+      <div class="col gap-2">
+        <h2 class="text-xl font-semibold">Variables (fields)</h2>
+        <p class="text-sm">
+          With <code>fields</code>, each <code>{name}</code> shows as a box with its label (red when it isn't a
+          field). Click <strong>Insert field</strong> or type <strong>{</strong> to pick one; Esc after <strong>{</strong>
+          types a plain brace. The value keeps the plain <code>{name}</code> text for the server to fill.
+        </p>
+        <wc-form>
+          <wc-rich-text id="rtfields"
+              name="body"
+              lbl-label="Email to each parent"
+              mode="html"
+              toolbar="bold,italic,link"
+              min-height="140px"
+              value="&lt;p&gt;Hi {first_name}, we can't wait to see {children} at {event_name}! {frist_name}&lt;/p&gt;"
+              fields='[{"token":"{first_name}","label":"First name","group":"Recipient","sample":"Ana"},{"token":"{children}","label":"Children","group":"Recipient","sample":"Sam, Kim"},{"token":"{event_name}","label":"Event name","group":"Event","sample":"VBS 2026"},{"token":"{organization}","label":"Organization","group":"Event"}]'>
+          </wc-rich-text>
+        </wc-form>
+      </div>
+
     </div>
 
     <wc-javascript>
