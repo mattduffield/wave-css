@@ -24334,6 +24334,7 @@ var WcThemeSelector = class extends WcBaseComponent {
       "theme-silver",
       "theme-gray",
       "theme-charcoal",
+      "theme-designer",
       "theme-high-contrast"
     ];
     const extraAttr = this.getAttribute("extra-themes");
@@ -24400,6 +24401,10 @@ var WcThemeSelector = class extends WcBaseComponent {
       wc-theme-selector .wc-theme-selector .theme-button.theme-charcoal {
         background-color: var(--swatch-10);
       }
+      /* Designer: its slate (#2c3e50) rather than the accent it gives buttons. */
+      wc-theme-selector .wc-theme-selector .theme-button.theme-designer {
+        background-color: var(--swatch-7);
+      }
       /* High-contrast: show a fixed black/white split so the swatch reads as
          "high contrast" and never inherits the active theme's color. */
       wc-theme-selector .wc-theme-selector .theme-button.theme-high-contrast {
@@ -24424,10 +24429,12 @@ var WcThemeSelector = class extends WcBaseComponent {
       btn.classList.remove("selected");
       btn.innerHTML = "";
     });
-    target.classList.add("selected");
-    target.innerHTML = `<svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+    if (target) {
+      target.classList.add("selected");
+      target.innerHTML = `<svg class="selectmark h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
         <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
       </svg>`.trim();
+    }
     document.documentElement.classList.forEach((cls) => {
       if (cls.startsWith("theme-")) {
         document.documentElement.classList.remove(cls);
