@@ -513,6 +513,7 @@ const ICONS_TO_COPY = [
   "percent",
   "period",
   "person-chalkboard",
+  "person-walking",
   "phone",
   "phone-flip",
   "phone-volume",
