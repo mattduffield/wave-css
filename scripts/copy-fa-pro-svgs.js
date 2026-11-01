@@ -567,6 +567,7 @@ const ICONS_TO_COPY = [
   "share-nodes",
   "shield-check",
   "shield-halved",
+  "shirt",
   "shop",
   "shopping-cart",
   "shovel",
