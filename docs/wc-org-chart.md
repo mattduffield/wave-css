@@ -35,7 +35,8 @@ members, and an optional **Not placed** pool. Directors move people between stat
   ≥ 4.5:1) · `"tonight-only"` (an info chip).
 - `flags`: `"no-lead"` → danger badge **No lead**, `"short:N"` → warning badge **Short N**, anything else →
   muted badge with the text.
-- The header shows the live member count and `/ needed`; it updates as people move. Leads show a **Lead**
+- The header shows the live member count and `/ needed`; it updates as people move. A node's `count` is
+  accepted but not shown — a passed-in count would go stale after a drag. Leads show a **Lead**
   badge and their title, separate from the members. The node title links to `href`.
 
 ## Moving people
