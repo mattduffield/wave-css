@@ -145,3 +145,259 @@ Unchanged: every background except the five light card surfaces above, swatches,
   {.light, .dark, no mode} × {OS light, OS dark}, and every visible text on `views/visual-reference.html`
   vs what is painted behind it (≥ 4.5:1; disabled ≥ 3:1). Both PASS.
 - All component suites pass; persistence + search-dropdown checks pass.
+
+
+---
+
+# Wave CSS — 2026-11-01, part 4: component contrast fixes (additive)
+
+Scope: every Wave component on `views/visual-reference.html` (58 components + page chrome + probes for
+unexercised variants), audited in 54 themes × {forced light, forced dark, follow the OS} × {OS light,
+OS dark} × {regular, .crisp} = 648 states. Before: 24 of 60 components failed somewhere; after: 0.
+
+## How (additive only — no component code changed)
+
+`scripts/gen-component-contrast.py` measures each element with its ORIGINAL color in every state and, only
+where it fails (text < 4.5:1; icons, borders, chip × < 3:1), tries candidates in order and keeps the first
+that passes for every instance. It writes one unlayered rule per (element, chosen value):
+
+    :is(<the exact failing theme+mode+family states>) <element> { color: <value> !important; }
+
+So passing states match no rule and keep their exact color. Candidates follow the established patterns:
+text ON an accent/colored fill → black/white from that fill (`--wc-on-primary`, or the component's own
+fill token, e.g. a calendar event's `--event-color`); accent/state/syntax-colored text ON a surface → the
+`.on-surface-accent` mix (55%, else 30%, toward `--text-1`); fixed gray fallbacks → `--text-2`/`--text-1`.
+`!important` because some originals are `!important` or inline. A failure in all 648 states collapses to one
+unconditional rule (CodeMirror monokai keyword, Prism operator).
+
+## Changed — each component and element, worst ratio before → after
+
+| Component | Element | Property | States changed (of 648) | Worst before | Worst after (need) | Replacement used |
+|---|---|---|---|---|---|---|
+| badges (global) | `.badge-info` | color | 1 | 1.0:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, color(srgb 0.079894 0.214357 0.508651) 55%, var(--text-1))` |
+| wc-calendar | `.wc-calendar-event` | color | 306 | 1.32:1 | 4.54:1 (≥ 4.5) | `rgb(from var(--event-color, var(--primary-bg-color)) INK)` |
+| wc-chart-builder | `.chart-builder-add-btn` | color | 432 | 1:1 | 4.51:1 (≥ 4.5) | `3 per-state values, e.g. var(--text-1)` |
+| wc-code-mirror | `.cm-s-monokai span.cm-keyword` | color | 648 | 3.93:1 | 5.89:1 (≥ 4.5) | `2 per-state values, e.g. #ffffff` |
+| wc-contact-chip | `.wc-contact-chip .close-btn` | color | 611 | 2.11:1 | 4.52:1 (≥ 4.5) | `var(--text-5)` |
+| wc-cron-picker | `.cron-expression` | color | 303 | 1.0:1 | 6.83:1 (≥ 4.5) | `3 per-state values, e.g. color-mix(in srgb, color(srgb 0 0 0) 30%, var(--text-1))` |
+| wc-cron-picker | `wc-cron-picker select` | border-color | 642 | 1.1:1 | 3.32:1 (≥ 3) | `var(--text-9)` |
+| wc-document-tree | `.doctree-type-boolean` | color | 324 | 1.19:1 | 8.18:1 (≥ 4.5) | `color-mix(in srgb, rgb(230, 219, 116) 30%, var(--text-1))` |
+| wc-document-tree | `.doctree-type-date` | color | 381 | 3.74:1 | 4.5:1 (≥ 4.5) | `color-mix(in srgb, rgb(99, 102, 241) 55%, var(--text-1))` |
+| wc-document-tree | `.doctree-type-null` | color | 538 | 4.09:1 | 4.53:1 (≥ 4.5) | `color-mix(in srgb, rgb(117, 113, 94) 55%, var(--text-1))` |
+| wc-document-tree | `.doctree-type-number` | color | 324 | 1.38:1 | 4.55:1 (≥ 4.5) | `2 per-state values, e.g. color-mix(in srgb, rgb(102, 217, 239) 30%, var(--text-1))` |
+| wc-document-tree | `.doctree-type-string` | color | 324 | 1.3:1 | 4.5:1 (≥ 4.5) | `2 per-state values, e.g. color-mix(in srgb, rgb(166, 226, 46) 30%, var(--text-1))` |
+| wc-document-tree | `:is(.doctree-key, .doctree-arrow-active)` | color | 324 | 1.11:1 | 12.49:1 (≥ 4.5) | `var(--text-2)` |
+| wc-document-tree-variants | `.doctree-type-objectid` | color | 324 | 2.38:1 | 6.29:1 (≥ 4.5) | `color-mix(in srgb, rgb(174, 129, 255) 55%, var(--text-1))` |
+| wc-explain-tree | `.explain-summary-good` | color | 324 | 1.72:1 | 4.84:1 (≥ 4.5) | `color-mix(in srgb, rgb(34, 197, 94) 55%, var(--text-1))` |
+| wc-explain-tree | `:is(.explain-node-name, .explain-metric-value)` | color | 324 | 1.01:1 | 11.06:1 (≥ 4.5) | `var(--text-2)` |
+| wc-explain-tree-variants | `.explain-summary-danger` | color | 324 | 2.63:1 | 4.62:1 (≥ 4.5) | `color-mix(in srgb, rgb(239, 68, 68) 55%, var(--text-1))` |
+| wc-explain-tree-variants | `.explain-summary-neutral` | color | 333 | 1.0:1 | 4.53:1 (≥ 4.5) | `3 per-state values, e.g. var(--text-1)` |
+| wc-explain-tree-variants | `.explain-summary-warn` | color | 324 | 1.64:1 | 4.69:1 (≥ 4.5) | `color-mix(in srgb, rgb(245, 158, 11) 55%, var(--text-1))` |
+| wc-file-upload | `.wc-file-upload-browse` | color | 501 | 1.17:1 | 4.55:1 (≥ 4.5) | `3 per-state values, e.g. var(--text-1)` |
+| wc-gantt | `.wc-gantt-bar .wc-gantt-bar-label` | color | 324 | 1.8:1 | 5.01:1 (≥ 4.5) | `rgb(from var(--bar-color, var(--primary-bg-color)) INK)` |
+| wc-help-drawer | `.help-drawer-trigger` | border-color | 153 | 1:1 | 3.14:1 (≥ 3) | `color-mix(in srgb, var(--primary-bg-color) 55%, var(--text-1))` |
+| wc-help-drawer | `.help-drawer-trigger` | color | 246 | 1:1 | 4.52:1 (≥ 4.5) | `2 per-state values, e.g. color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.boolean` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 0, 85) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.class-name` | color | 330 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(221, 74, 104) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.comment` | color | 330 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(112, 128, 144) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.constant` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 0, 85) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.function` | color | 330 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(221, 74, 104) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.interpolation` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(0, 0, 0) 30%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.interpolation-punctuation` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 153, 153) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.keyword` | color | 645 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(0, 119, 170) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.null` | color | 645 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(0, 119, 170) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.number` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 0, 85) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.operator` | color | 648 | 1:1 | 4.52:1 (≥ 4.5) | `2 per-state values, e.g. #000000` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.parameter` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(0, 0, 0) 30%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.property` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 0, 85) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.punctuation` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(153, 153, 153) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.string` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(102, 153, 0) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer .token.template-punctuation` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `color-mix(in srgb, rgb(102, 153, 0) 55%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer a` | color | 246 | 1:1 | 4.52:1 (≥ 4.5) | `2 per-state values, e.g. color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1))` |
+| wc-markdown-viewer | `.wc-markdown-viewer code[class*="language-"]` | color | 324 | 1:1 | 4.52:1 (≥ 4.5) | `var(--text-1)` |
+| wc-menu | `wc-menu .wc-menu a` | color | 303 | 1.01:1 | 4.58:1 (≥ 4.5) | `3 per-state values, e.g. color-mix(in srgb, color(srgb 0 0 0) 30%, var(--text-1))` |
+| wc-pivot | `.pivot-panel-field-type` | color | 330 | 1.0:1 | 4.5:1 (≥ 4.5) | `#ffffff` |
+| wc-pivot | `.pivot-panel-field-zone` | color | 432 | 1.0:1 | 4.51:1 (≥ 4.5) | `3 per-state values, e.g. var(--text-1)` |
+| wc-pivot | `.pivot-table .pivot-grand-total` | color | 498 | 1.0:1 | 4.53:1 (≥ 4.5) | `3 per-state values, e.g. #000000` |
+| wc-pivot | `.pivot-table :is(.pivot-row-total, .pivot-col-total, .pivot-total-label, .pivot-total-header)` | color | 333 | 1.0:1 | 4.88:1 (≥ 4.5) | `var(--text-2)` |
+| wc-pivot | `.pivot-table td.pivot-cell` | color | 324 | 1.0:1 | 4.88:1 (≥ 4.5) | `var(--text-2)` |
+| wc-pivot | `.pivot-table th.pivot-row-header` | color | 333 | 1.0:1 | 4.88:1 (≥ 4.5) | `var(--text-2)` |
+| wc-pivot | `.pivot-table th:not(.pivot-total-header):not(.pivot-row-header)` | color | 333 | 1.0:1 | 4.88:1 (≥ 4.5) | `var(--text-2)` |
+| wc-pivot | `.pivot-zone-chip` | color | 498 | 1.0:1 | 4.6:1 (≥ 4.5) | `var(--wc-on-primary)` |
+| wc-pivot | `:is(.pivot-panel-header, .pivot-panel-field)` | color | 333 | 1.0:1 | 4.88:1 (≥ 4.5) | `var(--text-2)` |
+| wc-rating | `.wc-rating-star` | color | 324 | 1.8:1 | 5.16:1 (≥ 3) | `color-mix(in srgb, rgb(245, 158, 11) 55%, var(--text-1))` |
+| wc-select-chip | `wc-select .chip` | color | 162 | 1.77:1 | 4.54:1 (≥ 3) | `var(--wc-on-primary)` |
+| wc-sidebar | `wc-sidebar .wc-sidebar a` | color | 507 | 1.33:1 | 4.54:1 (≥ 4.5) | `rgb(from var(--background-color) INK)` |
+| wc-sidenav | `wc-sidenav .wc-sidenav.sidenav a` | color | 441 | 1.88:1 | 4.53:1 (≥ 4.5) | `rgb(from var(--background-color) INK)` |
+| wc-sidenav | `wc-sidenav :is(.closebtn, .openbtn)` | color | 441 | 1.88:1 | 4.53:1 (≥ 4.5) | `var(--wc-on-primary)` |
+| wc-split-pane | `.wc-split-grip` | color | 159 | 1.66:1 | 3.03:1 (≥ 3) | `2 per-state values, e.g. #000000` |
+| wc-tabulator | `.wc-tabulator.tabulator .tabulator-header .tabulator-col` | color | 49 | 2.69:1 | 4.57:1 (≥ 4.5) | `rgb(from var(--card-border-color) INK)` |
+| wc-wizard | `.wc-wizard-indicator.active` | color | 498 | 1.06:1 | 4.6:1 (≥ 3) | `var(--wc-on-primary)` |
+
+"Worst before" is the lowest ratio over the states that failed; "worst after" over all 648 states.
+`INK` = black or white picked from the fill's luminance; "per-state values" = the measured original mixed
+toward `--text-1`, so the hue is kept where possible.
+
+## Findings recorded, not changed
+
+- **Undefined tokens.** pivot, document-tree, explain-tree, split-pane use `var(--text-color, #ccc)`,
+  `--surface-bg-color`, `--primary-text-color` — not Wave tokens, so the fixed fallback always applied.
+  Fixed per state above; replacing them in the components with real tokens would be a follow-up.
+- **Not measurable on a static page (no state rendered, hover-only, or needs a service):** hover/focus
+  colors (e.g. `.wc-calendar-more:hover`, `.pivot-sortable:hover`, `.help-drawer-trigger:hover`); wc-ai-bot,
+  wc-hf-bot (download models), wc-map/wc-google-map/wc-google-address (tiles/API key), wc-live-designer
+  (iframe), wc-chart/wc-chartjs/wc-ruler/wc-canvas-dot-highlight (text drawn on canvas), wc-prompt,
+  wc-notify, wc-context-menu (on demand); help-drawer `.status-closed` (#9ca3af) and wc-notify (#666)
+  fixed grays sit inside on-demand UI.
+- **Text over photos** (wc-slideshow captions/arrows, wc-image overlay) has no single background to measure.
+- Same 7 page errors on the reference page in both builds (pre-existing demo snippets).
+
+## Verified
+
+- `tests/component-contrast-test.py` — 60/60 components pass in all 648 states (text ≥ 4.5:1; icons,
+  borders, chip × ≥ 3:1). On the previous build: 36/60.
+- `tests/component-regression-test.py` — (1) every element's box identical in all 648 states (2,815
+  elements); 106,401 element-state color changes, all inside an active fix rule, 0 elsewhere; (2)
+  every untouched `views/*.html` page pixel-identical in 4 states.
+
+
+---
+
+# Wave CSS — 2026-11-01, part 5: readable status text classes
+
+`.success-color`, `.danger-color`, `.warning-color`, `.info-color`, their `-light-color` versions and every
+`hover:` / `focus:` / `focus-visible:` / `active:` variant set `color: var(--success-color)` — the FILL
+color. As text that failed badly (e.g. "connected" 1.64:1 on royal light). They now render the readable
+`.on-surface-*` value, ≥ 4.5:1 on `--surface-1`…`5`, `--card-bg-color` and `--container-bg-color` in all
+54 themes × forced light / forced dark / follow the OS × OS light / OS dark × regular / `.crisp`.
+
+**Changed**
+- `.success|danger|warning|info-color` → `color-mix(in srgb, var(--X-color) var(--wc-on-surface-X-mix, 55%), var(--text-1, #111))`
+- `.X-light-color` → the same from `var(--X-light-color)` with `--wc-on-surface-X-light-mix` (stays the lighter tint).
+- The 32 `hover:`/`focus:`/`focus-visible:`/`active:` variants — via `scripts/generate-state-variants.js`, which
+  **rewrites those variant rules in main.css on every build** (editing them in main.css alone is undone).
+- `.on-surface-success|danger|warning|info` — the same per-theme share. 55% (the old value) is NOT readable
+  everywhere (2.45:1 danger on lemon dark), so `scripts/gen-status-text.py` writes, per theme × mode × family,
+  the largest share ≤ 55% that clears 4.6:1 — only where 55% fails (`@layer wc.colors`); elsewhere the class is
+  byte-for-byte what it was.
+- NEW tokens: `--wc-on-surface-{success,danger,warning,info}[-light]-mix` (lowest: danger/info 9%, success 14%).
+
+**Unchanged:** `--success-color`/… and `-light-color` tokens, every `-bg-color` fill, `-border-color` border and
+badge background — verified identical in all 648 states.
+
+| Class | Worst before | Worst after |
+|---|---|---|
+| `.active:danger-color` | 1.4:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.active:danger-light-color` | 1.13:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.active:info-color` | 1.44:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.active:info-light-color` | 1.1:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.active:success-color` | 1.01:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.active:success-light-color` | 1.0:1 (theme-honey light/OS-light regular) | 4.6:1 |
+| `.active:warning-color` | 1.05:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.active:warning-light-color` | 1.0:1 (theme-violet light/OS-light regular) | 4.6:1 |
+| `.danger-color` | 1.4:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.danger-light-color` | 1.13:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus-visible:danger-color` | 1.4:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus-visible:danger-light-color` | 1.13:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus-visible:info-color` | 1.44:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus-visible:info-light-color` | 1.1:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus-visible:success-color` | 1.01:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus-visible:success-light-color` | 1.0:1 (theme-honey light/OS-light regular) | 4.6:1 |
+| `.focus-visible:warning-color` | 1.05:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus-visible:warning-light-color` | 1.0:1 (theme-violet light/OS-light regular) | 4.6:1 |
+| `.focus:danger-color` | 1.4:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus:danger-light-color` | 1.13:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus:info-color` | 1.44:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus:info-light-color` | 1.1:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus:success-color` | 1.01:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus:success-light-color` | 1.0:1 (theme-honey light/OS-light regular) | 4.6:1 |
+| `.focus:warning-color` | 1.05:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.focus:warning-light-color` | 1.0:1 (theme-violet light/OS-light regular) | 4.6:1 |
+| `.hover:danger-color` | 1.4:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.hover:danger-light-color` | 1.13:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.hover:info-color` | 1.44:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.hover:info-light-color` | 1.1:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.hover:success-color` | 1.01:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.hover:success-light-color` | 1.0:1 (theme-honey light/OS-light regular) | 4.6:1 |
+| `.hover:warning-color` | 1.05:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.hover:warning-light-color` | 1.0:1 (theme-violet light/OS-light regular) | 4.6:1 |
+| `.info-color` | 1.44:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.info-light-color` | 1.1:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.on-surface-danger` | 2.45:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.on-surface-info` | 2.63:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.on-surface-success` | 2.51:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.on-surface-warning` | 2.46:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.success-color` | 1.01:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.success-light-color` | 1.0:1 (theme-honey light/OS-light regular) | 4.6:1 |
+| `.warning-color` | 1.05:1 (theme-designer auto/OS-light regular) | 4.6:1 |
+| `.warning-light-color` | 1.0:1 (theme-violet light/OS-light regular) | 4.6:1 |
+
+---
+
+# Wave CSS — 2026-11-01, part 6: badge text ≥ 4.5:1 ("System" badge, 3.66:1 in designer light)
+
+`.badge-success/-warning/-danger/-info` mixed 55% toward `--text-1` over a 15% tint of the state color —
+2.42–2.62:1 at worst; the `hover:`/`focus:`/`focus-visible:`/`active:` badge variants used the raw fill color
+(down to 1.01:1); `hover:badge-primary` etc. used `--primary-color` (1.77:1).
+
+**Changed** (badge backgrounds and outlines untouched — verified identical in all 648 states)
+- `.badge-X` text → `color-mix(in srgb, var(--X-color) var(--wc-badge-X-mix, 55%), var(--wc-badge-X-ink, var(--text-1, #111)))`.
+  `scripts/gen-status-text.py` measures the share against the badge's own tint over every surface, only where
+  55% fails. Where even pure `--text-1` can't reach 4.5:1 (warning on lemon dark's card: the tint lands at the
+  black/white crossover — pure white is 4.56:1), it sets `--wc-badge-X-ink` to pure black/white (2 states).
+- `hover:`/`focus:`/`focus-visible:`/`active:badge-*` (generated) → the same expressions; `…:badge-primary` →
+  `var(--wc-on-primary, var(--primary-color))` (the part-3 change to these was being overwritten by the
+  variant generator on every build — now in the generator).
+- NEW tokens: `--wc-badge-{success,warning,danger,info}-mix`, `--wc-badge-{…}-ink`.
+
+| Badge | Worst before | Worst after |
+|---|---|---|
+| `.active:badge-danger` | 1.35:1 (theme-designer auto/OS-light regular) | 4.57:1 |
+| `.active:badge-info` | 1.43:1 (theme-lemon dark/OS-dark regular) | 4.56:1 |
+| `.active:badge-muted` | 5.19:1 (theme-designer dark/OS-dark regular) | 5.19:1 |
+| `.active:badge-primary` | 1.77:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.active:badge-success` | 1.03:1 (theme-designer auto/OS-light regular) | 4.54:1 |
+| `.active:badge-warning` | 1.01:1 (theme-designer auto/OS-light regular) | 4.52:1 |
+| `.badge` | 6.24:1 (theme-designer auto/OS-light regular) | 6.24:1 |
+| `.badge-danger` | 2.42:1 (theme-lemon dark/OS-dark regular) | 4.57:1 |
+| `.badge-info` | 2.62:1 (theme-lemon dark/OS-dark regular) | 4.56:1 |
+| `.badge-muted` | 5.19:1 (theme-designer dark/OS-dark regular) | 5.19:1 |
+| `.badge-primary` | 4.6:1 (theme-designer-gray dark/OS-dark regular) | 4.6:1 |
+| `.badge-success` | 2.62:1 (theme-designer auto/OS-light regular) | 4.54:1 |
+| `.badge-warning` | 2.59:1 (theme-designer auto/OS-light regular) | 4.52:1 |
+| `.focus-visible:badge-danger` | 1.35:1 (theme-designer auto/OS-light regular) | 4.57:1 |
+| `.focus-visible:badge-info` | 1.43:1 (theme-lemon dark/OS-dark regular) | 4.56:1 |
+| `.focus-visible:badge-muted` | 5.19:1 (theme-designer dark/OS-dark regular) | 5.19:1 |
+| `.focus-visible:badge-primary` | 1.77:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus-visible:badge-success` | 1.03:1 (theme-designer auto/OS-light regular) | 4.54:1 |
+| `.focus-visible:badge-warning` | 1.01:1 (theme-designer auto/OS-light regular) | 4.52:1 |
+| `.focus:badge-danger` | 1.35:1 (theme-designer auto/OS-light regular) | 4.57:1 |
+| `.focus:badge-info` | 1.43:1 (theme-lemon dark/OS-dark regular) | 4.56:1 |
+| `.focus:badge-muted` | 5.19:1 (theme-designer dark/OS-dark regular) | 5.19:1 |
+| `.focus:badge-primary` | 1.77:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.focus:badge-success` | 1.03:1 (theme-designer auto/OS-light regular) | 4.54:1 |
+| `.focus:badge-warning` | 1.01:1 (theme-designer auto/OS-light regular) | 4.52:1 |
+| `.hover:badge-danger` | 1.35:1 (theme-designer auto/OS-light regular) | 4.57:1 |
+| `.hover:badge-info` | 1.43:1 (theme-lemon dark/OS-dark regular) | 4.56:1 |
+| `.hover:badge-muted` | 5.19:1 (theme-designer dark/OS-dark regular) | 5.19:1 |
+| `.hover:badge-primary` | 1.77:1 (theme-lemon dark/OS-dark regular) | 4.6:1 |
+| `.hover:badge-success` | 1.03:1 (theme-designer auto/OS-light regular) | 4.54:1 |
+| `.hover:badge-warning` | 1.01:1 (theme-designer auto/OS-light regular) | 4.52:1 |
+
+**Verified** (`tests/status-text-test.py`, 77/77): every status text class, `.on-surface-*` and badge class —
+with the real `:hover`/`:focus`/`:focus-visible`/`:active` forced through DevTools — ≥ 4.5:1 in all 648 states;
+each base class equals its `.on-surface-*` value; tokens, fills, borders, badge backgrounds/outlines identical
+to the previous build. `tests/component-contrast-test.py` still 60/60. Pixel screenshots: see below.
+
+**Pixel proof (parts 4–6)** — `tests/component-regression-test.py --pages-only` on every `views/*.html` page,
+4 states each, previous build vs new:
+- Part 4 (component fixes): pages with a fixed component are covered element-by-element instead (2,815 elements ×
+  648 states: identical boxes; every color change inside an active fix rule).
+- Parts 5–6 (status text + badges): 8 pages use those classes; of the 96 that don't, 93 are pixel-identical and
+  3 are non-deterministic in BOTH builds (chartjs animation, dependency-example, test-google-map-debug — Google API
+  race), proven by rendering each build twice. busy-indicator / vin-decoder differences were timing flakes
+  (identical on re-render).
+
+**Test fixes** — `on-primary-contrast-test.py` disables transitions (`.btn` has `transition: all .2s`; the hue
+sweep could measure a half-transitioned label — flaky, not a CSS change); `crisp-contrast-test.py` skips text
+drawn over an `<img>` (components added to the reference page in part 4). Contrast gate: PASS (regular + crisp).

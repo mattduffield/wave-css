@@ -93,6 +93,620 @@
       <wc-table-col field="name" label="Name" sortable></wc-table-col>
       <wc-table-col field="role" label="Role"></wc-table-col>
     </wc-table>
+    <!-- BEGIN components (generated from views/* demo snippets; one wrapper per component) -->
+    <section id="components" class="col gap-4">
+      <h2 class="font-bold">Components</h2>
+      <div class="vr-comp" data-comp="wc-select-chip"><wc-select name="tags" lbl-label="Tags (chip)" mode="chip" multiple allow-custom><option value="alpha" selected>Alpha</option><option value="beta" selected>Beta</option><option value="gamma">Gamma</option></wc-select></div>
+      <div class="vr-comp" data-comp="wc-address"><wc-address
+        name="address.street"
+        lbl-label="Street Address"
+        address-group="address"
+        target-map="detailMap"
+        countries="us"
+        geocode-url="/api/geocode">
+      </wc-address></div>
+      <div class="vr-comp" data-comp="wc-article-skeleton"><wc-article-skeleton></wc-article-skeleton></div>
+      <div class="vr-comp" data-comp="wc-background-image"><wc-background-image caption="SCROLL DOWN"
+    img-url="https://www.w3schools.com/howto/img_parallax.jpg">
+  </wc-background-image></div>
+      <div class="vr-comp" data-comp="wc-barcode"><wc-barcode value="IE-4F9K2" caption="Ava Noble"></wc-barcode></div>
+      <div class="vr-comp" data-comp="wc-breadcrumb"><wc-breadcrumb>
+              <wc-breadcrumb-item label="Home" link="#"></wc-breadcrumb-item>
+              <wc-breadcrumb-item label="Articles" link="#"></wc-breadcrumb-item>
+              <wc-breadcrumb-item label="Edit" link=""></wc-breadcrumb-item>
+            </wc-breadcrumb></div>
+      <div class="vr-comp" data-comp="wc-busy-indicator"><wc-busy-indicator type="chart-bar" size="medium"></wc-busy-indicator></div>
+      <div class="vr-comp" data-comp="wc-calendar"><wc-calendar id="cal"
+            view="month"
+            initial-date="2026-06-15"
+            week-starts-on="0"
+            selectable
+            events='[
+              {"id":"1","title":"Kickoff","start":"2026-06-03","color":"#3b82f6"},
+              {"id":"2","title":"Design review","start":"2026-06-10T15:00:00Z","color":"#f59e0b"},
+              {"id":"3","title":"Sprint","start":"2026-06-10","end":"2026-06-12","color":"#22c55e"},
+              {"id":"4","title":"1:1","start":"2026-06-10T16:00:00Z"},
+              {"id":"5","title":"Standup","start":"2026-06-10T17:00:00Z"},
+              {"id":"6","title":"Demo","start":"2026-06-10T18:00:00Z"},
+              {"id":"7","title":"Retro","start":"2026-06-10T19:00:00Z"},
+              {"id":"8","title":"Launch","start":"2026-06-23","color":"#ef4444"}
+            ]'>
+        </wc-calendar></div>
+      <div class="vr-comp" data-comp="wc-card-skeleton"><wc-card-skeleton></wc-card-skeleton></div>
+      <div class="vr-comp" data-comp="wc-chart-builder"><wc-chart-builder
+      auto-detect
+      data='[
+        {"_id":"Oregon","count":4219},
+        {"_id":"Washington","count":3847},
+        {"_id":"California","count":7123},
+        {"_id":"North Carolina","count":2456},
+        {"_id":"Texas","count":5891},
+        {"_id":"Florida","count":4102},
+        {"_id":"New York","count":6234}
+      ]'>
+    </wc-chart-builder></div>
+      <div class="vr-comp" data-comp="wc-checkin"><wc-checkin id="ci-in" mode="in" scan-source="both"
+                    event-id="EVT-1" session-id="SES-1"></wc-checkin></div>
+      <div class="vr-comp" data-comp="wc-code-mirror"><wc-code-mirror
+        name="code"
+        line-numbers
+        line-wrapper
+        fold-gutter
+        mode="javascript"
+        theme="monokai"
+        value="class Customer { }"
+        tab-size="2"
+        indent-unit="2"></wc-code-mirror></div>
+      <div class="vr-comp" data-comp="wc-color"><wc-color
+              name="label_color"
+              lbl-label="Label Color"
+              format="hex"
+              value="#3b82f6"
+              swatches='["#ef4444","#f59e0b","#22c55e","#3b82f6","#a855f7"]'
+              required>
+          </wc-color></div>
+      <div class="vr-comp" data-comp="wc-combobox"><wc-combobox name="status" lbl-label="Status" value="open">
+      <option value="open">Open</option>
+      <option value="in_progress">In Progress</option>
+      <option value="closed">Closed</option>
+    </wc-combobox></div>
+      <div class="vr-comp" data-comp="wc-contact-card"><wc-contact-card name="card1" gender="male" contact-name="Duncan Duffield">
+    </wc-contact-card></div>
+      <div class="vr-comp" data-comp="wc-contact-chip"><wc-contact-chip name="oneChip" gender="male" person-name="Dean Duffield">
+    </wc-contact-chip></div>
+      <div class="vr-comp" data-comp="wc-cron-picker"><wc-cron-picker name="s1" lbl-label="Schedule" value="* * * * *"></wc-cron-picker></div>
+      <div class="vr-comp" data-comp="wc-data-cards"><wc-data-cards id="cards"
+            image-field="photo"
+            title-field="name"
+            subtitle-field="sku"
+            fields='["price","status"]'
+            columns="3"
+            link-template="/x/product/{_id}"
+            items='[
+              {"_id":"p1","name":"Aurora Lamp","sku":"LMP-001","price":"$59","status":"In stock","photo":"https://picsum.photos/seed/p1/480/270"},
+              {"_id":"p2","name":"Nimbus Chair","sku":"CHR-014","price":"$149","status":"Low","photo":"https://picsum.photos/seed/p2/480/270"},
+              {"_id":"p3","name":"Vela Desk","sku":"DSK-007","price":"$329","status":"In stock","photo":"https://picsum.photos/seed/p3/480/270"},
+              {"_id":"p4","name":"Lumen Shelf","sku":"SHF-022","price":"$89","status":"Backorder","photo":"https://picsum.photos/seed/p4/480/270"}
+            ]'>
+        </wc-data-cards></div>
+      <div class="vr-comp" data-comp="wc-document-tree"><wc-document-tree
+      expand-level="2"
+      data='[{
+        "_id": "68a6174aad3de97e8fdf564e",
+        "first_name": "Matt",
+        "last_name": "Duffield",
+        "email": "matt@example.com",
+        "age": 42,
+        "is_active": true,
+        "created_date": "2025-08-20T18:43:22.239Z",
+        "address": {
+          "street": "202 Main St",
+          "city": "Portland",
+          "state": "OR",
+          "postal_code": "97201",
+          "lat": 45.5152,
+          "lng": -122.6784
+        },
+        "tags": ["admin", "developer", "beta-tester"],
+        "preferences": {
+          "theme": "dark",
+          "notifications": true,
+          "language": "en"
+        },
+        "notes": null
+      }]'>
+    </wc-document-tree></div>
+      <div class="vr-comp" data-comp="wc-emoji"><wc-emoji onpick="console.log('Picked:', event.detail.emoji)"></wc-emoji></div>
+      <div class="vr-comp" data-comp="wc-explain-tree"><wc-explain-tree
+      data='{
+        "queryPlanner": {
+          "winningPlan": {
+            "stage": "FETCH",
+            "inputStage": {
+              "stage": "IXSCAN",
+              "keyPattern": {"status": 1},
+              "indexName": "status_1",
+              "direction": "forward",
+              "isMultiKey": false
+            }
+          }
+        },
+        "executionStats": {
+          "executionSuccess": true,
+          "nReturned": 42,
+          "executionTimeMillis": 3,
+          "totalKeysExamined": 42,
+          "totalDocsExamined": 42,
+          "executionStages": {
+            "stage": "FETCH",
+            "nReturned": 42,
+            "executionTimeMillisEstimate": 0,
+            "docsExamined": 42,
+            "inputStage": {
+              "stage": "IXSCAN",
+              "nReturned": 42,
+              "executionTimeMillisEstimate": 0,
+              "keyPattern": {"status": 1},
+              "indexName": "status_1",
+              "direction": "forward",
+              "keysExamined": 42
+            }
+          }
+        }
+      }'>
+    </wc-explain-tree></div>
+      <div class="vr-comp" data-comp="wc-file-upload"><wc-file-upload
+              name="document_url"
+              lbl-label="Document"
+              accept="image/*,application/pdf"
+              max-size="10"
+              upload-url="/upload"
+              category="docs"
+              record-id="rec-123"
+              value="https://picsum.photos/seed/seeded/300/200.jpg"
+              required>
+          </wc-file-upload></div>
+      <div class="vr-comp" data-comp="wc-flip-box"><wc-flip-box class="h-40 w-40 mb-4">
+      <div slot="front" class="theme-sunset dark">
+        <h2>Front Side</h2>
+      </div>
+      <div slot="back" class="theme-royal light">
+        <h2>Back Side</h2>
+      </div>
+    </wc-flip-box></div>
+      <div class="vr-comp" data-comp="wc-font-picker"><wc-font-picker id="fp" name="font" lbl-label="Font" value="playfair-display"
+                        document-fonts='["playfair-display","lora","great-vibes"]'
+                        recent-key="wave-demo-recent-fonts"
+                        preview-text="Follow the Star" required></wc-font-picker></div>
+      <div class="vr-comp" data-comp="wc-form-array"><wc-form-array id="orderItems" name="line_items"
+              min-rows="1" max-rows="8" add-label="Add line item"
+              value='[
+                {"product_id":"p2","quantity":"3","unit_price":"19.99"},
+                {"product_id":"p3","quantity":"1","unit_price":"149.00"}
+              ]'>
+            <wc-form-array-column field="product_id" label="Product" type="select" required
+                                  option-value="_id" option-label="name"
+                                  options='[
+                                    {"_id":"p1","name":"Bolt"},
+                                    {"_id":"p2","name":"Widget"},
+                                    {"_id":"p3","name":"Gizmo"},
+                                    {"_id":"p4","name":"Sprocket"}
+                                  ]'></wc-form-array-column>
+            <wc-form-array-column field="quantity"   label="Qty"        type="number" min="1" step="1" col-class="w-100" required></wc-form-array-column>
+            <wc-form-array-column field="unit_price" label="Unit Price" type="number" min="0" step="0.01" placeholder="0.00"></wc-form-array-column>
+          </wc-form-array></div>
+      <div class="vr-comp" data-comp="wc-fx-board"><wc-fx-board id="station"
+            zone="main-hall" controllable show-shortcuts columns="4" master-volume="80"
+            categories='[{"name":"Crowd","icon":"users","color":"#3b82f6"},
+                         {"name":"Ambience","icon":"cloud","color":"#22c55e"},
+                         {"name":"Vision","icon":"film","color":"#a855f7"},
+                         {"name":"Lights","icon":"lightbulb","color":"#f59e0b"}]'
+            resources='[
+              {"id":"applause","type":"audio","name":"Applause","category":"Crowd","file_url":"","volume":0.9,"is_background":false,"shortcut_key":"1","order":0},
+              {"id":"boo","type":"audio","name":"Boo","category":"Crowd","file_url":"","volume":1,"is_background":false,"shortcut_key":"2","order":1},
+              {"id":"rain","type":"audio","name":"Rain Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":0},
+              {"id":"wind","type":"audio","name":"Wind Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":1},
+              {"id":"sting","type":"video","name":"Intro Sting","category":"Vision","file_url":"","volume":1,"is_background":false,"order":0},
+              {"id":"strobe","type":"light","name":"Strobe","category":"Lights","file_url":"","order":0}
+            ]'>
+        </wc-fx-board></div>
+      <div class="vr-comp" data-comp="wc-fx-console"><wc-fx-console id="console"
+            master-volume="80"
+            zones='[
+              {"id":"z1","name":"Main Hall","event_name":"main-hall",
+               "columns":4,
+               "categories":[{"name":"Crowd","icon":"users","color":"#3b82f6"},
+                             {"name":"Ambience","icon":"cloud","color":"#22c55e"},
+                             {"name":"Vision","icon":"film","color":"#a855f7"},
+                             {"name":"Lights","icon":"lightbulb","color":"#f59e0b"}],
+               "resources":[
+                 {"id":"applause","type":"audio","name":"Applause","category":"Crowd","file_url":"","volume":0.9,"is_background":false,"order":0},
+                 {"id":"boo","type":"audio","name":"Boo","category":"Crowd","file_url":"","volume":1,"is_background":false,"order":1},
+                 {"id":"rain","type":"audio","name":"Rain Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":0},
+                 {"id":"wind","type":"audio","name":"Wind Bed","category":"Ambience","file_url":"","volume":0.7,"loop":true,"is_background":true,"order":1},
+                 {"id":"sting","type":"video","name":"Intro Sting","category":"Vision","file_url":"","volume":1,"is_background":false,"order":0},
+                 {"id":"strobe","type":"light","name":"Strobe","category":"Lights","file_url":"","order":0}
+               ]},
+              {"id":"z2","name":"Lobby","event_name":"lobby",
+               "resources":[
+                 {"id":"chime","type":"audio","name":"Chime","category":"Crowd","file_url":"","volume":0.8,"order":0}
+               ]}
+            ]'>
+        </wc-fx-console></div>
+      <div class="vr-comp" data-comp="wc-gantt"><wc-gantt id="g"
+          group-field="lane"
+          scale="week"
+          link-template="/x/task/{id}"
+          items='[
+            {"id":"t1","label":"Design","start":"2026-06-01","end":"2026-06-08","lane":"Phase 1","color":"#3b82f6"},
+            {"id":"t2","label":"Research","start":"2026-06-02","end":"2026-06-05","lane":"Phase 1","color":"#06b6d4"},
+            {"id":"t3","label":"Build","start":"2026-06-09","end":"2026-06-20","lane":"Phase 2","color":"#22c55e"},
+            {"id":"t4","label":"Review","start":"2026-06-15","end":"2026-06-18","lane":"Phase 2","color":"#f59e0b"},
+            {"id":"m1","label":"Launch","start":"2026-06-23","lane":"Phase 2"},
+            {"id":"t5","label":"Docs","start":"2026-06-10","end":"2026-06-14","lane":"Phase 3","color":"#a855f7"}
+          ]'>
+      </wc-gantt></div>
+      <div class="vr-comp" data-comp="wc-help-drawer"><wc-help-drawer id="demo-drawer"
+            reference-key="DEMO-001"
+            template-slug="help_drawer_demo"
+            username="demo_user"
+            user-email="demo@example.com"
+            help-url=""
+            ticket-url=""
+            csrf-token="">
+          </wc-help-drawer></div>
+      <div class="vr-comp" data-comp="wc-icon-picker"><wc-icon-picker name="icon" lbl-label="App Icon" value="cart-shopping"
+                        variant="solid" placeholder="Search icons…" columns="8" clearable required>
+        </wc-icon-picker></div>
+      <div class="vr-comp" data-comp="wc-image"><wc-image modal
+      url="https://images.pexels.com/photos/866398/pexels-photo-866398.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+      caption="Image">
+    </wc-image></div>
+      <div class="vr-comp" data-comp="wc-input"><wc-input name="prop-id" lbl-label="ID" class="col-1" readonly></wc-input></div>
+      <div class="vr-comp" data-comp="wc-kanban"><wc-kanban id="board"
+              group-field="status"
+              card-id-field="_id"
+              card-title-field="title"
+              card-fields='["priority","assignee"]'
+              rollup-field="amount" rollup-prefix="$"
+              quick-add
+              lanes='[
+                {"value":"backlog","label":"Backlog","color":"#64748b"},
+                {"value":"in_progress","label":"In Progress","color":"#3b82f6"},
+                {"value":"review","label":"Review","color":"#f59e0b"},
+                {"value":"done","label":"Done","color":"#22c55e"}
+              ]'
+              cards='[
+                {"_id":"1","title":"Wire up auth","status":"backlog","priority":"High","assignee":"Ana","amount":1200},
+                {"_id":"2","title":"Design tokens","status":"backlog","priority":"Low","assignee":"Bo","amount":400},
+                {"_id":"3","title":"Kanban DnD","status":"in_progress","priority":"High","assignee":"Cy","amount":2000},
+                {"_id":"4","title":"Rollup sums","status":"in_progress","priority":"Med","assignee":"Ana","amount":800},
+                {"_id":"5","title":"Empty states","status":"review","priority":"Low","assignee":"Bo","amount":300},
+                {"_id":"6","title":"Ship v1","status":"done","priority":"High","assignee":"Cy","amount":5000}
+              ]'>
+          </wc-kanban></div>
+      <div class="vr-comp" data-comp="wc-list-skeleton"><wc-list-skeleton></wc-list-skeleton></div>
+      <div class="vr-comp" data-comp="wc-loader"><wc-loader type="spinner"></wc-loader></div>
+      <div class="vr-comp" data-comp="wc-menu"><wc-menu id="menu">
+    <option value="home" selected>Home</option>
+    <option value="news">News</option>
+    <option value="contact">Contact</option>
+    <option value="about">About</option>
+    <option value="sidebar">Sidebar</option>
+    <option value="tab">Tab</option>
+    <option value="menu">Menu</option>
+  </wc-menu></div>
+      <div class="vr-comp" data-comp="wc-pivot"><wc-pivot
+      auto-detect
+      show-heatmap
+      show-field-panel
+      data='[
+        {"state":"Oregon","status":"active","category":"A","amount":1200,"score":85},
+        {"state":"Oregon","status":"active","category":"B","amount":800,"score":72},
+        {"state":"Oregon","status":"closed","category":"A","amount":450,"score":60},
+        {"state":"Oregon","status":"pending","category":"B","amount":300,"score":45},
+        {"state":"Washington","status":"active","category":"A","amount":950,"score":78},
+        {"state":"Washington","status":"active","category":"B","amount":1100,"score":88},
+        {"state":"Washington","status":"closed","category":"A","amount":600,"score":55},
+        {"state":"Washington","status":"pending","category":"B","amount":200,"score":40},
+        {"state":"California","status":"active","category":"A","amount":2000,"score":92},
+        {"state":"California","status":"active","category":"B","amount":1500,"score":80},
+        {"state":"California","status":"closed","category":"A","amount":900,"score":65},
+        {"state":"California","status":"pending","category":"B","amount":400,"score":50},
+        {"state":"Texas","status":"active","category":"A","amount":1100,"score":75},
+        {"state":"Texas","status":"closed","category":"B","amount":500,"score":58},
+        {"state":"Texas","status":"pending","category":"A","amount":250,"score":42},
+        {"state":"Florida","status":"active","category":"B","amount":900,"score":70},
+        {"state":"Florida","status":"closed","category":"A","amount":600,"score":52},
+        {"state":"Florida","status":"pending","category":"B","amount":350,"score":38}
+      ]'>
+    </wc-pivot></div>
+      <div class="vr-comp" data-comp="wc-progress"><wc-progress value="80" max="100" variant="default" label="Default" show-value></wc-progress></div>
+      <div class="vr-comp" data-comp="wc-rating"><wc-rating name="satisfaction" lbl-label="Satisfaction" value="3.5" max="5"
+                     allow-half color="#f59e0b" size="1.5rem" required></wc-rating></div>
+      <div class="vr-comp" data-comp="wc-record-lookup"><wc-record-lookup id="rl-select" mode="select" endpoint="/x/lookup/attendee"
+                          lbl-label="Find attendee" placeholder="Type a name…"></wc-record-lookup></div>
+      <div class="vr-comp" data-comp="wc-reveal"><wc-reveal id="adjust" label="Adjust size, alignment & lines" class="mt-3">
+          <div class="line-row row gap-3">
+            <wc-input name="size" type="number" lbl-label="Size" value="18"></wc-input>
+            <div class="col-1 gap-1">
+              <label for="align">Align</label>
+              <select id="align" name="align"
+                      hx-on:change="document.getElementById('htmx-out').textContent = 'htmx saw align=' + this.value">
+                <option value="left">Left</option>
+                <option value="center" selected>Center</option>
+                <option value="right">Right</option>
+              </select>
+              <span id="htmx-out" class="text-xs text-muted"></span>
+            </div>
+          </div>
+          <div class="field col-1 gap-1 mt-3">
+            <label for="lines">Decorative lines</label>
+            <!-- Picking "custom" reveals sub-controls: the panel grows with no remeasuring -->
+            <select id="lines" name="lines"
+                    _="on change if my.value is 'custom' remove .hidden from #line-custom else add .hidden to #line-custom end">
+              <option value="none">None</option>
+              <option value="single" selected>Single</option>
+              <option value="custom">Custom…</option>
+            </select>
+            <div id="line-custom" class="hidden col-1 gap-2 mt-2">
+              <wc-input name="line_weight" type="number" lbl-label="Line weight" value="2"></wc-input>
+              <wc-select name="line_style" lbl-label="Line style">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+              </wc-select>
+            </div>
+          </div>
+        </wc-reveal></div>
+      <div class="vr-comp" data-comp="wc-ribbon"><wc-ribbon id="rb" active="solid" keytips>
+        <wc-ribbon-tab key="solid" label="Solid" keytip="S">
+          <wc-ribbon-group label="Create" menu>
+            <wc-ribbon-button command="sketch" icon="pen-ruler" label="Sketch" tip="Start a sketch on a plane or a face"></wc-ribbon-button>
+            <wc-ribbon-button command="extrude" icon="arrow-up-from-line" label="Extrude" tip="Pull the selected sketch into a solid"></wc-ribbon-button>
+            <wc-ribbon-button command="revolve" icon="rotate" label="Revolve" tip="Spin the selected sketch around an axis (a bowl, a knob)"></wc-ribbon-button>
+            <wc-ribbon-button command="hole" icon="circle-dot" label="Hole" tip="A drilled hole, counterbore or countersink in a face"></wc-ribbon-button>
+            <wc-ribbon-item command="loft" icon="layer-group" label="Loft" tip="A solid through two or more sketches at different heights"></wc-ribbon-item>
+            <wc-ribbon-item command="sweep" icon="timeline" label="Sweep" tip="Carry a profile along a path"></wc-ribbon-item>
+            <wc-ribbon-item command="box" icon="cube" label="Box" tip="A box — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="cylinder" icon="database" label="Cylinder" tip="A cylinder — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="sphere" icon="circle" label="Sphere" tip="A sphere — no sketch needed"></wc-ribbon-item>
+            <wc-ribbon-item command="pattern" icon="arrows-spin" label="Circular pattern" tip="Repeat the selected feature around a centre"></wc-ribbon-item>
+            <wc-ribbon-item command="row" icon="grip" label="Rectangular pattern" tip="Repeat the selected feature in a row"></wc-ribbon-item>
+            <wc-ribbon-item command="mirror" icon="arrows-left-right" label="Mirror" tip="Mirror the selected feature across a plane"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Modify" menu>
+            <wc-ribbon-button command="fillet" icon="circle-notch" label="Fillet" tip="Round edges"></wc-ribbon-button>
+            <wc-ribbon-button command="chamfer" icon="hexagon" label="Chamfer" tip="Bevel edges"></wc-ribbon-button>
+            <wc-ribbon-button command="shell" icon="box-open" label="Shell" tip="Hollow a body, leaving faces open"></wc-ribbon-button>
+            <wc-ribbon-button command="cut" icon="knife" label="Cut" tip="Cut the selected sketch into a body"></wc-ribbon-button>
+            <wc-ribbon-item command="union" icon="object-group" label="Join" tip="Join two bodies into one"></wc-ribbon-item>
+            <wc-ribbon-item command="subtract" icon="object-ungroup" label="Subtract" tip="Cut one body out of another"></wc-ribbon-item>
+            <wc-ribbon-item command="move" icon="arrows-up-down" label="Move" tip="Move or rotate a body"></wc-ribbon-item>
+            <wc-ribbon-item command="delete" icon="trash" label="Delete" tip="Delete the selected item (Delete)"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Inspect" menu>
+            <wc-ribbon-button command="measure" icon="ruler" label="Measure" tip="Click two points on the model (Esc to stop)" toggle></wc-ribbon-button>
+            <select id="section" caption="Section" title="Cut the model open to see inside">
+              <option value="">No section</option><option value="x">Across X</option><option value="y">Across Y</option><option value="z">Across Z</option>
+            </select>
+            <input type="range" id="section-at" caption="Cut at" min="0" max="100" value="50" title="Where the section cuts">
+            <wc-ribbon-item command="sectionoff" icon="cube" label="No section" tip="Show the whole model"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Insert">
+            <wc-ribbon-button command="model" icon="cube" label="Model" tip="A STEP, STL, 3MF or OBJ model"></wc-ribbon-button>
+            <wc-ribbon-button command="import" icon="file-import" label="Import" tip="A logo or drawing from an SVG or DXF file"></wc-ribbon-button>
+            <wc-ribbon-button command="param" icon="sliders" label="Parameter" tip="A named size you can change in one place"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+
+        <wc-ribbon-tab key="sketch" label="Sketch" contextual accent="success" keytip="K" hidden>
+          <wc-ribbon-group label="Create" menu>
+            <wc-ribbon-button command="sk-select" icon="bullseye-pointer" label="Select" tip="Select and drag shapes (Esc)" toggle toggle-group="tool" active></wc-ribbon-button>
+            <wc-ribbon-button command="sk-line" icon="minus" label="Line" tip="Click each point; Esc to stop" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-button command="sk-rect" icon="square" label="Rectangle" tip="Drag from corner to corner" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-button command="sk-circle" icon="circle" label="Circle" tip="Click the centre, drag out the size" toggle toggle-group="tool"></wc-ribbon-button>
+            <wc-ribbon-item command="sk-polygon" icon="hexagon" label="Polygon" tip="Click the centre, drag out the size" toggle toggle-group="tool"></wc-ribbon-item>
+            <wc-ribbon-item command="sk-slot" icon="capsules" label="Slot" tip="Click one end, then the other" toggle toggle-group="tool"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Constraints" menu>
+            <wc-ribbon-button command="c-coincident" glyph="●" label="Coincident" tip="Two points meet, or a point on a line or circle"></wc-ribbon-button>
+            <wc-ribbon-button command="c-horizontal" glyph="H" label="Horizontal" tip="A line level, or two points in line"></wc-ribbon-button>
+            <wc-ribbon-button command="c-vertical" glyph="V" label="Vertical" tip="A line upright, or two points one above the other"></wc-ribbon-button>
+            <wc-ribbon-button command="c-perpendicular" glyph="⊥" label="Perpendicular" tip="Two lines at right angles"></wc-ribbon-button>
+            <wc-ribbon-button command="c-parallel" glyph="∥" label="Parallel" tip="Two lines parallel"></wc-ribbon-button>
+            <wc-ribbon-button command="c-tangent" glyph="T" label="Tangent" tip="A line or circle touching a circle or arc"></wc-ribbon-button>
+            <wc-ribbon-item command="c-equal" glyph="=" label="Equal" tip="Same length, or same radius"></wc-ribbon-item>
+            <wc-ribbon-item command="c-concentric" glyph="◎" label="Concentric" tip="Circles or arcs with one centre"></wc-ribbon-item>
+            <wc-ribbon-item command="c-symmetric" glyph="⇋" label="Symmetric" tip="Two points mirrored across a line"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Finish">
+            <wc-ribbon-button command="sk-finish" icon="check" label="Finish sketch" tip="Back to the model (Esc)" variant="success"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+
+        <wc-ribbon-tab key="make" label="Make" keytip="M">
+          <wc-ribbon-group label="Setup" menu>
+            <wc-ribbon-button command="stock" icon="square" label="Stock" tip="The board to cut from"></wc-ribbon-button>
+            <wc-ribbon-split command="tool-endmill" icon="screwdriver-wrench" label="Tool" tip="Add a cutter (an end mill)">
+              <wc-ribbon-item command="tool-endmill" icon="screwdriver-wrench" label="End mill" tip="A ¼″ flat end mill"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-vbit" icon="screwdriver-wrench" label="V-bit" tip="A 60° V-bit for lettering"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-ballmill" icon="screwdriver-wrench" label="Ball mill" tip="A ⅛″ ball-nose mill"></wc-ribbon-item>
+              <wc-ribbon-item command="tool-drill" icon="screwdriver-wrench" label="Drill" tip="A ⅛″ drill"></wc-ribbon-item>
+            </wc-ribbon-split>
+            <wc-ribbon-button command="machines" icon="gear" label="Machines" tip="Your shop's CNC machines and printers"></wc-ribbon-button>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="CNC" menu>
+            <wc-ribbon-button command="profile" icon="rectangle" label="Profile" tip="Cut around the selected sketch, with tabs"></wc-ribbon-button>
+            <wc-ribbon-button command="pocket" icon="circle-minus" label="Pocket" tip="Clear the inside of the selected sketch"></wc-ribbon-button>
+            <wc-ribbon-button command="drill" icon="circle-dot" label="Drill" tip="Drill the circles of the selected sketch"></wc-ribbon-button>
+            <wc-ribbon-item command="engrave" icon="pen-ruler" label="Engrave" tip="Follow the sketch's lines"></wc-ribbon-item>
+          </wc-ribbon-group>
+          <wc-ribbon-group label="Output">
+            <wc-ribbon-button command="gcode" icon="download" label="G-code" tip="Download one program per tool" variant="primary"></wc-ribbon-button>
+          </wc-ribbon-group>
+        </wc-ribbon-tab>
+      </wc-ribbon></div>
+      <div class="vr-comp" data-comp="wc-rich-text"><wc-rich-text id="rt"
+              name="body"
+              lbl-label="Body"
+              mode="markdown"
+              toolbar="full"
+              min-height="180px"
+              placeholder="Write something…"
+              value="# Hello
+
+This is **bold**, *italic*, and `code`.
+
+- one
+- two
+
+> a quote"
+              required>
+          </wc-rich-text></div>
+      <div class="vr-comp" data-comp="wc-save-button"><wc-save-button id="right-save"
+        save-url="/screen/contact/123"></wc-save-button></div>
+      <div class="vr-comp" data-comp="wc-save-split-button"><wc-save-split-button method="put"></wc-save-split-button></div>
+      <div class="vr-comp" data-comp="wc-sidebar"><wc-sidebar class="theme-midnight-blue dark">
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Clients</a>
+    <a href="#">Contact</a>
+  </wc-sidebar></div>
+      <div class="vr-comp" data-comp="wc-sidenav"><wc-sidenav class="mb-4 theme-midnight-blue dark" open-top="48px" label="LEFT"
+      open-vertical-text push>
+      <a href="#">About</a>
+      <a href="#">Services</a>
+      <a href="#">Clients</a>
+      <a href="#">Contact</a>
+    </wc-sidenav></div>
+      <div class="vr-comp" data-comp="wc-slider"><wc-slider name="discount_pct" lbl-label="Discount %" value="15"
+                   min="0" max="100" step="5" show-value unit="%"
+                   marks='[0,25,50,75,100]' required></wc-slider></div>
+      <div class="vr-comp" data-comp="wc-slideshow"><wc-slideshow class="mb-4" max-image-height="400px">
+      <wc-slideshow-image
+        url="https://images.pexels.com/photos/259526/pexels-photo-259526.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+        caption="Caption 1"></wc-slideshow-image>
+      <wc-slideshow-image
+        url="https://images.pexels.com/photos/3030268/pexels-photo-3030268.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+        caption="Caption 2"></wc-slideshow-image>
+      <wc-slideshow-image
+        url="https://images.pexels.com/photos/571169/pexels-photo-571169.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+        caption="Caption 3"></wc-slideshow-image>
+      <wc-slideshow-image
+        url="https://images.pexels.com/photos/866398/pexels-photo-866398.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+        caption="Caption 4"></wc-slideshow-image>
+      <wc-slideshow-image
+        url="https://images.pexels.com/photos/931881/pexels-photo-931881.jpeg?auto=compress&cs=tinysrgb&w=800&h=375"
+        caption="Caption 5"></wc-slideshow-image>
+    </wc-slideshow></div>
+      <div class="vr-comp" data-comp="wc-split-button"><wc-split-button id="generate-code" label="Generate Code"
+              onclick="console.log('tests');">
+              <a id="generate-detail" class="btn">
+                Generate Detail
+              </a>
+              <a id="generate-table" class="btn">
+                Generate Table
+              </a>
+            </wc-split-button></div>
+      <div class="vr-comp" data-comp="wc-split-pane"><wc-split-pane initial-size="250px" min-size="150px" max-size="50%">
+          <wc-split-start>
+            <div class="demo-panel">
+              <h4>Left Panel</h4>
+              <p>This is the start (left) pane. Drag the divider to resize.</p>
+            </div>
+          </wc-split-start>
+          <wc-split-end>
+            <div class="demo-panel">
+              <h4>Right Panel</h4>
+              <p>This is the end (right) pane. It fills the remaining space.</p>
+            </div>
+          </wc-split-end>
+        </wc-split-pane></div>
+      <div class="vr-comp" data-comp="wc-table-skeleton"><wc-table-skeleton></wc-table-skeleton></div>
+      <div class="vr-comp" data-comp="wc-tabulator"><wc-tabulator
+        id="dataTable"
+        height="400px"
+        data='[
+          {"id": 1, "name": "John Doe", "email": "john@example.com", "role": "Admin"},
+          {"id": 2, "name": "Jane Smith", "email": "jane@example.com", "role": "User"},
+          {"id": 3, "name": "Bob Johnson", "email": "bob@example.com", "role": "User"}
+        ]'>
+        <wc-tabulator-column 
+          field="id" 
+          title="ID" 
+          width="60">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="name" 
+          title="Name" 
+          editor="input">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="email" 
+          title="Email">
+        </wc-tabulator-column>
+        <wc-tabulator-column 
+          field="role" 
+          title="Role"
+          editor="select"
+          editor-params='{"values": ["Admin", "User", "Guest"]}'>
+        </wc-tabulator-column>
+      </wc-tabulator></div>
+      <div class="vr-comp" data-comp="wc-theme-selector"><wc-theme-selector></wc-theme-selector></div>
+      <div class="vr-comp" data-comp="wc-timeline"><wc-timeline id="timeline">
+    <option value="2017">
+      Lorem ipsum dolor sit amet, quo ei simul congue exerci, ad nec admodum perfecto mnesarchum, vim ea mazim fierent detracto. Ea quis iuvaret expetendis his, te elit voluptua dignissim per, habeo iusto primis ea eam.
+    </option>
+    <option value="2016">
+      Lorem ipsum dolor sit amet, quo ei simul congue exerci, ad nec admodum perfecto mnesarchum, vim ea mazim fierent detracto. Ea quis iuvaret expetendis his, te elit voluptua dignissim per, habeo iusto primis ea eam.
+    </option>
+    <option value="2015">
+      Lorem ipsum dolor sit amet, quo ei simul congue exerci, ad nec admodum perfecto mnesarchum, vim ea mazim fierent detracto. Ea quis iuvaret expetendis his, te elit voluptua dignissim per, habeo iusto primis ea eam.
+    </option>
+    <option value="2014">
+      Lorem ipsum dolor sit amet, quo ei simul congue exerci, ad nec admodum perfecto mnesarchum, vim ea mazim fierent detracto. Ea quis iuvaret expetendis his, te elit voluptua dignissim per, habeo iusto primis ea eam.
+    </option>
+  </wc-timeline></div>
+      <div class="vr-comp" data-comp="wc-vin-decoder"><wc-vin-decoder
+            name="vin"
+            lbl-label="VIN Number"
+            placeholder="Enter 17-character VIN"
+            class="w-full"
+            elt-class="input"
+            required>
+          </wc-vin-decoder></div>
+      <div class="vr-comp" data-comp="wc-wizard"><wc-wizard id="demo-wizard">
+          <wc-wizard-step label="Basics" icon="info-circle">
+            <div class="col-1 gap-3 p-3">
+              <h3 class="text-sm font-semibold">Step 1: Project Basics</h3>
+              <wc-input name="project_name" lbl-label="Project Name" placeholder="My Project"></wc-input>
+              <wc-textarea name="description" lbl-label="Description" rows="3" placeholder="Describe your project..."></wc-textarea>
+            </div>
+          </wc-wizard-step>
+          <wc-wizard-step label="Tech Stack" icon="code" before-navigate="demoBeforeNavigate">
+            <div class="col-1 gap-3 p-3">
+              <h3 class="text-sm font-semibold">Step 2: Technology Stack</h3>
+              <wc-input name="language" lbl-label="Language" placeholder="e.g., Go, Python, JavaScript"></wc-input>
+              <wc-input name="framework" lbl-label="Framework" placeholder="e.g., Gin, Django, Express"></wc-input>
+            </div>
+          </wc-wizard-step>
+          <wc-wizard-step label="Review" icon="check-circle">
+            <div class="col-1 gap-3 p-3">
+              <h3 class="text-sm font-semibold">Step 3: Review</h3>
+              <p class="text-xs text-muted">Review your selections and click Save.</p>
+            </div>
+          </wc-wizard-step>
+        </wc-wizard></div>
+      <div class="vr-comp" data-comp="wc-zoom"><wc-zoom id="zoom" value="92" target="#surface" fit-buttons></wc-zoom></div>
+      <div class="vr-comp" data-comp="wc-markdown-viewer"><wc-markdown-viewer><p>Markdown with <a href="#">a link</a> and <code>code</code>.</p><pre><code class="language-json">{"a": 1, "b": "text", "c": true, "d": null}</code></pre><pre><code class="language-javascript">// comment
+const total = items.reduce((sum, x) =&gt; sum + x.price * 2, 0);
+if (total &gt; 10) { console.log(`Total: ${total}`); }
+class Cart extends Base { static NAME = 'cart'; }</code></pre></wc-markdown-viewer></div>
+      <div class="vr-comp" data-comp="wc-explain-tree-variants"><div class="wc-explain-tree"><div class="explain-summary explain-summary-warn"><span class="explain-summary-icon">⚠</span> Warn summary</div><div class="explain-summary explain-summary-danger"><span class="explain-summary-icon">✕</span> Danger summary</div><div class="explain-summary explain-summary-neutral"><span class="explain-summary-icon">•</span> Neutral summary</div></div></div>
+      <div class="vr-comp" data-comp="wc-document-tree-variants"><span class="doctree-value doctree-type-objectid">ObjectId("64a1")</span> <span class="doctree-value doctree-type-object">{3 fields}</span> <span class="doctree-value doctree-type-array">[2 items]</span></div>
+    </section>
+    <!-- END components -->
   </main>
 </body>
 </html>

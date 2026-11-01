@@ -84,8 +84,11 @@ function buildBaseUtilities() {
 
   // --- Status colors (success / danger / warning / info) ---
   ["success", "danger", "warning", "info"].forEach((name) => {
-    one(`${name}-color`, "color", `var(--${name}-color)`);
-    one(`${name}-light-color`, "color", `var(--${name}-light-color)`);
+    // Text variants render the readable .on-surface-* value (state color mixed toward --text-1 at the
+    // per-theme share from scripts/gen-status-text.py) — same as the base .success-color etc. Fills and
+    // borders below keep the raw token.
+    one(`${name}-color`, "color", `color-mix(in srgb, var(--${name}-color) var(--wc-on-surface-${name}-mix, 55%), var(--text-1, #111))`);
+    one(`${name}-light-color`, "color", `color-mix(in srgb, var(--${name}-light-color) var(--wc-on-surface-${name}-light-mix, 55%), var(--text-1, #111))`);
     one(`${name}-bg-color`, "background-color", `var(--${name}-color)`);
     one(`${name}-border-color`, "border-color", `var(--${name}-color)`);
   });
@@ -96,12 +99,12 @@ function buildBaseUtilities() {
   // matching-hue surface (mirrors the base .badge-* rules in main.css).
   const badge = (cls, bg, color, outline) =>
     utils.push({ cls, decls: [["background", bg], ["color", color], ["box-shadow", `inset 0 0 0 1px ${outline}`]] });
-  badge("badge-success", "rgba(34, 197, 94, 0.15)", "var(--success-color)", "rgba(34, 197, 94, 0.4)");
-  badge("badge-warning", "rgba(245, 158, 11, 0.15)", "var(--warning-color)", "rgba(245, 158, 11, 0.4)");
-  badge("badge-danger", "rgba(239, 68, 68, 0.15)", "var(--danger-color)", "rgba(239, 68, 68, 0.4)");
-  badge("badge-info", "rgba(59, 130, 246, 0.15)", "var(--info-color)", "rgba(59, 130, 246, 0.4)");
+  badge("badge-success", "rgba(34, 197, 94, 0.15)", "color-mix(in srgb, var(--success-color) var(--wc-badge-success-mix, 55%), var(--wc-badge-success-ink, var(--text-1, #111)))", "rgba(34, 197, 94, 0.4)");
+  badge("badge-warning", "rgba(245, 158, 11, 0.15)", "color-mix(in srgb, var(--warning-color) var(--wc-badge-warning-mix, 55%), var(--wc-badge-warning-ink, var(--text-1, #111)))", "rgba(245, 158, 11, 0.4)");
+  badge("badge-danger", "rgba(239, 68, 68, 0.15)", "color-mix(in srgb, var(--danger-color) var(--wc-badge-danger-mix, 55%), var(--wc-badge-danger-ink, var(--text-1, #111)))", "rgba(239, 68, 68, 0.4)");
+  badge("badge-info", "rgba(59, 130, 246, 0.15)", "color-mix(in srgb, var(--info-color) var(--wc-badge-info-mix, 55%), var(--wc-badge-info-ink, var(--text-1, #111)))", "rgba(59, 130, 246, 0.4)");
   badge("badge-muted", "var(--surface-3)", "var(--text-6)", "var(--surface-5)");
-  badge("badge-primary", "var(--primary-bg-color)", "var(--primary-color)", "color-mix(in srgb, var(--primary-color) 45%, transparent)");
+  badge("badge-primary", "var(--primary-bg-color)", "var(--wc-on-primary, var(--primary-color))", "color-mix(in srgb, var(--primary-color) 45%, transparent)");
 
   // --- Scope B (opt-in): raw Tailwind named palette ---
   if (INCLUDE_PALETTE) {
