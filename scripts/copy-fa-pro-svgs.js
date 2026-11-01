@@ -548,6 +548,7 @@ const ICONS_TO_COPY = [
   "rocket",
   "rotate",
   "rotate-reverse",
+  "rotate-left",
   "rotate-right",
   "ruler",
   "ruler-horizontal",

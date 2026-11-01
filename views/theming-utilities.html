@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" class="h-full theme-ocean">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - soft callouts, theming rules, utilities</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+  <!-- the critical snippet first (as a page would inline it), then the full stylesheet -->
+  <link rel="stylesheet" href="../dist/wave-critical.min.css">
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+
+<body class="col-1 h-full text-sm">
+  <div id="page-contents" class="p-6" style="max-width: 960px; margin: 0 auto; background: var(--surface-1); color: var(--text-1);">
+    <style>
+      /* demo-only layout */
+      .tu-section { border: 1px solid var(--surface-4); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.25rem; }
+      .tu-swatch { width: 1.5rem; height: 1.5rem; border-radius: 0.25rem; display: inline-block; vertical-align: middle; }
+      .tu-frame { width: 8rem; height: 5rem; border: 1px solid var(--surface-4); border-radius: 0.25rem; }
+    </style>
+
+    <h1 class="text-xl font-bold mb-2">Soft callouts, theming rules &amp; utilities</h1>
+    <p class="mb-3">
+      Switch the mode below. <b>Forced light on a dark OS</b> = set your OS (or devtools ▸ Rendering ▸
+      prefers-color-scheme) to dark, then press <b>Light</b>.
+    </p>
+    <div class="row gap-2 mb-4" style="flex-wrap: wrap;">
+      <button class="btn" data-mode="">Follow OS</button>
+      <button class="btn" data-mode="light">Light</button>
+      <button class="btn" data-mode="dark">Dark</button>
+      <select id="tu-theme" aria-label="Theme">
+        <option>theme-ocean</option><option>theme-forest</option><option>theme-royal</option><option>theme-coffee</option>
+        <option>theme-gold</option><option>theme-rose</option><option>theme-gray</option><option>theme-high-contrast</option>
+      </select>
+      <span id="tu-state" class="text-xs" style="align-self: center;"></span>
+    </div>
+
+    <!-- 1. Soft semantic callouts -->
+    <section class="tu-section">
+      <h2 class="font-bold mb-2">1 · Soft semantic callouts</h2>
+      <div class="col gap-3">
+        <div id="c-success" class="success-soft-fill border border-l-4 border-solid rounded p-3"><b>Done.</b> Your registration is complete — <a href="#">view the receipt</a>.</div>
+        <div id="c-warning" class="warning-soft-fill border border-l-4 border-solid rounded p-3"><b>Practice notice.</b> Rehearsal moves to 6pm on Sunday — <a href="#">see the schedule</a>.</div>
+        <div id="c-danger" class="danger-soft-fill border border-l-4 border-solid rounded p-3"><b>Error.</b> The upload failed — <a href="#">try again</a>.</div>
+        <div id="c-info" class="info-soft-fill border border-l-4 border-solid rounded p-3"><b>Note.</b> Parking opens at 5:30 — <a href="#">map</a>.</div>
+        <div id="c-accent" class="accent-soft-fill border border-l-4 border-solid rounded p-3" style="border-color: var(--surface-4);"><b>Neutral callout</b> uses <code>.accent-soft-fill</code>.</div>
+      </div>
+    </section>
+
+    <!-- 2. Categorical colours -->
+    <section class="tu-section">
+      <h2 class="font-bold mb-2">2 · Categorical colours (map markers, legends, chart series)</h2>
+      <p class="mb-2">Recommended order — distinct under protan/deutan/tritan vision, no status hues. Text 700 (lime/green 800) in light / 300 in dark; soft fill 100 / 900.</p>
+      <p class="text-xs mb-1">On a light surface — text 700 (lime/green 800), soft fill 100, marker/stroke shade per family:</p>
+      <div id="cat-light" class="row gap-2 p-2 mb-2 bg-white" style="flex-wrap: wrap; border-radius:.375rem"><span class="text-indigo-700 bg-indigo-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-indigo-700" style="width:.75rem;height:.75rem"></span> 1 indigo</span><span class="text-lime-800 bg-lime-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-lime-700" style="width:.75rem;height:.75rem"></span> 2 lime</span><span class="text-fuchsia-700 bg-fuchsia-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-fuchsia-900" style="width:.75rem;height:.75rem"></span> 3 fuchsia</span><span class="text-emerald-700 bg-emerald-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-emerald-600" style="width:.75rem;height:.75rem"></span> 4 emerald</span><span class="text-pink-700 bg-pink-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-pink-500" style="width:.75rem;height:.75rem"></span> 5 pink</span><span class="text-violet-700 bg-violet-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-violet-500" style="width:.75rem;height:.75rem"></span> 6 violet</span><span class="text-green-800 bg-green-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-green-900" style="width:.75rem;height:.75rem"></span> 7 green</span><span class="text-slate-700 bg-slate-100 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-slate-800" style="width:.75rem;height:.75rem"></span> 8 slate</span></div>
+      <p class="text-xs mb-1">On a dark surface — text 300, soft fill 900, marker/stroke shade per family:</p>
+      <div id="cat-dark" class="row gap-2 p-2 mb-2" style="background: var(--wc-slate-950); flex-wrap: wrap; border-radius:.375rem"><span class="text-indigo-300 bg-indigo-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-indigo-200" style="width:.75rem;height:.75rem"></span> 1 indigo</span><span class="text-lime-300 bg-lime-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-lime-300" style="width:.75rem;height:.75rem"></span> 2 lime</span><span class="text-fuchsia-300 bg-fuchsia-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-fuchsia-400" style="width:.75rem;height:.75rem"></span> 3 fuchsia</span><span class="text-emerald-300 bg-emerald-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-emerald-500" style="width:.75rem;height:.75rem"></span> 4 emerald</span><span class="text-pink-300 bg-pink-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-pink-100" style="width:.75rem;height:.75rem"></span> 5 pink</span><span class="text-violet-300 bg-violet-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-violet-500" style="width:.75rem;height:.75rem"></span> 6 violet</span><span class="text-green-300 bg-green-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-green-300" style="width:.75rem;height:.75rem"></span> 7 green</span><span class="text-slate-300 bg-slate-900 px-2 py-1" style="border-radius:.25rem"><span class="tu-swatch bg-slate-400" style="width:.75rem;height:.75rem"></span> 8 slate</span></div>
+    </section>
+
+    <!-- 3. .text-inherit -->
+    <section class="tu-section">
+      <h2 class="font-bold mb-2">3 · <code>.text-inherit</code></h2>
+      <p id="inherit-box" class="on-surface-info">An info-coloured line with <a id="inherit-link" class="text-inherit" href="#">a link that takes its colour</a>,
+        and <a id="plain-link" href="#">a plain link</a> for comparison.</p>
+    </section>
+
+    <!-- 4. Responsive utilities -->
+    <section class="tu-section">
+      <h2 class="font-bold mb-2">4 · Responsive alignment, <code>md:table</code>, <code>object-*</code></h2>
+      <div id="resp" class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-3" style="border: 1px dashed var(--surface-4); padding: 0.5rem;">
+        <span>Stacked on small screens</span><span>a row with centred items</span><span>and space between at md+</span>
+      </div>
+      <div id="resp-table" class="col md:table mb-3" style="border-collapse: collapse;">
+        <div class="md:table-row"><span class="md:table-cell p-1">Name</span><span class="md:table-cell p-1">Mary</span></div>
+        <div class="md:table-row"><span class="md:table-cell p-1">Role</span><span class="md:table-cell p-1">Angel</span></div>
+      </div>
+      <div class="row gap-3">
+        <img id="img-cover" class="tu-frame object-cover" alt="cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='100'%3E%3Crect width='400' height='100' fill='%2360a5fa'/%3E%3Ccircle cx='200' cy='50' r='40' fill='%23fbbf24'/%3E%3C/svg%3E">
+        <img id="img-contain" class="tu-frame object-contain" alt="contain" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='100'%3E%3Crect width='400' height='100' fill='%2360a5fa'/%3E%3Ccircle cx='200' cy='50' r='40' fill='%23fbbf24'/%3E%3C/svg%3E">
+      </div>
+    </section>
+
+    <!-- 5. [hidden] + layering -->
+    <section class="tu-section">
+      <h2 class="font-bold mb-2">5 · <code>[hidden]</code> always hides; critical CSS is layered</h2>
+      <div id="hidden-col" class="col" hidden>✗ .col[hidden] — you should NOT see this</div>
+      <div id="hidden-flex" class="flex md:flex" hidden>✗ .flex[hidden] — you should NOT see this</div>
+      <div id="md-flex" class="hidden md:flex gap-2"><span>✓ hidden md:flex — visible from 768px up</span></div>
+      <p class="text-xs mt-2">This page loads <code>wave-critical.min.css</code> first, as an inlined critical snippet would; its rules now sit in Wave's layers, so <code>md:flex</code> still wins.</p>
+    </section>
+
+    <wc-javascript class="hidden">
+      <script type="text/plain">
+      (() => {
+        const html = document.documentElement;
+        const state = () => {
+          const os = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const forced = html.classList.contains('light') ? 'forced light' : html.classList.contains('dark') ? 'forced dark' : 'following the OS';
+          document.getElementById('tu-state').textContent = `OS: ${os} · page: ${forced}`;
+        };
+        let mode = '';
+        // swap only the theme-* / light / dark classes (inside views/index.html wc-theme owns the rest)
+        const apply = () => {
+          [...html.classList].filter(c => c.startsWith('theme-') || c === 'light' || c === 'dark').forEach(c => html.classList.remove(c));
+          html.classList.add(document.getElementById('tu-theme').value);
+          if (mode) html.classList.add(mode);
+          state();
+        };
+        document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { mode = b.dataset.mode; apply(); });
+        document.getElementById('tu-theme').onchange = apply;
+        matchMedia('(prefers-color-scheme: dark)').addEventListener('change', state);
+        state();
+      })();
+      </script>
+    </wc-javascript>
+  </div>
+
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

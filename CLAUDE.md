@@ -144,9 +144,23 @@ Four semantic color families with CSS variables and utility classes:
 
 **Secondary background** — `.secondary-bg-color` uses `--secondary-bg-color`
 
+**Soft semantic callouts** — `.success-soft-fill` / `.warning-soft-fill` / `.danger-soft-fill` / `.info-soft-fill`: the semantic counterpart of `.accent-soft-fill` — subtle tint (`--{state}-soft`, state colour mixed into `--surface-1`), legible foreground (`--on-{state}-soft`, mixed toward `--text-1`) and a matching border token (`--{state}-soft-border`, applied as `border-color`; Wave's `.border` sets only width, so use `border border-l-4 border-solid rounded`). Work in **any page theme, light/dark/forced, with NO theme-* or .crisp class on the element**. Links inside (not `a.btn`) take the callout colour, underlined. Measured text+link ≥ 6.2:1 (worst info on theme-high-contrast; most 8–11) across 54 themes × OS light/dark, forced light on a dark OS, forced dark on a light OS, and .crisp pages. **Status callouts (warnings, practice notices, errors, done) use these; neutral callouts use `.accent-soft-fill`** (left unchanged). **`.text-inherit`** (`color: inherit`, also on `:hover`, in `wc.ui` so it beats the bare `a` rule) for a link that should take its container's colour.
+
+### Theming rules (apps keep breaking these)
+
+- **One `theme-*` per page, on `<html>` or `<wc-theme>`** — never on an element to tint it. Forced modes match only `.light.theme-x`/`.dark.theme-x` on the same element, so a nested `theme-*` follows the OS (forced-light page + dark OS → near-white `--text-1` inside).
+- **Don't nest `.crisp` for colour** — it restarts the theme there and its text follows the OS even on a forced page (measured 1.05:1 forced-light/dark-OS, 1.04:1 forced-dark/light-OS; an `<a>` goes near-white). Put `.crisp` once on `<html>`. **Fixed (Oct 2026):** a page-level `.crisp` with no `.light`/`.dark` on a **dark OS** used light crisp surfaces + OS-dark near-white text (1.05:1) — a `@media (prefers-color-scheme: dark) .crisp:not(.light)…` block now applies the dark crisp tokens (~18:1).
+- **Categorical colours** (map markers, legends, chart series) use the static colour families in this order, avoiding status hues: **indigo, lime, fuchsia, emerald, pink, violet, green, slate** (slate = "Other"). Text: 700 in light (lime/green 800), 300 in dark. Soft fill: 100 / 900. Stroke/marker shades — light: indigo 700, lime 700, fuchsia 900, emerald 600, pink 500, violet 500, green 900, slate 800; dark: indigo 200, lime 300, fuchsia 400, emerald 500, pink 100, violet 500, green 300, slate 400. Chosen by search for worst colour-blind ΔE2000 12.3 (light) / 11.5 (dark) under protan/deutan/tritan, all ≥3:1 on every theme surface (text ≥4.73 / ≥10.1). Full table in `themes.categoricalColors` in the knowledge base.
+
+### Cascade layers, `[hidden]`, critical CSS
+
+- **All of Wave is in `@layer wc.*`** (order statement at the top of `main.css`). **Any unlayered app CSS beats every Wave class, `md:*` included** — a page's inline critical CSS copying `.flex`/`.col`/`.hidden` unlayered breaks `hidden md:flex`. Don't copy Wave classes; inline `dist/wave-critical.min.css` or wrap copies in `@layer wc.utility { … }` after the same order statement.
+- **`dist/wave-critical.min.css` is layered** (`src/css/critical.css`): starts with the identical layer-order statement, `[hidden]` in `wc.vars`, utilities in `wc.utility`, `sm:` variants in `wc.responsive` — safe loaded before, after or inlined.
+- **`[hidden]` always wins:** `[hidden]:not([hidden="until-found"]) { display: none !important }` in `wc.vars` (an important in the first layer beats all normal declarations, layered or not) — `<div class="col" hidden>` stays hidden.
+
 ### CSS Grid Utilities
 
-Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl). **Column span** is responsive: `col-span-1`…`col-span-12` + `col-span-full` (base) and breakpoint-prefixed `{sm,md,lg,xl,2xl}:col-span-{1..12|full}` — so an item can change its span per breakpoint, e.g. a field full-width on mobile but 2 cols in a `md:grid-2` form grid: `class="col-1 md:col-span-2"`. (`col-span-full` = `grid-column: 1 / -1`.)
+Tailwind-compatible CSS grid classes are available: `grid-cols-1` through `grid-cols-12`, `grid-rows`, `col-span`, `row-span`, and `grid-flow` classes at all breakpoints (base + sm/md/lg/xl/2xl). **Column span** is responsive: `col-span-1`…`col-span-12` + `col-span-full` (base) and breakpoint-prefixed `{sm,md,lg,xl,2xl}:col-span-{1..12|full}` — so an item can change its span per breakpoint, e.g. a field full-width on mobile but 2 cols in a `md:grid-2` form grid: `class="col-1 md:col-span-2"`. (`col-span-full` = `grid-column: 1 / -1`.) **Responsive alignment:** `{sm,md,lg,xl,2xl}:items-{start|center|end|stretch|baseline}`, `:justify-{start|center|end|between|around|evenly}`, `:table`, `:table-row` (`:table-cell` and `:flex-wrap` already existed; `2xl:flex-wrap|-reverse|nowrap` added). **`object-cover|contain|fill|none|scale-down`** + `object-center|top|bottom|left|right`.
 
 ### Modal Flex Fill
 
@@ -221,6 +235,9 @@ The AI Builder picks components by field type/shape. Full detail (with notes, de
 
 ### Content Components
 - `wc-markdown-viewer`: Enhances goldmark-rendered markdown HTML with Prism.js syntax highlighting and copy-to-clipboard buttons on code blocks; auto-processes on connect and after HTMX swaps; supports json, javascript, sql, bash, go, html, python, ruby, and more
+
+### Icons (search + aliases)
+`docs/ICONS.md` (generated table: name, styles, official aliases, search terms), `dist/assets/icon-bundles/icon-index.json` and `icon-aliases.json` are written by `scripts/bundle-icons.js` on every build from FA Pro metadata (`FA_PRO_PATH`). **`wc-fa-icon` resolves Font Awesome's official aliases** on a miss (`tshirt`→`shirt`, `undo-alt`→`rotate-left`, `home`→`house`) before the `?` placeholder. Add icons via `ICONS_TO_COPY` in `scripts/copy-fa-pro-svgs.js`.
 
 ### Icon Components
 - `wc-fa-icon`: Font Awesome icon wrapper
@@ -423,6 +440,7 @@ http://localhost:3015/views/index.html
 - `views/data-cards.html` - wc-data-cards demos: image gallery with `link-template` + responsive columns, and graceful no-image text cards with the open event
 - `views/file-upload.html` - wc-file-upload demos: single image seeded with an existing file + FACE submit payload, and a multiple-file field (value = JSON array of urls)
 - `views/color.html` - wc-color demos: hex with presets + seeded value, rgb-format conversion, a presets-only field; plus `alpha` + `allow-none` + `swatch-groups` + `cmyk` + Recent in the custom popover, an rgba() border, and `picker="custom"` without alpha (event log shows wccolorinput vs wccolorchange)
+- `views/theming-utilities.html` - soft semantic callouts with links, categorical families on light/dark surfaces, `.text-inherit`, responsive alignment + `md:table` + `object-*`, `[hidden]` vs `.col`/`.flex`, layered critical CSS; Light/Dark/Follow-OS + theme switch (test forced light on a dark OS). Verified in `tests/theming-utilities-test.py` (114 checks)
 - `views/rating.html` - wc-rating demos: editable half-value stars + a whole-value hearts variant, and a readonly display with `show-value` + `count`
 - `views/slider.html` - wc-slider demos: single with unit + marks + step snapping, and a dual-thumb range submitting `"min,max"`
 - `views/icon-picker.html` - wc-icon-picker demo: searchable grid of the full solid bundle with lazy previews, clearable, submits the icon name string

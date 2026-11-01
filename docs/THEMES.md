@@ -199,6 +199,11 @@ Consequences:
   by default (or scope into `@layer wc.usage`), so their styles reliably apply.
 - Per-mode overrides are written as explicit `.light` / `.dark` (ancestor) rules within the theme
   layers.
+- **App CSS:** unlayered page CSS (e.g. an inline critical snippet copying `.flex` / `.col` / `.hidden`)
+  beats **every** Wave class, `md:*` included — `class="hidden md:flex"` then never shows. Inline
+  `dist/wave-critical.min.css` (layered, same order statement) or wrap copies in `@layer wc.utility { }`.
+- **`[hidden]`** is `display: none !important` in `wc.vars` — an important in the first layer beats all
+  normal declarations, layered or not, so `<div class="col" hidden>` stays hidden.
 
 ---
 
@@ -214,6 +219,17 @@ Consequences:
 - **No `light-dark()`.** Wave doesn't use the CSS `light-dark()` function; mode is a class, so pick
   colors via `.light`/`.dark` selectors or tokens, not `light-dark(a, b)`. (`light-dark()` resolves
   only from the OS/`color-scheme` and can't express Wave's user-chosen, nestable modes.)
+
+- **One `theme-*` per page**, on `<html>` or `<wc-theme>`. Never put a `theme-*` on an element to tint
+  it: forced modes match only `.light.theme-x` / `.dark.theme-x` on the same element, so a nested theme
+  follows the OS (forced-light page + dark OS → near-white text inside).
+- **Don't nest `.crisp` for colour.** It restarts the theme there and its text follows the OS even on a
+  forced page (measured 1.05:1). Put `.crisp` once on `<html>`.
+- **Tint a block with tokens:** status → `.success/.warning/.danger/.info-soft-fill`; neutral →
+  `.accent-soft-fill`. Both are AA in every theme and mode with no theme class on the element.
+- **Categorical colours** (markers, legends, series): indigo, lime, fuchsia, emerald, pink, violet,
+  green, slate — never the status hues. Shades in `themes.categoricalColors` (knowledge base) / CLAUDE.md.
+  Demo: `views/theming-utilities.html`.
 
 ---
 

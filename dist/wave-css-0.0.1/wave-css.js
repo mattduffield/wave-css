@@ -15538,6 +15538,13 @@ if (!customElements.get("wc-fa-icon")) {
         this.style.removeProperty("--fa-secondary-opacity");
       }
     }
+    // { alias: bundledName } from Font Awesome's metadata, fetched once per page on the first miss.
+    static loadOfficialAliases() {
+      if (!WcFaIcon._officialAliases) {
+        WcFaIcon._officialAliases = fetch(`${WcIconConfig.bundleBaseUrl}/icon-aliases.json`).then((r) => r.ok ? r.json() : {}).catch(() => ({}));
+      }
+      return WcFaIcon._officialAliases;
+    }
     async _loadIcon() {
       const requestedName = this.getAttribute("name");
       if (!requestedName || !this._group) return;
@@ -15563,6 +15570,10 @@ if (!customElements.get("wc-fa-icon")) {
       try {
         const bundleKey2 = `${iconStyle}/${iconName}`;
         let iconData = iconBundles.get(bundleKey2);
+        if (!iconData) {
+          const official = (await WcFaIcon.loadOfficialAliases())[iconName];
+          if (official) iconData = iconBundles.get(`${iconStyle}/${official}`);
+        }
         if (!iconData && iconStyle === "duotone") {
           console.log(`[wc-fa-icon] Looking for duotone icon: ${iconName}`);
           console.log(`[wc-fa-icon] Loaded bundles:`, Array.from(loadedBundles));

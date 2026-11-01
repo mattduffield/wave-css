@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.50.0",
+    "version": "1.51.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-08-25"
+    "lastUpdated": "2026-10-31"
   },
   "selfHostedAssets": {
     "note": "Wave lazy-loads third-party libs from public CDNs. Set the single global window.WaveAssetBase (before the bundle runs) to load them from a local mirror first, with automatic CDN fallback. UNSET (default) = load from CDN exactly as before (no behavior change). SET (e.g. '/static/js') = try local first, fall back to CDN on any failure with one console.warn naming the missing file. Covers all three mechanisms: injected <script> onerror, injected <link> error, and dynamic import() rejection. Implemented centrally in helper-function.js (waveLocalAssetUrl + loadScript/loadCSS/loadLibrary/waveImport) AND in the WcDependencyManager loader (src/js/utils/dependency-manager.js) — the latter is how IMask (phone/date masking in wc-input via wc-mask-hub), CodeMirror core, and Tabulator core load. Progressively-loaded files (CodeMirror modes/themes/addons, Prism components/themes) resolve locally too; the loader dedups on BOTH local and CDN src so a component's own CDN-url dedup check (wc-code-mirror) can't double-load.",
@@ -2853,7 +2853,7 @@
   },
   "themes": {
     "description": "40+ predefined themes using oklch color space with automatic light/dark mode support. Includes theme-high-contrast for WCAG AAA accessibility.",
-    "usage": "Apply theme class to <html> element or use <wc-theme> component",
+    "usage": "Apply ONE theme-* class per page, on <html> (or via a single <wc-theme>) — never on an individual element to tint it. Add .light or .dark on the same element to force a mode; without either the page follows the OS. To tint a block use the token utilities (.accent-soft-fill, .success-soft-fill…, .surface-*), not a nested theme-* or .crisp. See themes.usageRules.",
     "semanticColors": {
       "description": "Four semantic color families with CSS variables and utility classes. Auto-adjust for light/dark mode.",
       "variables": [
@@ -2959,6 +2959,23 @@
           "warning": "#ffaa00",
           "info": "#00ccff"
         }
+      },
+      "softFills": {
+        "description": "Semantic counterpart of .accent-soft-fill: a subtle tinted background, a legible foreground and a matching border — in light and dark, inside ANY page theme, WITHOUT a theme-* or .crisp class on the element.",
+        "utilities": [
+          ".success-soft-fill",
+          ".warning-soft-fill",
+          ".danger-soft-fill",
+          ".info-soft-fill"
+        ],
+        "tokens": {
+          "--{state}-soft": "the background (state colour mixed into --surface-1)",
+          "--on-{state}-soft": "the foreground (state colour mixed toward --text-1)",
+          "--{state}-soft-border": "matching border colour, applied as border-color. Wave's .border sets only the width — add .border-solid (e.g. `border border-l-4 border-solid rounded`) to show it."
+        },
+        "links": "Links inside (except a.btn) take the callout's text colour and stay underlined. For a link elsewhere that should take its container's colour use .text-inherit.",
+        "measured": "Text and links >= 6.2:1 (worst: info on theme-high-contrast); most themes 8–11:1 — all 54 themes × OS light, OS dark, forced light on a dark OS, forced dark on a light OS, and .crisp pages. Verified in tests/theming-utilities-test.py.",
+        "guidance": "Status callouts (warnings, practice notices, errors, done/confirmation, informational notes) use these. Neutral callouts use .accent-soft-fill. Use .badge-* for inline status pills, .btn-success/… for actions."
       }
     },
     "themeList": [
@@ -3076,6 +3093,74 @@
         "--card-color",
         "--card-border-color"
       ]
+    },
+    "usageRules": [
+      {
+        "rule": "A theme-* class belongs on <html> or <wc-theme>, once per page — never on an individual element to tint it.",
+        "why": "A theme-* class sets the text AND surface tokens through @media (prefers-color-scheme) blocks. Forced modes match only `.light.theme-x` / `.dark.theme-x` on the SAME element, so a nested theme-* element ignores the page's .light/.dark and follows the OS: on a page forced light with a dark OS, a nested theme-* element gets near-white --text-1 (measured 99% lightness) over whatever surface it sits on.",
+        "instead": "Status tint → .success/.warning/.danger/.info-soft-fill. Neutral/brand tint → .accent-soft-fill. Elevation → .surface-2/.surface-3 tokens."
+      },
+      {
+        "rule": "Don't nest .crisp for colour.",
+        "why": ".crisp on a nested element restarts the theme there — surfaces, the accent family and (via the OS media blocks) the text tokens — so they follow the OS colour scheme even on a page forced light. Measured: nested `.crisp theme-x` on a forced-light page with a dark OS = 1.05:1 text; forced dark on a light OS = 1.04:1. An <a> inside goes near-white in dark mode.",
+        "instead": "Put .crisp once on <html> next to the theme (`<html class=\"theme-ocean crisp\">`, optionally + .light/.dark). Since 1.51.0 a page-level .crisp with no .light/.dark follows a dark OS correctly (was light surfaces + near-white text, 1.05:1; now ~18:1)."
+      },
+      {
+        "rule": "Categorical colours (map markers, legends, chart series) use the colour families (text-{family}-{shade} / bg-{family}-{shade} / var(--wc-{family}-{shade})), never the status hues.",
+        "why": "Red/orange/amber/yellow read as danger/warning; reusing them for a category makes a legend look like an alert. The families are static (theme-independent) so a category keeps its colour across themes.",
+        "instead": "Use themes.categoricalColors (order + shades, measured on every theme surface)."
+      },
+      {
+        "rule": "Status callouts use the semantic soft fills; neutral callouts use .accent-soft-fill.",
+        "why": "The soft fills carry meaning (success/warning/danger/info) and stay AA in every theme and mode without a theme-* or .crisp class on the element.",
+        "instead": "See patterns.statusCallouts."
+      }
+    ],
+    "categoricalColors": {
+      "description": "Recommended order of 8 distinct, colour-blind-friendly families for map markers, legends and chart series. Avoids the status hues (red, orange, amber, yellow). Use them in this order; series 9+ should reuse with a different marker shape/dash rather than a new hue.",
+      "order": [
+        "indigo",
+        "lime",
+        "fuchsia",
+        "emerald",
+        "pink",
+        "violet",
+        "green",
+        "slate"
+      ],
+      "shades": {
+        "light": {
+          "text": "700 (lime and green: 800)",
+          "softFill": "100 (text 700/800 on it)",
+          "stroke": {
+            "indigo": 700,
+            "lime": 700,
+            "fuchsia": 900,
+            "emerald": 600,
+            "pink": 500,
+            "violet": 500,
+            "green": 900,
+            "slate": 800
+          }
+        },
+        "dark": {
+          "text": "300",
+          "softFill": "900 (text 300 on it)",
+          "stroke": {
+            "indigo": 200,
+            "lime": 300,
+            "fuchsia": 400,
+            "emerald": 500,
+            "pink": 100,
+            "violet": 500,
+            "green": 300,
+            "slate": 400
+          }
+        }
+      },
+      "example": "<span class=\"text-indigo-700 bg-indigo-100\">Room A</span>  ·  marker fill: var(--wc-indigo-700) (light) / var(--wc-indigo-200) (dark)",
+      "measured": "Strokes chosen by search to maximise the worst pairwise CIEDE2000 distance under normal, protan, deutan and tritan simulation (Machado 2009) while staying >= 3:1 on every theme's surface-1: worst ΔE 12.3 (light) / 11.5 (dark). Text >= 4.73:1 (light, worst on theme-coffee's tan surface) / >= 10.1:1 (dark) on every theme surface; text on its soft fill >= 4.84 (light) / 5.32 (dark). Verified in tests/theming-utilities-test.py.",
+      "slate": "slate is the neutral — use it for 'Other' / 'Unassigned'."
     }
   },
   "cssUtilities": {
@@ -3318,7 +3403,113 @@
           "<div class=\"list-item is-active\">Selected via class</div>",
           "<button class=\"btn btn-outline is-active\">Selected (utility beats .btn)</button>"
         ]
-      }
+      },
+      "responsiveAlignment": [
+        "sm:items-start",
+        "sm:items-center",
+        "sm:items-end",
+        "sm:items-stretch",
+        "sm:items-baseline",
+        "sm:justify-start",
+        "sm:justify-center",
+        "sm:justify-end",
+        "sm:justify-between",
+        "sm:justify-around",
+        "sm:justify-evenly",
+        "sm:table",
+        "sm:table-row",
+        "sm:table-cell",
+        "sm:flex-wrap",
+        "sm:flex-nowrap",
+        "sm:flex-wrap-reverse",
+        "md:items-start",
+        "md:items-center",
+        "md:items-end",
+        "md:items-stretch",
+        "md:items-baseline",
+        "md:justify-start",
+        "md:justify-center",
+        "md:justify-end",
+        "md:justify-between",
+        "md:justify-around",
+        "md:justify-evenly",
+        "md:table",
+        "md:table-row",
+        "md:table-cell",
+        "md:flex-wrap",
+        "md:flex-nowrap",
+        "md:flex-wrap-reverse",
+        "lg:items-start",
+        "lg:items-center",
+        "lg:items-end",
+        "lg:items-stretch",
+        "lg:items-baseline",
+        "lg:justify-start",
+        "lg:justify-center",
+        "lg:justify-end",
+        "lg:justify-between",
+        "lg:justify-around",
+        "lg:justify-evenly",
+        "lg:table",
+        "lg:table-row",
+        "lg:table-cell",
+        "lg:flex-wrap",
+        "lg:flex-nowrap",
+        "lg:flex-wrap-reverse",
+        "xl:items-start",
+        "xl:items-center",
+        "xl:items-end",
+        "xl:items-stretch",
+        "xl:items-baseline",
+        "xl:justify-start",
+        "xl:justify-center",
+        "xl:justify-end",
+        "xl:justify-between",
+        "xl:justify-around",
+        "xl:justify-evenly",
+        "xl:table",
+        "xl:table-row",
+        "xl:table-cell",
+        "xl:flex-wrap",
+        "xl:flex-nowrap",
+        "xl:flex-wrap-reverse",
+        "2xl:items-start",
+        "2xl:items-center",
+        "2xl:items-end",
+        "2xl:items-stretch",
+        "2xl:items-baseline",
+        "2xl:justify-start",
+        "2xl:justify-center",
+        "2xl:justify-end",
+        "2xl:justify-between",
+        "2xl:justify-around",
+        "2xl:justify-evenly",
+        "2xl:table",
+        "2xl:table-row",
+        "2xl:table-cell",
+        "2xl:flex-wrap",
+        "2xl:flex-nowrap",
+        "2xl:flex-wrap-reverse"
+      ],
+      "objectFit": [
+        "object-cover",
+        "object-contain",
+        "object-fill",
+        "object-none",
+        "object-scale-down",
+        "object-center",
+        "object-top",
+        "object-bottom",
+        "object-left",
+        "object-right"
+      ],
+      "softFills": [
+        ".success-soft-fill",
+        ".warning-soft-fill",
+        ".danger-soft-fill",
+        ".info-soft-fill",
+        ".accent-soft-fill"
+      ]
     },
     "lineHeightUtilities": [
       "leading-none",
@@ -3337,7 +3528,19 @@
       "leading-10"
     ],
     "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
-    "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95"
+    "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95",
+    "textInherit": ".text-inherit { color: inherit } (also on :hover) — beats the wc.ui `a`/`a:hover` colour, for a link that should take its container's colour (e.g. inside .on-surface-info or a custom callout).",
+    "hiddenAttribute": "[hidden] always hides: `[hidden]:not([hidden=\"until-found\"]) { display: none !important }` in @layer wc.vars. Important declarations in the FIRST layer beat every normal declaration — any Wave class (.col, .flex, md:flex) AND unlayered app CSS — so <div class=\"col\" hidden> stays hidden and el.hidden = true always works. hidden=\"until-found\" is left to the browser (find-in-page).",
+    "cascadeLayers": {
+      "order": "@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;",
+      "rule": "ALL of Wave lives in @layer wc.*. Any UNLAYERED app CSS beats every Wave class regardless of specificity or order — md:*/lg:* included. So a page's inline critical CSS that copies .flex / .col / .hidden unlayered silently breaks `class=\"hidden md:flex\"` (the unlayered .hidden wins at every width).",
+      "do": [
+        "Don't copy Wave classes into your own CSS. If you need critical CSS, inline dist/wave-critical.min.css (it's layered and includes the sm: variants) or wrap your copy in the same layer: `@layer wc.utility { … }`, with the layer-order statement first.",
+        "To override Wave deliberately, unlayered CSS is fine — it wins by design; scope it with your own class.",
+        "Layer order is fixed by the first @layer statement the browser sees: wave-critical.min.css starts with the identical statement, so loading it before, after or inlined is safe."
+      ],
+      "criticalCss": "dist/wave-critical.min.css (src/css/critical.css) is layered since 1.51.0: [hidden] in wc.vars, display/flex/gap/padding utilities in wc.utility, sm: variants in wc.responsive. Verified loaded first, last and inlined in tests/theming-utilities-test.py."
+    }
   },
   "eventHub": {
     "description": "Central pub/sub system for inter-component communication.",
@@ -3477,7 +3680,10 @@
     "richTextFieldTemplate": "<!-- Long-text / markdown field. Submits like any input (FACE), stored by the standard save path. Display with wc-markdown-viewer over server-rendered HTML. -->\n<wc-form hx-post=\"/x/article/save\" hx-target=\"#viewport\">\n  <wc-input name=\"title\" lbl-label=\"Title\" required></wc-input>\n  <wc-rich-text name=\"body\" value=\"{{ Record.body }}\" lbl-label=\"Body\" mode=\"markdown\" toolbar=\"full\" required></wc-rich-text>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>",
     "ganttTemplate": "<!-- Gantt from a two-date entity. items = list rows {id,label,start,end,lane}. Host persists on wcganttchange (optimistic; reset items= to roll back). Scaffold rule: one date field → wc-calendar; two date fields → wc-gantt. -->\n<wc-gantt id=\"g\" group-field=\"status\" scale=\"week\"\n    items='{{ Data.tasks|toJSON|safe }}' link-template=\"/x/task/{id}\">\n</wc-gantt>\n<script>\n  document.getElementById('g').addEventListener('wcganttchange', (e) => {\n    htmx.ajax('PUT', `/x/task/${e.detail.id}`, { values: { start: e.detail.newStart, end: e.detail.newEnd || '' }, swap: 'none' });\n  });\n</script>",
     "dataCardsTemplate": "<!-- Gallery for an entity with an image field. -->\n<wc-data-cards items='{{ Data.items|toJSON|safe }}' image-field=\"photo\" title-field=\"name\"\n    subtitle-field=\"sku\" fields='[\"price\",\"status\"]' columns=\"3\" link-template=\"/x/product/{_id}\"></wc-data-cards>",
-    "fileUploadFieldTemplate": "<!-- File/image field. Uploads to /upload (R2) and submits the returned url like any input. -->\n<wc-form hx-post=\"/x/document/save\" hx-target=\"#viewport\">\n  <wc-input name=\"title\" lbl-label=\"Title\" required></wc-input>\n  <wc-file-upload name=\"document_url\" value=\"{{ Record.document_url }}\" lbl-label=\"File\"\n      accept=\"image/*,application/pdf\" max-size=\"10\" category=\"document\" record-id=\"{{ RecordID }}\" required></wc-file-upload>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>"
+    "fileUploadFieldTemplate": "<!-- File/image field. Uploads to /upload (R2) and submits the returned url like any input. -->\n<wc-form hx-post=\"/x/document/save\" hx-target=\"#viewport\">\n  <wc-input name=\"title\" lbl-label=\"Title\" required></wc-input>\n  <wc-file-upload name=\"document_url\" value=\"{{ Record.document_url }}\" lbl-label=\"File\"\n      accept=\"image/*,application/pdf\" max-size=\"10\" category=\"document\" record-id=\"{{ RecordID }}\" required></wc-file-upload>\n  <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n</wc-form>",
+    "statusCallouts": "<!-- status: warnings, practice notices, errors, done -->\n<div class=\"warning-soft-fill border border-l-4 border-solid rounded p-3\"><b>Practice notice.</b> Rehearsal moves to 6pm — <a href=\"/schedule\">see the schedule</a>.</div>\n<div class=\"success-soft-fill border border-l-4 border-solid rounded p-3\">Registration complete.</div>\n<div class=\"danger-soft-fill border border-l-4 border-solid rounded p-3\">Upload failed — <a href=\"#\" hx-post=\"/retry\">try again</a>.</div>\n<div class=\"info-soft-fill border border-l-4 border-solid rounded p-3\">Parking opens at 5:30.</div>\n<!-- neutral -->\n<div class=\"accent-soft-fill rounded p-3\">Tip: you can reorder songs by dragging.</div>\n<!-- NOT: <div class=\"theme-gold crisp\">…</div> — nested theme/crisp follows the OS and breaks on forced pages -->",
+    "categoricalLegend": "<!-- legend / map markers: families in order, never status hues -->\n<ul class=\"row gap-3\">\n  <li class=\"text-indigo-700\"><span style=\"color:var(--wc-indigo-700)\">●</span> Stage</li>\n  <li class=\"text-lime-800\"><span style=\"color:var(--wc-lime-700)\">●</span> Parking</li>\n  <li class=\"text-fuchsia-700\"><span style=\"color:var(--wc-fuchsia-900)\">●</span> Food</li>\n</ul>\n<!-- dark mode: text-*-300, markers per themes.categoricalColors.shades.dark.stroke -->",
+    "responsiveStackToRow": "<div class=\"flex flex-col gap-2 md:flex-row md:items-center md:justify-between\">…</div>\n<div class=\"col md:table\"><div class=\"md:table-row\"><span class=\"md:table-cell\">Name</span><span class=\"md:table-cell\">Mary</span></div></div>\n<img class=\"w-full h-48 object-cover\" src=\"…\">"
   },
   "viewFiles": {
     "description": "Example HTML files in views/ directory demonstrating components",
@@ -3506,7 +3712,8 @@
       "views/ruler.html — wc-ruler demos (scrollable, zoomable page with top + left rulers, corner box cycling units, click objects for the selection band, drag-out / double-click guides, wc-zoom status bar zooming toward the cursor)",
       "views/zoom.html — wc-zoom demos (30px status bar with fit buttons over a zoomable board: log slider, presets menu, typed value, Ctrl/⌘ + wheel / pinch toward the cursor, shortcuts; plus a custom min/max/steps control)",
       "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)",
-      "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)"
+      "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)",
+      "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical colour families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },
@@ -3663,5 +3870,19 @@
       "sharedItemShape": "wc-calendar / wc-kanban / wc-gantt / wc-data-cards share { id, label|title, start, end?, color? } so a two-date or record list maps to any of them.",
       "ready": "Components that lazy-load libs (wc-rich-text, wc-code-mirror) set _deferReady; await el.ready before setting their value programmatically."
     }
+  },
+  "icons": {
+    "description": "wc-fa-icon renders Font Awesome Pro 7 icons from per-style JSON bundles (WcIconConfig.bundleBaseUrl, default /dist/assets/icon-bundles). Only icons listed in scripts/copy-fa-pro-svgs.js are bundled.",
+    "search": [
+      "docs/ICONS.md — generated table of every bundled icon: name, styles, official aliases, search terms (grep it)",
+      "dist/assets/icon-bundles/icon-index.json — {count, icons:[{name,label,styles,aliases,terms}]} for tools / the AI Builder",
+      "dist/assets/icon-bundles/icon-aliases.json — {alias: name} from Font Awesome's metadata"
+    ],
+    "aliases": "wc-fa-icon resolves Font Awesome's official aliases when a name isn't bundled: tshirt/t-shirt → shirt, undo-alt → rotate-left, home → house. Unknown names still show the ? placeholder (and a console warning).",
+    "adding": "Add the FA name to ICONS_TO_COPY in scripts/copy-fa-pro-svgs.js and run npm run build (regenerates bundles, the index, aliases and docs/ICONS.md, and copies them to go-kart).",
+    "notable": [
+      "shirt (aliases tshirt, t-shirt)",
+      "rotate-left (aliases undo-alt, rotate-back) and arrow-rotate-left (undo) are both bundled"
+    ]
   }
 }

@@ -1,6 +1,9 @@
 /* src/css/main.css */
 @layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
 @layer wc.vars {
+  [hidden]:not([hidden=until-found]) {
+    display: none !important;
+  }
   :root {
     --hue: 0;
     --chroma-mult: 1;
@@ -4818,6 +4821,68 @@
   }
   .accent-border-color {
     border-color: var(--accent-border, var(--accent, var(--primary-bg-color)));
+  }
+  .success-soft-fill {
+    --success-soft: color-mix(in srgb, var(--success-color) 14%, var(--surface-1));
+    --on-success-soft: color-mix(in srgb, var(--success-color) 42%, var(--text-1, #111));
+    --success-soft-border: color-mix(in srgb, var(--success-color) 50%, var(--surface-1));
+    background: var(--success-soft);
+    color: var(--on-success-soft);
+    border-color: var(--success-soft-border);
+  }
+  .warning-soft-fill {
+    --warning-soft: color-mix(in srgb, var(--warning-color) 16%, var(--surface-1));
+    --on-warning-soft: color-mix(in srgb, var(--warning-color) 38%, var(--text-1, #111));
+    --warning-soft-border: color-mix(in srgb, var(--warning-color) 55%, var(--surface-1));
+    background: var(--warning-soft);
+    color: var(--on-warning-soft);
+    border-color: var(--warning-soft-border);
+  }
+  .danger-soft-fill {
+    --danger-soft: color-mix(in srgb, var(--danger-color) 13%, var(--surface-1));
+    --on-danger-soft: color-mix(in srgb, var(--danger-color) 45%, var(--text-1, #111));
+    --danger-soft-border: color-mix(in srgb, var(--danger-color) 50%, var(--surface-1));
+    background: var(--danger-soft);
+    color: var(--on-danger-soft);
+    border-color: var(--danger-soft-border);
+  }
+  .info-soft-fill {
+    --info-soft: color-mix(in srgb, var(--info-color) 13%, var(--surface-1));
+    --on-info-soft: color-mix(in srgb, var(--info-color) 45%, var(--text-1, #111));
+    --info-soft-border: color-mix(in srgb, var(--info-color) 50%, var(--surface-1));
+    background: var(--info-soft);
+    color: var(--on-info-soft);
+    border-color: var(--info-soft-border);
+  }
+  .object-cover {
+    object-fit: cover;
+  }
+  .object-contain {
+    object-fit: contain;
+  }
+  .object-fill {
+    object-fit: fill;
+  }
+  .object-none {
+    object-fit: none;
+  }
+  .object-scale-down {
+    object-fit: scale-down;
+  }
+  .object-center {
+    object-position: center;
+  }
+  .object-top {
+    object-position: top;
+  }
+  .object-bottom {
+    object-position: bottom;
+  }
+  .object-left {
+    object-position: left;
+  }
+  .object-right {
+    object-position: right;
   }
   .badge {
     display: inline-flex;
@@ -13378,6 +13443,16 @@
   a:hover {
     color: var(--text-3);
   }
+  .text-inherit,
+  .text-inherit:hover {
+    color: inherit;
+  }
+  :is(.success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill) a:not(.btn),
+  :is(.success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill) a:not(.btn):hover {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
   a.btn,
   input[type=button].btn,
   button.btn {
@@ -17230,6 +17305,31 @@ html.dark.crisp {
   --on-accent-soft: oklch(96% 0.02 var(--hue));
   --accent-border: oklch(58% 0.14 var(--hue));
 }
+@media (prefers-color-scheme: dark) {
+  .crisp:not(.light):not(:where(.light) .crisp) {
+    --surface-1: oklch(13% 0.016 var(--hue));
+    --surface-2: oklch(18% 0.020 var(--hue));
+    --surface-3: oklch(30% 0.030 var(--hue));
+    --surface-4: oklch(42% 0.035 var(--hue));
+    --surface-5: oklch(26% 0.030 var(--hue));
+    --surface-6: oklch(34% 0.032 var(--hue));
+    --surface-7: oklch(48% 0.035 var(--hue));
+    --surface-8: oklch(60% 0.035 var(--hue));
+    --card-bg-color: oklch(26% 0.030 var(--hue));
+    --card-border-color: oklch(34% 0.032 var(--hue));
+    --container-bg-color: oklch(20% 0.022 var(--hue));
+    --container-border-color: oklch(32% 0.030 var(--hue));
+    --component-bg-color: oklch(17% 0.020 var(--hue));
+    --component-border-color: oklch(30% 0.030 var(--hue));
+    --accent: oklch(64% 0.19 var(--hue));
+    --accent-hover: oklch(70% 0.18 var(--hue));
+    --on-accent: oklch(20% 0.03 var(--hue));
+    --accent-fill-bg: var(--accent);
+    --accent-soft: oklch(34% 0.075 var(--hue));
+    --on-accent-soft: oklch(96% 0.02 var(--hue));
+    --accent-border: oklch(58% 0.14 var(--hue));
+  }
+}
 @layer wc.selected {
   .list {
     display: flex;
@@ -17279,6 +17379,222 @@ html.dark.crisp {
     .list-item[aria-current]:not([aria-current=false]) {
       outline: 2px solid Highlight;
       outline-offset: -2px;
+    }
+  }
+}
+@layer wc.responsive {
+  @media (min-width: 640px) {
+    .sm\:items-start {
+      align-items: flex-start;
+    }
+    .sm\:items-center {
+      align-items: center;
+    }
+    .sm\:items-end {
+      align-items: flex-end;
+    }
+    .sm\:items-stretch {
+      align-items: stretch;
+    }
+    .sm\:items-baseline {
+      align-items: baseline;
+    }
+    .sm\:justify-start {
+      justify-content: flex-start;
+    }
+    .sm\:justify-center {
+      justify-content: center;
+    }
+    .sm\:justify-end {
+      justify-content: flex-end;
+    }
+    .sm\:justify-between {
+      justify-content: space-between;
+    }
+    .sm\:justify-around {
+      justify-content: space-around;
+    }
+    .sm\:justify-evenly {
+      justify-content: space-evenly;
+    }
+    .sm\:table {
+      display: table;
+    }
+    .sm\:table-row {
+      display: table-row;
+    }
+  }
+  @media (min-width: 768px) {
+    .md\:items-start {
+      align-items: flex-start;
+    }
+    .md\:items-center {
+      align-items: center;
+    }
+    .md\:items-end {
+      align-items: flex-end;
+    }
+    .md\:items-stretch {
+      align-items: stretch;
+    }
+    .md\:items-baseline {
+      align-items: baseline;
+    }
+    .md\:justify-start {
+      justify-content: flex-start;
+    }
+    .md\:justify-center {
+      justify-content: center;
+    }
+    .md\:justify-end {
+      justify-content: flex-end;
+    }
+    .md\:justify-between {
+      justify-content: space-between;
+    }
+    .md\:justify-around {
+      justify-content: space-around;
+    }
+    .md\:justify-evenly {
+      justify-content: space-evenly;
+    }
+    .md\:table {
+      display: table;
+    }
+    .md\:table-row {
+      display: table-row;
+    }
+  }
+  @media (min-width: 1024px) {
+    .lg\:items-start {
+      align-items: flex-start;
+    }
+    .lg\:items-center {
+      align-items: center;
+    }
+    .lg\:items-end {
+      align-items: flex-end;
+    }
+    .lg\:items-stretch {
+      align-items: stretch;
+    }
+    .lg\:items-baseline {
+      align-items: baseline;
+    }
+    .lg\:justify-start {
+      justify-content: flex-start;
+    }
+    .lg\:justify-center {
+      justify-content: center;
+    }
+    .lg\:justify-end {
+      justify-content: flex-end;
+    }
+    .lg\:justify-between {
+      justify-content: space-between;
+    }
+    .lg\:justify-around {
+      justify-content: space-around;
+    }
+    .lg\:justify-evenly {
+      justify-content: space-evenly;
+    }
+    .lg\:table {
+      display: table;
+    }
+    .lg\:table-row {
+      display: table-row;
+    }
+  }
+  @media (min-width: 1280px) {
+    .xl\:items-start {
+      align-items: flex-start;
+    }
+    .xl\:items-center {
+      align-items: center;
+    }
+    .xl\:items-end {
+      align-items: flex-end;
+    }
+    .xl\:items-stretch {
+      align-items: stretch;
+    }
+    .xl\:items-baseline {
+      align-items: baseline;
+    }
+    .xl\:justify-start {
+      justify-content: flex-start;
+    }
+    .xl\:justify-center {
+      justify-content: center;
+    }
+    .xl\:justify-end {
+      justify-content: flex-end;
+    }
+    .xl\:justify-between {
+      justify-content: space-between;
+    }
+    .xl\:justify-around {
+      justify-content: space-around;
+    }
+    .xl\:justify-evenly {
+      justify-content: space-evenly;
+    }
+    .xl\:table {
+      display: table;
+    }
+    .xl\:table-row {
+      display: table-row;
+    }
+  }
+  @media (min-width: 1536px) {
+    .\32xl\:items-start {
+      align-items: flex-start;
+    }
+    .\32xl\:items-center {
+      align-items: center;
+    }
+    .\32xl\:items-end {
+      align-items: flex-end;
+    }
+    .\32xl\:items-stretch {
+      align-items: stretch;
+    }
+    .\32xl\:items-baseline {
+      align-items: baseline;
+    }
+    .\32xl\:justify-start {
+      justify-content: flex-start;
+    }
+    .\32xl\:justify-center {
+      justify-content: center;
+    }
+    .\32xl\:justify-end {
+      justify-content: flex-end;
+    }
+    .\32xl\:justify-between {
+      justify-content: space-between;
+    }
+    .\32xl\:justify-around {
+      justify-content: space-around;
+    }
+    .\32xl\:justify-evenly {
+      justify-content: space-evenly;
+    }
+    .\32xl\:table {
+      display: table;
+    }
+    .\32xl\:table-row {
+      display: table-row;
+    }
+    .\32xl\:flex-wrap {
+      flex-wrap: wrap;
+    }
+    .\32xl\:flex-wrap-reverse {
+      flex-wrap: wrap-reverse;
+    }
+    .\32xl\:flex-nowrap {
+      flex-wrap: nowrap;
     }
   }
 }
