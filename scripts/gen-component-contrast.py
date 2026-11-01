@@ -125,6 +125,21 @@ REGISTRY = [
     ("explain-summary-good", "wc-explain-tree", ".explain-summary-good", "color",
      [(".explain-summary-good", "text", 4.5)], ON_SURFACE),
 ]
+REGISTRY += [
+    ("tabulator-placeholder", "wc-tabulator-empty", ".wc-tabulator.tabulator .tabulator-placeholder-contents", "color",
+     [(".tabulator-placeholder-contents", "text", 4.5)], ["var(--text-2)", "var(--text-1)", "{INK}"]),
+    ("tabulator-footer", "wc-tabulator-paged",
+     ".wc-tabulator.tabulator .tabulator-footer :is(.tabulator-page-counter, .tabulator-page:not(.active))", "color",
+     [(".tabulator-page-counter", "text", 4.5), (".tabulator-page:not(.active)", "text", 4.5)],
+     ["var(--text-2)", "var(--text-1)", "{INK}"]),
+    # the highlighted/hovered row only exists while the dropdown is open: measured on a probe painted with
+    # the same tokens (--primary-color on --primary-bg-color), applied to the real rows
+    # the open dropdown's search box: its FOCUSED border (the generator and the test open the dropdown)
+    ("select-input-focus-border", "wc-select-chip", "wc-select .dropdown-input:focus", "border-color",
+     [(".dropdown-input", "border", 3)], ["var(--text-9)", "var(--text-6)", "{INK}"], "wc-select .dropdown-input"),
+    ("select-option-active", "wc-select-option-probe", "wc-select :is(.option.highlighted, .option:hover)", "color",
+     [(".vr-onprimary-probe", "text", 4.5)], ON_PRIMARY, ".vr-onprimary-probe"),
+]
 for v in ["warn", "danger", "neutral"]:
     REGISTRY.append((f"explain-summary-{v}", "wc-explain-tree-variants", f".explain-summary-{v}", "color",
                      [(f".explain-summary-{v}", "text", 4.5)], ON_SURFACE))
@@ -188,9 +203,11 @@ MEASURE_JS = r"""
     let chosen = null, w1 = null;
     for (const c of cands) {
       const val = c.replaceAll('{O}', orig).replaceAll('{INK}', ink);
+      // keep each element's own inline value (a probe's original color can BE inline) and restore it
+      const saved = applyEls.map(e => [e.style.getPropertyValue(prop), e.style.getPropertyPriority(prop)]);
       applyEls.forEach(e => e.style.setProperty(prop, val, 'important'));
       const [ok, w] = worst();
-      applyEls.forEach(e => e.style.removeProperty(prop));
+      applyEls.forEach((e, i) => { if (saved[i][0]) e.style.setProperty(prop, saved[i][0], saved[i][1]); else e.style.removeProperty(prop); });
       if (ok) { chosen = val; w1 = w; break; }
     }
     res[id] = { ok: false, w0, chosen, w1, n: targets.length };
@@ -200,7 +217,9 @@ MEASURE_JS = r"""
 """
 
 src = open(MAIN).read()
-if BEGIN in src:
+APPEND = sys.argv[sys.argv.index("--append") + 1].split(",") if "--append" in sys.argv else None
+RUN = [e for e in REGISTRY if not APPEND or e[0] in APPEND]
+if BEGIN in src and not APPEND:
     a = src.index(BEGIN); b = src.index(END) + len(END)
     src = src[:a].rstrip("\n") + "\n" + src[b:].lstrip("\n")
     open(MAIN, "w").write(src)
@@ -216,13 +235,17 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={"width": 1100, "height": 900})
     page.goto(f"{BASE}/views/visual-reference.html?build=new", wait_until="networkidle", timeout=120000)
     page.wait_for_timeout(3000)
+    # open the chip select's dropdown (as tests/component-contrast-test.py does) so its focused input is measured
+    page.click('[data-comp="wc-select-chip"] .dropdown-input')
+    page.keyboard.press("ArrowDown")
+    page.wait_for_timeout(200)
     for fam in FAMILIES:
         for mode, os_, cls in MODES:
             page.emulate_media(color_scheme=os_)
             for t in THEMES:
                 page.evaluate(f"document.documentElement.className = '{' '.join(x for x in [t, cls, 'crisp' if fam == 'crisp' else ''] if x)}'")
                 page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
-                res = page.evaluate(MEASURE_JS, [[list(e) for e in REGISTRY]])
+                res = page.evaluate(MEASURE_JS, [[list(e[:2]) + [e[6] if len(e) > 6 else e[2]] + list(e[3:6]) for e in RUN]])
                 state = (t, mode, "forced" if cls else os_, fam)
                 for rid, r in res.items():
                     measured.setdefault(rid, []).append(r["w0"])
@@ -245,7 +268,11 @@ def state_sel(t, mode, how, fam):
 
 
 apply_of = {e[0]: (e[2], e[3]) for e in REGISTRY}
-lines = [BEGIN,
+if APPEND and BEGIN in src:
+    head, rest = src.split(END, 1)
+    lines = []
+if not (APPEND and BEGIN in src):
+  lines = [BEGIN,
          "/* Component contrast fixes — ADDITIVE. Each rule matches only the theme × mode × family states where",
          "   the component's ORIGINAL color fails WCAG on the visual reference page (text 4.5:1; icons, borders,",
          "   chip × 3:1) and applies the first candidate that passes; every passing state is untouched. !important",
@@ -268,8 +295,11 @@ for rid, by in decisions.items():
             auto = [s for s in states if s[2] == os_]
             if auto:
                 lines.append(f"@media (prefers-color-scheme: {os_}) {{ :is({', '.join(state_sel(*s) for s in auto)}) {apply} {{ {prop}: {chosen} !important; }} }}")
-lines += [END, ""]
-src = src.rstrip("\n") + "\n\n" + "\n".join(lines)
+if APPEND and BEGIN in src:
+    src = head.rstrip("\n") + "\n" + "\n".join(lines) + "\n" + END + rest
+else:
+    lines += [END, ""]
+    src = src.rstrip("\n") + "\n\n" + "\n".join(lines)
 open(MAIN, "w").write(src)
 json.dump({"summary": summary, "unfixable": {k: [[list(s), w] for s, w in v] for k, v in unfixable.items()}},
           open(os.path.join(ROOT, "tests", ".component-contrast-decisions.json"), "w"), indent=1)

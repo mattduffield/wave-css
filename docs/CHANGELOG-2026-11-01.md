@@ -401,3 +401,57 @@ to the previous build. `tests/component-contrast-test.py` still 60/60. Pixel scr
 **Test fixes** — `on-primary-contrast-test.py` disables transitions (`.btn` has `transition: all .2s`; the hue
 sweep could measure a half-transitioned label — flaky, not a CSS change); `crisp-contrast-test.py` skips text
 drawn over an `<img>` (components added to the reference page in part 4). Contrast gate: PASS (regular + crisp).
+
+---
+
+# Wave CSS — 2026-11-01, part 7: wc-org-chart + two contrast leftovers (knowledge base 1.55.0)
+
+## New: `wc-org-chart` (additive — no existing component, token or class changed)
+
+Event org chart for go-kart's Informa Events. Attributes `tiers`, `groups`, `pool`, `readonly`; events
+`wcorgchartmove` (cancelable `{memberId, fromNode, toNode, source}`) and `wcorgchartedit` (`{memberId}`);
+methods `revert(memberId)`, `move()`, `nodeOf()`, `refresh()`. Pointer-event drag (mouse / touch / pen),
+drop outline, edge auto-scroll, per-member menu (Move to… / Edit), readonly, landscape print. Full docs:
+`docs/wc-org-chart.md`. Files: `src/js/components/wc-org-chart.js` (styles injected by the component, so
+pages without it are unaffected), registered in `src/js/components/index.js`; demo `views/org-chart.html`
+(+ index menu entry).
+
+Verified:
+- `tests/org-chart-test.py` 54/54 — structure; 1 / 3 / 4 columns at 375 / 800 / 1280px; mouse drag (ghost,
+  drop target, model + DOM + counts, cancelable event), click / own-node drop are not moves, pool in/out;
+  **touch** drag from the grip (real touch events via DevTools) and touching a row scrolls instead; **pen**
+  drag; auto-scroll up and down; **keyboard Move to…** (lists all 20 nodes + Not placed, current one disabled,
+  focus returns to ⋯), Esc, Edit; **cancel** returns the card; **revert()** (and a second revert is a no-op);
+  demo failed-save path; **readonly** (no grips, drag does nothing, menu = Edit only, move() refused);
+  **print** (4 columns, menus hidden, landscape PDF, and on the real 6-page PDF every station's title and last
+  member are on the same page); **performance** with 252 members / 20 nodes: full re-render + layout 29 ms,
+  no long tasks while dragging, 13.8 ms per pointer move, 50 moves in 8 ms; no leaked global listeners.
+- `tests/org-chart-contrast-test.py` 28/28 in all 648 states — text ≥ 4.5:1 (lowest: dimmed "out" member
+  4.60, warning flag 4.53), grip/menu glyphs ≥ 4.67, node borders ≥ 3.55, drop outline ≥ 4.57 against the
+  node and ≥ 17.59 against the page, text inside a drop target ≥ 4.60, open menu text ≥ 6.30.
+
+## Leftovers (state-scoped generated fixes appended — no existing rule changed)
+
+| Component | Element | States fixed | Before | After (worst of 648) |
+|---|---|---|---|---|
+| wc-tabulator | empty-table placeholder `.tabulator-placeholder-contents` | 333 | 1.13:1 (midsky light), 1.87:1 (designer light) | 4.88:1 |
+| wc-tabulator | footer counter + page buttons ("Showing 1-5 of 9 rows") | 49 | 4.27:1 (midsky dark) | 4.57:1 |
+| wc-select | highlighted / hovered option in its own dropdown (`.option.highlighted`, `.option:hover`) | 162 | 2.29:1 (midsky dark — **confirmed painted**: near-white on bright cyan) | 4.54:1 |
+| wc-select | the open dropdown's focused search box border (`.dropdown-input:focus`) | 324 | 1.03:1 (designer dark) | 3.49:1 |
+
+- **wc-select options, confirmed:** the reported 2.12–2.29:1 is the custom dropdown (chip/multiple mode) —
+  real, visible. The **native** `<select>` option list is fine (12.85–19.56:1 in midsky dark; and on macOS
+  the OS paints that list itself).
+- Highlighted/hovered rows exist only while the dropdown is open, so the generator measures a probe painted
+  with the same tokens; the audit (`tests/component-contrast-test.py`) now opens the real dropdown and
+  measures the real highlighted row in every state.
+- `scripts/gen-component-contrast.py`: new `--append` mode (measure only the new entries, insert their rules,
+  leave every existing rule byte-for-byte); fixed a bug where trying a candidate removed an element's own
+  inline color (it misjudged inline-colored elements as passing).
+- `scripts/gen-status-text.py`: the black/white badge fallback now aims for 4.55:1 before 4.5 (lemon-dark
+  warning badge 4.49 → 4.53).
+
+## Verified overall
+
+`tests/component-contrast-test.py` 62/62 components, `tests/status-text-test.py` 77/77, contrast gate
+(regular + crisp) PASS; every existing `views/*.html` page pixel-compared (see below).

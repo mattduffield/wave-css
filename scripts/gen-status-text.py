@@ -57,7 +57,7 @@ JS = r"""
     while (pc > 0 && !ok(pc, ink)) pc--;
     if (!ok(pc, ink)) {          // even pure --text-1 can't: mix toward pure black or white instead
       // a background right at the black/white crossover can't give 4.6 — accept the real 4.5 here
-      for (const t of [target, 4.5]) {
+      for (const t of [target, 4.55, 4.5]) {   // keep a little margin when the crossover allows it
         for (const k2 of ['#ffffff', '#000000']) { let q = 55; while (q > 0 && !ok(q, k2, t)) q--; if (ok(q, k2, t)) { ink = k2; pc = q; break; } }
         if (ink[0] === '#') break;
       }

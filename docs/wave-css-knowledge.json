@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.54.0",
+    "version": "1.55.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-01"
   },
@@ -2014,6 +2014,36 @@
         ],
         "docs": "docs/wc-ref-key.md",
         "usage": "<wc-ref-key value=\"DST-4002\" label=\"Data Compare\"></wc-ref-key>"
+      },
+      {
+        "name": "wc-org-chart",
+        "description": "Event org chart: leadership tiers, titled groups of stations (nodes) in a responsive grid with leads and members, optional Not placed pool; directors drag people between stations, everyone else views it.",
+        "attributes": [
+          "tiers",
+          "groups",
+          "pool",
+          "readonly"
+        ],
+        "data": {
+          "tiers": "[{title, people:[{id,name,phone}]}]",
+          "groups": "[{title, nodes:[{id,title,href,count,needed,flags:['no-lead','short:3'],leads:[{id,name,title,phone}],members:[{id,name,sub,phone,state:''|'out'|'tonight-only'}]}]}]",
+          "pool": "{title?, members:[...]} | [...] (node id __pool__)"
+        },
+        "events": {
+          "emits": [
+            "wcorgchartmove (cancelable) {memberId, fromNode, toNode, source}",
+            "wcorgchartedit {memberId}"
+          ]
+        },
+        "methods": [
+          "revert(memberId)",
+          "move(memberId, toNodeId)",
+          "nodeOf(memberId)",
+          "refresh()"
+        ],
+        "notes": "Pointer-event drag (mouse: the row; touch/pen: the grip — rows still scroll), drop outline, edge auto-scroll; per-member menu Move to… (every node + Not placed) + Edit (keyboard/phone path). The UI moves at once; preventDefault on wcorgchartmove returns the card; call revert(memberId) when the save (htmx) fails. readonly disables drag and Move to…. Grid: 1 / 3 / 4 columns by the chart's own width. Print: landscape, compact, nodes never split, menus hidden. Tokens only; AA in every theme/mode.",
+        "docs": "docs/wc-org-chart.md",
+        "usage": "<wc-org-chart tiers='[...]' groups='[...]' pool='{\"members\":[...]}'></wc-org-chart>"
       }
     ],
     "interactive": [

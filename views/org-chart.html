@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" class="h-full theme-midsky light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-org-chart</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-4">
+    <h1 class="text-xl font-bold" style="margin: 0;">wc-org-chart</h1>
+    <p style="margin: 0;">Event org chart: leadership tiers, stations grouped by area, leads and members.
+      Drag a member (mouse: anywhere on the row; touch or pen: the ⠿ grip) to another station or to <b>Not placed</b>,
+      or use a member's ⋯ menu → <b>Move to…</b> (keyboard and phone path). Every move fires a cancelable
+      <code>wcorgchartmove</code>; this demo "saves" it and fails on purpose when <b>Fail next save</b> is checked,
+      calling <code>chart.revert(memberId)</code>.</p>
+
+    <div class="row gap-3" style="flex-wrap: wrap; align-items: center;">
+      <label class="row gap-2" style="align-items: center;"><input type="checkbox" id="oc-fail"> Fail next save</label>
+      <label class="row gap-2" style="align-items: center;"><input type="checkbox" id="oc-ro"> Readonly (volunteer view)</label>
+      <button class="btn btn-sm" type="button" id="oc-mode">Toggle light / dark</button>
+      <button class="btn btn-sm" type="button" onclick="window.print()">Print</button>
+      <span id="oc-log" class="text-xs" style="color: var(--text-3);"></span>
+    </div>
+
+    <wc-org-chart id="oc"></wc-org-chart>
+
+    <wc-javascript class="hidden">
+      <script type="text/plain">
+      (() => {
+        // ~250 volunteers across 20 stations, generated so the demo is self-contained
+        const first = ['Ann','Bo','Cy','Di','Ed','Flo','Gus','Hal','Ivy','Jo','Kai','Lu','Max','Nia','Oz','Pia','Quin','Ray','Sky','Tia'];
+        const last = ['Lee','Diaz','Park','Ng','Ruiz','Kim','Shaw','Moss','Cole','Reed'];
+        const parts = ['Soprano','Alto','Tenor','Bass','', '', ''];
+        let k = 0;
+        const person = (extra = {}) => { const i = k++; return { id: 'm' + i, name: first[i % 20] + ' ' + last[Math.floor(i / 20) % 10], phone: '555-01' + String(i % 100).padStart(2, '0'), ...extra }; };
+        const member = () => { const s = k % 17 === 0 ? 'out' : k % 23 === 0 ? 'tonight-only' : ''; return person({ sub: parts[k % parts.length], state: s }); };
+        const node = (id, title, n, needed, flags = [], leads = 1) => ({
+          id, title, href: '#station-' + id, needed, flags,
+          leads: Array.from({ length: leads }, () => person({ title: title + ' lead' })),
+          members: Array.from({ length: n }, member),
+        });
+        const scenes = ['Shepherds','Angels','Wise Men','Bethlehem Market','Inn','Stable','Census','Temple','Village Well','Carpenter Shop','Fishermen','Herald'];
+        const groups = [
+          { title: 'Scenes', nodes: scenes.map((t, i) => node('s' + i, t, 12 + (i % 4), 15, i === 2 ? ['no-lead'] : i % 5 === 1 ? ['short:3'] : [], i === 2 ? 0 : 1)) },
+          { title: 'Travel with the groups', nodes: ['Guides North','Guides South','Guides East','Guides West'].map((t, i) => node('t' + i, t, 10 + i, 12, i === 3 ? ['short:2'] : [])) },
+          { title: 'Support', nodes: ['First Aid','Parking','Costumes','Hospitality'].map((t, i) => node('u' + i, t, 8 + i, 10, i === 1 ? ['short:1', 'outdoor'] : [])) },
+        ];
+        const tiers = [
+          { title: 'Co-Director', people: [person(), person()] },
+          { title: 'Assistant Director', people: [person(), person(), person()] },
+        ];
+        const pool = { title: 'Not placed', members: Array.from({ length: 6 }, member) };
+
+        const chart = document.getElementById('oc');
+        chart.setAttribute('tiers', JSON.stringify(tiers));
+        chart.setAttribute('groups', JSON.stringify(groups));
+        chart.setAttribute('pool', JSON.stringify(pool));
+
+        const log = (t) => { document.getElementById('oc-log').textContent = t; };
+        chart.addEventListener('wcorgchartmove', (e) => {
+          const { memberId, fromNode, toNode } = e.detail;
+          log(`Saving ${memberId}: ${fromNode} → ${toNode}…`);
+          const fail = document.getElementById('oc-fail').checked;
+          // stand-in for the htmx save; on failure the page calls revert()
+          setTimeout(() => {
+            if (fail) { chart.revert(memberId); log(`Save failed — ${memberId} returned to ${fromNode}`); document.getElementById('oc-fail').checked = false; }
+            else log(`Saved ${memberId} → ${toNode}`);
+          }, 600);
+        });
+        chart.addEventListener('wcorgchartedit', (e) => log(`Edit ${e.detail.memberId}`));
+        document.getElementById('oc-ro').addEventListener('change', (e) => chart.toggleAttribute('readonly', e.target.checked));
+        document.getElementById('oc-mode').addEventListener('click', () => {
+          const h = document.documentElement;
+          const dark = h.classList.contains('dark');
+          h.classList.toggle('dark', !dark); h.classList.toggle('light', dark);
+        });
+        log(`${k} people`);
+      })();
+      </script>
+    </wc-javascript>
+  </div>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>
