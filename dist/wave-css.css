@@ -17287,12 +17287,38 @@ body.has-impersonation-bar {
   --surface-6: oklch(90% 0.012 var(--hue));
   --surface-7: oklch(78% 0.02 var(--hue));
   --surface-8: oklch(60% 0.03 var(--hue));
+  --surface-9: oklch(50% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-10: oklch(40% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-11: oklch(30% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-12: oklch(22% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
   --card-bg-color: oklch(99.4% 0.004 var(--hue));
   --card-border-color: oklch(91% 0.010 var(--hue));
   --container-bg-color: oklch(97% 0.006 var(--hue));
   --container-border-color: oklch(91% 0.010 var(--hue));
   --component-bg-color: oklch(99% 0.004 var(--hue));
-  --component-border-color: oklch(89% 0.012 var(--hue));
+  --component-border-color: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-1: oklch(14% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-2: oklch(25% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-3: oklch(31% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-4: oklch(36% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-5: oklch(41% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-6: oklch(45% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-7: oklch(52% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-8: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-9: oklch(59% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-10: oklch(70% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-11: oklch(80% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-12: oklch(88% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --success-color: #16a34a;
+  --success-light-color: #22c55e;
+  --danger-color: #dc2626;
+  --danger-light-color: #ef4444;
+  --warning-color: #d97706;
+  --warning-light-color: #f59e0b;
+  --info-color: #2563eb;
+  --info-light-color: #3b82f6;
   --accent: oklch(54% 0.21 var(--hue));
   --accent-hover: oklch(47% 0.22 var(--hue));
   --on-accent: oklch(99% 0.02 var(--hue));
@@ -17307,6 +17333,28 @@ body.has-impersonation-bar {
   --radio-checked-border: var(--accent);
   --slider-thumb: var(--accent);
   --component-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
+  --container-color: var(--text-2);
+  --card-color: var(--text-2);
+  --component-color: var(--text-1);
+  --component-placeholder-color: var(--text-5);
+  --component-focus-border-color: var(--accent);
+  --component-disabled-bg-color: var(--surface-2);
+  --component-disabled-text-color: var(--text-7);
+  --secondary-bg-color: var(--component-bg-color);
+  --checkbox-bg: var(--component-bg-color);
+  --checkbox-border: var(--component-border-color);
+  --checkbox-checked-border: var(--accent);
+  --radio-bg: var(--component-bg-color);
+  --radio-border: var(--component-border-color);
+  --slider-track: var(--surface-3);
+  --toggle-off: var(--surface-3);
+  --toggle-on: var(--component-bg-color);
+  --button-color: var(--text-2);
+  --button-focus-border-color: var(--accent);
+  --button-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
+  --button-disabled-bg-color: var(--surface-3);
+  --button-disabled-border-color: var(--surface-4);
+  --button-disabled-color: var(--text-7);
 }
 html.dark .crisp,
 .dark .crisp,
@@ -17320,12 +17368,38 @@ html.dark.crisp {
   --surface-6: oklch(34% 0.032 var(--hue));
   --surface-7: oklch(48% 0.035 var(--hue));
   --surface-8: oklch(60% 0.035 var(--hue));
+  --surface-9: oklch(68% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-10: oklch(76% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-11: oklch(84% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-12: oklch(90% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
   --card-bg-color: oklch(26% 0.030 var(--hue));
   --card-border-color: oklch(34% 0.032 var(--hue));
   --container-bg-color: oklch(20% 0.022 var(--hue));
   --container-border-color: oklch(32% 0.030 var(--hue));
   --component-bg-color: oklch(17% 0.020 var(--hue));
-  --component-border-color: oklch(30% 0.030 var(--hue));
+  --component-border-color: oklch(54% calc(0.03 * var(--chroma-mult, 1)) var(--hue));
+  --text-1: oklch(96% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-2: oklch(91% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-3: oklch(86% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-4: oklch(81% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-5: oklch(77% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-6: oklch(73% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-7: oklch(64% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-8: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-9: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-10: oklch(46% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-11: oklch(38% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-12: oklch(28% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --success-color: #22c55e;
+  --success-light-color: #4ade80;
+  --danger-color: #ef4444;
+  --danger-light-color: #f87171;
+  --warning-color: #f59e0b;
+  --warning-light-color: #fbbf24;
+  --info-color: #3b82f6;
+  --info-light-color: #60a5fa;
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
   --on-accent: oklch(20% 0.03 var(--hue));
@@ -17333,6 +17407,80 @@ html.dark.crisp {
   --accent-soft: oklch(34% 0.075 var(--hue));
   --on-accent-soft: oklch(96% 0.02 var(--hue));
   --accent-border: oklch(58% 0.14 var(--hue));
+  --primary-color: oklch(20% 0.03 var(--hue));
+  --component-focus-ring-color: oklch(70% 0.18 var(--hue) / 40%);
+}
+@media (prefers-color-scheme: dark) {
+  .crisp:not(.light):not(:where(.light) .crisp) {
+    --surface-1: oklch(13% 0.016 var(--hue));
+    --surface-2: oklch(18% 0.020 var(--hue));
+    --surface-3: oklch(30% 0.030 var(--hue));
+    --surface-4: oklch(42% 0.035 var(--hue));
+    --surface-5: oklch(26% 0.030 var(--hue));
+    --surface-6: oklch(34% 0.032 var(--hue));
+    --surface-7: oklch(48% 0.035 var(--hue));
+    --surface-8: oklch(60% 0.035 var(--hue));
+    --surface-9: oklch(68% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-10: oklch(76% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-11: oklch(84% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-12: oklch(90% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --card-bg-color: oklch(26% 0.030 var(--hue));
+    --card-border-color: oklch(34% 0.032 var(--hue));
+    --container-bg-color: oklch(20% 0.022 var(--hue));
+    --container-border-color: oklch(32% 0.030 var(--hue));
+    --component-bg-color: oklch(17% 0.020 var(--hue));
+    --component-border-color: oklch(54% calc(0.03 * var(--chroma-mult, 1)) var(--hue));
+    --text-1: oklch(96% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-2: oklch(91% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-3: oklch(86% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-4: oklch(81% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-5: oklch(77% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-6: oklch(73% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-7: oklch(64% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-8: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-9: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-10: oklch(46% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-11: oklch(38% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-12: oklch(28% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --success-color: #22c55e;
+    --success-light-color: #4ade80;
+    --danger-color: #ef4444;
+    --danger-light-color: #f87171;
+    --warning-color: #f59e0b;
+    --warning-light-color: #fbbf24;
+    --info-color: #3b82f6;
+    --info-light-color: #60a5fa;
+    --accent: oklch(64% 0.19 var(--hue));
+    --accent-hover: oklch(70% 0.18 var(--hue));
+    --on-accent: oklch(20% 0.03 var(--hue));
+    --accent-fill-bg: var(--accent);
+    --accent-soft: oklch(34% 0.075 var(--hue));
+    --on-accent-soft: oklch(96% 0.02 var(--hue));
+    --accent-border: oklch(58% 0.14 var(--hue));
+    --primary-color: oklch(20% 0.03 var(--hue));
+    --component-focus-ring-color: oklch(70% 0.18 var(--hue) / 40%);
+  }
+}
+@supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+  .crisp,
+  html.dark .crisp,
+  .dark .crisp,
+  .crisp.dark,
+  html.dark.crisp {
+    --primary-color: rgb(from var(--primary-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    --button-hover-color: rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+  }
+  @media (prefers-color-scheme: dark) {
+    .crisp:not(.light):not(:where(.light) .crisp) {
+      --primary-color: rgb(from var(--primary-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+      --button-hover-color: rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    }
+  }
+  .crisp :is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn) {
+    --button-color: rgb(from var(--button-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+  }
 }
 @layer wc.selected {
   .list {

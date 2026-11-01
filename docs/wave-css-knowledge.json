@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.51.1",
+    "version": "1.52.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-01"
   },
@@ -430,7 +430,7 @@
       },
       {
         "name": "wc-ribbon",
-        "description": "Fusion 360 / Microsoft Office–style ribbon container: a tab strip + the active tab's body. Groups show a few large icon-over-label buttons; a group's title (CREATE ▾) opens a menu listing every command in the group with icon, name and one-line description. Contextual tabs (accent-coloured) appear only when relevant.",
+        "description": "Fusion 360 / Microsoft Office–style ribbon container: a tab strip + the active tab's body. Groups show a few large icon-over-label buttons; a group's title (CREATE ▾) opens a menu listing every command in the group with icon, name and one-line description. Contextual tabs (accent-colored) appear only when relevant.",
         "attributes": [
           "id",
           "class",
@@ -487,7 +487,7 @@
       },
       {
         "name": "wc-ribbon-tab",
-        "description": "One ribbon tab (role=tabpanel). Contextual tabs are styled with an accent colour (label mixed toward --text-1 for AA + accent underline + a thin accent line on the panel) and can be shown/hidden at runtime without re-rendering the others.",
+        "description": "One ribbon tab (role=tabpanel). Contextual tabs are styled with an accent color (label mixed toward --text-1 for AA + accent underline + a thin accent line on the panel) and can be shown/hidden at runtime without re-rendering the others.",
         "attributes": [
           "key",
           "label",
@@ -2561,7 +2561,7 @@
           ]
         },
         "usage": "<wc-theme-selector></wc-theme-selector>",
-        "notes": "The \"Light or Dark?\" toggle switches .light/.dark on <html>, saves localStorage.darkMode (\"true\"/\"false\") and sends wcthemechange to <body>; theme buttons save localStorage.theme (bare name). wave-theme-init.js restores both on load. Works without hyperscript."
+        "notes": "The \"Light or Dark?\" toggle switches .light/.dark on <html>, saves localStorage.darkMode (\"true\"/\"false\") and sends wcthemechange to <body>; theme buttons save localStorage.theme (bare name). wave-theme-init.js restores both on load. Works without hyperscript. Ticks the saved theme on connect (localStorage.theme, else the theme already on <html>, else royal) — no hyperscript needed."
       },
       {
         "name": "wc-websocket",
@@ -2970,11 +2970,11 @@
           ".info-soft-fill"
         ],
         "tokens": {
-          "--{state}-soft": "the background (state colour mixed into --surface-1)",
-          "--on-{state}-soft": "the foreground: the state colour mixed into a black or white ink picked from the FILL's own luminance (relative color + pow(), same crossover as --wc-on-primary) — so it stays AA even where the page's text tokens don't match its surfaces; falls back to a --text-1 mix where unsupported",
-          "--{state}-soft-border": "matching border colour, applied as border-color. Wave's .border sets only the width — add .border-solid (e.g. `border border-l-4 border-solid rounded`) to show it."
+          "--{state}-soft": "the background (state color mixed into --surface-1)",
+          "--on-{state}-soft": "the foreground: the state color mixed into a black or white ink picked from the FILL's own luminance (relative color + pow(), same crossover as --wc-on-primary) — so it stays AA even where the page's text tokens don't match its surfaces; falls back to a --text-1 mix where unsupported",
+          "--{state}-soft-border": "matching border color, applied as border-color. Wave's .border sets only the width — add .border-solid (e.g. `border border-l-4 border-solid rounded`) to show it."
         },
-        "links": "Links inside (except a.btn) take the callout's text colour and stay underlined. For a link elsewhere that should take its container's colour use .text-inherit.",
+        "links": "Links inside (except a.btn) take the callout's text color and stay underlined. For a link elsewhere that should take its container's color use .text-inherit.",
         "measured": "Text and links >= 6.2:1 (worst: info on theme-high-contrast) in all 54 themes × {forced light, forced dark, following the OS} × {OS light, OS dark} × {.crisp, no .crisp}. Fill is calm: light L≈0.91–0.94, chroma ≤ 0.07; dark L≈0.17–0.20, chroma ≤ 0.08. Verified in tests/regression-vs-baseline-test.py and tests/theming-utilities-test.py.",
         "guidance": "Status callouts (warnings, practice notices, errors, done/confirmation, informational notes) use these. Neutral callouts use .accent-soft-fill. Use .badge-* for inline status pills, .btn-success/… for actions.",
         "additive": "New classes only — no effect on elements that don't carry them."
@@ -3103,13 +3103,13 @@
         "instead": "Status tint → .success/.warning/.danger/.info-soft-fill. Neutral/brand tint → .accent-soft-fill. Elevation → .surface-2/.surface-3 tokens."
       },
       {
-        "rule": "Don't nest .crisp for colour.",
-        "why": ".crisp on a nested element restarts the theme there — surfaces, the accent family and (via the OS media blocks) the text tokens — so they follow the OS colour scheme even on a page forced light. Measured: nested `.crisp theme-x` on a forced-light page with a dark OS = 1.05:1 text; forced dark on a light OS = 1.04:1. An <a> inside goes near-white in dark mode.",
-        "instead": "Put .crisp once on <html> together with .light or .dark (wave-theme-init.js adds the mode from localStorage.darkMode). Don't rely on .crisp following the OS: with neither .light nor .dark on a dark OS, .crisp keeps its LIGHT surfaces under the theme's OS-driven text — that is the long-standing behaviour and is deliberately unchanged."
+        "rule": "Use .crisp once, on <html> — it is a page mode, not a way to tint one panel.",
+        "why": "Crisp sets the whole palette for its subtree (surfaces, text, accent). Nesting it to tint a block restarts the page's colors inside that block.",
+        "instead": "<html class=\"theme-x light crisp\"> (wave-theme-init.js sets .light/.dark). To tint a block use .accent-soft-fill or the status soft fills."
       },
       {
-        "rule": "Categorical colours (map markers, legends, chart series) use the colour families (text-{family}-{shade} / bg-{family}-{shade} / var(--wc-{family}-{shade})), never the status hues.",
-        "why": "Red/orange/amber/yellow read as danger/warning; reusing them for a category makes a legend look like an alert. The families are static (theme-independent) so a category keeps its colour across themes.",
+        "rule": "Categorical colors (map markers, legends, chart series) use the color families (text-{family}-{shade} / bg-{family}-{shade} / var(--wc-{family}-{shade})), never the status hues.",
+        "why": "Red/orange/amber/yellow read as danger/warning; reusing them for a category makes a legend look like an alert. The families are static (theme-independent) so a category keeps its color across themes.",
         "instead": "Use themes.categoricalColors (order + shades, measured on every theme surface)."
       },
       {
@@ -3119,7 +3119,7 @@
       }
     ],
     "categoricalColors": {
-      "description": "Recommended order of 8 distinct, colour-blind-friendly families for map markers, legends and chart series. Avoids the status hues (red, orange, amber, yellow). Use them in this order; series 9+ should reuse with a different marker shape/dash rather than a new hue.",
+      "description": "Recommended order of 8 distinct, color-blind-friendly families for map markers, legends and chart series. Avoids the status hues (red, orange, amber, yellow). Use them in this order; series 9+ should reuse with a different marker shape/dash rather than a new hue.",
       "order": [
         "indigo",
         "lime",
@@ -3168,6 +3168,25 @@
       "model": "<html> carries ONE theme-* class + .light or .dark + (optionally) .crisp. wave-theme-init.js (in <head>, before the stylesheets) applies localStorage.theme (bare name, e.g. \"royal\") and localStorage.darkMode (\"true\"/\"false\") on every load. That is the established model — keep it.",
       "selector": "wc-theme-selector: the theme buttons save localStorage.theme; the \"Light or Dark?\" toggle switches .light/.dark on <html>, saves localStorage.darkMode and sends wcthemechange to <body> (plain JS since 1.51.1 — before, a hyperscript handler that never saved darkMode, so the mode was lost on refresh). The toggle starts from the saved mode, else from .dark/.light on <html>.",
       "verified": "tests/regression-vs-baseline-test.py: pick a theme, toggle dark, reload → same theme + dark; toggle light, reload → light; OS light and OS dark."
+    },
+    "crisp": {
+      "what": "Page mode: neutral gray (light) / charcoal (dark) backgrounds with a faint cast of the theme's hue; the theme's color becomes the ACCENT (buttons, primary badge, toggles, focus rings, selected rows, accent fills). All themes work; wc-theme-selector and the Light/Dark toggle are unchanged.",
+      "usage": "<html class=\"theme-royal light crisp\"> — once, on <html>. wave-theme-init.js adds .light/.dark from localStorage.darkMode.",
+      "owns": "Every color it shows (since 1.52.0): --surface-1..13, card/container/component backgrounds, --text-1..13, --card-color, --container-color, --component-color, --component-placeholder-color, --component-border-color (form outlines), --component-disabled-*, --button-color (page-legible: outline labels, menu links), --button-disabled-*, --button-hover-color, --primary-color, checkbox/radio/toggle/slider tokens, the accent family, and --success/-danger/-warning/-info-color (+ -light-color).",
+      "textOnFills": "--primary-color, --button-hover-color and the labels of components that paint --button-color on --button-bg-color (accordion header, dropdown trigger, AI-bot button) are black or white picked from the fill's own luminance (relative color + pow(), WCAG crossover Y≈0.179) — AA on every theme's accent, incl. yellow/gold/ice. Static fallbacks where unsupported.",
+      "mode": ".dark (on <html>, an ancestor or the element) → dark crisp; .light → light crisp; neither → the OS. Surfaces and text come from the same block, so they can't disagree. A nested .crisp takes the page's mode.",
+      "guarantees": {
+        "--text-1..6 on every text surface": ">= 4.5:1",
+        "--text-1..3 on --surface-4": ">= 4.5:1",
+        "--text-7..9 on page/card/field": ">= 3:1",
+        "component/card/container text + placeholder": ">= 4.5:1",
+        "--component-border-color on field and page": ">= 3:1 (WCAG 1.4.11)",
+        "text on accent / buttons / primary": ">= 4.5:1",
+        "disabled labels": ">= 3:1",
+        "--accent on the page": ">= 3:1"
+      },
+      "verified": "tests/crisp-contrast-test.py: 79 token pairs × 54 themes × {.light, .dark, no mode} × {OS light, OS dark} × {on <html>, nested}, plus every visible text on views/visual-reference.html vs the color painted behind it (3,618 elements per mode); the OS-dark rule set must equal .dark exactly.",
+      "history": "Before 1.52.0 crisp replaced only surfaces + accent and borrowed the theme's text tokens, which follow the OS — so crisp with no .light/.dark on a dark OS showed near-white text on light grays (1:1), and text on the accent fell to 2.7:1 in dark."
     }
   },
   "cssUtilities": {
@@ -3536,7 +3555,7 @@
     ],
     "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
     "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95",
-    "textInherit": ".text-inherit { color: inherit } (also on :hover) — beats the wc.ui `a`/`a:hover` colour, for a link that should take its container's colour (e.g. inside .on-surface-info or a custom callout).",
+    "textInherit": ".text-inherit { color: inherit } (also on :hover) — beats the wc.ui `a`/`a:hover` color, for a link that should take its container's color (e.g. inside .on-surface-info or a custom callout).",
     "hiddenAttribute": "[hidden] beats Wave's own display classes: `[hidden]:not([hidden=\"until-found\"]) { display: none }` in the LAST layer (wc.selected), NOT !important — so <div class=\"col\" hidden> / <div class=\"flex md:flex\" hidden> stay hidden, while inline style=\"display:…\" and unlayered app CSS still win exactly as before. hidden=\"until-found\" is left to the browser. (1.51.0 briefly used display:none !important in wc.vars; it also overrode inline styles, so it was narrowed in 1.51.1.)",
     "cascadeLayers": {
       "order": "@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;",
@@ -3720,7 +3739,7 @@
       "views/zoom.html — wc-zoom demos (30px status bar with fit buttons over a zoomable board: log slider, presets menu, typed value, Ctrl/⌘ + wheel / pinch toward the cursor, shortcuts; plus a custom min/max/steps control)",
       "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)",
       "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)",
-      "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical colour families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS",
+      "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical color families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS",
       "views/visual-reference.html — visual-regression reference page (header/nav, every button variant, inputs, selects, toggle, tabs, tree, card, badges, tables, accent fills, hint/help text); ?build=base loads a reference build from /tmp-base. Used by tests/regression-vs-baseline-test.py"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"

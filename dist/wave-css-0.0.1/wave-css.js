@@ -24468,7 +24468,8 @@ var WcThemeSelector = class extends WcBaseComponent {
     if (document.documentElement.dataset.themeControlledBy === "wc-theme") {
       return;
     }
-    const savedTheme = localStorage.getItem("theme") || "royal";
+    const current = [...document.documentElement.classList].find((c) => c.startsWith("theme-"));
+    const savedTheme = localStorage.getItem("theme") || (current ? current.slice(6) : "royal");
     const themeClass = `theme-${savedTheme}`;
     const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
     this._setTheme(target, themeClass);
@@ -24480,6 +24481,7 @@ var WcThemeSelector = class extends WcBaseComponent {
     this.componentElement.addEventListener("load", this._handleLoadTheme.bind(this));
     this._onModeChange = this._onModeChange || this._handleModeChange.bind(this);
     this.componentElement.addEventListener("change", this._onModeChange);
+    this._handleLoadTheme();
   }
   _unWireEvents() {
     super._unWireEvents();

@@ -18196,13 +18196,42 @@ body.has-impersonation-bar {
   --surface-6: oklch(90% 0.012 var(--hue));
   --surface-7: oklch(78% 0.02 var(--hue));
   --surface-8: oklch(60% 0.03 var(--hue));
+  --surface-9: oklch(50% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-10: oklch(40% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-11: oklch(30% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-12: oklch(22% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
   --card-bg-color: oklch(99.4% 0.004 var(--hue));
   --card-border-color: oklch(91% 0.010 var(--hue));
   --container-bg-color: oklch(97% 0.006 var(--hue));
   --container-border-color: oklch(91% 0.010 var(--hue));
   --component-bg-color: oklch(99% 0.004 var(--hue));
-  --component-border-color: oklch(89% 0.012 var(--hue));
-
+  /* form-control outline >= 3:1 on the field and the page (WCAG 1.4.11) */
+  --component-border-color: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  /* text ramp: 1-6 >= 4.5:1 on every text surface, 7-9 >= 3:1 (icons, separators,
+     disabled), 10-13 fade toward the page */
+  --text-1: oklch(14% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-2: oklch(25% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-3: oklch(31% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-4: oklch(36% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-5: oklch(41% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-6: oklch(45% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-7: oklch(52% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-8: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-9: oklch(59% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-10: oklch(70% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-11: oklch(80% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-12: oklch(88% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  /* status colors follow crisp's mode (Wave's defaults follow the OS): the deeper light set */
+  --success-color: #16a34a;
+  --success-light-color: #22c55e;
+  --danger-color: #dc2626;
+  --danger-light-color: #ef4444;
+  --warning-color: #d97706;
+  --warning-light-color: #f59e0b;
+  --info-color: #2563eb;
+  --info-light-color: #3b82f6;
   --accent: oklch(54% 0.21 var(--hue));
   --accent-hover: oklch(47% 0.22 var(--hue));
   /* Accent family — legible on-accent fg + a subtle offset fill, hue- AND theme-aware.
@@ -18215,14 +18244,43 @@ body.has-impersonation-bar {
   --on-accent-soft: oklch(32% 0.09 var(--hue));       /* fg on --accent-soft */
   --accent-border: oklch(62% 0.16 var(--hue));        /* accent-derived border/ring, reads on the card */
   --primary-bg-color: var(--accent);
-  --primary-color: oklch(99% 0.02 var(--hue));
+  --primary-color: oklch(99% 0.02 var(--hue));        /* fallback; auto-picked below where supported */
   --checkbox-checked-bg: var(--accent);
   --radio-checked-bg: var(--accent);
   --radio-checked-border: var(--accent);
   --slider-thumb: var(--accent);
   --component-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
+  /* component / card / container text — redeclared so they re-resolve against crisp's own
+     text tokens (also on a nested .crisp, where the theme's values were computed on <html>) */
+  --container-color: var(--text-2);
+  --card-color: var(--text-2);
+  --component-color: var(--text-1);
+  --component-placeholder-color: var(--text-5);
+  --component-focus-border-color: var(--accent);
+  --component-disabled-bg-color: var(--surface-2);
+  --component-disabled-text-color: var(--text-7);
+  --secondary-bg-color: var(--component-bg-color);
+  --checkbox-bg: var(--component-bg-color);
+  --checkbox-border: var(--component-border-color);
+  --checkbox-checked-border: var(--accent);
+  --radio-bg: var(--component-bg-color);
+  --radio-border: var(--component-border-color);
+  --slider-track: var(--surface-3);
+  --toggle-off: var(--surface-3);
+  --toggle-on: var(--component-bg-color);
+  /* --button-color is page-legible text (outline labels, menu/sidenav links); filled .btn labels
+     come from the auto-contrast rule, and the few components that paint it ON the button fill get
+     a fill-picked ink below */
+  --button-color: var(--text-2);
+  --button-focus-border-color: var(--accent);
+  --button-focus-ring-color: oklch(60% 0.20 var(--hue) / 35%);
+  /* disabled: neutral (no accent) but still readable (>= 3:1) */
+  --button-disabled-bg-color: var(--surface-3);
+  --button-disabled-border-color: var(--surface-4);
+  --button-disabled-color: var(--text-7);
 }
-html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
+/* Dark crisp: an explicit .dark (on <html>, an ancestor, or the .crisp element)... */
+html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {
   --surface-1: oklch(13% 0.016 var(--hue));
   --surface-2: oklch(18% 0.020 var(--hue));
   --surface-3: oklch(30% 0.030 var(--hue));
@@ -18231,13 +18289,39 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
   --surface-6: oklch(34% 0.032 var(--hue));
   --surface-7: oklch(48% 0.035 var(--hue));
   --surface-8: oklch(60% 0.035 var(--hue));
+  --surface-9: oklch(68% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-10: oklch(76% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-11: oklch(84% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-12: oklch(90% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --surface-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
   --card-bg-color: oklch(26% 0.030 var(--hue));
   --card-border-color: oklch(34% 0.032 var(--hue));
   --container-bg-color: oklch(20% 0.022 var(--hue));
   --container-border-color: oklch(32% 0.030 var(--hue));
   --component-bg-color: oklch(17% 0.020 var(--hue));
-  --component-border-color: oklch(30% 0.030 var(--hue));
-
+  --component-border-color: oklch(54% calc(0.03 * var(--chroma-mult, 1)) var(--hue));
+  --text-1: oklch(96% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-2: oklch(91% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-3: oklch(86% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-4: oklch(81% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-5: oklch(77% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-6: oklch(73% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+  --text-7: oklch(64% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-8: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-9: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-10: oklch(46% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-11: oklch(38% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-12: oklch(28% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  --text-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+  /* status colors: the bright dark-mode set */
+  --success-color: #22c55e;
+  --success-light-color: #4ade80;
+  --danger-color: #ef4444;
+  --danger-light-color: #f87171;
+  --warning-color: #f59e0b;
+  --warning-light-color: #fbbf24;
+  --info-color: #3b82f6;
+  --info-light-color: #60a5fa;
   --accent: oklch(64% 0.19 var(--hue));
   --accent-hover: oklch(70% 0.18 var(--hue));
   /* Accent family (dark). The dark --accent sits at L64% (lighter), so a near-BLACK
@@ -18248,6 +18332,106 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
   --accent-soft: oklch(34% 0.075 var(--hue));         /* elevated accent FILL, distinct from the card */
   --on-accent-soft: oklch(96% 0.02 var(--hue));       /* fg on --accent-soft */
   --accent-border: oklch(58% 0.14 var(--hue));        /* accent-derived border/ring, reads on the card */
+  --primary-color: oklch(20% 0.03 var(--hue));        /* fallback; auto-picked below where supported */
+  --component-focus-ring-color: oklch(70% 0.18 var(--hue) / 40%);
+}
+/* ...or, when NOTHING sets a mode (.light/.dark), the OS: dark OS → dark crisp. Same values as
+   the block above (keep them in sync — tests/crisp-contrast-test.py compares the two). A .light
+   anywhere above (or on the .crisp element) keeps it light. Surfaces AND text now come from the
+   same crisp block, so they can never disagree (before Nov 2026 crisp left text to the theme,
+   which followed the OS while crisp's surfaces didn't → 1:1 text). */
+@media (prefers-color-scheme: dark) {
+  .crisp:not(.light):not(:where(.light) .crisp) {
+    --surface-1: oklch(13% 0.016 var(--hue));
+    --surface-2: oklch(18% 0.020 var(--hue));
+    --surface-3: oklch(30% 0.030 var(--hue));
+    --surface-4: oklch(42% 0.035 var(--hue));
+    --surface-5: oklch(26% 0.030 var(--hue));
+    --surface-6: oklch(34% 0.032 var(--hue));
+    --surface-7: oklch(48% 0.035 var(--hue));
+    --surface-8: oklch(60% 0.035 var(--hue));
+    --surface-9: oklch(68% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-10: oklch(76% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-11: oklch(84% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-12: oklch(90% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --surface-13: oklch(96% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --card-bg-color: oklch(26% 0.030 var(--hue));
+    --card-border-color: oklch(34% 0.032 var(--hue));
+    --container-bg-color: oklch(20% 0.022 var(--hue));
+    --container-border-color: oklch(32% 0.030 var(--hue));
+    --component-bg-color: oklch(17% 0.020 var(--hue));
+    --component-border-color: oklch(54% calc(0.03 * var(--chroma-mult, 1)) var(--hue));
+    --text-1: oklch(96% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-2: oklch(91% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-3: oklch(86% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-4: oklch(81% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-5: oklch(77% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-6: oklch(73% calc(0.012 * var(--chroma-mult, 1)) var(--hue));
+    --text-7: oklch(64% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-8: oklch(60% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-9: oklch(56% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-10: oklch(46% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-11: oklch(38% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-12: oklch(28% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    --text-13: oklch(15% calc(0.02 * var(--chroma-mult, 1)) var(--hue));
+    /* status colors: the bright dark-mode set */
+    --success-color: #22c55e;
+    --success-light-color: #4ade80;
+    --danger-color: #ef4444;
+    --danger-light-color: #f87171;
+    --warning-color: #f59e0b;
+    --warning-light-color: #fbbf24;
+    --info-color: #3b82f6;
+    --info-light-color: #60a5fa;
+    --accent: oklch(64% 0.19 var(--hue));
+    --accent-hover: oklch(70% 0.18 var(--hue));
+    /* Accent family (dark). The dark --accent sits at L64% (lighter), so a near-BLACK
+       --on-accent is AA on the RAW accent — no deepening needed; --accent-fill-bg = --accent.
+       --accent-soft is an elevated tint distinct from the dark card, with a near-white fg. */
+    --on-accent: oklch(20% 0.03 var(--hue));            /* fg on --accent-fill-bg (= --accent) */
+    --accent-fill-bg: var(--accent);
+    --accent-soft: oklch(34% 0.075 var(--hue));         /* elevated accent FILL, distinct from the card */
+    --on-accent-soft: oklch(96% 0.02 var(--hue));       /* fg on --accent-soft */
+    --accent-border: oklch(58% 0.14 var(--hue));        /* accent-derived border/ring, reads on the card */
+    --primary-color: oklch(20% 0.03 var(--hue));        /* fallback; auto-picked below where supported */
+    --component-focus-ring-color: oklch(70% 0.18 var(--hue) / 40%);
+  }
+}
+/* Text on a colored fill picks black or white from the FILL's own luminance (WCAG crossover
+   Y≈0.179, as --wc-on-primary) — legible on every theme's accent and button color (yellow, gold,
+   ice…), light and dark. Static fallbacks above where relative color + pow() are unsupported. */
+@supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+  .crisp,
+  html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {
+    --primary-color: rgb(from var(--primary-bg-color)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    --button-hover-color: rgb(from var(--button-hover-bg-color)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+  }
+  @media (prefers-color-scheme: dark) {
+    .crisp:not(.light):not(:where(.light) .crisp) {
+      --primary-color: rgb(from var(--primary-bg-color)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+      --button-hover-color: rgb(from var(--button-hover-bg-color)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    }
+  }
+  /* components that paint --button-color ON --button-bg-color (accordion header, dropdown
+     trigger, AI-bot button) get black/white ink picked from that fill */
+  .crisp :is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn) {
+    --button-color: rgb(from var(--button-bg-color)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+      clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+  }
 }
 /* === end CRISP =========================================================== */
 

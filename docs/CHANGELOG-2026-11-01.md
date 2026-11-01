@@ -25,7 +25,7 @@ Compared against the build go-kart shipped before d210a51: go-kart `e4d6238b`
 Selectors:
 - `.success-soft-fill`, `.warning-soft-fill`, `.danger-soft-fill`, `.info-soft-fill`
   (+ `@supports (relative color + pow())` block computing their foreground ink)
-- `:is(.success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill) a:not(.btn)` and `:hover` — links take the callout colour
+- `:is(.success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill) a:not(.btn)` and `:hover` — links take the callout color
 - `.text-inherit`, `.text-inherit:hover`
 - `.object-cover|contain|fill|none|scale-down`, `.object-center|top|bottom|left|right`
 - `{sm,md,lg,xl,2xl}:items-start|center|end|stretch|baseline`, `:justify-start|center|end|between|around|evenly`, `:table`, `:table-row`
@@ -55,3 +55,50 @@ Files: `dist/wave-critical-layered.min.css`, `dist/assets/icon-bundles/icon-inde
   class `search` (from the mode), so the old `querySelector('.search')` bound the listener to the whole
   wrapper and a toggle inside the menu hid every item (reproduced on the 2026-10-29 build).
 - **wc-fa-icon** — resolves Font Awesome's official aliases on a miss (`tshirt`→`shirt`, `undo-alt`→`rotate-left`).
+
+---
+
+# Wave CSS — 2026-11-01, part 2: `.crisp` rebuilt (knowledge base 1.52.0)
+
+`.crisp` is the **one deliberate exception** to "add only". Pages **without** `.crisp` are unchanged
+(pixel-identical to 2026-10-29 — `tests/regression-vs-baseline-test.py`). Pages **with** `.crisp`
+change on purpose; before/after screenshots of every theme are in the approval gallery.
+
+## Why
+
+Crisp replaced only the surfaces and the accent. It borrowed the theme's text colors, which follow the
+**OS** — while crisp's surfaces followed `.light`/`.dark`. Result: near-white text on light grays with
+a dark OS and no mode class (1:1), dim hint text in some themes, text on the accent at 2.7:1 in dark,
+pale-on-pale disabled buttons, a fading "muted" badge.
+
+## What `.crisp` now sets (light block, `.dark` block, and an identical OS-dark block)
+
+| Token / selector | Before | Now |
+|---|---|---|
+| `--text-1` … `--text-13` | theme's (OS-following) | crisp's own neutral ramp: 1–6 ≥ 4.5:1, 7–9 ≥ 3:1 |
+| `--surface-9` … `--surface-13` | theme's (saturated) | crisp neutral |
+| `--card-color`, `--container-color`, `--component-color`, `--component-placeholder-color` | theme's | re-resolved on crisp's text ramp |
+| `--component-border-color` | light gray (≈1.3:1) | ≥ 3:1 form outline (inputs, checkboxes, radios, toggles) |
+| `--component-focus-border-color`, `--button-focus-*` | theme's | crisp accent |
+| `--component-disabled-*`, `--button-disabled-*` | theme's (pale on pale in dark) | neutral, label ≥ 3:1 |
+| `--button-color` | theme's | `--text-2` (outline labels, menu/sidenav links) |
+| `--primary-color`, `--button-hover-color` | fixed near-white (2.7:1 dark) | black/white from the fill's luminance |
+| `.crisp :is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn)` | — | `--button-color` = black/white from `--button-bg-color` |
+| `--checkbox-*`, `--radio-*`, `--toggle-*`, `--slider-track`, `--secondary-bg-color` | theme's | crisp tokens |
+| `--success/-danger/-warning/-info-color` (+ `-light-color`) | follow the OS | follow crisp's mode |
+| `@media (prefers-color-scheme: dark) { .crisp:not(.light):not(:where(.light) .crisp) {…} }` | — | dark crisp when no `.light`/`.dark` is set and the OS is dark |
+
+Unchanged: crisp's surface-1…8, card/container/component backgrounds, accent and accent family values.
+
+## JavaScript
+
+- **wc-theme-selector** ticks the saved theme when it connects (from `localStorage.theme`, else the theme
+  already on `<html>`, else royal). It used to wait for hyperscript's `load` event, which stopped coming
+  once the toggle's `_=` handler was replaced in part 1 — every swatch showed a tick.
+
+## Verified
+
+- `tests/crisp-contrast-test.py` — 79 token pairs × 54 themes × {.light, .dark, no mode} × {OS light,
+  OS dark} × {on `<html>`, nested}; every visible text on `views/visual-reference.html` vs what is painted
+  behind it (≥ 4.5:1, disabled ≥ 3:1); OS-dark tokens identical to `.dark`.
+- `tests/regression-vs-baseline-test.py` — non-crisp pixel-identical to go-kart `e4d6238b`.

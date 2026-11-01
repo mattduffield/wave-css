@@ -283,7 +283,9 @@ class WcThemeSelector extends WcBaseComponent {
       return;
     }
 
-    const savedTheme = localStorage.getItem("theme") || "royal";
+    // Saved theme, else the theme the page already shows (its own default), else royal.
+    const current = [...document.documentElement.classList].find(c => c.startsWith('theme-'));
+    const savedTheme = localStorage.getItem("theme") || (current ? current.slice(6) : "royal");
     const themeClass = `theme-${savedTheme}`;
     const target = this.componentElement.querySelector(`button[data-theme="${themeClass}"]`);
     this._setTheme(target, themeClass);
@@ -296,6 +298,10 @@ class WcThemeSelector extends WcBaseComponent {
     this.componentElement.addEventListener('load', this._handleLoadTheme.bind(this));
     this._onModeChange = this._onModeChange || this._handleModeChange.bind(this);
     this.componentElement.addEventListener('change', this._onModeChange);
+    // Tick the saved theme (and clear the other swatches' ticks) now. This used to run only
+    // when hyperscript initialised the toggle's old _= handler and fired 'load' — without that
+    // handler (or without hyperscript on the page) every swatch kept its tick.
+    this._handleLoadTheme();
   }
 
   _unWireEvents() {
