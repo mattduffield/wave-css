@@ -35,8 +35,12 @@ class WcThemeSelector extends WcBaseComponent {
 
   constructor() {
     super();
+    // Toggle starts from the saved mode; with nothing saved, from the mode the page is showing
+    // (.dark / .light on <html>), else dark (the original default).
     const savedDarkMode = localStorage.getItem("darkMode");
-    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true" : true;
+    const htmlCls = document.documentElement.classList;
+    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true"
+      : htmlCls.contains('dark') ? true : htmlCls.contains('light') ? false : true;
     this.prefersLight = !this.prefersDark;
 
     const compEl = this.querySelector('.wc-theme-selector');
@@ -170,17 +174,6 @@ class WcThemeSelector extends WcBaseComponent {
         type="checkbox"
         toggle-switch
         ${this.prefersDark ? 'checked' : ''}
-        _="on change
-          if me.value
-            remove .light from document.documentElement
-            add .dark to document.documentElement
-            send wcthemechange to <body/>
-          else
-            remove .dark from document.documentElement
-            add .light to document.documentElement
-            send wcthemechange to <body/>
-          end
-        end"
         >
       </wc-input>
       `.trim();
@@ -266,6 +259,24 @@ class WcThemeSelector extends WcBaseComponent {
     }
   }
 
+  // "Light or Dark?" toggle: switch .light/.dark on <html>, remember it in localStorage.darkMode
+  // ("true"/"false" — read back by wave-theme-init.js on the next page load) and send
+  // wcthemechange to <body> (as the old hyperscript did). Plain JS, so it works without hyperscript.
+  _handleModeChange(event) {
+    const toggle = event.target.closest?.('wc-input[name="theme_mode"]');
+    if (!toggle || !this.componentElement.contains(toggle)) return;
+    const box = toggle.querySelector('input[type="checkbox"]');
+    const isDark = box ? box.checked : !!toggle.value;
+    const html = document.documentElement;
+    const changed = html.classList.contains(isDark ? 'light' : 'dark') || !html.classList.contains(isDark ? 'dark' : 'light');
+    html.classList.remove(isDark ? 'light' : 'dark');
+    html.classList.add(isDark ? 'dark' : 'light');
+    localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+    if (changed) {
+      document.body.dispatchEvent(new CustomEvent('wcthemechange', { bubbles: true, cancelable: true, detail: { dark: isDark } }));
+    }
+  }
+
   _handleLoadTheme() {
     // Don't override if wc-theme component is controlling the theme
     if (document.documentElement.dataset.themeControlledBy === 'wc-theme') {
@@ -283,12 +294,15 @@ class WcThemeSelector extends WcBaseComponent {
     const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
     themeBtns.forEach(btn => btn.addEventListener('click', this._handleThemeClick.bind(this)));
     this.componentElement.addEventListener('load', this._handleLoadTheme.bind(this));
+    this._onModeChange = this._onModeChange || this._handleModeChange.bind(this);
+    this.componentElement.addEventListener('change', this._onModeChange);
   }
 
   _unWireEvents() {
     super._unWireEvents();
     const themeBtns = this.componentElement.querySelectorAll('button[data-theme]');
-    themeBtns.forEach(btn => btn.removeEventListener('click', this._handleThemeClick.bind(this)));    
+    themeBtns.forEach(btn => btn.removeEventListener('click', this._handleThemeClick.bind(this)));
+    if (this._onModeChange) this.componentElement.removeEventListener('change', this._onModeChange);
   }
 
 }

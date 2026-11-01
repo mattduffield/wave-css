@@ -1,0 +1,57 @@
+# Wave CSS changelog — 2026-11-01 (knowledge base 1.51.1)
+
+Compared against the build go-kart shipped before d210a51: go-kart `e4d6238b`
+(`static/js/wave-css-0.0.1/`, Wave of 2026-10-29). Generated from `diff` of the built `wave-css.css`.
+
+## Existing tokens / selectors changed: **none**
+
+- Lines removed or modified in `wave-css.css`: **0**. Lines added: **325**.
+- `wave-critical.min.css`: **byte-identical** to 2026-10-29 (restored).
+- `wave-theme-init.js`: byte-identical.
+- Proof: `tests/regression-vs-baseline-test.py` — 648/648 screenshots (54 themes × forced light / forced
+  dark / OS-following × OS light / OS dark × crisp / no crisp) pixel-identical; 92,664 text-token ×
+  surface-token contrast values identical.
+
+## Reverted from d210a51
+
+| d210a51 | Now |
+|---|---|
+| `@media (prefers-color-scheme: dark) { .crisp:not(.light):not(:where(.light) .crisp) { …dark crisp tokens… } }` | **removed** — `.crisp` with no `.light`/`.dark` behaves exactly as on 2026-10-29 |
+| `[hidden]:not([hidden="until-found"]) { display:none !important }` in `@layer wc.vars` | narrowed: `display:none` (not important) in `@layer wc.selected` — beats Wave's display classes only; inline styles and unlayered app CSS win as before |
+| `wave-critical.min.css` rewritten as layered CSS | **restored** to the original; layered version is a new opt-in file `wave-critical-layered.min.css` |
+
+## Added (new selectors / tokens only — no effect on elements that don't use them)
+
+Selectors:
+- `.success-soft-fill`, `.warning-soft-fill`, `.danger-soft-fill`, `.info-soft-fill`
+  (+ `@supports (relative color + pow())` block computing their foreground ink)
+- `:is(.success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill) a:not(.btn)` and `:hover` — links take the callout colour
+- `.text-inherit`, `.text-inherit:hover`
+- `.object-cover|contain|fill|none|scale-down`, `.object-center|top|bottom|left|right`
+- `{sm,md,lg,xl,2xl}:items-start|center|end|stretch|baseline`, `:justify-start|center|end|between|around|evenly`, `:table`, `:table-row`
+- `2xl:flex-wrap`, `2xl:flex-wrap-reverse`, `2xl:flex-nowrap` (sm–xl already existed; `md:flex-wrap`, `md:table-cell` already existed)
+- `[hidden]:not([hidden="until-found"])` in `@layer wc.selected`
+
+Custom properties (declared only on the soft-fill classes): `--danger-soft`, `--danger-soft-border`, `--info-soft`, `--info-soft-border`, `--on-danger-soft`, `--on-info-soft`, `--on-success-soft`, `--on-warning-soft`, `--success-soft`, `--success-soft-border`, `--warning-soft`, `--warning-soft-border`, `--wc-soft-bg`, `--wc-soft-ink`
+
+Files: `dist/wave-critical-layered.min.css`, `dist/assets/icon-bundles/icon-index.json`, `icon-aliases.json`,
+`docs/ICONS.md`; icons `shirt`, `rotate-left` (+ earlier icon additions).
+
+### Behaviour notes for go-kart's check
+- A page that ALREADY carried one of the new class names (e.g. `md:items-center`, `object-cover` copied
+  from Tailwind habits) got no styling before and gets it now. Search templates for these names if a layout shifts.
+- An element with the `hidden` attribute AND a Wave display class (`.col`, `.flex`, `.row`, `md:flex`…) was
+  visible before (the class won) and is hidden now. Inline `style="display:…"` / unlayered CSS still show it.
+
+## JavaScript
+
+- **wc-theme-selector** — the "Light or Dark?" toggle now saves `localStorage.darkMode` ("true"/"false")
+  and switches `.light`/`.dark` on `<html>` in plain JS (was a hyperscript handler that never saved the
+  mode, so a refresh lost it — true on 2026-10-29 as well). Still sends `wcthemechange` to `<body>`.
+  The toggle's initial state comes from `localStorage.darkMode`, else `.dark`/`.light` on `<html>` (was:
+  dark whenever nothing was saved, so on a light page the first click did nothing visible).
+- **wc-dropdown** `mode="search"` — `_handleInput` only filters for the dropdown's own
+  `.dropdown-content > input.search`; the listener is bound to that input. The wrapper also carries the
+  class `search` (from the mode), so the old `querySelector('.search')` bound the listener to the whole
+  wrapper and a toggle inside the menu hid every item (reproduced on the 2026-10-29 build).
+- **wc-fa-icon** — resolves Font Awesome's official aliases on a miss (`tshirt`→`shirt`, `undo-alt`→`rotate-left`).

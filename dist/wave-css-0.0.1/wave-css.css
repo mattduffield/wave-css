@@ -1,9 +1,6 @@
 /* src/css/main.css */
 @layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
 @layer wc.vars {
-  [hidden]:not([hidden=until-found]) {
-    display: none !important;
-  }
   :root {
     --hue: 0;
     --chroma-mult: 1;
@@ -4853,6 +4850,38 @@
     background: var(--info-soft);
     color: var(--on-info-soft);
     border-color: var(--info-soft-border);
+  }
+  .success-soft-fill {
+    --wc-soft-bg: var(--success-soft);
+  }
+  .warning-soft-fill {
+    --wc-soft-bg: var(--warning-soft);
+  }
+  .danger-soft-fill {
+    --wc-soft-bg: var(--danger-soft);
+  }
+  .info-soft-fill {
+    --wc-soft-bg: var(--info-soft);
+  }
+  @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+    .success-soft-fill,
+    .warning-soft-fill,
+    .danger-soft-fill,
+    .info-soft-fill {
+      --wc-soft-ink: rgb(from var(--wc-soft-bg) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    }
+    .success-soft-fill {
+      --on-success-soft: color-mix(in srgb, var(--success-color) 42%, var(--wc-soft-ink));
+    }
+    .warning-soft-fill {
+      --on-warning-soft: color-mix(in srgb, var(--warning-color) 38%, var(--wc-soft-ink));
+    }
+    .danger-soft-fill {
+      --on-danger-soft: color-mix(in srgb, var(--danger-color) 45%, var(--wc-soft-ink));
+    }
+    .info-soft-fill {
+      --on-info-soft: color-mix(in srgb, var(--info-color) 45%, var(--wc-soft-ink));
+    }
   }
   .object-cover {
     object-fit: cover;
@@ -17305,31 +17334,6 @@ html.dark.crisp {
   --on-accent-soft: oklch(96% 0.02 var(--hue));
   --accent-border: oklch(58% 0.14 var(--hue));
 }
-@media (prefers-color-scheme: dark) {
-  .crisp:not(.light):not(:where(.light) .crisp) {
-    --surface-1: oklch(13% 0.016 var(--hue));
-    --surface-2: oklch(18% 0.020 var(--hue));
-    --surface-3: oklch(30% 0.030 var(--hue));
-    --surface-4: oklch(42% 0.035 var(--hue));
-    --surface-5: oklch(26% 0.030 var(--hue));
-    --surface-6: oklch(34% 0.032 var(--hue));
-    --surface-7: oklch(48% 0.035 var(--hue));
-    --surface-8: oklch(60% 0.035 var(--hue));
-    --card-bg-color: oklch(26% 0.030 var(--hue));
-    --card-border-color: oklch(34% 0.032 var(--hue));
-    --container-bg-color: oklch(20% 0.022 var(--hue));
-    --container-border-color: oklch(32% 0.030 var(--hue));
-    --component-bg-color: oklch(17% 0.020 var(--hue));
-    --component-border-color: oklch(30% 0.030 var(--hue));
-    --accent: oklch(64% 0.19 var(--hue));
-    --accent-hover: oklch(70% 0.18 var(--hue));
-    --on-accent: oklch(20% 0.03 var(--hue));
-    --accent-fill-bg: var(--accent);
-    --accent-soft: oklch(34% 0.075 var(--hue));
-    --on-accent-soft: oklch(96% 0.02 var(--hue));
-    --accent-border: oklch(58% 0.14 var(--hue));
-  }
-}
 @layer wc.selected {
   .list {
     display: flex;
@@ -17596,5 +17600,10 @@ html.dark.crisp {
     .\32xl\:flex-nowrap {
       flex-wrap: nowrap;
     }
+  }
+}
+@layer wc.selected {
+  [hidden]:not([hidden=until-found]) {
+    display: none;
   }
 }

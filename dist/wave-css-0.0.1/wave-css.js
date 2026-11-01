@@ -7537,6 +7537,7 @@ var WcDropdown = class extends WcBaseComponent {
   }
   _handleInput(event) {
     const { target } = event;
+    if (target !== this.querySelector(".dropdown-content > input.search")) return;
     const filter = target.value.toLowerCase();
     const parts = this.querySelectorAll(".dropdown-content > *:not(.component)");
     parts.forEach((p) => {
@@ -7805,7 +7806,7 @@ var WcDropdown = class extends WcBaseComponent {
       document.body.addEventListener("wcdropdowntoggle", this._onToggle);
       this.querySelector(".dropbtn")?.addEventListener("click", this._onClick);
       window.addEventListener("click", this._onWindowClick);
-      this.querySelector(".search")?.addEventListener("input", this._onInput);
+      this.querySelector(".dropdown-content > input.search")?.addEventListener("input", this._onInput);
     }
     this.componentElement.addEventListener("keydown", this._onKeydown);
     this._boundReposition = this._repositionOnScroll.bind(this);
@@ -7819,7 +7820,7 @@ var WcDropdown = class extends WcBaseComponent {
     document.body.removeEventListener("wcdropdowntoggle", this._onToggle);
     this.querySelector(".dropbtn")?.removeEventListener("click", this._onClick);
     window.removeEventListener("click", this._onWindowClick);
-    this.querySelector(".search")?.removeEventListener("input", this._onInput);
+    this.querySelector(".dropdown-content > input.search")?.removeEventListener("input", this._onInput);
     this.componentElement?.removeEventListener("keydown", this._onKeydown);
     if (this._boundReposition) {
       window.removeEventListener("scroll", this._boundReposition);
@@ -24253,7 +24254,8 @@ var WcThemeSelector = class extends WcBaseComponent {
   constructor() {
     super();
     const savedDarkMode = localStorage.getItem("darkMode");
-    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true" : true;
+    const htmlCls = document.documentElement.classList;
+    this.prefersDark = savedDarkMode !== null ? savedDarkMode === "true" : htmlCls.contains("dark") ? true : htmlCls.contains("light") ? false : true;
     this.prefersLight = !this.prefersDark;
     const compEl = this.querySelector(".wc-theme-selector");
     if (compEl) {
@@ -24372,17 +24374,6 @@ var WcThemeSelector = class extends WcBaseComponent {
         type="checkbox"
         toggle-switch
         ${this.prefersDark ? "checked" : ""}
-        _="on change
-          if me.value
-            remove .light from document.documentElement
-            add .dark to document.documentElement
-            send wcthemechange to <body/>
-          else
-            remove .dark from document.documentElement
-            add .light to document.documentElement
-            send wcthemechange to <body/>
-          end
-        end"
         >
       </wc-input>
       `.trim();
@@ -24456,6 +24447,23 @@ var WcThemeSelector = class extends WcBaseComponent {
       window.wc.EventHub.broadcast("wcthemechange", "", { theme });
     }
   }
+  // "Light or Dark?" toggle: switch .light/.dark on <html>, remember it in localStorage.darkMode
+  // ("true"/"false" — read back by wave-theme-init.js on the next page load) and send
+  // wcthemechange to <body> (as the old hyperscript did). Plain JS, so it works without hyperscript.
+  _handleModeChange(event) {
+    const toggle = event.target.closest?.('wc-input[name="theme_mode"]');
+    if (!toggle || !this.componentElement.contains(toggle)) return;
+    const box = toggle.querySelector('input[type="checkbox"]');
+    const isDark = box ? box.checked : !!toggle.value;
+    const html = document.documentElement;
+    const changed = html.classList.contains(isDark ? "light" : "dark") || !html.classList.contains(isDark ? "dark" : "light");
+    html.classList.remove(isDark ? "light" : "dark");
+    html.classList.add(isDark ? "dark" : "light");
+    localStorage.setItem("darkMode", isDark ? "true" : "false");
+    if (changed) {
+      document.body.dispatchEvent(new CustomEvent("wcthemechange", { bubbles: true, cancelable: true, detail: { dark: isDark } }));
+    }
+  }
   _handleLoadTheme() {
     if (document.documentElement.dataset.themeControlledBy === "wc-theme") {
       return;
@@ -24470,11 +24478,14 @@ var WcThemeSelector = class extends WcBaseComponent {
     const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     themeBtns.forEach((btn) => btn.addEventListener("click", this._handleThemeClick.bind(this)));
     this.componentElement.addEventListener("load", this._handleLoadTheme.bind(this));
+    this._onModeChange = this._onModeChange || this._handleModeChange.bind(this);
+    this.componentElement.addEventListener("change", this._onModeChange);
   }
   _unWireEvents() {
     super._unWireEvents();
     const themeBtns = this.componentElement.querySelectorAll("button[data-theme]");
     themeBtns.forEach((btn) => btn.removeEventListener("click", this._handleThemeClick.bind(this)));
+    if (this._onModeChange) this.componentElement.removeEventListener("change", this._onModeChange);
   }
 };
 customElements.define("wc-theme-selector", WcThemeSelector);

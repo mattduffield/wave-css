@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.51.0",
+    "version": "1.51.1",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-10-31"
+    "lastUpdated": "2026-11-01"
   },
   "selfHostedAssets": {
     "note": "Wave lazy-loads third-party libs from public CDNs. Set the single global window.WaveAssetBase (before the bundle runs) to load them from a local mirror first, with automatic CDN fallback. UNSET (default) = load from CDN exactly as before (no behavior change). SET (e.g. '/static/js') = try local first, fall back to CDN on any failure with one console.warn naming the missing file. Covers all three mechanisms: injected <script> onerror, injected <link> error, and dynamic import() rejection. Implemented centrally in helper-function.js (waveLocalAssetUrl + loadScript/loadCSS/loadLibrary/waveImport) AND in the WcDependencyManager loader (src/js/utils/dependency-manager.js) — the latter is how IMask (phone/date masking in wc-input via wc-mask-hub), CodeMirror core, and Tabulator core load. Progressively-loaded files (CodeMirror modes/themes/addons, Prism components/themes) resolve locally too; the loader dedups on BOTH local and CDN src so a component's own CDN-url dedup check (wc-code-mirror) can't double-load.",
@@ -331,7 +331,7 @@
             "wcdropdowntoggle"
           ]
         },
-        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button. ANCHORING: each dropdown anchors to its own button — anchor name from `id`, else the instance's unique data-wc-id (no-id dropdowns used to share '---anchor' and all open at the last button). CSS anchor positioning is used only when BOTH anchor-name and position-area are supported (Chromium 125–128 lacked position-area); otherwise the JS fixed-position fallback places it. Esc closes and returns focus to the button. Listeners are bound once and removed on disconnect (no leaked window listeners). CSS hooks (defaults unchanged): --wc-dropdown-bg (button-hover-bg), --wc-dropdown-color, --wc-dropdown-border, --wc-dropdown-radius, --wc-dropdown-min-width (at least the button width), --wc-dropdown-max-width (250px), --wc-dropdown-max-height, --wc-dropdown-item-hover. menu-style=\"surface\" = the wc-ribbon menu look (surface-2, surface-4 border, 8px radius, min-width 300px, max-height 70vh). Rich items (opt-in): <a class=\"wc-menu-item\"> with .wc-menu-item-icon + .wc-menu-item-text > .wc-menu-item-label + .wc-menu-item-desc; .is-checked for toggles. Docs: docs/wc-dropdown.md.",
+        "notes": "Format options: default button, 'grid-round' (hamburger), 'avatar'. Mode 'search' adds filter input. btn-class attribute styles the trigger button. ANCHORING: each dropdown anchors to its own button — anchor name from `id`, else the instance's unique data-wc-id (no-id dropdowns used to share '---anchor' and all open at the last button). CSS anchor positioning is used only when BOTH anchor-name and position-area are supported (Chromium 125–128 lacked position-area); otherwise the JS fixed-position fallback places it. Esc closes and returns focus to the button. Listeners are bound once and removed on disconnect (no leaked window listeners). CSS hooks (defaults unchanged): --wc-dropdown-bg (button-hover-bg), --wc-dropdown-color, --wc-dropdown-border, --wc-dropdown-radius, --wc-dropdown-min-width (at least the button width), --wc-dropdown-max-width (250px), --wc-dropdown-max-height, --wc-dropdown-item-hover. menu-style=\"surface\" = the wc-ribbon menu look (surface-2, surface-4 border, 8px radius, min-width 300px, max-height 70vh). Rich items (opt-in): <a class=\"wc-menu-item\"> with .wc-menu-item-icon + .wc-menu-item-text > .wc-menu-item-label + .wc-menu-item-desc; .is-checked for toggles. Docs: docs/wc-dropdown.md. mode=\"search\": only the dropdown's own search box filters items — input events from controls inside the menu (e.g. a wc-theme-selector toggle) are ignored (fixed 1.51.1; before, the listener sat on the whole .search wrapper and a toggle hid every item).",
         "usage": "<wc-dropdown label=\"Options\" mode=\"search\">\n  <a href=\"#about\">About</a>\n  <a href=\"#settings\">Settings</a>\n  <a href=\"#logout\">Logout</a>\n</wc-dropdown>\n<!-- surface look + rich items -->\n<wc-dropdown label=\"CREATE ▾\" menu-style=\"surface\">\n  <a href=\"#\" class=\"wc-menu-item\"><wc-fa-icon class=\"wc-menu-item-icon\" name=\"cube\"></wc-fa-icon>\n    <span class=\"wc-menu-item-text\"><span class=\"wc-menu-item-label\">Box</span><span class=\"wc-menu-item-desc\">A box — no sketch needed</span></span></a>\n</wc-dropdown>"
       },
       {
@@ -2560,7 +2560,8 @@
             "wcthemechange"
           ]
         },
-        "usage": "<wc-theme-selector></wc-theme-selector>"
+        "usage": "<wc-theme-selector></wc-theme-selector>",
+        "notes": "The \"Light or Dark?\" toggle switches .light/.dark on <html>, saves localStorage.darkMode (\"true\"/\"false\") and sends wcthemechange to <body>; theme buttons save localStorage.theme (bare name). wave-theme-init.js restores both on load. Works without hyperscript."
       },
       {
         "name": "wc-websocket",
@@ -2970,12 +2971,13 @@
         ],
         "tokens": {
           "--{state}-soft": "the background (state colour mixed into --surface-1)",
-          "--on-{state}-soft": "the foreground (state colour mixed toward --text-1)",
+          "--on-{state}-soft": "the foreground: the state colour mixed into a black or white ink picked from the FILL's own luminance (relative color + pow(), same crossover as --wc-on-primary) — so it stays AA even where the page's text tokens don't match its surfaces; falls back to a --text-1 mix where unsupported",
           "--{state}-soft-border": "matching border colour, applied as border-color. Wave's .border sets only the width — add .border-solid (e.g. `border border-l-4 border-solid rounded`) to show it."
         },
         "links": "Links inside (except a.btn) take the callout's text colour and stay underlined. For a link elsewhere that should take its container's colour use .text-inherit.",
-        "measured": "Text and links >= 6.2:1 (worst: info on theme-high-contrast); most themes 8–11:1 — all 54 themes × OS light, OS dark, forced light on a dark OS, forced dark on a light OS, and .crisp pages. Verified in tests/theming-utilities-test.py.",
-        "guidance": "Status callouts (warnings, practice notices, errors, done/confirmation, informational notes) use these. Neutral callouts use .accent-soft-fill. Use .badge-* for inline status pills, .btn-success/… for actions."
+        "measured": "Text and links >= 6.2:1 (worst: info on theme-high-contrast) in all 54 themes × {forced light, forced dark, following the OS} × {OS light, OS dark} × {.crisp, no .crisp}. Fill is calm: light L≈0.91–0.94, chroma ≤ 0.07; dark L≈0.17–0.20, chroma ≤ 0.08. Verified in tests/regression-vs-baseline-test.py and tests/theming-utilities-test.py.",
+        "guidance": "Status callouts (warnings, practice notices, errors, done/confirmation, informational notes) use these. Neutral callouts use .accent-soft-fill. Use .badge-* for inline status pills, .btn-success/… for actions.",
+        "additive": "New classes only — no effect on elements that don't carry them."
       }
     },
     "themeList": [
@@ -3103,7 +3105,7 @@
       {
         "rule": "Don't nest .crisp for colour.",
         "why": ".crisp on a nested element restarts the theme there — surfaces, the accent family and (via the OS media blocks) the text tokens — so they follow the OS colour scheme even on a page forced light. Measured: nested `.crisp theme-x` on a forced-light page with a dark OS = 1.05:1 text; forced dark on a light OS = 1.04:1. An <a> inside goes near-white in dark mode.",
-        "instead": "Put .crisp once on <html> next to the theme (`<html class=\"theme-ocean crisp\">`, optionally + .light/.dark). Since 1.51.0 a page-level .crisp with no .light/.dark follows a dark OS correctly (was light surfaces + near-white text, 1.05:1; now ~18:1)."
+        "instead": "Put .crisp once on <html> together with .light or .dark (wave-theme-init.js adds the mode from localStorage.darkMode). Don't rely on .crisp following the OS: with neither .light nor .dark on a dark OS, .crisp keeps its LIGHT surfaces under the theme's OS-driven text — that is the long-standing behaviour and is deliberately unchanged."
       },
       {
         "rule": "Categorical colours (map markers, legends, chart series) use the colour families (text-{family}-{shade} / bg-{family}-{shade} / var(--wc-{family}-{shade})), never the status hues.",
@@ -3161,6 +3163,11 @@
       "example": "<span class=\"text-indigo-700 bg-indigo-100\">Room A</span>  ·  marker fill: var(--wc-indigo-700) (light) / var(--wc-indigo-200) (dark)",
       "measured": "Strokes chosen by search to maximise the worst pairwise CIEDE2000 distance under normal, protan, deutan and tritan simulation (Machado 2009) while staying >= 3:1 on every theme's surface-1: worst ΔE 12.3 (light) / 11.5 (dark). Text >= 4.73:1 (light, worst on theme-coffee's tan surface) / >= 10.1:1 (dark) on every theme surface; text on its soft fill >= 4.84 (light) / 5.32 (dark). Verified in tests/theming-utilities-test.py.",
       "slate": "slate is the neutral — use it for 'Other' / 'Unassigned'."
+    },
+    "persistence": {
+      "model": "<html> carries ONE theme-* class + .light or .dark + (optionally) .crisp. wave-theme-init.js (in <head>, before the stylesheets) applies localStorage.theme (bare name, e.g. \"royal\") and localStorage.darkMode (\"true\"/\"false\") on every load. That is the established model — keep it.",
+      "selector": "wc-theme-selector: the theme buttons save localStorage.theme; the \"Light or Dark?\" toggle switches .light/.dark on <html>, saves localStorage.darkMode and sends wcthemechange to <body> (plain JS since 1.51.1 — before, a hyperscript handler that never saved darkMode, so the mode was lost on refresh). The toggle starts from the saved mode, else from .dark/.light on <html>.",
+      "verified": "tests/regression-vs-baseline-test.py: pick a theme, toggle dark, reload → same theme + dark; toggle light, reload → light; OS light and OS dark."
     }
   },
   "cssUtilities": {
@@ -3530,16 +3537,16 @@
     "responsiveUsage": "Prefix any utility with breakpoint: sm:flex, md:grid-2, lg:text-lg, xl:w-1/2",
     "pseudoClassUsage": "Prefix with state: hover:bg-blue-500, focus:border-primary, active:scale-95",
     "textInherit": ".text-inherit { color: inherit } (also on :hover) — beats the wc.ui `a`/`a:hover` colour, for a link that should take its container's colour (e.g. inside .on-surface-info or a custom callout).",
-    "hiddenAttribute": "[hidden] always hides: `[hidden]:not([hidden=\"until-found\"]) { display: none !important }` in @layer wc.vars. Important declarations in the FIRST layer beat every normal declaration — any Wave class (.col, .flex, md:flex) AND unlayered app CSS — so <div class=\"col\" hidden> stays hidden and el.hidden = true always works. hidden=\"until-found\" is left to the browser (find-in-page).",
+    "hiddenAttribute": "[hidden] beats Wave's own display classes: `[hidden]:not([hidden=\"until-found\"]) { display: none }` in the LAST layer (wc.selected), NOT !important — so <div class=\"col\" hidden> / <div class=\"flex md:flex\" hidden> stay hidden, while inline style=\"display:…\" and unlayered app CSS still win exactly as before. hidden=\"until-found\" is left to the browser. (1.51.0 briefly used display:none !important in wc.vars; it also overrode inline styles, so it was narrowed in 1.51.1.)",
     "cascadeLayers": {
       "order": "@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;",
       "rule": "ALL of Wave lives in @layer wc.*. Any UNLAYERED app CSS beats every Wave class regardless of specificity or order — md:*/lg:* included. So a page's inline critical CSS that copies .flex / .col / .hidden unlayered silently breaks `class=\"hidden md:flex\"` (the unlayered .hidden wins at every width).",
       "do": [
-        "Don't copy Wave classes into your own CSS. If you need critical CSS, inline dist/wave-critical.min.css (it's layered and includes the sm: variants) or wrap your copy in the same layer: `@layer wc.utility { … }`, with the layer-order statement first.",
+        "Don't copy Wave classes into your own CSS. If you need critical CSS that keeps md:* working, inline dist/wave-critical-layered.min.css (layered, includes the sm: variants) or wrap your copy in `@layer wc.utility { … }` after the layer-order statement.",
         "To override Wave deliberately, unlayered CSS is fine — it wins by design; scope it with your own class.",
-        "Layer order is fixed by the first @layer statement the browser sees: wave-critical.min.css starts with the identical statement, so loading it before, after or inlined is safe."
+        "Layer order is fixed by the first @layer statement the browser sees: wave-critical-layered.min.css starts with the identical statement, so loading it before, after or inlined is safe."
       ],
-      "criticalCss": "dist/wave-critical.min.css (src/css/critical.css) is layered since 1.51.0: [hidden] in wc.vars, display/flex/gap/padding utilities in wc.utility, sm: variants in wc.responsive. Verified loaded first, last and inlined in tests/theming-utilities-test.py."
+      "criticalCss": "dist/wave-critical.min.css (src/css/critical.css) is the ORIGINAL unlayered snippet, unchanged — note its unlayered .hidden/.flex/.col beat md:* variants. dist/wave-critical-layered.min.css (src/css/critical-layered.css, new in 1.51.1) is the same rules inside wc.utility / wc.responsive (+ the [hidden] rule in wc.selected), so `hidden md:flex` works whether it is loaded first, last or inlined. Opt in by switching the file."
     }
   },
   "eventHub": {
@@ -3713,7 +3720,8 @@
       "views/zoom.html — wc-zoom demos (30px status bar with fit buttons over a zoomable board: log slider, presets menu, typed value, Ctrl/⌘ + wheel / pinch toward the cursor, shortcuts; plus a custom min/max/steps control)",
       "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)",
       "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)",
-      "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical colour families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS"
+      "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical colour families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS",
+      "views/visual-reference.html — visual-regression reference page (header/nav, every button variant, inputs, selects, toggle, tabs, tree, card, badges, tables, accent fills, hint/help text); ?build=base loads a reference build from /tmp-base. Used by tests/regression-vs-baseline-test.py"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },

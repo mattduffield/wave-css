@@ -7,12 +7,6 @@
 @layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
 
 @layer wc.vars {
-    /* The hidden attribute always hides: an !important declaration in the FIRST layer beats
-       every later Wave layer AND unlayered app CSS (important layered > important/normal
-       unlayered), so <div class="col" hidden> stays hidden even though .col sets display. */
-    [hidden]:not([hidden="until-found"]) {
-        display: none !important;
-    }
     :root {
         --hue: 0;
         /* Saturation multiplier for the generated swatch ramp. 1 = full chroma
@@ -5069,6 +5063,27 @@
         background: var(--info-soft);
         color: var(--on-info-soft);
         border-color: var(--info-soft-border);
+    }
+
+    /* Soft-fill foreground follows the FILL's own luminance (black or white ink, same WCAG crossover
+       as --wc-on-primary), not --text-1 — so the callout stays AA even where the page's text tokens
+       don't match its surfaces (e.g. a nested theme, or .crisp with no .light/.dark on a dark OS).
+       Browsers without relative color + pow() keep the --text-1 mix above. */
+    .success-soft-fill { --wc-soft-bg: var(--success-soft); }
+    .warning-soft-fill { --wc-soft-bg: var(--warning-soft); }
+    .danger-soft-fill { --wc-soft-bg: var(--danger-soft); }
+    .info-soft-fill { --wc-soft-bg: var(--info-soft); }
+    @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+        .success-soft-fill, .warning-soft-fill, .danger-soft-fill, .info-soft-fill {
+            --wc-soft-ink: rgb(from var(--wc-soft-bg)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)
+                clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+        }
+        .success-soft-fill { --on-success-soft: color-mix(in srgb, var(--success-color) 42%, var(--wc-soft-ink)); }
+        .warning-soft-fill { --on-warning-soft: color-mix(in srgb, var(--warning-color) 38%, var(--wc-soft-ink)); }
+        .danger-soft-fill { --on-danger-soft: color-mix(in srgb, var(--danger-color) 45%, var(--wc-soft-ink)); }
+        .info-soft-fill { --on-info-soft: color-mix(in srgb, var(--info-color) 45%, var(--wc-soft-ink)); }
     }
 
     /* object-fit for images/video in fixed boxes */
@@ -18234,41 +18249,6 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
   --on-accent-soft: oklch(96% 0.02 var(--hue));       /* fg on --accent-soft */
   --accent-border: oklch(58% 0.14 var(--hue));        /* accent-derived border/ring, reads on the card */
 }
-/* .crisp follows the OS colour scheme when nothing forces it (Oct 2026 fix). The explicit
-   `.dark` rule above only fired for a .dark class, so <html class="theme-x crisp"> on a dark-mode
-   OS got crisp's LIGHT surfaces under the theme's OS-driven near-white text (1.05:1). A forced
-   `.light` (on <html>, a container, or the .crisp element) still keeps it light. */
-@media (prefers-color-scheme: dark) {
-  .crisp:not(.light):not(:where(.light) .crisp) {
-     /* dark mode */
-    --surface-1: oklch(13% 0.016 var(--hue));
-    --surface-2: oklch(18% 0.020 var(--hue));
-    --surface-3: oklch(30% 0.030 var(--hue));
-    --surface-4: oklch(42% 0.035 var(--hue));
-    --surface-5: oklch(26% 0.030 var(--hue));
-    --surface-6: oklch(34% 0.032 var(--hue));
-    --surface-7: oklch(48% 0.035 var(--hue));
-    --surface-8: oklch(60% 0.035 var(--hue));
-    --card-bg-color: oklch(26% 0.030 var(--hue));
-    --card-border-color: oklch(34% 0.032 var(--hue));
-    --container-bg-color: oklch(20% 0.022 var(--hue));
-    --container-border-color: oklch(32% 0.030 var(--hue));
-    --component-bg-color: oklch(17% 0.020 var(--hue));
-    --component-border-color: oklch(30% 0.030 var(--hue));
-
-    --accent: oklch(64% 0.19 var(--hue));
-    --accent-hover: oklch(70% 0.18 var(--hue));
-    /* Accent family (dark). The dark --accent sits at L64% (lighter), so a near-BLACK
-       --on-accent is AA on the RAW accent — no deepening needed; --accent-fill-bg = --accent.
-       --accent-soft is an elevated tint distinct from the dark card, with a near-white fg. */
-    --on-accent: oklch(20% 0.03 var(--hue));            /* fg on --accent-fill-bg (= --accent) */
-    --accent-fill-bg: var(--accent);
-    --accent-soft: oklch(34% 0.075 var(--hue));         /* elevated accent FILL, distinct from the card */
-    --on-accent-soft: oklch(96% 0.02 var(--hue));       /* fg on --accent-soft */
-    --accent-border: oklch(58% 0.14 var(--hue));        /* accent-derived border/ring, reads on the card */
-  }
-}
-
 /* === end CRISP =========================================================== */
 
 /* === Selected / active list-item utility ================================= *
@@ -18425,5 +18405,15 @@ html.dark .crisp, .dark .crisp, .crisp.dark, html.dark.crisp {   /* dark mode */
         .\32xl\:flex-wrap { flex-wrap: wrap; }
         .\32xl\:flex-wrap-reverse { flex-wrap: wrap-reverse; }
         .\32xl\:flex-nowrap { flex-wrap: nowrap; }
+    }
+}
+
+/* The hidden attribute beats Wave's display utilities (Nov 2026): <div class="col" hidden>,
+   <div class="flex md:flex" hidden> stay hidden. In the LAST layer and NOT !important, so it only
+   outranks Wave's own layered classes — inline style="display:…" and unlayered app CSS still win,
+   exactly as they did before. hidden="until-found" is left to the browser (find-in-page). */
+@layer wc.selected {
+    [hidden]:not([hidden="until-found"]) {
+        display: none;
     }
 }

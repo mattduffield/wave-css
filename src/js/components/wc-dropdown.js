@@ -364,6 +364,9 @@ class WcDropdown extends WcBaseComponent {
 
   _handleInput(event) {
     const {target} = event;
+    // Only the dropdown's own search box filters. A control inside the menu (e.g. a theme
+    // selector's toggle, value "bool:False") firing input must not be read as search text.
+    if (target !== this.querySelector('.dropdown-content > input.search')) return;
     const filter = target.value.toLowerCase();
     const parts = this.querySelectorAll('.dropdown-content > *:not(.component)');
     parts.forEach(p => {
@@ -680,7 +683,7 @@ class WcDropdown extends WcBaseComponent {
       document.body.addEventListener('wcdropdowntoggle', this._onToggle);
       this.querySelector('.dropbtn')?.addEventListener('click', this._onClick);
       window.addEventListener('click', this._onWindowClick);
-      this.querySelector('.search')?.addEventListener('input', this._onInput);
+      this.querySelector('.dropdown-content > input.search')?.addEventListener('input', this._onInput);
     }
     this.componentElement.addEventListener('keydown', this._onKeydown);
     
@@ -697,7 +700,7 @@ class WcDropdown extends WcBaseComponent {
     document.body.removeEventListener('wcdropdowntoggle', this._onToggle);
     this.querySelector('.dropbtn')?.removeEventListener('click', this._onClick);
     window.removeEventListener('click', this._onWindowClick);
-    this.querySelector('.search')?.removeEventListener('input', this._onInput);
+    this.querySelector('.dropdown-content > input.search')?.removeEventListener('input', this._onInput);
     this.componentElement?.removeEventListener('keydown', this._onKeydown);
     
     // Remove scroll and resize listeners

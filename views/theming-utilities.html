@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 
   <!-- the critical snippet first (as a page would inline it), then the full stylesheet -->
-  <link rel="stylesheet" href="../dist/wave-critical.min.css">
+  <link rel="stylesheet" href="../dist/wave-critical-layered.min.css">
   <link rel="stylesheet" href="../dist/wave-css.min.css">
 </head>
 
@@ -90,7 +90,7 @@
       <div id="hidden-col" class="col" hidden>✗ .col[hidden] — you should NOT see this</div>
       <div id="hidden-flex" class="flex md:flex" hidden>✗ .flex[hidden] — you should NOT see this</div>
       <div id="md-flex" class="hidden md:flex gap-2"><span>✓ hidden md:flex — visible from 768px up</span></div>
-      <p class="text-xs mt-2">This page loads <code>wave-critical.min.css</code> first, as an inlined critical snippet would; its rules now sit in Wave's layers, so <code>md:flex</code> still wins.</p>
+      <p class="text-xs mt-2">This page loads <code>wave-critical-layered.min.css</code> first, as an inlined critical snippet would; its rules now sit in Wave's layers, so <code>md:flex</code> still wins.</p>
     </section>
 
     <wc-javascript class="hidden">

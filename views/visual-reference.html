@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" class="theme-royal light crisp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - visual regression reference</title>
+  <!-- ?build=base loads a reference build from /tmp-base (copied there by the regression test);
+       anything else loads /dist. Same markup either way, so screenshots compare build vs build. -->
+  <script>
+    (function () {
+      var base = new URLSearchParams(location.search).get('build') === 'base' ? '/tmp-base' : '/dist';
+      document.write('<link rel="stylesheet" href="' + base + '/wave-css.min.css">');
+      document.write('<script type="module" src="' + base + '/wave-css.min.js"><\/script>');
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
+  </style>
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <header class="row items-center gap-4 p-3" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-4);">
+    <strong>DataStudio</strong>
+    <nav class="row gap-3"><a href="#">Collections</a><a href="#">Queries</a><a href="#">Reports</a></nav>
+    <span class="flex-1"></span>
+    <button class="btn btn-sm" type="button">Saved Items</button>
+  </header>
+
+  <main class="col gap-4 p-4" style="max-width: 1040px;">
+    <section class="row gap-2" style="flex-wrap: wrap;">
+      <button class="btn" type="button">Default</button>
+      <button class="btn btn-primary" type="button">Primary</button>
+      <button class="btn btn-secondary" type="button">Secondary</button>
+      <button class="btn btn-cancel" type="button">Cancel</button>
+      <button class="btn btn-success" type="button">Success</button>
+      <button class="btn btn-danger" type="button">Danger</button>
+      <button class="btn btn-warning" type="button">Warning</button>
+      <button class="btn btn-info" type="button">Info</button>
+      <button class="btn btn-outline" type="button">Outline</button>
+      <button class="btn btn-sm" type="button">Small</button>
+      <button class="btn" type="button" disabled>Disabled</button>
+    </section>
+
+    <section class="row gap-4">
+      <div class="col gap-2 flex-1">
+        <wc-input name="title" lbl-label="Title" value="Follow the Star" required></wc-input>
+        <p class="text-xs text-3" style="margin: 0;">Scope — help text under a field (--text-3)</p>
+        <wc-select name="scope" lbl-label="Scope">
+          <option value="a">All records</option><option value="b" selected>This tenant</option>
+        </wc-select>
+        <p class="text-xs text-4" style="margin: 0;">Hint text (--text-4)</p>
+        <wc-input name="active" lbl-label="Active" type="checkbox" toggle-switch checked></wc-input>
+        <wc-textarea name="notes" lbl-label="Notes" value="Secondary text (--text-2) below"></wc-textarea>
+        <p class="text-xs text-2" style="margin: 0;">--text-2 line</p>
+        <p class="text-xs text-5" style="margin: 0;">--text-5 line</p>
+        <input type="text" value="native input"><select><option>native select</option></select>
+      </div>
+      <div class="col gap-2 flex-1">
+        <div class="card p-3"><b>Card</b><p class="text-3" style="margin: .25rem 0 0;">Card body with secondary text and <a href="#">a link</a>.</p></div>
+        <div class="row gap-2" style="flex-wrap: wrap;">
+          <span class="badge">badge</span><span class="badge badge-primary">primary</span><span class="badge badge-success">success</span>
+          <span class="badge badge-warning">warning</span><span class="badge badge-danger">danger</span><span class="badge badge-info">info</span><span class="badge badge-muted">muted</span>
+        </div>
+        <div class="accent-soft-fill p-3 rounded">accent-soft-fill callout with <a href="#">a link</a></div>
+        <div class="accent-fill p-3 rounded">accent-fill callout</div>
+        <wc-tree id="tree">
+          <wc-tree-item label="Collections" icon="folder" expanded>
+            <wc-tree-item label="contacts" icon="table" selected></wc-tree-item>
+            <wc-tree-item label="orders" icon="table" badge="12"></wc-tree-item>
+          </wc-tree-item>
+          <wc-tree-item label="Saved queries" icon="folder"></wc-tree-item>
+        </wc-tree>
+      </div>
+    </section>
+
+    <wc-tab>
+      <wc-tab-item class="active" label="Results"><div class="p-3">Tab content (active)</div></wc-tab-item>
+      <wc-tab-item label="Explain"><div class="p-3">Other tab</div></wc-tab-item>
+    </wc-tab>
+
+    <table class="w-full">
+      <thead><tr><th>Name</th><th>Status</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Mary</td><td><span class="badge badge-success">Done</span></td><td>12</td></tr>
+        <tr><td>Joseph</td><td><span class="badge badge-warning">Pending</span></td><td>7</td></tr>
+      </tbody>
+    </table>
+    <wc-table items='[{"name":"Gabriel","role":"Angel"},{"name":"Shepherd","role":"Cast"}]'>
+      <wc-table-col field="name" label="Name" sortable></wc-table-col>
+      <wc-table-col field="role" label="Role"></wc-table-col>
+    </wc-table>
+  </main>
+</body>
+</html>

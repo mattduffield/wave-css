@@ -17,6 +17,7 @@ const buildConfigs = [
   { entryPoints: ['src/css/main.css'], bundle: true, minify: true,  outfile: 'dist/wave-css.min.css' },
   // Critical CSS (for inlining in <head>)
   { entryPoints: ['src/css/critical.css'], bundle: true, minify: true, outfile: 'dist/wave-critical.min.css' },
+  { entryPoints: ['src/css/critical-layered.css'], bundle: true, minify: true, outfile: 'dist/wave-critical-layered.min.css' },
 ];
 
 // Recursive copy helper for SVG assets.
@@ -46,7 +47,7 @@ async function main() {
     console.log('SVG icons copied to dist/assets/icons');
   }
 
-  const bundleFiles = ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-helpers.js', 'wave-theme-init.js'];
+  const bundleFiles = ['wave-css.js', 'wave-css.min.js', 'wave-css.css', 'wave-css.min.css', 'wave-critical.min.css', 'wave-critical-layered.min.css', 'wave-helpers.js', 'wave-theme-init.js'];
 
   // 3) Copy freshly-built files to the versioned dist folder (+ icons).
   const versionedDir = path.join(__dirname, 'dist/wave-css-0.0.1');

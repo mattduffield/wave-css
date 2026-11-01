@@ -1,127 +1,109 @@
 /* Critical CSS to prevent FOUC - inline in <head> */
 
 /* No body hiding - let your skeleton pattern work naturally.
-   The critical utilities below prevent layout shift flicker.
+   The critical utilities below prevent layout shift flicker. */
 
-   LAYERED (Oct 2026): these rules live in the SAME cascade layers as their originals in
-   wave-css.css. Unlayered CSS beats every layered rule, so the old unlayered copies of
-   .hidden/.flex/.col here overrode Wave's md:* variants (class="hidden md:flex" stayed hidden).
-   The layer-order statement comes first and matches main.css exactly, so inlining this before
-   the full stylesheet can't reorder Wave's layers. */
-@layer wc.vars, wc.themes, wc.prefers-light, wc.prefers-dark, wc.theme-light, wc.theme-dark, wc.colors, wc.classes, wc.utility, wc.external, wc.usage, wc.tables, wc.palette, wc.ui, wc.responsive, wc.main, wc.hover, wc.state, wc.selected;
-
-@layer wc.vars {
-  /* the hidden attribute always hides (same rule as main.css) */
-  [hidden]:not([hidden="until-found"]) {
-    display: none !important;
-  }
+/* Display utilities */
+.hidden {
+  display: none;
 }
 
-@layer wc.utility {
-  /* Display utilities */
-  .hidden {
-    display: none;
-  }
+.flex {
+  display: flex;
+}
 
-  .flex {
+.block {
+  display: block;
+}
+
+.grid {
+  display: grid;
+}
+
+/* Layout utilities */
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.col-1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Flex utilities */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+/* Gap utilities - most common */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Padding utilities - most common */
+.p-0 {
+  padding: 0;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+/* Height utilities */
+.h-screen {
+  height: 100vh;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* Responsive display - most critical breakpoint (sm) */
+@media (min-width: 640px) {
+  .sm\:flex {
     display: flex;
   }
 
-  .block {
+  .sm\:block {
     display: block;
   }
 
-  .grid {
-    display: grid;
-  }
-
-  /* Layout utilities */
-  .col {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .col-1 {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: row;
-  }
-
-  /* Flex utilities */
-  .flex-1 {
-    flex: 1 1 0%;
-  }
-
-  .flex-col {
-    flex-direction: column;
-  }
-
-  .flex-row {
-    flex-direction: row;
-  }
-
-  /* Gap utilities - most common */
-  .gap-2 {
-    gap: 0.5rem;
-  }
-
-  .gap-3 {
-    gap: 0.75rem;
-  }
-
-  .gap-4 {
-    gap: 1rem;
-  }
-
-  /* Padding utilities - most common */
-  .p-0 {
-    padding: 0;
-  }
-
-  .p-2 {
-    padding: 0.5rem;
-  }
-
-  .p-3 {
-    padding: 0.75rem;
-  }
-
-  .p-4 {
-    padding: 1rem;
-  }
-
-  .p-6 {
-    padding: 1.5rem;
-  }
-
-  /* Height utilities */
-  .h-screen {
-    height: 100vh;
-  }
-
-  .h-full {
-    height: 100%;
-  }
-}
-
-@layer wc.responsive {
-  /* Responsive display - most critical breakpoint (sm) */
-  @media (min-width: 640px) {
-    .sm\:flex {
-      display: flex;
-    }
-
-    .sm\:block {
-      display: block;
-    }
-
-    .sm\:hidden {
-      display: none;
-    }
+  .sm\:hidden {
+    display: none;
   }
 }
