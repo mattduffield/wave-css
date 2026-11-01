@@ -1260,6 +1260,1011 @@
     --primary-hover-color: oklch(55% 0.18 250);
   }
 }
+@supports (color: oklch(from red l c h)) {
+  @layer wc.colors {
+    :is(.theme-amber, .theme-aqua, .theme-avocado, .theme-azure, .theme-blush, .theme-bubblegum, .theme-charcoal, .theme-chocolate, .theme-coffee, .theme-cornsilk, .theme-cottoncandy, .theme-deepsky, .theme-desert, .theme-designer, .theme-designer-blue, .theme-designer-gray, .theme-emerald, .theme-fern, .theme-fire, .theme-forest, .theme-fuchsia, .theme-gold, .theme-golden, .theme-grape, .theme-gray, .theme-high-contrast, .theme-honey, .theme-ice, .theme-jungle, .theme-lagoon, .theme-lavender, .theme-lemon, .theme-lime, .theme-meadow, .theme-midsky, .theme-mint, .theme-moss, .theme-ocean, .theme-olive, .theme-peach, .theme-petal, .theme-plum, .theme-rose, .theme-royal, .theme-sage, .theme-sienna, .theme-silver, .theme-sky, .theme-sunset, .theme-tan, .theme-turquoise, .theme-twilight, .theme-violet, .theme-yellow).light {
+      --text-1: oklch(from var(--swatch-13) min(l, var(--wc-text-lim, 1)) c h);
+      --text-2: oklch(from var(--swatch-12) min(l, var(--wc-text-lim, 1)) c h);
+      --text-3: oklch(from var(--swatch-11) min(l, var(--wc-text-lim, 1)) c h);
+      --text-4: oklch(from var(--swatch-10) min(l, var(--wc-text-lim, 1)) c h);
+      --text-5: oklch(from var(--swatch-9) min(l, var(--wc-text-lim, 1)) c h);
+      --text-6: oklch(from var(--swatch-8) min(l, var(--wc-text-lim, 1)) c h);
+      --text-7: oklch(from var(--swatch-7) min(l, var(--wc-text-lim-ui, 1)) c h);
+      --text-8: oklch(from var(--swatch-6) min(l, var(--wc-text-lim-ui, 1)) c h);
+      --text-9: oklch(from var(--swatch-5) min(l, var(--wc-text-lim-ui, 1)) c h);
+      --component-border-color: var(--text-9);
+      --checkbox-border: var(--text-9);
+      --radio-border: var(--text-9);
+      --success-color: #16a34a;
+      --success-light-color: #22c55e;
+      --danger-color: #dc2626;
+      --danger-light-color: #ef4444;
+      --warning-color: #d97706;
+      --warning-light-color: #f59e0b;
+      --info-color: #2563eb;
+      --info-light-color: #3b82f6;
+    }
+    .theme-amber.light {
+      --wc-text-lim: 0.324;
+      --wc-text-lim-ui: 0.424;
+    }
+    .theme-aqua.light {
+      --wc-text-lim: 0.371;
+      --wc-text-lim-ui: 0.45;
+    }
+    .theme-avocado.light {
+      --wc-text-lim: 0.417;
+      --wc-text-lim-ui: 0.509;
+    }
+    .theme-azure.light {
+      --wc-text-lim: 0.378;
+      --wc-text-lim-ui: 0.461;
+    }
+    .theme-blush.light {
+      --wc-text-lim: 0.32;
+      --wc-text-lim-ui: 0.418;
+    }
+    .theme-bubblegum.light {
+      --wc-text-lim: 0.31;
+      --wc-text-lim-ui: 0.407;
+    }
+    .theme-charcoal.light {
+      --wc-text-lim: 0.414;
+      --wc-text-lim-ui: 0.508;
+    }
+    .theme-chocolate.light {
+      --wc-text-lim: 0.299;
+      --wc-text-lim-ui: 0.406;
+      --surface-5: oklch(from var(--swatch-5) 0.678 c h);
+    }
+    .theme-coffee.light {
+      --wc-text-lim: 0.298;
+      --wc-text-lim-ui: 0.401;
+      --surface-5: oklch(from var(--swatch-5) 0.673 c h);
+    }
+    .theme-cornsilk.light {
+      --wc-text-lim: 0.413;
+      --wc-text-lim-ui: 0.505;
+    }
+    .theme-cottoncandy.light {
+      --wc-text-lim: 0.341;
+      --wc-text-lim-ui: 0.439;
+    }
+    .theme-deepsky.light {
+      --wc-text-lim: 0.386;
+      --wc-text-lim-ui: 0.473;
+    }
+    .theme-desert.light {
+      --wc-text-lim: 0.276;
+      --wc-text-lim-ui: 0.372;
+    }
+    .theme-designer.light {
+      --wc-text-lim: 0.262;
+      --wc-text-lim-ui: 0.396;
+      --surface-5: oklch(from var(--swatch-5) 0.668 c h);
+    }
+    .theme-designer-blue.light {
+      --wc-text-lim: 0.268;
+      --wc-text-lim-ui: 0.363;
+      --surface-5: oklch(from var(--swatch-5) 0.651 c h);
+    }
+    .theme-designer-gray.light {
+      --wc-text-lim: 0.397;
+      --wc-text-lim-ui: 0.489;
+    }
+    .theme-emerald.light {
+      --wc-text-lim: 0.386;
+      --wc-text-lim-ui: 0.474;
+    }
+    .theme-fern.light {
+      --wc-text-lim: 0.416;
+      --wc-text-lim-ui: 0.507;
+    }
+    .theme-fire.light {
+      --wc-text-lim: 0.275;
+      --wc-text-lim-ui: 0.372;
+    }
+    .theme-forest.light {
+      --wc-text-lim: 0.411;
+      --wc-text-lim-ui: 0.498;
+    }
+    .theme-fuchsia.light {
+      --wc-text-lim: 0.366;
+      --wc-text-lim-ui: 0.466;
+    }
+    .theme-gold.light {
+      --wc-text-lim: 0.455;
+      --wc-text-lim-ui: 0.545;
+    }
+    .theme-golden.light {
+      --wc-text-lim: 0.297;
+      --wc-text-lim-ui: 0.395;
+    }
+    .theme-grape.light {
+      --wc-text-lim: 0.375;
+      --wc-text-lim-ui: 0.486;
+    }
+    .theme-gray.light {
+      --wc-text-lim: 0.418;
+      --wc-text-lim-ui: 0.508;
+    }
+    .theme-high-contrast.light {
+      --wc-text-lim: 0.418;
+      --wc-text-lim-ui: 0.508;
+    }
+    .theme-honey.light {
+      --wc-text-lim: 0.308;
+      --wc-text-lim-ui: 0.407;
+    }
+    .theme-ice.light {
+      --wc-text-lim: 0.373;
+      --wc-text-lim-ui: 0.453;
+    }
+    .theme-jungle.light {
+      --wc-text-lim: 0.407;
+      --wc-text-lim-ui: 0.495;
+    }
+    .theme-lagoon.light {
+      --wc-text-lim: 0.369;
+      --wc-text-lim-ui: 0.451;
+    }
+    .theme-lavender.light {
+      --wc-text-lim: 0.39;
+      --wc-text-lim-ui: 0.495;
+    }
+    .theme-lemon.light {
+      --wc-text-lim: 0.491;
+      --wc-text-lim-ui: 0.582;
+    }
+    .theme-lime.light {
+      --wc-text-lim: 0.414;
+      --wc-text-lim-ui: 0.507;
+    }
+    .theme-meadow.light {
+      --wc-text-lim: 0.413;
+      --wc-text-lim-ui: 0.504;
+    }
+    .theme-midsky.light {
+      --wc-text-lim: 0.382;
+      --wc-text-lim-ui: 0.466;
+    }
+    .theme-mint.light {
+      --wc-text-lim: 0.373;
+      --wc-text-lim-ui: 0.458;
+    }
+    .theme-moss.light {
+      --wc-text-lim: 0.407;
+      --wc-text-lim-ui: 0.503;
+    }
+    .theme-ocean.light {
+      --wc-text-lim: 0.374;
+      --wc-text-lim-ui: 0.456;
+    }
+    .theme-olive.light {
+      --wc-text-lim: 0.364;
+      --wc-text-lim-ui: 0.468;
+    }
+    .theme-peach.light {
+      --wc-text-lim: 0.278;
+      --wc-text-lim-ui: 0.375;
+    }
+    .theme-petal.light {
+      --wc-text-lim: 0.291;
+      --wc-text-lim-ui: 0.387;
+    }
+    .theme-plum.light {
+      --wc-text-lim: 0.373;
+      --wc-text-lim-ui: 0.477;
+    }
+    .theme-rose.light {
+      --wc-text-lim: 0.3;
+      --wc-text-lim-ui: 0.397;
+    }
+    .theme-royal.light {
+      --wc-text-lim: 0.391;
+      --wc-text-lim-ui: 0.483;
+    }
+    .theme-sage.light {
+      --wc-text-lim: 0.413;
+      --wc-text-lim-ui: 0.504;
+    }
+    .theme-sienna.light {
+      --wc-text-lim: 0.3;
+      --wc-text-lim-ui: 0.41;
+      --surface-5: oklch(from var(--swatch-5) 0.683 c h);
+    }
+    .theme-silver.light {
+      --wc-text-lim: 0.414;
+      --wc-text-lim-ui: 0.505;
+    }
+    .theme-sky.light {
+      --wc-text-lim: 0.38;
+      --wc-text-lim-ui: 0.463;
+    }
+    .theme-sunset.light {
+      --wc-text-lim: 0.284;
+      --wc-text-lim-ui: 0.38;
+    }
+    .theme-tan.light {
+      --wc-text-lim: 0.373;
+      --wc-text-lim-ui: 0.468;
+    }
+    .theme-turquoise.light {
+      --wc-text-lim: 0.37;
+      --wc-text-lim-ui: 0.453;
+    }
+    .theme-twilight.light {
+      --wc-text-lim: 0.393;
+      --wc-text-lim-ui: 0.492;
+    }
+    .theme-violet.light {
+      --wc-text-lim: 0.379;
+      --wc-text-lim-ui: 0.497;
+    }
+    .theme-yellow.light {
+      --wc-text-lim: 0.478;
+      --wc-text-lim-ui: 0.567;
+    }
+    @media (prefers-color-scheme: light) {
+      :is(.theme-amber, .theme-aqua, .theme-avocado, .theme-azure, .theme-blush, .theme-bubblegum, .theme-charcoal, .theme-chocolate, .theme-coffee, .theme-cornsilk, .theme-cottoncandy, .theme-deepsky, .theme-desert, .theme-designer, .theme-designer-blue, .theme-designer-gray, .theme-emerald, .theme-fern, .theme-fire, .theme-forest, .theme-fuchsia, .theme-gold, .theme-golden, .theme-grape, .theme-gray, .theme-high-contrast, .theme-honey, .theme-ice, .theme-jungle, .theme-lagoon, .theme-lavender, .theme-lemon, .theme-lime, .theme-meadow, .theme-midsky, .theme-mint, .theme-moss, .theme-ocean, .theme-olive, .theme-peach, .theme-petal, .theme-plum, .theme-rose, .theme-royal, .theme-sage, .theme-sienna, .theme-silver, .theme-sky, .theme-sunset, .theme-tan, .theme-turquoise, .theme-twilight, .theme-violet, .theme-yellow):not(.dark):not(.light) {
+        --text-1: oklch(from var(--swatch-13) min(l, var(--wc-text-lim, 1)) c h);
+        --text-2: oklch(from var(--swatch-12) min(l, var(--wc-text-lim, 1)) c h);
+        --text-3: oklch(from var(--swatch-11) min(l, var(--wc-text-lim, 1)) c h);
+        --text-4: oklch(from var(--swatch-10) min(l, var(--wc-text-lim, 1)) c h);
+        --text-5: oklch(from var(--swatch-9) min(l, var(--wc-text-lim, 1)) c h);
+        --text-6: oklch(from var(--swatch-8) min(l, var(--wc-text-lim, 1)) c h);
+        --text-7: oklch(from var(--swatch-7) min(l, var(--wc-text-lim-ui, 1)) c h);
+        --text-8: oklch(from var(--swatch-6) min(l, var(--wc-text-lim-ui, 1)) c h);
+        --text-9: oklch(from var(--swatch-5) min(l, var(--wc-text-lim-ui, 1)) c h);
+        --component-border-color: var(--text-9);
+        --checkbox-border: var(--text-9);
+        --radio-border: var(--text-9);
+        --success-color: #16a34a;
+        --success-light-color: #22c55e;
+        --danger-color: #dc2626;
+        --danger-light-color: #ef4444;
+        --warning-color: #d97706;
+        --warning-light-color: #f59e0b;
+        --info-color: #2563eb;
+        --info-light-color: #3b82f6;
+      }
+      .theme-amber:not(.dark):not(.light) {
+        --wc-text-lim: 0.324;
+        --wc-text-lim-ui: 0.424;
+      }
+      .theme-aqua:not(.dark):not(.light) {
+        --wc-text-lim: 0.371;
+        --wc-text-lim-ui: 0.45;
+      }
+      .theme-avocado:not(.dark):not(.light) {
+        --wc-text-lim: 0.417;
+        --wc-text-lim-ui: 0.509;
+      }
+      .theme-azure:not(.dark):not(.light) {
+        --wc-text-lim: 0.378;
+        --wc-text-lim-ui: 0.461;
+      }
+      .theme-blush:not(.dark):not(.light) {
+        --wc-text-lim: 0.32;
+        --wc-text-lim-ui: 0.418;
+      }
+      .theme-bubblegum:not(.dark):not(.light) {
+        --wc-text-lim: 0.31;
+        --wc-text-lim-ui: 0.407;
+      }
+      .theme-charcoal:not(.dark):not(.light) {
+        --wc-text-lim: 0.414;
+        --wc-text-lim-ui: 0.508;
+      }
+      .theme-chocolate:not(.dark):not(.light) {
+        --wc-text-lim: 0.299;
+        --wc-text-lim-ui: 0.406;
+        --surface-5: oklch(from var(--swatch-5) 0.678 c h);
+      }
+      .theme-coffee:not(.dark):not(.light) {
+        --wc-text-lim: 0.298;
+        --wc-text-lim-ui: 0.401;
+        --surface-5: oklch(from var(--swatch-5) 0.673 c h);
+      }
+      .theme-cornsilk:not(.dark):not(.light) {
+        --wc-text-lim: 0.413;
+        --wc-text-lim-ui: 0.505;
+      }
+      .theme-cottoncandy:not(.dark):not(.light) {
+        --wc-text-lim: 0.341;
+        --wc-text-lim-ui: 0.439;
+      }
+      .theme-deepsky:not(.dark):not(.light) {
+        --wc-text-lim: 0.386;
+        --wc-text-lim-ui: 0.473;
+      }
+      .theme-desert:not(.dark):not(.light) {
+        --wc-text-lim: 0.276;
+        --wc-text-lim-ui: 0.372;
+      }
+      .theme-designer:not(.dark):not(.light) {
+        --wc-text-lim: 0.262;
+        --wc-text-lim-ui: 0.396;
+        --surface-5: oklch(from var(--swatch-5) 0.668 c h);
+      }
+      .theme-designer-blue:not(.dark):not(.light) {
+        --wc-text-lim: 0.268;
+        --wc-text-lim-ui: 0.363;
+        --surface-5: oklch(from var(--swatch-5) 0.651 c h);
+      }
+      .theme-designer-gray:not(.dark):not(.light) {
+        --wc-text-lim: 0.397;
+        --wc-text-lim-ui: 0.489;
+      }
+      .theme-emerald:not(.dark):not(.light) {
+        --wc-text-lim: 0.386;
+        --wc-text-lim-ui: 0.474;
+      }
+      .theme-fern:not(.dark):not(.light) {
+        --wc-text-lim: 0.416;
+        --wc-text-lim-ui: 0.507;
+      }
+      .theme-fire:not(.dark):not(.light) {
+        --wc-text-lim: 0.275;
+        --wc-text-lim-ui: 0.372;
+      }
+      .theme-forest:not(.dark):not(.light) {
+        --wc-text-lim: 0.411;
+        --wc-text-lim-ui: 0.498;
+      }
+      .theme-fuchsia:not(.dark):not(.light) {
+        --wc-text-lim: 0.366;
+        --wc-text-lim-ui: 0.466;
+      }
+      .theme-gold:not(.dark):not(.light) {
+        --wc-text-lim: 0.455;
+        --wc-text-lim-ui: 0.545;
+      }
+      .theme-golden:not(.dark):not(.light) {
+        --wc-text-lim: 0.297;
+        --wc-text-lim-ui: 0.395;
+      }
+      .theme-grape:not(.dark):not(.light) {
+        --wc-text-lim: 0.375;
+        --wc-text-lim-ui: 0.486;
+      }
+      .theme-gray:not(.dark):not(.light) {
+        --wc-text-lim: 0.418;
+        --wc-text-lim-ui: 0.508;
+      }
+      .theme-high-contrast:not(.dark):not(.light) {
+        --wc-text-lim: 0.418;
+        --wc-text-lim-ui: 0.508;
+      }
+      .theme-honey:not(.dark):not(.light) {
+        --wc-text-lim: 0.308;
+        --wc-text-lim-ui: 0.407;
+      }
+      .theme-ice:not(.dark):not(.light) {
+        --wc-text-lim: 0.373;
+        --wc-text-lim-ui: 0.453;
+      }
+      .theme-jungle:not(.dark):not(.light) {
+        --wc-text-lim: 0.407;
+        --wc-text-lim-ui: 0.495;
+      }
+      .theme-lagoon:not(.dark):not(.light) {
+        --wc-text-lim: 0.369;
+        --wc-text-lim-ui: 0.451;
+      }
+      .theme-lavender:not(.dark):not(.light) {
+        --wc-text-lim: 0.39;
+        --wc-text-lim-ui: 0.495;
+      }
+      .theme-lemon:not(.dark):not(.light) {
+        --wc-text-lim: 0.491;
+        --wc-text-lim-ui: 0.582;
+      }
+      .theme-lime:not(.dark):not(.light) {
+        --wc-text-lim: 0.414;
+        --wc-text-lim-ui: 0.507;
+      }
+      .theme-meadow:not(.dark):not(.light) {
+        --wc-text-lim: 0.413;
+        --wc-text-lim-ui: 0.504;
+      }
+      .theme-midsky:not(.dark):not(.light) {
+        --wc-text-lim: 0.382;
+        --wc-text-lim-ui: 0.466;
+      }
+      .theme-mint:not(.dark):not(.light) {
+        --wc-text-lim: 0.373;
+        --wc-text-lim-ui: 0.458;
+      }
+      .theme-moss:not(.dark):not(.light) {
+        --wc-text-lim: 0.407;
+        --wc-text-lim-ui: 0.503;
+      }
+      .theme-ocean:not(.dark):not(.light) {
+        --wc-text-lim: 0.374;
+        --wc-text-lim-ui: 0.456;
+      }
+      .theme-olive:not(.dark):not(.light) {
+        --wc-text-lim: 0.364;
+        --wc-text-lim-ui: 0.468;
+      }
+      .theme-peach:not(.dark):not(.light) {
+        --wc-text-lim: 0.278;
+        --wc-text-lim-ui: 0.375;
+      }
+      .theme-petal:not(.dark):not(.light) {
+        --wc-text-lim: 0.291;
+        --wc-text-lim-ui: 0.387;
+      }
+      .theme-plum:not(.dark):not(.light) {
+        --wc-text-lim: 0.373;
+        --wc-text-lim-ui: 0.477;
+      }
+      .theme-rose:not(.dark):not(.light) {
+        --wc-text-lim: 0.3;
+        --wc-text-lim-ui: 0.397;
+      }
+      .theme-royal:not(.dark):not(.light) {
+        --wc-text-lim: 0.391;
+        --wc-text-lim-ui: 0.483;
+      }
+      .theme-sage:not(.dark):not(.light) {
+        --wc-text-lim: 0.413;
+        --wc-text-lim-ui: 0.504;
+      }
+      .theme-sienna:not(.dark):not(.light) {
+        --wc-text-lim: 0.3;
+        --wc-text-lim-ui: 0.41;
+        --surface-5: oklch(from var(--swatch-5) 0.683 c h);
+      }
+      .theme-silver:not(.dark):not(.light) {
+        --wc-text-lim: 0.414;
+        --wc-text-lim-ui: 0.505;
+      }
+      .theme-sky:not(.dark):not(.light) {
+        --wc-text-lim: 0.38;
+        --wc-text-lim-ui: 0.463;
+      }
+      .theme-sunset:not(.dark):not(.light) {
+        --wc-text-lim: 0.284;
+        --wc-text-lim-ui: 0.38;
+      }
+      .theme-tan:not(.dark):not(.light) {
+        --wc-text-lim: 0.373;
+        --wc-text-lim-ui: 0.468;
+      }
+      .theme-turquoise:not(.dark):not(.light) {
+        --wc-text-lim: 0.37;
+        --wc-text-lim-ui: 0.453;
+      }
+      .theme-twilight:not(.dark):not(.light) {
+        --wc-text-lim: 0.393;
+        --wc-text-lim-ui: 0.492;
+      }
+      .theme-violet:not(.dark):not(.light) {
+        --wc-text-lim: 0.379;
+        --wc-text-lim-ui: 0.497;
+      }
+      .theme-yellow:not(.dark):not(.light) {
+        --wc-text-lim: 0.478;
+        --wc-text-lim-ui: 0.567;
+      }
+    }
+    :is(.theme-amber, .theme-aqua, .theme-avocado, .theme-azure, .theme-blush, .theme-bubblegum, .theme-charcoal, .theme-chocolate, .theme-coffee, .theme-cornsilk, .theme-cottoncandy, .theme-deepsky, .theme-desert, .theme-designer, .theme-designer-blue, .theme-designer-gray, .theme-emerald, .theme-fern, .theme-fire, .theme-forest, .theme-fuchsia, .theme-gold, .theme-golden, .theme-grape, .theme-gray, .theme-high-contrast, .theme-honey, .theme-ice, .theme-jungle, .theme-lagoon, .theme-lavender, .theme-lemon, .theme-lime, .theme-meadow, .theme-midsky, .theme-mint, .theme-moss, .theme-ocean, .theme-olive, .theme-peach, .theme-petal, .theme-plum, .theme-rose, .theme-royal, .theme-sage, .theme-sienna, .theme-silver, .theme-sky, .theme-sunset, .theme-tan, .theme-turquoise, .theme-twilight, .theme-violet, .theme-yellow).dark {
+      --text-1: oklch(from var(--swatch-1) max(l, var(--wc-text-lim, 0)) c h);
+      --text-2: oklch(from var(--swatch-2) max(l, var(--wc-text-lim, 0)) c h);
+      --text-3: oklch(from var(--swatch-3) max(l, var(--wc-text-lim, 0)) c h);
+      --text-4: oklch(from var(--swatch-4) max(l, var(--wc-text-lim, 0)) c h);
+      --text-5: oklch(from var(--swatch-5) max(l, var(--wc-text-lim, 0)) c h);
+      --text-6: oklch(from var(--swatch-6) max(l, var(--wc-text-lim, 0)) c h);
+      --text-7: oklch(from var(--swatch-7) max(l, var(--wc-text-lim-ui, 0)) c h);
+      --text-8: oklch(from var(--swatch-8) max(l, var(--wc-text-lim-ui, 0)) c h);
+      --text-9: oklch(from var(--swatch-9) max(l, var(--wc-text-lim-ui, 0)) c h);
+      --component-border-color: var(--text-9);
+      --checkbox-border: var(--text-9);
+      --radio-border: var(--text-9);
+      --success-color: #22c55e;
+      --success-light-color: #4ade80;
+      --danger-color: #ef4444;
+      --danger-light-color: #f87171;
+      --warning-color: #f59e0b;
+      --warning-light-color: #fbbf24;
+      --info-color: #3b82f6;
+      --info-light-color: #60a5fa;
+    }
+    .theme-amber.dark {
+      --wc-text-lim: 0.862;
+      --wc-text-lim-ui: 0.763;
+    }
+    .theme-aqua.dark {
+      --wc-text-lim: 0.8;
+      --wc-text-lim-ui: 0.631;
+    }
+    .theme-avocado.dark {
+      --wc-text-lim: 0.718;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-azure.dark {
+      --wc-text-lim: 0.79;
+      --wc-text-lim-ui: 0.621;
+    }
+    .theme-blush.dark {
+      --wc-text-lim: 0.883;
+      --wc-text-lim-ui: 0.787;
+    }
+    .theme-bubblegum.dark {
+      --wc-text-lim: 0.9;
+      --wc-text-lim-ui: 0.812;
+    }
+    .theme-charcoal.dark {
+      --wc-text-lim: 0.724;
+      --wc-text-lim-ui: 0.623;
+    }
+    .theme-chocolate.dark {
+      --wc-text-lim: 0.667;
+      --wc-text-lim-ui: 0.567;
+    }
+    .theme-coffee.dark {
+      --wc-text-lim: 0.658;
+      --wc-text-lim-ui: 0.56;
+    }
+    .theme-cornsilk.dark {
+      --wc-text-lim: 0.727;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-cottoncandy.dark {
+      --wc-text-lim: 0.842;
+      --wc-text-lim-ui: 0.726;
+    }
+    .theme-deepsky.dark {
+      --wc-text-lim: 0.746;
+      --wc-text-lim-ui: 0.635;
+    }
+    .theme-desert.dark {
+      --wc-text-lim: 0.945;
+      --wc-text-lim-ui: 0.881;
+    }
+    .theme-designer.dark {
+      --wc-text-lim: 0.598;
+      --wc-text-lim-ui: 0.502;
+    }
+    .theme-designer-blue.dark {
+      --wc-text-lim: 0.659;
+      --wc-text-lim-ui: 0.526;
+    }
+    .theme-designer-gray.dark {
+      --wc-text-lim: 0.675;
+      --wc-text-lim-ui: 0.574;
+    }
+    .theme-emerald.dark {
+      --wc-text-lim: 0.761;
+      --wc-text-lim-ui: 0.632;
+    }
+    .theme-fern.dark {
+      --wc-text-lim: 0.719;
+      --wc-text-lim-ui: 0.615;
+    }
+    .theme-fire.dark {
+      --wc-text-lim: 0.947;
+      --wc-text-lim-ui: 0.886;
+    }
+    .theme-forest.dark {
+      --wc-text-lim: 0.733;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-fuchsia.dark {
+      --wc-text-lim: 0.808;
+      --wc-text-lim-ui: 0.684;
+    }
+    .theme-gold.dark {
+      --wc-text-lim: 0.872;
+      --wc-text-lim-ui: 0.751;
+    }
+    .theme-golden.dark {
+      --wc-text-lim: 0.911;
+      --wc-text-lim-ui: 0.828;
+    }
+    .theme-grape.dark {
+      --wc-text-lim: 0.787;
+      --wc-text-lim-ui: 0.704;
+    }
+    .theme-gray.dark {
+      --wc-text-lim: 0.721;
+      --wc-text-lim-ui: 0.619;
+    }
+    .theme-high-contrast.dark {
+      --wc-text-lim: 0.721;
+      --wc-text-lim-ui: 0.619;
+    }
+    .theme-honey.dark {
+      --wc-text-lim: 0.89;
+      --wc-text-lim-ui: 0.799;
+    }
+    .theme-ice.dark {
+      --wc-text-lim: 0.805;
+      --wc-text-lim-ui: 0.627;
+    }
+    .theme-jungle.dark {
+      --wc-text-lim: 0.743;
+      --wc-text-lim-ui: 0.623;
+    }
+    .theme-lagoon.dark {
+      --wc-text-lim: 0.806;
+      --wc-text-lim-ui: 0.631;
+    }
+    .theme-lavender.dark {
+      --wc-text-lim: 0.77;
+      --wc-text-lim-ui: 0.698;
+    }
+    .theme-lemon.dark {
+      --wc-text-lim: 0.953;
+      --wc-text-lim-ui: 0.828;
+    }
+    .theme-lime.dark {
+      --wc-text-lim: 0.716;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-meadow.dark {
+      --wc-text-lim: 0.723;
+      --wc-text-lim-ui: 0.615;
+    }
+    .theme-midsky.dark {
+      --wc-text-lim: 0.76;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-mint.dark {
+      --wc-text-lim: 0.782;
+      --wc-text-lim-ui: 0.637;
+    }
+    .theme-moss.dark {
+      --wc-text-lim: 0.73;
+      --wc-text-lim-ui: 0.632;
+    }
+    .theme-ocean.dark {
+      --wc-text-lim: 0.799;
+      --wc-text-lim-ui: 0.626;
+    }
+    .theme-olive.dark {
+      --wc-text-lim: 0.803;
+      --wc-text-lim-ui: 0.675;
+    }
+    .theme-peach.dark {
+      --wc-text-lim: 0.943;
+      --wc-text-lim-ui: 0.879;
+    }
+    .theme-petal.dark {
+      --wc-text-lim: 0.925;
+      --wc-text-lim-ui: 0.852;
+    }
+    .theme-plum.dark {
+      --wc-text-lim: 0.784;
+      --wc-text-lim-ui: 0.687;
+    }
+    .theme-rose.dark {
+      --wc-text-lim: 0.915;
+      --wc-text-lim-ui: 0.835;
+    }
+    .theme-royal.dark {
+      --wc-text-lim: 0.752;
+      --wc-text-lim-ui: 0.649;
+    }
+    .theme-sage.dark {
+      --wc-text-lim: 0.729;
+      --wc-text-lim-ui: 0.616;
+    }
+    .theme-sienna.dark {
+      --wc-text-lim: 0.678;
+      --wc-text-lim-ui: 0.578;
+    }
+    .theme-silver.dark {
+      --wc-text-lim: 0.727;
+      --wc-text-lim-ui: 0.622;
+    }
+    .theme-sky.dark {
+      --wc-text-lim: 0.777;
+      --wc-text-lim-ui: 0.62;
+    }
+    .theme-sunset.dark {
+      --wc-text-lim: 0.934;
+      --wc-text-lim-ui: 0.868;
+    }
+    .theme-tan.dark {
+      --wc-text-lim: 0.767;
+      --wc-text-lim-ui: 0.661;
+    }
+    .theme-turquoise.dark {
+      --wc-text-lim: 0.792;
+      --wc-text-lim-ui: 0.633;
+    }
+    .theme-twilight.dark {
+      --wc-text-lim: 0.744;
+      --wc-text-lim-ui: 0.664;
+    }
+    .theme-violet.dark {
+      --wc-text-lim: 0.785;
+      --wc-text-lim-ui: 0.709;
+    }
+    .theme-yellow.dark {
+      --wc-text-lim: 0.907;
+      --wc-text-lim-ui: 0.79;
+    }
+    @media (prefers-color-scheme: dark) {
+      :is(.theme-amber, .theme-aqua, .theme-avocado, .theme-azure, .theme-blush, .theme-bubblegum, .theme-charcoal, .theme-chocolate, .theme-coffee, .theme-cornsilk, .theme-cottoncandy, .theme-deepsky, .theme-desert, .theme-designer, .theme-designer-blue, .theme-designer-gray, .theme-emerald, .theme-fern, .theme-fire, .theme-forest, .theme-fuchsia, .theme-gold, .theme-golden, .theme-grape, .theme-gray, .theme-high-contrast, .theme-honey, .theme-ice, .theme-jungle, .theme-lagoon, .theme-lavender, .theme-lemon, .theme-lime, .theme-meadow, .theme-midsky, .theme-mint, .theme-moss, .theme-ocean, .theme-olive, .theme-peach, .theme-petal, .theme-plum, .theme-rose, .theme-royal, .theme-sage, .theme-sienna, .theme-silver, .theme-sky, .theme-sunset, .theme-tan, .theme-turquoise, .theme-twilight, .theme-violet, .theme-yellow):not(.light):not(.dark) {
+        --text-1: oklch(from var(--swatch-1) max(l, var(--wc-text-lim, 0)) c h);
+        --text-2: oklch(from var(--swatch-2) max(l, var(--wc-text-lim, 0)) c h);
+        --text-3: oklch(from var(--swatch-3) max(l, var(--wc-text-lim, 0)) c h);
+        --text-4: oklch(from var(--swatch-4) max(l, var(--wc-text-lim, 0)) c h);
+        --text-5: oklch(from var(--swatch-5) max(l, var(--wc-text-lim, 0)) c h);
+        --text-6: oklch(from var(--swatch-6) max(l, var(--wc-text-lim, 0)) c h);
+        --text-7: oklch(from var(--swatch-7) max(l, var(--wc-text-lim-ui, 0)) c h);
+        --text-8: oklch(from var(--swatch-8) max(l, var(--wc-text-lim-ui, 0)) c h);
+        --text-9: oklch(from var(--swatch-9) max(l, var(--wc-text-lim-ui, 0)) c h);
+        --component-border-color: var(--text-9);
+        --checkbox-border: var(--text-9);
+        --radio-border: var(--text-9);
+        --success-color: #22c55e;
+        --success-light-color: #4ade80;
+        --danger-color: #ef4444;
+        --danger-light-color: #f87171;
+        --warning-color: #f59e0b;
+        --warning-light-color: #fbbf24;
+        --info-color: #3b82f6;
+        --info-light-color: #60a5fa;
+      }
+      .theme-amber:not(.light):not(.dark) {
+        --wc-text-lim: 0.862;
+        --wc-text-lim-ui: 0.763;
+      }
+      .theme-aqua:not(.light):not(.dark) {
+        --wc-text-lim: 0.8;
+        --wc-text-lim-ui: 0.631;
+      }
+      .theme-avocado:not(.light):not(.dark) {
+        --wc-text-lim: 0.718;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-azure:not(.light):not(.dark) {
+        --wc-text-lim: 0.79;
+        --wc-text-lim-ui: 0.621;
+      }
+      .theme-blush:not(.light):not(.dark) {
+        --wc-text-lim: 0.883;
+        --wc-text-lim-ui: 0.787;
+      }
+      .theme-bubblegum:not(.light):not(.dark) {
+        --wc-text-lim: 0.9;
+        --wc-text-lim-ui: 0.812;
+      }
+      .theme-charcoal:not(.light):not(.dark) {
+        --wc-text-lim: 0.724;
+        --wc-text-lim-ui: 0.623;
+      }
+      .theme-chocolate:not(.light):not(.dark) {
+        --wc-text-lim: 0.667;
+        --wc-text-lim-ui: 0.567;
+      }
+      .theme-coffee:not(.light):not(.dark) {
+        --wc-text-lim: 0.658;
+        --wc-text-lim-ui: 0.56;
+      }
+      .theme-cornsilk:not(.light):not(.dark) {
+        --wc-text-lim: 0.727;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-cottoncandy:not(.light):not(.dark) {
+        --wc-text-lim: 0.842;
+        --wc-text-lim-ui: 0.726;
+      }
+      .theme-deepsky:not(.light):not(.dark) {
+        --wc-text-lim: 0.746;
+        --wc-text-lim-ui: 0.635;
+      }
+      .theme-desert:not(.light):not(.dark) {
+        --wc-text-lim: 0.945;
+        --wc-text-lim-ui: 0.881;
+      }
+      .theme-designer:not(.light):not(.dark) {
+        --wc-text-lim: 0.598;
+        --wc-text-lim-ui: 0.502;
+      }
+      .theme-designer-blue:not(.light):not(.dark) {
+        --wc-text-lim: 0.659;
+        --wc-text-lim-ui: 0.526;
+      }
+      .theme-designer-gray:not(.light):not(.dark) {
+        --wc-text-lim: 0.675;
+        --wc-text-lim-ui: 0.574;
+      }
+      .theme-emerald:not(.light):not(.dark) {
+        --wc-text-lim: 0.761;
+        --wc-text-lim-ui: 0.632;
+      }
+      .theme-fern:not(.light):not(.dark) {
+        --wc-text-lim: 0.719;
+        --wc-text-lim-ui: 0.615;
+      }
+      .theme-fire:not(.light):not(.dark) {
+        --wc-text-lim: 0.947;
+        --wc-text-lim-ui: 0.886;
+      }
+      .theme-forest:not(.light):not(.dark) {
+        --wc-text-lim: 0.733;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-fuchsia:not(.light):not(.dark) {
+        --wc-text-lim: 0.808;
+        --wc-text-lim-ui: 0.684;
+      }
+      .theme-gold:not(.light):not(.dark) {
+        --wc-text-lim: 0.872;
+        --wc-text-lim-ui: 0.751;
+      }
+      .theme-golden:not(.light):not(.dark) {
+        --wc-text-lim: 0.911;
+        --wc-text-lim-ui: 0.828;
+      }
+      .theme-grape:not(.light):not(.dark) {
+        --wc-text-lim: 0.787;
+        --wc-text-lim-ui: 0.704;
+      }
+      .theme-gray:not(.light):not(.dark) {
+        --wc-text-lim: 0.721;
+        --wc-text-lim-ui: 0.619;
+      }
+      .theme-high-contrast:not(.light):not(.dark) {
+        --wc-text-lim: 0.721;
+        --wc-text-lim-ui: 0.619;
+      }
+      .theme-honey:not(.light):not(.dark) {
+        --wc-text-lim: 0.89;
+        --wc-text-lim-ui: 0.799;
+      }
+      .theme-ice:not(.light):not(.dark) {
+        --wc-text-lim: 0.805;
+        --wc-text-lim-ui: 0.627;
+      }
+      .theme-jungle:not(.light):not(.dark) {
+        --wc-text-lim: 0.743;
+        --wc-text-lim-ui: 0.623;
+      }
+      .theme-lagoon:not(.light):not(.dark) {
+        --wc-text-lim: 0.806;
+        --wc-text-lim-ui: 0.631;
+      }
+      .theme-lavender:not(.light):not(.dark) {
+        --wc-text-lim: 0.77;
+        --wc-text-lim-ui: 0.698;
+      }
+      .theme-lemon:not(.light):not(.dark) {
+        --wc-text-lim: 0.953;
+        --wc-text-lim-ui: 0.828;
+      }
+      .theme-lime:not(.light):not(.dark) {
+        --wc-text-lim: 0.716;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-meadow:not(.light):not(.dark) {
+        --wc-text-lim: 0.723;
+        --wc-text-lim-ui: 0.615;
+      }
+      .theme-midsky:not(.light):not(.dark) {
+        --wc-text-lim: 0.76;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-mint:not(.light):not(.dark) {
+        --wc-text-lim: 0.782;
+        --wc-text-lim-ui: 0.637;
+      }
+      .theme-moss:not(.light):not(.dark) {
+        --wc-text-lim: 0.73;
+        --wc-text-lim-ui: 0.632;
+      }
+      .theme-ocean:not(.light):not(.dark) {
+        --wc-text-lim: 0.799;
+        --wc-text-lim-ui: 0.626;
+      }
+      .theme-olive:not(.light):not(.dark) {
+        --wc-text-lim: 0.803;
+        --wc-text-lim-ui: 0.675;
+      }
+      .theme-peach:not(.light):not(.dark) {
+        --wc-text-lim: 0.943;
+        --wc-text-lim-ui: 0.879;
+      }
+      .theme-petal:not(.light):not(.dark) {
+        --wc-text-lim: 0.925;
+        --wc-text-lim-ui: 0.852;
+      }
+      .theme-plum:not(.light):not(.dark) {
+        --wc-text-lim: 0.784;
+        --wc-text-lim-ui: 0.687;
+      }
+      .theme-rose:not(.light):not(.dark) {
+        --wc-text-lim: 0.915;
+        --wc-text-lim-ui: 0.835;
+      }
+      .theme-royal:not(.light):not(.dark) {
+        --wc-text-lim: 0.752;
+        --wc-text-lim-ui: 0.649;
+      }
+      .theme-sage:not(.light):not(.dark) {
+        --wc-text-lim: 0.729;
+        --wc-text-lim-ui: 0.616;
+      }
+      .theme-sienna:not(.light):not(.dark) {
+        --wc-text-lim: 0.678;
+        --wc-text-lim-ui: 0.578;
+      }
+      .theme-silver:not(.light):not(.dark) {
+        --wc-text-lim: 0.727;
+        --wc-text-lim-ui: 0.622;
+      }
+      .theme-sky:not(.light):not(.dark) {
+        --wc-text-lim: 0.777;
+        --wc-text-lim-ui: 0.62;
+      }
+      .theme-sunset:not(.light):not(.dark) {
+        --wc-text-lim: 0.934;
+        --wc-text-lim-ui: 0.868;
+      }
+      .theme-tan:not(.light):not(.dark) {
+        --wc-text-lim: 0.767;
+        --wc-text-lim-ui: 0.661;
+      }
+      .theme-turquoise:not(.light):not(.dark) {
+        --wc-text-lim: 0.792;
+        --wc-text-lim-ui: 0.633;
+      }
+      .theme-twilight:not(.light):not(.dark) {
+        --wc-text-lim: 0.744;
+        --wc-text-lim-ui: 0.664;
+      }
+      .theme-violet:not(.light):not(.dark) {
+        --wc-text-lim: 0.785;
+        --wc-text-lim-ui: 0.709;
+      }
+      .theme-yellow:not(.light):not(.dark) {
+        --wc-text-lim: 0.907;
+        --wc-text-lim-ui: 0.79;
+      }
+    }
+    .theme-high-contrast.dark {
+      --success-color: #00d000;
+      --success-light-color: #66ff66;
+      --danger-color: #ff2020;
+      --danger-light-color: #ff7070;
+      --warning-color: #ffaa00;
+      --warning-light-color: #ffd060;
+      --info-color: #00ccff;
+      --info-light-color: #66e0ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      .theme-high-contrast:not(.light):not(.dark) {
+        --success-color: #00d000;
+        --success-light-color: #66ff66;
+        --danger-color: #ff2020;
+        --danger-light-color: #ff7070;
+        --warning-color: #ffaa00;
+        --warning-light-color: #ffd060;
+        --info-color: #00ccff;
+        --info-light-color: #66e0ff;
+      }
+    }
+  }
+}
+@supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+  @layer wc.colors {
+    :is(.theme-amber, .theme-aqua, .theme-avocado, .theme-azure, .theme-blush, .theme-bubblegum, .theme-charcoal, .theme-chocolate, .theme-coffee, .theme-cornsilk, .theme-cottoncandy, .theme-deepsky, .theme-desert, .theme-designer, .theme-designer-blue, .theme-designer-gray, .theme-emerald, .theme-fern, .theme-fire, .theme-forest, .theme-fuchsia, .theme-gold, .theme-golden, .theme-grape, .theme-gray, .theme-high-contrast, .theme-honey, .theme-ice, .theme-jungle, .theme-lagoon, .theme-lavender, .theme-lemon, .theme-lime, .theme-meadow, .theme-midsky, .theme-mint, .theme-moss, .theme-ocean, .theme-olive, .theme-peach, .theme-petal, .theme-plum, .theme-rose, .theme-royal, .theme-sage, .theme-sienna, .theme-silver, .theme-sky, .theme-sunset, .theme-tan, .theme-turquoise, .theme-twilight, .theme-violet, .theme-yellow),
+    .crisp {
+      --wc-on-primary: rgb(from var(--primary-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+      --button-hover-color: rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+      --button-disabled-color: color-mix(in srgb, rgb(from var(--button-disabled-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)) 75%, var(--button-disabled-bg-color));
+    }
+    :is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn) {
+      --button-color: rgb(from var(--button-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
+    }
+  }
+}
 @layer wc.colors {
   .bg-transparent {
     background-color: transparent;
@@ -4810,7 +5815,7 @@
   }
   .accent-fill {
     background: var(--accent-fill-bg, var(--accent, var(--primary-bg-color)));
-    color: var(--on-accent, #fff);
+    color: var(--on-accent, var(--wc-on-primary, #fff));
   }
   .accent-soft-fill {
     background: var(--accent-soft, color-mix(in oklab, var(--accent, var(--primary-bg-color)) 15%, var(--surface-1)));
@@ -4953,7 +5958,7 @@
   }
   .badge-primary {
     background: var(--primary-bg-color);
-    color: var(--primary-color);
+    color: var(--wc-on-primary, var(--primary-color));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   @media (forced-colors: active) {
@@ -13577,6 +14582,12 @@
     --button-hover-color: var(--on-accent, #ffffff);
     --button-active-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 45%, #000));
   }
+  @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+    .btn-primary {
+      --button-color: var(--on-accent, rgb(from var(--button-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)));
+      --button-hover-color: var(--on-accent, rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)));
+    }
+  }
   .btn-secondary {
     --button-bg-color: var(--secondary-bg-color);
     --button-color: var(--component-color, var(--text-1));
@@ -17477,9 +18488,6 @@ html.dark.crisp {
       --primary-color: rgb(from var(--primary-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
       --button-hover-color: rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
     }
-  }
-  .crisp :is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn) {
-    --button-color: rgb(from var(--button-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255));
   }
 }
 @layer wc.selected {

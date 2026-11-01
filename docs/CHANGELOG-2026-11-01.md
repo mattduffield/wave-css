@@ -102,3 +102,46 @@ Unchanged: crisp's surface-1…8, card/container/component backgrounds, accent a
   OS dark} × {on `<html>`, nested}; every visible text on `views/visual-reference.html` vs what is painted
   behind it (≥ 4.5:1, disabled ≥ 3:1); OS-dark tokens identical to `.dark`.
 - `tests/regression-vs-baseline-test.py` — non-crisp pixel-identical to go-kart `e4d6238b`.
+
+---
+
+# Wave CSS — 2026-11-01, part 3: contrast for REGULAR themes (knowledge base 1.53.0)
+
+Approved: change regular (non-crisp) colors where needed so light and dark both honor the contrast
+standard. Each theme keeps its backgrounds and tint; only failing pieces move.
+
+## Why
+
+Regular themes build text from the same swatch ramp as their backgrounds (light `--text-N` =
+`--swatch-(14-N)`, dark `--text-N` = `--swatch-N`). The muted levels land in the middle of that ramp —
+same hue, similar lightness as the panels. Measured before: light `--text-6` failed in 52/52 themes
+(midsky 2.71:1, `--text-7` 1.45:1), dark `--text-5` in 19, body text in coffee/sienna/chocolate/lemon;
+input borders 1.09:1; text on some accents 1.77:1; disabled buttons 1.17:1.
+
+## What changed (generated block in `@layer wc.colors`, `scripts/gen-text-contrast.py`)
+
+| Token / selector | Change |
+|---|---|
+| `--text-1` … `--text-6` (every theme, light + dark, forced + OS-following) | `oklch(from var(--swatch-K) min(l, var(--wc-text-lim)) c h)` (light; `max` in dark) — same hue/chroma, only darker/lighter where it would fail; ≥ 4.5:1 on surface-1…5, card, container, component |
+| `--text-7` … `--text-9` | same, against `--wc-text-lim-ui` — ≥ 3:1 on page/card/field |
+| `--wc-text-lim`, `--wc-text-lim-ui` | NEW per theme × mode (measured) |
+| `--surface-5` (light, coffee / sienna / chocolate / designer / designer-blue) | lightened (cards were too dark for any dark text: coffee 4.06:1 even with black) |
+| `--component-border-color`, `--checkbox-border`, `--radio-border` | `var(--text-9)` — form outlines ≥ 3:1 |
+| `--success/-danger/-warning/-info-color` (+ `-light-color`) | follow the page's mode (deeper set light, bright set dark; high-contrast keeps its own bright set in dark) |
+| `--wc-on-primary` | now defined on every theme scope and `.crisp` (was only wc-table / fx / font-picker) |
+| `--button-hover-color` | black/white from `--button-hover-bg-color` |
+| `--button-disabled-color` | that ink eased 25% toward the fill (≥ 3:1, still reads disabled) |
+| `:is(.wc-accordion .accordion-header, .wc-dropdown .dropbtn, .wc-ai-bot-nano-btn)` | `--button-color` = black/white from `--button-bg-color` (was crisp-only in part 2) |
+| `.badge-primary` (+ hover/focus/active variants) | `color: var(--wc-on-primary, var(--primary-color))` |
+| `.accent-fill` | `color: var(--on-accent, var(--wc-on-primary, #fff))` |
+| `.btn-primary` | outside crisp, label + hover label = black/white from its own fill (designer light was 4.13:1); crisp keeps `--on-accent` |
+
+All new values sit inside `@supports` (relative color / `pow()`); older browsers keep the original colors.
+Unchanged: every background except the five light card surfaces above, swatches, accents, button fills.
+
+## Verified
+
+- `tests/text-contrast-test.py` → `crisp-contrast-test.py --regular` + crisp: token pairs × 54 themes ×
+  {.light, .dark, no mode} × {OS light, OS dark}, and every visible text on `views/visual-reference.html`
+  vs what is painted behind it (≥ 4.5:1; disabled ≥ 3:1). Both PASS.
+- All component suites pass; persistence + search-dropdown checks pass.

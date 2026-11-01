@@ -117,6 +117,29 @@ The token families you use in components (full list in [`COLORS.md`](./COLORS.md
 
 ---
 
+## 4b. Contrast standard (regular themes too)
+
+Every theme, light and dark (forced or OS-following), with or without `.crisp`:
+
+| What | Minimum |
+|---|---|
+| `--text-1`…`--text-6` on every text surface | 4.5:1 |
+| `--text-7`…`--text-9` (icons, separators, disabled) | 3:1 |
+| Form outlines (inputs, checkboxes, radios, toggles) | 3:1 |
+| Text on colored fills (buttons, primary badge, accent) | 4.5:1 |
+| Disabled labels | 3:1 |
+
+Regular themes build text from their own swatch ramp, so the muted levels used to land on the same hue
+and lightness as the panels (light `--text-6` failed in every theme). Now a generated block
+(`scripts/gen-text-contrast.py`, in `@layer wc.colors`) clamps each level per theme and mode — same hue and
+tint, only darker (light) or lighter (dark) where needed. It also sets form outlines to `--text-9`, makes the
+status colors follow the page's mode, and lightens the light-mode card surface of coffee, sienna, chocolate,
+designer and designer-blue (too dark for any dark text). Text on fills uses `--wc-on-primary` and other
+black/white picks from the fill's luminance. **After changing a theme's swatches, re-run the generator.**
+Gate: `tests/text-contrast-test.py`.
+
+---
+
 ## 5. `.crisp` — neutral surfaces, the theme as the accent (complete mode, Nov 2026)
 
 Without `.crisp`, a theme tints the **whole page** with its hue (royal light = cyan surfaces, royal dark

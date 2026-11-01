@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.52.0",
+    "version": "1.53.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-01"
   },
@@ -3187,6 +3187,14 @@
       },
       "verified": "tests/crisp-contrast-test.py: 79 token pairs × 54 themes × {.light, .dark, no mode} × {OS light, OS dark} × {on <html>, nested}, plus every visible text on views/visual-reference.html vs the color painted behind it (3,618 elements per mode); the OS-dark rule set must equal .dark exactly.",
       "history": "Before 1.52.0 crisp replaced only surfaces + accent and borrowed the theme's text tokens, which follow the OS — so crisp with no .light/.dark on a dark OS showed near-white text on light grays (1:1), and text on the accent fell to 2.7:1 in dark."
+    },
+    "contrast": {
+      "standard": "Text levels --text-1..6 >= 4.5:1 on every text surface; --text-7..9 >= 3:1 (icons, separators, disabled); form outlines >= 3:1; text on colored fills >= 4.5:1; disabled labels >= 3:1 — in EVERY theme, light and dark, forced (.light/.dark) or OS-following, with or without .crisp.",
+      "regular": "Regular themes keep their tinted backgrounds. Their text is generated from their own swatches and clamped per theme × mode (--wc-text-lim / --wc-text-lim-ui, measured by scripts/gen-text-contrast.py) — same hue/chroma, only darker (light) or lighter (dark) where it would fail. Light-mode cards (--surface-5) of coffee, sienna, chocolate, designer, designer-blue were lightened. Form outlines = --text-9. Status colors follow the page mode.",
+      "crisp": "See themes.crisp — neutral surfaces, the theme as the accent, owns every color.",
+      "textOnFills": "--wc-on-primary (defined on every theme scope + .crisp) = black/white from --primary-bg-color; use it for text ON the accent (badge-primary, accent-fill fallback, headers). --primary-color may also be used as page text in regular themes, so don't rely on it on the accent. Hover/disabled button labels and accordion/dropdown/AI-bot fill labels are auto-picked too.",
+      "regenerate": "After changing a theme's swatches: python3.12 scripts/gen-text-contrast.py (server on :3015), npm run build, python3.12 tests/text-contrast-test.py.",
+      "verified": "tests/text-contrast-test.py (regular + crisp)."
     }
   },
   "cssUtilities": {
