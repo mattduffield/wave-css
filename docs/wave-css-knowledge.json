@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.56.0",
+    "version": "1.57.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-02"
   },
@@ -697,7 +697,8 @@
           "chip": "<wc-select name=\"tags\" lbl-label=\"Tags\" mode=\"chip\"\n  items='[{\"key\":\"JavaScript\",\"value\":\"js\"},{\"key\":\"React\",\"value\":\"react\"}]'>\n</wc-select>",
           "url": "<wc-select name=\"dept\" lbl-label=\"Department\"\n  url=\"/api/departments\"\n  display-member=\"name\"\n  value-member=\"id\"\n  sort=\"asc\">\n</wc-select>",
           "optgroups": "<wc-select name=\"fruit\" lbl-label=\"Fruit\">\n  <optgroup label=\"Citrus\">\n    <option value=\"orange\">Orange</option>\n    <option value=\"lemon\">Lemon</option>\n  </optgroup>\n  <optgroup label=\"Berries\">\n    <option value=\"blueberry\">Blueberry</option>\n  </optgroup>\n</wc-select>"
-        }
+        },
+        "valueChipMultiple": "On mode=\"chip\" / multiple, setting value (property, array, or the value attribute) after render replaces the selection with the comma-separated list, rebuilds the select, chips and dropdown, and dispatches one change (none if unchanged). value=\"a,b\" in markup renders those chips silently. Case-insensitive match to the canonical option; unknown values become custom chips under allow-custom/allow-dynamic. Single selects and addChip/removeChip unchanged."
       },
       {
         "name": "wc-combobox",

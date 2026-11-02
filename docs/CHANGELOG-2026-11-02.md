@@ -50,3 +50,29 @@ byte-identical — the new styles are injected by wc-rich-text itself.
 - While an image is selected it is the editor's selection, so the browser draws its normal selection tint over it.
 - Test fix: the contrast sweep disables transitions — Wave's form fields animate `color`, and an immediate measurement
   after a theme switch catches the old theme's color mid-transition.
+
+---
+
+## wc-select: setting value on a chip / multiple select (knowledge base 1.57.0)
+
+**Before:** `sel.setAttribute('value', 'a,b,c')` or `sel.value = …` on a rendered `<wc-select mode="chip" multiple>`
+only reached the inner `<select>` (through the base form component); `selectedOptions` and the chips stayed as they
+were, and no `change` fired. A `value="a,b"` in the markup showed no chips.
+
+**Now** (chip / multiple only): a value change from outside replaces `selectedOptions` with the comma-separated list
+(an array works too; values trimmed; an option matching case-insensitively keeps its canonical value; unknown values
+become custom options under `allow-custom` / `allow-dynamic`, as `addChip` does), then runs `updateSelect()`,
+`updateChips()` and `updateDropdownOptions()` and dispatches **one** `change` — none if the selection didn't change.
+A `value="a,b"` in the markup now renders those chips, silently (no `change` on page load, so `hx-trigger="change"`
+doesn't fire). The inner `<select>`'s own change events keep their old path, so a user's native multi-select change
+isn't collapsed to one value.
+
+**Unchanged:** single selects, `addChip` / `removeChip`, native multi-select interaction — each verified identical to
+the previous build. No demo page renders a chip/multiple select with a `value` attribute.
+
+**Verified:** `tests/select-value-test.py` 18/18 (render `value="a,b"` → chips a, b, silent; set `"c"` → one chip "c",
+selectedOptions/inner select/form = c, one change, dropdown hides c; set `""` → no chips, one change; property, array,
+no-op, case-insensitive, allow-custom, plain multiple; the unchanged paths identical to the previous build). Related
+suites pass: `select-face-test` 15/15, form-array (24, 34, 15, 10, and generic 18/19 — its one failing check,
+"dropdown input has autocomplete=off", fails identically on the previous build: the test predates the
+`password-contact` autofill token), combobox suites, `component-contrast-test` 62/62.

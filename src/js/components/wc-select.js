@@ -86,6 +86,12 @@ class WcSelect extends WcBaseFormComponent {
   }
 
   set value(newValue) {
+    // chip / multiple: an outside value change replaces the whole selection (comma-separated list).
+    // The inner <select>'s own change events still take the original path below (_internalValueSet).
+    if (this._isMultiValue() && !this._internalValueSet && this.querySelector('select')) {
+      this._setMultiValue(newValue);
+      return;
+    }
     this._value = newValue;
     this._internals.setFormValue(newValue);
     const innerSelect = this.querySelector('select');
@@ -95,7 +101,8 @@ class WcSelect extends WcBaseFormComponent {
   }
 
   _handleInputChange(event) {
-    super._handleInputChange(event);
+    this._internalValueSet = true;
+    try { super._handleInputChange(event); } finally { this._internalValueSet = false; }
     // Re-dispatch change event from the wc-select element so external
     // listeners can use wc-select.addEventListener('change', ...)
     if (event.type === 'change') {
@@ -199,9 +206,44 @@ class WcSelect extends WcBaseFormComponent {
       // Do nothing...
     } else if (attrName === 'display-member') {
       // Do nothing...
+    } else if (attrName === 'value' && this._isMultiValue() && this.querySelector('select')) {
+      this._setMultiValue(newValue);
     } else {
       super._handleAttributeChange(attrName, newValue);
     }
+  }
+
+  _isMultiValue() {
+    return this.getAttribute('mode') === 'chip' || this.hasAttribute('multiple');
+  }
+
+  // Replace the chip / multiple selection with a comma-separated list (or an array), then rebuild the
+  // inner <select>, the chips and the dropdown, and dispatch ONE change. A value matching no option keeps
+  // the canonical option when it matches case-insensitively; unknown values become custom options under
+  // allow-custom / allow-dynamic (as addChip does). The first application while the element is still
+  // starting up (value="…" in the markup) is silent — no change event on page load.
+  _setMultiValue(raw) {
+    const list = (Array.isArray(raw) ? raw : String(raw == null ? '' : raw).split(','))
+      .map(v => String(v).trim()).filter(v => v !== '');
+    const selectEl = this.querySelector('select');
+    const opts = selectEl ? Array.from(selectEl.options) : [];
+    const allowDynamic = this.hasAttribute('allow-dynamic') || this.hasAttribute('allow-custom');
+    const next = [];
+    for (const v of list) {
+      const exact = opts.find(o => o.value === v);
+      const ci = exact || opts.find(o => String(o.value).toLowerCase() === v.toLowerCase());
+      const val = ci ? ci.value : v;
+      if (next.some(x => x.toLowerCase() === val.toLowerCase())) continue;
+      if (!ci && allowDynamic && selectEl) selectEl.add(new Option(v, v));
+      next.push(val);
+    }
+    const same = next.length === this.selectedOptions.length && next.every((v, i) => v === this.selectedOptions[i]);
+    this.selectedOptions = next;
+    this._value = next.join(',');
+    this.updateSelect();
+    this.updateChips();
+    this.updateDropdownOptions();
+    if (!same && this.isReady) this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   _render() {
