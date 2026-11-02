@@ -90,6 +90,25 @@ This is **bold**, *italic*, and `code`.
       </div>
 
       <div class="col gap-2">
+        <h2 class="text-xl font-semibold">Images: resize, align, alt text</h2>
+        <p class="text-sm">
+          Click an image (or put the caret next to it and press <kbd>Shift</kbd>+<kbd>→</kbd>) to select it: drag a corner
+          (mouse, touch or pen) to resize with the aspect kept, or use the image toolbar — <b>S / M / L / Original</b>,
+          <b>Width</b> in pixels, <b>Left / Center / Right</b>, <b>Alt text</b>, <b>Remove</b>. <kbd>Enter</kbd>/<kbd>Space</kbd>
+          opens the toolbar, <kbd>Esc</kbd> closes it, <kbd>Delete</kbd> removes the image. Everything is saved as
+          attributes and inline styles, so it survives email programs. Try: logo → <b>M</b> + <b>Center</b>; QR code → <b>S</b>.
+        </p>
+        <wc-rich-text id="rtimages" name="email_body" mode="html" toolbar="full" min-height="320px"
+          value="<p><img src=&quot;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0ODAiIGhlaWdodD0iMTIwIj48cmVjdCB3aWR0aD0iNDgwIiBoZWlnaHQ9IjEyMCIgcng9IjE2IiBmaWxsPSIjMWUzYThhIi8+PHRleHQgeD0iMjQwIiB5PSI3NiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQ0IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JbmZvcm1hIEV2ZW50czwvdGV4dD48L3N2Zz4=&quot; alt=&quot;&quot;></p><p>Scan the code below at the door to check in.</p><p><img src=&quot;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgMzAgMzAiPjxyZWN0IHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iI2ZmZiIvPjxnIGZpbGw9IiMwMDAiPjxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSI4IiBoZWlnaHQ9IjgiLz48cmVjdCB4PSIyMCIgeT0iMiIgd2lkdGg9IjgiIGhlaWdodD0iOCIvPjxyZWN0IHg9IjIiIHk9IjIwIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ii8+PHJlY3QgeD0iMTMiIHk9IjEzIiB3aWR0aD0iNCIgaGVpZ2h0PSI0Ii8+PHJlY3QgeD0iMjEiIHk9IjIxIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIi8+PHJlY3QgeD0iMjUiIHk9IjE0IiB3aWR0aD0iMyIgaGVpZ2h0PSIzIi8+PHJlY3QgeD0iMTQiIHk9IjI0IiB3aWR0aD0iMyIgaGVpZ2h0PSIzIi8+PC9nPjxnIGZpbGw9IiNmZmYiPjxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiLz48cmVjdCB4PSIyMiIgeT0iNCIgd2lkdGg9IjQiIGhlaWdodD0iNCIvPjxyZWN0IHg9IjQiIHk9IjIyIiB3aWR0aD0iNCIgaGVpZ2h0PSI0Ii8+PC9nPjwvc3ZnPg==&quot; alt=&quot;&quot;></p><p>See you there!</p>"></wc-rich-text>
+        <details class="text-sm"><summary>Saved HTML</summary><pre id="rtimages-out" style="white-space: pre-wrap; word-break: break-all; font-size: 0.75rem;"></pre></details>
+        <wc-javascript class="hidden"><script type="text/plain">
+          (() => { const ed = document.getElementById('rtimages'), out = document.getElementById('rtimages-out');
+            const show = () => { out.textContent = ed.value.replace(/src="data:[^"]+"/g, 'src="data:…"'); };
+            ed.addEventListener('wcrichtextchange', show); customElements.whenDefined('wc-rich-text').then(() => (ed.ready || Promise.resolve()).then(show)); })();
+        </script></wc-javascript>
+      </div>
+
+      <div class="col gap-2">
         <h2 class="text-xl font-semibold">Variables (fields)</h2>
         <p class="text-sm">
           With <code>fields</code>, each <code>{name}</code> shows as a box with its label (red when it isn't a

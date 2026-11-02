@@ -116,6 +116,12 @@ class WcRichText extends WcBaseFormComponent {
     this._savedRange = null;
     this._fields = null;
     this._onEditorKeyDown = this._handleEditorKeyDown.bind(this);
+    // image select / resize / align (all inert until an image is clicked or keyboard-selected)
+    this._onEditorClick = this._handleEditorClick.bind(this);
+    this._onEditorKeyUp = this._handleEditorKeyUp.bind(this);
+    this._onImgOutside = this._handleImgOutside.bind(this);
+    this._onImgReposition = () => this._positionImgUi();
+    this._selImg = null;
     this._onPickOutside = (e) => { if (this._pickEl && !this._pickEl.contains(e.target)) this._closePicker(false); };
 
     const compEl = this.querySelector(':scope > .wc-rich-text');
@@ -248,6 +254,7 @@ class WcRichText extends WcBaseFormComponent {
   }
 
   _handleEditorKeyDown(e) {
+    if (this._selImg && this._handleImgKey(e)) return;
     if (e.key !== '{' || e.ctrlKey || e.metaKey || e.altKey || !this._hasFields()) return;
     if (this.hasAttribute('readonly') || this.hasAttribute('disabled')) return;
     e.preventDefault();
@@ -733,6 +740,10 @@ class WcRichText extends WcBaseFormComponent {
       this.editorEl.addEventListener('paste', this._onPaste);
       this.editorEl.removeEventListener('keydown', this._onEditorKeyDown);
       this.editorEl.addEventListener('keydown', this._onEditorKeyDown);
+      this.editorEl.removeEventListener('click', this._onEditorClick);
+      this.editorEl.addEventListener('click', this._onEditorClick);
+      this.editorEl.removeEventListener('keyup', this._onEditorKeyUp);
+      this.editorEl.addEventListener('keyup', this._onEditorKeyUp);
     }
   }
 
@@ -746,7 +757,10 @@ class WcRichText extends WcBaseFormComponent {
       this.editorEl.removeEventListener('input', this._onEditorInput);
       this.editorEl.removeEventListener('paste', this._onPaste);
       this.editorEl.removeEventListener('keydown', this._onEditorKeyDown);
+      this.editorEl.removeEventListener('click', this._onEditorClick);
+      this.editorEl.removeEventListener('keyup', this._onEditorKeyUp);
     }
+    this._deselectImg(false);
     this._closePicker(true);
     if (this._fileInput) {
       this._fileInput.removeEventListener('change', this._onFileChosen);
@@ -786,6 +800,311 @@ class WcRichText extends WcBaseFormComponent {
     }
     if (attrName === 'class') { super._handleAttributeChange(attrName, newValue); return; }
     super._handleAttributeChange(attrName, newValue);
+  }
+
+  // ---- Images: select, resize, align, alt ---------------------------------------------------
+  // Nothing here touches the editor's content until the writer acts on an image: the outline,
+  // handles and image toolbar live OUTSIDE the contenteditable (siblings positioned over the image)
+  // and the document-level listeners exist only while an image is selected. Sizes and alignment
+  // are stored as attributes + inline styles that email programs honor (no classes, no <style>).
+
+  _imgEditable() {
+    return !!this.editorEl && this.editorEl.isContentEditable && !this.hasAttribute('readonly') && !this.hasAttribute('disabled');
+  }
+
+  _handleEditorClick(e) {
+    const img = e.target.closest && e.target.closest('img');
+    if (img && this.editorEl.contains(img) && this._imgEditable()) {
+      this._selectImg(img, { toolbar: true });
+    } else if (this._selImg) {
+      this._deselectImg(false);
+    }
+  }
+
+  // keyboard selection: Shift+Arrow (or any selection) that wraps exactly one image selects it
+  _handleEditorKeyUp() {
+    if (!this._imgEditable() || this._selImg) return;
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+    const r = sel.getRangeAt(0);
+    const frag = r.cloneContents();
+    const imgs = frag.querySelectorAll('img');
+    if (imgs.length !== 1 || frag.textContent.trim()) return;
+    const src = imgs[0].getAttribute('src');
+    const img = [...this.editorEl.querySelectorAll('img')].find(i => i.getAttribute('src') === src && r.intersectsNode(i));
+    if (img) this._selectImg(img, { toolbar: false });
+  }
+
+  _selectImg(img, { toolbar = false, focusToolbar = false } = {}) {
+    if (this._selImg !== img) this._deselectImg(false);
+    this._selImg = img;
+    // the image itself is the editor selection, so the browser's own Delete/typing act on it
+    const sel = window.getSelection();
+    const r = document.createRange();
+    r.selectNode(img);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    this._ensureImgUi();
+    this._imgUi.box.hidden = false;
+    if (toolbar) this._openImgToolbar(focusToolbar);
+    this._positionImgUi();
+    if (!this._imgListening) {
+      this._imgListening = true;
+      document.addEventListener('pointerdown', this._onImgOutside, true);
+      window.addEventListener('scroll', this._onImgReposition, true);
+      window.addEventListener('resize', this._onImgReposition);
+    }
+  }
+
+  _deselectImg(refocus, caretAfter = null) {
+    const img = this._selImg;
+    this._selImg = null;
+    if (this._imgUi) {
+      this._imgUi.box.hidden = true;
+      this._imgUi.bar.hidden = true;
+    }
+    if (this._imgListening) {
+      this._imgListening = false;
+      document.removeEventListener('pointerdown', this._onImgOutside, true);
+      window.removeEventListener('scroll', this._onImgReposition, true);
+      window.removeEventListener('resize', this._onImgReposition);
+    }
+    if (refocus && this.editorEl) {
+      this.editorEl.focus();
+      const anchor = caretAfter || img;
+      if (anchor && anchor.isConnected) {
+        const sel = window.getSelection();
+        const r = document.createRange();
+        r.setStartAfter(anchor);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+    }
+  }
+
+  _handleImgOutside(e) {
+    const t = e.target;
+    if (this._imgUi && (this._imgUi.box.contains(t) || this._imgUi.bar.contains(t))) return;
+    if (t === this._selImg) return;
+    this._deselectImg(false);
+  }
+
+  // keys while an image is selected (in the editor). Returns true when handled.
+  _handleImgKey(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._openImgToolbar(true);
+      return true;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this._deselectImg(true);
+      return true;
+    }
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      this._removeSelectedImg();
+      return true;
+    }
+    if (e.key === 'Tab' || e.key.startsWith('Arrow') || e.key === 'Shift' || e.metaKey || e.ctrlKey) {
+      if (e.key.startsWith('Arrow') && !e.shiftKey) this._deselectImg(false);
+      return false;
+    }
+    // any other key types over the image (native behavior) — drop our selection UI first
+    this._deselectImg(false);
+    return false;
+  }
+
+  _removeSelectedImg() {
+    const img = this._selImg;
+    if (!img) return;
+    const marker = document.createTextNode('');
+    img.replaceWith(marker);
+    this._deselectImg(true, marker);
+    marker.remove();
+    this._handleEditorInput();
+  }
+
+  _ensureImgUi() {
+    if (this._imgUi) return;
+    const box = document.createElement('div');
+    box.className = 'wc-rich-text-imgsel';
+    box.hidden = true;
+    box.innerHTML = ['nw', 'ne', 'sw', 'se'].map(c =>
+      `<span class="wc-rich-text-imgsel-handle" data-corner="${c}" aria-hidden="true"></span>`).join('');
+    const bar = document.createElement('div');
+    bar.className = 'wc-rich-text-imgbar';
+    bar.hidden = true;
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'Image');
+    bar.innerHTML = `
+      <div class="wc-rich-text-imgbar-group" role="group" aria-label="Size">
+        <button type="button" data-size="0.25" title="Small (25%)">S</button>
+        <button type="button" data-size="0.5" title="Medium (50%)">M</button>
+        <button type="button" data-size="0.75" title="Large (75%)">L</button>
+        <button type="button" data-size="1" title="Original size">Original</button>
+        <label class="wc-rich-text-imgbar-field">Width <input type="number" min="16" step="1" class="wc-rich-text-imgbar-width" aria-label="Width in pixels"> px</label>
+      </div>
+      <div class="wc-rich-text-imgbar-group" role="group" aria-label="Align">
+        <button type="button" data-align="left" aria-pressed="false" title="Align left">Left</button>
+        <button type="button" data-align="center" aria-pressed="false" title="Center">Center</button>
+        <button type="button" data-align="right" aria-pressed="false" title="Align right">Right</button>
+      </div>
+      <label class="wc-rich-text-imgbar-field wc-rich-text-imgbar-alt">Alt text <input type="text" class="wc-rich-text-imgbar-alttext" placeholder="Describe the image"></label>
+      <button type="button" data-remove title="Remove image (Delete)">Remove</button>`;
+    // keep them out of the contenteditable: siblings right after the editor
+    this.editorEl.after(box, bar);
+    this._imgUi = { box, bar, width: bar.querySelector('.wc-rich-text-imgbar-width'), alt: bar.querySelector('.wc-rich-text-imgbar-alttext') };
+
+    box.addEventListener('pointerdown', (e) => this._startImgResize(e));
+    bar.addEventListener('mousedown', (e) => { if (!e.target.closest('input')) e.preventDefault(); });
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b || !this._selImg) return;
+      if (b.dataset.size) this._applyImgWidth(Math.round(this._naturalWidth(this._selImg) * parseFloat(b.dataset.size)));
+      else if (b.dataset.align) this._applyImgAlign(b.getAttribute('aria-pressed') === 'true' ? '' : b.dataset.align);
+      else if (b.hasAttribute('data-remove')) this._removeSelectedImg();
+    });
+    this._imgUi.width.addEventListener('change', () => {
+      const n = parseInt(this._imgUi.width.value, 10);
+      if (this._selImg && n >= 16) this._applyImgWidth(n);
+    });
+    this._imgUi.width.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); this._imgUi.width.dispatchEvent(new Event('change')); }
+    });
+    this._imgUi.alt.addEventListener('input', () => {
+      if (!this._selImg) return;
+      this._selImg.setAttribute('alt', this._imgUi.alt.value);
+      this._handleEditorInput();
+    });
+    bar.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {         // close the toolbar, back to the text with the image still selected
+        e.preventDefault();
+        const img = this._selImg;
+        this._imgUi.bar.hidden = true;
+        this.editorEl.focus();
+        if (img) this._selectImg(img, { toolbar: false });
+        return;
+      }
+      const items = [...bar.querySelectorAll('button, input')];
+      const i = items.indexOf(document.activeElement);
+      if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && document.activeElement.tagName === 'BUTTON') {
+        e.preventDefault();
+        items[(i + (e.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length].focus();
+      }
+    });
+  }
+
+  _openImgToolbar(focus) {
+    if (!this._selImg) return;
+    this._ensureImgUi();
+    this._syncImgBar();
+    this._imgUi.bar.hidden = false;
+    this._positionImgUi();
+    if (focus) this._imgUi.bar.querySelector('button').focus();
+  }
+
+  _syncImgBar() {
+    const img = this._selImg, ui = this._imgUi;
+    if (!img || !ui) return;
+    ui.width.value = Math.round(img.getBoundingClientRect().width) || '';
+    ui.alt.value = img.getAttribute('alt') || '';
+    const a = this._imgAlign(img);
+    ui.bar.querySelectorAll('[data-align]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.align === a)));
+  }
+
+  _positionImgUi() {
+    const img = this._selImg, ui = this._imgUi;
+    if (!img || !ui) return;
+    if (!img.isConnected) { this._deselectImg(false); return; }
+    const r = img.getBoundingClientRect(), ed = this.editorEl.getBoundingClientRect();
+    // hide while the image is scrolled out of the editor's view
+    const visible = r.bottom > ed.top && r.top < ed.bottom && r.width > 0;
+    ui.box.style.visibility = visible ? '' : 'hidden';
+    ui.box.style.left = `${r.left}px`;
+    ui.box.style.top = `${r.top}px`;
+    ui.box.style.width = `${r.width}px`;
+    ui.box.style.height = `${r.height}px`;
+    if (!ui.bar.hidden) {
+      ui.bar.style.visibility = visible ? '' : 'hidden';
+      const bh = ui.bar.offsetHeight, bw = ui.bar.offsetWidth;
+      const below = r.bottom + 8 + bh < window.innerHeight;
+      ui.bar.style.top = `${below ? r.bottom + 8 : Math.max(8, r.top - bh - 8)}px`;
+      ui.bar.style.left = `${Math.max(8, Math.min(window.innerWidth - bw - 8, r.left))}px`;
+    }
+  }
+
+  _naturalWidth(img) {
+    return img.naturalWidth || Math.round(img.getBoundingClientRect().width) || 100;
+  }
+
+  // width attribute + inline width / max-width / height:auto — what email programs honor
+  _applyImgWidth(px, commit = true) {
+    const img = this._selImg;
+    if (!img) return;
+    const w = Math.max(16, Math.round(px));
+    img.setAttribute('width', String(w));
+    img.removeAttribute('height');
+    img.style.width = `${w}px`;
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    this._positionImgUi();
+    if (commit) { this._syncImgBar(); this._handleEditorInput(); }
+  }
+
+  _imgAlign(img) {
+    const st = img.style;
+    if (st.float === 'left') return 'left';
+    if (st.float === 'right') return 'right';
+    if (st.display === 'block' && st.marginLeft === 'auto' && st.marginRight === 'auto') return 'center';
+    return '';
+  }
+
+  // left/right = float + margin (text wraps), center = block + auto margins; '' clears it
+  _applyImgAlign(align) {
+    const img = this._selImg;
+    if (!img) return;
+    const st = img.style;
+    st.removeProperty('float');
+    st.removeProperty('display');
+    st.removeProperty('margin');
+    if (align === 'center') { st.display = 'block'; st.margin = '0 auto'; }
+    else if (align === 'left') { st.float = 'left'; st.margin = '0 12px 8px 0'; }
+    else if (align === 'right') { st.float = 'right'; st.margin = '0 0 8px 12px'; }
+    if (!img.getAttribute('style')) img.removeAttribute('style');
+    this._positionImgUi();
+    this._syncImgBar();
+    this._handleEditorInput();
+  }
+
+  // corner handles: pointer events (mouse, touch, pen), aspect ratio kept (height:auto)
+  _startImgResize(e) {
+    const h = e.target.closest('.wc-rich-text-imgsel-handle');
+    if (!h || !this._selImg || !e.isPrimary) return;
+    e.preventDefault();
+    const img = this._selImg;
+    const sign = h.dataset.corner.endsWith('e') ? 1 : -1;
+    const x0 = e.clientX, w0 = img.getBoundingClientRect().width;
+    const maxW = this.editorEl.clientWidth - 2;
+    h.setPointerCapture(e.pointerId);
+    this._imgUi.box.classList.add('is-resizing');
+    const move = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      this._applyImgWidth(Math.min(maxW, Math.max(16, w0 + sign * (ev.clientX - x0))), false);
+    };
+    const up = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      h.removeEventListener('pointermove', move);
+      h.removeEventListener('pointerup', up);
+      h.removeEventListener('pointercancel', up);
+      this._imgUi.box.classList.remove('is-resizing');
+      this._syncImgBar();
+      this._handleEditorInput();
+    };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up);
+    h.addEventListener('pointercancel', up);
   }
 
   _applyStyle() {
@@ -868,6 +1187,23 @@ class WcRichText extends WcBaseFormComponent {
           opacity: 0.7;
           cursor: not-allowed;
         }
+        /* image selection: outline + corner handles in body text color (>= 3:1 on every surface) */
+        .wc-rich-text-imgsel { position: fixed; z-index: 20; pointer-events: none; box-sizing: border-box;
+          outline: 2px solid var(--text-1); outline-offset: 1px; }
+        .wc-rich-text-imgsel-handle { position: absolute; width: 12px; height: 12px; box-sizing: border-box;
+          background: var(--text-1); border: 2px solid var(--component-bg-color); border-radius: 2px;
+          pointer-events: auto; touch-action: none; }
+        @media (pointer: coarse) { .wc-rich-text-imgsel-handle { width: 22px; height: 22px; } }
+        .wc-rich-text-imgsel-handle[data-corner="nw"] { left: 0; top: 0; transform: translate(-50%, -50%); cursor: nwse-resize; }
+        .wc-rich-text-imgsel-handle[data-corner="ne"] { right: 0; top: 0; transform: translate(50%, -50%); cursor: nesw-resize; }
+        .wc-rich-text-imgsel-handle[data-corner="sw"] { left: 0; bottom: 0; transform: translate(-50%, 50%); cursor: nesw-resize; }
+        .wc-rich-text-imgsel-handle[data-corner="se"] { right: 0; bottom: 0; transform: translate(50%, 50%); cursor: nwse-resize; }
+        .wc-rich-text-imgbar { position: fixed; z-index: 21; display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem 0.75rem;
+          max-width: min(36rem, calc(100vw - 16px)); padding: 0.375rem 0.5rem; font-size: 0.8125rem;
+          background: var(--component-bg-color); color: var(--text-1); border: 1px solid var(--text-8); border-radius: 0.375rem;
+          box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); }
+        .wc-rich-text-imgbar-group { display: flex; align-items: center; gap: 0.25rem; }
+        .wc-rich-text-imgbar-field { display: inline-flex; align-items: center; gap: 0.25rem; color: var(--text-1); }
         .wc-rich-text-editor:empty::before {
           content: attr(data-placeholder);
           color: var(--text-3, var(--component-alt-color));
@@ -929,6 +1265,19 @@ class WcRichText extends WcBaseFormComponent {
       }
     `.trim();
     this.loadStyle('wc-rich-text-style', style);
+    // image toolbar buttons + inputs: unlayered and tightly scoped, because the wc.ui layer styles bare
+    // buttons/inputs and outranks wc.usage (same pattern as wc-record-lookup / wc-zoom)
+    this.loadStyle('wc-rich-text-imgbar-style', `
+      .wc-rich-text-imgbar button { padding: 0.125rem 0.5rem; min-height: 1.75rem; border: 1px solid var(--text-9); border-radius: 0.25rem;
+        background: transparent; color: var(--text-1); font: inherit; cursor: pointer; }
+      .wc-rich-text-imgbar button:hover { background: var(--surface-3); }
+      .wc-rich-text-imgbar button[aria-pressed="true"] { background: var(--text-1); color: var(--component-bg-color); border-color: var(--text-1); }
+      .wc-rich-text-imgbar button:focus-visible, .wc-rich-text-imgbar input:focus-visible { outline: 2px solid var(--text-1); outline-offset: 1px; }
+      .wc-rich-text-imgbar input { width: 4.5rem; padding: 0.125rem 0.375rem; min-height: 1.75rem; font: inherit; font-size: 0.8125rem;
+        background: var(--component-bg-color); color: var(--text-1); border: 1px solid var(--text-9); border-radius: 0.25rem; }
+      .wc-rich-text-imgbar .wc-rich-text-imgbar-alttext { width: 12rem; }
+      .wc-rich-text-imgbar input::placeholder { color: var(--text-5); }
+    `);
   }
 }
 

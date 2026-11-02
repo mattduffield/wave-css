@@ -70,6 +70,38 @@ await richText.ready;
 richText.value = markdownString;
 ```
 
+## Images: select, resize, align, alt text
+
+Click an image (or put the caret next to it and press **Shift+Arrow**) to select it: a 2px outline and four corner
+handles appear, plus a small image toolbar.
+
+| Control | What it stores |
+|---|---|
+| Corner handles (mouse, touch, pen — pointer events; the aspect ratio is kept) | `width="N"` + inline `width: Npx; max-width: 100%; height: auto` |
+| **S / M / L / Original** (25% / 50% / 75% / 100% of the natural width) | same |
+| **Width** box (pixels; Enter or leaving the box applies it) | same |
+| **Left / Center / Right** (click the active one again to clear) | left: `float: left; margin: 0 12px 8px 0` · center: `display: block; margin: 0 auto` · right: `float: right; margin: 0 0 8px 12px` |
+| **Alt text** | `alt="…"` |
+| **Remove** (or Delete) | removes the image |
+
+Everything is an attribute or an inline style — no classes, no `<style>` — so it survives email programs
+(verified in a bare, CSS-free render at 600px and in a 320px column, where `max-width: 100%` shrinks large
+images and `height: auto` keeps their shape).
+
+**Keyboard:** with an image selected, **Enter** or **Space** opens the image toolbar (focus on its first control;
+←/→ move between buttons), **Esc** closes it and returns to the text with the image still selected, **Esc** again
+deselects, **Delete**/**Backspace** removes the image. Focus always returns to the text.
+
+**Saving:** each change fires the normal `wcrichtextchange` (once per resize — on release) and updates the form value.
+In `mode="html"` size, alignment and alt survive DOMPurify, the form value and a save-and-reopen round trip. In
+`mode="markdown"` they are dropped, exactly as before (Markdown has no image size/alignment; the alt text becomes the
+Markdown alt).
+
+The outline, handles and toolbar sit outside the editable area, so selecting an image never changes the value, and
+their page-level listeners exist only while an image is selected. `readonly` / `disabled` editors don't select images.
+On touch screens the handles grow to 22px. Contrast in every theme and mode: outline and handles ≥ 3:1 against the
+editor and the image, toolbar text ≥ 4.5:1, its borders and focus ring ≥ 3:1.
+
 ## Notes
 
 - Lazily loads `marked`, `turndown`, and `DOMPurify` (same CDN-load pattern as `wc-code-mirror`); it sets `_deferReady`, so **await `.ready`** before reading or setting `value`.
