@@ -1272,6 +1272,7 @@
     }
     .theme-amber.dark:not(.crisp) {
       --wc-badge-danger-mix: 43%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
     }
     .theme-amber.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1286,6 +1287,7 @@
       --wc-badge-warning-mix: 44%;
       --wc-badge-danger-mix: 51%;
       --wc-badge-info-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
       --wc-on-surface-success-mix: 46%;
       --wc-on-surface-success-light-mix: 38%;
       --wc-on-surface-danger-light-mix: 48%;
@@ -1319,6 +1321,7 @@
     }
     .theme-aqua.light:not(.crisp) {
       --wc-badge-warning-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 49%;
       --wc-on-surface-warning-light-mix: 47%;
     }
@@ -1342,6 +1345,7 @@
     .theme-avocado.light:not(.crisp) {
       --wc-badge-success-mix: 50%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-mix: 53%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 52%;
@@ -1373,6 +1377,7 @@
     }
     .theme-azure.light:not(.crisp) {
       --wc-badge-warning-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 48%;
       --wc-on-surface-warning-light-mix: 47%;
     }
@@ -1386,6 +1391,7 @@
     }
     .theme-blush.dark:not(.crisp) {
       --wc-badge-danger-mix: 42%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 63%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 54%;
     }
     .theme-blush.light.crisp {
@@ -1401,6 +1407,7 @@
       --wc-badge-warning-mix: 43%;
       --wc-badge-danger-mix: 51%;
       --wc-badge-info-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 38%;
       --wc-on-surface-danger-light-mix: 48%;
@@ -1418,6 +1425,7 @@
     }
     .theme-bubblegum.dark:not(.crisp) {
       --wc-badge-danger-mix: 42%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 53%;
     }
     .theme-bubblegum.light.crisp {
@@ -1433,6 +1441,7 @@
       --wc-badge-warning-mix: 42%;
       --wc-badge-danger-mix: 50%;
       --wc-badge-info-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 37%;
       --wc-on-surface-danger-mix: 54%;
@@ -1452,6 +1461,7 @@
     }
     .theme-charcoal.dark:not(.crisp) {
       --wc-badge-danger-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 99%, var(--text-1, #111));
     }
     .theme-charcoal.light.crisp {
       --wc-badge-success-mix: 50%;
@@ -1464,6 +1474,7 @@
     .theme-charcoal.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
       --wc-on-surface-success-mix: 53%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 52%;
@@ -1478,6 +1489,9 @@
       --wc-on-surface-danger-light-mix: 54%;
       --wc-on-surface-info-mix: 43%;
     }
+    .theme-chocolate.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+    }
     .theme-chocolate.light.crisp {
       --wc-badge-success-mix: 52%;
       --wc-badge-warning-mix: 51%;
@@ -1491,6 +1505,7 @@
       --wc-badge-warning-mix: 33%;
       --wc-badge-danger-mix: 37%;
       --wc-badge-info-mix: 37%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 59%, var(--text-1, #111));
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -1508,6 +1523,9 @@
       --wc-on-surface-danger-mix: 40%;
       --wc-on-surface-info-mix: 44%;
     }
+    .theme-coffee.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 73%, var(--text-1, #111));
+    }
     .theme-coffee.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 50%;
@@ -1521,6 +1539,7 @@
       --wc-badge-warning-mix: 33%;
       --wc-badge-danger-mix: 36%;
       --wc-badge-info-mix: 37%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 64%, var(--text-1, #111));
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -1553,6 +1572,7 @@
     .theme-cornsilk.light:not(.crisp) {
       --wc-badge-success-mix: 52%;
       --wc-badge-warning-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 45%;
       --wc-on-surface-warning-mix: 54%;
       --wc-on-surface-warning-light-mix: 43%;
@@ -1567,6 +1587,7 @@
     }
     .theme-cottoncandy.dark:not(.crisp) {
       --wc-badge-danger-mix: 45%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
     }
     .theme-cottoncandy.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1580,6 +1601,7 @@
       --wc-badge-success-mix: 44%;
       --wc-badge-warning-mix: 45%;
       --wc-badge-danger-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-success-mix: 47%;
       --wc-on-surface-success-light-mix: 39%;
       --wc-on-surface-danger-light-mix: 50%;
@@ -1610,6 +1632,7 @@
     .theme-deepsky.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 47%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
       --wc-on-surface-success-mix: 53%;
       --wc-on-surface-success-light-mix: 43%;
       --wc-on-surface-warning-mix: 52%;
@@ -1625,6 +1648,7 @@
     }
     .theme-desert.dark:not(.crisp) {
       --wc-badge-danger-mix: 38%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 49%;
       --wc-on-surface-info-mix: 54%;
     }
@@ -1641,6 +1665,7 @@
       --wc-badge-warning-mix: 41%;
       --wc-badge-danger-mix: 48%;
       --wc-badge-info-mix: 49%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
       --wc-on-surface-success-mix: 43%;
       --wc-on-surface-success-light-mix: 35%;
       --wc-on-surface-danger-mix: 51%;
@@ -1657,6 +1682,9 @@
       --wc-on-surface-danger-mix: 40%;
       --wc-on-surface-info-mix: 45%;
     }
+    .theme-designer.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 70%, var(--text-1, #111));
+    }
     .theme-designer.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 50%;
@@ -1670,6 +1698,7 @@
       --wc-badge-warning-mix: 32%;
       --wc-badge-danger-mix: 35%;
       --wc-badge-info-mix: 37%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 27%, var(--text-1, #111));
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 25%;
       --wc-on-surface-danger-mix: 40%;
@@ -1687,6 +1716,9 @@
       --wc-on-surface-danger-mix: 40%;
       --wc-on-surface-info-mix: 45%;
     }
+    .theme-designer-blue.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+    }
     .theme-designer-blue.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 50%;
@@ -1700,6 +1732,7 @@
       --wc-badge-warning-mix: 29%;
       --wc-badge-danger-mix: 30%;
       --wc-badge-info-mix: 38%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 41%;
@@ -1717,6 +1750,9 @@
       --wc-on-surface-danger-mix: 40%;
       --wc-on-surface-info-mix: 45%;
     }
+    .theme-designer-gray.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 97%, var(--text-1, #111));
+    }
     .theme-designer-gray.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 50%;
@@ -1728,6 +1764,7 @@
     .theme-designer-gray.light:not(.crisp) {
       --wc-badge-success-mix: 48%;
       --wc-badge-warning-mix: 48%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
       --wc-on-surface-success-mix: 50%;
       --wc-on-surface-success-light-mix: 41%;
       --wc-on-surface-warning-mix: 49%;
@@ -1759,6 +1796,7 @@
     .theme-emerald.light:not(.crisp) {
       --wc-badge-success-mix: 54%;
       --wc-badge-warning-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 46%;
       --wc-on-surface-warning-light-mix: 45%;
     }
@@ -1785,6 +1823,7 @@
     .theme-fern.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -1800,6 +1839,7 @@
     }
     .theme-fire.dark:not(.crisp) {
       --wc-badge-danger-mix: 38%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 49%;
       --wc-on-surface-info-mix: 53%;
     }
@@ -1816,6 +1856,7 @@
       --wc-badge-warning-mix: 41%;
       --wc-badge-danger-mix: 47%;
       --wc-badge-info-mix: 48%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 45%, var(--text-1, #111));
       --wc-on-surface-success-mix: 43%;
       --wc-on-surface-success-light-mix: 35%;
       --wc-on-surface-danger-mix: 51%;
@@ -1847,6 +1888,7 @@
     .theme-forest.light:not(.crisp) {
       --wc-badge-success-mix: 53%;
       --wc-badge-warning-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 45%;
       --wc-on-surface-warning-mix: 54%;
       --wc-on-surface-warning-light-mix: 44%;
@@ -1861,6 +1903,7 @@
     }
     .theme-fuchsia.dark:not(.crisp) {
       --wc-badge-danger-mix: 48%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 87%, var(--text-1, #111));
     }
     .theme-fuchsia.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1873,6 +1916,7 @@
     .theme-fuchsia.light:not(.crisp) {
       --wc-badge-success-mix: 45%;
       --wc-badge-warning-mix: 46%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
       --wc-on-surface-success-mix: 50%;
       --wc-on-surface-success-light-mix: 41%;
       --wc-on-surface-danger-light-mix: 53%;
@@ -1894,6 +1938,7 @@
       --wc-badge-warning-mix: 22%;
       --wc-badge-danger-mix: 21%;
       --wc-badge-info-mix: 27%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 91%, var(--text-1, #111));
       --wc-on-surface-success-mix: 44%;
       --wc-on-surface-danger-mix: 28%;
       --wc-on-surface-danger-light-mix: 38%;
@@ -1910,6 +1955,7 @@
       --wc-on-surface-warning-light-mix: 42%;
     }
     .theme-gold.light:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 49%;
       --wc-on-surface-warning-light-mix: 47%;
     }
@@ -1923,6 +1969,7 @@
     }
     .theme-golden.dark:not(.crisp) {
       --wc-badge-danger-mix: 40%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 52%;
     }
     .theme-golden.light.crisp {
@@ -1938,6 +1985,7 @@
       --wc-badge-warning-mix: 43%;
       --wc-badge-danger-mix: 49%;
       --wc-badge-info-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 37%;
       --wc-on-surface-danger-mix: 54%;
@@ -1957,6 +2005,7 @@
     }
     .theme-grape.dark:not(.crisp) {
       --wc-badge-danger-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 89%, var(--text-1, #111));
     }
     .theme-grape.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1970,6 +2019,7 @@
       --wc-badge-success-mix: 46%;
       --wc-badge-warning-mix: 46%;
       --wc-badge-danger-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-success-mix: 49%;
       --wc-on-surface-success-light-mix: 40%;
       --wc-on-surface-danger-light-mix: 51%;
@@ -1997,6 +2047,7 @@
     .theme-gray.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2025,6 +2076,7 @@
     .theme-high-contrast.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2040,6 +2092,7 @@
     }
     .theme-honey.dark:not(.crisp) {
       --wc-badge-danger-mix: 42%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 63%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 53%;
     }
     .theme-honey.light.crisp {
@@ -2055,6 +2108,7 @@
       --wc-badge-warning-mix: 43%;
       --wc-badge-danger-mix: 50%;
       --wc-badge-info-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 37%;
       --wc-on-surface-danger-light-mix: 47%;
@@ -2089,6 +2143,7 @@
     }
     .theme-ice.light:not(.crisp) {
       --wc-badge-warning-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 50%;
       --wc-on-surface-warning-light-mix: 48%;
     }
@@ -2115,6 +2170,7 @@
     .theme-jungle.light:not(.crisp) {
       --wc-badge-success-mix: 54%;
       --wc-badge-warning-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 46%;
       --wc-on-surface-warning-light-mix: 44%;
     }
@@ -2145,6 +2201,7 @@
     }
     .theme-lagoon.light:not(.crisp) {
       --wc-badge-warning-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 49%;
       --wc-on-surface-warning-light-mix: 48%;
     }
@@ -2156,6 +2213,9 @@
       --wc-on-surface-danger-mix: 38%;
       --wc-on-surface-danger-light-mix: 53%;
       --wc-on-surface-info-mix: 44%;
+    }
+    .theme-lavender.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 93%, var(--text-1, #111));
     }
     .theme-lavender.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2169,6 +2229,7 @@
       --wc-badge-success-mix: 47%;
       --wc-badge-warning-mix: 46%;
       --wc-badge-danger-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 49%, var(--text-1, #111));
       --wc-on-surface-success-mix: 49%;
       --wc-on-surface-success-light-mix: 40%;
       --wc-on-surface-danger-light-mix: 52%;
@@ -2191,6 +2252,7 @@
       --wc-badge-warning-ink: #ffffff;
       --wc-badge-danger-mix: 7%;
       --wc-badge-info-mix: 9%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
       --wc-on-surface-success-mix: 14%;
       --wc-on-surface-success-light-mix: 19%;
       --wc-on-surface-danger-mix: 9%;
@@ -2209,6 +2271,7 @@
       --wc-on-surface-warning-light-mix: 42%;
     }
     .theme-lemon.light:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-warning-light-mix: 53%;
     }
     .theme-lime.dark.crisp {
@@ -2234,6 +2297,7 @@
     .theme-lime.light:not(.crisp) {
       --wc-badge-success-mix: 50%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-mix: 53%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 52%;
@@ -2262,6 +2326,7 @@
     .theme-meadow.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 45%;
       --wc-on-surface-warning-mix: 53%;
@@ -2292,6 +2357,7 @@
     .theme-midsky.light:not(.crisp) {
       --wc-badge-success-mix: 53%;
       --wc-badge-warning-mix: 50%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 46%;
       --wc-on-surface-warning-mix: 54%;
       --wc-on-surface-warning-light-mix: 44%;
@@ -2322,6 +2388,7 @@
     }
     .theme-mint.light:not(.crisp) {
       --wc-badge-warning-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 47%;
       --wc-on-surface-warning-light-mix: 45%;
     }
@@ -2348,6 +2415,7 @@
     .theme-moss.light:not(.crisp) {
       --wc-badge-success-mix: 48%;
       --wc-badge-warning-mix: 49%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
       --wc-on-surface-success-mix: 52%;
       --wc-on-surface-success-light-mix: 43%;
       --wc-on-surface-warning-mix: 50%;
@@ -2379,6 +2447,7 @@
     }
     .theme-ocean.light:not(.crisp) {
       --wc-badge-warning-mix: 54%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 49%;
       --wc-on-surface-warning-light-mix: 48%;
     }
@@ -2393,6 +2462,7 @@
     }
     .theme-olive.dark:not(.crisp) {
       --wc-badge-danger-mix: 47%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
     }
     .theme-olive.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2405,6 +2475,7 @@
     .theme-olive.light:not(.crisp) {
       --wc-badge-success-mix: 45%;
       --wc-badge-warning-mix: 47%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-success-mix: 49%;
       --wc-on-surface-success-light-mix: 40%;
       --wc-on-surface-danger-light-mix: 51%;
@@ -2422,6 +2493,7 @@
     }
     .theme-peach.dark:not(.crisp) {
       --wc-badge-danger-mix: 38%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 49%;
       --wc-on-surface-info-mix: 54%;
     }
@@ -2438,6 +2510,7 @@
       --wc-badge-warning-mix: 41%;
       --wc-badge-danger-mix: 47%;
       --wc-badge-info-mix: 49%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
       --wc-on-surface-success-mix: 43%;
       --wc-on-surface-success-light-mix: 35%;
       --wc-on-surface-danger-mix: 52%;
@@ -2456,6 +2529,7 @@
     }
     .theme-petal.dark:not(.crisp) {
       --wc-badge-danger-mix: 40%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 55%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 51%;
     }
     .theme-petal.light.crisp {
@@ -2471,6 +2545,7 @@
       --wc-badge-warning-mix: 41%;
       --wc-badge-danger-mix: 48%;
       --wc-badge-info-mix: 49%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
       --wc-on-surface-success-mix: 43%;
       --wc-on-surface-success-light-mix: 36%;
       --wc-on-surface-danger-mix: 52%;
@@ -2489,6 +2564,7 @@
     }
     .theme-plum.dark:not(.crisp) {
       --wc-badge-danger-mix: 50%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 92%, var(--text-1, #111));
     }
     .theme-plum.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2501,6 +2577,7 @@
     .theme-plum.light:not(.crisp) {
       --wc-badge-success-mix: 46%;
       --wc-badge-warning-mix: 47%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
       --wc-on-surface-success-mix: 50%;
       --wc-on-surface-success-light-mix: 41%;
       --wc-on-surface-danger-light-mix: 53%;
@@ -2518,6 +2595,7 @@
     }
     .theme-rose.dark:not(.crisp) {
       --wc-badge-danger-mix: 40%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 57%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 52%;
     }
     .theme-rose.light.crisp {
@@ -2533,6 +2611,7 @@
       --wc-badge-warning-mix: 42%;
       --wc-badge-danger-mix: 49%;
       --wc-badge-info-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
       --wc-on-surface-success-mix: 44%;
       --wc-on-surface-success-light-mix: 36%;
       --wc-on-surface-danger-mix: 53%;
@@ -2562,6 +2641,7 @@
       --wc-badge-success-mix: 50%;
       --wc-badge-warning-mix: 47%;
       --wc-badge-danger-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
       --wc-on-surface-success-mix: 51%;
       --wc-on-surface-success-light-mix: 42%;
       --wc-on-surface-danger-light-mix: 54%;
@@ -2592,6 +2672,7 @@
     .theme-sage.light:not(.crisp) {
       --wc-badge-success-mix: 52%;
       --wc-badge-warning-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 45%;
       --wc-on-surface-warning-mix: 53%;
       --wc-on-surface-warning-light-mix: 44%;
@@ -2603,6 +2684,9 @@
       --wc-badge-info-mix: 35%;
       --wc-on-surface-danger-mix: 39%;
       --wc-on-surface-info-mix: 44%;
+    }
+    .theme-sienna.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 74%, var(--text-1, #111));
     }
     .theme-sienna.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2617,6 +2701,7 @@
       --wc-badge-warning-mix: 33%;
       --wc-badge-danger-mix: 37%;
       --wc-badge-info-mix: 36%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
       --wc-on-surface-success-mix: 32%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -2635,6 +2720,9 @@
       --wc-on-surface-danger-light-mix: 52%;
       --wc-on-surface-info-mix: 43%;
     }
+    .theme-silver.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
+    }
     .theme-silver.light.crisp {
       --wc-badge-success-mix: 52%;
       --wc-badge-warning-mix: 51%;
@@ -2646,6 +2734,7 @@
     .theme-silver.light:not(.crisp) {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2675,6 +2764,7 @@
     }
     .theme-sky.light:not(.crisp) {
       --wc-badge-warning-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 47%;
       --wc-on-surface-warning-light-mix: 46%;
     }
@@ -2688,6 +2778,7 @@
     }
     .theme-sunset.dark:not(.crisp) {
       --wc-badge-danger-mix: 39%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 51%;
     }
     .theme-sunset.light.crisp {
@@ -2703,6 +2794,7 @@
       --wc-badge-warning-mix: 41%;
       --wc-badge-danger-mix: 47%;
       --wc-badge-info-mix: 49%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
       --wc-on-surface-success-mix: 43%;
       --wc-on-surface-success-light-mix: 35%;
       --wc-on-surface-danger-mix: 52%;
@@ -2723,6 +2815,7 @@
     .theme-tan.dark:not(.crisp) {
       --wc-badge-danger-mix: 42%;
       --wc-badge-info-mix: 48%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 80%, var(--text-1, #111));
       --wc-on-surface-danger-mix: 52%;
     }
     .theme-tan.light.crisp {
@@ -2738,6 +2831,7 @@
       --wc-badge-warning-mix: 43%;
       --wc-badge-danger-mix: 50%;
       --wc-badge-info-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 37%;
       --wc-on-surface-danger-light-mix: 47%;
@@ -2771,6 +2865,7 @@
     }
     .theme-turquoise.light:not(.crisp) {
       --wc-badge-warning-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 47%;
       --wc-on-surface-warning-light-mix: 46%;
     }
@@ -2795,6 +2890,7 @@
       --wc-badge-success-mix: 49%;
       --wc-badge-warning-mix: 47%;
       --wc-badge-danger-mix: 52%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
       --wc-on-surface-success-mix: 50%;
       --wc-on-surface-success-light-mix: 41%;
       --wc-on-surface-danger-light-mix: 53%;
@@ -2811,6 +2907,9 @@
       --wc-on-surface-danger-light-mix: 54%;
       --wc-on-surface-info-mix: 45%;
     }
+    .theme-violet.dark:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1, #111));
+    }
     .theme-violet.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
@@ -2823,6 +2922,7 @@
       --wc-badge-success-mix: 46%;
       --wc-badge-warning-mix: 46%;
       --wc-badge-danger-mix: 53%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 49%, var(--text-1, #111));
       --wc-on-surface-success-mix: 48%;
       --wc-on-surface-success-light-mix: 40%;
       --wc-on-surface-danger-light-mix: 51%;
@@ -2844,6 +2944,7 @@
       --wc-badge-warning-mix: 10%;
       --wc-badge-danger-mix: 15%;
       --wc-badge-info-mix: 20%;
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 88%, var(--text-1, #111));
       --wc-on-surface-success-mix: 30%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-danger-mix: 19%;
@@ -2862,6 +2963,7 @@
       --wc-on-surface-warning-light-mix: 42%;
     }
     .theme-yellow.light:not(.crisp) {
+      --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
       --wc-on-surface-success-light-mix: 53%;
       --wc-on-surface-warning-light-mix: 50%;
     }
@@ -2879,6 +2981,7 @@
         --wc-badge-warning-mix: 44%;
         --wc-badge-danger-mix: 51%;
         --wc-badge-info-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
         --wc-on-surface-success-mix: 46%;
         --wc-on-surface-success-light-mix: 38%;
         --wc-on-surface-danger-light-mix: 48%;
@@ -2896,6 +2999,7 @@
       }
       .theme-aqua:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 49%;
         --wc-on-surface-warning-light-mix: 47%;
       }
@@ -2910,6 +3014,7 @@
       .theme-avocado:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 50%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-mix: 53%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 52%;
@@ -2925,6 +3030,7 @@
       }
       .theme-azure:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 48%;
         --wc-on-surface-warning-light-mix: 47%;
       }
@@ -2941,6 +3047,7 @@
         --wc-badge-warning-mix: 43%;
         --wc-badge-danger-mix: 51%;
         --wc-badge-info-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 38%;
         --wc-on-surface-danger-light-mix: 48%;
@@ -2961,6 +3068,7 @@
         --wc-badge-warning-mix: 42%;
         --wc-badge-danger-mix: 50%;
         --wc-badge-info-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 37%;
         --wc-on-surface-danger-mix: 54%;
@@ -2980,6 +3088,7 @@
       .theme-charcoal:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
         --wc-on-surface-success-mix: 53%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 52%;
@@ -2998,6 +3107,7 @@
         --wc-badge-warning-mix: 33%;
         --wc-badge-danger-mix: 37%;
         --wc-badge-info-mix: 37%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 59%, var(--text-1, #111));
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3020,6 +3130,7 @@
         --wc-badge-warning-mix: 33%;
         --wc-badge-danger-mix: 36%;
         --wc-badge-info-mix: 37%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 64%, var(--text-1, #111));
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3040,6 +3151,7 @@
       .theme-cornsilk:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 52%;
         --wc-badge-warning-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 45%;
         --wc-on-surface-warning-mix: 54%;
         --wc-on-surface-warning-light-mix: 43%;
@@ -3056,6 +3168,7 @@
         --wc-badge-success-mix: 44%;
         --wc-badge-warning-mix: 45%;
         --wc-badge-danger-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-success-mix: 47%;
         --wc-on-surface-success-light-mix: 39%;
         --wc-on-surface-danger-light-mix: 50%;
@@ -3074,6 +3187,7 @@
       .theme-deepsky:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 47%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
         --wc-on-surface-success-mix: 53%;
         --wc-on-surface-success-light-mix: 43%;
         --wc-on-surface-warning-mix: 52%;
@@ -3092,6 +3206,7 @@
         --wc-badge-warning-mix: 41%;
         --wc-badge-danger-mix: 48%;
         --wc-badge-info-mix: 49%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
         --wc-on-surface-success-mix: 43%;
         --wc-on-surface-success-light-mix: 35%;
         --wc-on-surface-danger-mix: 51%;
@@ -3113,6 +3228,7 @@
         --wc-badge-warning-mix: 28%;
         --wc-badge-danger-mix: 29%;
         --wc-badge-info-mix: 32%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1, #111));
         --wc-on-surface-success-mix: 26%;
         --wc-on-surface-success-light-mix: 21%;
         --wc-on-surface-danger-mix: 34%;
@@ -3135,6 +3251,7 @@
         --wc-badge-warning-mix: 29%;
         --wc-badge-danger-mix: 30%;
         --wc-badge-info-mix: 38%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 41%;
@@ -3155,6 +3272,7 @@
       .theme-designer-gray:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 48%;
         --wc-badge-warning-mix: 48%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
         --wc-on-surface-success-mix: 50%;
         --wc-on-surface-success-light-mix: 41%;
         --wc-on-surface-warning-mix: 49%;
@@ -3172,6 +3290,7 @@
       .theme-emerald:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 54%;
         --wc-badge-warning-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 46%;
         --wc-on-surface-warning-light-mix: 45%;
       }
@@ -3186,6 +3305,7 @@
       .theme-fern:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3204,6 +3324,7 @@
         --wc-badge-warning-mix: 41%;
         --wc-badge-danger-mix: 47%;
         --wc-badge-info-mix: 48%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 45%, var(--text-1, #111));
         --wc-on-surface-success-mix: 43%;
         --wc-on-surface-success-light-mix: 35%;
         --wc-on-surface-danger-mix: 51%;
@@ -3223,6 +3344,7 @@
       .theme-forest:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 53%;
         --wc-badge-warning-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 45%;
         --wc-on-surface-warning-mix: 54%;
         --wc-on-surface-warning-light-mix: 44%;
@@ -3238,6 +3360,7 @@
       .theme-fuchsia:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 45%;
         --wc-badge-warning-mix: 46%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
         --wc-on-surface-success-mix: 50%;
         --wc-on-surface-success-light-mix: 41%;
         --wc-on-surface-danger-light-mix: 53%;
@@ -3254,6 +3377,7 @@
         --wc-on-surface-warning-light-mix: 42%;
       }
       .theme-gold:not(.light):not(.dark):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 49%;
         --wc-on-surface-warning-light-mix: 47%;
       }
@@ -3270,6 +3394,7 @@
         --wc-badge-warning-mix: 43%;
         --wc-badge-danger-mix: 49%;
         --wc-badge-info-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 37%;
         --wc-on-surface-danger-mix: 54%;
@@ -3290,6 +3415,7 @@
         --wc-badge-success-mix: 46%;
         --wc-badge-warning-mix: 46%;
         --wc-badge-danger-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-success-mix: 49%;
         --wc-on-surface-success-light-mix: 40%;
         --wc-on-surface-danger-light-mix: 51%;
@@ -3308,6 +3434,7 @@
       .theme-gray:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3324,6 +3451,7 @@
       .theme-high-contrast:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3342,6 +3470,7 @@
         --wc-badge-warning-mix: 43%;
         --wc-badge-danger-mix: 50%;
         --wc-badge-info-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 37%;
         --wc-on-surface-danger-light-mix: 47%;
@@ -3359,6 +3488,7 @@
       }
       .theme-ice:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 50%;
         --wc-on-surface-warning-light-mix: 48%;
       }
@@ -3373,6 +3503,7 @@
       .theme-jungle:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 54%;
         --wc-badge-warning-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 46%;
         --wc-on-surface-warning-light-mix: 44%;
       }
@@ -3386,6 +3517,7 @@
       }
       .theme-lagoon:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 49%;
         --wc-on-surface-warning-light-mix: 48%;
       }
@@ -3401,6 +3533,7 @@
         --wc-badge-success-mix: 47%;
         --wc-badge-warning-mix: 46%;
         --wc-badge-danger-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 49%, var(--text-1, #111));
         --wc-on-surface-success-mix: 49%;
         --wc-on-surface-success-light-mix: 40%;
         --wc-on-surface-danger-light-mix: 52%;
@@ -3417,6 +3550,7 @@
         --wc-on-surface-warning-light-mix: 42%;
       }
       .theme-lemon:not(.light):not(.dark):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-warning-light-mix: 53%;
       }
       .theme-lime:not(.light):not(.dark).crisp {
@@ -3430,6 +3564,7 @@
       .theme-lime:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 50%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-mix: 53%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 52%;
@@ -3446,6 +3581,7 @@
       .theme-meadow:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 45%;
         --wc-on-surface-warning-mix: 53%;
@@ -3462,6 +3598,7 @@
       .theme-midsky:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 53%;
         --wc-badge-warning-mix: 50%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 46%;
         --wc-on-surface-warning-mix: 54%;
         --wc-on-surface-warning-light-mix: 44%;
@@ -3476,6 +3613,7 @@
       }
       .theme-mint:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 47%;
         --wc-on-surface-warning-light-mix: 45%;
       }
@@ -3490,6 +3628,7 @@
       .theme-moss:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 48%;
         --wc-badge-warning-mix: 49%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
         --wc-on-surface-success-mix: 52%;
         --wc-on-surface-success-light-mix: 43%;
         --wc-on-surface-warning-mix: 50%;
@@ -3505,6 +3644,7 @@
       }
       .theme-ocean:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 49%;
         --wc-on-surface-warning-light-mix: 48%;
       }
@@ -3519,6 +3659,7 @@
       .theme-olive:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 45%;
         --wc-badge-warning-mix: 47%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-success-mix: 49%;
         --wc-on-surface-success-light-mix: 40%;
         --wc-on-surface-danger-light-mix: 51%;
@@ -3539,6 +3680,7 @@
         --wc-badge-warning-mix: 41%;
         --wc-badge-danger-mix: 47%;
         --wc-badge-info-mix: 49%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
         --wc-on-surface-success-mix: 43%;
         --wc-on-surface-success-light-mix: 35%;
         --wc-on-surface-danger-mix: 52%;
@@ -3560,6 +3702,7 @@
         --wc-badge-warning-mix: 41%;
         --wc-badge-danger-mix: 48%;
         --wc-badge-info-mix: 49%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
         --wc-on-surface-success-mix: 43%;
         --wc-on-surface-success-light-mix: 36%;
         --wc-on-surface-danger-mix: 52%;
@@ -3579,6 +3722,7 @@
       .theme-plum:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 46%;
         --wc-badge-warning-mix: 47%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
         --wc-on-surface-success-mix: 50%;
         --wc-on-surface-success-light-mix: 41%;
         --wc-on-surface-danger-light-mix: 53%;
@@ -3599,6 +3743,7 @@
         --wc-badge-warning-mix: 42%;
         --wc-badge-danger-mix: 49%;
         --wc-badge-info-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 47%, var(--text-1, #111));
         --wc-on-surface-success-mix: 44%;
         --wc-on-surface-success-light-mix: 36%;
         --wc-on-surface-danger-mix: 53%;
@@ -3619,6 +3764,7 @@
         --wc-badge-success-mix: 50%;
         --wc-badge-warning-mix: 47%;
         --wc-badge-danger-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
         --wc-on-surface-success-mix: 51%;
         --wc-on-surface-success-light-mix: 42%;
         --wc-on-surface-danger-light-mix: 54%;
@@ -3637,6 +3783,7 @@
       .theme-sage:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 52%;
         --wc-badge-warning-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 45%;
         --wc-on-surface-warning-mix: 53%;
         --wc-on-surface-warning-light-mix: 44%;
@@ -3654,6 +3801,7 @@
         --wc-badge-warning-mix: 33%;
         --wc-badge-danger-mix: 37%;
         --wc-badge-info-mix: 36%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
         --wc-on-surface-success-mix: 32%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3674,6 +3822,7 @@
       .theme-silver:not(.light):not(.dark):not(.crisp) {
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3689,6 +3838,7 @@
       }
       .theme-sky:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 47%;
         --wc-on-surface-warning-light-mix: 46%;
       }
@@ -3705,6 +3855,7 @@
         --wc-badge-warning-mix: 41%;
         --wc-badge-danger-mix: 47%;
         --wc-badge-info-mix: 49%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 46%, var(--text-1, #111));
         --wc-on-surface-success-mix: 43%;
         --wc-on-surface-success-light-mix: 35%;
         --wc-on-surface-danger-mix: 52%;
@@ -3726,6 +3877,7 @@
         --wc-badge-warning-mix: 43%;
         --wc-badge-danger-mix: 50%;
         --wc-badge-info-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 37%;
         --wc-on-surface-danger-light-mix: 47%;
@@ -3743,6 +3895,7 @@
       }
       .theme-turquoise:not(.light):not(.dark):not(.crisp) {
         --wc-badge-warning-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 47%;
         --wc-on-surface-warning-light-mix: 46%;
       }
@@ -3758,6 +3911,7 @@
         --wc-badge-success-mix: 49%;
         --wc-badge-warning-mix: 47%;
         --wc-badge-danger-mix: 52%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-success-mix: 50%;
         --wc-on-surface-success-light-mix: 41%;
         --wc-on-surface-danger-light-mix: 53%;
@@ -3777,6 +3931,7 @@
         --wc-badge-success-mix: 46%;
         --wc-badge-warning-mix: 46%;
         --wc-badge-danger-mix: 53%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 49%, var(--text-1, #111));
         --wc-on-surface-success-mix: 48%;
         --wc-on-surface-success-light-mix: 40%;
         --wc-on-surface-danger-light-mix: 51%;
@@ -3793,6 +3948,7 @@
         --wc-on-surface-warning-light-mix: 42%;
       }
       .theme-yellow:not(.light):not(.dark):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-success-light-mix: 53%;
         --wc-on-surface-warning-light-mix: 50%;
       }
@@ -3808,6 +3964,7 @@
       }
       .theme-amber:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 43%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
       }
       .theme-aqua:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
@@ -3860,6 +4017,7 @@
       }
       .theme-blush:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 42%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 63%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 54%;
       }
       .theme-bubblegum:not(.dark):not(.light).crisp {
@@ -3872,6 +4030,7 @@
       }
       .theme-bubblegum:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 42%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 53%;
       }
       .theme-charcoal:not(.dark):not(.light).crisp {
@@ -3885,6 +4044,7 @@
       }
       .theme-charcoal:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 99%, var(--text-1, #111));
       }
       .theme-chocolate:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 41%;
@@ -3895,6 +4055,9 @@
         --wc-on-surface-danger-light-mix: 54%;
         --wc-on-surface-info-mix: 43%;
       }
+      .theme-chocolate:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+      }
       .theme-coffee:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 42%;
         --wc-badge-warning-mix: 42%;
@@ -3902,6 +4065,9 @@
         --wc-badge-info-mix: 35%;
         --wc-on-surface-danger-mix: 40%;
         --wc-on-surface-info-mix: 44%;
+      }
+      .theme-coffee:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 73%, var(--text-1, #111));
       }
       .theme-cornsilk:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -3925,6 +4091,7 @@
       }
       .theme-cottoncandy:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 45%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
       }
       .theme-deepsky:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
@@ -3948,6 +4115,7 @@
       }
       .theme-desert:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 38%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 49%;
         --wc-on-surface-info-mix: 54%;
       }
@@ -3959,6 +4127,9 @@
         --wc-on-surface-danger-mix: 40%;
         --wc-on-surface-info-mix: 45%;
       }
+      .theme-designer:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 70%, var(--text-1, #111));
+      }
       .theme-designer-blue:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
         --wc-badge-warning-mix: 42%;
@@ -3967,6 +4138,9 @@
         --wc-on-surface-danger-mix: 40%;
         --wc-on-surface-info-mix: 45%;
       }
+      .theme-designer-blue:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+      }
       .theme-designer-gray:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
         --wc-badge-warning-mix: 42%;
@@ -3974,6 +4148,9 @@
         --wc-badge-info-mix: 36%;
         --wc-on-surface-danger-mix: 40%;
         --wc-on-surface-info-mix: 45%;
+      }
+      .theme-designer-gray:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 97%, var(--text-1, #111));
       }
       .theme-emerald:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -4011,6 +4188,7 @@
       }
       .theme-fire:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 38%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 49%;
         --wc-on-surface-info-mix: 53%;
       }
@@ -4036,6 +4214,7 @@
       }
       .theme-fuchsia:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 48%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 87%, var(--text-1, #111));
       }
       .theme-gold:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 40%;
@@ -4051,6 +4230,7 @@
         --wc-badge-warning-mix: 22%;
         --wc-badge-danger-mix: 21%;
         --wc-badge-info-mix: 27%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 91%, var(--text-1, #111));
         --wc-on-surface-success-mix: 44%;
         --wc-on-surface-danger-mix: 28%;
         --wc-on-surface-danger-light-mix: 38%;
@@ -4068,6 +4248,7 @@
       }
       .theme-golden:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 40%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 52%;
       }
       .theme-grape:not(.dark):not(.light).crisp {
@@ -4081,6 +4262,7 @@
       }
       .theme-grape:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 54%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 89%, var(--text-1, #111));
       }
       .theme-gray:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
@@ -4113,6 +4295,7 @@
       }
       .theme-honey:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 42%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 63%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 53%;
       }
       .theme-ice:not(.dark):not(.light).crisp {
@@ -4170,6 +4353,9 @@
         --wc-on-surface-danger-light-mix: 53%;
         --wc-on-surface-info-mix: 44%;
       }
+      .theme-lavender:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 93%, var(--text-1, #111));
+      }
       .theme-lemon:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
         --wc-badge-warning-mix: 39%;
@@ -4185,6 +4371,7 @@
         --wc-badge-warning-ink: #ffffff;
         --wc-badge-danger-mix: 7%;
         --wc-badge-info-mix: 9%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
         --wc-on-surface-success-mix: 14%;
         --wc-on-surface-success-light-mix: 19%;
         --wc-on-surface-danger-mix: 9%;
@@ -4287,6 +4474,7 @@
       }
       .theme-olive:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 47%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
       }
       .theme-peach:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
@@ -4298,6 +4486,7 @@
       }
       .theme-peach:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 38%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 51%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 49%;
         --wc-on-surface-info-mix: 54%;
       }
@@ -4311,6 +4500,7 @@
       }
       .theme-petal:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 40%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 55%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 51%;
       }
       .theme-plum:not(.dark):not(.light).crisp {
@@ -4323,6 +4513,7 @@
       }
       .theme-plum:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 50%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 92%, var(--text-1, #111));
       }
       .theme-rose:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
@@ -4334,6 +4525,7 @@
       }
       .theme-rose:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 40%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 57%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 52%;
       }
       .theme-royal:not(.dark):not(.light).crisp {
@@ -4365,6 +4557,9 @@
         --wc-on-surface-danger-mix: 39%;
         --wc-on-surface-info-mix: 44%;
       }
+      .theme-sienna:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 74%, var(--text-1, #111));
+      }
       .theme-silver:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
         --wc-badge-warning-mix: 41%;
@@ -4373,6 +4568,9 @@
         --wc-on-surface-danger-mix: 38%;
         --wc-on-surface-danger-light-mix: 52%;
         --wc-on-surface-info-mix: 43%;
+      }
+      .theme-silver:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
       }
       .theme-sky:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -4398,6 +4596,7 @@
       }
       .theme-sunset:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 39%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 51%;
       }
       .theme-tan:not(.dark):not(.light).crisp {
@@ -4412,6 +4611,7 @@
       .theme-tan:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 42%;
         --wc-badge-info-mix: 48%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 80%, var(--text-1, #111));
         --wc-on-surface-danger-mix: 52%;
       }
       .theme-turquoise:not(.dark):not(.light).crisp {
@@ -4448,6 +4648,9 @@
         --wc-on-surface-danger-light-mix: 54%;
         --wc-on-surface-info-mix: 45%;
       }
+      .theme-violet:not(.dark):not(.light):not(.crisp) {
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 90%, var(--text-1, #111));
+      }
       .theme-yellow:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 39%;
         --wc-badge-warning-mix: 40%;
@@ -4462,6 +4665,7 @@
         --wc-badge-warning-mix: 10%;
         --wc-badge-danger-mix: 15%;
         --wc-badge-info-mix: 20%;
+        --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 88%, var(--text-1, #111));
         --wc-on-surface-success-mix: 30%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-danger-mix: 19%;

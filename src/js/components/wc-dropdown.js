@@ -526,6 +526,15 @@ class WcDropdown extends WcBaseComponent {
       .wc-dropdown .dropbtn.grid-round {
         background-color: transparent;
         padding: 4px;
+        /* the icon sits on the page/header, not on a button fill: the theme's primary color (hook
+           --wc-dropdown-grid-color). --wc-dropdown-grid-auto is set only in themes/modes where the plain
+           primary is under 3:1 on a header surface (scripts/gen-status-text.py). */
+        color: var(--wc-dropdown-grid-color, var(--wc-dropdown-grid-auto, var(--primary-bg-color)));
+      }
+      /* open / hovered: the button gets a fill — use the label color picked for that fill */
+      .wc-dropdown:hover:not(.click):not(.search) .dropdown .dropbtn.grid-round,
+      .wc-dropdown.show .dropdown .dropbtn.grid-round {
+        color: var(--button-hover-color);
       }
       .wc-dropdown .dropbtn.avatar {
         padding: 6px;
