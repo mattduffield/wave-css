@@ -203,6 +203,7 @@ const ICONS_TO_COPY = [
   "cart-shopping",
   "cat",
   "certificate",
+  "chair",
   "chalkboard",
   "chalkboard-user",
   "champagne-glasses",
