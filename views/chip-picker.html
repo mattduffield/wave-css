@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" class="h-full theme-midsky light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-chip-picker</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-5" style="max-width: 980px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">wc-chip-picker</h1>
+      <p style="margin: 0;">Pick several values, each limited to some slots — parts × show nights, roles × shifts. One chip = one
+        value + its slots; no slots = all. Click a chip (or <b>+ Add</b>) to edit; ←/→ move between chips, Enter/Space opens,
+        Delete/Backspace removes, Esc closes. With <code>warn-overlap</code>, chips sharing a slot turn amber (hover for who/when)
+        — the choice is never blocked.</p>
+      <div class="row gap-2" style="flex-wrap: wrap;">
+        <button class="btn btn-sm" type="button" id="cp-mode">Toggle light / dark</button>
+        <button class="btn btn-sm" type="button" id="cp-crisp">Toggle crisp</button>
+        <select id="cp-theme" aria-label="Theme"><option>theme-midsky</option><option>theme-royal</option><option>theme-designer</option><option>theme-lemon</option><option>theme-coffee</option><option>theme-high-contrast</option></select>
+      </div>
+    </div>
+
+    <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">Parts × show nights (warn-overlap, a form post)</h2>
+      <form id="cp-form" class="col gap-3" onsubmit="return false">
+        <wc-chip-picker id="parts" name="parts_42" add-label="Add part" all-label="every night" slot-label="Nights" warn-overlap
+          slots='[{"value":"n1","label":"Fri 12/12"},{"value":"n2","label":"Sat 12/13"},{"value":"n3","label":"Sun 12/14"},{"value":"n4","label":"Fri 12/19"},{"value":"n5","label":"Sat 12/20"}]'
+          value='[{"value":"Mary","slots":[]},{"value":"Angel","slots":["n1","n2"]},{"value":"Shepherd","slots":["n3"]},{"value":"Angel","slots":["n4"]},{"value":"Wise Man","slots":["n1","n2","n3","n4"]}]'>
+          <option value="Mary">Mary</option><option value="Joseph">Joseph</option><option value="Angel">Angel</option>
+          <option value="Shepherd">Shepherd</option><option value="Wise Man">Wise Man</option><option value="Innkeeper">Innkeeper</option>
+        </wc-chip-picker>
+        <div class="row gap-2"><button type="submit" class="btn btn-primary btn-sm" id="cp-submit">Save (form post)</button>
+          <button type="button" class="btn btn-sm" id="cp-set">Set value from outside</button></div>
+        <pre id="cp-out" class="text-xs" style="margin: 0; white-space: pre-wrap; color: var(--text-2);"></pre>
+      </form>
+    </section>
+
+    <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">Roles × shifts</h2>
+      <wc-chip-picker id="roles" name="roles" add-label="Add role" all-label="all shifts" slot-label="Shifts" warn-overlap
+        slots='[{"value":"am","label":"Morning"},{"value":"pm","label":"Afternoon"},{"value":"ev","label":"Evening"}]'
+        value='[{"value":"usher","slots":["am","pm"]},{"value":"parking","slots":["ev"]}]'>
+        <option value="usher">Usher</option><option value="parking">Parking</option><option value="greeter">Greeter</option>
+      </wc-chip-picker>
+    </section>
+
+    <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">Readonly (display table) and disabled</h2>
+      <table class="w-full">
+        <thead><tr><th style="text-align: left;">Volunteer</th><th style="text-align: left;">Parts</th></tr></thead>
+        <tbody>
+          <tr><td>Ann Lee</td><td><wc-chip-picker readonly all-label="every night" slot-label="Nights" warn-overlap
+            slots='[{"value":"n1","label":"Fri 12/12"},{"value":"n2","label":"Sat 12/13"}]'
+            value='[{"value":"Mary","slots":[]},{"value":"Angel","slots":["n1"]}]'><option value="Mary">Mary</option><option value="Angel">Angel</option></wc-chip-picker></td></tr>
+          <tr><td>Bo Diaz</td><td><wc-chip-picker readonly all-label="every night" slot-label="Nights"
+            slots='[{"value":"n1","label":"Fri 12/12"},{"value":"n2","label":"Sat 12/13"}]'
+            value='[{"value":"Shepherd","slots":["n2"]}]'><option value="Shepherd">Shepherd</option></wc-chip-picker></td></tr>
+        </tbody>
+      </table>
+      <wc-chip-picker id="dis" name="disabled_parts" disabled add-label="Add part" all-label="every night" slot-label="Nights"
+        slots='[{"value":"n1","label":"Fri 12/12"}]' value='[{"value":"Joseph","slots":["n1"]}]'><option value="Joseph">Joseph</option></wc-chip-picker>
+    </section>
+
+    <wc-javascript class="hidden">
+      <script type="text/plain">
+      (() => {
+        const out = document.getElementById('cp-out');
+        const form = document.getElementById('cp-form');
+        const show = (why) => { out.textContent = why + '\n' + [...new FormData(form)].map(([k, v]) => `${k} = ${v}`).join('\n'); };
+        form.addEventListener('submit', () => show('Form post:'));
+        document.getElementById('parts').addEventListener('change', (e) => { if (e.detail) show('change → detail.value: ' + JSON.stringify(e.detail.value)); });
+        document.getElementById('cp-set').addEventListener('click', () => {
+          document.getElementById('parts').setAttribute('value', JSON.stringify([{ value: 'Joseph', slots: [] }, { value: 'Innkeeper', slots: ['n5'] }]));
+          show('value attribute set from outside:');
+        });
+        const h = document.documentElement;
+        document.getElementById('cp-mode').onclick = () => { const d = h.classList.contains('dark'); h.classList.toggle('dark', !d); h.classList.toggle('light', d); };
+        document.getElementById('cp-crisp').onclick = () => h.classList.toggle('crisp');
+        document.getElementById('cp-theme').onchange = (e) => { [...h.classList].filter(c => c.startsWith('theme-')).forEach(c => h.classList.remove(c)); h.classList.add(e.target.value); };
+      })();
+      </script>
+    </wc-javascript>
+  </div>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

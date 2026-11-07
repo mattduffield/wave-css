@@ -100,6 +100,7 @@ import './wc-busy-indicator.js';
 import './wc-progress.js';
 import './wc-kanban.js';
 import './wc-org-chart.js';
+import './wc-chip-picker.js';
 import './wc-calendar.js';
 import './wc-gantt.js';
 import './wc-data-cards.js';

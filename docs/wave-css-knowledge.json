@@ -1,9 +1,9 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.58.0",
+    "version": "1.59.0",
     "description": "Structured documentation for Wave CSS web component library",
-    "lastUpdated": "2026-11-03"
+    "lastUpdated": "2026-11-07"
   },
   "selfHostedAssets": {
     "note": "Wave lazy-loads third-party libs from public CDNs. Set the single global window.WaveAssetBase (before the bundle runs) to load them from a local mirror first, with automatic CDN fallback. UNSET (default) = load from CDN exactly as before (no behavior change). SET (e.g. '/static/js') = try local first, fall back to CDN on any failure with one console.warn naming the missing file. Covers all three mechanisms: injected <script> onerror, injected <link> error, and dynamic import() rejection. Implemented centrally in helper-function.js (waveLocalAssetUrl + loadScript/loadCSS/loadLibrary/waveImport) AND in the WcDependencyManager loader (src/js/utils/dependency-manager.js) — the latter is how IMask (phone/date masking in wc-input via wc-mask-hub), CodeMirror core, and Tabulator core load. Progressively-loaded files (CodeMirror modes/themes/addons, Prism components/themes) resolve locally too; the loader dedups on BOTH local and CDN src so a component's own CDN-url dedup check (wc-code-mirror) can't double-load.",
@@ -1165,6 +1165,29 @@
         },
         "notes": "Extends WcBaseFormComponent; submits the font value (id, or family when no id) under `name` via FACE; `required` → valueMissing. Font entries {id, family, display_name, category, url?, weights?, styles?, note?, badge?:{text,variant}}. `url` fonts register lazily with the FontFace API when their row (or the closed control) scrolls into view (IntersectionObserver), with a neutral placeholder bar until loaded and an italic fallback on failure; registrations are shared page-wide (each file fetched once). Fonts load from `fonts` JSON (or the .fonts property) or `url` (+ results-member; array or {results}) with ready deferred until loaded and wcoptionsloaded fired. Sections: Document fonts (`document-fonts` JSON of values, in order), Recent (`recent-key` localStorage, last 8, newest first), then All fonts grouped by category (flat while searching / filtering). Chips: Serif, Sans Serif, Display, Script, Monospace + categories found (override with `categories` JSON of ids or {id,label}); category slugs normalise sans-serif→sans, handwriting→script, mono→monospace, slab-serif→slab. `preview-text` sample line per row (default 'The quick brown fox'; '' → compact rows). Keyboard: typing on the closed control opens with the search seeded; ↑/↓/PageUp/PageDown/Home/End, Enter picks, Esc closes; role=listbox/option + aria-activedescendant on the search (role=combobox). wcfontpreview {value, family} on hover/arrow (live preview); wcfontpreviewend {value, family} (unchanged current) when closed without a pick; wcfontchange {value, family} on pick. Values given as family/display names still resolve. renderPreview hook for custom previews (e.g. single-line SVG pen fonts). Virtualised list (fixed row heights, ~viewport of rows in the DOM). Panel is a body-level popover mirroring theme classes; pressed chip uses the --wc-on-primary auto-contrast token. Events also broadcast via wc.EventHub (detail.custom). Docs: docs/wc-font-picker.md (includes the SummitMemories designer migration map).",
         "usage": "<wc-font-picker name=\"font\" lbl-label=\"Font\" value=\"georgia\"\n    fonts='[{\"id\":\"georgia\",\"family\":\"Georgia\",\"category\":\"serif\"},{\"id\":\"lobster\",\"family\":\"Lobster\",\"category\":\"display\",\"url\":\"/fonts/lobster.woff2\"}]'\n    document-fonts='[\"georgia\"]' recent-key=\"ps-recent-fonts\" preview-text=\"Follow the Star\" required></wc-font-picker>"
+      },
+      {
+        "name": "wc-chip-picker",
+        "description": "Form-associated multi-value picker where each chip carries one value plus a subset of \"slots\" (parts × show nights, roles × shifts). A chip with no slots means every slot. The same value may appear more than once with different slots. Submits the whole selection as one JSON string under `name`.",
+        "attributes": [
+          "name",
+          "id",
+          "value",
+          "slots",
+          "add-label",
+          "all-label",
+          "slot-label",
+          "warn-overlap",
+          "readonly",
+          "disabled",
+          "aria-label"
+        ],
+        "events": [
+          "change",
+          "wcchippickerchange"
+        ],
+        "notes": "Extends WcBaseFormComponent (FACE, ElementInternals; no native input, so formElement is nulled). VALUE: JSON array [{value, slots:[slotValue…]}]; slots [] = all. `slots` = JSON [{value,label}] (order kept in chips + pills). Choices = the host's <option> children (hidden). CHIP TEXT: 'Mary · every night' (all-label, default 'all'), up to 3 slots → first word of each label joined ('Angel · Fri, Sat'), more than 3 → '· 4 nights' (slot-label lowercased) with every slot label in title. Chips are `.badge` buttons (readonly/disabled → `.badge` spans). `warn-overlap`: chips that share a slot (a no-slots chip shares every slot) get `badge-warning` + a title such as 'Mary and Angel both on Fri 12/12' ('A, B and C all on …' for 3+); never blocks. EDITING: click a chip or '+ add-label' → body-level WcPopover (menu-surface look, role=dialog 'Edit part'/'Add part', theme classes mirrored, clamped to the viewport, full width under 480px) with the value select, slot toggle pills (aria-pressed, ✓ + bold when on), the all-label shortcut (clears slots), Remove (edit only) and Done. Edits are a draft: Done commits; Escape / outside click discards (a new chip exists only after Done). No confirm()/alert(). KEYBOARD: one tab stop (roving tabindex) over role=group; ←/→/↑/↓/Home/End move, Enter/Space open, Delete/Backspace remove the focused chip, Escape closes and refocuses the chip. Chip aria-label = value, every slot label, any overlap warning, 'Press Enter to edit'. FORM: setFormValue(JSON string); readonly still submits, disabled does not. EVENTS: user edits fire `change` + `wcchippickerchange` (bubbling) with detail.value; setting the value attribute or `.value` from outside rebuilds the chips silently. HTMX: all state is rebuilt from attributes on connect / attribute change, and every edit is reflected to the `value` attribute so a swap/settle keeps the latest value. Styles: display:contents host; @layer wc.usage layout; chip/popover controls unlayered (wc.ui styles bare buttons/selects); tokens only. Contrast measured in 648 states (chips, warning chip, pills, popover ≥ 4.5:1; borders/focus ≥ 3:1) — tests/chip-picker-contrast-test.py; behavior tests/chip-picker-test.py. Docs docs/wc-chip-picker.md.",
+        "usage": "<wc-chip-picker name=\"parts_42\" add-label=\"Add part\" all-label=\"every night\" slot-label=\"Nights\" warn-overlap\n    slots='[{\"value\":\"n1\",\"label\":\"Fri 12/12\"},{\"value\":\"n2\",\"label\":\"Sat 12/13\"}]'\n    value='[{\"value\":\"Mary\",\"slots\":[]},{\"value\":\"Angel\",\"slots\":[\"n1\"]}]'>\n  <option value=\"Mary\">Mary</option><option value=\"Angel\">Angel</option>\n</wc-chip-picker>\n<!-- submits parts_42 = '[{\"value\":\"Mary\",\"slots\":[]},{\"value\":\"Angel\",\"slots\":[\"n1\"]}]' -->"
       }
     ],
     "display": [
@@ -3785,7 +3808,8 @@
       "views/font-picker.html — wc-font-picker demos (1,500 fonts with ~40 lazily-registered Google Fonts, Document fonts + Recent, chips, live hover preview with revert; a url-loaded picker with custom categories and compact rows)",
       "views/ribbon.html — wc-ribbon demos (Solid tab: Create ▾ with 4 main + 8 menu-only commands, Modify ▾, Inspect with a select + range widget; green contextual Sketch tab with glyph buttons ● H V ⊥ ∥ T and toggle tools; Make tab with a split button; theme switcher; a setModel-defined ribbon in a resizable frame showing collapse + ⋯ overflow; event log)",
       "views/theming-utilities.html — soft semantic callouts (.success/.warning/.danger/.info-soft-fill) with links, categorical color families on light/dark surfaces, .text-inherit, responsive alignment + md:table + object-cover/contain, [hidden] vs .col/.flex, layered critical CSS; mode switch for light / dark / forced light on a dark OS",
-      "views/visual-reference.html — visual-regression reference page (header/nav, every button variant, inputs, selects, toggle, tabs, tree, card, badges, tables, accent fills, hint/help text); ?build=base loads a reference build from /tmp-base. Used by tests/regression-vs-baseline-test.py"
+      "views/visual-reference.html — visual-regression reference page (header/nav, every button variant, inputs, selects, toggle, tabs, tree, card, badges, tables, accent fills, hint/help text); ?build=base loads a reference build from /tmp-base. Used by tests/regression-vs-baseline-test.py",
+      "views/chip-picker.html — wc-chip-picker: parts × show nights with warn-overlap and a form post (FormData echo + set value from outside), roles × shifts, readonly pickers in a display table, a disabled picker; theme / light-dark / crisp toggles"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },
@@ -3892,6 +3916,11 @@
         "when": "font field (font family / typeface, e.g. heading_font, body_font)",
         "component": "wc-font-picker",
         "notes": "value = the font id (or family); pass the tenant's font collection via `fonts` or `url`; set document-fonts to fonts already used in the document and recent-key per app"
+      },
+      {
+        "when": "array of {value, subset of a fixed slot list} (parts × nights, roles × shifts)",
+        "component": "wc-chip-picker",
+        "notes": "slots = the slot list, <option> children = the values; submits a JSON string; warn-overlap flags values sharing a slot"
       }
     ],
     "collectionViews": [
