@@ -573,6 +573,7 @@ const ICONS_TO_COPY = [
   "shop",
   "shopping-cart",
   "shovel",
+  "shuffle",
   "sidebar",
   "sidebar-flip",
   "signal-bars",
