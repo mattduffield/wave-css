@@ -44,7 +44,8 @@ Demo: `views/chip-picker.html`. Tests: `tests/chip-picker-test.py` (behavior, 50
 Click a chip, or **+ add-label**, to open an anchored popover (menu-surface look, `role="dialog"`):
 
 1. the value select
-2. slot toggle pills (`aria-pressed`; a selected pill shows ✓ and bold, not only a color change)
+2. slot toggle pills (`aria-pressed`; a selected pill has the theme's primary-button colors, the same fill and label as
+   `.btn-primary`, plus ✓ and bold, so it isn't marked by color alone)
 3. the all-label shortcut (clears the slots)
 4. **Remove** (when editing an existing chip), then **Done**
 
@@ -86,6 +87,6 @@ Measured on a canvas, with translucent backgrounds composited, in 54 themes × {
 {OS light, OS dark} × {regular, `.crisp`}:
 
 - chip, warning chip, readonly chip, add label, labels, select text, pills (off / on / all) and Remove / Done: ≥ 4.5:1
-  (lowest: a selected pill at 4.60)
+  (lowest: a selected pill at 4.60, the same as the theme's `.btn-primary`)
 - borders and focus rings: ≥ 3:1
 - the disabled label: ≥ 3:1

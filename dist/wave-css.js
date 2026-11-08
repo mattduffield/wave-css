@@ -40869,13 +40869,13 @@ var WcChipPicker = class extends WcBaseFormComponent {
       panel.querySelectorAll(".wc-chip-picker-pill[data-slot]").forEach((p) => {
         const on = this._draft.slots.includes(p.dataset.slot);
         p.setAttribute("aria-pressed", String(on));
-        p.classList.toggle("badge-primary", on);
+        p.classList.toggle("btn-primary", on);
       });
       const all = panel.querySelector(".wc-chip-picker-all");
       if (all) {
         const on = this._draft.slots.length === 0;
         all.setAttribute("aria-pressed", String(on));
-        all.classList.toggle("badge-primary", on);
+        all.classList.toggle("btn-primary", on);
       }
     };
     syncPills();
@@ -40979,6 +40979,9 @@ var WcChipPicker = class extends WcBaseFormComponent {
       .wc-chip-picker-pop .wc-chip-picker-pill { font: inherit; font-size: 0.75rem; line-height: 1.5; padding: 2px 10px; border: 0; cursor: pointer; }
       /* selected is not color alone: a check mark + bold (aria-pressed carries it for assistive tech) */
       .wc-chip-picker-pop .wc-chip-picker-pill[aria-pressed="true"] { font-weight: 700; }
+      /* selected = the theme's primary-button fill (.btn-primary tokens: the deepened accent + its verified label),
+         so a picked night looks like Save / primary actions in every theme, crisp included */
+      .wc-chip-picker-pop .wc-chip-picker-pill.btn-primary { background: var(--button-bg-color); color: var(--button-color); box-shadow: none; }
       .wc-chip-picker-pop .wc-chip-picker-pill[aria-pressed="true"]::before { content: "\u2713 "; }
       .wc-chip-picker-pop .wc-chip-picker-actions { display: flex; justify-content: space-between; gap: 0.5rem; }
       .wc-chip-picker-pop .wc-chip-picker-actions button { font: inherit; padding: 0.375rem 0.875rem; border-radius: 6px; cursor: pointer; }

@@ -10,7 +10,8 @@ and no slots means all of them. Full reference: `docs/wc-chip-picker.md`. Demo: 
 - Chip text: `Mary · every night`, `Angel · Fri, Sat`, or `Wise Man · 4 nights` (full list in the title). Chips use badge classes.
 - `warn-overlap`: chips sharing a slot get `badge-warning` and a title such as *Mary and Angel both on Fri 12/12*.
   The choice is never blocked.
-- An anchored popover (menu-surface) holds the value select, slot pills, the all-label shortcut, Remove and Done.
+- An anchored popover (menu-surface) holds the value select, slot pills (a selected pill uses the theme's `.btn-primary`
+  colors, like Save), the all-label shortcut, Remove and Done.
   Edits are a draft. The popover stays in the viewport and is full width on narrow screens. No `confirm()` / `alert()`.
 - Keyboard: roving focus with the arrow keys, Home and End. Enter or Space opens a chip, Delete or Backspace removes
   it, and Escape closes the popover. The chips are a `role=group`, the popover is a `role=dialog`, and the pills use
@@ -28,7 +29,8 @@ used as they are). The component's styles are injected at runtime only when the 
 **Verified:**
 - `tests/chip-picker-test.py`: 50/50.
 - `tests/chip-picker-contrast-test.py`: 19/19 over 648 states. Every chip text, the warning chip, the pills and the
-  popover text are ≥ 4.5:1 (lowest 4.60). Borders and focus rings are ≥ 3:1.
+  popover text are ≥ 4.5:1 (lowest 4.60). Borders and focus rings are ≥ 3:1. A selected pill matches
+  `.btn.btn-primary` exactly in every state.
 - Existing `views/` pages vs the previous build (`tests/component-regression-test.py --pages-only`, base
   `/tmp/wave-part13`, 4 theme/mode states each): 97 pages compared.
   - 84 were pixel-identical on the first pass.
