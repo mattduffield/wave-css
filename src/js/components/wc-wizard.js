@@ -278,8 +278,8 @@ if (!customElements.get('wc-wizard')) {
           white-space: nowrap;
         }
         .wc-wizard-indicator.active {
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--primary-text-color, #fff));
         }
         .wc-wizard-indicator:hover:not(.active) {
           background: var(--surface-5);

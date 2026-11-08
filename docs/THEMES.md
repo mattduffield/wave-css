@@ -191,6 +191,28 @@ channels to survive out-of-gamut accents); a `:where(.dark)` `#000` fallback + `
 cover browsers without that math. The same mechanism backs bare `.btn` auto-contrast
 (`--button-color`). See `src/css/main.css` (search `--wc-on-primary`).
 
+**Don't trust the formula alone (Nov 2026).** Some Chrome versions evaluate it wrongly (black on royal's
+crisp accent, 4.27:1). Text-on-primary elements therefore read, in order:
+
+```css
+.badge-primary {
+  background: var(--accent-fill-bg, var(--primary-bg-color));
+  color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
+}
+```
+
+- **`.crisp`:** `--accent-fill-bg` + `--on-accent`, the pair `.btn-primary` uses, checked for every hue with no
+  formula, so it also follows a tenant `--hue`. The crisp-light fill is about 18% deeper than the raw accent. The raw
+  accent at L54% can't carry one text color on every hue: white fails teal, black fails royal.
+- **Regular themes:** `--wc-on-primary-static` (`#000`/`#fff`, the formula's own answer) is written by
+  `scripts/gen-status-text.py` **only for themes whose fill doesn't move with `--hue`**. Those are the 14 hand-tuned
+  ones: earth tones, designer*, neutrals, yellows, high-contrast. A static pick for one hue would be wrong for an
+  app's re-hued theme. Everywhere else the formula stays, unchanged.
+- Applies to `.badge-primary` (+ state variants), `.accent-fill`, wc-table header / row number / primary row /
+  pager, fx-board pads and zones, the font-picker selected chip, wc-select chips + highlighted option, the active
+  wc-wizard step and wc-pivot zone chips. Gate: `tests/on-primary-static-test.py`, which covers every theme × mode ×
+  crisp, a tenant hue sweep, and `--wc-on-primary` forced to black. Demo: `views/on-primary.html`.
+
 ---
 
 ## 7. Neutral themes
@@ -251,8 +273,9 @@ Consequences:
 
 - **Never hardcode hex.** Reference role tokens: `background: var(--surface-2); color: var(--text-1);`.
   They resolve correctly in every theme and mode automatically.
-- **On the accent fill**, use `--wc-on-primary` for text (not `--primary-color`, which flips and can
-  fail contrast). For fills/borders/icons use `--primary-bg-color` / semantic `--*-color`.
+- **On the accent fill**, use `background: var(--accent-fill-bg, var(--primary-bg-color))` with
+  `color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)))` (section 6), not `--primary-color`, which
+  flips and can fail contrast. For borders/icons use `--primary-bg-color` / semantic `--*-color`.
 - **Mode-specific tweaks** go in a `.dark <selector>` (ancestor) rule — `.dark` is on `<html>`.
 - **Muted/neutral safety:** because color comes from `--chroma-mult`, your component is automatically
   grayscale in neutral themes — don't assume saturation.

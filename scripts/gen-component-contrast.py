@@ -49,7 +49,9 @@ ON_SURFACE = ["color-mix(in srgb, {O} 55%, var(--text-1))", "color-mix(in srgb, 
               "var(--text-1)", "{INK}"]
 ACCENT_TEXT = ["color-mix(in srgb, var(--primary-bg-color) 55%, var(--text-1))",
                "color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1))", "var(--text-1)", "{INK}"]
-ON_PRIMARY = ["var(--wc-on-primary)", ink("var(--primary-bg-color)"), "{INK}"]
+ON_PRIMARY = ["var(--wc-on-primary-static, var(--wc-on-primary))", ink("var(--primary-bg-color)"), "{INK}"]
+# elements whose fill is var(--accent-fill-bg, var(--primary-bg-color)): in .crisp the hue-verified --on-accent
+ON_ACCENT_FILL = ["var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)))", ink("var(--primary-bg-color)"), "{INK}"]
 GRAY_TEXT = ["var(--text-2)", "var(--text-1)", "{INK}"]
 
 # id, component wrapper (data-comp), element selector (global, as the fix rule targets it),
@@ -57,11 +59,11 @@ GRAY_TEXT = ["var(--text-2)", "var(--text-1)", "{INK}"]
 REGISTRY = [
     # 1. text/icons ON an accent or colored fill → black/white from the fill
     ("select-chip", "wc-select-chip", "wc-select .chip", "color",
-     [("wc-select .chip", "text", 4.5), ("wc-select .chip-close", "text", 3)], ON_PRIMARY),
+     [("wc-select .chip", "text", 4.5), ("wc-select .chip-close", "text", 3)], ON_ACCENT_FILL),
     ("pivot-zone-chip", "wc-pivot", ".pivot-zone-chip", "color",
-     [(".pivot-zone-chip > *", "text", 4.5)], ON_PRIMARY),
+     [(".pivot-zone-chip > *", "text", 4.5)], ON_ACCENT_FILL),
     ("wizard-active", "wc-wizard", ".wc-wizard-indicator.active", "color",
-     [(".wc-wizard-indicator.active", "text", 4.5), (".wc-wizard-indicator.active svg", "icon", 3)], ON_PRIMARY),
+     [(".wc-wizard-indicator.active", "text", 4.5), (".wc-wizard-indicator.active svg", "icon", 3)], ON_ACCENT_FILL),
     ("sidenav-buttons", "wc-sidenav", "wc-sidenav :is(.closebtn, .openbtn)", "color",
      [(".closebtn", "text", 4.5), (".openbtn span", "text", 4.5)], ON_PRIMARY),
     ("calendar-event", "wc-calendar", ".wc-calendar-event", "color",
@@ -138,7 +140,7 @@ REGISTRY += [
     ("select-input-focus-border", "wc-select-chip", "wc-select .dropdown-input:focus", "border-color",
      [(".dropdown-input", "border", 3)], ["var(--text-9)", "var(--text-6)", "{INK}"], "wc-select .dropdown-input"),
     ("select-option-active", "wc-select-option-probe", "wc-select :is(.option.highlighted, .option:hover)", "color",
-     [(".vr-onprimary-probe", "text", 4.5)], ON_PRIMARY, ".vr-onprimary-probe"),
+     [(".vr-onprimary-probe", "text", 4.5)], ON_ACCENT_FILL, ".vr-onprimary-probe"),
 ]
 for v in ["warn", "danger", "neutral"]:
     REGISTRY.append((f"explain-summary-{v}", "wc-explain-tree-variants", f".explain-summary-{v}", "color",

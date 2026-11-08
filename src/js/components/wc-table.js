@@ -1532,10 +1532,11 @@ if (!customElements.get('wc-table')) {
            in every theme, light + dark. The generic --button-color flips per-theme and fails
            on the bright accent (dark themes) and on dark earth-tone accents (light themes). */
         .wc-table-pager .btn {
-          --button-bg-color: var(--primary-bg-color);
-          --button-color: var(--wc-on-primary, var(--primary-color));
-          --button-hover-bg-color: color-mix(in oklab, var(--primary-bg-color) 88%, #000);
-          --button-hover-color: var(--wc-on-primary, var(--primary-color));
+          /* .crisp: the hue-verified --accent-fill-bg / --accent-hover / --on-accent set (as .btn-primary) */
+          --button-bg-color: var(--accent-fill-bg, var(--primary-bg-color));
+          --button-color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
+          --button-hover-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 88%, #000));
+          --button-hover-color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
         }
         /* Uniform page-button width + tabular digits so 1- vs 2-digit buttons don't jitter. */
         .wc-table-pager .wc-table-pages .btn {
@@ -1543,7 +1544,7 @@ if (!customElements.get('wc-table')) {
           font-variant-numeric: tabular-nums;
         }
         .wc-table-pager .btn.wc-page-active {
-          background: var(--primary-bg-color); color: var(--wc-on-primary, var(--primary-color));
+          background: var(--accent-fill-bg, var(--primary-bg-color)); color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
           font-weight: 600; pointer-events: none;
         }
         .wc-table-pager .wc-table-ellipsis {

@@ -1018,9 +1018,9 @@ class WcFontPicker extends WcBaseFormComponent {
         }
         .wc-font-picker-chip:hover { background-color: var(--surface-3); }
         .wc-font-picker-chip[aria-pressed="true"] {
-          background-color: var(--primary-bg-color);
-          border-color: var(--primary-bg-color);
-          color: var(--wc-on-primary, var(--primary-color));
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          border-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
         }
         .wc-font-picker-chip:focus-visible { outline: 2px solid var(--primary-bg-color); outline-offset: 1px; }
         .wc-font-picker-viewport { position: relative; flex: 1 1 auto; min-height: 0; }

@@ -104,7 +104,7 @@ function buildBaseUtilities() {
   badge("badge-danger", "rgba(239, 68, 68, 0.15)", "color-mix(in srgb, var(--danger-color) var(--wc-badge-danger-mix, 55%), var(--wc-badge-danger-ink, var(--text-1, #111)))", "rgba(239, 68, 68, 0.4)");
   badge("badge-info", "rgba(59, 130, 246, 0.15)", "color-mix(in srgb, var(--info-color) var(--wc-badge-info-mix, 55%), var(--wc-badge-info-ink, var(--text-1, #111)))", "rgba(59, 130, 246, 0.4)");
   badge("badge-muted", "var(--surface-3)", "var(--text-6)", "var(--surface-5)");
-  badge("badge-primary", "var(--primary-bg-color)", "var(--wc-on-primary, var(--primary-color))", "color-mix(in srgb, var(--primary-color) 45%, transparent)");
+  badge("badge-primary", "var(--accent-fill-bg, var(--primary-bg-color))", "var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))))", "color-mix(in srgb, var(--primary-color) 45%, transparent)");
 
   // --- Scope B (opt-in): raw Tailwind named palette ---
   if (INCLUDE_PALETTE) {

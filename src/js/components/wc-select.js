@@ -776,8 +776,8 @@ class WcSelect extends WcBaseFormComponent {
         display: flex; 
         align-items: center; 
         padding: 5px; 
-        background-color: var(--primary-bg-color); 
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color)); 
+        color: var(--on-accent, var(--primary-color));
         border-radius: 15px; 
         font-size: 0.75rem; /* 12px */
         line-height: 1rem; /* 16px */
@@ -841,12 +841,12 @@ class WcSelect extends WcBaseFormComponent {
         cursor: pointer; 
       }
       wc-select .option.highlighted { 
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--primary-color));
       }
       wc-select .option:hover { 
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--primary-color));
       }
       wc-select .optgroup-label {
         padding: 8px 5px 5px 5px;

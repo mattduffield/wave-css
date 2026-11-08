@@ -1783,8 +1783,8 @@ if (!customElements.get('wc-pivot')) {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--primary-text-color, #fff));
           font-size: 0.625rem;
           padding: 2px 6px;
           border-radius: 10px;

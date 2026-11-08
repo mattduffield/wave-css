@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal light crisp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - text on the primary fill</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+  <style id="simulate"></style>
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-4" style="max-width: 1000px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">Text on the primary fill</h1>
+      <p style="margin: 0;">Every element below puts text on the theme's primary fill. The number next to each is its contrast,
+        measured live on a canvas (≥ 4.5:1 passes). Try every theme, light / dark, crisp, a tenant hue, and
+        <b>Simulate the failing Chrome</b>, which forces the relative-color token <code>--wc-on-primary</code> to black
+        the way some Chrome versions evaluate it.</p>
+      <div class="row gap-3" style="flex-wrap: wrap; align-items: center;">
+        <label class="row gap-1" style="align-items: center;">Theme <select id="op-theme" aria-label="Theme"></select></label>
+        <label class="row gap-1" style="align-items: center;">Mode <select id="op-mode" aria-label="Mode"><option value="light">light</option><option value="dark">dark</option><option value="">follow the OS</option></select></label>
+        <label class="row gap-1" style="align-items: center;"><input type="checkbox" id="op-crisp" checked> crisp</label>
+        <label class="row gap-1" style="align-items: center;"><input type="checkbox" id="op-hue-on"> tenant hue
+          <input type="range" id="op-hue" min="0" max="355" step="5" value="190" aria-label="Tenant hue"> <span id="op-hue-val">190°</span></label>
+        <label class="row gap-1" style="align-items: center;"><input type="checkbox" id="op-sim"> Simulate the failing Chrome</label>
+      </div>
+      <div id="op-summary" class="font-semibold" role="status"></div>
+    </div>
+
+    <div class="col gap-3" id="op-probes">
+      <div class="row gap-3" style="flex-wrap: wrap; align-items: center;">
+        <span class="badge badge-primary" data-p="badge-primary">Primary</span>
+        <span class="accent-fill" data-p="accent-fill" style="padding: 2px 8px; border-radius: 6px;">Accent fill</span>
+        <wc-select id="op-sel" name="tags" mode="chip" multiple value="a"><option value="a">Chip</option><option value="b">Beta</option></wc-select>
+      </div>
+      <wc-table id="op-table" paginate page-size="2" row-numbers
+        items='[{"name":"Ann Lee","part":"Mary"},{"name":"Bo Diaz","part":"Angel"},{"name":"Cy Park","part":"Shepherd"},{"name":"Di Ross","part":"Herod"}]'>
+        <wc-table-col field="name" label="Name"></wc-table-col><wc-table-col field="part" label="Part"></wc-table-col>
+      </wc-table>
+      <wc-wizard id="op-wiz"><wc-wizard-step label="Cast">Cast</wc-wizard-step><wc-wizard-step label="Nights">Nights</wc-wizard-step></wc-wizard>
+      <div class="wc-fx-board row gap-2" style="flex-wrap: wrap;">
+        <button class="wc-fx-pad is-playing" data-p="fx pad (playing)"><span class="wc-fx-pad-name">Thunder</span> <span class="wc-fx-pad-key" data-p="fx key cap">1</span></button>
+        <div class="wc-fx-zone is-selected is-playing" data-p="fx zone (selected)"><span class="wc-fx-zone-name">Stage</span></div>
+        <div class="wc-fx-zone is-playing"><span class="wc-fx-zone-name" data-p="fx zone (playing)">Lobby</span></div>
+      </div>
+      <wc-pivot id="op-pivot" show-field-panel data='[{"state":"OR","status":"a","amount":1},{"state":"WA","status":"b","amount":2}]'
+        rows='["state"]' columns='["status"]' values='[{"field":"amount","agg":"sum"}]'></wc-pivot>
+    </div>
+
+    <table class="w-full text-xs" id="op-results">
+      <thead><tr><th style="text-align: left;">Element</th><th style="text-align: left;">Contrast</th></tr></thead><tbody></tbody>
+    </table>
+
+    <wc-javascript class="hidden">
+      <script type="text/plain">
+      (() => {
+        const h = document.documentElement;
+        const sel = document.getElementById('op-theme');
+        sel.add(new Option('royal', 'theme-royal', true, true));
+        fetch(document.querySelector('link[rel=stylesheet]').href).then(r => r.text()).then(css => {
+          const themes = [...new Set([...css.matchAll(/\.(theme-[a-z-]+)\s*\{/g)].map(m => m[1]))].sort();
+          sel.innerHTML = '';
+          for (const t of themes) sel.add(new Option(t.replace('theme-', ''), t, false, t === 'theme-royal'));
+        });
+        const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        const rgba = (c) => { cv.clearRect(0,0,1,1); cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0,0,1,1); const d = cv.getImageData(0,0,1,1).data; return [d[0],d[1],d[2],d[3]/255]; };
+        const lum = ([r,g,b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }; return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b); };
+        const over = (t, u) => [0,1,2].map(i => t[i]*t[3] + u[i]*(1-t[3])).concat(1);
+        const bgOf = (el) => { const L = []; for (let n = el; n; n = n.parentElement) { const v = rgba(getComputedStyle(n).backgroundColor); if (v[3] === 0) continue; L.push(v); if (v[3] >= .999) break; }
+          let o = L.length && L[L.length-1][3] >= .999 ? L.pop() : rgba(getComputedStyle(document.body).backgroundColor); for (let i = L.length-1; i >= 0; i--) o = over(L[i], o); return o; };
+        const C = (fg, bg) => { const f = over(rgba(fg), bg); const a = lum(f), b = lum(bg); return (Math.max(a,b)+.05)/(Math.min(a,b)+.05); };
+        const tag = () => {
+          const t = (q, k) => { const e = document.querySelector(q); if (e) e.dataset.p = k; };
+          t('#op-sel .chip', 'wc-select chip');
+          t('#op-table thead th:not(.wc-rownum)', 'wc-table header');
+          t('#op-table .wc-table-pager .btn.wc-page-active', 'wc-table pager (active)');
+          t('#op-table .wc-table-pager .btn:not(.wc-page-active):not([disabled])', 'wc-table pager button');
+          t('#op-wiz .wc-wizard-indicator.active', 'wc-wizard step');
+          t('#op-pivot .pivot-zone-chip', 'wc-pivot zone chip');
+        };
+        const measure = () => {
+          tag();
+          const rows = [...document.querySelectorAll('#op-probes [data-p]')].map(e => [e.dataset.p, C(getComputedStyle(e).color, bgOf(e))]);
+          const body = document.querySelector('#op-results tbody');
+          body.innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td><span class="badge ${v >= 4.5 ? 'badge-success' : 'badge-danger'}">${v.toFixed(2)}:1 ${v >= 4.5 ? 'pass' : 'FAIL'}</span></td></tr>`).join('');
+          const low = Math.min(...rows.map(r => r[1]));
+          document.getElementById('op-summary').textContent = `${rows.length} elements — lowest ${low.toFixed(2)}:1 — ${low >= 4.5 ? 'all pass' : 'FAIL'}`;
+        };
+        const apply = () => {
+          const mode = document.getElementById('op-mode').value;
+          h.className = [sel.value, mode, document.getElementById('op-crisp').checked ? 'crisp' : ''].filter(Boolean).join(' ');
+          const hue = document.getElementById('op-hue').value;
+          document.getElementById('op-hue-val').textContent = hue + '°';
+          if (document.getElementById('op-hue-on').checked) h.style.setProperty('--hue', hue); else h.style.removeProperty('--hue');
+          document.getElementById('simulate').textContent = document.getElementById('op-sim').checked ? '* { --wc-on-primary: #000 !important; }' : '';
+          requestAnimationFrame(() => requestAnimationFrame(measure));
+        };
+        for (const id of ['op-theme', 'op-mode', 'op-crisp', 'op-hue-on', 'op-hue', 'op-sim']) document.getElementById(id).addEventListener('input', apply);
+        const wait = () => document.querySelector('#op-pivot .pivot-zone-chip') && document.querySelector('#op-table .wc-table-pager .btn') ? apply() : setTimeout(wait, 100);
+        wait();
+      })();
+      </script>
+    </wc-javascript>
+  </div>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

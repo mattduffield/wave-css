@@ -1462,6 +1462,7 @@
     .theme-charcoal.dark:not(.crisp) {
       --wc-badge-danger-mix: 54%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 99%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
     }
     .theme-charcoal.light.crisp {
       --wc-badge-success-mix: 50%;
@@ -1475,6 +1476,7 @@
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 53%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 52%;
@@ -1491,6 +1493,7 @@
     }
     .theme-chocolate.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-chocolate.light.crisp {
       --wc-badge-success-mix: 52%;
@@ -1506,6 +1509,7 @@
       --wc-badge-danger-mix: 37%;
       --wc-badge-info-mix: 37%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 59%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -1525,6 +1529,7 @@
     }
     .theme-coffee.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 73%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-coffee.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1540,6 +1545,7 @@
       --wc-badge-danger-mix: 36%;
       --wc-badge-info-mix: 37%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 64%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -1684,6 +1690,7 @@
     }
     .theme-designer.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 70%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-designer.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1699,6 +1706,7 @@
       --wc-badge-danger-mix: 35%;
       --wc-badge-info-mix: 37%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 27%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 25%;
       --wc-on-surface-danger-mix: 40%;
@@ -1718,6 +1726,7 @@
     }
     .theme-designer-blue.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-designer-blue.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1733,6 +1742,7 @@
       --wc-badge-danger-mix: 30%;
       --wc-badge-info-mix: 38%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 31%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 41%;
@@ -1752,6 +1762,7 @@
     }
     .theme-designer-gray.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 97%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-designer-gray.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -1765,6 +1776,7 @@
       --wc-badge-success-mix: 48%;
       --wc-badge-warning-mix: 48%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 50%;
       --wc-on-surface-success-light-mix: 41%;
       --wc-on-surface-warning-mix: 49%;
@@ -1939,6 +1951,7 @@
       --wc-badge-danger-mix: 21%;
       --wc-badge-info-mix: 27%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 91%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 44%;
       --wc-on-surface-danger-mix: 28%;
       --wc-on-surface-danger-light-mix: 38%;
@@ -1956,6 +1969,7 @@
     }
     .theme-gold.light:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-light-mix: 49%;
       --wc-on-surface-warning-light-mix: 47%;
     }
@@ -2036,6 +2050,9 @@
       --wc-on-surface-danger-light-mix: 52%;
       --wc-on-surface-info-mix: 43%;
     }
+    .theme-gray.dark:not(.crisp) {
+      --wc-on-primary-static: #000;
+    }
     .theme-gray.light.crisp {
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
@@ -2048,6 +2065,7 @@
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2064,6 +2082,7 @@
     }
     .theme-high-contrast.dark:not(.crisp) {
       --wc-badge-danger-mix: 48%;
+      --wc-on-primary-static: #000;
     }
     .theme-high-contrast.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2077,6 +2096,7 @@
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2253,6 +2273,7 @@
       --wc-badge-danger-mix: 7%;
       --wc-badge-info-mix: 9%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 14%;
       --wc-on-surface-success-light-mix: 19%;
       --wc-on-surface-danger-mix: 9%;
@@ -2272,6 +2293,7 @@
     }
     .theme-lemon.light:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-warning-light-mix: 53%;
     }
     .theme-lime.dark.crisp {
@@ -2687,6 +2709,7 @@
     }
     .theme-sienna.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 74%, var(--text-1, #111));
+      --wc-on-primary-static: #fff;
     }
     .theme-sienna.light.crisp {
       --wc-badge-success-mix: 51%;
@@ -2702,6 +2725,7 @@
       --wc-badge-danger-mix: 37%;
       --wc-badge-info-mix: 36%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 32%;
       --wc-on-surface-success-light-mix: 26%;
       --wc-on-surface-danger-mix: 40%;
@@ -2722,6 +2746,7 @@
     }
     .theme-silver.dark:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
     }
     .theme-silver.light.crisp {
       --wc-badge-success-mix: 52%;
@@ -2735,6 +2760,7 @@
       --wc-badge-success-mix: 51%;
       --wc-badge-warning-mix: 51%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 54%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-warning-mix: 53%;
@@ -2816,6 +2842,7 @@
       --wc-badge-danger-mix: 42%;
       --wc-badge-info-mix: 48%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 80%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-danger-mix: 52%;
     }
     .theme-tan.light.crisp {
@@ -2832,6 +2859,7 @@
       --wc-badge-danger-mix: 50%;
       --wc-badge-info-mix: 53%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 45%;
       --wc-on-surface-success-light-mix: 37%;
       --wc-on-surface-danger-light-mix: 47%;
@@ -2945,6 +2973,7 @@
       --wc-badge-danger-mix: 15%;
       --wc-badge-info-mix: 20%;
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 88%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-mix: 30%;
       --wc-on-surface-success-light-mix: 44%;
       --wc-on-surface-danger-mix: 19%;
@@ -2964,6 +2993,7 @@
     }
     .theme-yellow.light:not(.crisp) {
       --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
+      --wc-on-primary-static: #000;
       --wc-on-surface-success-light-mix: 53%;
       --wc-on-surface-warning-light-mix: 50%;
     }
@@ -3089,6 +3119,7 @@
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 53%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 52%;
@@ -3108,6 +3139,7 @@
         --wc-badge-danger-mix: 37%;
         --wc-badge-info-mix: 37%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 59%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3131,6 +3163,7 @@
         --wc-badge-danger-mix: 36%;
         --wc-badge-info-mix: 37%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 64%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3229,6 +3262,7 @@
         --wc-badge-danger-mix: 29%;
         --wc-badge-info-mix: 32%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 26%;
         --wc-on-surface-success-light-mix: 21%;
         --wc-on-surface-danger-mix: 34%;
@@ -3252,6 +3286,7 @@
         --wc-badge-danger-mix: 30%;
         --wc-badge-info-mix: 38%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 48%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 31%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 41%;
@@ -3273,6 +3308,7 @@
         --wc-badge-success-mix: 48%;
         --wc-badge-warning-mix: 48%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 52%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 50%;
         --wc-on-surface-success-light-mix: 41%;
         --wc-on-surface-warning-mix: 49%;
@@ -3378,6 +3414,7 @@
       }
       .theme-gold:not(.light):not(.dark):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 53%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-light-mix: 49%;
         --wc-on-surface-warning-light-mix: 47%;
       }
@@ -3435,6 +3472,7 @@
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3452,6 +3490,7 @@
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3551,6 +3590,7 @@
       }
       .theme-lemon:not(.light):not(.dark):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-warning-light-mix: 53%;
       }
       .theme-lime:not(.light):not(.dark).crisp {
@@ -3802,6 +3842,7 @@
         --wc-badge-danger-mix: 37%;
         --wc-badge-info-mix: 36%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 60%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 32%;
         --wc-on-surface-success-light-mix: 26%;
         --wc-on-surface-danger-mix: 40%;
@@ -3823,6 +3864,7 @@
         --wc-badge-success-mix: 51%;
         --wc-badge-warning-mix: 51%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 76%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 54%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-warning-mix: 53%;
@@ -3878,6 +3920,7 @@
         --wc-badge-danger-mix: 50%;
         --wc-badge-info-mix: 53%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 50%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 45%;
         --wc-on-surface-success-light-mix: 37%;
         --wc-on-surface-danger-light-mix: 47%;
@@ -3949,6 +3992,7 @@
       }
       .theme-yellow:not(.light):not(.dark):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 54%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-light-mix: 53%;
         --wc-on-surface-warning-light-mix: 50%;
       }
@@ -4045,6 +4089,7 @@
       .theme-charcoal:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 54%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 99%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
       }
       .theme-chocolate:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 41%;
@@ -4057,6 +4102,7 @@
       }
       .theme-chocolate:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 75%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-coffee:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 42%;
@@ -4068,6 +4114,7 @@
       }
       .theme-coffee:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 73%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-cornsilk:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -4129,6 +4176,7 @@
       }
       .theme-designer:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 70%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-designer-blue:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
@@ -4140,6 +4188,7 @@
       }
       .theme-designer-blue:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-designer-gray:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 43%;
@@ -4151,6 +4200,7 @@
       }
       .theme-designer-gray:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 97%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-emerald:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -4231,6 +4281,7 @@
         --wc-badge-danger-mix: 21%;
         --wc-badge-info-mix: 27%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 91%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 44%;
         --wc-on-surface-danger-mix: 28%;
         --wc-on-surface-danger-light-mix: 38%;
@@ -4273,6 +4324,9 @@
         --wc-on-surface-danger-light-mix: 52%;
         --wc-on-surface-info-mix: 43%;
       }
+      .theme-gray:not(.dark):not(.light):not(.crisp) {
+        --wc-on-primary-static: #000;
+      }
       .theme-high-contrast:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
         --wc-badge-warning-mix: 42%;
@@ -4284,6 +4338,7 @@
       }
       .theme-high-contrast:not(.dark):not(.light):not(.crisp) {
         --wc-badge-danger-mix: 48%;
+        --wc-on-primary-static: #000;
       }
       .theme-honey:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 41%;
@@ -4372,6 +4427,7 @@
         --wc-badge-danger-mix: 7%;
         --wc-badge-info-mix: 9%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 81%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 14%;
         --wc-on-surface-success-light-mix: 19%;
         --wc-on-surface-danger-mix: 9%;
@@ -4559,6 +4615,7 @@
       }
       .theme-sienna:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 74%, var(--text-1, #111));
+        --wc-on-primary-static: #fff;
       }
       .theme-silver:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 36%;
@@ -4571,6 +4628,7 @@
       }
       .theme-silver:not(.dark):not(.light):not(.crisp) {
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 98%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
       }
       .theme-sky:not(.dark):not(.light).crisp {
         --wc-badge-success-mix: 37%;
@@ -4612,6 +4670,7 @@
         --wc-badge-danger-mix: 42%;
         --wc-badge-info-mix: 48%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 80%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-danger-mix: 52%;
       }
       .theme-turquoise:not(.dark):not(.light).crisp {
@@ -4666,6 +4725,7 @@
         --wc-badge-danger-mix: 15%;
         --wc-badge-info-mix: 20%;
         --wc-dropdown-grid-auto: color-mix(in srgb, var(--primary-bg-color) 88%, var(--text-1, #111));
+        --wc-on-primary-static: #000;
         --wc-on-surface-success-mix: 30%;
         --wc-on-surface-success-light-mix: 44%;
         --wc-on-surface-danger-mix: 19%;
@@ -9231,7 +9291,7 @@
   }
   .accent-fill {
     background: var(--accent-fill-bg, var(--accent, var(--primary-bg-color)));
-    color: var(--on-accent, var(--wc-on-primary, #fff));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, #fff)));
   }
   .accent-soft-fill {
     background: var(--accent-soft, color-mix(in oklab, var(--accent, var(--primary-bg-color)) 15%, var(--surface-1)));
@@ -9373,8 +9433,8 @@
     box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .badge-primary {
-    background: var(--primary-bg-color);
-    color: var(--wc-on-primary, var(--primary-color));
+    background: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   @media (forced-colors: active) {
@@ -15611,8 +15671,8 @@
     box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .hover\:badge-primary:hover {
-    background: var(--primary-bg-color);
-    color: var(--wc-on-primary, var(--primary-color));
+    background: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .focus\:surface-1:focus {
@@ -16049,8 +16109,8 @@
     box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .focus\:badge-primary:focus {
-    background: var(--primary-bg-color);
-    color: var(--wc-on-primary, var(--primary-color));
+    background: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .focus-visible\:surface-1:focus-visible {
@@ -16487,8 +16547,8 @@
     box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .focus-visible\:badge-primary:focus-visible {
-    background: var(--primary-bg-color);
-    color: var(--wc-on-primary, var(--primary-color));
+    background: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
   .active\:surface-1:active {
@@ -16925,8 +16985,8 @@
     box-shadow: inset 0 0 0 1px var(--surface-5);
   }
   .active\:badge-primary:active {
-    background: var(--primary-bg-color);
-    color: var(--wc-on-primary, var(--primary-color));
+    background: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary, var(--primary-color))));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 45%, transparent);
   }
 }
@@ -17059,7 +17119,7 @@
     border-radius: 50%;
     cursor: pointer;
     background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
+    color: var(--wc-on-primary-static, var(--wc-on-primary));
   }
   .wc-fx-group {
     border: 1px solid var(--surface-4);
@@ -17134,18 +17194,17 @@
     color: var(--text-2, var(--component-alt-color));
   }
   .wc-fx-pad.is-playing {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
-    border-color: var(--primary-bg-color);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
+    border-color: var(--accent-fill-bg, var(--primary-bg-color));
   }
-  .wc-fx-pad.is-playing .wc-fx-pad-name,
-  .wc-fx-zone.is-playing .wc-fx-zone-name {
-    color: var(--wc-on-primary);
+  .wc-fx-pad.is-playing .wc-fx-pad-name {
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
   }
   .wc-fx-pad.is-playing .wc-fx-pad-key {
-    background-color: color-mix(in oklab, var(--primary-bg-color) 70%, #000);
-    color: var(--wc-on-primary);
-    border-color: transparent;
+    background-color: transparent;
+    color: inherit;
+    border-color: currentColor;
   }
   .wc-fx-pad.is-light,
   .wc-fx-pad:disabled {
@@ -17182,9 +17241,9 @@
     outline-offset: 2px;
   }
   .wc-fx-zone.is-selected {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
-    border-color: var(--primary-bg-color);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
+    border-color: var(--accent-fill-bg, var(--primary-bg-color));
   }
   .wc-fx-zone-indicator {
     display: inline-flex;
@@ -17281,8 +17340,8 @@
     }
   }
   .wc-table thead {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
   }
   .wc-table thead th {
     padding: 0.75rem 1rem;
@@ -17298,8 +17357,8 @@
     padding: 0.75rem 1rem;
   }
   .wc-table thead th.wc-rownum {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
     width: 1%;
     white-space: nowrap;
     text-align: center;
@@ -17440,8 +17499,8 @@
     background-color: var(--surface-3);
   }
   .wc-table tr.wc-table-primary {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
   }
   .wc-table tr.wc-table-success {
     background-color: color-mix(in srgb, var(--success-bg-color) 20%, transparent);
@@ -17466,8 +17525,8 @@
   }
   .wc-table td.wc-table-primary,
   .wc-table th.wc-table-primary {
-    background-color: var(--primary-bg-color);
-    color: var(--wc-on-primary);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)));
   }
   .wc-table td.wc-table-success,
   .wc-table th.wc-table-success {
@@ -22180,29 +22239,29 @@ html.dark.crisp {
   }
 }
 :is(.theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-gold.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lemon.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-yellow.light:not(.crisp), .theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-gold.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lemon.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-yellow.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-lagoon.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-lagoon.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp) .pivot-zone-chip {
-  color: var(--wc-on-primary) !important;
+  color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
 }
 @media (prefers-color-scheme: light) {
   :is(.theme-amber:not(.light):not(.dark):not(.crisp), .theme-aqua:not(.light):not(.dark):not(.crisp), .theme-avocado:not(.light):not(.dark):not(.crisp), .theme-azure:not(.light):not(.dark):not(.crisp), .theme-blush:not(.light):not(.dark):not(.crisp), .theme-bubblegum:not(.light):not(.dark):not(.crisp), .theme-charcoal:not(.light):not(.dark):not(.crisp), .theme-chocolate:not(.light):not(.dark):not(.crisp), .theme-cornsilk:not(.light):not(.dark):not(.crisp), .theme-cottoncandy:not(.light):not(.dark):not(.crisp), .theme-deepsky:not(.light):not(.dark):not(.crisp), .theme-desert:not(.light):not(.dark):not(.crisp), .theme-designer:not(.light):not(.dark):not(.crisp), .theme-designer-blue:not(.light):not(.dark):not(.crisp), .theme-designer-gray:not(.light):not(.dark):not(.crisp), .theme-emerald:not(.light):not(.dark):not(.crisp), .theme-fern:not(.light):not(.dark):not(.crisp), .theme-fire:not(.light):not(.dark):not(.crisp), .theme-forest:not(.light):not(.dark):not(.crisp), .theme-fuchsia:not(.light):not(.dark):not(.crisp), .theme-gold:not(.light):not(.dark):not(.crisp), .theme-golden:not(.light):not(.dark):not(.crisp), .theme-grape:not(.light):not(.dark):not(.crisp), .theme-gray:not(.light):not(.dark):not(.crisp), .theme-high-contrast:not(.light):not(.dark):not(.crisp), .theme-honey:not(.light):not(.dark):not(.crisp), .theme-ice:not(.light):not(.dark):not(.crisp), .theme-jungle:not(.light):not(.dark):not(.crisp), .theme-lagoon:not(.light):not(.dark):not(.crisp), .theme-lavender:not(.light):not(.dark):not(.crisp), .theme-lemon:not(.light):not(.dark):not(.crisp), .theme-lime:not(.light):not(.dark):not(.crisp), .theme-meadow:not(.light):not(.dark):not(.crisp), .theme-midsky:not(.light):not(.dark):not(.crisp), .theme-mint:not(.light):not(.dark):not(.crisp), .theme-moss:not(.light):not(.dark):not(.crisp), .theme-ocean:not(.light):not(.dark):not(.crisp), .theme-olive:not(.light):not(.dark):not(.crisp), .theme-peach:not(.light):not(.dark):not(.crisp), .theme-petal:not(.light):not(.dark):not(.crisp), .theme-plum:not(.light):not(.dark):not(.crisp), .theme-rose:not(.light):not(.dark):not(.crisp), .theme-royal:not(.light):not(.dark):not(.crisp), .theme-sage:not(.light):not(.dark):not(.crisp), .theme-sienna:not(.light):not(.dark):not(.crisp), .theme-silver:not(.light):not(.dark):not(.crisp), .theme-sky:not(.light):not(.dark):not(.crisp), .theme-sunset:not(.light):not(.dark):not(.crisp), .theme-tan:not(.light):not(.dark):not(.crisp), .theme-turquoise:not(.light):not(.dark):not(.crisp), .theme-twilight:not(.light):not(.dark):not(.crisp), .theme-violet:not(.light):not(.dark):not(.crisp), .theme-yellow:not(.light):not(.dark):not(.crisp), .theme-aqua:not(.light):not(.dark).crisp, .theme-azure:not(.light):not(.dark).crisp, .theme-high-contrast:not(.light):not(.dark).crisp, .theme-ice:not(.light):not(.dark).crisp, .theme-lagoon:not(.light):not(.dark).crisp, .theme-midsky:not(.light):not(.dark).crisp, .theme-mint:not(.light):not(.dark).crisp, .theme-ocean:not(.light):not(.dark).crisp, .theme-silver:not(.light):not(.dark).crisp, .theme-sky:not(.light):not(.dark).crisp, .theme-turquoise:not(.light):not(.dark).crisp) .pivot-zone-chip {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 @media (prefers-color-scheme: dark) {
   :is(.theme-amber:not(.dark):not(.light):not(.crisp), .theme-aqua:not(.dark):not(.light):not(.crisp), .theme-avocado:not(.dark):not(.light):not(.crisp), .theme-azure:not(.dark):not(.light):not(.crisp), .theme-blush:not(.dark):not(.light):not(.crisp), .theme-bubblegum:not(.dark):not(.light):not(.crisp), .theme-charcoal:not(.dark):not(.light):not(.crisp), .theme-cornsilk:not(.dark):not(.light):not(.crisp), .theme-cottoncandy:not(.dark):not(.light):not(.crisp), .theme-deepsky:not(.dark):not(.light):not(.crisp), .theme-desert:not(.dark):not(.light):not(.crisp), .theme-emerald:not(.dark):not(.light):not(.crisp), .theme-fern:not(.dark):not(.light):not(.crisp), .theme-fire:not(.dark):not(.light):not(.crisp), .theme-forest:not(.dark):not(.light):not(.crisp), .theme-fuchsia:not(.dark):not(.light):not(.crisp), .theme-gold:not(.dark):not(.light):not(.crisp), .theme-golden:not(.dark):not(.light):not(.crisp), .theme-grape:not(.dark):not(.light):not(.crisp), .theme-gray:not(.dark):not(.light):not(.crisp), .theme-high-contrast:not(.dark):not(.light):not(.crisp), .theme-honey:not(.dark):not(.light):not(.crisp), .theme-ice:not(.dark):not(.light):not(.crisp), .theme-jungle:not(.dark):not(.light):not(.crisp), .theme-lagoon:not(.dark):not(.light):not(.crisp), .theme-lavender:not(.dark):not(.light):not(.crisp), .theme-lemon:not(.dark):not(.light):not(.crisp), .theme-lime:not(.dark):not(.light):not(.crisp), .theme-meadow:not(.dark):not(.light):not(.crisp), .theme-midsky:not(.dark):not(.light):not(.crisp), .theme-mint:not(.dark):not(.light):not(.crisp), .theme-moss:not(.dark):not(.light):not(.crisp), .theme-ocean:not(.dark):not(.light):not(.crisp), .theme-olive:not(.dark):not(.light):not(.crisp), .theme-peach:not(.dark):not(.light):not(.crisp), .theme-petal:not(.dark):not(.light):not(.crisp), .theme-plum:not(.dark):not(.light):not(.crisp), .theme-rose:not(.dark):not(.light):not(.crisp), .theme-royal:not(.dark):not(.light):not(.crisp), .theme-sage:not(.dark):not(.light):not(.crisp), .theme-silver:not(.dark):not(.light):not(.crisp), .theme-sky:not(.dark):not(.light):not(.crisp), .theme-sunset:not(.dark):not(.light):not(.crisp), .theme-tan:not(.dark):not(.light):not(.crisp), .theme-turquoise:not(.dark):not(.light):not(.crisp), .theme-twilight:not(.dark):not(.light):not(.crisp), .theme-violet:not(.dark):not(.light):not(.crisp), .theme-yellow:not(.dark):not(.light):not(.crisp), .theme-amber:not(.dark):not(.light).crisp, .theme-aqua:not(.dark):not(.light).crisp, .theme-avocado:not(.dark):not(.light).crisp, .theme-azure:not(.dark):not(.light).crisp, .theme-blush:not(.dark):not(.light).crisp, .theme-bubblegum:not(.dark):not(.light).crisp, .theme-charcoal:not(.dark):not(.light).crisp, .theme-chocolate:not(.dark):not(.light).crisp, .theme-coffee:not(.dark):not(.light).crisp, .theme-cornsilk:not(.dark):not(.light).crisp, .theme-cottoncandy:not(.dark):not(.light).crisp, .theme-deepsky:not(.dark):not(.light).crisp, .theme-desert:not(.dark):not(.light).crisp, .theme-designer:not(.dark):not(.light).crisp, .theme-designer-blue:not(.dark):not(.light).crisp, .theme-designer-gray:not(.dark):not(.light).crisp, .theme-emerald:not(.dark):not(.light).crisp, .theme-fern:not(.dark):not(.light).crisp, .theme-fire:not(.dark):not(.light).crisp, .theme-forest:not(.dark):not(.light).crisp, .theme-fuchsia:not(.dark):not(.light).crisp, .theme-gold:not(.dark):not(.light).crisp, .theme-golden:not(.dark):not(.light).crisp, .theme-grape:not(.dark):not(.light).crisp, .theme-gray:not(.dark):not(.light).crisp, .theme-high-contrast:not(.dark):not(.light).crisp, .theme-honey:not(.dark):not(.light).crisp, .theme-ice:not(.dark):not(.light).crisp, .theme-jungle:not(.dark):not(.light).crisp, .theme-lagoon:not(.dark):not(.light).crisp, .theme-lavender:not(.dark):not(.light).crisp, .theme-lemon:not(.dark):not(.light).crisp, .theme-lime:not(.dark):not(.light).crisp, .theme-meadow:not(.dark):not(.light).crisp, .theme-midsky:not(.dark):not(.light).crisp, .theme-mint:not(.dark):not(.light).crisp, .theme-moss:not(.dark):not(.light).crisp, .theme-ocean:not(.dark):not(.light).crisp, .theme-olive:not(.dark):not(.light).crisp, .theme-peach:not(.dark):not(.light).crisp, .theme-petal:not(.dark):not(.light).crisp, .theme-plum:not(.dark):not(.light).crisp, .theme-rose:not(.dark):not(.light).crisp, .theme-royal:not(.dark):not(.light).crisp, .theme-sage:not(.dark):not(.light).crisp, .theme-sienna:not(.dark):not(.light).crisp, .theme-silver:not(.dark):not(.light).crisp, .theme-sky:not(.dark):not(.light).crisp, .theme-sunset:not(.dark):not(.light).crisp, .theme-tan:not(.dark):not(.light).crisp, .theme-turquoise:not(.dark):not(.light).crisp, .theme-twilight:not(.dark):not(.light).crisp, .theme-violet:not(.dark):not(.light).crisp, .theme-yellow:not(.dark):not(.light).crisp) .pivot-zone-chip {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 :is(.theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-gold.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lemon.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-yellow.light:not(.crisp), .theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-gold.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lemon.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-yellow.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-lagoon.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-lagoon.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp) .wc-wizard-indicator.active {
-  color: var(--wc-on-primary) !important;
+  color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
 }
 @media (prefers-color-scheme: light) {
   :is(.theme-amber:not(.light):not(.dark):not(.crisp), .theme-aqua:not(.light):not(.dark):not(.crisp), .theme-avocado:not(.light):not(.dark):not(.crisp), .theme-azure:not(.light):not(.dark):not(.crisp), .theme-blush:not(.light):not(.dark):not(.crisp), .theme-bubblegum:not(.light):not(.dark):not(.crisp), .theme-charcoal:not(.light):not(.dark):not(.crisp), .theme-chocolate:not(.light):not(.dark):not(.crisp), .theme-cornsilk:not(.light):not(.dark):not(.crisp), .theme-cottoncandy:not(.light):not(.dark):not(.crisp), .theme-deepsky:not(.light):not(.dark):not(.crisp), .theme-desert:not(.light):not(.dark):not(.crisp), .theme-designer:not(.light):not(.dark):not(.crisp), .theme-designer-blue:not(.light):not(.dark):not(.crisp), .theme-designer-gray:not(.light):not(.dark):not(.crisp), .theme-emerald:not(.light):not(.dark):not(.crisp), .theme-fern:not(.light):not(.dark):not(.crisp), .theme-fire:not(.light):not(.dark):not(.crisp), .theme-forest:not(.light):not(.dark):not(.crisp), .theme-fuchsia:not(.light):not(.dark):not(.crisp), .theme-gold:not(.light):not(.dark):not(.crisp), .theme-golden:not(.light):not(.dark):not(.crisp), .theme-grape:not(.light):not(.dark):not(.crisp), .theme-gray:not(.light):not(.dark):not(.crisp), .theme-high-contrast:not(.light):not(.dark):not(.crisp), .theme-honey:not(.light):not(.dark):not(.crisp), .theme-ice:not(.light):not(.dark):not(.crisp), .theme-jungle:not(.light):not(.dark):not(.crisp), .theme-lagoon:not(.light):not(.dark):not(.crisp), .theme-lavender:not(.light):not(.dark):not(.crisp), .theme-lemon:not(.light):not(.dark):not(.crisp), .theme-lime:not(.light):not(.dark):not(.crisp), .theme-meadow:not(.light):not(.dark):not(.crisp), .theme-midsky:not(.light):not(.dark):not(.crisp), .theme-mint:not(.light):not(.dark):not(.crisp), .theme-moss:not(.light):not(.dark):not(.crisp), .theme-ocean:not(.light):not(.dark):not(.crisp), .theme-olive:not(.light):not(.dark):not(.crisp), .theme-peach:not(.light):not(.dark):not(.crisp), .theme-petal:not(.light):not(.dark):not(.crisp), .theme-plum:not(.light):not(.dark):not(.crisp), .theme-rose:not(.light):not(.dark):not(.crisp), .theme-royal:not(.light):not(.dark):not(.crisp), .theme-sage:not(.light):not(.dark):not(.crisp), .theme-sienna:not(.light):not(.dark):not(.crisp), .theme-silver:not(.light):not(.dark):not(.crisp), .theme-sky:not(.light):not(.dark):not(.crisp), .theme-sunset:not(.light):not(.dark):not(.crisp), .theme-tan:not(.light):not(.dark):not(.crisp), .theme-turquoise:not(.light):not(.dark):not(.crisp), .theme-twilight:not(.light):not(.dark):not(.crisp), .theme-violet:not(.light):not(.dark):not(.crisp), .theme-yellow:not(.light):not(.dark):not(.crisp), .theme-aqua:not(.light):not(.dark).crisp, .theme-azure:not(.light):not(.dark).crisp, .theme-high-contrast:not(.light):not(.dark).crisp, .theme-ice:not(.light):not(.dark).crisp, .theme-lagoon:not(.light):not(.dark).crisp, .theme-midsky:not(.light):not(.dark).crisp, .theme-mint:not(.light):not(.dark).crisp, .theme-ocean:not(.light):not(.dark).crisp, .theme-silver:not(.light):not(.dark).crisp, .theme-sky:not(.light):not(.dark).crisp, .theme-turquoise:not(.light):not(.dark).crisp) .wc-wizard-indicator.active {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 @media (prefers-color-scheme: dark) {
   :is(.theme-amber:not(.dark):not(.light):not(.crisp), .theme-aqua:not(.dark):not(.light):not(.crisp), .theme-avocado:not(.dark):not(.light):not(.crisp), .theme-azure:not(.dark):not(.light):not(.crisp), .theme-blush:not(.dark):not(.light):not(.crisp), .theme-bubblegum:not(.dark):not(.light):not(.crisp), .theme-charcoal:not(.dark):not(.light):not(.crisp), .theme-cornsilk:not(.dark):not(.light):not(.crisp), .theme-cottoncandy:not(.dark):not(.light):not(.crisp), .theme-deepsky:not(.dark):not(.light):not(.crisp), .theme-desert:not(.dark):not(.light):not(.crisp), .theme-emerald:not(.dark):not(.light):not(.crisp), .theme-fern:not(.dark):not(.light):not(.crisp), .theme-fire:not(.dark):not(.light):not(.crisp), .theme-forest:not(.dark):not(.light):not(.crisp), .theme-fuchsia:not(.dark):not(.light):not(.crisp), .theme-gold:not(.dark):not(.light):not(.crisp), .theme-golden:not(.dark):not(.light):not(.crisp), .theme-grape:not(.dark):not(.light):not(.crisp), .theme-gray:not(.dark):not(.light):not(.crisp), .theme-high-contrast:not(.dark):not(.light):not(.crisp), .theme-honey:not(.dark):not(.light):not(.crisp), .theme-ice:not(.dark):not(.light):not(.crisp), .theme-jungle:not(.dark):not(.light):not(.crisp), .theme-lagoon:not(.dark):not(.light):not(.crisp), .theme-lavender:not(.dark):not(.light):not(.crisp), .theme-lemon:not(.dark):not(.light):not(.crisp), .theme-lime:not(.dark):not(.light):not(.crisp), .theme-meadow:not(.dark):not(.light):not(.crisp), .theme-midsky:not(.dark):not(.light):not(.crisp), .theme-mint:not(.dark):not(.light):not(.crisp), .theme-moss:not(.dark):not(.light):not(.crisp), .theme-ocean:not(.dark):not(.light):not(.crisp), .theme-olive:not(.dark):not(.light):not(.crisp), .theme-peach:not(.dark):not(.light):not(.crisp), .theme-petal:not(.dark):not(.light):not(.crisp), .theme-plum:not(.dark):not(.light):not(.crisp), .theme-rose:not(.dark):not(.light):not(.crisp), .theme-royal:not(.dark):not(.light):not(.crisp), .theme-sage:not(.dark):not(.light):not(.crisp), .theme-silver:not(.dark):not(.light):not(.crisp), .theme-sky:not(.dark):not(.light):not(.crisp), .theme-sunset:not(.dark):not(.light):not(.crisp), .theme-tan:not(.dark):not(.light):not(.crisp), .theme-turquoise:not(.dark):not(.light):not(.crisp), .theme-twilight:not(.dark):not(.light):not(.crisp), .theme-violet:not(.dark):not(.light):not(.crisp), .theme-yellow:not(.dark):not(.light):not(.crisp), .theme-amber:not(.dark):not(.light).crisp, .theme-aqua:not(.dark):not(.light).crisp, .theme-avocado:not(.dark):not(.light).crisp, .theme-azure:not(.dark):not(.light).crisp, .theme-blush:not(.dark):not(.light).crisp, .theme-bubblegum:not(.dark):not(.light).crisp, .theme-charcoal:not(.dark):not(.light).crisp, .theme-chocolate:not(.dark):not(.light).crisp, .theme-coffee:not(.dark):not(.light).crisp, .theme-cornsilk:not(.dark):not(.light).crisp, .theme-cottoncandy:not(.dark):not(.light).crisp, .theme-deepsky:not(.dark):not(.light).crisp, .theme-desert:not(.dark):not(.light).crisp, .theme-designer:not(.dark):not(.light).crisp, .theme-designer-blue:not(.dark):not(.light).crisp, .theme-designer-gray:not(.dark):not(.light).crisp, .theme-emerald:not(.dark):not(.light).crisp, .theme-fern:not(.dark):not(.light).crisp, .theme-fire:not(.dark):not(.light).crisp, .theme-forest:not(.dark):not(.light).crisp, .theme-fuchsia:not(.dark):not(.light).crisp, .theme-gold:not(.dark):not(.light).crisp, .theme-golden:not(.dark):not(.light).crisp, .theme-grape:not(.dark):not(.light).crisp, .theme-gray:not(.dark):not(.light).crisp, .theme-high-contrast:not(.dark):not(.light).crisp, .theme-honey:not(.dark):not(.light).crisp, .theme-ice:not(.dark):not(.light).crisp, .theme-jungle:not(.dark):not(.light).crisp, .theme-lagoon:not(.dark):not(.light).crisp, .theme-lavender:not(.dark):not(.light).crisp, .theme-lemon:not(.dark):not(.light).crisp, .theme-lime:not(.dark):not(.light).crisp, .theme-meadow:not(.dark):not(.light).crisp, .theme-midsky:not(.dark):not(.light).crisp, .theme-mint:not(.dark):not(.light).crisp, .theme-moss:not(.dark):not(.light).crisp, .theme-ocean:not(.dark):not(.light).crisp, .theme-olive:not(.dark):not(.light).crisp, .theme-peach:not(.dark):not(.light).crisp, .theme-petal:not(.dark):not(.light).crisp, .theme-plum:not(.dark):not(.light).crisp, .theme-rose:not(.dark):not(.light).crisp, .theme-royal:not(.dark):not(.light).crisp, .theme-sage:not(.dark):not(.light).crisp, .theme-sienna:not(.dark):not(.light).crisp, .theme-silver:not(.dark):not(.light).crisp, .theme-sky:not(.dark):not(.light).crisp, .theme-sunset:not(.dark):not(.light).crisp, .theme-tan:not(.dark):not(.light).crisp, .theme-turquoise:not(.dark):not(.light).crisp, .theme-twilight:not(.dark):not(.light).crisp, .theme-violet:not(.dark):not(.light).crisp, .theme-yellow:not(.dark):not(.light).crisp) .wc-wizard-indicator.active {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 :is(.theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-amber.light:not(.crisp), .theme-aqua.light:not(.crisp), .theme-avocado.light:not(.crisp), .theme-azure.light:not(.crisp), .theme-blush.light:not(.crisp), .theme-bubblegum.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-cornsilk.light:not(.crisp), .theme-cottoncandy.light:not(.crisp), .theme-deepsky.light:not(.crisp), .theme-desert.light:not(.crisp), .theme-designer-blue.light:not(.crisp), .theme-designer-gray.light:not(.crisp), .theme-emerald.light:not(.crisp), .theme-fern.light:not(.crisp), .theme-fire.light:not(.crisp), .theme-forest.light:not(.crisp), .theme-fuchsia.light:not(.crisp), .theme-golden.light:not(.crisp), .theme-grape.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-honey.light:not(.crisp), .theme-ice.light:not(.crisp), .theme-jungle.light:not(.crisp), .theme-lagoon.light:not(.crisp), .theme-lavender.light:not(.crisp), .theme-lime.light:not(.crisp), .theme-meadow.light:not(.crisp), .theme-midsky.light:not(.crisp), .theme-mint.light:not(.crisp), .theme-moss.light:not(.crisp), .theme-ocean.light:not(.crisp), .theme-olive.light:not(.crisp), .theme-peach.light:not(.crisp), .theme-petal.light:not(.crisp), .theme-plum.light:not(.crisp), .theme-rose.light:not(.crisp), .theme-royal.light:not(.crisp), .theme-sage.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-sky.light:not(.crisp), .theme-sunset.light:not(.crisp), .theme-tan.light:not(.crisp), .theme-turquoise.light:not(.crisp), .theme-twilight.light:not(.crisp), .theme-violet.light:not(.crisp), .theme-chocolate.dark:not(.crisp), .theme-coffee.dark:not(.crisp), .theme-designer.dark:not(.crisp), .theme-designer-blue.dark:not(.crisp), .theme-sienna.dark:not(.crisp), .theme-chocolate.dark:not(.crisp), .theme-coffee.dark:not(.crisp), .theme-designer.dark:not(.crisp), .theme-designer-blue.dark:not(.crisp), .theme-sienna.dark:not(.crisp), .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-cornsilk.light.crisp, .theme-deepsky.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-forest.light.crisp, .theme-gray.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-jungle.light.crisp, .theme-lagoon.light.crisp, .theme-lemon.light.crisp, .theme-meadow.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-yellow.light.crisp, .theme-aqua.light.crisp, .theme-azure.light.crisp, .theme-cornsilk.light.crisp, .theme-deepsky.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-forest.light.crisp, .theme-gray.light.crisp, .theme-high-contrast.light.crisp, .theme-ice.light.crisp, .theme-jungle.light.crisp, .theme-lagoon.light.crisp, .theme-lemon.light.crisp, .theme-meadow.light.crisp, .theme-midsky.light.crisp, .theme-mint.light.crisp, .theme-ocean.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-silver.light.crisp, .theme-sky.light.crisp, .theme-turquoise.light.crisp, .theme-yellow.light.crisp) .help-drawer-trigger {
@@ -22789,16 +22848,16 @@ html.dark.crisp {
   }
 }
 :is(.theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp)) wc-select .chip {
-  color: var(--wc-on-primary) !important;
+  color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
 }
 @media (prefers-color-scheme: light) {
   :is(.theme-charcoal:not(.light):not(.dark):not(.crisp), .theme-coffee:not(.light):not(.dark):not(.crisp), .theme-gray:not(.light):not(.dark):not(.crisp), .theme-high-contrast:not(.light):not(.dark):not(.crisp), .theme-silver:not(.light):not(.dark):not(.crisp)) wc-select .chip {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 @media (prefers-color-scheme: dark) {
   :is(.theme-amber:not(.dark):not(.light):not(.crisp), .theme-aqua:not(.dark):not(.light):not(.crisp), .theme-avocado:not(.dark):not(.light):not(.crisp), .theme-azure:not(.dark):not(.light):not(.crisp), .theme-blush:not(.dark):not(.light):not(.crisp), .theme-bubblegum:not(.dark):not(.light):not(.crisp), .theme-charcoal:not(.dark):not(.light):not(.crisp), .theme-cornsilk:not(.dark):not(.light):not(.crisp), .theme-cottoncandy:not(.dark):not(.light):not(.crisp), .theme-deepsky:not(.dark):not(.light):not(.crisp), .theme-desert:not(.dark):not(.light):not(.crisp), .theme-designer-gray:not(.dark):not(.light):not(.crisp), .theme-emerald:not(.dark):not(.light):not(.crisp), .theme-fern:not(.dark):not(.light):not(.crisp), .theme-fire:not(.dark):not(.light):not(.crisp), .theme-forest:not(.dark):not(.light):not(.crisp), .theme-fuchsia:not(.dark):not(.light):not(.crisp), .theme-gold:not(.dark):not(.light):not(.crisp), .theme-golden:not(.dark):not(.light):not(.crisp), .theme-grape:not(.dark):not(.light):not(.crisp), .theme-gray:not(.dark):not(.light):not(.crisp), .theme-high-contrast:not(.dark):not(.light):not(.crisp), .theme-honey:not(.dark):not(.light):not(.crisp), .theme-ice:not(.dark):not(.light):not(.crisp), .theme-jungle:not(.dark):not(.light):not(.crisp), .theme-lagoon:not(.dark):not(.light):not(.crisp), .theme-lavender:not(.dark):not(.light):not(.crisp), .theme-lemon:not(.dark):not(.light):not(.crisp), .theme-lime:not(.dark):not(.light):not(.crisp), .theme-meadow:not(.dark):not(.light):not(.crisp), .theme-midsky:not(.dark):not(.light):not(.crisp), .theme-mint:not(.dark):not(.light):not(.crisp), .theme-moss:not(.dark):not(.light):not(.crisp), .theme-ocean:not(.dark):not(.light):not(.crisp), .theme-olive:not(.dark):not(.light):not(.crisp), .theme-peach:not(.dark):not(.light):not(.crisp), .theme-petal:not(.dark):not(.light):not(.crisp), .theme-plum:not(.dark):not(.light):not(.crisp), .theme-rose:not(.dark):not(.light):not(.crisp), .theme-royal:not(.dark):not(.light):not(.crisp), .theme-sage:not(.dark):not(.light):not(.crisp), .theme-silver:not(.dark):not(.light):not(.crisp), .theme-sky:not(.dark):not(.light):not(.crisp), .theme-sunset:not(.dark):not(.light):not(.crisp), .theme-tan:not(.dark):not(.light):not(.crisp), .theme-turquoise:not(.dark):not(.light):not(.crisp), .theme-twilight:not(.dark):not(.light):not(.crisp), .theme-violet:not(.dark):not(.light):not(.crisp), .theme-yellow:not(.dark):not(.light):not(.crisp)) wc-select .chip {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 :is(.theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-chocolate.dark:not(.crisp), .theme-coffee.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer.dark:not(.crisp), .theme-designer-blue.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-sienna.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-chocolate.dark:not(.crisp), .theme-coffee.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer.dark:not(.crisp), .theme-designer-blue.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-sienna.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp, .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp) .wc-calendar-event {
@@ -22889,16 +22948,16 @@ html.dark.crisp {
   }
 }
 :is(.theme-coffee.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp, .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp) wc-sidenav :is(.closebtn, .openbtn) {
-  color: var(--wc-on-primary) !important;
+  color: var(--wc-on-primary-static, var(--wc-on-primary)) !important;
 }
 @media (prefers-color-scheme: light) {
   :is(.theme-coffee:not(.light):not(.dark):not(.crisp), .theme-amber:not(.light):not(.dark).crisp, .theme-avocado:not(.light):not(.dark).crisp, .theme-blush:not(.light):not(.dark).crisp, .theme-bubblegum:not(.light):not(.dark).crisp, .theme-charcoal:not(.light):not(.dark).crisp, .theme-chocolate:not(.light):not(.dark).crisp, .theme-coffee:not(.light):not(.dark).crisp, .theme-cornsilk:not(.light):not(.dark).crisp, .theme-cottoncandy:not(.light):not(.dark).crisp, .theme-deepsky:not(.light):not(.dark).crisp, .theme-desert:not(.light):not(.dark).crisp, .theme-designer:not(.light):not(.dark).crisp, .theme-designer-blue:not(.light):not(.dark).crisp, .theme-designer-gray:not(.light):not(.dark).crisp, .theme-emerald:not(.light):not(.dark).crisp, .theme-fern:not(.light):not(.dark).crisp, .theme-fire:not(.light):not(.dark).crisp, .theme-forest:not(.light):not(.dark).crisp, .theme-fuchsia:not(.light):not(.dark).crisp, .theme-gold:not(.light):not(.dark).crisp, .theme-golden:not(.light):not(.dark).crisp, .theme-grape:not(.light):not(.dark).crisp, .theme-gray:not(.light):not(.dark).crisp, .theme-honey:not(.light):not(.dark).crisp, .theme-jungle:not(.light):not(.dark).crisp, .theme-lavender:not(.light):not(.dark).crisp, .theme-lemon:not(.light):not(.dark).crisp, .theme-lime:not(.light):not(.dark).crisp, .theme-meadow:not(.light):not(.dark).crisp, .theme-moss:not(.light):not(.dark).crisp, .theme-olive:not(.light):not(.dark).crisp, .theme-peach:not(.light):not(.dark).crisp, .theme-petal:not(.light):not(.dark).crisp, .theme-plum:not(.light):not(.dark).crisp, .theme-rose:not(.light):not(.dark).crisp, .theme-royal:not(.light):not(.dark).crisp, .theme-sage:not(.light):not(.dark).crisp, .theme-sienna:not(.light):not(.dark).crisp, .theme-sunset:not(.light):not(.dark).crisp, .theme-tan:not(.light):not(.dark).crisp, .theme-twilight:not(.light):not(.dark).crisp, .theme-violet:not(.light):not(.dark).crisp, .theme-yellow:not(.light):not(.dark).crisp) wc-sidenav :is(.closebtn, .openbtn) {
-    color: var(--wc-on-primary) !important;
+    color: var(--wc-on-primary-static, var(--wc-on-primary)) !important;
   }
 }
 @media (prefers-color-scheme: dark) {
   :is(.theme-amber:not(.dark):not(.light):not(.crisp), .theme-aqua:not(.dark):not(.light):not(.crisp), .theme-avocado:not(.dark):not(.light):not(.crisp), .theme-azure:not(.dark):not(.light):not(.crisp), .theme-blush:not(.dark):not(.light):not(.crisp), .theme-bubblegum:not(.dark):not(.light):not(.crisp), .theme-charcoal:not(.dark):not(.light):not(.crisp), .theme-cornsilk:not(.dark):not(.light):not(.crisp), .theme-cottoncandy:not(.dark):not(.light):not(.crisp), .theme-deepsky:not(.dark):not(.light):not(.crisp), .theme-desert:not(.dark):not(.light):not(.crisp), .theme-designer-gray:not(.dark):not(.light):not(.crisp), .theme-emerald:not(.dark):not(.light):not(.crisp), .theme-fern:not(.dark):not(.light):not(.crisp), .theme-fire:not(.dark):not(.light):not(.crisp), .theme-forest:not(.dark):not(.light):not(.crisp), .theme-fuchsia:not(.dark):not(.light):not(.crisp), .theme-gold:not(.dark):not(.light):not(.crisp), .theme-golden:not(.dark):not(.light):not(.crisp), .theme-grape:not(.dark):not(.light):not(.crisp), .theme-gray:not(.dark):not(.light):not(.crisp), .theme-high-contrast:not(.dark):not(.light):not(.crisp), .theme-honey:not(.dark):not(.light):not(.crisp), .theme-ice:not(.dark):not(.light):not(.crisp), .theme-jungle:not(.dark):not(.light):not(.crisp), .theme-lagoon:not(.dark):not(.light):not(.crisp), .theme-lavender:not(.dark):not(.light):not(.crisp), .theme-lemon:not(.dark):not(.light):not(.crisp), .theme-lime:not(.dark):not(.light):not(.crisp), .theme-meadow:not(.dark):not(.light):not(.crisp), .theme-midsky:not(.dark):not(.light):not(.crisp), .theme-mint:not(.dark):not(.light):not(.crisp), .theme-moss:not(.dark):not(.light):not(.crisp), .theme-ocean:not(.dark):not(.light):not(.crisp), .theme-olive:not(.dark):not(.light):not(.crisp), .theme-peach:not(.dark):not(.light):not(.crisp), .theme-petal:not(.dark):not(.light):not(.crisp), .theme-plum:not(.dark):not(.light):not(.crisp), .theme-rose:not(.dark):not(.light):not(.crisp), .theme-royal:not(.dark):not(.light):not(.crisp), .theme-sage:not(.dark):not(.light):not(.crisp), .theme-silver:not(.dark):not(.light):not(.crisp), .theme-sky:not(.dark):not(.light):not(.crisp), .theme-sunset:not(.dark):not(.light):not(.crisp), .theme-tan:not(.dark):not(.light):not(.crisp), .theme-turquoise:not(.dark):not(.light):not(.crisp), .theme-twilight:not(.dark):not(.light):not(.crisp), .theme-violet:not(.dark):not(.light):not(.crisp), .theme-yellow:not(.dark):not(.light):not(.crisp), .theme-amber:not(.dark):not(.light).crisp, .theme-aqua:not(.dark):not(.light).crisp, .theme-avocado:not(.dark):not(.light).crisp, .theme-azure:not(.dark):not(.light).crisp, .theme-blush:not(.dark):not(.light).crisp, .theme-bubblegum:not(.dark):not(.light).crisp, .theme-charcoal:not(.dark):not(.light).crisp, .theme-chocolate:not(.dark):not(.light).crisp, .theme-coffee:not(.dark):not(.light).crisp, .theme-cornsilk:not(.dark):not(.light).crisp, .theme-cottoncandy:not(.dark):not(.light).crisp, .theme-deepsky:not(.dark):not(.light).crisp, .theme-desert:not(.dark):not(.light).crisp, .theme-designer:not(.dark):not(.light).crisp, .theme-designer-blue:not(.dark):not(.light).crisp, .theme-designer-gray:not(.dark):not(.light).crisp, .theme-emerald:not(.dark):not(.light).crisp, .theme-fern:not(.dark):not(.light).crisp, .theme-fire:not(.dark):not(.light).crisp, .theme-forest:not(.dark):not(.light).crisp, .theme-fuchsia:not(.dark):not(.light).crisp, .theme-gold:not(.dark):not(.light).crisp, .theme-golden:not(.dark):not(.light).crisp, .theme-grape:not(.dark):not(.light).crisp, .theme-gray:not(.dark):not(.light).crisp, .theme-high-contrast:not(.dark):not(.light).crisp, .theme-honey:not(.dark):not(.light).crisp, .theme-ice:not(.dark):not(.light).crisp, .theme-jungle:not(.dark):not(.light).crisp, .theme-lagoon:not(.dark):not(.light).crisp, .theme-lavender:not(.dark):not(.light).crisp, .theme-lemon:not(.dark):not(.light).crisp, .theme-lime:not(.dark):not(.light).crisp, .theme-meadow:not(.dark):not(.light).crisp, .theme-midsky:not(.dark):not(.light).crisp, .theme-mint:not(.dark):not(.light).crisp, .theme-moss:not(.dark):not(.light).crisp, .theme-ocean:not(.dark):not(.light).crisp, .theme-olive:not(.dark):not(.light).crisp, .theme-peach:not(.dark):not(.light).crisp, .theme-petal:not(.dark):not(.light).crisp, .theme-plum:not(.dark):not(.light).crisp, .theme-rose:not(.dark):not(.light).crisp, .theme-royal:not(.dark):not(.light).crisp, .theme-sage:not(.dark):not(.light).crisp, .theme-sienna:not(.dark):not(.light).crisp, .theme-silver:not(.dark):not(.light).crisp, .theme-sky:not(.dark):not(.light).crisp, .theme-sunset:not(.dark):not(.light).crisp, .theme-tan:not(.dark):not(.light).crisp, .theme-turquoise:not(.dark):not(.light).crisp, .theme-twilight:not(.dark):not(.light).crisp, .theme-violet:not(.dark):not(.light).crisp, .theme-yellow:not(.dark):not(.light).crisp) wc-sidenav :is(.closebtn, .openbtn) {
-    color: var(--wc-on-primary) !important;
+    color: var(--wc-on-primary-static, var(--wc-on-primary)) !important;
   }
 }
 :is(.theme-coffee.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp, .theme-amber.light.crisp, .theme-avocado.light.crisp, .theme-blush.light.crisp, .theme-bubblegum.light.crisp, .theme-charcoal.light.crisp, .theme-chocolate.light.crisp, .theme-coffee.light.crisp, .theme-cornsilk.light.crisp, .theme-cottoncandy.light.crisp, .theme-deepsky.light.crisp, .theme-desert.light.crisp, .theme-designer.light.crisp, .theme-designer-blue.light.crisp, .theme-designer-gray.light.crisp, .theme-emerald.light.crisp, .theme-fern.light.crisp, .theme-fire.light.crisp, .theme-forest.light.crisp, .theme-fuchsia.light.crisp, .theme-gold.light.crisp, .theme-golden.light.crisp, .theme-grape.light.crisp, .theme-gray.light.crisp, .theme-honey.light.crisp, .theme-jungle.light.crisp, .theme-lavender.light.crisp, .theme-lemon.light.crisp, .theme-lime.light.crisp, .theme-meadow.light.crisp, .theme-moss.light.crisp, .theme-olive.light.crisp, .theme-peach.light.crisp, .theme-petal.light.crisp, .theme-plum.light.crisp, .theme-rose.light.crisp, .theme-royal.light.crisp, .theme-sage.light.crisp, .theme-sienna.light.crisp, .theme-sunset.light.crisp, .theme-tan.light.crisp, .theme-twilight.light.crisp, .theme-violet.light.crisp, .theme-yellow.light.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp, .theme-amber.dark.crisp, .theme-aqua.dark.crisp, .theme-avocado.dark.crisp, .theme-azure.dark.crisp, .theme-blush.dark.crisp, .theme-bubblegum.dark.crisp, .theme-charcoal.dark.crisp, .theme-chocolate.dark.crisp, .theme-coffee.dark.crisp, .theme-cornsilk.dark.crisp, .theme-cottoncandy.dark.crisp, .theme-deepsky.dark.crisp, .theme-desert.dark.crisp, .theme-designer.dark.crisp, .theme-designer-blue.dark.crisp, .theme-designer-gray.dark.crisp, .theme-emerald.dark.crisp, .theme-fern.dark.crisp, .theme-fire.dark.crisp, .theme-forest.dark.crisp, .theme-fuchsia.dark.crisp, .theme-gold.dark.crisp, .theme-golden.dark.crisp, .theme-grape.dark.crisp, .theme-gray.dark.crisp, .theme-high-contrast.dark.crisp, .theme-honey.dark.crisp, .theme-ice.dark.crisp, .theme-jungle.dark.crisp, .theme-lagoon.dark.crisp, .theme-lavender.dark.crisp, .theme-lemon.dark.crisp, .theme-lime.dark.crisp, .theme-meadow.dark.crisp, .theme-midsky.dark.crisp, .theme-mint.dark.crisp, .theme-moss.dark.crisp, .theme-ocean.dark.crisp, .theme-olive.dark.crisp, .theme-peach.dark.crisp, .theme-petal.dark.crisp, .theme-plum.dark.crisp, .theme-rose.dark.crisp, .theme-royal.dark.crisp, .theme-sage.dark.crisp, .theme-sienna.dark.crisp, .theme-silver.dark.crisp, .theme-sky.dark.crisp, .theme-sunset.dark.crisp, .theme-tan.dark.crisp, .theme-turquoise.dark.crisp, .theme-twilight.dark.crisp, .theme-violet.dark.crisp, .theme-yellow.dark.crisp) wc-sidenav .wc-sidenav.sidenav a {
@@ -22997,16 +23056,16 @@ html.dark.crisp {
   }
 }
 :is(.theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-charcoal.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-gray.light:not(.crisp), .theme-high-contrast.light:not(.crisp), .theme-silver.light:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp), .theme-amber.dark:not(.crisp), .theme-aqua.dark:not(.crisp), .theme-avocado.dark:not(.crisp), .theme-azure.dark:not(.crisp), .theme-blush.dark:not(.crisp), .theme-bubblegum.dark:not(.crisp), .theme-charcoal.dark:not(.crisp), .theme-cornsilk.dark:not(.crisp), .theme-cottoncandy.dark:not(.crisp), .theme-deepsky.dark:not(.crisp), .theme-desert.dark:not(.crisp), .theme-designer-gray.dark:not(.crisp), .theme-emerald.dark:not(.crisp), .theme-fern.dark:not(.crisp), .theme-fire.dark:not(.crisp), .theme-forest.dark:not(.crisp), .theme-fuchsia.dark:not(.crisp), .theme-gold.dark:not(.crisp), .theme-golden.dark:not(.crisp), .theme-grape.dark:not(.crisp), .theme-gray.dark:not(.crisp), .theme-high-contrast.dark:not(.crisp), .theme-honey.dark:not(.crisp), .theme-ice.dark:not(.crisp), .theme-jungle.dark:not(.crisp), .theme-lagoon.dark:not(.crisp), .theme-lavender.dark:not(.crisp), .theme-lemon.dark:not(.crisp), .theme-lime.dark:not(.crisp), .theme-meadow.dark:not(.crisp), .theme-midsky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-moss.dark:not(.crisp), .theme-ocean.dark:not(.crisp), .theme-olive.dark:not(.crisp), .theme-peach.dark:not(.crisp), .theme-petal.dark:not(.crisp), .theme-plum.dark:not(.crisp), .theme-rose.dark:not(.crisp), .theme-royal.dark:not(.crisp), .theme-sage.dark:not(.crisp), .theme-silver.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-sunset.dark:not(.crisp), .theme-tan.dark:not(.crisp), .theme-turquoise.dark:not(.crisp), .theme-twilight.dark:not(.crisp), .theme-violet.dark:not(.crisp), .theme-yellow.dark:not(.crisp)) wc-select :is(.option.highlighted, .option:hover) {
-  color: var(--wc-on-primary) !important;
+  color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
 }
 @media (prefers-color-scheme: light) {
   :is(.theme-charcoal:not(.light):not(.dark):not(.crisp), .theme-coffee:not(.light):not(.dark):not(.crisp), .theme-gray:not(.light):not(.dark):not(.crisp), .theme-high-contrast:not(.light):not(.dark):not(.crisp), .theme-silver:not(.light):not(.dark):not(.crisp)) wc-select :is(.option.highlighted, .option:hover) {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 @media (prefers-color-scheme: dark) {
   :is(.theme-amber:not(.dark):not(.light):not(.crisp), .theme-aqua:not(.dark):not(.light):not(.crisp), .theme-avocado:not(.dark):not(.light):not(.crisp), .theme-azure:not(.dark):not(.light):not(.crisp), .theme-blush:not(.dark):not(.light):not(.crisp), .theme-bubblegum:not(.dark):not(.light):not(.crisp), .theme-charcoal:not(.dark):not(.light):not(.crisp), .theme-cornsilk:not(.dark):not(.light):not(.crisp), .theme-cottoncandy:not(.dark):not(.light):not(.crisp), .theme-deepsky:not(.dark):not(.light):not(.crisp), .theme-desert:not(.dark):not(.light):not(.crisp), .theme-designer-gray:not(.dark):not(.light):not(.crisp), .theme-emerald:not(.dark):not(.light):not(.crisp), .theme-fern:not(.dark):not(.light):not(.crisp), .theme-fire:not(.dark):not(.light):not(.crisp), .theme-forest:not(.dark):not(.light):not(.crisp), .theme-fuchsia:not(.dark):not(.light):not(.crisp), .theme-gold:not(.dark):not(.light):not(.crisp), .theme-golden:not(.dark):not(.light):not(.crisp), .theme-grape:not(.dark):not(.light):not(.crisp), .theme-gray:not(.dark):not(.light):not(.crisp), .theme-high-contrast:not(.dark):not(.light):not(.crisp), .theme-honey:not(.dark):not(.light):not(.crisp), .theme-ice:not(.dark):not(.light):not(.crisp), .theme-jungle:not(.dark):not(.light):not(.crisp), .theme-lagoon:not(.dark):not(.light):not(.crisp), .theme-lavender:not(.dark):not(.light):not(.crisp), .theme-lemon:not(.dark):not(.light):not(.crisp), .theme-lime:not(.dark):not(.light):not(.crisp), .theme-meadow:not(.dark):not(.light):not(.crisp), .theme-midsky:not(.dark):not(.light):not(.crisp), .theme-mint:not(.dark):not(.light):not(.crisp), .theme-moss:not(.dark):not(.light):not(.crisp), .theme-ocean:not(.dark):not(.light):not(.crisp), .theme-olive:not(.dark):not(.light):not(.crisp), .theme-peach:not(.dark):not(.light):not(.crisp), .theme-petal:not(.dark):not(.light):not(.crisp), .theme-plum:not(.dark):not(.light):not(.crisp), .theme-rose:not(.dark):not(.light):not(.crisp), .theme-royal:not(.dark):not(.light):not(.crisp), .theme-sage:not(.dark):not(.light):not(.crisp), .theme-silver:not(.dark):not(.light):not(.crisp), .theme-sky:not(.dark):not(.light):not(.crisp), .theme-sunset:not(.dark):not(.light):not(.crisp), .theme-tan:not(.dark):not(.light):not(.crisp), .theme-turquoise:not(.dark):not(.light):not(.crisp), .theme-twilight:not(.dark):not(.light):not(.crisp), .theme-violet:not(.dark):not(.light):not(.crisp), .theme-yellow:not(.dark):not(.light):not(.crisp)) wc-select :is(.option.highlighted, .option:hover) {
-    color: var(--wc-on-primary) !important;
+    color: var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary))) !important;
   }
 }
 :is(.theme-chocolate.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-chocolate.light:not(.crisp), .theme-coffee.light:not(.crisp), .theme-sienna.light:not(.crisp), .theme-mint.dark:not(.crisp), .theme-sky.dark:not(.crisp), .theme-mint.dark:not(.crisp), .theme-sky.dark:not(.crisp)) .wc-tabulator.tabulator .tabulator-footer :is(.tabulator-page-counter, .tabulator-page:not(.active)) {
