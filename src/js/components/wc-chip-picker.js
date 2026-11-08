@@ -18,9 +18,13 @@
  *  discards. Keyboard: ←/→ (↑/↓, Home/End) move between chips; Enter/Space opens; Delete/Backspace removes
  *  the focused chip; Escape closes.
  *
- *  Attributes: name, value (JSON array of {value, slots}), slots (JSON array of {value, label}), add-label,
+ *  Attributes: name, value (JSON array of {value, slots}), slots (JSON array of {value, label, short?}), add-label,
  *  all-label, slot-label, warn-overlap, readonly (chips only, no editing — still submits), disabled (not
- *  editable, not submitted). Options come from <option> children.
+ *  editable, not submitted), unique (each value on at most one chip). Options come from <option> children.
+ *  A slot's `short` is its chip text (else the first word of its label).
+ *  `unique`: in the editor, values already on another chip are disabled options; "+ Add" is hidden once every
+ *  option is used; a value attribute with repeats is merged into the first chip (slots combined; "all" wins),
+ *  silently.
  *  Form-associated: submits `name` = the value as a JSON string. Events: `change` and `wcchippickerchange`,
  *  both with detail.value (the array). Setting the `value` attribute (or .value) rebuilds the chips.
  *  HTMX: everything is rebuilt from attributes on every connect; edits are reflected to the value attribute.
@@ -33,7 +37,7 @@ class WcChipPicker extends WcBaseFormComponent {
   static get is() { return 'wc-chip-picker'; }
 
   static get observedAttributes() {
-    return ['name', 'value', 'slots', 'add-label', 'all-label', 'slot-label', 'warn-overlap', 'readonly', 'disabled'];
+    return ['name', 'value', 'slots', 'add-label', 'all-label', 'slot-label', 'warn-overlap', 'readonly', 'disabled', 'unique'];
   }
 
   constructor() {
@@ -73,7 +77,7 @@ class WcChipPicker extends WcBaseFormComponent {
   }
 
   _handleAttributeChange(attrName, newValue) {
-    if (['value', 'slots', 'add-label', 'all-label', 'slot-label', 'warn-overlap', 'readonly', 'disabled'].includes(attrName)) {
+    if (['value', 'slots', 'add-label', 'all-label', 'slot-label', 'warn-overlap', 'readonly', 'disabled', 'unique'].includes(attrName)) {
       if (attrName === 'value' && this._reflecting) return;   // our own reflection
       if (this.componentElement) this._rebuild();
     } else if (attrName !== 'class' && attrName !== 'id') {
@@ -95,12 +99,37 @@ class WcChipPicker extends WcBaseFormComponent {
     let arr = v;
     if (typeof v === 'string') { try { arr = v.trim() ? JSON.parse(v) : []; } catch (e) { console.warn('[wc-chip-picker] invalid value JSON', e); arr = []; } }
     if (!Array.isArray(arr)) return [];
-    return arr.filter(c => c && c.value != null && c.value !== '')
+    const chips = arr.filter(c => c && c.value != null && c.value !== '')
       .map(c => ({ value: String(c.value), slots: Array.isArray(c.slots) ? c.slots.map(String) : [] }));
+    return this.hasAttribute('unique') ? this._mergeRepeats(chips) : chips;
+  }
+
+  // unique: fold repeats of a value into its first chip — slots combined (in slot order), any "all" chip → all
+  _mergeRepeats(chips) {
+    const order = this._slots().map(s => s.value);
+    const rank = (v) => { const i = order.indexOf(v); return i < 0 ? order.length : i; };
+    const out = [];
+    for (const c of chips) {
+      const first = out.find(o => o.value === c.value);
+      if (!first) { out.push({ value: c.value, slots: [...c.slots] }); continue; }
+      if (!first.slots.length || !c.slots.length) { first.slots = []; continue; }
+      const merged = [...new Set([...first.slots, ...c.slots])];
+      first.slots = merged.map((v, i) => [v, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
+    }
+    return out;
+  }
+
+  // unique: values on chips other than `exceptIndex`
+  _usedValues(exceptIndex = -1) {
+    return new Set(this._chips.filter((c, i) => i !== exceptIndex).map(c => c.value));
   }
 
   _slots() {
-    try { const s = JSON.parse(this.getAttribute('slots') || '[]'); return Array.isArray(s) ? s.map(x => ({ value: String(x.value), label: String(x.label ?? x.value) })) : []; }
+    try { const s = JSON.parse(this.getAttribute('slots') || '[]'); return Array.isArray(s) ? s.map(x => {
+      const slot = { value: String(x.value), label: String(x.label ?? x.value) };
+      if (x.short != null && String(x.short).trim()) slot.short = String(x.short);
+      return slot;
+    }) : []; }
     catch (e) { console.warn('[wc-chip-picker] invalid slots JSON', e); return []; }
   }
 
@@ -146,9 +175,10 @@ class WcChipPicker extends WcBaseFormComponent {
   _chipText(chip, slots) {
     const name = this._labelOf(chip.value);
     if (!chip.slots.length) return `${name} · ${this._allLabel()}`;
-    const labels = chip.slots.map(v => slots.find(s => s.value === v)?.label ?? v);
-    if (labels.length > 3) return `${name} · ${labels.length} ${this._slotWord()}`;
-    return `${name} · ${labels.map(l => l.split(/\s+/)[0]).join(', ')}`;
+    if (chip.slots.length > 3) return `${name} · ${chip.slots.length} ${this._slotWord()}`;
+    // a slot's `short` when given, else the first word of its label
+    const short = chip.slots.map(v => { const s = slots.find(x => x.value === v); return s?.short ?? (s?.label ?? v).split(/\s+/)[0]; });
+    return `${name} · ${short.join(', ')}`;
   }
 
   // chips sharing a slot (no slots = every slot) → { chipIndex: ["Mary and Angel both on Fri 12/12", …] }
@@ -196,7 +226,9 @@ class WcChipPicker extends WcBaseFormComponent {
       if (editable) el.tabIndex = -1;
       group.appendChild(el);
     });
-    if (editable) {
+    // unique: no "+ Add" once every option is on a chip
+    const allUsed = this.hasAttribute('unique') && this._options().every(o => this._usedValues().has(o.value));
+    if (editable && !allUsed) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'wc-chip-picker-add';
@@ -205,6 +237,10 @@ class WcChipPicker extends WcBaseFormComponent {
       add.tabIndex = -1;
       group.appendChild(add);
       // roving tabindex: one tab stop for the whole group
+      const items = this._items(group);
+      this._focusIndex = Math.min(this._focusIndex, items.length - 1);
+      items[Math.max(0, this._focusIndex)].tabIndex = 0;
+    } else if (editable && this._chips.length) {
       const items = this._items(group);
       this._focusIndex = Math.min(this._focusIndex, items.length - 1);
       items[Math.max(0, this._focusIndex)].tabIndex = 0;
@@ -288,7 +324,9 @@ class WcChipPicker extends WcBaseFormComponent {
     this._closeEditor(false);
     const slots = this._slots();
     const opts = this._options();
-    const src = index >= 0 ? this._chips[index] : { value: opts[0]?.value ?? '', slots: [] };
+    const unique = this.hasAttribute('unique');
+    const used = unique ? this._usedValues(index) : new Set();
+    const src = index >= 0 ? this._chips[index] : { value: (opts.find(o => !used.has(o.value)) ?? opts[0])?.value ?? '', slots: [] };
     this._draft = { index, value: src.value, slots: [...src.slots] };
     const noun = this.getAttribute('add-label') ? this.getAttribute('add-label').replace(/^add\s+/i, '') : 'choice';
     const uid = `wccp-${Math.random().toString(36).slice(2, 8)}`;
@@ -311,7 +349,12 @@ class WcChipPicker extends WcBaseFormComponent {
         <button type="button" class="wc-chip-picker-done">Done</button>
       </div>`;
     const sel = panel.querySelector('select');
-    for (const o of opts) sel.add(new Option(o.label, o.value, false, o.value === this._draft.value));
+    for (const o of opts) {
+      const taken = used.has(o.value);   // unique: on another chip (the edited chip keeps its own value)
+      const opt = new Option(taken ? `${o.label} (already added)` : o.label, o.value, false, o.value === this._draft.value);
+      if (taken) opt.disabled = true;
+      sel.add(opt);
+    }
     if (!opts.some(o => o.value === this._draft.value) && this._draft.value) sel.add(new Option(this._draft.value, this._draft.value, false, true));
 
     const syncPills = () => {
@@ -414,6 +457,8 @@ class WcChipPicker extends WcBaseFormComponent {
       .wc-chip-picker-pop .wc-chip-picker-lbl { font-size: 0.75rem; font-weight: 600; color: var(--text-2); }
       .wc-chip-picker-pop .wc-chip-picker-select { font: inherit; padding: 0.375rem 0.5rem; border-radius: 6px;
         background: var(--component-bg-color); color: var(--text-1); border: 1px solid var(--text-8); }
+      /* unique: a value already on another chip — dimmed (still ≥ 4.5:1) and labelled "(already added)" */
+      .wc-chip-picker-pop .wc-chip-picker-select option:disabled { color: var(--text-6); background: var(--component-bg-color); }
       .wc-chip-picker-pop .wc-chip-picker-pills { display: flex; flex-wrap: wrap; gap: 0.375rem; }
       .wc-chip-picker-pop .wc-chip-picker-pill { font: inherit; font-size: 0.75rem; line-height: 1.5; padding: 2px 10px; border: 0; cursor: pointer; }
       /* selected is not color alone: a check mark + bold (aria-pressed carries it for assistive tech) */

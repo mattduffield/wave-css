@@ -40577,7 +40577,7 @@ var WcChipPicker = class extends WcBaseFormComponent {
     return "wc-chip-picker";
   }
   static get observedAttributes() {
-    return ["name", "value", "slots", "add-label", "all-label", "slot-label", "warn-overlap", "readonly", "disabled"];
+    return ["name", "value", "slots", "add-label", "all-label", "slot-label", "warn-overlap", "readonly", "disabled", "unique"];
   }
   constructor() {
     super();
@@ -40611,7 +40611,7 @@ var WcChipPicker = class extends WcBaseFormComponent {
     if (this.componentElement) this._rebuild();
   }
   _handleAttributeChange(attrName, newValue) {
-    if (["value", "slots", "add-label", "all-label", "slot-label", "warn-overlap", "readonly", "disabled"].includes(attrName)) {
+    if (["value", "slots", "add-label", "all-label", "slot-label", "warn-overlap", "readonly", "disabled", "unique"].includes(attrName)) {
       if (attrName === "value" && this._reflecting) return;
       if (this.componentElement) this._rebuild();
     } else if (attrName !== "class" && attrName !== "id") {
@@ -40640,12 +40640,44 @@ var WcChipPicker = class extends WcBaseFormComponent {
       }
     }
     if (!Array.isArray(arr)) return [];
-    return arr.filter((c) => c && c.value != null && c.value !== "").map((c) => ({ value: String(c.value), slots: Array.isArray(c.slots) ? c.slots.map(String) : [] }));
+    const chips = arr.filter((c) => c && c.value != null && c.value !== "").map((c) => ({ value: String(c.value), slots: Array.isArray(c.slots) ? c.slots.map(String) : [] }));
+    return this.hasAttribute("unique") ? this._mergeRepeats(chips) : chips;
+  }
+  // unique: fold repeats of a value into its first chip — slots combined (in slot order), any "all" chip → all
+  _mergeRepeats(chips) {
+    const order = this._slots().map((s) => s.value);
+    const rank = (v) => {
+      const i = order.indexOf(v);
+      return i < 0 ? order.length : i;
+    };
+    const out = [];
+    for (const c of chips) {
+      const first = out.find((o) => o.value === c.value);
+      if (!first) {
+        out.push({ value: c.value, slots: [...c.slots] });
+        continue;
+      }
+      if (!first.slots.length || !c.slots.length) {
+        first.slots = [];
+        continue;
+      }
+      const merged = [.../* @__PURE__ */ new Set([...first.slots, ...c.slots])];
+      first.slots = merged.map((v, i) => [v, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map((x) => x[0]);
+    }
+    return out;
+  }
+  // unique: values on chips other than `exceptIndex`
+  _usedValues(exceptIndex = -1) {
+    return new Set(this._chips.filter((c, i) => i !== exceptIndex).map((c) => c.value));
   }
   _slots() {
     try {
       const s = JSON.parse(this.getAttribute("slots") || "[]");
-      return Array.isArray(s) ? s.map((x) => ({ value: String(x.value), label: String(x.label ?? x.value) })) : [];
+      return Array.isArray(s) ? s.map((x) => {
+        const slot = { value: String(x.value), label: String(x.label ?? x.value) };
+        if (x.short != null && String(x.short).trim()) slot.short = String(x.short);
+        return slot;
+      }) : [];
     } catch (e) {
       console.warn("[wc-chip-picker] invalid slots JSON", e);
       return [];
@@ -40692,9 +40724,12 @@ var WcChipPicker = class extends WcBaseFormComponent {
   _chipText(chip, slots) {
     const name = this._labelOf(chip.value);
     if (!chip.slots.length) return `${name} \xB7 ${this._allLabel()}`;
-    const labels = chip.slots.map((v) => slots.find((s) => s.value === v)?.label ?? v);
-    if (labels.length > 3) return `${name} \xB7 ${labels.length} ${this._slotWord()}`;
-    return `${name} \xB7 ${labels.map((l) => l.split(/\s+/)[0]).join(", ")}`;
+    if (chip.slots.length > 3) return `${name} \xB7 ${chip.slots.length} ${this._slotWord()}`;
+    const short = chip.slots.map((v) => {
+      const s = slots.find((x) => x.value === v);
+      return s?.short ?? (s?.label ?? v).split(/\s+/)[0];
+    });
+    return `${name} \xB7 ${short.join(", ")}`;
   }
   // chips sharing a slot (no slots = every slot) → { chipIndex: ["Mary and Angel both on Fri 12/12", …] }
   _overlaps(slots) {
@@ -40743,7 +40778,8 @@ var WcChipPicker = class extends WcBaseFormComponent {
       if (editable) el2.tabIndex = -1;
       group.appendChild(el2);
     });
-    if (editable) {
+    const allUsed = this.hasAttribute("unique") && this._options().every((o) => this._usedValues().has(o.value));
+    if (editable && !allUsed) {
       const add = document.createElement("button");
       add.type = "button";
       add.className = "wc-chip-picker-add";
@@ -40751,6 +40787,10 @@ var WcChipPicker = class extends WcBaseFormComponent {
       add.textContent = `+ ${this.getAttribute("add-label") || "Add"}`;
       add.tabIndex = -1;
       group.appendChild(add);
+      const items = this._items(group);
+      this._focusIndex = Math.min(this._focusIndex, items.length - 1);
+      items[Math.max(0, this._focusIndex)].tabIndex = 0;
+    } else if (editable && this._chips.length) {
       const items = this._items(group);
       this._focusIndex = Math.min(this._focusIndex, items.length - 1);
       items[Math.max(0, this._focusIndex)].tabIndex = 0;
@@ -40841,7 +40881,9 @@ var WcChipPicker = class extends WcBaseFormComponent {
     this._closeEditor(false);
     const slots = this._slots();
     const opts = this._options();
-    const src = index >= 0 ? this._chips[index] : { value: opts[0]?.value ?? "", slots: [] };
+    const unique = this.hasAttribute("unique");
+    const used = unique ? this._usedValues(index) : /* @__PURE__ */ new Set();
+    const src = index >= 0 ? this._chips[index] : { value: (opts.find((o) => !used.has(o.value)) ?? opts[0])?.value ?? "", slots: [] };
     this._draft = { index, value: src.value, slots: [...src.slots] };
     const noun = this.getAttribute("add-label") ? this.getAttribute("add-label").replace(/^add\s+/i, "") : "choice";
     const uid = `wccp-${Math.random().toString(36).slice(2, 8)}`;
@@ -40863,7 +40905,12 @@ var WcChipPicker = class extends WcBaseFormComponent {
         <button type="button" class="wc-chip-picker-done">Done</button>
       </div>`;
     const sel = panel.querySelector("select");
-    for (const o of opts) sel.add(new Option(o.label, o.value, false, o.value === this._draft.value));
+    for (const o of opts) {
+      const taken = used.has(o.value);
+      const opt = new Option(taken ? `${o.label} (already added)` : o.label, o.value, false, o.value === this._draft.value);
+      if (taken) opt.disabled = true;
+      sel.add(opt);
+    }
     if (!opts.some((o) => o.value === this._draft.value) && this._draft.value) sel.add(new Option(this._draft.value, this._draft.value, false, true));
     const syncPills = () => {
       panel.querySelectorAll(".wc-chip-picker-pill[data-slot]").forEach((p) => {
@@ -40975,6 +41022,8 @@ var WcChipPicker = class extends WcBaseFormComponent {
       .wc-chip-picker-pop .wc-chip-picker-lbl { font-size: 0.75rem; font-weight: 600; color: var(--text-2); }
       .wc-chip-picker-pop .wc-chip-picker-select { font: inherit; padding: 0.375rem 0.5rem; border-radius: 6px;
         background: var(--component-bg-color); color: var(--text-1); border: 1px solid var(--text-8); }
+      /* unique: a value already on another chip \u2014 dimmed (still \u2265 4.5:1) and labelled "(already added)" */
+      .wc-chip-picker-pop .wc-chip-picker-select option:disabled { color: var(--text-6); background: var(--component-bg-color); }
       .wc-chip-picker-pop .wc-chip-picker-pills { display: flex; flex-wrap: wrap; gap: 0.375rem; }
       .wc-chip-picker-pop .wc-chip-picker-pill { font: inherit; font-size: 0.75rem; line-height: 1.5; padding: 2px 10px; border: 0; cursor: pointer; }
       /* selected is not color alone: a check mark + bold (aria-pressed carries it for assistive tech) */

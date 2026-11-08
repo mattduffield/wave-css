@@ -46,6 +46,25 @@
     </section>
 
     <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">unique + short slot labels</h2>
+      <p style="margin: 0;">Each part on at most one chip. Click <b>+ Add part</b>: parts already on a chip are disabled
+        ("already added"). Add the last free part and <b>+ Add part</b> disappears; remove a chip and it comes back.
+        Chips use each night's <code>short</code> text ("Dec 6 (Sat)"); the last night has none, so it falls back to the first word of its label ("Sun").</p>
+      <wc-chip-picker id="uniq" name="uniq_parts" unique warn-overlap add-label="Add part" all-label="every night" slot-label="Nights"
+        slots='[{"value":"d4","label":"Thursday, December 4","short":"Dec 4 (Thu)"},{"value":"d5","label":"Friday, December 5","short":"Dec 5 (Fri)"},{"value":"d6","label":"Saturday, December 6","short":"Dec 6 (Sat)"},{"value":"d7","label":"Sun 12/7"}]'
+        value='[{"value":"Herod","slots":["d4","d5"]},{"value":"Priest","slots":["d6","d7"]}]'>
+        <option value="Herod">Herod</option><option value="Priest">Priest</option><option value="Soldier 1">Soldier 1</option>
+      </wc-chip-picker>
+      <p style="margin: 0;">Every part used, so there's no <b>+ Add part</b>. The value attribute listed Soldier 1 twice
+        (<code>["d4"]</code> and <code>["d6"]</code>); the repeats were merged into one chip, silently:</p>
+      <wc-chip-picker id="uniq-full" name="uniq_full" unique warn-overlap add-label="Add part" all-label="every night" slot-label="Nights"
+        slots='[{"value":"d4","label":"Thursday, December 4","short":"Dec 4 (Thu)"},{"value":"d5","label":"Friday, December 5","short":"Dec 5 (Fri)"},{"value":"d6","label":"Saturday, December 6","short":"Dec 6 (Sat)"}]'
+        value='[{"value":"Soldier 1","slots":["d4"]},{"value":"Herod","slots":["d5"]},{"value":"Soldier 1","slots":["d6"]}]'>
+        <option value="Herod">Herod</option><option value="Soldier 1">Soldier 1</option>
+      </wc-chip-picker>
+    </section>
+
+    <section class="col gap-2">
       <h2 class="font-semibold" style="margin: 0;">Readonly (display table) and disabled</h2>
       <table class="w-full">
         <thead><tr><th style="text-align: left;">Volunteer</th><th style="text-align: left;">Parts</th></tr></thead>

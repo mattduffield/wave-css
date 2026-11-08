@@ -39,3 +39,28 @@ used as they are). The component's styles are injected at runtime only when the 
     help-drawer, test-innerhtml) also differ when a build is compared **with itself**, so they are nondeterministic
     pages, not regressions.
   - New option `--pages a.html,b.html` limits a run to named views.
+
+## `wc-chip-picker`: per-slot `short` text and `unique` (knowledge base 1.60.0)
+
+Additive only. A picker that uses neither option behaves exactly as before.
+
+- **`short` on a slot** (`{"value":"n1","label":"Dec 5 (Sat)","short":"Dec 5 (Sat)"}`) is the chip text for that slot.
+  Without it, chips use the first word of the label, as before. The "· 4 nights" collapse above 3 slots and the
+  full-label title are unchanged. Pills keep the full label.
+- **`unique`**: each value can be on at most one chip.
+  - In the editor's select, values already on another chip are disabled ("Mary (already added)"). The chip being
+    edited keeps its own value, and Add preselects the first free one.
+  - "+ Add" is hidden while every option is used.
+  - A `value` with a repeated value is merged into the first chip: slots are combined in slot order, and "all" wins.
+    No `change` event fires.
+  - Overlap warnings still apply between different values.
+  - Disabled option: `--text-6` on `--component-bg-color`.
+
+**Verified:**
+- `tests/chip-picker-unique-test.py`: 36/36, run twice.
+  - Without the options, the same scripted session gives identical results on the previous build (`/tmp/wave-part15`,
+    byte-identical to the committed build) and this one: DOM, ARIA, editor options, form values, `change` events,
+    repeated values kept, and screenshots of the chips and the open editor.
+  - The disabled option is ≥ 4.5:1 in 54 themes × light/dark/OS × regular/crisp (lowest 5.32).
+- `chip-picker-test` 50/50 and `chip-picker-contrast-test` 20/20 are unchanged.
+- The CSS bundle is still byte-identical.

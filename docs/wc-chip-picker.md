@@ -5,7 +5,8 @@ value + its slots; a chip with **no slots means every slot**. The same value may
 (Angel on Fri + Sat, and Angel again on the following Fri).
 
 Demo: `views/chip-picker.html`. Tests: `tests/chip-picker-test.py` (behavior, 50 checks) and
-`tests/chip-picker-contrast-test.py` (648 theme/mode states).
+`tests/chip-picker-contrast-test.py` (648 theme/mode states), `tests/chip-picker-unique-test.py` (`short`, `unique`,
+and the proof that pickers without them are unchanged).
 
 ```html
 <wc-chip-picker name="parts_42" add-label="Add part" all-label="every night" slot-label="Nights" warn-overlap
@@ -22,22 +23,38 @@ Demo: `views/chip-picker.html`. Tests: `tests/chip-picker-test.py` (behavior, 50
 |---|---|
 | `name` | Form field name. Submits the value as **one JSON string**. |
 | `value` | JSON array `[{"value": "...", "slots": ["slotValue", ...]}]`. `slots: []` = every slot. Setting it from outside rebuilds the chips. |
-| `slots` | JSON array `[{"value", "label"}]`. Their order is kept in chips and pills. |
+| `slots` | JSON array `[{"value", "label", "short"?}]`. Their order is kept in chips and pills. `short` (optional) is the slot's chip text; pills and titles always use `label`. |
 | `<option>` children | The choices for the value select (hidden; label = option text). |
 | `add-label` | Text of the add button (`+ Add part`) and of the dialog (`Add part` / `Edit part`). Default `Add`. |
 | `all-label` | Chip suffix and pill for "no slots" (`every night`). Default `all`. |
 | `slot-label` | Heading of the slot pills (`Nights`); its lowercase form is used in counts (`4 nights`). Default `Slots`. |
 | `warn-overlap` | Chips that share a slot get the warning style plus a title naming who and when. Never blocks. |
+| `unique` | Each value can be on at most one chip. See [unique](#unique). |
 | `readonly` | Chips only (spans), no editing. Still submits. Use for display tables. |
 | `disabled` | Chips only, not focusable, `aria-disabled`, **not submitted**. |
 | `aria-label` | Label of the chip group. Default: the plural of `add-label`'s noun (`Parts`), else `Choices`. |
 
 ## Chips
 
-- `Mary · every night` (no slots), `Angel · Fri, Sat` (up to 3 slots: first word of each label), `Wise Man · 4 nights`
+- `Mary · every night` (no slots), `Angel · Fri, Sat` (up to 3 slots: each slot's `short`, else the first word of its
+  label, e.g. `Herod · Dec 4 (Thu), Dec 5 (Fri)`), `Wise Man · 4 nights`
   (more than 3; every slot label is in the title).
 - Badge classes: `.badge`, and `.badge-warning` for an overlap. The title reads e.g. *Mary and Angel both on Fri 12/12*
   (*Mary, Angel and Wise Man all on Fri 12/12* for three or more). A no-slots chip shares every slot.
+
+## unique
+
+- In the editor's select, values already on **another** chip are disabled and read "Mary (already added)". The chip
+  being edited keeps its own value. Add preselects the first free value.
+- **+ add-label** is hidden while every option is on a chip and returns when one is removed. The chips stay one tab stop.
+- A `value` (attribute or `.value`) that repeats a value is **merged into the first chip**: slots combined in slot
+  order, and if any of the repeats is "all" (`slots: []`) the result is "all". No `change` event.
+- Overlap warnings (`warn-overlap`) still apply between different values.
+- Disabled options: `--text-6` on `--component-bg-color`, ≥ 4.5:1 in every theme and mode (lowest 5.32). That color
+  applies where the browser draws the list in the page (Windows, Linux, a listbox). macOS Chrome/Safari draw the
+  open list natively in their own gray; the "(already added)" text says it either way.
+
+Without `unique` (and without `short`) a picker behaves exactly as before: a repeated value stays two chips.
 
 ## Editing
 
