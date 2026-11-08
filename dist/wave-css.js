@@ -2450,8 +2450,8 @@ if (!customElements.get("wc-article-card")) {
           padding: 20px;
         }
         .wc-article-card {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           box-shadow: var(--card-shadow);
           overflow: hidden;
           transition: transform 0.2s, box-shadow 0.2s;
@@ -7138,8 +7138,8 @@ if (!customElements.get("wc-context-menu")) {
           gap: 8px;
         }
         .wc-context-menu .wc-context-menu-item:hover {
-          background: var(--primary-bg-color, #4466ff);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #4466ff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .wc-context-menu .wc-context-menu-item.disabled {
           opacity: 0.35;
@@ -8292,8 +8292,8 @@ if (!customElements.get("wc-emoji")) {
           transition: background-color 0.2s ease-in-out;
         }
         .wc-emoji button:hover {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-emoji-trigger {
           opacity: 0.7;
@@ -8341,8 +8341,8 @@ if (!customElements.get("wc-emoji")) {
           text-align: center;
         }
         .wc-emoji-grid button:hover {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           transform: scale(1.2);
         }
       `;
@@ -9754,8 +9754,8 @@ if (!customElements.get("wc-help-drawer")) {
           transition: background 0.2s, color 0.2s;
         }
         .help-drawer-trigger:hover {
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
 
         /* Overlay */
@@ -10093,8 +10093,8 @@ if (!customElements.get("wc-help-drawer")) {
           width: 100%;
           padding: 0.5rem;
           font-size: 0.8125rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border: none;
           border-radius: 0.25rem;
           cursor: pointer;
@@ -11976,8 +11976,8 @@ if (!customElements.get("wc-record-lookup")) {
           .wc-record-lookup .rl-suggestion-item:last-child { border-bottom: none; }
           .wc-record-lookup .rl-suggestion-item:hover { background: var(--surface-2, #f3f4f6); }
           .wc-record-lookup .rl-suggestion-item.highlighted {
-            background: var(--primary-bg-color, #3b82f6);
-            color: var(--primary-color, #fff);
+            background: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+            color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
             font-weight: 500;
           }
 
@@ -11997,8 +11997,8 @@ if (!customElements.get("wc-record-lookup")) {
             min-height: 2.25rem; padding: 0.4rem 1rem;
             border: 1px solid transparent; border-radius: 0.375rem;
             font-weight: 600; cursor: pointer;
-            background: var(--primary-bg-color, #3b82f6);
-            color: var(--primary-color, #fff);
+            background: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+            color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
           }
           .wc-record-lookup .rl-hint-use:focus-visible { outline: 2px solid var(--text-1); outline-offset: 2px; }
           .wc-record-lookup .rl-hint-dismiss {
@@ -14131,8 +14131,8 @@ var WcAddress = class extends WcBaseFormComponent {
         background-color: var(--surface-2, #f3f4f6);
       }
       .address-suggestion-item.highlighted {
-        background-color: var(--primary-bg-color, #3b82f6);
-        color: var(--primary-color, #fff);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
         font-weight: 500;
       }
       /* Attribution required by LocationIQ / provider ToS \u2014 the app surfaces this once
@@ -16243,13 +16243,13 @@ var WcMenu = class extends WcBaseComponent {
         user-select: none;
       }
       wc-menu .wc-menu a:hover {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         opacity: 1;
       }
       wc-menu .wc-menu a.active {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         opacity: 1;
       }
       wc-menu .wc-menu a.icon {
@@ -16272,13 +16272,13 @@ var WcMenu = class extends WcBaseComponent {
           flex: 1 1 0%;
         }
         wc-menu .wc-menu.open a:active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           opacity: 1;
         }
         wc-menu .wc-menu.open .icon {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           opacity: 1;
           position: absolute;
           right: 0;
@@ -19961,6 +19961,7 @@ var WcSidebar = class extends WcBaseComponent {
     if (this.hasAttribute("background-color")) {
       const bgColor = this.getAttribute("background-color");
       this.componentElement.style.setProperty("--background-color", bgColor);
+      this.componentElement.style.setProperty("--wc-side-ink", "initial");
     }
     this.componentElement.style.width = width;
     if (pushSelector) {
@@ -19978,7 +19979,10 @@ var WcSidebar = class extends WcBaseComponent {
   _applyStyle() {
     const style = `
       wc-sidebar {
-        --background-color: var(--primary-bg-color);
+        /* .crisp: the .btn-primary fill; --wc-side-ink = text that reads on it (the generated link fixes use it,
+           and fall back to black/white from --background-color when an app sets background-color) */
+        --background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        --wc-side-ink: var(--on-accent, var(--wc-on-primary-ink));
         display: contents;
       }
       wc-sidebar .wc-sidebar {
@@ -20009,6 +20013,10 @@ var WcSidebar = class extends WcBaseComponent {
       wc-sidebar .wc-sidebar a:hover {
         color: var(--text-1);
       }
+      /* links on the default (primary) fill: .crisp \u2192 --on-accent; regular themes \u2192 black/white only where
+         --text-5 / --text-1 fail on the fill (also at a tenant --hue); an app background-color keeps the originals */
+      wc-sidebar:not([background-color]) .wc-sidebar a { color: var(--on-accent, var(--wc-on-primary-text5, var(--text-5))); }
+      wc-sidebar:not([background-color]) .wc-sidebar a:hover { color: var(--on-accent, var(--wc-on-primary-text1, var(--text-1))); }
     `;
     this.loadStyle("wc-sidebar-style", style);
   }
@@ -20173,6 +20181,7 @@ if (!customElements.get("wc-sidenav")) {
       if (this.hasAttribute("background-color")) {
         const bgColor = this.getAttribute("background-color");
         this.componentElement.style.setProperty("--background-color", bgColor);
+        this.componentElement.style.setProperty("--wc-side-ink", "initial");
       }
       const lbl = this.getAttribute("label") || "Sidenav";
       const closeBtn = document.createElement("div");
@@ -20318,7 +20327,10 @@ if (!customElements.get("wc-sidenav")) {
     _applyStyle() {
       const style = `
         wc-sidenav {
-          --background-color: var(--primary-bg-color);
+          /* .crisp: the .btn-primary fill; --wc-side-ink = text that reads on it (the generated link/button fixes
+             use it, and fall back to black/white from --background-color when an app sets background-color) */
+          --background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          --wc-side-ink: var(--on-accent, var(--wc-on-primary-ink));
           display: contents;
         }
         /* Default mode: Fixed positioning (global/full screen) */
@@ -20392,6 +20404,15 @@ if (!customElements.get("wc-sidenav")) {
         }
         wc-sidenav[no-tab] .openbtn {
           display: none;
+        }
+        /* links on the default (primary) fill: .crisp \u2192 --on-accent; regular themes \u2192 black/white only where
+           --text-1 (the global link color) fails on the fill (also at a tenant --hue) */
+        wc-sidenav:not([background-color]) .wc-sidenav.sidenav a:not(:hover) { color: var(--on-accent, var(--wc-on-primary-text1, var(--text-1))); }
+        .crisp wc-sidenav:not([background-color]) .wc-sidenav.sidenav a:hover { color: var(--on-accent); }
+        .crisp wc-sidenav :is(.closebtn, .openbtn).primary-bg-color { color: var(--on-accent); }
+        /* the default open/close buttons (class primary-bg-color): the .btn-primary fill in .crisp */
+        wc-sidenav :is(.closebtn, .openbtn).primary-bg-color {
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
         }
         wc-sidenav .openbtn {
           position: absolute;
@@ -23925,8 +23946,8 @@ if (!customElements.get("wc-tabulator")) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover input {
     color: var(--component-color);
@@ -23959,14 +23980,14 @@ if (!customElements.get("wc-tabulator")) {
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) 
   {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected) a,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) a 
@@ -27242,7 +27263,7 @@ if (!customElements.get("wc-table")) {
           position: sticky;
           top: 0;
           z-index: 1;
-          background: var(--primary-bg-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));   /* same fill as .wc-table thead */
         }
 
         /* Search toolbar */
@@ -27826,8 +27847,8 @@ if (!customElements.get("wc-split-pane")) {
           transition: background-color 0.15s, color 0.15s;
         }
         .wc-split-collapse-btn:hover {
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color);
         }
 
@@ -28436,8 +28457,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 1rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
 
         .wc-ai-bot-header-title {
@@ -28727,8 +28748,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           display: none;
           padding: 0.5rem 1rem;
           font-size: 0.875rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border-top: 1px solid var(--border-color);
         }
 
@@ -28855,8 +28876,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border: none;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
           cursor: pointer;
@@ -30540,8 +30561,8 @@ if (!customElements.get("wc-hf-bot")) {
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 1rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
 
         .wc-hf-bot-header-title {
@@ -30607,8 +30628,8 @@ if (!customElements.get("wc-hf-bot")) {
         }
 
         .wc-hf-bot-message--bot .wc-hf-bot-message-bubble {
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
 
         /* Markdown content styling */
@@ -30721,8 +30742,8 @@ if (!customElements.get("wc-hf-bot")) {
           display: none;
           padding: 0.5rem 1rem;
           font-size: 0.875rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border-top: 1px solid var(--border-color);
         }
 
@@ -30742,8 +30763,8 @@ if (!customElements.get("wc-hf-bot")) {
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border: none;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
           cursor: pointer;
@@ -33155,7 +33176,9 @@ if (!customElements.get("wc-prompt")) {
         z-index: auto;
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-confirm {
-        background-color: var(--primary-bg-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        /* sweetalert's own label is #fff: keep it, except .crisp (--on-accent) and themes where white fails */
+        color: var(--on-accent, var(--wc-on-primary-white, #fff));
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-cancel {
         background-color: var(--secondary-bg-color);
@@ -34694,8 +34717,8 @@ if (!customElements.get("wc-chart-builder")) {
           white-space: nowrap;
         }
         .chart-builder-add-btn:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .chart-builder-remove-btn {
           background: transparent;
@@ -36313,7 +36336,7 @@ if (!customElements.get("wc-pivot")) {
           align-items: center;
           gap: 4px;
           background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
-          color: var(--on-accent, var(--primary-text-color, #fff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           font-size: 0.625rem;
           padding: 2px 6px;
           border-radius: 10px;
@@ -36367,8 +36390,8 @@ if (!customElements.get("wc-pivot")) {
           white-space: nowrap;
         }
         .pivot-field-popover-item:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .pivot-field-popover-active {
           color: var(--primary-bg-color, #6366f1);
@@ -36449,13 +36472,13 @@ if (!customElements.get("wc-pivot")) {
           cursor: pointer;
         }
         .pivot-filter-actions button:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
         .pivot-filter-apply {
-          background: var(--primary-bg-color, #6366f1) !important;
-          color: var(--primary-text-color, #fff) !important;
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1)) !important;
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff))) !important;
           border-color: var(--primary-bg-color, #6366f1) !important;
         }
 
@@ -36489,8 +36512,8 @@ if (!customElements.get("wc-pivot")) {
           line-height: 1;
         }
         .pivot-panel-toggle:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
         .pivot-field {
@@ -36529,8 +36552,8 @@ if (!customElements.get("wc-pivot")) {
           font-weight: 500;
         }
         .pivot-export-btn:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
 
@@ -36625,8 +36648,8 @@ if (!customElements.get("wc-pivot")) {
         }
         .pivot-grand-total {
           font-weight: 700;
-          background: var(--primary-bg-color, #6366f1) !important;
-          color: var(--primary-text-color, #fff) !important;
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1)) !important;
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff))) !important;
         }
         .pivot-total-label {
           text-align: left !important;
@@ -37879,8 +37902,8 @@ if (!customElements.get("wc-document-tree")) {
           position: absolute;
           top: -18px;
           left: 0;
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           font-size: 0.5625rem;
           padding: 1px 6px;
           border-radius: 3px;
@@ -41680,8 +41703,8 @@ var WcCalendar = class extends WcBaseComponent {
         .wc-calendar-label { font-weight: 600; font-size: 1rem; flex: 1 1 auto; text-align: center; }
         .wc-calendar-views { display: inline-flex; gap: 0.25rem; }
         .wc-calendar-view-btn.active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-calendar-weekdays {
           display: grid;
@@ -41720,8 +41743,8 @@ var WcCalendar = class extends WcBaseComponent {
         .wc-calendar-grid.is-day .wc-calendar-cell { overflow-y: auto; }
         .wc-calendar-cell.is-out { background-color: var(--surface-1, var(--surface-3)); opacity: 0.55; }
         .wc-calendar-cell.is-today .wc-calendar-daynum {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border-radius: 999px;
         }
         .wc-calendar-cell.is-selectable { cursor: pointer; }
@@ -44515,8 +44538,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       }
       input[type="button"] {
         position: relative;
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         border: 1px solid var(--primary-bg-color);
         border: none;
         border-radius: 0.375rem;
@@ -44711,8 +44734,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         position: absolute;
       }
       wc-input .radio-group.modern .radio-option:hover:not(:has(input[type="radio"]:disabled)) {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
         background-color: var(--radio-checked-bg);
@@ -45722,7 +45745,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
         align-items: center; 
         padding: 5px; 
         background-color: var(--accent-fill-bg, var(--primary-bg-color)); 
-        color: var(--on-accent, var(--primary-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         border-radius: 15px; 
         font-size: 0.75rem; /* 12px */
         line-height: 1rem; /* 16px */
@@ -45787,11 +45810,11 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       }
       wc-select .option.highlighted { 
         background-color: var(--accent-fill-bg, var(--primary-bg-color));
-        color: var(--on-accent, var(--primary-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       wc-select .option:hover { 
         background-color: var(--accent-fill-bg, var(--primary-bg-color));
-        color: var(--on-accent, var(--primary-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       wc-select .optgroup-label {
         padding: 8px 5px 5px 5px;
@@ -46855,8 +46878,8 @@ if (!customElements.get("wc-combobox")) {
         }
         .wc-combobox-option:hover,
         .wc-combobox-option.is-active {
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
       `.trim();
       this.loadStyle("wc-combobox-style", style);
@@ -47149,8 +47172,8 @@ var WcTextarea = class extends WcBaseFormComponent {
       }
       .wc-emoji-ac-item:hover,
       .wc-emoji-ac-item.selected {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       .wc-emoji-ac-emoji {
         font-size: 1.1rem;
@@ -49507,8 +49530,8 @@ var WcRichText = class extends WcBaseFormComponent {
           background-color: var(--surface-4);
         }
         .wc-rich-text-btn.active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-rich-text-sep {
           width: 1px;
@@ -49524,8 +49547,8 @@ var WcRichText = class extends WcBaseFormComponent {
           padding: 0.25rem 0.625rem;
           font-size: 0.8rem;
           border-radius: 0.375rem;
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           box-shadow: 0 2px 6px rgba(0,0,0,0.15);
           pointer-events: none;
           z-index: 5;
@@ -56704,7 +56727,7 @@ if (!customElements.get("wc-wizard")) {
         }
         .wc-wizard-indicator.active {
           background: var(--accent-fill-bg, var(--primary-bg-color));
-          color: var(--on-accent, var(--primary-text-color, #fff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .wc-wizard-indicator:hover:not(.active) {
           background: var(--surface-5);

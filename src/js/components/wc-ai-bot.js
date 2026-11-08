@@ -675,8 +675,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 1rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
 
         .wc-ai-bot-header-title {
@@ -966,8 +966,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           display: none;
           padding: 0.5rem 1rem;
           font-size: 0.875rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border-top: 1px solid var(--border-color);
         }
 
@@ -1094,8 +1094,8 @@ If the user's request is ambiguous, generate the most likely interpretation and 
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border: none;
           box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
           cursor: pointer;

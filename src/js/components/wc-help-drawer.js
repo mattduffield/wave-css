@@ -1137,8 +1137,8 @@ if (!customElements.get("wc-help-drawer")) {
           transition: background 0.2s, color 0.2s;
         }
         .help-drawer-trigger:hover {
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
 
         /* Overlay */
@@ -1476,8 +1476,8 @@ if (!customElements.get("wc-help-drawer")) {
           width: 100%;
           padding: 0.5rem;
           font-size: 0.8125rem;
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border: none;
           border-radius: 0.25rem;
           cursor: pointer;

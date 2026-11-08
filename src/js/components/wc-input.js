@@ -825,8 +825,8 @@ class WcInput extends WcBaseFormComponent {
       }
       input[type="button"] {
         position: relative;
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         border: 1px solid var(--primary-bg-color);
         border: none;
         border-radius: 0.375rem;
@@ -1021,8 +1021,8 @@ class WcInput extends WcBaseFormComponent {
         position: absolute;
       }
       wc-input .radio-group.modern .radio-option:hover:not(:has(input[type="radio"]:disabled)) {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       wc-input .radio-group.modern .radio-option:has(input[type="radio"]:checked) {
         background-color: var(--radio-checked-bg);

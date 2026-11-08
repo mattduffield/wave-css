@@ -2601,8 +2601,8 @@ if (!customElements.get('wc-tabulator')) {
     accent-color: var(--accent-color);
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-header .tabulator-header-contents .tabulator-headers .tabulator-col:hover input {
     color: var(--component-color);
@@ -2635,14 +2635,14 @@ if (!customElements.get('wc-tabulator')) {
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd.tabulator-selected,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even.tabulator-selected {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected),
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) 
   {
-    background-color: var(--primary-bg-color);
-    color: var(--surface-1);
+    background-color: var(--accent-fill-bg, var(--primary-bg-color));
+    color: var(--on-accent, var(--wc-on-primary-surface, var(--surface-1)));
   }
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-odd:hover:not(.tabulator-selected) a,
   .wc-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even:hover:not(.tabulator-selected) a 

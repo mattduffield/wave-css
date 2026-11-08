@@ -269,13 +269,13 @@ class WcMenu extends WcBaseComponent {
         user-select: none;
       }
       wc-menu .wc-menu a:hover {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         opacity: 1;
       }
       wc-menu .wc-menu a.active {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         opacity: 1;
       }
       wc-menu .wc-menu a.icon {
@@ -298,13 +298,13 @@ class WcMenu extends WcBaseComponent {
           flex: 1 1 0%;
         }
         wc-menu .wc-menu.open a:active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           opacity: 1;
         }
         wc-menu .wc-menu.open .icon {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           opacity: 1;
           position: absolute;
           right: 0;

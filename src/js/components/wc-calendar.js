@@ -675,8 +675,8 @@ class WcCalendar extends WcBaseComponent {
         .wc-calendar-label { font-weight: 600; font-size: 1rem; flex: 1 1 auto; text-align: center; }
         .wc-calendar-views { display: inline-flex; gap: 0.25rem; }
         .wc-calendar-view-btn.active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-calendar-weekdays {
           display: grid;
@@ -715,8 +715,8 @@ class WcCalendar extends WcBaseComponent {
         .wc-calendar-grid.is-day .wc-calendar-cell { overflow-y: auto; }
         .wc-calendar-cell.is-out { background-color: var(--surface-1, var(--surface-3)); opacity: 0.55; }
         .wc-calendar-cell.is-today .wc-calendar-daynum {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           border-radius: 999px;
         }
         .wc-calendar-cell.is-selectable { cursor: pointer; }

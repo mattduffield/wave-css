@@ -142,13 +142,13 @@ class WcTopNav extends WcBaseComponent {
     }
 
     .wc-top-nav a:hover {
-      background-color: var(--primary-bg-color);
-      color: var(--primary-color);
+      background-color: var(--accent-fill-bg, var(--primary-bg-color));
+      color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
     }
 
     .wc-top-nav a.active {
-      background-color: var(--primary-bg-color);
-      color: var(--primary-color);
+      background-color: var(--accent-fill-bg, var(--primary-bg-color));
+      color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       opacity: 1;
     }
 

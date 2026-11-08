@@ -50,7 +50,9 @@ ON_SURFACE = ["color-mix(in srgb, {O} 55%, var(--text-1))", "color-mix(in srgb, 
 ACCENT_TEXT = ["color-mix(in srgb, var(--primary-bg-color) 55%, var(--text-1))",
                "color-mix(in srgb, var(--primary-bg-color) 30%, var(--text-1))", "var(--text-1)", "{INK}"]
 ON_PRIMARY = ["var(--wc-on-primary-static, var(--wc-on-primary))", ink("var(--primary-bg-color)"), "{INK}"]
-# elements whose fill is var(--accent-fill-bg, var(--primary-bg-color)): in .crisp the hue-verified --on-accent
+# elements whose fill is var(--accent-fill-bg, var(--primary-bg-color)): in .crisp the hue-verified --on-accent.
+# wc-sidebar / wc-sidenav set --wc-side-ink (--on-accent / --wc-on-primary-ink) on the default fill and clear it when
+# an app sets background-color, so their link/button fixes fall back to black/white from --background-color
 ON_ACCENT_FILL = ["var(--on-accent, var(--wc-on-primary-static, var(--wc-on-primary)))", ink("var(--primary-bg-color)"), "{INK}"]
 GRAY_TEXT = ["var(--text-2)", "var(--text-1)", "{INK}"]
 
@@ -65,16 +67,16 @@ REGISTRY = [
     ("wizard-active", "wc-wizard", ".wc-wizard-indicator.active", "color",
      [(".wc-wizard-indicator.active", "text", 4.5), (".wc-wizard-indicator.active svg", "icon", 3)], ON_ACCENT_FILL),
     ("sidenav-buttons", "wc-sidenav", "wc-sidenav :is(.closebtn, .openbtn)", "color",
-     [(".closebtn", "text", 4.5), (".openbtn span", "text", 4.5)], ON_PRIMARY),
+     [(".closebtn", "text", 4.5), (".openbtn span", "text", 4.5)], ["var(--wc-side-ink, var(--wc-on-primary-static, var(--wc-on-primary)))"] + ON_PRIMARY[1:]),
     ("calendar-event", "wc-calendar", ".wc-calendar-event", "color",
      [(".wc-calendar-event > *", "text", 4.5)],
      [ink("var(--event-color, var(--primary-bg-color))")]),
     ("gantt-bar-label", "wc-gantt", ".wc-gantt-bar .wc-gantt-bar-label", "color",
      [(".wc-gantt-bar-label", "text", 4.5)], [ink("var(--bar-color, var(--primary-bg-color))")]),
     ("sidebar-link", "wc-sidebar", "wc-sidebar .wc-sidebar a", "color",
-     [("wc-sidebar .wc-sidebar a", "text", 4.5)], [ink("var(--background-color)"), "{INK}"]),
+     [("wc-sidebar .wc-sidebar a", "text", 4.5)], [f"var(--wc-side-ink, {ink('var(--background-color)')})", "{INK}"]),
     ("sidenav-link", "wc-sidenav", "wc-sidenav .wc-sidenav.sidenav a", "color",
-     [(".wc-sidenav.sidenav a", "text", 4.5)], [ink("var(--background-color)"), "{INK}"]),
+     [(".wc-sidenav.sidenav a", "text", 4.5)], [f"var(--wc-side-ink, {ink('var(--background-color)')})", "{INK}"]),
     ("tabulator-header", "wc-tabulator", ".wc-tabulator.tabulator .tabulator-header .tabulator-col", "color",
      [(".tabulator-col-title", "text", 4.5)], [ink("var(--card-border-color)"), "{INK}"]),
     # 2. accent-colored text / borders on a surface → the .on-surface-accent mix
@@ -110,7 +112,7 @@ REGISTRY = [
     ("pivot-totals", "wc-pivot", ".pivot-table :is(.pivot-row-total, .pivot-col-total, .pivot-total-label, .pivot-total-header)", "color",
      [(".pivot-table :is(.pivot-row-total, .pivot-col-total, .pivot-total-label, .pivot-total-header)", "text", 4.5)], GRAY_TEXT),
     ("pivot-grand-total", "wc-pivot", ".pivot-table .pivot-grand-total", "color",
-     [(".pivot-table .pivot-grand-total", "text", 4.5)], GRAY_TEXT),
+     [(".pivot-table .pivot-grand-total", "text", 4.5)], [f"var(--on-accent, {x})" for x in GRAY_TEXT]),   # on the primary fill
     ("pivot-field-type", "wc-pivot", ".pivot-panel-field-type", "color",
      [(".pivot-panel-field-type", "text", 4.5)], ["{INK}"]),
     ("doctree-key", "wc-document-tree", ":is(.doctree-key, .doctree-arrow-active)", "color",
@@ -305,6 +307,9 @@ else:
 open(MAIN, "w").write(src)
 json.dump({"summary": summary, "unfixable": {k: [[list(s), w] for s, w in v] for k, v in unfixable.items()}},
           open(os.path.join(ROOT, "tests", ".component-contrast-decisions.json"), "w"), indent=1)
+# fixes whose selector also matches the element's primary-fill state: narrow them where they fail on the fill
+import subprocess
+subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "fill-state-split.py")], check=True)
 print(f"{len(decisions)} fixes over {TOTAL} states:")
 for rid, n, k in sorted(summary, key=lambda x: -x[1]):
     print(f"  {rid:28} {n:4} states, {k} distinct value(s)")

@@ -553,8 +553,8 @@ if (!customElements.get('wc-split-pane')) {
           transition: background-color 0.15s, color 0.15s;
         }
         .wc-split-collapse-btn:hover {
-          background: var(--primary-bg-color);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color);
         }
 

@@ -42,12 +42,29 @@
         <div class="wc-fx-zone is-selected is-playing" data-p="fx zone (selected)"><span class="wc-fx-zone-name">Stage</span></div>
         <div class="wc-fx-zone is-playing"><span class="wc-fx-zone-name" data-p="fx zone (playing)">Lobby</span></div>
       </div>
+      <div class="row gap-4" style="flex-wrap: wrap; align-items: flex-start;">
+        <wc-menu id="op-menu"><option value="cast">Cast</option><option value="nights">Nights</option></wc-menu>
+        <div style="position: relative; width: 220px; height: 120px; overflow: hidden;">
+          <wc-sidenav id="op-sidenav" relative open label="MENU" width="160px"><a href="#">Schedule</a><a href="#">People</a></wc-sidenav>
+        </div>
+        <div class="wc-tabulator tabulator" style="min-width: 220px;"><div class="tabulator-header"><div class="tabulator-header-contents"><div class="tabulator-headers">
+          <div class="tabulator-col"><div class="tabulator-col-content"><div class="tabulator-col-title">Volunteer</div></div></div></div></div></div>
+          <div class="tabulator-tableholder"><div class="tabulator-table"><div class="tabulator-row tabulator-row-even tabulator-selected"><div class="tabulator-cell" data-p="tabulator selected row">Ann Lee</div></div></div></div></div>
+      </div>
+      <wc-calendar id="op-cal" view="month" events='[{"id":"1","title":"Show night","start":"2026-12-04"}]'></wc-calendar>
+      <wc-tabulator id="op-tbl-style" data='[{"a":1}]' auto-columns class="hidden"></wc-tabulator>
       <wc-pivot id="op-pivot" show-field-panel data='[{"state":"OR","status":"a","amount":1},{"state":"WA","status":"b","amount":2}]'
         rows='["state"]' columns='["status"]' values='[{"field":"amount","agg":"sum"}]'></wc-pivot>
     </div>
 
     <table class="w-full text-xs" id="op-results">
       <thead><tr><th style="text-align: left;">Element</th><th style="text-align: left;">Contrast</th></tr></thead><tbody></tbody>
+    </table>
+    <h2 class="font-semibold" style="margin: 0;">Every stylesheet rule that puts text on the primary fill</h2>
+    <p style="margin: 0;">Each component's styles are loaded, then every rule whose background is the primary fill and that sets a text
+      color is measured as declared (hover / active / mobile rules included).</p>
+    <table class="w-full text-xs" id="op-rules">
+      <thead><tr><th style="text-align: left;">Rule</th><th style="text-align: left;">Contrast</th></tr></thead><tbody></tbody>
     </table>
 
     <wc-javascript class="hidden">
@@ -76,14 +93,50 @@
           t('#op-table .wc-table-pager .btn:not(.wc-page-active):not([disabled])', 'wc-table pager button');
           t('#op-wiz .wc-wizard-indicator.active', 'wc-wizard step');
           t('#op-pivot .pivot-zone-chip', 'wc-pivot zone chip');
+          t('#op-pivot .pivot-grand-total', 'wc-pivot grand total');
+          const ma = document.querySelector('#op-menu a'); if (ma) { ma.classList.add('active'); ma.dataset.p = 'wc-menu active link'; }
+          t('#op-sidenav .wc-sidenav.sidenav a', 'wc-sidenav link');
+          t('#op-cal .wc-calendar-view-btn.active', 'wc-calendar view button');
+          const today = document.querySelector('#op-cal .wc-calendar-daynum');
+          if (today) { today.closest('.wc-calendar-cell').classList.add('is-today'); today.dataset.p = 'wc-calendar today'; }
+        };
+        // load every component's styles (as the components do), then list the rules that paint the primary fill
+        const loadAllStyles = () => {
+          for (const t of ['wc-address','wc-ai-bot','wc-article-card','wc-calendar','wc-chart-builder','wc-combobox','wc-context-menu',
+            'wc-document-tree','wc-emoji','wc-help-drawer','wc-hf-bot','wc-input','wc-menu','wc-pivot','wc-prompt','wc-record-lookup',
+            'wc-rich-text','wc-split-pane','wc-tabulator','wc-textarea','wc-table','wc-font-picker','wc-select','wc-wizard','wc-sidebar','wc-sidenav']) {
+            const C = customElements.get(t); if (!C) continue;
+            const fake = Object.create(C.prototype);
+            fake.loadStyle = (id, content) => { if (!document.querySelector(`style#${id}`)) { const st = document.createElement('style'); st.id = id; st.textContent = content.trim(); document.head.appendChild(st); } };
+            for (const fn of [C.prototype._applyStyle, C.prototype._applyStyles]) { try { fn && fn.call(fake); } catch (e) {} }
+          }
+        };
+        const scanRules = () => {
+          const out = [];
+          const walk = (list) => { for (const r of list) {
+            if (r.cssRules && !(r instanceof CSSStyleRule)) { walk(r.cssRules); continue; }
+            if (!(r instanceof CSSStyleRule)) continue;
+            if (r.cssRules && r.cssRules.length) walk(r.cssRules);
+            const bg = r.style.getPropertyValue('background-color') || r.style.getPropertyValue('background');
+            const fg = r.style.getPropertyValue('color');
+            if (!fg || !/--primary-bg-color/.test(bg) || /--background-color|--wc-side-ink|--event-color|--bar-color/.test(bg + fg)) continue;
+            out.push([r.selectorText.replace(/\s+/g, ' '), bg, fg]);
+          } };
+          for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} }
+          const probe = document.getElementById('op-rule-probe') || Object.assign(document.body.appendChild(document.createElement('span')), { id: 'op-rule-probe', hidden: false });
+          return out.map(([sel, bg, fg]) => { probe.style.background = bg; probe.style.color = fg;
+            const cs = getComputedStyle(probe); return [sel, C(cs.color, rgba(cs.backgroundColor))]; });
         };
         const measure = () => {
           tag();
           const rows = [...document.querySelectorAll('#op-probes [data-p]')].map(e => [e.dataset.p, C(getComputedStyle(e).color, bgOf(e))]);
           const body = document.querySelector('#op-results tbody');
           body.innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td><span class="badge ${v >= 4.5 ? 'badge-success' : 'badge-danger'}">${v.toFixed(2)}:1 ${v >= 4.5 ? 'pass' : 'FAIL'}</span></td></tr>`).join('');
-          const low = Math.min(...rows.map(r => r[1]));
-          document.getElementById('op-summary').textContent = `${rows.length} elements — lowest ${low.toFixed(2)}:1 — ${low >= 4.5 ? 'all pass' : 'FAIL'}`;
+          const rules = scanRules();
+          document.querySelector('#op-rules tbody').innerHTML = rules.map(([k, v]) => `<tr><td><code>${k.replace(/</g, '&lt;')}</code></td><td><span class="badge ${v >= 4.5 ? 'badge-success' : 'badge-danger'}">${v.toFixed(2)}:1 ${v >= 4.5 ? 'pass' : 'FAIL'}</span></td></tr>`).join('');
+          const all = rows.map(r => r[1]).concat(rules.map(r => r[1]));
+          const low = Math.min(...all);
+          document.getElementById('op-summary').textContent = `${rows.length} elements + ${rules.length} rules — lowest ${low.toFixed(2)}:1 — ${low >= 4.5 ? 'all pass' : 'FAIL'}`;
         };
         const apply = () => {
           const mode = document.getElementById('op-mode').value;
@@ -92,10 +145,11 @@
           document.getElementById('op-hue-val').textContent = hue + '°';
           if (document.getElementById('op-hue-on').checked) h.style.setProperty('--hue', hue); else h.style.removeProperty('--hue');
           document.getElementById('simulate').textContent = document.getElementById('op-sim').checked ? '* { --wc-on-primary: #000 !important; }' : '';
-          requestAnimationFrame(() => requestAnimationFrame(measure));
+          // measure after the components' color transitions (fx pads, sidenav: up to 0.5s) have finished
+          clearTimeout(apply._t); apply._t = setTimeout(measure, 700);
         };
         for (const id of ['op-theme', 'op-mode', 'op-crisp', 'op-hue-on', 'op-hue', 'op-sim']) document.getElementById(id).addEventListener('input', apply);
-        const wait = () => document.querySelector('#op-pivot .pivot-zone-chip') && document.querySelector('#op-table .wc-table-pager .btn') ? apply() : setTimeout(wait, 100);
+        const wait = () => document.querySelector('#op-pivot .pivot-zone-chip') && document.querySelector('#op-table .wc-table-pager .btn') && document.querySelector('#op-menu a') ? (loadAllStyles(), apply()) : setTimeout(wait, 100);
         wait();
       })();
       </script>

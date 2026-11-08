@@ -676,8 +676,8 @@ if (!customElements.get('wc-chart-builder')) {
           white-space: nowrap;
         }
         .chart-builder-add-btn:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .chart-builder-remove-btn {
           background: transparent;

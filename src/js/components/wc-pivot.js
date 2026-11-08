@@ -1784,7 +1784,7 @@ if (!customElements.get('wc-pivot')) {
           align-items: center;
           gap: 4px;
           background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
-          color: var(--on-accent, var(--primary-text-color, #fff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           font-size: 0.625rem;
           padding: 2px 6px;
           border-radius: 10px;
@@ -1838,8 +1838,8 @@ if (!customElements.get('wc-pivot')) {
           white-space: nowrap;
         }
         .pivot-field-popover-item:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .pivot-field-popover-active {
           color: var(--primary-bg-color, #6366f1);
@@ -1920,13 +1920,13 @@ if (!customElements.get('wc-pivot')) {
           cursor: pointer;
         }
         .pivot-filter-actions button:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
         .pivot-filter-apply {
-          background: var(--primary-bg-color, #6366f1) !important;
-          color: var(--primary-text-color, #fff) !important;
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1)) !important;
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff))) !important;
           border-color: var(--primary-bg-color, #6366f1) !important;
         }
 
@@ -1960,8 +1960,8 @@ if (!customElements.get('wc-pivot')) {
           line-height: 1;
         }
         .pivot-panel-toggle:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
         .pivot-field {
@@ -2000,8 +2000,8 @@ if (!customElements.get('wc-pivot')) {
           font-weight: 500;
         }
         .pivot-export-btn:hover {
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           border-color: var(--primary-bg-color, #6366f1);
         }
 
@@ -2096,8 +2096,8 @@ if (!customElements.get('wc-pivot')) {
         }
         .pivot-grand-total {
           font-weight: 700;
-          background: var(--primary-bg-color, #6366f1) !important;
-          color: var(--primary-text-color, #fff) !important;
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1)) !important;
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff))) !important;
         }
         .pivot-total-label {
           text-align: left !important;

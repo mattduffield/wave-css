@@ -258,6 +258,7 @@ if (!customElements.get('wc-sidenav')) {
       if (this.hasAttribute('background-color')) {
         const bgColor = this.getAttribute('background-color');
         this.componentElement.style.setProperty('--background-color', bgColor);
+        this.componentElement.style.setProperty('--wc-side-ink', 'initial');   // custom fill: pick from it instead
       }
 
       const lbl = this.getAttribute('label') || 'Sidenav';
@@ -424,7 +425,10 @@ if (!customElements.get('wc-sidenav')) {
     _applyStyle() {
       const style = `
         wc-sidenav {
-          --background-color: var(--primary-bg-color);
+          /* .crisp: the .btn-primary fill; --wc-side-ink = text that reads on it (the generated link/button fixes
+             use it, and fall back to black/white from --background-color when an app sets background-color) */
+          --background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          --wc-side-ink: var(--on-accent, var(--wc-on-primary-ink));
           display: contents;
         }
         /* Default mode: Fixed positioning (global/full screen) */
@@ -498,6 +502,15 @@ if (!customElements.get('wc-sidenav')) {
         }
         wc-sidenav[no-tab] .openbtn {
           display: none;
+        }
+        /* links on the default (primary) fill: .crisp → --on-accent; regular themes → black/white only where
+           --text-1 (the global link color) fails on the fill (also at a tenant --hue) */
+        wc-sidenav:not([background-color]) .wc-sidenav.sidenav a:not(:hover) { color: var(--on-accent, var(--wc-on-primary-text1, var(--text-1))); }
+        .crisp wc-sidenav:not([background-color]) .wc-sidenav.sidenav a:hover { color: var(--on-accent); }
+        .crisp wc-sidenav :is(.closebtn, .openbtn).primary-bg-color { color: var(--on-accent); }
+        /* the default open/close buttons (class primary-bg-color): the .btn-primary fill in .crisp */
+        wc-sidenav :is(.closebtn, .openbtn).primary-bg-color {
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
         }
         wc-sidenav .openbtn {
           position: absolute;

@@ -114,8 +114,8 @@ if (!customElements.get('wc-article-card')) {
           padding: 20px;
         }
         .wc-article-card {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           box-shadow: var(--card-shadow);
           overflow: hidden;
           transition: transform 0.2s, box-shadow 0.2s;

@@ -1488,7 +1488,7 @@ if (!customElements.get('wc-table')) {
           position: sticky;
           top: 0;
           z-index: 1;
-          background: var(--primary-bg-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));   /* same fill as .wc-table thead */
         }
 
         /* Search toolbar */

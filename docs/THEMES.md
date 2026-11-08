@@ -210,7 +210,30 @@ crisp accent, 4.27:1). Text-on-primary elements therefore read, in order:
   app's re-hued theme. Everywhere else the formula stays, unchanged.
 - Applies to `.badge-primary` (+ state variants), `.accent-fill`, wc-table header / row number / primary row /
   pager, fx-board pads and zones, the font-picker selected chip, wc-select chips + highlighted option, the active
-  wc-wizard step and wc-pivot zone chips. Gate: `tests/on-primary-static-test.py`, which covers every theme × mode ×
+  wc-wizard step and wc-pivot zone chips.
+- **Second pass (Nov 8): every other text on the primary fill.** That's menus (active/hover, mobile `.open`), the
+  calendar's today cell and view button, combobox / address / record-lookup / emoji / textarea-emoji highlighted items,
+  the context menu, rich-text buttons, the ai-bot / hf-bot header, status, FAB and bot bubble, article cards, the
+  modern radio hover, pivot buttons / popover / grand total, the help-drawer trigger hover and submit, the chart-builder
+  add hover, split-pane collapse, tabulator header hover and selected/hovered rows, the doc-tree toast,
+  `.popover-form`, the swal confirm, the fixed table header, and sidebar / sidenav links and buttons on their default
+  fill. Rule shape:
+
+  ```css
+  background: var(--accent-fill-bg, <original fill>);
+  color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));   /* or -white / -surface / -text1 / -text5 */
+  ```
+
+  - **Crisp:** `--on-accent` on `--accent-fill-bg`.
+  - **Regular themes:** `scripts/gen-status-text.py` writes `--wc-on-primary-text` / `-white` / `-surface` /
+    `-text1` / `-text5` (black or white) **only** for theme × mode states where `--primary-color` / `#fff` /
+    `--surface-1` / `--text-1` / `--text-5` is under 4.5:1 on the fill. That's measured at the theme's own hue **and
+    every tenant hue**. Where the original passes, the token is unset and nothing changes.
+  - The ink is formula-free and checked at every hue (`--wc-on-primary-ink`).
+- Generated fixes that also matched a fill state (the menu-link, help-trigger and chart-builder-add fixes measured at
+  rest) are narrowed (`:not(.active):not(:hover)…`) only in states where their color fails on the fill. That's
+  `scripts/fill-state-split.py`, which `gen-component-contrast.py` runs at the end. The pivot grand-total fix reads
+  `--on-accent` first. Gate: `tests/on-primary-static-test.py`, which covers every theme × mode ×
   crisp, a tenant hue sweep, and `--wc-on-primary` forced to black. Demo: `views/on-primary.html`.
 
 ---

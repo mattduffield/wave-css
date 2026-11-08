@@ -467,8 +467,8 @@ if (!customElements.get('wc-record-lookup')) {
           .wc-record-lookup .rl-suggestion-item:last-child { border-bottom: none; }
           .wc-record-lookup .rl-suggestion-item:hover { background: var(--surface-2, #f3f4f6); }
           .wc-record-lookup .rl-suggestion-item.highlighted {
-            background: var(--primary-bg-color, #3b82f6);
-            color: var(--primary-color, #fff);
+            background: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+            color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
             font-weight: 500;
           }
 
@@ -488,8 +488,8 @@ if (!customElements.get('wc-record-lookup')) {
             min-height: 2.25rem; padding: 0.4rem 1rem;
             border: 1px solid transparent; border-radius: 0.375rem;
             font-weight: 600; cursor: pointer;
-            background: var(--primary-bg-color, #3b82f6);
-            color: var(--primary-color, #fff);
+            background: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+            color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
           }
           .wc-record-lookup .rl-hint-use:focus-visible { outline: 2px solid var(--text-1); outline-offset: 2px; }
           .wc-record-lookup .rl-hint-dismiss {

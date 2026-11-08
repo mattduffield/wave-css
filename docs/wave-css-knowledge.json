@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.61.0",
+    "version": "1.62.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-08"
   },
@@ -3272,7 +3272,9 @@
       ],
       "warning": "Never write a per-theme static color for a fill that follows --hue: apps re-hue themes (Informa Events: .theme-tenant-<slug> { --hue: N }).",
       "gate": "tests/on-primary-static-test.py (54 themes × 6 modes × regular/crisp + tenant-hue sweep, normal + --wc-on-primary forced black)",
-      "demo": "views/on-primary.html"
+      "demo": "views/on-primary.html",
+      "secondPass": "Every other text on the primary fill: menus, calendar today/view button, combobox/address/record-lookup/emoji items, context menu, rich-text, ai-bot/hf-bot, article card, radio hover, pivot buttons + grand total, help-drawer, chart-builder, split-pane, tabulator header hover + rows, doc-tree toast, .popover-form, swal confirm, fixed table header, sidebar/sidenav on the default fill. background var(--accent-fill-bg, <orig>); color var(--on-accent, var(--wc-on-primary-text|-white|-surface|-text1|-text5, <orig>)). Regular-theme tokens are black/white, formula-free, checked at every --hue, and written only where the original fails on the fill at the theme's hue or any tenant hue.",
+      "generatorNotes": "scripts/gen-status-text.py writes --wc-on-primary-ink + fail-only -text/-white/-surface/-text1/-text5. scripts/fill-state-split.py (run by gen-component-contrast.py) narrows generated rest-state fixes (menu link, help trigger, chart-builder add) only where they'd fail on the fill."
     }
   },
   "cssUtilities": {

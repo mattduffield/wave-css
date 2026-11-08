@@ -359,8 +359,8 @@ class WcTextarea extends WcBaseFormComponent {
       }
       .wc-emoji-ac-item:hover,
       .wc-emoji-ac-item.selected {
-        background-color: var(--primary-bg-color);
-        color: var(--primary-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
       }
       .wc-emoji-ac-emoji {
         font-size: 1.1rem;

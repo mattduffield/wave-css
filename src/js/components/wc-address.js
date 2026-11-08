@@ -547,8 +547,8 @@ class WcAddress extends WcBaseFormComponent {
         background-color: var(--surface-2, #f3f4f6);
       }
       .address-suggestion-item.highlighted {
-        background-color: var(--primary-bg-color, #3b82f6);
-        color: var(--primary-color, #fff);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color, #3b82f6));
+        color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color, #fff)));
         font-weight: 500;
       }
       /* Attribution required by LocationIQ / provider ToS — the app surfaces this once

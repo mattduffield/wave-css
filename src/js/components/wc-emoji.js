@@ -496,8 +496,8 @@ if (!customElements.get('wc-emoji')) {
           transition: background-color 0.2s ease-in-out;
         }
         .wc-emoji button:hover {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-emoji-trigger {
           opacity: 0.7;
@@ -545,8 +545,8 @@ if (!customElements.get('wc-emoji')) {
           text-align: center;
         }
         .wc-emoji-grid button:hover {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           transform: scale(1.2);
         }
       `;

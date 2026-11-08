@@ -1146,8 +1146,8 @@ class WcRichText extends WcBaseFormComponent {
           background-color: var(--surface-4);
         }
         .wc-rich-text-btn.active {
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
         .wc-rich-text-sep {
           width: 1px;
@@ -1163,8 +1163,8 @@ class WcRichText extends WcBaseFormComponent {
           padding: 0.25rem 0.625rem;
           font-size: 0.8rem;
           border-radius: 0.375rem;
-          background-color: var(--primary-bg-color);
-          color: var(--primary-color);
+          background-color: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
           box-shadow: 0 2px 6px rgba(0,0,0,0.15);
           pointer-events: none;
           z-index: 5;

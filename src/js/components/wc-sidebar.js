@@ -138,6 +138,7 @@ class WcSidebar extends WcBaseComponent {
     if (this.hasAttribute('background-color')) {
       const bgColor = this.getAttribute('background-color');
       this.componentElement.style.setProperty('--background-color', bgColor);
+      this.componentElement.style.setProperty('--wc-side-ink', 'initial');   // custom fill: pick from it instead
     }
     this.componentElement.style.width = width;
     if (pushSelector) {
@@ -156,7 +157,10 @@ class WcSidebar extends WcBaseComponent {
   _applyStyle() {
     const style = `
       wc-sidebar {
-        --background-color: var(--primary-bg-color);
+        /* .crisp: the .btn-primary fill; --wc-side-ink = text that reads on it (the generated link fixes use it,
+           and fall back to black/white from --background-color when an app sets background-color) */
+        --background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        --wc-side-ink: var(--on-accent, var(--wc-on-primary-ink));
         display: contents;
       }
       wc-sidebar .wc-sidebar {
@@ -187,6 +191,10 @@ class WcSidebar extends WcBaseComponent {
       wc-sidebar .wc-sidebar a:hover {
         color: var(--text-1);
       }
+      /* links on the default (primary) fill: .crisp → --on-accent; regular themes → black/white only where
+         --text-5 / --text-1 fail on the fill (also at a tenant --hue); an app background-color keeps the originals */
+      wc-sidebar:not([background-color]) .wc-sidebar a { color: var(--on-accent, var(--wc-on-primary-text5, var(--text-5))); }
+      wc-sidebar:not([background-color]) .wc-sidebar a:hover { color: var(--on-accent, var(--wc-on-primary-text1, var(--text-1))); }
     `;
     this.loadStyle('wc-sidebar-style', style);
   }

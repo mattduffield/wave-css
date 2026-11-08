@@ -315,7 +315,9 @@ if (!customElements.get('wc-prompt')) {
         z-index: auto;
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-confirm {
-        background-color: var(--primary-bg-color);
+        background-color: var(--accent-fill-bg, var(--primary-bg-color));
+        /* sweetalert's own label is #fff: keep it, except .crisp (--on-accent) and themes where white fails */
+        color: var(--on-accent, var(--wc-on-primary-white, #fff));
       }
       .swal2-container .swal2-popup .swal2-actions .swal2-cancel {
         background-color: var(--secondary-bg-color);

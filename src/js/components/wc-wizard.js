@@ -279,7 +279,7 @@ if (!customElements.get('wc-wizard')) {
         }
         .wc-wizard-indicator.active {
           background: var(--accent-fill-bg, var(--primary-bg-color));
-          color: var(--on-accent, var(--primary-text-color, #fff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .wc-wizard-indicator:hover:not(.active) {
           background: var(--surface-5);

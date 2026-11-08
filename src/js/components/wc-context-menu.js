@@ -263,8 +263,8 @@ if (!customElements.get('wc-context-menu')) {
           gap: 8px;
         }
         .wc-context-menu .wc-context-menu-item:hover {
-          background: var(--primary-bg-color, #4466ff);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #4466ff));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
         }
         .wc-context-menu .wc-context-menu-item.disabled {
           opacity: 0.35;

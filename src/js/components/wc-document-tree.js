@@ -503,8 +503,8 @@ if (!customElements.get('wc-document-tree')) {
           position: absolute;
           top: -18px;
           left: 0;
-          background: var(--primary-bg-color, #6366f1);
-          color: var(--primary-text-color, #fff);
+          background: var(--accent-fill-bg, var(--primary-bg-color, #6366f1));
+          color: var(--on-accent, var(--wc-on-primary-white, var(--primary-text-color, #fff)));
           font-size: 0.5625rem;
           padding: 1px 6px;
           border-radius: 3px;

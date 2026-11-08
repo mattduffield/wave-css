@@ -647,8 +647,8 @@ if (!customElements.get('wc-combobox')) {
         }
         .wc-combobox-option:hover,
         .wc-combobox-option.is-active {
-          background: var(--primary-bg-color);
-          color: var(--primary-color);
+          background: var(--accent-fill-bg, var(--primary-bg-color));
+          color: var(--on-accent, var(--wc-on-primary-text, var(--primary-color)));
         }
       `.trim();
       this.loadStyle('wc-combobox-style', style);
