@@ -456,6 +456,7 @@ const ICONS_TO_COPY = [
   "magnifying-glass-minus",
   "magnifying-glass-plus",
   "mailbox",
+  "map",
   "map-location-dot",
   "map-pin",
   "mask",
