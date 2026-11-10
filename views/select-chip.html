@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-select chip mode (pick many quickly)</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-4" style="max-width: 900px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">wc-select chip mode — pick many in a row</h1>
+      <p style="margin: 0;">Type, pick, type again: the list comes back as you type (or click the input, or press ↓) — no need to
+        leave the field. A mouse pick keeps the cursor in the input. When the chips fill the row, the input moves to its own line
+        so it (and its list) stay wide enough to use.</p>
+      <div class="row gap-2" style="flex-wrap: wrap;">
+        <button class="btn btn-sm" type="button" id="sc-mode">Toggle light / dark</button>
+        <button class="btn btn-sm" type="button" id="sc-crisp">Toggle crisp</button>
+      </div>
+    </div>
+
+    <form id="sc-form" class="col gap-3" onsubmit="return false">
+      <label class="font-semibold" for="sc-cast">Cast (250 volunteers)</label>
+      <wc-select id="sc-cast" name="cast" mode="chip" multiple></wc-select>
+
+      <label class="font-semibold">Nights (no-filter: pick only)</label>
+      <wc-select id="sc-nights" name="nights" mode="chip" multiple no-filter>
+        <option value="d4">Thu Dec 4</option><option value="d5">Fri Dec 5</option><option value="d6">Sat Dec 6</option>
+        <option value="d7">Sun Dec 7</option><option value="d11">Thu Dec 11</option><option value="d12">Fri Dec 12</option>
+      </wc-select>
+
+      <div class="row gap-2"><button type="submit" class="btn btn-primary btn-sm" id="sc-submit">Save (form post)</button></div>
+      <pre id="sc-out" class="text-xs" style="margin: 0; white-space: pre-wrap; color: var(--text-2);"></pre>
+    </form>
+
+    <div class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">Narrow column (360px) with many chips</h2>
+      <div style="width: 360px; border: 1px dashed var(--text-8); padding: 8px;">
+        <wc-select id="sc-narrow" name="narrow" mode="chip" multiple></wc-select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 250 volunteers, generated before the component upgrades (it reads its <option> children on connect)
+    (() => {
+      const first = ['Ann', 'Bo', 'Cy', 'Dee', 'Eli', 'Fay', 'Gus', 'Hal', 'Ida', 'Jo', 'Kai', 'Lia', 'Max', 'Nia', 'Oz', 'Pia', 'Quin', 'Rae', 'Sam', 'Tia', 'Uma', 'Vic', 'Wes', 'Xan', 'Yara'];
+      const last = ['Lee', 'Diaz', 'Park', 'Ross', 'Shaw', 'Ng', 'Ivers', 'Mills', 'Ortiz', 'Duffield'];
+      const opts = [];
+      for (let i = 0; i < 250; i++) {
+        const name = `${first[i % first.length]} ${last[Math.floor(i / first.length) % last.length]}`;
+        opts.push(`<option value="v${i + 1}">${name}</option>`);
+      }
+      document.getElementById('sc-cast').innerHTML = opts.join('');
+      document.getElementById('sc-narrow').innerHTML = opts.slice(0, 40).join('');
+      document.getElementById('sc-narrow').setAttribute('value', 'v1,v2,v3,v4,v5,v6,v7,v8,v9');
+    })();
+  </script>
+  <wc-javascript class="hidden">
+    <script type="text/plain">
+    (() => {
+      const form = document.getElementById('sc-form');
+      const out = document.getElementById('sc-out');
+      form.addEventListener('submit', () => {
+        out.textContent = 'Form post:\n' + [...new FormData(form)].map(([k, v]) => `${k} = ${v}`).join('\n');
+      });
+      const h = document.documentElement;
+      document.getElementById('sc-mode').onclick = () => { const d = h.classList.contains('dark'); h.classList.toggle('dark', !d); h.classList.toggle('light', d); };
+      document.getElementById('sc-crisp').onclick = () => h.classList.toggle('crisp');
+    })();
+    </script>
+  </wc-javascript>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

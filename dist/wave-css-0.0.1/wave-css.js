@@ -45780,6 +45780,16 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       wc-select[mode="chip"] .dropdown-input { 
         display: block; 
       }
+      /* As chips fill the row the input (and the list, which matches its width) used to shrink to 85px. Let the
+         row wrap and keep the input at least 9rem: when the chips leave less room, it moves to its own line
+         (full width). Layouts where the input already had 9rem+ beside the chips are unchanged. */
+      wc-select[mode="chip"] .row:has(> .chip-container) {
+        flex-wrap: wrap;
+      }
+      wc-select[mode="chip"] .row > .chip-container + .dropdown {
+        flex: 1 1 9rem;
+        min-width: min(9rem, 100%);
+      }
       wc-select .options-container {
         display: none;
         position: absolute;
@@ -46075,6 +46085,23 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
         if (!this.hasAttribute("no-filter")) {
           dropdownInput?.addEventListener("input", () => this.filterOptions(dropdownInput.value));
         }
+        const isHidden = () => optionsContainer && optionsContainer.style.display !== "block";
+        const reopen = () => {
+          this.filterOptions(dropdownInput.value);
+          optionsContainer.style.display = "block";
+        };
+        dropdownInput.addEventListener("input", () => {
+          if (isHidden()) optionsContainer.style.display = "block";
+        });
+        dropdownInput.addEventListener("click", () => {
+          if (document.activeElement === dropdownInput && isHidden()) reopen();
+        });
+        dropdownInput.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown" && isHidden() && !dropdownInput.disabled) reopen();
+        });
+        optionsContainer?.addEventListener("mousedown", (e) => {
+          if (e.target.closest(".option")) e.preventDefault();
+        });
         optionsContainer?.addEventListener("click", (e) => {
           if (e.target.classList.contains("option")) {
             this.addChip(e.target.getAttribute("data-value"), e.target.textContent);

@@ -812,6 +812,16 @@ class WcSelect extends WcBaseFormComponent {
       wc-select[mode="chip"] .dropdown-input { 
         display: block; 
       }
+      /* As chips fill the row the input (and the list, which matches its width) used to shrink to 85px. Let the
+         row wrap and keep the input at least 9rem: when the chips leave less room, it moves to its own line
+         (full width). Layouts where the input already had 9rem+ beside the chips are unchanged. */
+      wc-select[mode="chip"] .row:has(> .chip-container) {
+        flex-wrap: wrap;
+      }
+      wc-select[mode="chip"] .row > .chip-container + .dropdown {
+        flex: 1 1 9rem;
+        min-width: min(9rem, 100%);
+      }
       wc-select .options-container {
         display: none;
         position: absolute;
@@ -1109,6 +1119,20 @@ class WcSelect extends WcBaseFormComponent {
         if (!this.hasAttribute('no-filter')) {
           dropdownInput?.addEventListener('input', () => this.filterOptions(dropdownInput.value));
         }
+
+        // Reopen the list after a pick while the input still has focus (the focus event above only fires once):
+        // typing, clicking the focused input (also covers no-filter, where the input is read-only), or ArrowDown.
+        const isHidden = () => optionsContainer && optionsContainer.style.display !== 'block';
+        const reopen = () => { this.filterOptions(dropdownInput.value); optionsContainer.style.display = 'block'; };
+        dropdownInput.addEventListener('input', () => { if (isHidden()) optionsContainer.style.display = 'block'; });
+        dropdownInput.addEventListener('click', () => { if (document.activeElement === dropdownInput && isHidden()) reopen(); });
+        dropdownInput.addEventListener('keydown', (e) => {   // before the navigation handler, so it highlights in the open list
+          if (e.key === 'ArrowDown' && isHidden() && !dropdownInput.disabled) reopen();
+        });
+        // Picking with the mouse keeps focus in the input (no blur), so the next name can be typed right away
+        optionsContainer?.addEventListener('mousedown', (e) => {
+          if (e.target.closest('.option')) e.preventDefault();
+        });
 
         optionsContainer?.addEventListener('click', (e) => {
           if (e.target.classList.contains('option')) {
