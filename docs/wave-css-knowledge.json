@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Wave CSS Knowledge Base",
-    "version": "1.64.0",
+    "version": "1.65.0",
     "description": "Structured documentation for Wave CSS web component library",
     "lastUpdated": "2026-11-09"
   },
@@ -2604,7 +2604,8 @@
             "wcpromptnotifytemplate"
           ]
         },
-        "usage": "wc.Prompt.success({ title: 'Done!', text: 'Record saved' });\nwc.Prompt.question({ title: 'Confirm?', text: 'Delete this record?', callback: (result) => {} });"
+        "usage": "wc.Prompt.success({ title: 'Done!', text: 'Record saved' });\nwc.Prompt.question({ title: 'Confirm?', text: 'Delete this record?', callback: (result) => {} });",
+        "notes": "CANCEL (Nov 2026): the SweetAlert Cancel button looks like .btn-secondary — --component-color label, --component-border-color border on --secondary-bg-color (border taken out of the padding so it matches Confirm's height), hover --surface-3 with no darkening gradient, keyboard focus a 3px ring in the label color. Before, its #fff label was unreadable in light themes (1.02:1). Confirm/Deny/dialog/title/text/toasts unchanged. Needs <wc-event-hub> on the page (else the prompt styles are never injected). Demo views/prompt.html; test tests/prompt-cancel-test.py."
       },
       {
         "name": "wc-theme-selector",
@@ -3834,7 +3835,8 @@
       "views/visual-reference.html — visual-regression reference page (header/nav, every button variant, inputs, selects, toggle, tabs, tree, card, badges, tables, accent fills, hint/help text); ?build=base loads a reference build from /tmp-base. Used by tests/regression-vs-baseline-test.py",
       "views/chip-picker.html — wc-chip-picker: parts × show nights with warn-overlap and a form post (FormData echo + set value from outside), roles × shifts, readonly pickers in a display table, a disabled picker; theme / light-dark / crisp toggles",
       "views/on-primary.html — text on the primary fill (badge-primary, accent-fill, select chip, wc-table header + pager, wizard step, fx pads/zones, pivot chips) with live canvas contrast; theme / mode / crisp / tenant-hue slider / Simulate the failing Chrome",
-      "views/select-chip.html — wc-select chip mode with 250 options: type → pick → type without leaving the field (mouse + keyboard), no-filter, form post, a narrow column with many chips; light / dark / crisp"
+      "views/select-chip.html — wc-select chip mode with 250 options: type → pick → type without leaving the field (mouse + keyboard), no-filter, form post, a narrow column with many chips; light / dark / crisp",
+      "views/prompt.html — wc-prompt dialogs: question(), fire() with Deny, error(), warning(), toast(); theme / light-dark / crisp toggles"
     ],
     "fx-board.html": "wc-fx-board + wc-fx-console demo: master console bridged in-page to a station player (message→receive), live STATE indicators, event log"
   },

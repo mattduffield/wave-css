@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal light crisp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-prompt dialogs</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <wc-event-hub></wc-event-hub>
+  <wc-prompt></wc-prompt>
+  <div id="page-contents" class="p-6 col gap-4" style="max-width: 900px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">wc-prompt dialogs</h1>
+      <p style="margin: 0;">SweetAlert dialogs styled by the theme. Cancel looks like <code>.btn-secondary</code> (readable in light
+        and dark, a hover state without SweetAlert's darkening, and a visible keyboard focus ring); Confirm and Deny are unchanged.</p>
+      <div class="row gap-2" style="flex-wrap: wrap;">
+        <button class="btn btn-sm" type="button" id="pr-mode">Toggle light / dark</button>
+        <button class="btn btn-sm" type="button" id="pr-crisp">Toggle crisp</button>
+        <select id="pr-theme" aria-label="Theme"><option>theme-royal</option><option>theme-designer</option><option>theme-midsky</option><option>theme-lemon</option><option>theme-coffee</option></select>
+      </div>
+    </div>
+    <div class="row gap-2" style="flex-wrap: wrap;">
+      <button class="btn btn-primary" type="button" id="pr-question">question()</button>
+      <button class="btn btn-primary" type="button" id="pr-fire">fire() with Deny</button>
+      <button class="btn btn-primary" type="button" id="pr-error">error()</button>
+      <button class="btn btn-primary" type="button" id="pr-warning">warning()</button>
+      <button class="btn btn-primary" type="button" id="pr-toast">toast()</button>
+    </div>
+    <pre id="pr-out" class="text-xs" style="margin: 0; color: var(--text-2);"></pre>
+  </div>
+  <wc-javascript class="hidden">
+    <script type="text/plain">
+    (() => {
+      const out = document.getElementById('pr-out');
+      const show = (what) => (r) => { out.textContent = `${what} → ${JSON.stringify(r)}`; };
+      const go = (fn) => () => { if (window.wc && wc.Prompt) fn(); };
+      document.getElementById('pr-question').onclick = go(() => wc.Prompt.question({ title: 'Remove Angel from Fri 12/12?', text: 'They stay on their other nights.', showCancelButton: true }).then(show('question')));
+      document.getElementById('pr-fire').onclick = go(() => wc.Prompt.fire({ title: 'Save changes?', text: 'You have unsaved edits to the cast.', icon: 'question', showCancelButton: true, showDenyButton: true, confirmButtonText: 'Save', denyButtonText: "Don't save" }).then(show('fire')));
+      document.getElementById('pr-error').onclick = go(() => wc.Prompt.error({ title: 'Could not save', text: 'The server did not answer. Try again in a moment.' }).then(show('error')));
+      document.getElementById('pr-warning').onclick = go(() => wc.Prompt.warning({ title: 'Herod is double-booked', text: 'Herod is already on Sat 12/13.' }).then(show('warning')));
+      document.getElementById('pr-toast').onclick = go(() => wc.Prompt.toast({ title: 'Saved', icon: 'success' }));
+      const h = document.documentElement;
+      document.getElementById('pr-mode').onclick = () => { const d = h.classList.contains('dark'); h.classList.toggle('dark', !d); h.classList.toggle('light', d); };
+      document.getElementById('pr-crisp').onclick = () => h.classList.toggle('crisp');
+      document.getElementById('pr-theme').onchange = (e) => { [...h.classList].filter(c => c.startsWith('theme-')).forEach(c => h.classList.remove(c)); h.classList.add(e.target.value); };
+    })();
+    </script>
+  </wc-javascript>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

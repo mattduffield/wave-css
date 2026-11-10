@@ -33183,6 +33183,24 @@ if (!customElements.get("wc-prompt")) {
       .swal2-container .swal2-popup .swal2-actions .swal2-cancel {
         background-color: var(--secondary-bg-color);
       }
+      /* Cancel looks like .btn-secondary: sweetalert's own label is #fff, which is unreadable on the light
+         --secondary-bg-color (1.03:1 in light crisp themes). The 1px border is taken out of the padding so Cancel
+         keeps Confirm's height. */
+      .swal2-container .swal2-popup .swal2-actions .swal2-cancel {
+        color: var(--component-color, var(--text-1));
+        border: 1px solid var(--component-border-color, var(--secondary-bg-color));
+        padding: calc(0.625em - 1px) calc(1.1em - 1px);
+      }
+      .swal2-container .swal2-popup .swal2-actions .swal2-cancel:hover {
+        background-color: var(--surface-3, var(--secondary-bg-color));
+        background-image: none;
+        color: var(--component-color, var(--text-1));
+      }
+      /* the same 3px ring sweetalert draws on Confirm, in Cancel's own label color so it shows on the dialog in every
+         theme and tenant hue */
+      .swal2-container .swal2-popup .swal2-actions .swal2-cancel:focus-visible {
+        box-shadow: 0 0 0 3px var(--component-color, var(--text-1));
+      }
       .swal2-container .swal2-popup input,
       .swal2-container .swal2-popup select,
       .swal2-container .swal2-popup textarea {

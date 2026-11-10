@@ -87,3 +87,43 @@ preselected it although it was disabled.
 - `chip-picker-contrast-test.py` 28/28 over 648 states, including the new detail input (text, placeholder 5.32:1,
   label, border), the overlap message (6.51:1), taken pills, the clashing pill and the disabled Done.
 - Screenshots in light and dark at 1200px and 375px.
+
+## wc-prompt: Cancel is readable in light themes (knowledge base 1.65.0)
+
+**Problem:** `.swal2-cancel` set only `background-color: var(--secondary-bg-color)`, so its label stayed SweetAlert's
+`#fff`. In light themes that's white on a near-white fill: 1.02:1 (lemon light), 1.03:1 (royal / designer light
+crisp).
+
+**Fix (additive, `wc-prompt.js` `_applyStyle()`):** Cancel looks like `.btn-secondary`.
+- **Normal:** label `var(--component-color, var(--text-1))`; border `1px solid var(--component-border-color,
+  var(--secondary-bg-color))`. The 1px comes out of the padding, so Cancel keeps Confirm's height.
+- **Hover:** `background-color: var(--surface-3, …)`, the same label, `background-image: none` (no SweetAlert
+  darkening).
+- **Keyboard focus (`:focus-visible`):** the same 3px ring SweetAlert draws on Confirm, in Cancel's label color.
+
+**Unchanged:** Confirm, Deny, the dialog surface, title and text colors, and toasts. All are computed identical to
+the committed build in every state.
+
+**Proof:** `tests/prompt-cancel-test.py` 8/8 over 840 states. That's 54 themes × forced light / forced dark / light on
+dark OS / dark on light OS / follow the OS (light, dark) × regular / crisp, plus a tenant-hue sweep of royal (regular
++ crisp, every 15°).
+
+| Check | New build | Committed build |
+|---|---|---|
+| Cancel label, normal | ≥ 16.94:1 | as low as 1.02:1 |
+| Cancel label, hover | ≥ 9.17:1 | as low as 1.02:1 |
+| Focus ring vs dialog | ≥ 5.17:1 | — |
+| Border at each theme's own hue | ≥ 3.05:1 | — |
+
+- Cancel's height matches Confirm's in every state, and hover has no gradient.
+- Screenshots of question(), fire() with Deny, error() and warning() in light crisp and dark, plus Cancel hover /
+  focus. Demo: `views/prompt.html`.
+- The specified border token (`--component-border-color`, `.btn-secondary`'s border) is guaranteed 3:1 at each
+  theme's own hue. At a tenant hue it can drop (2.46:1 for royal dark re-hued to 30°). The label stays ≥ 9:1 there.
+
+**Found, not changed:**
+- wc-prompt needs `<wc-event-hub>` on the page. Without it, `renderPrompt()` throws on `wc.EventHub.broadcast` and
+  none of the prompt styles are injected.
+- In regular themes re-hued by a tenant, the lighter text steps (`--text-6` / `--text-8`) can lose their margin on
+  some surfaces (`--text-6` ~2.96:1 on the dialog for royal dark at 30°). Their per-theme limits are generated for the
+  theme's own hue.
