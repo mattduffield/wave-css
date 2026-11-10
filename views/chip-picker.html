@@ -47,21 +47,76 @@
 
     <section class="col gap-2">
       <h2 class="font-semibold" style="margin: 0;">unique + short slot labels</h2>
-      <p style="margin: 0;">Each part on at most one chip. Click <b>+ Add part</b>: parts already on a chip are disabled
-        ("already added"). Add the last free part and <b>+ Add part</b> disappears; remove a chip and it comes back.
+      <p style="margin: 0;">A part may appear more than once, but never on overlapping nights. In the editor, nights a part already
+        has are crossed out; pick a part that would overlap and a message names the clash and <b>Done</b> waits until you
+        choose other nights. A part that already covers every night is disabled ("already added"); when every part covers
+        every night, <b>+ Add part</b> disappears.
         Chips use each night's <code>short</code> text ("Dec 6 (Sat)"); the last night has none, so it falls back to the first word of its label ("Sun").</p>
       <wc-chip-picker id="uniq" name="uniq_parts" unique warn-overlap add-label="Add part" all-label="every night" slot-label="Nights"
         slots='[{"value":"d4","label":"Thursday, December 4","short":"Dec 4 (Thu)"},{"value":"d5","label":"Friday, December 5","short":"Dec 5 (Fri)"},{"value":"d6","label":"Saturday, December 6","short":"Dec 6 (Sat)"},{"value":"d7","label":"Sun 12/7"}]'
         value='[{"value":"Herod","slots":["d4","d5"]},{"value":"Priest","slots":["d6","d7"]}]'>
         <option value="Herod">Herod</option><option value="Priest">Priest</option><option value="Soldier 1">Soldier 1</option>
       </wc-chip-picker>
-      <p style="margin: 0;">Every part used, so there's no <b>+ Add part</b>. The value attribute listed Soldier 1 twice
-        (<code>["d4"]</code> and <code>["d6"]</code>); the repeats were merged into one chip, silently:</p>
+      <p style="margin: 0;">Every part covers every night, so there's no <b>+ Add part</b>. Soldier 1 is on two chips (different
+        nights, allowed). The value attribute also listed Soldier 1 on <code>["d4"]</code> and <code>["d4","d5"]</code>, which
+        overlap, so those were merged into one chip, silently:</p>
       <wc-chip-picker id="uniq-full" name="uniq_full" unique warn-overlap add-label="Add part" all-label="every night" slot-label="Nights"
         slots='[{"value":"d4","label":"Thursday, December 4","short":"Dec 4 (Thu)"},{"value":"d5","label":"Friday, December 5","short":"Dec 5 (Fri)"},{"value":"d6","label":"Saturday, December 6","short":"Dec 6 (Sat)"}]'
-        value='[{"value":"Soldier 1","slots":["d4"]},{"value":"Herod","slots":["d5"]},{"value":"Soldier 1","slots":["d6"]}]'>
+        value='[{"value":"Herod","slots":[]},{"value":"Soldier 1","slots":["d4"]},{"value":"Soldier 1","slots":["d6"]},{"value":"Soldier 1","slots":["d4","d5"]}]'>
         <option value="Herod">Herod</option><option value="Soldier 1">Soldier 1</option>
       </wc-chip-picker>
+    </section>
+
+    <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">Per-chip detail (detail-label="Hours")</h2>
+      <p style="margin: 0;">Each chip can carry a short detail, edited under the night pills. It shows on the chip
+        ("Angel · Sun · 7:30–9"), goes into the value and the form post, and Escape discards it with the rest of the edit.</p>
+      <form id="cp-detail-form" class="col gap-3" onsubmit="return false">
+        <wc-chip-picker id="hours" name="hours_42" unique warn-overlap add-label="Add part" all-label="every night" slot-label="Nights"
+          detail-label="Hours" detail-placeholder="all night, or 6-7:30"
+          slots='[{"value":"n1","label":"Fri 12/12"},{"value":"n2","label":"Sat 12/13"},{"value":"n3","label":"Sun 12/14"},{"value":"n4","label":"Fri 12/19"},{"value":"n5","label":"Sat 12/20"}]'
+          value='[{"value":"Mary","slots":[],"detail":"6–7:30"},{"value":"Angel","slots":["n3"],"detail":"7:30–9"},{"value":"Angel","slots":["n1","n2"]},{"value":"Wise Man","slots":["n1","n2","n3","n4"],"detail":"all night"}]'>
+          <option value="Mary">Mary</option><option value="Angel">Angel</option><option value="Wise Man">Wise Man</option><option value="Shepherd">Shepherd</option>
+        </wc-chip-picker>
+        <div class="row gap-2"><button type="submit" class="btn btn-primary btn-sm" id="cp-detail-submit">Save (form post)</button></div>
+        <pre id="cp-detail-out" class="text-xs" style="margin: 0; white-space: pre-wrap; color: var(--text-2);"></pre>
+      </form>
+      <p style="margin: 0;">Readonly with <code>readonly-hint</code> (hover a chip):</p>
+      <wc-chip-picker id="hours-ro" readonly readonly-hint="Edit hours on the volunteer's page" all-label="every night" slot-label="Nights" detail-label="Hours"
+        slots='[{"value":"n1","label":"Fri 12/12"},{"value":"n3","label":"Sun 12/14"}]'
+        value='[{"value":"Angel","slots":["n3"],"detail":"7:30–9"},{"value":"Mary","slots":[]}]'><option value="Angel">Angel</option><option value="Mary">Mary</option></wc-chip-picker>
+    </section>
+
+    <section class="col gap-2">
+      <h2 class="font-semibold" style="margin: 0;">No slots + detail: a schedule grid (25 rows × 7 nights = 175 pickers)</h2>
+      <p style="margin: 0;">Without <code>slots</code> there is no Nights section; chips read just the volunteer plus the detail
+        ("Angel · 7:30–9", or "Angel"); the value is <code>[{value, detail}]</code>.</p>
+      <form id="cp-grid-form" onsubmit="return false" style="overflow-x: auto;">
+        <table class="text-xs" id="cp-grid" style="border-collapse: collapse; min-width: 900px;">
+          <thead><tr><th style="text-align: left; padding: 4px;">Station</th><th>Fri 12/12</th><th>Sat 12/13</th><th>Sun 12/14</th><th>Thu 12/18</th><th>Fri 12/19</th><th>Sat 12/20</th><th>Sun 12/21</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </form>
+      <script>
+        // built before the components upgrade, so opening the page includes all 175 pickers
+        (() => {
+          const people = ['Ann Lee', 'Bo Diaz', 'Cy Park', 'Dee Ross', 'Eli Shaw', 'Fay Ng', 'Gus Ivers', 'Hal Mills'];
+          const opts = people.map(p => `<option value="${p}">${p}</option>`).join('');
+          const hours = ['', '6–7:30', '7:30–9', 'all night'];
+          let rows = '';
+          for (let r = 0; r < 25; r++) {
+            let cells = `<td style="padding: 4px; white-space: nowrap;">Station ${r + 1}</td>`;
+            for (let c = 0; c < 7; c++) {
+              const v = (r + c) % 3 === 0 ? [] : [{ value: people[(r * 3 + c) % 8], detail: hours[(r + c) % 4] }]
+                .concat((r + c) % 4 === 1 ? [{ value: people[(r * 5 + c + 1) % 8] }] : []);
+              cells += `<td style="padding: 4px; vertical-align: top; min-width: 110px;"><wc-chip-picker name="grid_${r}_${c}" unique add-label="Add volunteer" detail-label="Hours"
+                detail-placeholder="all night, or 6-7:30" value='${JSON.stringify(v)}'>${opts}</wc-chip-picker></td>`;
+            }
+            rows += `<tr style="border-top: 1px solid var(--surface-4);">${cells}</tr>`;
+          }
+          document.querySelector('#cp-grid tbody').innerHTML = rows;
+        })();
+      </script>
     </section>
 
     <section class="col gap-2">
@@ -88,6 +143,8 @@
         const form = document.getElementById('cp-form');
         const show = (why) => { out.textContent = why + '\n' + [...new FormData(form)].map(([k, v]) => `${k} = ${v}`).join('\n'); };
         form.addEventListener('submit', () => show('Form post:'));
+        const dform = document.getElementById('cp-detail-form');
+        dform.addEventListener('submit', () => { document.getElementById('cp-detail-out').textContent = 'Form post:\n' + [...new FormData(dform)].map(([k, v]) => `${k} = ${v}`).join('\n'); });
         document.getElementById('parts').addEventListener('change', (e) => { if (e.detail) show('change → detail.value: ' + JSON.stringify(e.detail.value)); });
         document.getElementById('cp-set').addEventListener('click', () => {
           document.getElementById('parts').setAttribute('value', JSON.stringify([{ value: 'Joseph', slots: [] }, { value: 'Innkeeper', slots: ['n5'] }]));

@@ -32,6 +32,9 @@ and the proof that pickers without them are unchanged).
 | `unique` | Each value can be on at most one chip. See [unique](#unique). |
 | `readonly` | Chips only (spans), no editing. Still submits. Use for display tables. |
 | `disabled` | Chips only, not focusable, `aria-disabled`, **not submitted**. |
+| `detail-label` | Turns on a per-chip free-text detail (e.g. `Hours`), edited under the slot pills. See [Detail](#detail). |
+| `detail-placeholder` | Placeholder for the detail input (e.g. `all night, or 6-7:30`). |
+| `readonly-hint` | With `readonly`: an extra last line in each chip's tooltip (e.g. where to edit). |
 | `aria-label` | Label of the chip group. Default: the plural of `add-label`'s noun (`Parts`), else `Choices`. |
 
 ## Chips
@@ -55,6 +58,45 @@ and the proof that pickers without them are unchanged).
   open list natively in their own gray; the "(already added)" text says it either way.
 
 Without `unique` (and without `short`) a picker behaves exactly as before: a repeated value stays two chips.
+
+## Detail
+
+With `detail-label="Hours"` the editor shows a labeled text input under the slot pills (`detail-placeholder` optional).
+**Done** commits it with the rest of the draft, and Enter in the input commits too. **Escape** discards it.
+
+- **Value:** each chip is `{value, slots, detail}`. `detail` is a trimmed string and is written only when it's
+  non-empty, so a picker with no details produces exactly the same JSON as before. Missing, empty or blank all mean
+  no detail.
+- **Chip text:** the detail is appended: `Angel · Sun · 7:30–9`, `Mary · every night · 6–7:30`,
+  `Wise Man · 4 nights · all night`.
+- **Title and aria-label** add `Hours: 7:30–9`.
+- **Form post and events:** the post and `change` / `wcchippickerchange` (`detail.value`) include it.
+- **Without `detail-label`:** a `detail` already in the value is still shown and kept on edit. There's just no input.
+
+## No slots
+
+When `slots` is empty or absent:
+- The editor has no slot section.
+- Chips read just the value plus the detail: `Angel · 7:30–9` or `Angel`, with no "all".
+- The value is `[{value, detail}]`. Input `slots` may be omitted or `[]`.
+
+With `unique`, there's one chip per value, since any repeat overlaps.
+
+## unique
+
+Changed Nov 9: unique is now per value + slots overlap, not per value.
+
+- A value may appear more than once only on slots that don't overlap. A chip with no slots covers every slot.
+- In the editor:
+  - Slots the value already has on another chip are disabled pills (crossed out).
+  - If the draft still overlaps (for example, you switched the value after picking slots), a message names the
+    overlap and **Done** (and Enter) is disabled until you pick other slots.
+  - A selected pill that overlaps stays clickable, so you can turn it off.
+- A value whose chips already cover every slot is a disabled option, "(already added)".
+- **+ add-label** is hidden only when every option covers every slot.
+- Repeats in a `value` that overlap are merged into the earlier chip: slots combined in order, "all" wins, the first
+  detail kept. Merges chain, and no `change` event fires. Repeats that don't overlap are kept.
+- Without `unique`, behavior is unchanged.
 
 ## Editing
 
