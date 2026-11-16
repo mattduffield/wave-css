@@ -704,6 +704,19 @@ const ICONS_TO_COPY = [
   "window-restore",
   "wrench",
   "xmark",
+  // Follow the Star departures (go-kart, 2026-11-16): accessibility counts and each group's weather
+  "wheelchair",
+  "baby-carriage",
+  "person-cane",
+  "cloud-sun",
+  "cloud-moon",
+  "cloud-rain",
+  "cloud-showers-heavy",
+  "cloud-drizzle",
+  "cloud-fog",
+  "cloud-bolt",
+  "cloud-snow",
+  "wind",
   // Add more icon names here
 ];
 
