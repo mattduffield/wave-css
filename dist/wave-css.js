@@ -27579,6 +27579,14 @@ if (!customElements.get("wc-split-pane")) {
       const maxSize = this._getMaxSizePx();
       return Math.max(minSize, Math.min(maxSize, size));
     }
+    // The size measured after creation is 0 when the split pane starts hidden (a closed tab or view), so measure the
+    // panel again whenever someone starts to drag it or uses the keyboard. Collapsed or still hidden: keep the stored size.
+    _syncSize() {
+      if (!this._targetEl || this._isCollapsed) return;
+      const isH = this._direction === "horizontal";
+      const size = isH ? this._targetEl.offsetWidth : this._targetEl.offsetHeight;
+      if (size > 0) this._currentSize = size;
+    }
     _setSize(size, animate = false) {
       if (!this._targetEl) return;
       const isH = this._direction === "horizontal";
@@ -27655,6 +27663,7 @@ if (!customElements.get("wc-split-pane")) {
         document.body.style.cursor = this._direction === "horizontal" ? "col-resize" : "row-resize";
         this._divider.classList.add("active");
         this._dragStartPos = this._direction === "horizontal" ? e.clientX : e.clientY;
+        this._syncSize();
         this._dragStartSize = this._currentSize;
       };
       this._onMouseMove = (e) => {
@@ -27688,6 +27697,7 @@ if (!customElements.get("wc-split-pane")) {
         this._collapseBtn.addEventListener("click", this._onCollapseClick);
       }
       this._onKeyDown = (e) => {
+        this._syncSize();
         const step = e.shiftKey ? 50 : 10;
         const isH = this._direction === "horizontal";
         const sign = this._collapseSide === "end" ? -1 : 1;
@@ -27744,6 +27754,7 @@ if (!customElements.get("wc-split-pane")) {
         this._isDragging = true;
         const isH = this._direction === "horizontal";
         this._dragStartPos = isH ? touch.clientX : touch.clientY;
+        this._syncSize();
         this._dragStartSize = this._currentSize;
         this._divider.classList.add("active");
       };
