@@ -33212,6 +33212,30 @@ if (!customElements.get("wc-prompt")) {
       .swal2-container .swal2-popup .swal2-actions .swal2-cancel:focus-visible {
         box-shadow: 0 0 0 3px var(--component-color, var(--text-1));
       }
+      /* icons: sweetalert draws warning, error and success in its own pale colors (warning #f8bb86 is 1.7:1 on a
+         light dialog, so it looked empty). Use the on-surface-* colors, tuned per theme, as info/question follow
+         the text color. Toasts use the same icons. */
+      .swal2-container .swal2-popup .swal2-icon.swal2-warning {
+        border-color: color-mix(in srgb, var(--warning-color) var(--wc-on-surface-warning-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--warning-color) var(--wc-on-surface-warning-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-error {
+        border-color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+        background-color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success {
+        border-color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success [class^="swal2-success-line"] {
+        background-color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success .swal2-success-ring {
+        border-color: color-mix(in srgb, color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111)) 35%, transparent);
+      }
       .swal2-container .swal2-popup input,
       .swal2-container .swal2-popup select,
       .swal2-container .swal2-popup textarea {
@@ -44152,7 +44176,8 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
       "tooltip",
       "tooltip-position",
       "select-on-focus",
-      "auto-flex"
+      "auto-flex",
+      "list-append"
     ];
     this.eventAttributes = [
       "onchange",
@@ -44549,6 +44574,29 @@ var WcInput = class _WcInput extends WcBaseFormComponent {
         setTimeout(() => {
           e.target.select();
         }, 0);
+      });
+    }
+    if (this.hasAttribute("list-append") && this.formElement) {
+      const input2 = this.formElement;
+      const sep = this.getAttribute("list-append") || ",";
+      const parts = (v) => String(v).split(sep).map((s) => s.trim()).filter(Boolean);
+      const remember = () => {
+        input2.dataset.wcPrev = input2.value;
+      };
+      input2.addEventListener("focus", remember);
+      input2.addEventListener("input", (e) => {
+        const prev = input2.dataset.wcPrev || "";
+        const picked = e.inputType === "insertReplacementText" || e.inputType === void 0;
+        if (picked && prev.trim() && input2.value && !parts(input2.value).some((v) => v === prev.trim())) {
+          const pick = input2.value.trim();
+          const have = parts(prev);
+          if (!have.includes(pick) && !pick.startsWith(prev.trim())) {
+            input2.value = have.concat(pick).join(sep + " ");
+          } else if (have.includes(pick)) {
+            input2.value = have.join(sep + " ");
+          }
+        }
+        remember();
       });
     }
   }
@@ -45579,7 +45627,8 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       ipt.classList.add("dropdown-input");
       ipt.id = "dropdownInput";
       ipt.type = "text";
-      ipt.setAttribute("placeholder", "Add or select...");
+      const _canAdd = this.hasAttribute("allow-custom") || this.hasAttribute("allow-dynamic");
+      ipt.setAttribute("placeholder", this.getAttribute("placeholder") || (_canAdd ? "Add or select..." : "Select..."));
       suppressAutofill(ipt, this.getAttribute("autocomplete"));
       if (this.hasAttribute("no-filter")) {
         ipt.setAttribute("readonly", "");
@@ -45630,6 +45679,7 @@ var WcSelect = class _WcSelect extends WcBaseFormComponent {
       this.componentElement.appendChild(select);
     }
     if (!_WcSelect.designerMode && (_isMultiSel || _isChipSel)) {
+      if (this.getAttribute("name") && !this.hasAttribute("data-name")) this.setAttribute("data-name", this.getAttribute("name"));
       this.removeAttribute("name");
     }
     if (!_isMultiSel && !_isChipSel) {

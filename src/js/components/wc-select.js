@@ -364,7 +364,10 @@ class WcSelect extends WcBaseFormComponent {
       ipt.classList.add('dropdown-input');
       ipt.id = 'dropdownInput';
       ipt.type = 'text';
-      ipt.setAttribute('placeholder', 'Add or select...');
+      // the author's placeholder when given; otherwise "Add or select..." only where typing adds a value
+      // (allow-custom / allow-dynamic), "Select..." where it can only pick from the list
+      const _canAdd = this.hasAttribute('allow-custom') || this.hasAttribute('allow-dynamic');
+      ipt.setAttribute('placeholder', this.getAttribute('placeholder') || (_canAdd ? 'Add or select...' : 'Select...'));
 
       // Suppress the browser's native autofill/history popup — only the component's own option
       // dropdown should show (unrelated saved values like "AAA"/"prospect" leaking in, and the
@@ -432,6 +435,9 @@ class WcSelect extends WcBaseFormComponent {
     // multiple/chip relocate the name onto the inner <select> (native multi submission), so drop it
     // from the host. Standard single keeps `name` on the host and submits via setFormValue (FACE).
     if (!WcSelect.designerMode && (_isMultiSel || _isChipSel)) {
+      // keep a copy as data-name so CSS, scripts and tests can still find the host by its field name
+      // (wc-select[data-name="sizes"]); data-name isn't submitted
+      if (this.getAttribute('name') && !this.hasAttribute('data-name')) this.setAttribute('data-name', this.getAttribute('name'));
       this.removeAttribute('name');
     }
     if (!_isMultiSel && !_isChipSel) {

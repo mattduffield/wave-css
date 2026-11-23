@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - wc-input list-append, wc-select placeholder and data-name</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-4" style="max-width: 900px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">Several values from a suggestion list</h1>
+      <p style="margin: 0;"><code>list-append=","</code> on a <code>wc-input</code> with <code>list="…"</code>: picking a suggestion adds it
+        to what's typed ("101, 205") instead of replacing it. Without the attribute nothing changes.</p>
+      <div class="row gap-2" style="flex-wrap: wrap;">
+        <button class="btn btn-sm" type="button" id="la-mode">Toggle light / dark</button>
+        <button class="btn btn-sm" type="button" id="la-crisp">Toggle crisp</button>
+      </div>
+    </div>
+
+    <form id="la-form" class="col gap-3" onsubmit="return false">
+      <datalist id="la-items"><option value="101">Shepherd robe</option><option value="205">Angel wings</option><option value="300">Crown</option></datalist>
+      <wc-input id="la-append" name="items" lbl-label="Item numbers (list-append)" list="la-items" list-append="," autocomplete="off" placeholder="101, 205"></wc-input>
+      <wc-input id="la-plain" name="plain" lbl-label="Item number (plain list, unchanged)" list="la-items" autocomplete="off"></wc-input>
+
+      <label class="font-semibold">Sizes (chip, placeholder="Sizes")</label>
+      <wc-select id="la-sizes" name="sizes" mode="chip" multiple placeholder="Sizes">
+        <option value="s">S/Kid</option><option value="m">M/Women</option><option value="l">L/Men</option>
+      </wc-select>
+      <label class="font-semibold">Pick only (chip, no placeholder): "Select..."</label>
+      <wc-select id="la-pick" name="pick" mode="chip" multiple>
+        <option value="a">Alpha</option><option value="b">Beta</option>
+      </wc-select>
+      <label class="font-semibold">Tags (chip, allow-custom): "Add or select..."</label>
+      <wc-select id="la-tags" name="tags" mode="chip" multiple allow-custom>
+        <option value="x">Choir</option><option value="y">Usher</option>
+      </wc-select>
+      <label class="font-semibold">Nights (multiple, data-name kept on the host)</label>
+      <wc-select id="la-multi" name="nights" multiple>
+        <option value="d4">Thu Dec 4</option><option value="d5">Fri Dec 5</option>
+      </wc-select>
+      <label class="font-semibold">Status (standard single: name stays on the host)</label>
+      <wc-select id="la-single" name="status"><option value="on">On</option><option value="off">Off</option></wc-select>
+    </form>
+  </div>
+  <wc-javascript class="hidden">
+    <script type="text/plain">
+    (() => {
+      const h = document.documentElement;
+      document.getElementById('la-mode').onclick = () => { const d = h.classList.contains('dark'); h.classList.toggle('dark', !d); h.classList.toggle('light', d); };
+      document.getElementById('la-crisp').onclick = () => h.classList.toggle('crisp');
+    })();
+    </script>
+  </wc-javascript>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>

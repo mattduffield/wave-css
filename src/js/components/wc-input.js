@@ -188,7 +188,7 @@ class WcInput extends WcBaseFormComponent {
       'autofocus', 'disabled', 'readonly', 'required', 'novalidate'
     ];
     this.ignoreAttributes = [
-      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position', 'select-on-focus', 'auto-flex'
+      'lbl-label', 'toggle-switch', 'tooltip', 'tooltip-position', 'select-on-focus', 'auto-flex', 'list-append'
     ];
     this.eventAttributes = [
       'onchange', 'oninput', 'onblur', 'onfocus', 'onkeydown', 'onkeyup',
@@ -656,6 +656,32 @@ class WcInput extends WcBaseFormComponent {
         setTimeout(() => {
           e.target.select();
         }, 0);
+      });
+    }
+
+    // list-append="," : picking a suggestion from the datalist (list="…") adds it to what's already typed
+    // ("101, 205") instead of the browser replacing the whole value. A value already in the box isn't added twice.
+    // Typing is unchanged. The attribute's value is the separator (default ",").
+    if (this.hasAttribute('list-append') && this.formElement) {
+      const input = this.formElement;
+      const sep = this.getAttribute('list-append') || ',';
+      const parts = (v) => String(v).split(sep).map((s) => s.trim()).filter(Boolean);
+      const remember = () => { input.dataset.wcPrev = input.value; };
+      input.addEventListener('focus', remember);
+      input.addEventListener('input', (e) => {
+        const prev = input.dataset.wcPrev || '';
+        // Chrome/Edge report a datalist pick as insertReplacementText; Firefox and Safari send no inputType
+        const picked = e.inputType === 'insertReplacementText' || e.inputType === undefined;
+        if (picked && prev.trim() && input.value && !parts(input.value).some((v) => v === prev.trim())) {
+          const pick = input.value.trim();
+          const have = parts(prev);
+          if (!have.includes(pick) && !pick.startsWith(prev.trim())) {
+            input.value = have.concat(pick).join(sep + ' ');
+          } else if (have.includes(pick)) {
+            input.value = have.join(sep + ' ');
+          }
+        }
+        remember();
       });
     }
   }

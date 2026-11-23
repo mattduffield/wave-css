@@ -593,7 +593,7 @@
       },
       {
         "name": "wc-input",
-        "description": "Text input supporting text, email, password, tel, search, number, date, currency, checkbox, radio, and toggle switch",
+        "description": "Text input supporting text, email, password, tel, search, number, date, currency, checkbox, radio, and toggle switch list-append=\",\" (2026-11-23): with list=\"<datalist id>\", picking a suggestion adds it to what's typed (\"101, 205\") instead of replacing the value; a value already there isn't added twice; typing, paste and plain list= unchanged. The value is the separator (default \",\").",
         "attributes": [
           "name",
           "id",
@@ -623,7 +623,8 @@
           "list",
           "auto-flex",
           "tooltip",
-          "tooltip-position"
+          "tooltip-position",
+          "list-append"
         ],
         "eventAttributes": [
           "onchange",
@@ -662,7 +663,7 @@
       },
       {
         "name": "wc-select",
-        "description": "Dropdown select with chip mode for multi-select, URL-based data loading, and keyboard navigation",
+        "description": "Dropdown select with chip mode for multi-select, URL-based data loading, and keyboard navigation 2026-11-23: chip mode's text box uses the placeholder attribute; with none it says \"Add or select...\" only when typing can add (allow-custom / allow-dynamic), otherwise \"Select...\". multiple/chip still move name to the inner <select> but keep a copy as data-name (multi/chip) on the host, so wc-select[data-name=\"x\"] finds it; data-name isn't submitted.",
         "attributes": [
           "name",
           "id",
@@ -680,7 +681,8 @@
           "autocomplete",
           "elt-class",
           "tooltip",
-          "tooltip-position"
+          "tooltip-position",
+          "placeholder"
         ],
         "eventAttributes": [
           "onchange",

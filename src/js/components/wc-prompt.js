@@ -340,6 +340,30 @@ if (!customElements.get('wc-prompt')) {
       .swal2-container .swal2-popup .swal2-actions .swal2-cancel:focus-visible {
         box-shadow: 0 0 0 3px var(--component-color, var(--text-1));
       }
+      /* icons: sweetalert draws warning, error and success in its own pale colors (warning #f8bb86 is 1.7:1 on a
+         light dialog, so it looked empty). Use the on-surface-* colors, tuned per theme, as info/question follow
+         the text color. Toasts use the same icons. */
+      .swal2-container .swal2-popup .swal2-icon.swal2-warning {
+        border-color: color-mix(in srgb, var(--warning-color) var(--wc-on-surface-warning-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--warning-color) var(--wc-on-surface-warning-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-error {
+        border-color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+        background-color: color-mix(in srgb, var(--danger-color) var(--wc-on-surface-danger-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success {
+        border-color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+        color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success [class^="swal2-success-line"] {
+        background-color: color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111));
+      }
+      .swal2-container .swal2-popup .swal2-icon.swal2-success .swal2-success-ring {
+        border-color: color-mix(in srgb, color-mix(in srgb, var(--success-color) var(--wc-on-surface-success-mix, 55%), var(--text-1, #111)) 35%, transparent);
+      }
       .swal2-container .swal2-popup input,
       .swal2-container .swal2-popup select,
       .swal2-container .swal2-popup textarea {
