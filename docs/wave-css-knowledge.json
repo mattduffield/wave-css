@@ -2975,6 +2975,7 @@
           ".btn (base)",
           ".btn-outline",
           ".btn-sm (size)",
+          ".btn-group (segmented control; aria-pressed marks the choice)",
           ".btn-primary",
           ".btn-secondary",
           ".btn-cancel",
@@ -2985,7 +2986,8 @@
         ],
         "primary": ".btn-primary deepens --primary-bg-color 60% toward black + white label so it's AA in every theme (the theme's --primary-color isn't reliably AA; --primary-bg-color ranges bright-yellow to dark-coffee). In .crisp it uses the lighter per-hue --accent-fill-bg/--on-accent via fallback.",
         "semantic": "success/danger/warning/info are FIXED deepened fills (#15803d / #b91c1c / #b45309 / #1d4ed8) with white text — AA in every theme + light/dark (raw --*-color accents are too light for white).",
-        "cancel": ".btn-cancel is the dark 'opposite-of-primary' dismiss button (like the swal cancel): --text-1 fill (black-ish in light themes, a light chip in dark) with a --surface-1 label. The swal dialog's own cancel button styles via --secondary-bg-color in wc-prompt.js; .btn-secondary matches that neutral look."
+        "cancel": ".btn-cancel is the dark 'opposite-of-primary' dismiss button (like the swal cancel): --text-1 fill (black-ish in light themes, a light chip in dark) with a --surface-1 label. The swal dialog's own cancel button styles via --secondary-bg-color in wc-prompt.js; .btn-secondary matches that neutral look.",
+        "buttonGroup": ".btn-group (2026-11-23) = segmented control: <div class=\"btn-group\" role=\"group\" aria-label=\"…\"> with .btn children (recommended: btn btn-sm btn-outline). Buttons join into one bar (outer corners round, inner square). The page marks the choice with aria-pressed=\"true\" (others \"false\"); Wave styles it — outline buttons get the accent fill (bright accent in dark non-crisp), filled buttons get the --text-1 fill. CSS only, no JS: the page sets aria-pressed on click. Use it instead of custom .on/.active button CSS for one-of-several choices (language, layout, view). Gate: tests/btn-group-test.py; demo views/btn-group.html."
       },
       "accentFillFamily": {
         "note": "Completes the --accent family (.crisp mode) so accent bubbles/pills/callouts need zero hardcoded colors. Tokens are hue- AND theme-aware, defined in both .crisp light & dark blocks. The full-saturation --accent (L54% light) is too mid-toned for a single AA foreground across all hues, so .accent-fill paints --accent-fill-bg (the accent deepened ~18% in light themes via color-mix(in oklab, var(--accent) 82%, #000)); dark-theme accent (L64%) is light enough to keep --accent-fill-bg = raw --accent with a near-black --on-accent. All pairings verified WCAG AA (>=4.5:1) across all 45 theme hues in both themes (tests/accent-family-test.py).",

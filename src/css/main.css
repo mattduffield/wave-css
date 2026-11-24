@@ -15036,6 +15036,94 @@
         padding: 0.25rem 0.5rem;
     }
 
+    /* ---- Button group (segmented control) -----------------------------------------
+       Buttons joined into one bar; the chosen one carries aria-pressed="true" and is filled (outline
+       buttons: the accent, like .btn-primary; filled buttons: the text color, like .btn-cancel), readable
+       in every theme, light + dark, crisp or not. Gate: tests/btn-group-test.py
+         <div class="btn-group" role="group" aria-label="Projector language">
+           <button type="button" class="btn btn-sm btn-outline" aria-pressed="true">English</button>
+           <button type="button" class="btn btn-sm btn-outline" aria-pressed="false">Español</button>
+         </div>
+       The page sets aria-pressed (one or several). Additive: nothing outside .btn-group changes. */
+    .btn-group {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 0;
+        vertical-align: middle;
+    }
+    .btn-group > .btn {
+        margin: 0;
+        border-radius: 0;
+        white-space: nowrap;
+    }
+    .btn-group > .btn + .btn {
+        margin-left: -1px;
+    }
+    .btn-group > .btn:first-child {
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+    .btn-group > .btn:last-child {
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+    }
+    .btn-group > .btn:focus,
+    .btn-group > .btn:hover {
+        position: relative;
+        z-index: 2;
+    }
+    .btn-group > .btn[aria-pressed="true"] {
+        --button-bg-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+        --button-border-color: var(--accent-fill-bg, color-mix(in oklab, var(--primary-bg-color) 60%, #000));
+        --button-hover-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 50%, #000));
+        --button-active-bg-color: var(--accent-hover, color-mix(in oklab, var(--primary-bg-color) 45%, #000));
+        --button-color: var(--on-accent, #ffffff);
+        --button-hover-color: var(--on-accent, #ffffff);
+        position: relative;
+        z-index: 1;
+        background: var(--button-bg-color);
+        color: var(--button-color);
+        border-color: var(--button-border-color);
+    }
+    .btn-group > .btn[aria-pressed="true"]:hover {
+        background: var(--button-hover-bg-color);
+        color: var(--button-hover-color);
+    }
+    /* Dark, not crisp: the deepened fill sits too close to the dark surface the other buttons show,
+       so a chosen outline button takes the theme's bright accent instead (measured >= 2.9:1 against them). */
+    .dark:not(.crisp) .btn-group > .btn-outline[aria-pressed="true"] {
+        --button-bg-color: var(--primary-bg-color);
+        --button-border-color: var(--primary-bg-color);
+        --button-hover-bg-color: color-mix(in oklab, var(--primary-bg-color) 85%, #fff);
+        --button-active-bg-color: color-mix(in oklab, var(--primary-bg-color) 80%, #fff);
+    }
+    @media (prefers-color-scheme: dark) {
+        :root:not(.light):not(.crisp) .btn-group > .btn-outline[aria-pressed="true"] {
+            --button-bg-color: var(--primary-bg-color);
+            --button-border-color: var(--primary-bg-color);
+            --button-hover-bg-color: color-mix(in oklab, var(--primary-bg-color) 85%, #fff);
+            --button-active-bg-color: color-mix(in oklab, var(--primary-bg-color) 80%, #fff);
+        }
+    }
+    /* Outside .crisp, pick black or white text from the fill itself (as .btn-primary does). */
+    @supports (color: rgb(from white r g b)) and (width: calc(pow(2, 2) * 1px)) {
+        .btn-group > .btn[aria-pressed="true"] {
+            --button-color: var(--on-accent, rgb(from var(--button-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)));
+            --button-hover-color: var(--on-accent, rgb(from var(--button-hover-bg-color) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255) clamp(0, (0.179 - (0.2126*pow((clamp(0,r,255)/255 + 0.055)/1.055, 2.4) + 0.7152*pow((clamp(0,g,255)/255 + 0.055)/1.055, 2.4) + 0.0722*pow((clamp(0,b,255)/255 + 0.055)/1.055, 2.4))) * 1000000000, 255)));
+        }
+    }
+    /* Filled (not outline) buttons already show the accent, so the chosen one is the opposite:
+       the text color as the fill, like .btn-cancel (stands apart in every theme and mode). */
+    .btn-group > .btn:not(.btn-outline)[aria-pressed="true"] {
+        --button-bg-color: var(--text-1);
+        --button-border-color: var(--text-1);
+        --button-color: var(--surface-1);
+        --button-hover-bg-color: var(--text-2, var(--text-1));
+        --button-hover-color: var(--surface-1);
+        --button-active-bg-color: var(--text-2, var(--text-1));
+    }
+
     /* ---- Button color variants -------------------------------------------------
        Compose with .btn (e.g. class="btn btn-primary"). Each variant simply reassigns
        the shared --button-* tokens, so the base .btn structure — padding, radius, and

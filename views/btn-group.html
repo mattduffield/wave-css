@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" class="h-full theme-royal light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave CSS - btn-group (segmented control)</title>
+  <link rel="stylesheet" href="../dist/wave-css.min.css">
+</head>
+<body class="text-sm" style="background: var(--surface-1); color: var(--text-1); margin: 0;">
+  <div id="page-contents" class="p-6 col gap-4" style="max-width: 900px;">
+    <div class="col gap-2">
+      <h1 class="text-xl font-bold" style="margin: 0;">Button group</h1>
+      <p style="margin: 0;"><code>.btn-group</code> joins its buttons into one bar. The chosen one has <code>aria-pressed="true"</code>
+        and is filled: outline buttons with the theme's accent, filled buttons with the text color. Click to choose.</p>
+      <div class="row gap-2" style="flex-wrap: wrap;">
+        <button class="btn btn-sm" type="button" id="bg-mode">Toggle light / dark</button>
+        <button class="btn btn-sm" type="button" id="bg-crisp">Toggle crisp</button>
+      </div>
+    </div>
+
+    <div class="row gap-3 items-center">
+      <strong>Projector</strong>
+      <div class="btn-group" role="group" aria-label="Projector language" id="bg-lang">
+        <button type="button" class="btn btn-sm btn-outline" aria-pressed="false">English</button>
+        <button type="button" class="btn btn-sm btn-outline" aria-pressed="false">Español</button>
+        <button type="button" class="btn btn-sm btn-outline" aria-pressed="true">Both</button>
+      </div>
+    </div>
+    <div class="row gap-3 items-center">
+      <strong>Layout (plain .btn)</strong>
+      <div class="btn-group" role="group" aria-label="Layout" id="bg-plain">
+        <button type="button" class="btn" aria-pressed="true">Full</button>
+        <button type="button" class="btn" aria-pressed="false">Picture in picture</button>
+        <button type="button" class="btn" aria-pressed="false">Side by side</button>
+      </div>
+    </div>
+    <div class="row gap-3 items-center">
+      <strong>Outside a group (unchanged)</strong>
+      <button type="button" class="btn btn-sm btn-outline" id="bg-alone" aria-pressed="true">Alone</button>
+      <button type="button" class="btn btn-sm" id="bg-alone2">Plain</button>
+    </div>
+  </div>
+  <wc-javascript class="hidden">
+    <script type="text/plain">
+    (() => {
+      const h = document.documentElement;
+      document.getElementById('bg-mode').onclick = () => { const d = h.classList.contains('dark'); h.classList.toggle('dark', !d); h.classList.toggle('light', d); };
+      document.getElementById('bg-crisp').onclick = () => h.classList.toggle('crisp');
+      document.querySelectorAll('.btn-group').forEach((g) => g.addEventListener('click', (e) => {
+        const b = e.target.closest('.btn'); if (!b) return;
+        g.querySelectorAll('.btn').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      }));
+    })();
+    </script>
+  </wc-javascript>
+  <script type="module" src="../dist/wave-css.min.js"></script>
+</body>
+</html>
