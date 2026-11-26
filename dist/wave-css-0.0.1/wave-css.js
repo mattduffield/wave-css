@@ -2693,6 +2693,7 @@ if (!customElements.get("wc-breadcrumb")) {
     async connectedCallback() {
       super.connectedCallback();
       this._applyStyle();
+      if (typeof htmx !== "undefined") htmx.process(this);
     }
     getInnerContainer() {
       return this.querySelector(":scope > .wc-breadcrumb") || this;

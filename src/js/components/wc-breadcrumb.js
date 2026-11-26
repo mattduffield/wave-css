@@ -41,6 +41,10 @@ if (!customElements.get('wc-breadcrumb')) {
       super.connectedCallback();
 
       this._applyStyle();
+      // The links carry hx-boost, #viewport and the busy indicator (_createElement), but htmx only acts on what it has
+      // processed: a breadcrumb added after the page loaded (built by a script, moved in) would do full page loads
+      // without this. Processing again is harmless (htmx skips what it has already set up).
+      if (typeof htmx !== 'undefined') htmx.process(this);
     }
 
     getInnerContainer() {
